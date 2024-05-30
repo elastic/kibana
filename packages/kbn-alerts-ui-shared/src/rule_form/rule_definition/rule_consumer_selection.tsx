@@ -9,11 +9,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import {
-  CONSUMER_SELECT_TITLE,
-  FEATURE_NAME_MAP,
-  CONSUMER_SELECT_COMBO_BOX_TITLE,
-} from '../translations';
+import { FEATURE_NAME_MAP, CONSUMER_SELECT_COMBO_BOX_TITLE } from '../translations';
 import { RuleFormErrors } from '../types';
 
 export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
@@ -26,12 +22,6 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 export interface RuleConsumerSelectionProps {
   consumers: RuleCreationValidConsumer[];
   selectedConsumer?: RuleCreationValidConsumer | null;
-  /* FUTURE ENGINEER
-   * if this prop is set to null then we wont initialize the value and the user will have to set it
-   * if this prop is set to a valid consumers then we will set it up to what was passed
-   * if this prop is not valid or undefined but the valid consumers has stackAlerts then we will default it to stackAlerts
-   */
-  initialSelectedConsumer?: RuleCreationValidConsumer | null;
   errors?: RuleFormErrors;
   onChange: (property: string, value: unknown) => void;
 }
@@ -41,13 +31,7 @@ const SINGLE_SELECTION = { asPlainText: true };
 type ComboBoxOption = EuiComboBoxOptionOption<RuleCreationValidConsumer>;
 
 export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
-  const {
-    consumers,
-    selectedConsumer,
-    // initialSelectedConsumer,
-    errors = {},
-    onChange,
-  } = props;
+  const { consumers, selectedConsumer, errors = {}, onChange } = props;
 
   const isInvalid = (errors.consumer?.length || 0) > 0;
 
@@ -108,7 +92,6 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
   return (
     <EuiFormRow
       fullWidth
-      label={CONSUMER_SELECT_TITLE}
       isInvalid={isInvalid}
       error={errors?.consumer ?? ''}
       data-test-subj="ruleConsumerSelection"

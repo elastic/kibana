@@ -16,13 +16,11 @@ import {
   EuiText,
   EuiLink,
   EuiDescribedFormGroup,
-  EuiIconTip,
   EuiAccordion,
   EuiPanel,
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import {
   RuleCreationValidConsumer,
   ES_QUERY_ID,
@@ -33,6 +31,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import type { RuleTypeModel, RuleFormErrors, MinimumScheduleInterval } from '../types';
@@ -41,7 +40,6 @@ import {
   LOADING_RULE_TYPE_PARAMS_TITLE,
   SCHEDULE_TITLE,
   SCHEDULE_DESCRIPTION_TEXT,
-  SCHEDULE_TOOLTIP_TEXT,
   ALERT_DELAY_TITLE,
   SCOPE_TITLE,
   SCOPE_DESCRIPTION_TEXT,
@@ -102,7 +100,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
   const { id, params, schedule, alertDelay, notifyWhen, consumer = 'alerts' } = formValues;
 
   const [metadata, setMetadata] = useState<Record<string, unknown>>();
-  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
+  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
   const shouldShowConsumerSelect = useMemo(() => {
     if (!canShowConsumerSelection) {
@@ -126,12 +124,6 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
     return documentationUrl;
   }, [selectedRuleTypeModel, docLinks]);
 
-  const onToggleAdvancedOptions = useCallback((isOpen) => {
-    setIsAdvancedOptionsVisible(isOpen);
-  }, []);
-
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
-
   const onSetRuleParams = useCallback(
     (property: string, value: unknown) => {
       onChange('params', {
@@ -150,7 +142,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
   );
 
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
       <EuiSplitPanel.Inner color="subdued">
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
@@ -207,7 +199,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                     data={data}
                     dataViews={dataViews}
                     unifiedSearch={unifiedSearch}
-                    onChangeMetaData={onChangeMetaData}
+                    onChangeMetaData={setMetadata}
                   />
                 </EuiErrorBoundary>
               </EuiFlexItem>
@@ -219,18 +211,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
         <EuiDescribedFormGroup
           fullWidth
           title={<h3>{SCHEDULE_TITLE}</h3>}
-          description={
-            <EuiText>
-              <p>
-                {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={SCHEDULE_TOOLTIP_TEXT}
-                />
-              </p>
-            </EuiText>
-          }
+          description={<p>{SCHEDULE_DESCRIPTION_TEXT}</p>}
         >
           <RuleSchedule
             interval={schedule.interval}
@@ -243,11 +224,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
           <EuiDescribedFormGroup
             fullWidth
             title={<h3>{SCOPE_TITLE}</h3>}
-            description={
-              <EuiText>
-                <p>{SCOPE_DESCRIPTION_TEXT}</p>
-              </EuiText>
-            }
+            description={<p>{SCOPE_DESCRIPTION_TEXT}</p>}
           >
             <RuleConsumerSelection
               consumers={authorizedConsumers}
@@ -261,8 +238,11 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
           <EuiAccordion
             id="advancedOptionsAccordion"
             data-test-subj="advancedOptionsAccordion"
-            onToggle={onToggleAdvancedOptions}
+            onToggle={setIsAdvancedOptionsVisible}
             initialIsOpen={isAdvancedOptionsVisible}
+            buttonProps={{
+              'data-test-subj': 'advancedOptionsAccordionButton',
+            }}
             buttonContent={
               <EuiText size="s">
                 <p>{ADVANCED_OPTIONS_TITLE}</p>

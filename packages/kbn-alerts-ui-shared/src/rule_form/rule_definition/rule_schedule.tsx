@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldText } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import {
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFlexGroup,
+  EuiSelect,
+  EuiFieldNumber,
+  EuiIconTip,
+} from '@elastic/eui';
 import {
   parseDuration,
   formatDuration,
@@ -20,9 +27,11 @@ import {
   SCHEDULE_TITLE_PREFIX,
   INTERVAL_MINIMUM_TEXT,
   INTERVAL_WARNING_TEXT,
+  SCHEDULE_TOOLTIP_TEXT,
 } from '../translations';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
+const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
 const getHelpTextForInterval = (
   currentInterval: string,
@@ -46,8 +55,6 @@ const getHelpTextForInterval = (
   }
 };
 
-const labelForRuleChecked = [SCHEDULE_TITLE_PREFIX];
-
 export interface RuleScheduleProps {
   interval: string;
   minimumScheduleInterval?: MinimumScheduleInterval;
@@ -58,32 +65,21 @@ export interface RuleScheduleProps {
 export const RuleSchedule = (props: RuleScheduleProps) => {
   const { interval, minimumScheduleInterval, errors = {}, onChange } = props;
 
-  const hasIntervalError = useMemo(() => {
-    return errors.interval?.length > 0;
-  }, [errors]);
+  const hasIntervalError = errors.interval?.length > 0;
 
-  const intervalNumber = useMemo(() => {
-    return getDurationNumberInItsUnit(interval ?? 1);
-  }, [interval]);
+  const intervalNumber = getDurationNumberInItsUnit(interval);
 
-  const intervalUnit = useMemo(() => {
-    return getDurationUnitValue(interval);
-  }, [interval]);
+  const intervalUnit = getDurationUnitValue(interval);
 
-  const helpText = useMemo(
-    () =>
-      minimumScheduleInterval && !hasIntervalError // No help text if there is an error
-        ? getHelpTextForInterval(interval, minimumScheduleInterval)
-        : '',
-    [interval, minimumScheduleInterval, hasIntervalError]
-  );
+  // No help text if there is an error
+  const helpText =
+    minimumScheduleInterval && !hasIntervalError
+      ? getHelpTextForInterval(interval, minimumScheduleInterval)
+      : '';
 
   const onIntervalNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.validity.valid) {
-        return;
-      }
-      const value = e.target.value;
+      const value = e.target.value.trim();
       if (INTEGER_REGEX.test(value)) {
         const parsedValue = parseInt(value, 10);
         onChange('interval', `${parsedValue}${intervalUnit}`);
@@ -99,6 +95,12 @@ export const RuleSchedule = (props: RuleScheduleProps) => {
     [intervalNumber, onChange]
   );
 
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (INVALID_KEYS.includes(e.key)) {
+      e.preventDefault();
+    }
+  }, []);
+
   return (
     <EuiFormRow
       fullWidth
@@ -110,16 +112,22 @@ export const RuleSchedule = (props: RuleScheduleProps) => {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={2}>
-          <EuiFieldText
+          <EuiFieldNumber
             fullWidth
-            inputMode="numeric"
-            pattern="[1-9][0-9]*"
-            prepend={labelForRuleChecked}
+            prepend={[
+              SCHEDULE_TITLE_PREFIX,
+              <EuiIconTip
+                position="right"
+                type="questionInCircle"
+                content={SCHEDULE_TOOLTIP_TEXT}
+              />,
+            ]}
             isInvalid={errors.interval?.length > 0}
             value={intervalNumber}
             name="interval"
             data-test-subj="ruleScheduleNumberInput"
             onChange={onIntervalNumberChange}
+            onKeyDown={onKeyDown}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>

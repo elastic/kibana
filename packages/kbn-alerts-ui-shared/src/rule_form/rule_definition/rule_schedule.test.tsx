@@ -14,6 +14,10 @@ import { RuleSchedule } from './rule_schedule';
 const mockOnChange = jest.fn();
 
 describe('RuleSchedule', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('Renders correctly', () => {
     render(<RuleSchedule interval={'5m'} onChange={mockOnChange} />);
 
@@ -36,6 +40,19 @@ describe('RuleSchedule', () => {
 
     userEvent.selectOptions(screen.getByTestId('ruleScheduleUnitInput'), 'hours');
     expect(mockOnChange).toHaveBeenCalledWith('interval', '5h');
+  });
+
+  test('Should only allow integers as inputs', async () => {
+    render(<RuleSchedule interval={'5m'} onChange={mockOnChange} />);
+
+    ['-', '+', 'e', 'E', '.', 'a', '01'].forEach((char) => {
+      fireEvent.change(screen.getByTestId('ruleScheduleNumberInput'), {
+        target: {
+          value: char,
+        },
+      });
+    });
+    expect(mockOnChange).not.toHaveBeenCalled();
   });
 
   test('Should display error properly', () => {

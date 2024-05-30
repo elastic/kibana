@@ -7,20 +7,20 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFieldText, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
 import {
   ALERT_DELAY_TITLE_PREFIX,
   ALERT_DELAY_TITLE_SUFFIX,
   ALERT_DELAY_HELP_TEXT,
-  ALERT_DELAY_TITLE,
 } from '../translations';
 import { RuleFormErrors } from '../types';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
+const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
 
 export interface RuleAlertDelayProps {
-  alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'];
+  alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'] | null;
   errors?: RuleFormErrors;
   onChange: (property: string, value: unknown) => void;
 }
@@ -30,10 +30,7 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
 
   const onAlertDelayChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.validity.valid) {
-        return;
-      }
-      const value = e.target.value;
+      const value = e.target.value.trim();
       if (value === '') {
         onChange('alertDelay', null);
       } else if (INTEGER_REGEX.test(value)) {
@@ -44,19 +41,23 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
     [onChange]
   );
 
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (INVALID_KEYS.includes(e.key)) {
+      e.preventDefault();
+    }
+  }, []);
+
   return (
     <EuiFormRow
       fullWidth
-      label={ALERT_DELAY_TITLE}
       isInvalid={errors.alertDelay?.length > 0}
       error={errors.alertDelay}
       data-test-subj="alertDelay"
       display="rowCompressed"
     >
-      <EuiFieldText
+      <EuiFieldNumber
         fullWidth
-        inputMode="numeric"
-        pattern="[1-9][0-9]*"
+        min={1}
         value={alertDelay?.active ?? ''}
         name="alertDelay"
         data-test-subj="alertDelayInput"
@@ -67,6 +68,7 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
         isInvalid={errors.alertDelay?.length > 0}
         append={ALERT_DELAY_TITLE_SUFFIX}
         onChange={onAlertDelayChange}
+        onKeyDown={onKeyDown}
       />
     </EuiFormRow>
   );
