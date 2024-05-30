@@ -89,7 +89,6 @@ function GroupSelection(props: GroupSelectionProps) {
                 onVisTypeSelected={props.onVisTypeSelected}
               />
             ))}
-
           </EuiFlexGrid>
           <EuiSpacer size="l" />
         </div>
