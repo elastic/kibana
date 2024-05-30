@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
 import { EntitySecurityException } from './errors/entity_security_exception';
-import { generateSummaryTransform } from './transform/generate_summary_transform';
+import { generateSummaryTransform } from './transform/generate_latest_transform';
 import { generateHistoryTransform } from './transform/generate_history_transform';
 
 export async function createAndInstallHistoryTransform(

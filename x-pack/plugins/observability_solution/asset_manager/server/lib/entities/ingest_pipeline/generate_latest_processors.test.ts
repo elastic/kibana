@@ -6,7 +6,7 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { generateSummaryProcessors } from './generate_summary_processors';
+import { generateSummaryProcessors } from './generate_latest_processors';
 
 describe('generateSummaryProcessors(definition)', () => {
   it('should genearte a valid pipeline', () => {

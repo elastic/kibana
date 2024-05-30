@@ -13,8 +13,8 @@ import {
   ENTITY_SUMMARY_BASE_PREFIX,
 } from '../../../../common/constants_entities';
 import { generateSummaryMetadataAggregations } from './generate_metadata_aggregations';
-import { generateSummaryIngestPipelineId } from '../ingest_pipeline/generate_summary_ingest_pipeline_id';
-import { generateSummaryTransformId } from './generate_summary_transform_id';
+import { generateSummaryIngestPipelineId } from '../ingest_pipeline/generate_latest_ingest_pipeline_id';
+import { generateSummaryTransformId } from './generate_latest_transform_id';
 import { generateHistoryIndexName } from '../helpers/generate_index_name';
 import { generateSummaryMetricAggregations } from './generate_metric_aggregations';
 

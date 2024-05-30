@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateSummaryTransformId } from './transform/generate_summary_transform_id';
+import { generateSummaryTransformId } from './transform/generate_latest_transform_id';
 import { generateHistoryTransformId } from './transform/generate_history_transform_id';
 
 export async function startTransform(

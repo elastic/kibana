@@ -6,7 +6,7 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { generateSummaryTransform } from './generate_summary_transform';
+import { generateSummaryTransform } from './generate_latest_transform';
 
 describe('generateSummaryTransform(definition)', () => {
   it('should generate a valid summary transform', () => {

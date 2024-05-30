@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateSummaryIngestPipelineId } from './ingest_pipeline/generate_summary_ingest_pipeline_id';
+import { generateSummaryIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
 import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
 
 export async function deleteHistoryIngestPipeline(
