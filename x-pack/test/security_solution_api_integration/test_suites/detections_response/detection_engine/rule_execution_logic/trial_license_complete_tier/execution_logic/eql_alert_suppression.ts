@@ -283,11 +283,11 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'host-a',
             },
           };
-          await indexListOfSourceDocuments([firstDocument]);
+          await indexListOfSourceDocuments([firstDocument, firstDocument]);
 
           const createdRule = await createRule(supertest, log, ruleWithoutSuppression);
           const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alerts.hits.hits).toHaveLength(1);
+          expect(alerts.hits.hits).toHaveLength(2);
           // alert does not have suppression properties
           alerts.hits.hits.forEach((previewAlert) => {
             const source = previewAlert._source;
@@ -328,12 +328,12 @@ export default ({ getService }: FtrProviderContext) => {
             afterTimestamp
           );
 
-          expect(secondAlerts.hits.hits.length).toEqual(2);
+          expect(secondAlerts.hits.hits.length).toEqual(3);
 
           const sortedAlerts = sortBy(secondAlerts.hits.hits, ALERT_ORIGINAL_TIME);
 
-          // second alert is generated with suppression
-          expect(sortedAlerts[1]._source).toEqual(
+          // third alert is generated with suppression
+          expect(sortedAlerts[2]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
                 {
