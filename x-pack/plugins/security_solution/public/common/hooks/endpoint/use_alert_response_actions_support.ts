@@ -8,7 +8,7 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
+import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../utils/crowdstrike_alert_check';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../utils/sentinelone_alert_check';
@@ -48,13 +48,6 @@ type AlertAgentActionsSupported = Record<ResponseActionsApiCommandNames, boolean
 export const useAlertResponseActionsSupport = (
   eventData: TimelineEventsDetailsItem[] | null = []
 ): AlertResponseActionsSupport => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
-  const isCrowdstrikeHostIsolationEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
-
   const isAlert = useMemo(() => {
     return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, eventData);
   }, [eventData]);
@@ -82,13 +75,8 @@ export const useAlertResponseActionsSupport = (
   }, [eventData, isAlert]);
 
   const isFeatureEnabled: boolean = useMemo(() => {
-    return Boolean(
-      agentType &&
-        (agentType === 'endpoint' ||
-          (agentType === 'sentinel_one' && isSentinelOneV1Enabled) ||
-          (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled))
-    );
-  }, [agentType, isCrowdstrikeHostIsolationEnabled, isSentinelOneV1Enabled]);
+    return agentType ? isAgentTypeAndActionSupported(agentType) : false;
+  }, [agentType]);
 
   const agentId: string = useMemo(() => {
     if (!isAlert || !agentType) {
