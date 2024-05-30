@@ -12,13 +12,13 @@ import { mount } from 'enzyme';
 import { SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { fireEvent, waitFor, render } from '@testing-library/react';
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
-import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
+import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 
 const mockDispatch = jest.fn();
 
@@ -47,8 +47,8 @@ jest.mock('@kbn/react-kibana-mount', () => {
 });
 
 const mockUpdateUrlParam = jest.fn();
-jest.mock('../../utils/global_query_string', () => {
-  const original = jest.requireActual('../../utils/global_query_string');
+jest.mock('../../common/utils/global_query_string', () => {
+  const original = jest.requireActual('../../common/utils/global_query_string');
 
   return {
     ...original,
