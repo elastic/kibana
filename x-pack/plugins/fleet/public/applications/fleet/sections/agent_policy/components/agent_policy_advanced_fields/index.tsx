@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -25,6 +25,7 @@ import {
   EuiBetaBadge,
   EuiBadge,
   EuiSwitch,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,8 +34,14 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+  GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
 } from '../../../../../../../common/constants';
-import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import type {
+  NewAgentPolicy,
+  AgentPolicy,
+  PackagePolicy,
+  PackagePolicyInput,
+} from '../../../../types';
 import {
   useStartServices,
   useConfig,
@@ -73,11 +80,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   validation,
   disabled = false,
 }) => {
-  useEffect(() => {
-    console.log('=============================');
-    console.log(agentPolicy);
-    console.log('=============================');
-  });
   const { docLinks } = useStartServices();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',
@@ -118,6 +120,20 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
+
+  const findUnsupportedInputs = (policy: AgentPolicy, excludedInputs: Set<string>): string[] => {
+    const found = new Set<string>([]);
+    policy.package_policies?.forEach((p: PackagePolicy) => {
+      p.inputs.forEach((input: PackagePolicyInput) => {
+        if (excludedInputs.has(input.type)) {
+          found.add(input.type);
+        }
+      });
+    });
+    console.log('HERE WE ARE ');
+    return Array.from(found);
+  };
+  const unsupportedInputs = findUnsupportedInputs(agentPolicy, GLOBAL_DATA_TAG_EXCLUDED_INPUTS);
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -319,10 +335,29 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           </h3>
         }
         description={
-          <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.globalDataTagDescription"
-            defaultMessage="Add a field and value set to all data colected from the agents enrolled in this policy."
-          />
+          <>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.globalDataTagDescription"
+              defaultMessage="Add a field and value set to all data colected from the agents enrolled in this policy."
+            />
+            {unsupportedInputs.length > 0 ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut title="Unsupported Inputs" color="warning" iconType="alert" size="s">
+                  <p>
+                    Tagging data collected from input{' '}
+                    {unsupportedInputs.map((input, index) => (
+                      <strong>
+                        {input}
+                        {index < unsupportedInputs.length - 1 ? ', ' : ''}
+                      </strong>
+                    ))}{' '}
+                    is not supported.
+                  </p>
+                </EuiCallOut>
+              </>
+            ) : null}
+          </>
         }
       >
         <GlobalDataTagsTable

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -42,10 +42,6 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    setGlobalDataTags(initialTags);
-  }, [initialTags]);
 
   const handleAddField = () => {
     setIsAdding(true);
@@ -88,7 +84,6 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
     ];
     setGlobalDataTags(updatedTags);
     updateAgentPolicy({ global_data_tags: updatedTags });
-    console.log('Updated Global Data Tags:', updatedTags);
     setNewTag({ name: '', value: '' });
     setIsAdding(false);
     setNewTagErrors({ name: null, value: null });
@@ -132,7 +127,6 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
       const { [index]: removedError, ...remainingErrors } = prevErrors;
       return remainingErrors;
     });
-    console.log('Updated Global Data Tags:', updatedTags);
     closeModal();
   };
 
@@ -166,7 +160,6 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
       newIndices.delete(index);
       return newIndices;
     });
-    console.log('Updated Global Data Tags:', updatedTags);
     setErrors((prevErrors) => {
       const newErrors = { ...prevErrors };
       delete newErrors[index];
