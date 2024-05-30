@@ -14,6 +14,7 @@ import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 
 const integrationWithML = 'lmd';
+const destinationIndex = 'ml-rdp-lmd';
 const assets = [
   {
     type: 'index_template',
@@ -22,8 +23,16 @@ const assets = [
       {
         text: 'logs-lmd.pivot_transform-template',
         expectedEsApi:
-          'api/index_management/index_templates/logs-lmd.pivot_transform-template?legacy=false',
+          '/api/index_management/index_templates/logs-lmd.pivot_transform-template?legacy=false',
         expectedResponseStatus: 200,
+        expectedBody: (resp) => {
+          const body = resp.body;
+          expect(body.composedOf).to.deep.equal([
+            'logs-lmd.pivot_transform-template@package',
+            'logs-lmd.pivot_transform-template@custom',
+          ]);
+          expect(body.indexPatterns).to.deep.equal([destinationIndex]);
+        },
       },
     ],
   },
@@ -37,13 +46,13 @@ const assets = [
       {
         text: 'logs-lmd.pivot_transform-template@package',
         expectedEsApi:
-          'api/index_management/component_templates/logs-lmd.pivot_transform-template@package',
+          '/api/index_management/component_templates/logs-lmd.pivot_transform-template%40package',
         expectedResponseStatus: 200,
       },
       {
         text: 'logs-lmd.pivot_transform-template@custom',
         expectedEsApi:
-          'api/index_management/component_templates/logs-lmd.pivot_transform-template@custom',
+          '/api/index_management/component_templates/logs-lmd.pivot_transform-template%40custom',
         // @custom should be defined by user if needed
         // therefore should not exist when package is first installed
         // but it should be defined in the index template
@@ -61,11 +70,11 @@ const assets = [
   },
   {
     type: 'index',
-    expected: ['ml-rdp-lmd'],
+    expected: [destinationIndex],
     links: [
       {
-        text: 'ml-rdp-lmd',
-        expectedEsApi: '/internal/index_management/indices/ml-rdp-lmd',
+        text: destinationIndex,
+        expectedEsApi: `/internal/index_management/indices/${destinationIndex}`,
         expectedResponseStatus: 200,
       },
     ],
@@ -116,8 +125,12 @@ describe('Assets - Real API for integration with ML and transforms', () => {
           cy.intercept(link.expectedEsApi, (req) => {
             req.reply((res) => {
               expect(res.statusCode).to.equal(link.expectedResponseStatus);
+              if (link.expectedBody) {
+                link.expectedBody(res);
+              }
             });
-          });
+          }).as(`get${link.text}`);
+          cy.wait(`@get${link.text}`);
           cy.go('back');
         });
       }
