@@ -47,7 +47,7 @@ export function DatasetQualityContextProvider({
       if (initialState?.flyout?.dataset) {
         datasetQualityController.service.send({
           type: 'OPEN_FLYOUT',
-          dataset: initialState?.flyout?.dataset,
+          dataset: initialState.flyout.dataset,
         });
       }
 
