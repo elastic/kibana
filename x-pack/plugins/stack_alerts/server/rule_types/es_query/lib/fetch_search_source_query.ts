@@ -6,6 +6,7 @@
  */
 
 import { buildRangeFilter, Filter } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   DataView,
   DataViewsContract,
@@ -22,6 +23,7 @@ import {
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { lastValueFrom } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
@@ -76,7 +78,8 @@ export async function fetchSearchSourceQuery({
     )}`
   );
 
-  const searchResult = await searchSource.fetch();
+  const r = await lastValueFrom((await searchSource.withDataViewLazy({})).fetch$());
+  const searchResult = r.rawResponse as estypes.SearchResponse<unknown>;
 
   const link = await generateLink(
     initialSearchSource,
