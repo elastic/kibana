@@ -197,7 +197,8 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
     }
   );
 
-  describe('from Cases', () => {
+  // TODO re-enable when https://github.com/elastic/security-team/issues/9625 is merged
+  describe.skip('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
