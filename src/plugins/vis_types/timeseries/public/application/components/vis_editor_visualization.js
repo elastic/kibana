@@ -211,8 +211,11 @@ class VisEditorVisualizationUI extends Component {
               api.subscribeToInitialRender(() =>
                 this.props.eventEmitter.emit('embeddableRendered')
               );
-              const [, setOpenInspector] = this.props.embeddableApiHandler.openInspector;
-              setOpenInspector(() => api.openInspector);
+              api.subscribeToHasInspector((hasInspector) => {
+                if (!hasInspector) return;
+                const [, setOpenInspector] = this.props.embeddableApiHandler.openInspector;
+                setOpenInspector(() => api.openInspector);
+              });
               api.subscribeToVisData((data) => {
                 this.props.onDataChange(data?.value);
               });

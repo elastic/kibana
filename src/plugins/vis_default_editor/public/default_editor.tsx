@@ -128,8 +128,11 @@ function DefaultEditor({
                   })}
                   onApiAvailable={(api) => {
                     api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
-                    const [, setOpenInspector] = embeddableApiHandler.openInspector;
-                    setOpenInspector(() => api.openInspector);
+                    api.subscribeToHasInspector((hasInspector) => {
+                      if (!hasInspector) return;
+                      const [, setOpenInspector] = embeddableApiHandler.openInspector;
+                      setOpenInspector(() => api.openInspector);
+                    });
                     setOnUpdateVis(() => api.setVis);
                   }}
                 />

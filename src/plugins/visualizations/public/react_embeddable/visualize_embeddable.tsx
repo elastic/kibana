@@ -24,7 +24,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { get, isEqual } from 'lodash';
+import { get, isEmpty, isEqual } from 'lodash';
 import React, { useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
@@ -113,6 +113,8 @@ export const getVisualizeEmbeddableFactory: (
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
         subscribeToVisData: (listener) => visData$.subscribe(listener),
+        subscribeToHasInspector: (listener) =>
+          inspectorAdapters$.subscribe((value) => listener(!isEmpty(value))),
         openInspector: () => {
           const adapters = inspectorAdapters$.getValue();
           if (!adapters) return;

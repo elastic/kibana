@@ -49,5 +49,6 @@ export type VisualizeApi = HasEditCapabilities &
     setVis: (vis: SerializedVis<VisParams>) => void;
     subscribeToInitialRender: (listener: () => void) => void;
     subscribeToVisData: (listener: (data: unknown) => void) => void;
+    subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;
     openInspector: () => OverlayRef | undefined;
   };
