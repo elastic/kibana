@@ -368,6 +368,7 @@ enabled:
   - x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/saved_object_api_integration/spaces_only/config.ts
+  - x-pack/test/saved_object_api_integration/user_profiles/config.ts
   - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
