@@ -47,7 +47,6 @@ const defaultProps = {
   connectors: connectorsMock,
   isLoading: false,
   configurationConnectorId: 'none',
-  path: 'caseFields.connectorId',
 };
 
 describe('Connector', () => {
