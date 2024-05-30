@@ -55,6 +55,7 @@ describe('TemplatesList', () => {
       await screen.findByTestId(`template-${templatesConfigurationMock[3].key}`)
     ).toBeInTheDocument();
     expect(await screen.findByText(`${templatesConfigurationMock[3].name}`)).toBeInTheDocument();
+
     const tags = templatesConfigurationMock[3].tags;
 
     tags?.forEach((tag, index) =>

@@ -7,14 +7,9 @@
 
 import React from 'react';
 import { act, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import type { TemplateFormState } from './form';
-import { TemplateForm } from './form';
-import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
-import userEvent from '@testing-library/user-event';
-import { useGetChoices } from '../connectors/servicenow/use_get_choices';
-import { useGetChoicesResponse } from '../create/mock';
 import {
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
@@ -22,6 +17,11 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../common/constants';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
+import { useGetChoices } from '../connectors/servicenow/use_get_choices';
+import { useGetChoicesResponse } from '../create/mock';
+import type { TemplateFormState } from './form';
+import { TemplateForm } from './form';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -269,6 +269,9 @@ describe('TemplateForm', () => {
         fields: {
           category: 'software',
           urgency: '1',
+          impact: null,
+          severity: null,
+          subcategory: null,
         },
         syncAlerts: true,
       });
@@ -342,7 +345,7 @@ describe('TemplateForm', () => {
     });
   });
 
-  it('shows from state as invalid when template name missing', async () => {
+  it('shows form state as invalid when template name missing', async () => {
     let formState: TemplateFormState;
 
     const onChangeState = (state: TemplateFormState) => (formState = state);

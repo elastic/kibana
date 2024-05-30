@@ -11,8 +11,6 @@ import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import type { FlyOutBodyProps } from './flyout';
-import { CommonFlyout } from './flyout';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import {
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
@@ -22,12 +20,19 @@ import {
 } from '../../../common/constants';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
-
-import * as i18n from './translations';
+import { useGetChoices } from '../connectors/servicenow/use_get_choices';
+import { useGetChoicesResponse } from '../create/mock';
 import { FIELD_LABEL, DEFAULT_VALUE } from '../custom_fields/translations';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
 import type { TemplateFormProps } from '../templates/types';
+import * as i18n from './translations';
+import type { FlyOutBodyProps } from './flyout';
+import { CommonFlyout } from './flyout';
+
+jest.mock('../connectors/servicenow/use_get_choices');
+
+const useGetChoicesMock = useGetChoices as jest.Mock;
 
 describe('CommonFlyout ', () => {
   let appMockRender: AppMockRenderer;
@@ -413,12 +418,17 @@ describe('CommonFlyout ', () => {
     });
 
     it('calls onSaveField with case fields correctly', async () => {
-      appMockRender.render(<CommonFlyout {...newProps} />);
-
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
-      userEvent.paste(
-        await screen.findByTestId('template-description-input'),
-        'Template description'
+      appMockRender.render(
+        <CommonFlyout
+          {...{
+            ...newProps,
+            data: {
+              key: 'random_key',
+              name: 'Template 1',
+              templateDescription: 'test description',
+            },
+          }}
+        />
       );
 
       const caseTitle = await screen.findByTestId('caseTitle');
@@ -437,13 +447,130 @@ describe('CommonFlyout ', () => {
 
       await waitFor(() => {
         expect(newProps.onSaveField).toBeCalledWith({
-          key: expect.anything(),
-          name: 'Template name',
-          templateDescription: 'Template description',
+          key: 'random_key',
+          name: 'Template 1',
+          templateDescription: 'test description',
           title: 'Case using template',
           description: 'This is a case description',
           category: 'new',
           connectorId: 'none',
+          syncAlerts: true,
+        });
+      });
+    });
+
+    it('calls onSaveField form with custom fields correctly', async () => {
+      const newRenderBody = ({
+        initialValue,
+        onChange,
+        configCustomFields,
+        configConnectorId,
+        configConnectors,
+      }: FlyOutBodyProps<TemplateFormProps | null>) => (
+        <TemplateForm
+          initialValue={initialValue}
+          connectors={configConnectors ?? []}
+          configurationConnectorId={configConnectorId ?? 'none'}
+          configurationCustomFields={configCustomFields ?? []}
+          onChange={onChange}
+        />
+      );
+
+      const modifiedProps = {
+        ...props,
+        connectors: [],
+        configurationConnectorId: 'none',
+        configurationCustomFields: customFieldsConfigurationMock,
+        data: {
+          key: 'random_key',
+          name: 'Template 1',
+          templateDescription: 'test description',
+        },
+        renderBody: newRenderBody,
+      };
+
+      appMockRender.render(<CommonFlyout {...modifiedProps} />);
+
+      const textCustomField = await screen.findByTestId(
+        `${customFieldsConfigurationMock[0].key}-text-create-custom-field`
+      );
+
+      userEvent.clear(textCustomField);
+      userEvent.paste(textCustomField, 'this is a sample text!');
+
+      userEvent.click(await screen.findByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(newProps.onSaveField).toBeCalledWith({
+          key: 'random_key',
+          name: 'Template 1',
+          templateDescription: 'test description',
+          connectorId: 'none',
+          syncAlerts: true,
+          customFields: {
+            [customFieldsConfigurationMock[0].key]: 'this is a sample text!',
+            [customFieldsConfigurationMock[1].key]: true,
+            [customFieldsConfigurationMock[3].key]: false,
+          },
+        });
+      });
+    });
+
+    it('calls onSaveField form with connector fields correctly', async () => {
+      useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
+
+      const newRenderBody = ({
+        initialValue,
+        onChange,
+        configCustomFields,
+        configConnectorId,
+        configConnectors,
+      }: FlyOutBodyProps<TemplateFormProps | null>) => (
+        <TemplateForm
+          initialValue={initialValue}
+          connectors={configConnectors ?? []}
+          configurationConnectorId={configConnectorId ?? 'none'}
+          configurationCustomFields={configCustomFields ?? []}
+          onChange={onChange}
+        />
+      );
+
+      const modifiedProps = {
+        ...props,
+        connectors: connectorsMock,
+        configurationConnectorId: 'servicenow-1',
+        configurationCustomFields: [],
+        data: {
+          key: 'random_key',
+          name: 'Template 1',
+          templateDescription: 'test description',
+        },
+        renderBody: newRenderBody,
+      };
+
+      appMockRender.render(<CommonFlyout {...modifiedProps} />);
+
+      expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
+
+      userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '1');
+
+      userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
+
+      userEvent.click(await screen.findByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(newProps.onSaveField).toBeCalledWith({
+          key: 'random_key',
+          name: 'Template 1',
+          templateDescription: 'test description',
+          connectorId: 'servicenow-1',
+          fields: {
+            category: 'software',
+            urgency: '1',
+            impact: null,
+            severity: null,
+            subcategory: null,
+          },
           syncAlerts: true,
         });
       });

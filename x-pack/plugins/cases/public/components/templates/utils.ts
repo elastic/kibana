@@ -17,20 +17,11 @@ export const removeEmptyFields = (
 
       if (key === 'customFields') {
         const nonEmptyCustomFields =
-          removeEmptyFields(value as Record<string, string | boolean>) ?? {};
+          removeEmptyFields(value as Record<string, string | boolean | null | undefined>) ?? {};
 
         if (Object.entries(nonEmptyCustomFields).length > 0) {
           initialValue = {
             customFields: nonEmptyCustomFields,
-          };
-        }
-      } else if (key === 'fields') {
-        const nonEmptyFields =
-          removeEmptyFields(value as Record<string, string | null | undefined>) ?? {};
-
-        if (Object.entries(nonEmptyFields).length > 0) {
-          initialValue = {
-            fields: nonEmptyFields,
           };
         }
       } else if (!isEmptyValue(value)) {
@@ -51,13 +42,11 @@ export const templateSerializer = <T extends TemplateFormProps | null>(data: T):
   if (data !== null) {
     const { fields = null, ...rest } = data;
     const connectorFields = getConnectorsFormSerializer({ fields });
-    const serializedFields = removeEmptyFields({
-      ...rest,
-      fields: connectorFields.fields,
-    });
+    const serializedFields = removeEmptyFields({ ...rest, fields: connectorFields.fields });
 
     return {
       ...serializedFields,
+      // fields: connectorFields.fields,
     } as T;
   }
 

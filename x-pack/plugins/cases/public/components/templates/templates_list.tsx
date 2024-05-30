@@ -16,6 +16,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { CasesConfigurationUITemplate } from '../../../common/ui';
+import { css } from '@emotion/react';
+import { TruncatedText } from '../truncated_text';
 
 export interface Props {
   templates: CasesConfigurationUITemplate[];
@@ -42,12 +44,17 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
                         <EuiText>
-                          <h4>{template.name}</h4>
+                          <h4>
+                            <TruncatedText text={template.name} />
+                          </h4>
                         </EuiText>
                       </EuiFlexItem>
                       {template.tags?.length
                         ? template.tags.map((tag, index) => (
                             <EuiBadge
+                              css={css`
+                                max-width: 100px;
+                              `}
                               key={`${template.key}-tag-${index}`}
                               data-test-subj={`${template.key}-tag-${index}`}
                               color={euiTheme.colors.body}

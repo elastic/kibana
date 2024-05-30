@@ -84,6 +84,9 @@ describe('templateSerializer', () => {
       fields: {
         impact: 'high',
         severity: 'low',
+        category: null,
+        urgency: null,
+        subcategory: null,
       },
     });
   });

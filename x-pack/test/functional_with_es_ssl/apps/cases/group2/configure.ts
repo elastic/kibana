@@ -18,7 +18,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const find = getService('find');
 
-  describe.only('Configure', function () {
+  describe('Configure', function () {
     before(async () => {
       await cases.navigation.navigateToConfigurationPage();
     });

@@ -12,10 +12,9 @@ import * as i18n from './translations';
 
 interface Props {
   isLoading: boolean;
-  path?: string;
 }
 
-const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading, path }) => {
+const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading }) => {
   const [{ syncAlerts }] = useFormData({ watch: ['syncAlerts'] });
 
   return (
