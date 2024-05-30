@@ -126,7 +126,6 @@ export const CloudSecurityDataTable = ({
         const newColumn = { [curr.id]: columnDefaultSettings };
         return { ...prev, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
-      columnHeaders: columnHeaders as UnifiedDataTableSettings['columnHeaders'],
     }
   );
 
