@@ -294,7 +294,7 @@ export default ({ getService }: FtrProviderContext) => {
         group_by: ['host.name'],
         duration: {
           value: 300,
-          unit: 'm',
+          unit: 'm' as const,
         },
         missing_fields_strategy: 'suppress',
       };

@@ -8,7 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from 'expect';
 import sortBy from 'lodash/sortBy';
-
 import {
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
@@ -25,6 +24,7 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
   getAlerts,
@@ -305,7 +305,7 @@ export default ({ getService }: FtrProviderContext) => {
       // update the rule to include suppression
       await patchRule(supertest, log, {
         id: createdRule.id,
-        alert_suppression: alertSuppression,
+        alert_suppression: alertSuppression as AlertSuppression,
         enabled: false,
       });
       await patchRule(supertest, log, { id: createdRule.id, enabled: true });
