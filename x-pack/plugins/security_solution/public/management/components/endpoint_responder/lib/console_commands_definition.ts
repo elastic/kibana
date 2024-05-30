@@ -138,6 +138,7 @@ const COMMENT_ARG_ABOUT = i18n.translate(
 export interface GetEndpointConsoleCommandsOptions {
   endpointAgentId: string;
   agentType: ResponseActionAgentType;
+  /** Applicable only for Endpoint Agents */
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }

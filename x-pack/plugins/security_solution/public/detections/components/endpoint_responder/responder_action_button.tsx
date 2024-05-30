@@ -8,18 +8,15 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  type ResponderContextMenuItemProps,
-  useResponderActionData,
-} from './use_responder_action_data';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { useResponderActionData } from './use_responder_action_data';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-export const ResponderActionButton = memo<ResponderContextMenuItemProps>(
-  ({ agentType, endpointId, onClick }) => {
+export const ResponderActionButton = memo<{ agentId: string; agentType: ResponseActionAgentType }>(
+  ({ agentType, agentId }) => {
     const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
       agentType,
-      endpointId,
-      onClick,
+      agentId,
     });
     const endpointPrivileges = useUserPrivileges().endpointPrivileges;
 

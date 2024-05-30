@@ -226,7 +226,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 rightSideItems={[
                   hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
                     <ResponderActionButton
-                      endpointId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                      agentId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
                       agentType="endpoint"
                     />
                   ),

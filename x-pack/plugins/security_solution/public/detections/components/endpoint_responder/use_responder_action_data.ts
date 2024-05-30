@@ -7,13 +7,10 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { Platform } from '../../../management/components/endpoint_responder/components/header_info/platforms';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
-import type { ThirdPartyAgentInfo } from '../../../../common/types';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import type {
-  ResponseActionAgentType,
   EndpointCapabilities,
+  ResponseActionAgentType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -22,108 +19,212 @@ import {
   LOADING_ENDPOINT_DATA_TOOLTIP,
   METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-  SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING,
 } from './translations';
-import { getFieldValue } from '../host_isolation/helpers';
 
 export interface ResponderContextMenuItemProps {
-  endpointId: string;
   onClick?: () => void;
-  agentType: ResponseActionAgentType;
   eventData?: TimelineEventsDetailsItem[] | null;
+  // FIXME:PT cleanup
+  // endpointId: string;
+  // agentType: ResponseActionAgentType;
 }
 
-const getThirdPartyAgentInfo = (
-  eventData: TimelineEventsDetailsItem[] | null
-): ThirdPartyAgentInfo => {
-  return {
-    agent: {
-      id: getSentinelOneAgentId(eventData) || '',
-      type: getFieldValue(
-        { category: 'event', field: 'event.module' },
-        eventData
-      ) as ResponseActionAgentType,
-    },
-    host: {
-      name: getFieldValue({ category: 'host', field: 'host.name' }, eventData),
-      os: {
-        name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
-        family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
-        version: getFieldValue({ category: 'host', field: 'host.os.version' }, eventData),
-      },
-    },
-    lastCheckin: getFieldValue(
-      { category: 'kibana', field: 'kibana.alert.last_detected' },
-      eventData
-    ),
-  };
-};
-
-/**
- * This hook is used to get the data needed to show the context menu items for the responder
- * actions.
- * @param endpointId the id of the endpoint
- * @param onClick the callback to handle the click event
- * @param agentType the type of agent, defaults to 'endpoint'
- * @param eventData the event data, exists only when agentType !== 'endpoint'
- * @returns an object with the data needed to show the context menu item
- */
-
-export const useResponderActionData = ({
-  endpointId,
-  onClick,
-  agentType,
-  eventData,
-}: ResponderContextMenuItemProps): {
+interface ResponderActionData {
   handleResponseActionsClick: () => void;
   isDisabled: boolean;
   tooltip: ReactNode;
-} => {
-  const isEndpointHost = agentType === 'endpoint';
-  const showResponseActionsConsole = useWithShowResponder();
+}
 
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
+// FIXME:PT cleanup
+
+// const getThirdPartyAgentInfo = (
+//   eventData: TimelineEventsDetailsItem[] | null
+// ): ThirdPartyAgentInfo => {
+//   return {
+//     agent: {
+//       id: getSentinelOneAgentId(eventData) || '',
+//       type: getFieldValue(
+//         { category: 'event', field: 'event.module' },
+//         eventData
+//       ) as ResponseActionAgentType,
+//     },
+//     host: {
+//       name: getFieldValue({ category: 'host', field: 'host.name' }, eventData),
+//       os: {
+//         name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
+//         family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
+//         version: getFieldValue({ category: 'host', field: 'host.os.version' }, eventData),
+//       },
+//     },
+//     lastCheckin: getFieldValue(
+//       { category: 'kibana', field: 'kibana.alert.last_detected' },
+//       eventData
+//     ),
+//   };
+// };
+
+/**
+ * This hook is used to get the data needed to show the context menu items for the responder
+ * actions using Alert data.
+ * @param onClick the callback to handle the click event
+ * @param eventData the event data, exists only when agentType !== 'endpoint'
+ * @returns an object with the data needed to show the context menu item
+ */
+export const useWithResponderActionDataFromAlert = ({
+  eventData = [],
+  onClick,
+}: ResponderContextMenuItemProps): ResponderActionData => {
   const {
-    data: hostInfo,
+    isSupported: hostSupportsResponseActions,
+    details: { agentType, agentId, platform, hostName },
+  } = useAlertResponseActionsSupport(eventData);
+  const showResponseActionsConsole = useWithShowResponder();
+  const isEndpointHost = agentType === 'endpoint';
+
+  const {
+    data: endpointHostInfo,
     isFetching,
     error,
-  } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId && isEndpointHost) });
+  } = useGetEndpointDetails(agentId, {
+    enabled: Boolean(hostSupportsResponseActions && isEndpointHost),
+  });
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
-    // v8.13 disabled for third-party agent alerts if the feature flag is not enabled
-    if (!isEndpointHost) {
-      switch (agentType) {
-        case 'sentinel_one':
-          // Disable it if feature flag is disabled
-          if (!isSentinelOneV1Enabled) {
-            return [true, undefined];
-          }
-          // Event must have the property that identifies the agent id
-          if (!getSentinelOneAgentId(eventData ?? null)) {
-            return [true, SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING];
-          }
+    if (!hostSupportsResponseActions) {
+      return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
+    }
 
-          return [false, undefined];
+    // Checks applicable only for Endpoint hosts
+    if (isEndpointHost) {
+      if (isFetching) {
+        return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
+      }
 
-        default:
-          return [true, undefined];
+      // if we got an error, and it's a 404, it means the endpoint is not from the endpoint host
+      if (error && error.body?.statusCode === 404) {
+        return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
+      }
+
+      // if we got an error and,
+      // it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
+      // or,
+      // the Host status is `unenrolled`
+      if (
+        (error && error.body?.statusCode === 400 && error.body?.message.includes('unenrolled')) ||
+        endpointHostInfo?.host_status === HostStatus.UNENROLLED
+      ) {
+        return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
+      }
+
+      // return general error tooltip
+      if (error) {
+        return [true, METADATA_API_ERROR_TOOLTIP];
       }
     }
+    return [false, undefined];
+  }, [
+    hostSupportsResponseActions,
+    isEndpointHost,
+    isFetching,
+    error,
+    endpointHostInfo?.host_status,
+  ]);
 
-    if (!endpointId) {
-      return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
+  const handleResponseActionsClick = useCallback(() => {
+    showResponseActionsConsole({
+      agentId,
+      agentType,
+      hostName,
+      platform,
+      capabilities: isEndpointHost
+        ? (endpointHostInfo?.metadata.Endpoint.capabilities as EndpointCapabilities[]) ?? []
+        : [],
+    });
+
+    // FIXME:PT cleanup
+
+    // if (!isEndpointHost) {
+    // }
+    // if (isEndpointHost && endpointHostInfo) {
+    //   showResponseActionsConsole({
+    //     agentId,
+    //     agentType,
+    //     capabilities:
+    //       (endpointHostInfo.metadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
+    //     hostName: endpointHostInfo.metadata.host.name,
+    //     platform: endpointHostInfo.metadata.host.os.name.toLowerCase(),
+    //   });
+    // }
+
+    if (onClick) {
+      onClick();
+    }
+  }, [
+    showResponseActionsConsole,
+    agentId,
+    agentType,
+    isEndpointHost,
+    endpointHostInfo?.metadata.Endpoint.capabilities,
+    hostName,
+    platform,
+    onClick,
+  ]);
+
+  return {
+    handleResponseActionsClick,
+    isDisabled,
+    tooltip,
+  };
+};
+
+type ResponderDataForEndpointHost = Omit<ResponderActionData, 'handleResponseActionsClick'> & {
+  capabilities: EndpointCapabilities[];
+  hostName: string;
+  platform: string;
+};
+
+/**
+ * Hook to specifically gather up the responder data for Elastic Defend endpoints
+ * @param endpointAgentId
+ * @param enabled
+ */
+const useResponderDataForEndpointHost = (
+  endpointAgentId: string,
+  enabled: boolean = true
+): ResponderDataForEndpointHost => {
+  const {
+    data: endpointHostInfo,
+    isFetching,
+    error,
+  } = useGetEndpointDetails(endpointAgentId, {
+    enabled,
+  });
+
+  return useMemo<ResponderDataForEndpointHost>(() => {
+    const response: ResponderDataForEndpointHost = {
+      isDisabled: false,
+      tooltip: undefined,
+      capabilities: [],
+      hostName: '',
+      platform: '',
+    };
+
+    if (!enabled) {
+      response.isDisabled = true;
+      return response;
     }
 
-    // Still loading host info
     if (isFetching) {
-      return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
+      response.isDisabled = true;
+      response.tooltip = LOADING_ENDPOINT_DATA_TOOLTIP;
+      return response;
     }
 
     // if we got an error, and it's a 404, it means the endpoint is not from the endpoint host
     if (error && error.body?.statusCode === 404) {
-      return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
+      response.isDisabled = true;
+      response.tooltip = NOT_FROM_ENDPOINT_HOST_TOOLTIP;
+      return response;
     }
 
     // if we got an error and,
@@ -132,54 +233,83 @@ export const useResponderActionData = ({
     // the Host status is `unenrolled`
     if (
       (error && error.body?.statusCode === 400 && error.body?.message.includes('unenrolled')) ||
-      hostInfo?.host_status === HostStatus.UNENROLLED
+      endpointHostInfo?.host_status === HostStatus.UNENROLLED
     ) {
-      return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
+      response.isDisabled = true;
+      response.tooltip = HOST_ENDPOINT_UNENROLLED_TOOLTIP;
+      return response;
     }
 
     // return general error tooltip
     if (error) {
-      return [true, METADATA_API_ERROR_TOOLTIP];
+      response.isDisabled = true;
+      response.tooltip = METADATA_API_ERROR_TOOLTIP;
     }
 
-    return [false, undefined];
+    response.capabilities = (endpointHostInfo?.metadata.Endpoint.capabilities ??
+      []) as EndpointCapabilities[];
+    response.hostName = endpointHostInfo?.metadata.host.name ?? '';
+    response.platform = endpointHostInfo?.metadata.host.os.name.toLowerCase() ?? '';
+
+    return response;
   }, [
-    isEndpointHost,
-    endpointId,
+    enabled,
     isFetching,
     error,
-    hostInfo?.host_status,
-    agentType,
-    isSentinelOneV1Enabled,
-    eventData,
+    endpointHostInfo?.host_status,
+    endpointHostInfo?.metadata.Endpoint.capabilities,
+    endpointHostInfo?.metadata.host.name,
+    endpointHostInfo?.metadata.host.os.name,
   ]);
+};
+
+export const useResponderActionData = ({
+  onClick,
+  agentId,
+  agentType,
+}: {
+  agentId: string;
+  agentType: ResponseActionAgentType;
+  onClick?: () => void;
+}): ResponderActionData => {
+  const isEndpointHost = agentType === 'endpoint';
+
+  const showResponseActionsConsole = useWithShowResponder();
+  const { tooltip, isDisabled, capabilities, hostName, platform } = useResponderDataForEndpointHost(
+    agentId,
+    isEndpointHost
+  );
+
+  // TODO:PT add support for other agent types once we add the `Respond` button to the Host details page in SIEM
 
   const handleResponseActionsClick = useCallback(() => {
-    if (!isEndpointHost) {
-      const agentInfoFromAlert = getThirdPartyAgentInfo(eventData || null);
-      showResponseActionsConsole({
-        agentId: agentInfoFromAlert.agent.id,
-        agentType,
-        capabilities: ['isolation'],
-        hostName: agentInfoFromAlert.host.name,
-        platform: agentInfoFromAlert.host.os.family,
-      });
-    }
-    if (isEndpointHost && hostInfo) {
-      showResponseActionsConsole({
-        agentId: hostInfo.metadata.agent.id,
-        agentType,
-        capabilities: (hostInfo.metadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
-        hostName: hostInfo.metadata.host.name,
-        platform: hostInfo.metadata.host.os.name.toLowerCase() as Platform,
-      });
-    }
-    if (onClick) onClick();
-  }, [isEndpointHost, hostInfo, onClick, eventData, showResponseActionsConsole, agentType]);
+    showResponseActionsConsole({
+      agentId,
+      agentType,
+      hostName,
+      platform,
+      capabilities: isEndpointHost ? capabilities : [],
+    });
 
-  return {
-    handleResponseActionsClick,
-    isDisabled,
-    tooltip,
-  };
+    if (onClick) {
+      onClick();
+    }
+  }, [
+    agentType,
+    capabilities,
+    agentId,
+    hostName,
+    isEndpointHost,
+    onClick,
+    platform,
+    showResponseActionsConsole,
+  ]);
+
+  return useMemo(() => {
+    return {
+      isDisabled: isEndpointHost ? isDisabled : true,
+      tooltip: isEndpointHost ? tooltip : NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+      handleResponseActionsClick,
+    };
+  }, [handleResponseActionsClick, isDisabled, isEndpointHost, tooltip]);
 };

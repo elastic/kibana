@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
-import { useResponderActionData } from './use_responder_action_data';
+import { useWithResponderActionDataFromAlert } from './use_responder_action_data';
 
 export const useResponderActionItem = (
   eventDetailsData: TimelineEventsDetailsItem[] | null,
@@ -20,16 +20,12 @@ export const useResponderActionItem = (
   const { loading: isAuthzLoading, canAccessResponseConsole } =
     useUserPrivileges().endpointPrivileges;
 
-  const {
-    isSupported: hostSupportsResponseActions,
-    details: { agentType, agentId },
-  } = useAlertResponseActionsSupport(eventDetailsData);
+  const { isSupported: hostSupportsResponseActions } =
+    useAlertResponseActionsSupport(eventDetailsData);
 
-  const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
-    endpointId: agentId,
+  const { handleResponseActionsClick, isDisabled, tooltip } = useWithResponderActionDataFromAlert({
     onClick,
-    agentType,
-    eventData: agentType !== 'endpoint' ? eventDetailsData : null,
+    eventData: eventDetailsData,
   });
 
   return useMemo(() => {
