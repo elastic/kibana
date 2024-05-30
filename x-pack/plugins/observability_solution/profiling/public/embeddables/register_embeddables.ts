@@ -12,10 +12,10 @@ import {
   EMBEDDABLE_STACK_TRACES,
 } from '@kbn/observability-shared-plugin/public';
 import { getEmbeddableFlamegraphComponent } from './flamegraph';
-import { EmbeddableFunctionsFactory } from './functions/embeddable_functions_factory';
+import { getEmbeddableFunctionsComponent } from './functions';
 import { ProfilingEmbeddablesDependencies } from './profiling_embeddable_provider';
-import { EmbeddableSearchBarFactory } from './search_bar/embeddable_search_bar_factory';
 import { getEmbeddableStackTracesComponent } from './stack_traces';
+import { EmbeddableSearchBarFactory } from './search_bar/embeddable_search_bar_factory';
 
 export function registerEmbeddables(deps: ProfilingEmbeddablesDependencies) {
   const {
@@ -25,9 +25,9 @@ export function registerEmbeddables(deps: ProfilingEmbeddablesDependencies) {
     EMBEDDABLE_FLAMEGRAPH,
     getEmbeddableFlamegraphComponent(deps)
   );
-  embeddable.registerEmbeddableFactory(
+  observabilityShared.registerProfilingComponent(
     EMBEDDABLE_FUNCTIONS,
-    new EmbeddableFunctionsFactory(() => Promise.resolve(deps))
+    getEmbeddableFunctionsComponent(deps)
   );
   embeddable.registerEmbeddableFactory(
     EMBEDDABLE_PROFILING_SEARCH_BAR,
