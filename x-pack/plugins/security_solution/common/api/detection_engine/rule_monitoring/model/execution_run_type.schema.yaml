@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info:
+  title: Execution Run Type Schema
+  version: not applicable
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleRunType:
+      type: string
+      description: Type of rule execution run.
+      enum:
+        - backfill
+        - standard

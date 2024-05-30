@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 
+import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
+
 const ResultDocumentInterface = t.interface({
   batchId: t.string,
   indexName: t.string,
@@ -37,7 +39,19 @@ const ResultDocumentOptional = t.partial({
 export const ResultDocument = t.intersection([ResultDocumentInterface, ResultDocumentOptional]);
 export type ResultDocument = t.TypeOf<typeof ResultDocument>;
 
-export const PostResultBody = ResultDocument;
+export const PostIndexResultBody = ResultDocument;
 
-export const GetResultParams = t.type({ pattern: t.string });
-export type GetResultParams = t.TypeOf<typeof GetResultParams>;
+export const GetIndexResultsLatestParams = t.type({ pattern: t.string });
+export type GetIndexResultsLatestParams = t.TypeOf<typeof GetIndexResultsLatestParams>;
+
+export const GetIndexResultsParams = t.type({
+  pattern: t.string,
+});
+
+export const GetIndexResultsQuery = t.partial({
+  size: StringToPositiveNumber,
+  from: StringToPositiveNumber,
+  startDate: t.string,
+  endDate: t.string,
+  outcome: t.union([t.literal('pass'), t.literal('fail')]),
+});
