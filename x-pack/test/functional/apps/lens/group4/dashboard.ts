@@ -347,9 +347,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.navigateTo(url);
       expect(await PageObjects.lens.getTitle()).to.be('test');
       // need to make sure there aren't extra tabs or it will impact future test suites
-      if ((await browser.getAllWindowHandles()).length !== 1) {
+      // close any new tabs that were opened
+      const windowHandlers = await browser.getAllWindowHandles();
+      if (windowHandlers.length > 1) {
         await browser.closeCurrentWindow();
-        await browser.switchTab(0);
+        await browser.switchToWindow(windowHandlers[0]);
       }
     });
   });
