@@ -19,14 +19,14 @@ export class IntegrationAssistantPlugin
   }
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
-    this.logger.debug('integrationAssistant api: Setup');
+    this.logger.info('integrationAssistant api: Setup');
     registerRoutes(router);
 
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('integrationAssistant api: Started');
+    this.logger.info('integrationAssistant api: Started');
     return {};
   }
 
