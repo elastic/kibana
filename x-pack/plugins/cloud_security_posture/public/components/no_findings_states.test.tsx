@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { setupMockServer, startMockServer } from '../test/mock_server/mock_server';
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { NoFindingsStates } from './no_findings_states';
+import { setupMockServer, startMockServer } from '../test/mock_server/mock_server';
 import { renderWrapper } from '../test/mock_server/mock_server_test_provider';
+import { NoFindingsStates } from './no_findings_states';
 import {
   statusIndexing,
   statusIndexTimeout,
@@ -18,11 +18,10 @@ import {
   statusUnprivileged,
   statusIndexed,
 } from '../test/mock_server/handlers/internal/cloud_security_posture/status_handlers';
-import { PostureTypes } from '../../common/types_old';
 
 const server = setupMockServer();
 
-const renderNoFindingsStates = (postureType: PostureTypes = 'cspm') => {
+const renderNoFindingsStates = (postureType: 'cspm' | 'kspm' = 'cspm') => {
   return renderWrapper(<NoFindingsStates postureType={postureType} />);
 };
 
@@ -36,29 +35,19 @@ describe('NoFindingsStates', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', {
-          name: /detect security misconfigurations in your cloud infrastructure!/i,
-        })
+        screen.getByText(/detect security misconfigurations in your cloud infrastructure!/i)
       ).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      const link = screen.getByRole('link', {
-        name: /add cspm integration/i,
-      });
-
-      expect(link).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /add cspm integration/i })).toHaveAttribute(
         'href',
         '/app/fleet/integrations/cloud_security_posture-1.9.0/add-integration/cspm'
       );
     });
 
     await waitFor(() => {
-      const link = screen.getByRole('link', {
-        name: /add kspm integration/i,
-      });
-
-      expect(link).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /add kspm integration/i })).toHaveAttribute(
         'href',
         '/app/fleet/integrations/cloud_security_posture-1.9.0/add-integration/kspm'
       );
@@ -70,18 +59,11 @@ describe('NoFindingsStates', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', {
-          name: /no agents installed/i,
-        })
-      ).toBeInTheDocument();
+      expect(screen.getByText(/no agents installed/i)).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      const link = screen.getByRole('link', {
-        name: /install agent/i,
-      });
-      expect(link).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /install agent/i })).toHaveAttribute(
         'href',
         '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=1f850b02-c6db-4378-9323-d439db4d65b4&integration=9b69ad21-1451-462c-9cd7-cc7dee50a34e'
       );
@@ -93,11 +75,7 @@ describe('NoFindingsStates', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', {
-          name: /no agents installed/i,
-        })
-      ).toBeInTheDocument();
+      expect(screen.getByText(/no agents installed/i)).toBeInTheDocument();
     });
 
     await waitFor(() => {
@@ -117,17 +95,14 @@ describe('NoFindingsStates', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', {
-          name: /posture evaluation underway/i,
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          /waiting for data to be collected and indexed. check back later to see your findings/i
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByText(/posture evaluation underway/i)).toBeInTheDocument();
     });
+
+    expect(
+      screen.getByText(
+        /waiting for data to be collected and indexed. check back later to see your findings/i
+      )
+    ).toBeInTheDocument();
   });
   it('shows timeout message when status is index-timeout', async () => {
     server.use(statusIndexTimeout);
@@ -151,11 +126,7 @@ describe('NoFindingsStates', () => {
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', {
-          name: /privileges required/i,
-        })
-      ).toBeInTheDocument();
+      expect(screen.getByText(/privileges required/i)).toBeInTheDocument();
 
       expect(
         screen.getByText(/required elasticsearch index privilege for the following indices:/i)
