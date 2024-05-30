@@ -24,6 +24,10 @@ export const getUserActionsRoute = createCasesRoute({
     }),
   },
   options: { deprecated: true },
+  routerOptions: {
+    access: 'public',
+    description: `Get all user activity for a case`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
