@@ -59,7 +59,7 @@ import { startSyncingDashboardControlGroup } from './controls/dashboard_control_
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { startQueryPerformanceTracking } from './query_performance_tracking';
+import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 
 /**
  * Builds a new Dashboard from scratch.

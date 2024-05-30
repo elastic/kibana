@@ -7,12 +7,12 @@
  */
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
 import { apiPublishesPhaseEvents, PublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { combineLatest, map, of, pairwise, startWith, switchMap } from 'rxjs';
-import { DASHBOARD_LOADED_EVENT } from '../../../dashboard_constants';
-import { pluginServices } from '../../../services/plugin_services';
-import { DashboardLoadType } from '../../types';
-import type { DashboardContainer } from '../dashboard_container';
+import { DASHBOARD_LOADED_EVENT } from '../../../../dashboard_constants';
+import { pluginServices } from '../../../../services/plugin_services';
+import { DashboardLoadType } from '../../../types';
 
 let isFirstDashboardLoadOfSession = true;
 
@@ -22,7 +22,9 @@ const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   dashboardSubsequentLoad: 2,
 };
 
-export const startQueryPerformanceTracking = (dashboard: DashboardContainer) => {
+export const startQueryPerformanceTracking = (
+  dashboard: PresentationContainer & TracksQueryPerformance
+) => {
   const { analytics } = pluginServices.getServices();
   const reportPerformanceMetrics = ({
     timeToData,
@@ -64,7 +66,7 @@ export const startQueryPerformanceTracking = (dashboard: DashboardContainer) => 
       pairwise()
     )
     .subscribe(([lastLoading, currentLoading]) => {
-      const panelCount = Object.keys(dashboard.getInput().panels).length;
+      const panelCount = Object.keys(dashboard.children$.getValue()).length;
       const now = performance.now();
       const loadType: DashboardLoadType = isFirstDashboardLoadOfSession
         ? 'sessionFirstLoad'
@@ -84,11 +86,11 @@ export const startQueryPerformanceTracking = (dashboard: DashboardContainer) => 
         dashboard.firstLoad = false;
       }
       if (queryHasStarted) {
-        dashboard.lastloadStartTime = now;
+        dashboard.lastLoadStartTime = now;
         return;
       }
       if (queryHasFinished) {
-        const timeToData = now - (dashboard.lastloadStartTime ?? now);
+        const timeToData = now - (dashboard.lastLoadStartTime ?? now);
         const completeLoadDuration =
           (dashboard.creationEndTime ?? now) - (dashboard.creationStartTime ?? now);
         reportPerformanceMetrics({

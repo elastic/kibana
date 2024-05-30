@@ -38,6 +38,7 @@ import {
   HasSaveNotification,
   HasSerializedChildState,
   TrackContentfulRender,
+  TracksQueryPerformance,
 } from '@kbn/presentation-containers';
 import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -124,6 +125,7 @@ export class DashboardContainer
   implements
     DashboardExternallyAccessibleApi,
     TrackContentfulRender,
+    TracksQueryPerformance,
     HasSaveNotification,
     HasRuntimeChildState,
     HasSerializedChildState
@@ -158,7 +160,7 @@ export class DashboardContainer
   private allDataViews: DataView[] = [];
 
   // performance monitoring
-  public lastloadStartTime?: number;
+  public lastLoadStartTime?: number;
   public creationStartTime?: number;
   public creationEndTime?: number;
   public firstLoad: boolean = true;
