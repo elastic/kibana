@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -284,25 +285,28 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.versioned
-    .post({
-      access: 'public',
-      path: SCAN_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: ScanActionRequestSchema,
+  // 8.15 route
+  if (endpointContext.experimentalFeatures.responseActionScanEnabled) {
+    router.versioned
+      .post({
+        access: 'public',
+        path: SCAN_ROUTE,
+        options: { authRequired: true, tags: ['access:securitySolution'] },
+      })
+      .addVersion(
+        {
+          version: '2023-10-31',
+          validate: {
+            request: ScanActionRequestSchema,
+          },
         },
-      },
-      withEndpointAuthz(
-        { all: ['canWriteScanOperations'] },
-        logger,
-        responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
-      )
-    );
+        withEndpointAuthz(
+          { all: ['canWriteScanOperations'] },
+          logger,
+          responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
+        )
+      );
+  }
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
