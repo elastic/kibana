@@ -37,7 +37,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageCo
     bk.setAnnotation(
       'agent image config',
       'warning',
-      `#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you didn't intend this remove FTR_ENABLE_FIPS_AGENT environment variable and/or the ci:enable-fips-agent Github label.`
+      '#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove ```FTR_ENABLE_FIPS_AGENT``` environment variable and/or the ```ci:enable-fips-agent``` Github label.'
     );
     config = FIPS_AGENT_IMAGE_CONFIG;
   } else {
