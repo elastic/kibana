@@ -40,6 +40,8 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
       const { packageName, dataStreamName, rawSamples, currentPipeline } =
         req.body as RelatedApiRequest;
 
+      const services = await context.resolve(['core']);
+      const { client } = services.core.elasticsearch;
       const { getStartServices } = await context.integrationAssistant;
       const [, { actions: actionsPlugin }] = await getStartServices();
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
@@ -64,7 +66,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         },
       });
 
-      const graph = await getRelatedGraph(model);
+      const graph = await getRelatedGraph(client, model);
       let results = { results: { docs: {}, pipeline: {} } };
       try {
         results = (await graph.invoke({
@@ -74,9 +76,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           currentPipeline,
         })) as RelatedApiResponse;
       } catch (e) {
-        return res.badRequest({
-          body: e,
-        });
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: results });

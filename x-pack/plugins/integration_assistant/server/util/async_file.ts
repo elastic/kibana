@@ -29,7 +29,7 @@ export async function asyncEnsureDir(dirPath: string): Promise<void> {
   }
 }
 
-export async function asyncCreate(path: string, content: string): Promise<void> {
+export async function asyncCreate(path: string, content: string | Buffer): Promise<void> {
   return await writeFile(path, content, { encoding: 'utf-8' });
 }
 

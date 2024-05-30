@@ -8,7 +8,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { RELATED_ERROR_PROMPT } from './prompts';
 import { RelatedState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 
 export async function handleErrors(state: RelatedState, model: BedrockChat) {
@@ -25,7 +25,6 @@ export async function handleErrors(state: RelatedState, model: BedrockChat) {
   })) as any[];
 
   const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
-
   return {
     currentPipeline,
     currentProcessors,

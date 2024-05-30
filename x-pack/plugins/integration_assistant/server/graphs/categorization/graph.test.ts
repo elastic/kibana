@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from '@kbn/core/server';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { getCategorizationGraph } from './graph';
 import { getModel } from '../../providers/bedrock';
@@ -19,13 +20,12 @@ import {
   testPipelineValidResult,
   testPipelineInvalidEcs,
 } from '../../../__jest__/fixtures/categorization';
-import { mockedRequest } from '../../../__jest__/fixtures';
+import { mockedRequestWithPipeline } from '../../../__jest__/fixtures';
 import { handleReview } from './review';
 import { handleCategorization } from './categorization';
 import { handleErrors } from './errors';
 import { handleInvalidCategorization } from './invalid';
-import { testPipeline } from '../../util/es';
-import { combineProcessors } from '../../util/pipeline';
+import { testPipeline, combineProcessors } from '../../util';
 
 const mockLlm = new FakeLLM({
   response: "I'll callback later.",
@@ -39,11 +39,27 @@ jest.mock('../../providers/bedrock', () => ({
   getModel: jest.fn(),
 }));
 
-jest.mock('../../util/es', () => ({
+jest.mock('../../util/pipeline', () => ({
   testPipeline: jest.fn(),
 }));
 
+jest.mock('../../util/es', () => {
+  return {
+    ESClient: {
+      setClient: jest.fn(),
+      getClient: jest.fn(),
+    },
+  };
+});
+
 describe('runCategorizationGraph', () => {
+  const mockClient = {
+    asCurrentUser: {
+      ingest: {
+        simulate: jest.fn(),
+      },
+    },
+  } as unknown as IScopedClusterClient;
   beforeEach(() => {
     // Mocked responses for each node that requires an LLM API call/response.
     const mockInvokeCategorization = jest
@@ -56,11 +72,14 @@ describe('runCategorizationGraph', () => {
     // Return a fake LLM to prevent API calls from being made, or require API credentials
     (getModel as jest.Mock).mockReturnValue(mockLlm);
 
+    // We do not care about ES in these tests, the mock is just to prevent errors.
+
     // After this is triggered, the mock of TestPipeline will trigger the expected error, to route to error handler
     (handleCategorization as jest.Mock).mockImplementation(async () => ({
       currentPipeline: categorizationInitialPipeline,
       currentProcessors: await mockInvokeCategorization(),
       reviewed: false,
+      finalized: false,
       lastExecutedChain: 'categorization',
     }));
     // Error pipeline resolves it, though the responce includes an invalid categorization
@@ -68,6 +87,7 @@ describe('runCategorizationGraph', () => {
       currentPipeline: categorizationInitialPipeline,
       currentProcessors: await mockInvokeError(),
       reviewed: false,
+      finalized: false,
       lastExecutedChain: 'error',
     }));
     // Invalid categorization is resolved and returned correctly, which routes it to a review
@@ -75,6 +95,7 @@ describe('runCategorizationGraph', () => {
       currentPipeline: categorizationInitialPipeline,
       currentProcessors: await mockInvokeInvalid(),
       reviewed: false,
+      finalized: false,
       lastExecutedChain: 'invalidCategorization',
     }));
     // After the review it should route to modelOutput and finish.
@@ -85,6 +106,7 @@ describe('runCategorizationGraph', () => {
         currentProcessors,
         currentPipeline,
         reviewed: true,
+        finalized: false,
         lastExecutedChain: 'review',
       };
     });
@@ -92,14 +114,14 @@ describe('runCategorizationGraph', () => {
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getCategorizationGraph();
+      await getCategorizationGraph(mockClient);
     } catch (error) {
       // noop
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const categorizationGraph = await getCategorizationGraph();
+    const categorizationGraph = await getCategorizationGraph(mockClient);
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)
@@ -111,10 +133,11 @@ describe('runCategorizationGraph', () => {
 
     let response;
     try {
-      response = await categorizationGraph.invoke(mockedRequest);
+      response = await categorizationGraph.invoke(mockedRequestWithPipeline);
     } catch (e) {
       // noop
     }
+
     expect(response.results).toStrictEqual(categorizationExpectedResults);
 
     // Check if the functions were called

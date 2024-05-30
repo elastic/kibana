@@ -11,7 +11,6 @@ import {
   SingleDatasetLocatorParams,
   ObsLogsExplorerDataViewLocatorParams,
 } from '@kbn/deeplinks-observability/locators';
-import { DatasetQualityLocatorDefinition } from './dataset_quality_locator';
 import { AllDatasetsLocatorDefinition } from './all_datasets_locator';
 import { DataViewLocatorDefinition } from './data_view_locator';
 import { SingleDatasetLocatorDefinition } from './single_dataset_locator';
@@ -24,13 +23,11 @@ const setup = async () => {
   const allDatasetsLocator = new AllDatasetsLocatorDefinition(dep);
   const dataViewLocator = new DataViewLocatorDefinition(dep);
   const singleDatasetLocator = new SingleDatasetLocatorDefinition(dep);
-  const datasetQualityLocator = new DatasetQualityLocatorDefinition(dep);
 
   return {
     allDatasetsLocator,
     dataViewLocator,
     singleDatasetLocator,
-    datasetQualityLocator,
   };
 };
 
@@ -424,43 +421,6 @@ describe('Observability Logs Explorer Locators', () => {
       expect(location.path).toMatchInlineSnapshot(
         `"/?pageState=(dataSourceSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),filters:!((meta:(alias:foo,disabled:!f,negate:!f)),(meta:(alias:bar,disabled:!f,negate:!f))),v:2)"`
       );
-    });
-  });
-
-  describe('Dataset Quality Locator', () => {
-    it('should create a link with correct path and no state', async () => {
-      const { datasetQualityLocator } = await setup();
-      const location = await datasetQualityLocator.getLocation({});
-
-      expect(location).toMatchObject({
-        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-        path: '/dataset-quality?pageState=(v:1)',
-        state: {},
-      });
-    });
-
-    it('should create a link with correct timeRange', async () => {
-      const refresh = {
-        pause: false,
-        value: 0,
-      };
-      const locatorParams = {
-        filters: {
-          timeRange: {
-            ...timeRange,
-            refresh,
-          },
-        },
-      };
-      const { datasetQualityLocator } = await setup();
-
-      const location = await datasetQualityLocator.getLocation(locatorParams);
-
-      expect(location).toMatchObject({
-        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
-        path: '/dataset-quality?pageState=(filters:(timeRange:(from:now-30m,refresh:(pause:!f,value:0),to:now)),v:1)',
-        state: {},
-      });
     });
   });
 });

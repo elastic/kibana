@@ -8,7 +8,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CATEGORIZATION_ERROR_PROMPT } from './prompts';
 import { CategorizationState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 
 export async function handleErrors(state: CategorizationState, model: BedrockChat) {

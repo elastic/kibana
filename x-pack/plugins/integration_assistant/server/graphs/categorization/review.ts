@@ -9,7 +9,7 @@ import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CATEGORIZATION_REVIEW_PROMPT } from './prompts';
 
 import { CategorizationState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 import { Pipeline } from '../../../common';
 

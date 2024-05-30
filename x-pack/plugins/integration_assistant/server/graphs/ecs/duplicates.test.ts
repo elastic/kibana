@@ -20,7 +20,7 @@ jest.mock('../../providers/bedrock', () => ({
 }));
 const testState: EcsMappingState = ecsTestState;
 
-describe('Testing duplicates handler', () => {
+describe('Testing ecs handler', () => {
   beforeEach(() => {
     (getModel as jest.Mock).mockReturnValue(mockLlm);
   });

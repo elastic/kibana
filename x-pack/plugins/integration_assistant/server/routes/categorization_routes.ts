@@ -41,6 +41,8 @@ export function registerCategorizationRoutes(
       const { packageName, dataStreamName, rawSamples, currentPipeline } =
         req.body as CategorizationApiRequest;
 
+      const services = await context.resolve(['core']);
+      const { client } = services.core.elasticsearch;
       const { getStartServices } = await context.integrationAssistant;
       const [, { actions: actionsPlugin }] = await getStartServices();
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
@@ -65,7 +67,7 @@ export function registerCategorizationRoutes(
         },
       });
 
-      const graph = await getCategorizationGraph(model);
+      const graph = await getCategorizationGraph(client, model);
       let results = { results: { docs: {}, pipeline: {} } };
       try {
         results = (await graph.invoke({
@@ -75,9 +77,7 @@ export function registerCategorizationRoutes(
           currentPipeline,
         })) as CategorizationApiResponse;
       } catch (e) {
-        return res.badRequest({
-          body: e,
-        });
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: results });

@@ -8,7 +8,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { RELATED_REVIEW_PROMPT } from './prompts';
 import { RelatedState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 
 export async function handleReview(state: RelatedState, model: BedrockChat) {

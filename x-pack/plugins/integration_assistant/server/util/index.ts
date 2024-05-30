@@ -16,3 +16,6 @@ export {
 
 export { generateFields, mergeSamples } from './samples';
 export { deepCopy, generateUniqueId } from './util';
+export { testPipeline } from './pipeline';
+export { combineProcessors } from './processors';
+export { ESClient } from './es';

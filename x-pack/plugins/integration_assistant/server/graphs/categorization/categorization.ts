@@ -7,7 +7,7 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CategorizationState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 

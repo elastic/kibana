@@ -80,9 +80,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             rawSamples,
           })) as EcsMappingApiResponse;
       } catch (e) {
-        return res.badRequest({
-          body: e,
-        });
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: results });

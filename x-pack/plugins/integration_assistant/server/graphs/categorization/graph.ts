@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CategorizationState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
@@ -14,6 +16,7 @@ import { handleInvalidCategorization } from './invalid';
 import { handleErrors } from './errors';
 import { handleReview } from './review';
 import { CATEGORIZATION_EXAMPLE_ANSWER, ECS_CATEGORIES, ECS_TYPES } from './constants';
+import { ESClient } from '../../util/es';
 
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
@@ -138,10 +141,12 @@ function chainRouter(state: CategorizationState): string {
   if (!state.finalized) {
     return 'modelOutput';
   }
+
   return END;
 }
 
-export async function getCategorizationGraph(model) {
+export async function getCategorizationGraph(client: IScopedClusterClient, model: BedrockChat) {
+  ESClient.setClient(client);
   const workflow = new StateGraph({
     channels: graphState,
   })
@@ -151,8 +156,8 @@ export async function getCategorizationGraph(model) {
     .addNode('handleValidatePipeline', handleValidatePipeline)
     .addNode('handleCategorizationValidation', handleCategorizationValidation)
     .addNode('handleInvalidCategorization', (state) => handleInvalidCategorization(state, model))
-    .addNode('handleErrors', handleErrors)
-    .addNode('handleReview', handleReview)
+    .addNode('handleErrors', (state) => handleErrors(state, model))
+    .addNode('handleReview', (state) => handleReview(state, model))
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('modelInput', 'handleValidatePipeline')

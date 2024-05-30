@@ -22,6 +22,7 @@ export function registerIntegrationBuilderRoutes(router: IRouter) {
             name: schema.string(),
             title: schema.string(),
             description: schema.string(),
+            logo: schema.maybe(schema.string()),
             dataStreams: schema.arrayOf(
               schema.object({
                 name: schema.string(),
@@ -45,12 +46,7 @@ export function registerIntegrationBuilderRoutes(router: IRouter) {
                 docs: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
               })
             ),
-            streamVersion: schema.maybe(schema.string()),
-            dockerComposeVersion: schema.maybe(schema.string()),
-            initialVersion: schema.string(),
-            formatVersion: schema.string(),
-            owner: schema.string(),
-            minKibanaVersion: schema.string(),
+            initialVersion: schema.maybe(schema.string()),
           }),
         }),
       },

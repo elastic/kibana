@@ -13,7 +13,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  */
 export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
-  tGridEventRenderedViewEnabled: true,
 
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
@@ -286,6 +285,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new rule's bulk action to manage custom highlighted fields
    */
   bulkCustomHighlightedFieldsEnabled: false,
+
+  /**
+   * Enables the manual rule run
+   */
+  manualRuleRunEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
