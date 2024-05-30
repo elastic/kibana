@@ -284,16 +284,12 @@ export const TIMELINE_VIEW_IN_ANALYZER = '[data-test-subj="view-in-analyzer"]';
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="hover-actions-add-timeline"]',
-  FILTER_FOR: '[data-test-subj="hover-actions-filter-for"]',
-  FILTER_OUT: '[data-test-subj="hovhover-actions-filter-out"]',
-  COPY: '[data-test-subj="hover-actions-copy-button"]',
-  SHOW_TOP: '[data-test-subj=show-top-field]',
+  ADD_TO_TIMELINE: '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="actionItem-security-default-cellActions-filterIn"]',
+  FILTER_OUT: '[data-test-subj="actionItem-security-default-cellActions-filterOut"]',
+  COPY: '[data-test-subj="actionItem-security-default-cellActions-copyToClipboard"]',
+  SHOW_TOP: '[data-test-subj="actionItem-security-default-cellActions-showTopN"]',
 };
-
-export const TIMELINE_FILTER_OUT = '[data-test-subj="filter-out-value"]';
-
-export const TIMELINE_FILTER_FOR = '[data-test-subj="filter-for-value"]';
 
 export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
 

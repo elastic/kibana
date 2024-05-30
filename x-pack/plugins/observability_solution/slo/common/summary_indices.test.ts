@@ -6,13 +6,17 @@
  */
 
 import { getListOfSloSummaryIndices } from './summary_indices';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
+import {
+  DEFAULT_STALE_SLO_THRESHOLD_HOURS,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from './constants';
 
 describe('getListOfSloSummaryIndices', () => {
   it('should return default index if disabled', function () {
     const settings = {
       useAllRemoteClusters: false,
       selectedRemoteClusters: [],
+      staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
     };
     const result = getListOfSloSummaryIndices(settings, []);
     expect(result).toBe(SLO_SUMMARY_DESTINATION_INDEX_PATTERN);
@@ -22,6 +26,7 @@ describe('getListOfSloSummaryIndices', () => {
     const settings = {
       useAllRemoteClusters: true,
       selectedRemoteClusters: [],
+      staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
     };
     const clustersByName = [
       { name: 'cluster1', isConnected: true },
@@ -37,6 +42,7 @@ describe('getListOfSloSummaryIndices', () => {
     const settings = {
       useAllRemoteClusters: false,
       selectedRemoteClusters: ['cluster1'],
+      staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
     };
     const clustersByName = [
       { name: 'cluster1', isConnected: true },

@@ -26,7 +26,7 @@ import {
   EuiFlyoutHeader,
   EuiRadioGroupOption,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
   LinkType,

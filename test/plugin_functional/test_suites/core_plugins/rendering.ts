@@ -279,7 +279,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
-        'xpack.infra.featureFlags.osqueryEnabled (any)',
+        'xpack.infra.featureFlags.osqueryEnabled (boolean)',
         'xpack.infra.featureFlags.inventoryThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
@@ -293,6 +293,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.editableIndexSettings (any)',
         'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.index_management.enableMappingsSourceFieldSection (any)',
+        'xpack.index_management.dev.enableSemanticText (boolean)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',

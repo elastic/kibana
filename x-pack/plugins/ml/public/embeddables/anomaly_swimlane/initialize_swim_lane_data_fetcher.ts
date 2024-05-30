@@ -8,14 +8,15 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   catchError,
   combineLatest,
   debounceTime,
+  EMPTY,
   from,
   map,
+  type Observable,
   of,
   shareReplay,
   skipWhile,
@@ -52,11 +53,9 @@ export const initializeSwimLaneDataFetcher = (
 
   const swimLaneData$ = new BehaviorSubject<OverallSwimlaneData | undefined>(undefined);
 
-  const selectedJobs$ = getJobsObservable(
-    swimLaneApi.jobIds.pipe(map((jobIds) => ({ jobIds }))),
-    anomalyDetectorService,
-    (error) => blockingError.next(error)
-  ).pipe(shareReplay(1));
+  const selectedJobs$ = getJobsObservable(swimLaneApi.jobIds, anomalyDetectorService, (error) => {
+    blockingError.next(error);
+  }).pipe(shareReplay(1));
 
   const swimLaneInput$ = combineLatest({
     jobIds: swimLaneApi.jobIds,
@@ -105,7 +104,7 @@ export const initializeSwimLaneDataFetcher = (
         } catch (e) {
           // handle query syntax errors
           blockingError.next(e);
-          return of(undefined);
+          return EMPTY;
         }
 
         return from(
@@ -146,12 +145,12 @@ export const initializeSwimLaneDataFetcher = (
               );
             }
             return of(overallSwimlaneData);
+          }),
+          catchError((error) => {
+            blockingError.next(error);
+            return EMPTY;
           })
         );
-      }),
-      catchError((error) => {
-        blockingError.next(error);
-        return of(undefined);
       })
     )
     .subscribe((data) => {

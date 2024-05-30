@@ -70,7 +70,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 
 describe('bulkUntrackAlerts()', () => {
   let rulesClient: RulesClient;
+
   beforeEach(async () => {
+    jest.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
   });
 
@@ -238,6 +240,63 @@ describe('bulkUntrackAlerts()', () => {
             "taskType": "once told me the world was gonna roll me i ain't the sharpest tool in the shed",
           },
         ],
+      }
+    `);
+  });
+
+  it('should not call bulkUpdateState with no taskIds', async () => {
+    alertsService.setAlertsToUntracked.mockResolvedValueOnce([]);
+
+    await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
+      indices: ['test-index'],
+      alertUuids: ['my-uuid'],
+    });
+
+    expect(alertsService.setAlertsToUntracked).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalledWith();
+  });
+
+  it('filters out undefined rule uuids', async () => {
+    alertsService.setAlertsToUntracked.mockResolvedValueOnce([{}, { foo: 'bar' }]);
+
+    await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
+      indices: ['test-index'],
+      alertUuids: ['my-uuid'],
+    });
+
+    expect(alertsService.setAlertsToUntracked).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalledWith();
+  });
+
+  it('should audit log success with no taskIds', async () => {
+    alertsService.setAlertsToUntracked.mockResolvedValueOnce([]);
+
+    await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
+      indices: ['test-index'],
+      alertUuids: ['my-uuid'],
+    });
+
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalledWith();
+    expect(auditLogger.log.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "rule_alert_untrack",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": undefined,
+        },
+        "message": "User has untracked a rule",
       }
     `);
   });

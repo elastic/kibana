@@ -19,7 +19,7 @@ import type {
  * @param rule The rule to create
  */
 export const createRuleWithAuth = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   rule: RuleCreateProps,
   auth: { user: string; pass: string }
 ): Promise<RuleResponse> => {

@@ -964,6 +964,20 @@
       }
     }
   },
+  "endpoint:unified-user-artifact-manifest": {
+    "dynamic": false,
+    "properties": {
+      "artifactIds": {
+        "type": "keyword"
+      },
+      "policyId": {
+        "type": "keyword"
+      },
+      "semanticVersion": {
+        "type": "keyword"
+      }
+    }
+  },
   "endpoint:user-artifact-manifest": {
     "dynamic": false,
     "properties": {
@@ -1664,6 +1678,10 @@
       "fleet_server_host_id": {
         "type": "keyword"
       },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
@@ -1710,6 +1728,9 @@
       },
       "status": {
         "type": "keyword"
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "unenroll_timeout": {
         "type": "integer"
@@ -1999,6 +2020,9 @@
         "properties": {
           "name": {
             "type": "keyword"
+          },
+          "requires_root": {
+            "type": "boolean"
           },
           "title": {
             "type": "keyword"
@@ -3034,6 +3058,9 @@
   "space": {
     "dynamic": false,
     "properties": {
+      "disabledFeatures": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -3042,10 +3069,17 @@
           }
         },
         "type": "text"
+      },
+      "solution": {
+        "type": "keyword"
       }
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
   },

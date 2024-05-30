@@ -19,7 +19,7 @@ export const PipelineManageButton: React.FC = () => {
     <>
       <EuiSpacer />
       <EuiButtonEmpty
-        size="s"
+        size="m"
         href={http.basePath.prepend('/app/management/ingest/ingest_pipelines')}
         data-test-subj="manage-pipeline-button"
       >

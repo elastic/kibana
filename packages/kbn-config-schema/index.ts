@@ -49,6 +49,7 @@ import {
   URIType,
   StreamType,
   UnionTypeOptions,
+  Lazy,
 } from './src/types';
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
@@ -216,6 +217,13 @@ function conditional<A extends ConditionalTypeValue, B, C>(
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
+/**
+ * Useful for creating recursive schemas.
+ */
+function lazy<T>(id: string) {
+  return new Lazy<T>(id);
+}
+
 export const schema = {
   any,
   arrayOf,
@@ -226,6 +234,7 @@ export const schema = {
   contextRef,
   duration,
   ip,
+  lazy,
   literal,
   mapOf,
   maybe,
@@ -244,7 +253,7 @@ export const schema = {
 export type Schema = typeof schema;
 
 import {
-  META_FIELD_X_OAS_REF_ID,
+  META_FIELD_X_OAS_ANY,
   META_FIELD_X_OAS_OPTIONAL,
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,
@@ -253,7 +262,7 @@ import {
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
-  META_FIELD_X_OAS_REF_ID,
+  META_FIELD_X_OAS_ANY,
   META_FIELD_X_OAS_OPTIONAL,
   META_FIELD_X_OAS_DEPRECATED,
   META_FIELD_X_OAS_MAX_LENGTH,

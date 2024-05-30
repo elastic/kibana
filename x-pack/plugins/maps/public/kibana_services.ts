@@ -104,6 +104,3 @@ export const getEMSSettings: () => EMSSettings = () => {
 export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
 
 export const getShareService = () => pluginsStart.share;
-
-export const getIsAllowByValueEmbeddables = () =>
-  pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;

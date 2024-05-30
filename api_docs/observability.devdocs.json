@@ -2711,7 +2711,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; isNewVersion: () => boolean; }"
+              ") => void; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
@@ -3256,6 +3256,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.navigation",
+            "type": "Object",
+            "tags": [],
+            "label": "navigation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.NavigationPublicStart",
+                "text": "NavigationPublicStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.observabilityShared",
             "type": "Object",
             "tags": [],
@@ -3572,7 +3592,13 @@
             "label": "aiops",
             "description": [],
             "signature": [
-              "AiopsPluginStart"
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsPluginStart",
+                "text": "AiopsPluginStart"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
@@ -4515,6 +4541,21 @@
         "description": [],
         "signature": [
           "\"observability:enableComparisonByDefault\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.enableInfrastructureContainerAssetView",
+        "type": "string",
+        "tags": [],
+        "label": "enableInfrastructureContainerAssetView",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureContainerAssetView\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -7868,6 +7909,41 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-server.existsQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "existsQuery",
+        "description": [],
+        "signature": [
+          "(field: string) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.existsQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-server.getInspectResponse",
         "type": "Function",
         "tags": [],
@@ -8761,7 +8837,25 @@
           },
           "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
           "ServerRouteCreateOptions",
-          " ? TReturnType : never"
+          " ? TReturnType extends ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
+          },
+          " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
         "deprecated": false,
@@ -10089,6 +10183,90 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableInfrastructureContainerAssetView",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableInfrastructureContainerAssetView]",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration",
             "type": "Object",
             "tags": [],
@@ -10592,6 +10770,118 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmEnableTableSearchBar.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"boolean\""
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmEnableMultiSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmEnableMultiSignal]",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableMultiSignal.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -12851,6 +13141,48 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.convertToBuiltInComparators",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToBuiltInComparators",
+        "description": [],
+        "signature": [
+          "(comparator: ",
+          "LegacyComparator",
+          ") => ",
+          {
+            "pluginId": "@kbn/alerting-comparators",
+            "scope": "common",
+            "docId": "kibKbnAlertingComparatorsPluginApi",
+            "section": "def-common.COMPARATORS",
+            "text": "COMPARATORS"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/utils/convert_legacy_outside_comparator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.convertToBuiltInComparators.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "comparator",
+            "description": [],
+            "signature": [
+              "LegacyComparator"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/common/utils/convert_legacy_outside_comparator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.formatDurationFromTimeUnitChar",
         "type": "Function",
         "tags": [],
@@ -13915,6 +14247,21 @@
         "description": [],
         "signature": [
           "\"observability:enableInfrastructureAssetCustomDashboards\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableInfrastructureContainerAssetView",
+        "type": "string",
+        "tags": [],
+        "label": "enableInfrastructureContainerAssetView",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureContainerAssetView\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,

@@ -42,7 +42,7 @@ interface State {
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
 
-class VectorTileInspector extends Component<InspectorViewProps, State> {
+export class VectorTileInspector extends Component<InspectorViewProps, State> {
   private _isMounted = false;
 
   constructor(props: InspectorViewProps) {
@@ -335,7 +335,3 @@ function getTileResponse(tileRequest: TileRequest) {
       }
     : undefined;
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export default VectorTileInspector;

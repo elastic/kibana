@@ -182,7 +182,6 @@ export function createTestEsCluster<
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
-  const isFIPSMode = process.env.FTR_FIPS_MODE === '1';
 
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
@@ -193,12 +192,7 @@ export function createTestEsCluster<
       : ['discovery.type=single-node']),
   ];
 
-  const esArgs = assignArgs(
-    defaultEsArgs,
-    // ML has issues running in FIPS mode due to custom OpenSSL
-    // Remove after https://github.com/elastic/kibana-operations/issues/96
-    isFIPSMode ? [...customEsArgs, 'xpack.ml.enabled=false'] : customEsArgs
-  );
+  const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
   const config = {
     version: esTestConfig.getVersion(),
@@ -231,22 +225,21 @@ export function createTestEsCluster<
 
     async start() {
       let installPath: string;
+      let disableEsTmpDir: boolean;
 
       // We only install once using the first node. If the cluster has
       // multiple nodes, they'll all share the same ESinstallation.
       const firstNode = this.nodes[0];
       if (esFrom === 'source') {
-        installPath = (
-          await firstNode.installSource({
-            sourcePath: config.sourcePath,
-            license: config.license,
-            password: config.password,
-            basePath: config.basePath,
-            esArgs: config.esArgs,
-          })
-        ).installPath;
+        ({ installPath, disableEsTmpDir } = await firstNode.installSource({
+          sourcePath: config.sourcePath,
+          license: config.license,
+          password: config.password,
+          basePath: config.basePath,
+          esArgs: config.esArgs,
+        }));
       } else if (esFrom === 'snapshot') {
-        installPath = (await firstNode.installSnapshot(config)).installPath;
+        ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
       } else if (esFrom === 'serverless') {
         if (!esServerlessOptions) {
           throw new Error(
@@ -308,6 +301,7 @@ export function createTestEsCluster<
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
             onEarlyExit,
             writeLogsToPath,
+            disableEsTmpDir,
           });
         });
       }

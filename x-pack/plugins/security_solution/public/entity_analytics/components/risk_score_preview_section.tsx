@@ -25,10 +25,10 @@ import {
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import {
   RiskScoreEntity,
   RISK_SCORE_INDEX_PATTERN,
-  type RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
@@ -43,11 +43,11 @@ interface IRiskScorePreviewPanel {
   showMessage: string;
   hideMessage: string;
   isLoading: boolean;
-  items: RiskScore[];
+  items: EntityRiskScoreRecord[];
   type: RiskScoreEntity;
 }
 
-const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
+const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
   scores
     ?.filter((item) => item?.id_field === field)
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)

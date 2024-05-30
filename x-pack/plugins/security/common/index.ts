@@ -31,6 +31,7 @@ export type {
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
   RoleRemoteIndexPrivilege,
+  RoleRemoteClusterPrivilege,
   FeaturesPrivileges,
   LoginLayout,
   SecurityLicenseFeatures,
