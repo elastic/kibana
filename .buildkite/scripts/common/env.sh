@@ -137,7 +137,8 @@ if [[ "${FTR_ENABLE_FIPS_AGENT:-}" == "true" ]] || is_pr_with_label "ci:enable-f
   FIPS_ENABLED=true
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
 
-  # TODO: adjust node options
+  echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"
+  echo "--openssl-config=$HOME/nodejs.cnf" >>"$KIBANA_DIR/config/node.options"
 fi
 
 export FIPS_ENABLED

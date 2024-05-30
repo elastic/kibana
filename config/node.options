@@ -13,6 +13,3 @@
 
 ## enable OpenSSL 3 legacy provider
 --openssl-legacy-provider
-
---enable-fips
---openssl-config=/opt/buildkite-agent/nodejs.cnf
