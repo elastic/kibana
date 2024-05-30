@@ -15,12 +15,11 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
-    "@kbn/some-dev-log",
-    "@kbn/stdio-dev-helpers",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/safer-lodash-set",
     "@kbn/core-plugins-server-internal",
     "@kbn/dev-cli-runner",
     "@kbn/test",
+    "@kbn/dev-utils",
   ]
 }
