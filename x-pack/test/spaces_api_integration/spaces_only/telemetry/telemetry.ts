@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       await spacesService.delete('space-1');
       await spacesService.delete('space-2');
       await spacesService.delete('space-3');
-    })
+    });
 
     it('includes only disabledFeatures findings', async () => {
       const [{ stats }] = await usageAPI.getTelemetryStats({
