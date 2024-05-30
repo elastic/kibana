@@ -88,7 +88,7 @@ ${inputsYaml}
           foundMetrics = true;
           break;
         }
-
+        await agent.log();
         await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
       }
 
@@ -100,6 +100,7 @@ ${inputsYaml}
 interface AgentProcess {
   name: string;
   stop: () => void;
+  log: () => void;
 }
 
 async function startAgent({
@@ -146,6 +147,9 @@ async function startAgent({
 
   return {
     name: hostName,
+    log: () => {
+      console.log(execa.sync('docker', ['logs', agentContainerId]));
+    },
     stop: () => {
       try {
         execa.sync('docker', ['kill', agentContainerId]);
