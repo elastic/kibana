@@ -932,10 +932,12 @@
   ],
   "slo-settings": [],
   "space": [
+    "disabledFeatures",
     "name",
     "solution"
   ],
   "spaces-usage-stats": [],
+  "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
     "alert.status",
