@@ -73,7 +73,10 @@ function SparkPlotItem({
 
   if (hasValidTimeSeries(series)) {
     return (
-      <div style={{ backgroundColor: `${palette[0]}`, padding: 1, height: '100%' }}>
+      <div
+        style={{ backgroundColor: `${palette[0]}`, padding: 1, height: '100%' }}
+        data-test-subj="datasetQualitySparkPlot"
+      >
         <Chart size={chartSize}>
           <Settings showLegend={false} locale={i18n.getLocale()} />
           <Tooltip type="none" />
