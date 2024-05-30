@@ -21,6 +21,7 @@ import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 import {
   createExceptionList,
   createExceptionListItem,
+  deleteEndpointExceptionList,
   deleteExceptionLists,
 } from '../../../../../../tasks/api_calls/exceptions';
 import { getNewRule } from '../../../../../../objects/rule';
@@ -48,6 +49,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
     login();
     deleteAlertsAndRules();
     deleteExceptionLists();
+    deleteEndpointExceptionList();
     createRule(getNewRule({ name: 'Another rule' }));
 
     // Create exception list associated with a rule
@@ -109,6 +111,12 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
     });
     visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
+  });
+
+  afterEach(() => {
+    deleteAlertsAndRules();
+    deleteExceptionLists();
+    deleteEndpointExceptionList();
   });
 
   it('Duplicate exception list with expired items', function () {
