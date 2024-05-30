@@ -25,7 +25,7 @@ import * as i18n from './translations';
 import type { TemplateFormProps } from '../templates/types';
 import type { CasesConfigurationUI } from '../../containers/types';
 
-interface FlyOutBodyProps<T> {
+export interface FlyOutBodyProps<T> {
   initialValue: T;
   onChange: (state: CustomFieldFormState | TemplateFormState) => void;
   configConnectors?: ActionConnector[];

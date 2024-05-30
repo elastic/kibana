@@ -26,6 +26,8 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 jest.mock('../connectors/servicenow/use_get_choices');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;
+const appId = 'securitySolution';
+const draftKey = `cases.${appId}.createCaseTemplate.description.markdownEditor`;
 
 describe('TemplateForm', () => {
   let appMockRenderer: AppMockRenderer;
@@ -41,6 +43,10 @@ describe('TemplateForm', () => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftKey);
   });
 
   it('renders correctly', async () => {
@@ -70,7 +76,6 @@ describe('TemplateForm', () => {
         key: 'template_key_1',
         name: 'Template 1',
         templateDescription: 'Sample description',
-        templateTags: [],
       },
     };
     appMockRenderer.render(<TemplateForm {...newProps} />);
@@ -97,7 +102,6 @@ describe('TemplateForm', () => {
         templateDescription: 'Sample description',
         title: 'Case with template 1',
         description: 'case description',
-        templateTags: [],
       },
     };
     appMockRenderer.render(<TemplateForm {...newProps} />);
@@ -162,7 +166,6 @@ describe('TemplateForm', () => {
         templateDescription: 'this is a first template',
         templateTags: ['foo', 'bar'],
         connectorId: 'none',
-        fields: null,
         syncAlerts: true,
       });
     });
@@ -216,7 +219,6 @@ describe('TemplateForm', () => {
         tags: ['template-1'],
         category: 'new',
         connectorId: 'none',
-        fields: null,
         syncAlerts: true,
       });
     });
@@ -266,9 +268,6 @@ describe('TemplateForm', () => {
         connectorId: 'servicenow-1',
         fields: {
           category: 'software',
-          impact: null,
-          severity: null,
-          subcategory: null,
           urgency: '1',
         },
         syncAlerts: true,
@@ -333,7 +332,6 @@ describe('TemplateForm', () => {
         name: 'Template 1',
         templateDescription: 'this is a first template',
         connectorId: 'none',
-        fields: null,
         syncAlerts: true,
         customFields: {
           test_key_1: 'My text test value 1',

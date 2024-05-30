@@ -391,7 +391,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         key,
         name,
         description: templateDescription,
-        tags: templateTags,
+        tags: templateTags ?? [],
         caseFields: {
           ...otherCaseFields,
           connector: transformedConnector,

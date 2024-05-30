@@ -6,22 +6,31 @@
  */
 
 import { getConnectorsFormSerializer, isEmptyValue } from '../utils';
-import type { ConnectorTypeFields } from '../../../common/types/domain';
 import type { TemplateFormProps } from './types';
 
 export const removeEmptyFields = (
-  data: Omit<TemplateFormProps, 'fields'> | Record<string, string | boolean> | null | undefined
-): Omit<TemplateFormProps, 'fields'> | Record<string, string | boolean> | null => {
+  data: TemplateFormProps | Record<string, string | boolean | null | undefined> | null | undefined
+): TemplateFormProps | Record<string, string | boolean> | null => {
   if (data) {
     return Object.entries(data).reduce((acc, [key, value]) => {
       let initialValue = {};
 
       if (key === 'customFields') {
-        const nonEmptyFields = removeEmptyFields(value as Record<string, string | boolean>) ?? {};
+        const nonEmptyCustomFields =
+          removeEmptyFields(value as Record<string, string | boolean>) ?? {};
+
+        if (Object.entries(nonEmptyCustomFields).length > 0) {
+          initialValue = {
+            customFields: nonEmptyCustomFields,
+          };
+        }
+      } else if (key === 'fields') {
+        const nonEmptyFields =
+          removeEmptyFields(value as Record<string, string | null | undefined>) ?? {};
 
         if (Object.entries(nonEmptyFields).length > 0) {
           initialValue = {
-            customFields: nonEmptyFields,
+            fields: nonEmptyFields,
           };
         }
       } else if (!isEmptyValue(value)) {
@@ -40,14 +49,16 @@ export const removeEmptyFields = (
 
 export const templateSerializer = <T extends TemplateFormProps | null>(data: T): T => {
   if (data !== null) {
-    const { fields, ...rest } = data;
-    const serializedFields = removeEmptyFields(rest);
-    const connectorFields = getConnectorsFormSerializer({ fields: fields ?? null });
+    const { fields = null, ...rest } = data;
+    const connectorFields = getConnectorsFormSerializer({ fields });
+    const serializedFields = removeEmptyFields({
+      ...rest,
+      fields: connectorFields.fields,
+    });
 
     return {
       ...serializedFields,
-      fields: connectorFields.fields as ConnectorTypeFields['fields'],
-    };
+    } as T;
   }
 
   return data;
