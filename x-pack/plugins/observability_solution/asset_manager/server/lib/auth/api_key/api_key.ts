@@ -7,7 +7,7 @@
 
 import { AssetManagerServerSetup } from "@kbn/assetManager-plugin/server/types";
 import { KibanaRequest } from "@kbn/core-http-server";
-import { canRunEntityDiscovery, requiredRunTimePrivileges, entitiesIndexPattern } from '../privileges';
+import { canRunEntityDiscovery, requiredRunTimePrivileges } from '../privileges';
 import { getFakeKibanaRequest } from "@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request";
 
 export type EntityDiscoveryAPIKey = {
@@ -51,16 +51,7 @@ export const generateEntityDiscoveryAPIKey = async (
     const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
         name: "Entity discovery API key",
         role_descriptors: {
-            entity_discovery_admin: {
-                cluster: requiredRunTimePrivileges.cluster,
-                index: [
-                    {
-                        names: [entitiesIndexPattern],
-                        privileges: requiredRunTimePrivileges.index,
-                    },
-                ],
-                run_as: [],
-            },
+            entity_discovery_admin: requiredRunTimePrivileges,
         },
         metadata: {
             description:

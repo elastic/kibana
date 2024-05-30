@@ -10,15 +10,24 @@ import {
 } from '@kbn/core/server';
 import { ENTITY_BASE_PREFIX } from "@kbn/assetManager-plugin/common/constants_entities";
 
-export const entitiesIndexPattern = `${ENTITY_BASE_PREFIX}*`
-
 export const requiredRunTimePrivileges = {
   // all of
   index: [
-    'view_index_metadata',
-    'create_doc',
-    'auto_configure',
-    'read',
+    {
+      names: [`${ENTITY_BASE_PREFIX}*`],
+      privileges: [
+        'create_doc',
+        'auto_configure',
+        'read',
+      ],
+    },
+    {
+      // how do we know ahead of time what we need to include here??
+      names: ['logs-*', 'filebeat*', 'metrics-*', 'apm-*'],
+      privileges: [
+        'read'
+      ],
+    }
   ],
   cluster: [
     'manage_transform',
@@ -42,12 +51,7 @@ export const canRunEntityDiscovery = async (
   const { has_all_requested } = await client.asCurrentUser.security.hasPrivileges({
     body: {
       cluster: requiredRunTimePrivileges.cluster,
-      index: [
-        {
-          names: [entitiesIndexPattern],
-          privileges: requiredRunTimePrivileges.index,
-        }
-      ]
+      index: requiredRunTimePrivileges.index,
     }
   });
 
