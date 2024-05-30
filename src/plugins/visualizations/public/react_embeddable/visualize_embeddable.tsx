@@ -73,6 +73,8 @@ export const getVisualizeEmbeddableFactory: (
 
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
 
+    let updateExpressionParams = async () => {};
+
     const api = buildApi(
       {
         ...titlesApi,
@@ -110,21 +112,30 @@ export const getVisualizeEmbeddableFactory: (
         isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
         setVis: async (newSerializedVis) => {
           vis$.next(await createVisInstance(newSerializedVis));
+          await updateExpressionParams();
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
         subscribeToVisData: (listener) => visData$.subscribe(listener),
         subscribeToHasInspector: (listener) =>
           inspectorAdapters$.subscribe((value) => listener(!isEmpty(value))),
         subscribeToNavigateToLens: (listener) =>
-          vis$.subscribe(async (vis) => {
-            if (!vis.type.navigateToLens) return;
-            const expressionVariables = await vis.type.getExpressionVariables?.(
-              vis,
-              getTimeFilter()
-            );
-            if (!expressionVariables?.canNavigateToLens) return;
-            listener(vis.type.navigateToLens);
-          }),
+          vis$
+            .pipe(
+              switchMap((vis) => {
+                return (async () => {
+                  if (!vis.type.navigateToLens) return;
+                  const expressionVariables = await vis.type.getExpressionVariables?.(
+                    vis,
+                    getTimeFilter()
+                  );
+                  if (!expressionVariables?.canNavigateToLens) return;
+                  return vis.type.navigateToLens;
+                })();
+              })
+            )
+            .subscribe(async (navigateToLensFn) => {
+              if (navigateToLensFn) listener(navigateToLensFn);
+            }),
         openInspector: () => {
           const adapters = inspectorAdapters$.getValue();
           if (!adapters) return;
@@ -150,6 +161,7 @@ export const getVisualizeEmbeddableFactory: (
         ],
       }
     );
+
     fetch$(api)
       .pipe(
         switchMap((data) => {
@@ -173,66 +185,69 @@ export const getVisualizeEmbeddableFactory: (
                   syncTooltips: parentApi.settings.syncTooltips$.getValue(),
                 }
               : {};
-            const { params, abortController } = await getExpressionRendererProps({
-              unifiedSearch,
-              vis: vis$.getValue(),
-              settings,
-              disableTriggers,
-              searchSessionId,
-              parentExecutionContext: executionContext,
-              abortController: expressionAbortController$.getValue(),
-              onRender: () => {
-                renderCount$.next(renderCount$.getValue() + 1);
-                if (hasRendered$.getValue() === true) return;
-                hasRendered$.next(true);
-                hasRendered$.complete();
-              },
-              onEvent: async (event) => {
-                // Visualize doesn't respond to sizing events, so ignore.
-                if (isChartSizeEvent(event)) {
-                  return;
-                }
-                const currentVis = vis$.getValue();
-                if (!disableTriggers) {
-                  const triggerId = get(
-                    VIS_EVENT_TO_TRIGGER,
-                    event.name,
-                    VIS_EVENT_TO_TRIGGER.filter
-                  );
-                  let context;
+            updateExpressionParams = async () => {
+              const { params, abortController } = await getExpressionRendererProps({
+                unifiedSearch,
+                vis: vis$.getValue(),
+                settings,
+                disableTriggers,
+                searchSessionId,
+                parentExecutionContext: executionContext,
+                abortController: expressionAbortController$.getValue(),
+                onRender: () => {
+                  renderCount$.next(renderCount$.getValue() + 1);
+                  if (hasRendered$.getValue() === true) return;
+                  hasRendered$.next(true);
+                  hasRendered$.complete();
+                },
+                onEvent: async (event) => {
+                  // Visualize doesn't respond to sizing events, so ignore.
+                  if (isChartSizeEvent(event)) {
+                    return;
+                  }
+                  const currentVis = vis$.getValue();
+                  if (!disableTriggers) {
+                    const triggerId = get(
+                      VIS_EVENT_TO_TRIGGER,
+                      event.name,
+                      VIS_EVENT_TO_TRIGGER.filter
+                    );
+                    let context;
 
-                  if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-                    context = {
-                      timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
-                      ...event.data,
-                    };
-                  } else {
-                    context = {
-                      data: {
+                    if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+                      context = {
                         timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
                         ...event.data,
-                      },
-                    };
-                  }
+                      };
+                    } else {
+                      context = {
+                        data: {
+                          timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
+                          ...event.data,
+                        },
+                      };
+                    }
 
-                  await getUiActions().getTrigger(triggerId).exec(context);
-                }
-              },
-              onData: (newData, inspectorAdapters) => {
-                visData$.next(newData);
-                inspectorAdapters$.next(
-                  typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters
-                );
-              },
-            });
-            return { params, abortController };
+                    await getUiActions().getTrigger(triggerId).exec(context);
+                  }
+                },
+                onData: (newData, inspectorAdapters) => {
+                  visData$.next(newData);
+                  inspectorAdapters$.next(
+                    typeof inspectorAdapters === 'function'
+                      ? inspectorAdapters()
+                      : inspectorAdapters
+                  );
+                },
+              });
+              if (params) expressionParams$.next(params);
+              expressionAbortController$.next(abortController);
+            };
+            return await updateExpressionParams();
           })();
         })
       )
-      .subscribe(({ params, abortController }) => {
-        if (params) expressionParams$.next(params);
-        expressionAbortController$.next(abortController);
-      });
+      .subscribe();
 
     return {
       api,
