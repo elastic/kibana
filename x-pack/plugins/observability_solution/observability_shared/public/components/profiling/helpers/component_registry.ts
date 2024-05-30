@@ -21,11 +21,6 @@ export const registerProfilingComponent = <T>(key: string, component: React.FC<T
   registry[key] = component;
 };
 
-/**
-  If necessary, we can provide the following functions on the ObservabilitySharedPluginStart contract.
- */
-export const hasProfilingComponent = (key: string) => registry[key] !== undefined;
-
 export const getProfilingComponent = <T>(key: string): React.FC<T> => {
   if (registry[key] === undefined) {
     throw new Error(
