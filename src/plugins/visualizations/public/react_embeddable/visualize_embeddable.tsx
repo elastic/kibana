@@ -227,6 +227,7 @@ export const getVisualizeEmbeddableFactory: (
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
+        const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
 
@@ -236,6 +237,7 @@ export const getVisualizeEmbeddableFactory: (
             ref={domNode}
             data-test-subj="visualizationLoader"
             data-rendering-count={renderCount /* Used for functional tests */}
+            data-render-complete={hasRendered}
             data-title={api.panelTitle?.getValue()}
             data-description={api.panelDescription?.getValue()}
             data-shared-item
