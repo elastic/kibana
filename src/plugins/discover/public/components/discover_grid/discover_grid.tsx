@@ -8,8 +8,8 @@
 
 import React from 'react';
 import {
-  UnifiedDataTable,
   renderCustomToolbar,
+  UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 
