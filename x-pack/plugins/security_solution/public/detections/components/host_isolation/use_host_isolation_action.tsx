@@ -6,23 +6,17 @@
  */
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import {
+  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  LOADING_ENDPOINT_DATA_TOOLTIP,
+  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+} from '../endpoint_responder/translations';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import {
-  getSentinelOneAgentId,
-  isAlertFromSentinelOneEvent,
-} from '../../../common/utils/sentinelone_alert_check';
-import {
-  getCrowdstrikeAgentId,
-  isAlertFromCrowdstrikeEvent,
-} from '../../../common/utils/crowdstrike_alert_check';
-import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import type { AgentStatusInfo } from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import { useEndpointHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
-import { getFieldValue } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
 import { useAgentStatusHook } from '../../../management/hooks/agents/use_get_agent_status';
@@ -40,63 +34,21 @@ export const useHostIsolationAction = ({
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
-  const useAgentStatus = useAgentStatusHook();
-
-  const hasActionsAllPrivileges = useKibana().services.application?.capabilities?.actions?.save;
-
+  const {
+    isSupported: hostSupportsResponseActions,
+    details: {
+      agentType,
+      agentId,
+      agentSupport: { isolate: isolationSupported },
+    },
+  } = useAlertResponseActionsSupport(detailsData);
   const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'sentinelOneManualHostActionsEnabled'
-  );
-  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
-  );
-
+  const useAgentStatus = useAgentStatusHook();
   const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
 
-  const isEndpointAlert = useMemo(
-    () => isAlertFromEndpointEvent({ data: detailsData || [] }),
-    [detailsData]
-  );
-
-  const isSentinelOneAlert = useMemo(
-    () => isAlertFromSentinelOneEvent({ data: detailsData || [] }),
-    [detailsData]
-  );
-
-  const isCrowdstrikeAlert = useMemo(
-    () => isAlertFromCrowdstrikeEvent({ data: detailsData || [] }),
-    [detailsData]
-  );
-
-  const agentId = useMemo(
-    () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
-    [detailsData]
-  );
-
-  const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
-  const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(detailsData), [detailsData]);
-
-  const externalAgentId = sentinelOneAgentId ?? crowdstrikeAgentId ?? '';
-  const hostOsFamily = useMemo(
-    () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
-    [detailsData]
-  );
-
-  const agentVersion = useMemo(
-    () => getFieldValue({ category: 'agent', field: 'agent.version' }, detailsData),
-    [detailsData]
-  );
-
-  const agentType = useMemo(() => {
-    if (isSentinelOneAlert) {
-      return 'sentinel_one';
-    }
-    if (isCrowdstrikeAlert) {
-      return 'crowdstrike';
-    }
-    return 'endpoint';
-  }, [isCrowdstrikeAlert, isSentinelOneAlert]);
+  const isEndpointAgent = useMemo(() => {
+    return agentType === 'endpoint';
+  }, [agentType]);
 
   const {
     loading: loadingHostIsolationStatus,
@@ -108,60 +60,29 @@ export const useHostIsolationAction = ({
     agentType,
   });
 
-  const { data: externalAgentData } = useAgentStatus([externalAgentId], agentType, {
-    enabled:
-      (!!sentinelOneAgentId && sentinelOneManualHostActionsEnabled) ||
-      (!!crowdstrikeAgentId && crowdstrikeManualHostActionsEnabled),
+  const { data: externalAgentData } = useAgentStatus([agentId], agentType, {
+    enabled: hostSupportsResponseActions,
   });
 
-  const externalAgentStatus = externalAgentData?.[externalAgentId];
+  const externalAgentStatus = externalAgentData?.[agentId];
 
-  const isHostIsolated = useMemo(() => {
-    if (
-      (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) ||
-      (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert)
-    ) {
-      return externalAgentStatus?.isolated;
+  const isHostIsolated = useMemo((): boolean => {
+    if (!isEndpointAgent) {
+      return Boolean(externalAgentStatus?.isolated);
     }
 
     return isIsolated;
-  }, [
-    isIsolated,
-    isSentinelOneAlert,
-    isCrowdstrikeAlert,
-    externalAgentStatus?.isolated,
-    sentinelOneManualHostActionsEnabled,
-    crowdstrikeManualHostActionsEnabled,
-  ]);
+  }, [isEndpointAgent, isIsolated, externalAgentStatus?.isolated]);
 
   const doesHostSupportIsolation = useMemo(() => {
-    if (isEndpointAlert) {
-      return isIsolationSupported({
-        osName: hostOsFamily,
-        version: agentVersion,
-        capabilities,
-      });
+    // With Elastic Defend Endpoint, we check that the actual `endpoint` agent on
+    // this host reported that capability
+    if (agentType === 'endpoint') {
+      return capabilities.includes('isolation');
     }
 
-    if (
-      (externalAgentStatus && sentinelOneManualHostActionsEnabled && isSentinelOneAlert) ||
-      (externalAgentStatus && crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert)
-    ) {
-      return externalAgentStatus.status === 'healthy';
-    }
-
-    return false;
-  }, [
-    isEndpointAlert,
-    sentinelOneManualHostActionsEnabled,
-    isSentinelOneAlert,
-    externalAgentStatus,
-    crowdstrikeManualHostActionsEnabled,
-    isCrowdstrikeAlert,
-    hostOsFamily,
-    agentVersion,
-    capabilities,
-  ]);
+    return Boolean(externalAgentStatus?.found && isolationSupported);
+  }, [agentType, externalAgentStatus?.found, isolationSupported, capabilities]);
 
   const isolateHostHandler = useCallback(() => {
     closePopover();
@@ -172,101 +93,75 @@ export const useHostIsolationAction = ({
     }
   }, [closePopover, isHostIsolated, onAddIsolationStatusClick]);
 
-  const isIsolationActionDisabled = useMemo(() => {
-    if (
-      (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) ||
-      (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert)
-    ) {
-      // 8.15 use FF for computing if action is enabled
-      if (agentStatusClientEnabled) {
-        return externalAgentStatus?.status === HostStatus.UNENROLLED;
-      }
-
-      // else use the old way
-      if (!externalAgentStatus) {
-        return true;
-      }
-
-      const { isUninstalled, isPendingUninstall } = externalAgentStatus as AgentStatusInfo[string];
-
-      return isUninstalled || isPendingUninstall;
+  const isHostAgentUnEnrolled = useMemo<boolean>(() => {
+    if (!hostSupportsResponseActions) {
+      return true;
     }
 
-    return agentStatus === HostStatus.UNENROLLED;
+    if (isEndpointAgent) {
+      return agentStatus === HostStatus.UNENROLLED;
+    }
+
+    // NON-Endpoint agent types
+    // 8.15 use FF for computing if action is enabled
+    if (agentStatusClientEnabled) {
+      return externalAgentStatus?.status === HostStatus.UNENROLLED;
+    }
+
+    // else use the old way
+    if (!externalAgentStatus) {
+      return true;
+    }
+
+    const { isUninstalled, isPendingUninstall } = externalAgentStatus as AgentStatusInfo[string];
+
+    return isUninstalled || isPendingUninstall;
   }, [
-    agentStatus,
+    hostSupportsResponseActions,
+    isEndpointAgent,
     agentStatusClientEnabled,
-    isSentinelOneAlert,
     externalAgentStatus,
-    sentinelOneManualHostActionsEnabled,
-    crowdstrikeManualHostActionsEnabled,
-    isCrowdstrikeAlert,
+    agentStatus,
   ]);
 
-  const menuItems = useMemo(
-    () => [
-      {
-        key: 'isolate-host-action-item',
-        'data-test-subj': 'isolate-host-action-item',
-        disabled: isIsolationActionDisabled,
-        onClick: isolateHostHandler,
-        name: isHostIsolated ? UNISOLATE_HOST : ISOLATE_HOST,
-      },
-    ],
-    [isHostIsolated, isolateHostHandler, isIsolationActionDisabled]
-  );
+  return useMemo<AlertTableContextMenuItem[]>(() => {
+    const menuItem: AlertTableContextMenuItem = {
+      key: 'isolate-host-action-item',
+      'data-test-subj': 'isolate-host-action-item',
+      disabled: isHostAgentUnEnrolled || isHostIsolationPanelOpen,
+      onClick: isolateHostHandler,
+      name: isHostIsolated ? UNISOLATE_HOST : ISOLATE_HOST,
+    };
 
-  return useMemo(() => {
-    if (isHostIsolationPanelOpen) {
+    // If user has not Authz, then don't show the menu item at all
+    if ((isHostIsolated && !canUnIsolateHost) || !canIsolateHost) {
       return [];
     }
 
-    if (
-      isSentinelOneAlert &&
-      sentinelOneManualHostActionsEnabled &&
-      sentinelOneAgentId &&
-      externalAgentStatus &&
-      hasActionsAllPrivileges
-    ) {
-      return menuItems;
+    // Determine if menu item should be disabled
+    if (isEndpointAgent && loadingHostIsolationStatus) {
+      menuItem.disabled = true;
+      menuItem.toolTipContent = LOADING_ENDPOINT_DATA_TOOLTIP;
+    } else if (!doesHostSupportIsolation) {
+      menuItem.disabled = true;
+      menuItem.toolTipContent = NOT_FROM_ENDPOINT_HOST_TOOLTIP;
+    } else if (isHostAgentUnEnrolled) {
+      menuItem.disabled = true;
+      menuItem.toolTipContent = isEndpointAgent
+        ? HOST_ENDPOINT_UNENROLLED_TOOLTIP
+        : NOT_FROM_ENDPOINT_HOST_TOOLTIP;
     }
 
-    if (
-      isCrowdstrikeAlert &&
-      crowdstrikeManualHostActionsEnabled &&
-      crowdstrikeAgentId &&
-      externalAgentStatus &&
-      hasActionsAllPrivileges
-    ) {
-      return menuItems;
-    }
-
-    if (
-      isEndpointAlert &&
-      doesHostSupportIsolation &&
-      !loadingHostIsolationStatus &&
-      (canIsolateHost || (isHostIsolated && !canUnIsolateHost))
-    ) {
-      return menuItems;
-    }
-
-    return [];
+    return [menuItem];
   }, [
+    isHostAgentUnEnrolled,
+    isHostIsolationPanelOpen,
+    isolateHostHandler,
+    isHostIsolated,
     canIsolateHost,
     canUnIsolateHost,
     doesHostSupportIsolation,
-    hasActionsAllPrivileges,
-    isEndpointAlert,
-    isHostIsolated,
-    isHostIsolationPanelOpen,
-    isSentinelOneAlert,
+    isEndpointAgent,
     loadingHostIsolationStatus,
-    menuItems,
-    externalAgentStatus,
-    sentinelOneAgentId,
-    sentinelOneManualHostActionsEnabled,
-    crowdstrikeAgentId,
-    isCrowdstrikeAlert,
-    crowdstrikeManualHostActionsEnabled,
   ]);
 };
