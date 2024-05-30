@@ -7,12 +7,12 @@
  */
 
 /**
- * Assumes that there is at least one version in the array.
- * @internal
+ * Sort Kibana HTTP API versions from oldest to newest
+ *
+ * @example Given 'internal' versions ["1", "10", "2"] it will return ["1", "2", "10]
+ * @example Given 'public' versions ["2023-01-01", "2002-10-10", "2005-01-01"] it will return ["2002-10-10", "2005-01-01", "2023-01-01"]
  */
-type Resolver = (versions: string[], access: 'public' | 'internal') => undefined | string;
-
-const sort = (versions: string[], access: 'public' | 'internal') => {
+export const sort = (versions: string[], access: 'public' | 'internal') => {
   if (access === 'internal') {
     const versionNrs = versions.map((v) => {
       const nr = parseInt(v, 10);
@@ -24,6 +24,12 @@ const sort = (versions: string[], access: 'public' | 'internal') => {
   return [...versions].sort((a, b) => a.localeCompare(b));
 };
 
+/**
+ * Assumes that there is at least one version in the array.
+ * @internal
+ */
+type Resolver = (versions: string[], access: 'public' | 'internal') => undefined | string;
+
 const oldest: Resolver = (versions, access) => sort(versions, access)[0];
 
 const newest: Resolver = (versions, access) => sort(versions, access).reverse()[0];
@@ -31,6 +37,7 @@ const newest: Resolver = (versions, access) => sort(versions, access).reverse()[
 const none: Resolver = () => undefined;
 
 export const resolvers = {
+  sort,
   oldest,
   newest,
   none,

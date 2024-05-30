@@ -39,7 +39,10 @@ export const processVersionedRouter = (
     let parameters: OpenAPIV3.ParameterObject[] = [];
     let version: undefined | string;
     let handler: undefined | VersionedRouterRoute['handlers'][0];
-    let versions: string[] = route.handlers.map(({ options: { version: v } }) => v).sort();
+    let versions: string[] = versionHandlerResolvers.sort(
+      route.handlers.map(({ options: { version: v } }) => v),
+      route.options.access
+    );
 
     if (filters?.version) {
       const versionIdx = versions.indexOf(filters.version);
@@ -48,7 +51,7 @@ export const processVersionedRouter = (
       handler = route.handlers.find(({ options: { version: v } }) => v === filters.version);
       version = filters.version;
     } else {
-      version = versionHandlerResolvers.newest(versions);
+      version = versionHandlerResolvers.newest(versions, route.options.access);
       handler = route.handlers.find(({ options: { version: v } }) => v === version);
     }
 

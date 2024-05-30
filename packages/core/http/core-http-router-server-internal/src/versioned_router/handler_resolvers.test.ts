@@ -9,6 +9,30 @@
 import { resolvers } from './handler_resolvers';
 
 describe('default handler resolvers', () => {
+  describe('sort', () => {
+    test.each([
+      [['1', '10', '2'], 'internal', ['1', '2', '10']],
+      [
+        ['2023-01-01', '2002-10-10', '2005-01-01'],
+        'public',
+        ['2002-10-10', '2005-01-01', '2023-01-01'],
+      ],
+      [[], 'internal', []],
+      [[], 'public', []],
+    ])('%s, %s returns %s', (input, access, output) => {
+      expect(resolvers.sort(input, access as 'internal' | 'public')).toEqual(output);
+    });
+
+    test('copy, not mutate', () => {
+      const input = ['1', '12', '0'];
+      const output = resolvers.sort(input, 'internal');
+      expect(output).not.toBe(input);
+    });
+
+    test('throw for non numeric input when access is internal', () => {
+      expect(() => resolvers.sort(['abc'], 'internal')).toThrow(/found non numeric/i);
+    });
+  });
   describe('oldest', () => {
     test.each([
       {
@@ -23,9 +47,6 @@ describe('default handler resolvers', () => {
       { versions: [], expected: undefined, access: 'public' },
     ])(`$versions returns $expected`, ({ versions, expected, access }) => {
       expect(resolvers.oldest(versions, access as 'internal' | 'public')).toBe(expected);
-    });
-    test('throw for non numeric input when access is internal', () => {
-      expect(() => resolvers.oldest(['abc'], 'internal')).toThrow(/found non numeric/i);
     });
   });
 
@@ -43,10 +64,6 @@ describe('default handler resolvers', () => {
       { versions: [], expected: undefined, access: 'public' },
     ])(`$versions returns $expected`, ({ versions, expected, access }) => {
       expect(resolvers.newest(versions, access as 'internal' | 'public')).toBe(expected);
-    });
-
-    test('throw for non numeric input when access is internal', () => {
-      expect(() => resolvers.newest(['abc'], 'internal')).toThrow(/found non numeric/i);
     });
   });
 });
