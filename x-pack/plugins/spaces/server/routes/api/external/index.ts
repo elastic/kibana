@@ -42,5 +42,8 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initCopyToSpacesApi(deps);
   initUpdateObjectsSpacesApi(deps);
   initGetShareableReferencesApi(deps);
-  initDisableLegacyUrlAliasesApi(deps);
+
+  if (!deps.isServerless) {
+    initDisableLegacyUrlAliasesApi(deps);
+  }
 }

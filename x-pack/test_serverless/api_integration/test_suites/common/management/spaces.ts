@@ -112,7 +112,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set(internalRequestHeader)
           .set(roleAuthc.apiKeyHeader);
 
-        svlCommonApi.assertResponseStatusCode(400, status, body);
+        // without a request body we would normally a 400 bad request if the endpoint was registered
+        svlCommonApi.assertApiNotFound(body, status);
       });
 
       describe('internal', () => {
