@@ -32,8 +32,9 @@ describe('fetchActionResponses()', () => {
           _source: {
             '@timestamp': '2022-04-30T16:08:47.449Z',
             action_data: {
-              command: 'get-file',
+              command: 'execute',
               comment: '',
+              parameter: undefined,
             },
             action_id: '123',
             agent_id: 'agent-a',
@@ -44,7 +45,7 @@ describe('fetchActionResponses()', () => {
           sort: ['abc'],
         },
         {
-          _id: 'ef278144-d8b9-45c6-9c3c-484c86b57d0b',
+          _id: 'b2c51bc3-0cd7-4e6b-a085-84f5eb09438f',
           _index: '.ds-.logs-endpoint.action.responses-some_namespace-something',
           _score: 1,
           _source: {
@@ -53,30 +54,32 @@ describe('fetchActionResponses()', () => {
               action_id: '123',
               completed_at: '2022-04-30T10:53:59.449Z',
               data: {
-                command: 'get-file',
+                command: 'execute',
                 comment: '',
+                parameter: undefined,
                 output: {
                   content: {
-                    code: 'ra_get-file_success_done',
-                    contents: [
-                      {
-                        file_name: 'bad_file.txt',
-                        path: '/some/path/bad_file.txt',
-                        sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                        size: 1234,
-                        type: 'file',
-                      },
-                    ],
-                    zip_size: 123,
+                    code: 'ra_execute_success_done',
+                    cwd: '/some/path',
+                    output_file_id: 'some-output-file-id',
+                    output_file_stderr_truncated: false,
+                    output_file_stdout_truncated: true,
+                    shell: 'bash',
+                    shell_code: 0,
+                    stderr_truncated: true,
+                    stdout_truncated: true,
+                    stderr: expect.any(String),
+                    stdout: expect.any(String),
                   },
                   type: 'json',
                 },
               },
-              started_at: '2022-04-30T12:56:00.449Z',
+              started_at: '2022-04-30T13:56:00.449Z',
             },
             agent: {
               id: 'agent-a',
             },
+            error: undefined,
           },
           sort: ['abc'],
         },
@@ -87,8 +90,9 @@ describe('fetchActionResponses()', () => {
           _source: {
             '@timestamp': '2022-04-30T16:08:47.449Z',
             action_data: {
-              command: 'get-file',
+              command: 'execute',
               comment: '',
+              parameter: undefined,
             },
             action_id: '123',
             agent_id: 'agent-a',
@@ -99,7 +103,7 @@ describe('fetchActionResponses()', () => {
           sort: ['abc'],
         },
         {
-          _id: 'ef278144-d8b9-45c6-9c3c-484c86b57d0b',
+          _id: 'b2c51bc3-0cd7-4e6b-a085-84f5eb09438f',
           _index: '.ds-.logs-endpoint.action.responses-some_namespace-something',
           _score: 1,
           _source: {
@@ -108,30 +112,31 @@ describe('fetchActionResponses()', () => {
               action_id: '123',
               completed_at: '2022-04-30T10:53:59.449Z',
               data: {
-                command: 'get-file',
+                command: 'execute',
                 comment: '',
                 output: {
                   content: {
-                    code: 'ra_get-file_success_done',
-                    contents: [
-                      {
-                        file_name: 'bad_file.txt',
-                        path: '/some/path/bad_file.txt',
-                        sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                        size: 1234,
-                        type: 'file',
-                      },
-                    ],
-                    zip_size: 123,
+                    code: 'ra_execute_success_done',
+                    cwd: '/some/path',
+                    output_file_id: 'some-output-file-id',
+                    output_file_stderr_truncated: false,
+                    output_file_stdout_truncated: true,
+                    shell: 'bash',
+                    shell_code: 0,
+                    stderr_truncated: true,
+                    stdout_truncated: true,
+                    stderr: expect.any(String),
+                    stdout: expect.any(String),
                   },
                   type: 'json',
                 },
               },
-              started_at: '2022-04-30T12:56:00.449Z',
+              started_at: '2022-04-30T13:56:00.449Z',
             },
             agent: {
               id: 'agent-a',
             },
+            error: undefined,
           },
           sort: ['abc'],
         },
