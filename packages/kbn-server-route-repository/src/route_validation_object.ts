@@ -14,7 +14,7 @@ export const routeValidationObject = {
   // if any validation is defined. Not having validation currently
   // means we don't get the payload. See
   // https://github.com/elastic/kibana/issues/50179
-  body: schema.nullable(anyObject),
+  body: schema.nullable(schema.oneOf([anyObject, schema.string()])),
   params: anyObject,
   query: anyObject,
 };
