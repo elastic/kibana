@@ -47,34 +47,30 @@ export const createSearchSource = (
     // hydrating index pattern
     if (searchSourceFields.index) {
       if (!useDataViewLazy) {
-        if (typeof searchSourceFields.index === 'string') {
-          fields.index = await indexPatterns.get(searchSourceFields.index);
-        } else {
-          fields.index = await indexPatterns.create(searchSourceFields.index);
-        }
+        fields.index =
+          typeof searchSourceFields.index === 'string'
+            ? await indexPatterns.get(searchSourceFields.index)
+            : await indexPatterns.create(searchSourceFields.index);
       } else {
-        if (typeof searchSourceFields.index === 'string') {
-          dataViewLazy = await indexPatterns.getDataViewLazy(searchSourceFields.index);
-          const dataView = new DataView({
-            spec: await dataViewLazy.toSpec(),
-            // field format functionality is not used within search source
-            fieldFormats: {} as FieldFormatsStartCommon,
-            shortDotsEnable: await searchSourceDependencies.dataViews.getShortDotsEnable(),
-            metaFields: await searchSourceDependencies.dataViews.getMetaFields(),
-          });
+        dataViewLazy =
+          typeof searchSourceFields.index === 'string'
+            ? await indexPatterns.getDataViewLazy(searchSourceFields.index)
+            : await indexPatterns.createDataViewLazy(searchSourceFields.index);
 
-          fields.index = dataView;
-        } else {
-          dataViewLazy = await indexPatterns.createDataViewLazy(searchSourceFields.index);
-          const dataView = new DataView({
-            spec: await dataViewLazy.toSpec(),
-            // field format functionality is not used within search source
-            fieldFormats: {} as FieldFormatsStartCommon,
-            shortDotsEnable: await searchSourceDependencies.dataViews.getShortDotsEnable(),
-            metaFields: await searchSourceDependencies.dataViews.getMetaFields(),
-          });
-          fields.index = dataView;
-        }
+        const [spec, shortDotsEnable, metaFields] = await Promise.all([
+          dataViewLazy.toSpec(),
+          searchSourceDependencies.dataViews.getShortDotsEnable(),
+          searchSourceDependencies.dataViews.getMetaFields(),
+        ]);
+
+        const dataView = new DataView({
+          spec,
+          // field format functionality is not used within search source
+          fieldFormats: {} as FieldFormatsStartCommon,
+          shortDotsEnable,
+          metaFields,
+        });
+        fields.index = dataView;
       }
     }
 
