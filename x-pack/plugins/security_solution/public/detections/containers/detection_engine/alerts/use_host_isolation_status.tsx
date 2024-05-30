@@ -22,8 +22,9 @@ interface HostIsolationStatusResponse {
   pendingUnisolation: number;
 }
 
-/*
- * Retrieves the current isolation status of a host and the agent/host status */
+/**
+ * Retrieves the current isolation status of a host and the agent/host status
+ */
 export const useEndpointHostIsolationStatus = ({
   agentId,
   agentType,
@@ -79,16 +80,15 @@ export const useEndpointHostIsolationStatus = ({
         }
       } catch (error) {
         // silently catch non-user initiated error
-        return;
-      }
-
-      if (isMounted) {
-        setLoading(false);
       }
     };
 
     if (!isEmpty(agentId) && agentType === 'endpoint') {
-      fetchData();
+      fetchData().finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
+      });
     }
     return () => {
       // updates to show component is unmounted
