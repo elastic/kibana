@@ -24,7 +24,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('When there is no data', () => {
       before(async () => {
         // delete APM index templates
-        await es.indices.deleteIndexTemplate({ name: getApmIndexTemplateNames() });
+        await es.indices.deleteIndexTemplate({
+          name: Object.values(getApmIndexTemplateNames()).flat(),
+        });
       });
 
       it('returns the built-in (non-APM) index templates`', async () => {

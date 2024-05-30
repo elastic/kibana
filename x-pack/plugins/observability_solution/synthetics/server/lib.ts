@@ -18,9 +18,8 @@ import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
-import { SYNTHETICS_API_URLS } from '../common/constants';
+import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { SyntheticsServerSetup } from './types';
-import { savedObjectsAdapter } from './saved_objects/saved_objects';
 
 export interface CountResponse {
   result: {
@@ -41,7 +40,6 @@ export class UptimeEsClient {
   isDev: boolean;
   request?: KibanaRequest;
   baseESClient: ElasticsearchClient;
-  heartbeatIndices: string;
   isInspectorEnabled?: Promise<boolean | undefined>;
   inspectableEsQueries: InspectResponse = [];
   uiSettings?: CoreRequestHandlerContext['uiSettings'];
@@ -57,34 +55,24 @@ export class UptimeEsClient {
       heartbeatIndices?: string;
     }
   ) {
-    const { isDev = false, uiSettings, request, heartbeatIndices = '' } = options ?? {};
+    const { isDev = false, uiSettings, request } = options ?? {};
     this.uiSettings = uiSettings;
     this.baseESClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
     this.request = request;
-    this.heartbeatIndices = heartbeatIndices;
     this.isDev = isDev;
     this.inspectableEsQueries = [];
     this.getInspectEnabled().catch(() => {});
   }
 
-  async initSettings() {
-    const self = this;
-    const heartbeatIndices = await this.getIndices();
-    self.heartbeatIndices = heartbeatIndices || '';
-  }
-
   async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
     params: TParams,
-    operationName?: string,
-    index?: string
+    operationName?: string
   ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
     let res: any;
     let esError: any;
 
-    await this.initSettings();
-
-    const esParams = { index: index ?? this.heartbeatIndices, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
     const startTime = process.hrtime();
 
     const startTimeNow = Date.now();
@@ -132,9 +120,7 @@ export class UptimeEsClient {
     let res: any;
     let esError: any;
 
-    await this.initSettings();
-
-    const esParams = { index: this.heartbeatIndices, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
     const startTime = process.hrtime();
 
     try {
@@ -159,7 +145,7 @@ export class UptimeEsClient {
       throw esError;
     }
 
-    return { result: res, indices: this.heartbeatIndices };
+    return { result: res, indices: SYNTHETICS_INDEX_PATTERN };
   }
   getSavedObjectsClient() {
     return this.savedObjectsClient;
@@ -184,14 +170,6 @@ export class UptimeEsClient {
       this.isInspectorEnabled = this.uiSettings.client.get<boolean>(enableInspectEsQueries);
     }
     return this.isInspectorEnabled;
-  }
-
-  async getIndices() {
-    if (this.heartbeatIndices) {
-      return this.heartbeatIndices;
-    }
-    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.savedObjectsClient);
-    return settings?.heartbeatIndices || '';
   }
 }
 
