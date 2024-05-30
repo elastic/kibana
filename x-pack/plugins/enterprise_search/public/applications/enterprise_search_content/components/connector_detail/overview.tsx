@@ -15,7 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../../common/constants';
+import {
+  ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+  EXAMPLE_CONNECTOR_SERVICE_TYPES,
+} from '../../../../../common/constants';
 
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -42,6 +45,34 @@ export const ConnectorDetailOverview: React.FC = () => {
 
   return (
     <>
+      {
+        // TODO remove this callout when example status is removed
+        connector &&
+          connector.service_type &&
+          EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(connector.service_type) && (
+            <>
+              <EuiCallOut
+                iconType="iInCircle"
+                color="warning"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
+                  {
+                    defaultMessage: 'Example connector',
+                  }
+                )}
+              >
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
+                    defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
+                  />
+                </EuiText>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )
+      }
       {error && (
         <>
           <EuiCallOut

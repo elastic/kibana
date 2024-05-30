@@ -195,11 +195,11 @@ describe('generateOpenApiDocument', () => {
         routers: {
           testRouter1: {
             routes: [
-              { path: '/1-1/{id}', options: { tags: ['oas-tag:1', 'oas-tag:2', 'foo'] } },
-              { path: '/1-2/{id}', options: { tags: ['oas-tag:1', 'foo'] } },
+              { path: '/1-1/{id}/{path*}', options: { tags: ['oas-tag:1', 'oas-tag:2', 'foo'] } },
+              { path: '/1-2/{id}/{path*}', options: { tags: ['oas-tag:1', 'foo'] } },
             ],
           },
-          testRouter2: { routes: [{ path: '/2-1/{id}', options: { tags: undefined } }] },
+          testRouter2: { routes: [{ path: '/2-1/{id}/{path*}', options: { tags: undefined } }] },
         },
         versionedRouters: {
           testVersionedRouter1: {
@@ -233,9 +233,9 @@ describe('generateOpenApiDocument', () => {
         }
       );
       // router paths
-      expect(result.paths['/1-1/{id}']!.get!.tags).toEqual(['1', '2']);
-      expect(result.paths['/1-2/{id}']!.get!.tags).toEqual(['1']);
-      expect(result.paths['/2-1/{id}']!.get!.tags).toEqual([]);
+      expect(result.paths['/1-1/{id}/{path*}']!.get!.tags).toEqual(['1', '2']);
+      expect(result.paths['/1-2/{id}/{path*}']!.get!.tags).toEqual(['1']);
+      expect(result.paths['/2-1/{id}/{path*}']!.get!.tags).toEqual([]);
       // versioned router paths
       expect(result.paths['/v1-1']!.get!.tags).toEqual(['v1']);
       expect(result.paths['/v1-2']!.get!.tags).toEqual(['v2', 'v3']);

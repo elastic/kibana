@@ -29,12 +29,17 @@ import type {
   Installation,
   RegistryPackage,
 } from '../../types';
+
 import type { FleetAuthzRouteConfig } from '../security/types';
 import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } from '../security';
 import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
 import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
 import type { InstallResult } from '../../../common';
+
+import { appContextService } from '..';
+
+import type { CustomPackageDatasetConfiguration } from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
 import * as Registry from './registry';
@@ -60,14 +65,22 @@ export interface PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<Installation | undefined>;
+  }): Promise<Installation>;
 
   installPackage(options: {
     pkgName: string;
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<InstallResult | undefined>;
+  }): Promise<InstallResult>;
+
+  installCustomIntegration(options: {
+    pkgName: string;
+    kibanaVersion?: string;
+    force?: boolean;
+    spaceId?: string;
+    datasets: CustomPackageDatasetConfiguration[];
+  }): Promise<InstallResult>;
 
   fetchFindLatestPackage(
     packageName: string,
@@ -167,7 +180,7 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<Installation | undefined> {
+  }): Promise<Installation> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
     return ensureInstalledPackage({
@@ -176,12 +189,13 @@ class PackageClientImpl implements PackageClient {
       savedObjectsClient: this.internalSoClient,
     });
   }
+
   public async installPackage(options: {
     pkgName: string;
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<InstallResult | undefined> {
+  }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
     const { pkgName, pkgVersion, spaceId = DEFAULT_SPACE_ID, force = false } = options;
@@ -200,6 +214,37 @@ class PackageClientImpl implements PackageClient {
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
+    });
+  }
+
+  public async installCustomIntegration(options: {
+    pkgName: string;
+    kibanaVersion?: string;
+    force?: boolean | undefined;
+    spaceId?: string | undefined;
+    datasets: CustomPackageDatasetConfiguration[];
+  }): Promise<InstallResult> {
+    await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
+
+    const {
+      pkgName,
+      kibanaVersion = appContextService.getKibanaVersion(),
+      datasets,
+      spaceId = DEFAULT_SPACE_ID,
+      force = false,
+    } = options;
+
+    return await installPackage({
+      force,
+      pkgName,
+      kibanaVersion,
+      datasets,
+      spaceId,
+      installSource: 'custom',
+      esClient: this.internalEsClient,
+      savedObjectsClient: this.internalSoClient,
+      neverIgnoreVerificationError: !force,
+      authorizationHeader: this.getAuthorizationHeader(),
     });
   }
 
