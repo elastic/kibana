@@ -13,8 +13,8 @@ import { SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { sourcererActions, sourcererModel } from '../store';
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
+import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { useSourcererDataView } from '../containers';
 
 const mockDispatch = jest.fn();
@@ -44,8 +44,8 @@ jest.mock('@kbn/react-kibana-mount', () => {
 });
 
 const mockUpdateUrlParam = jest.fn();
-jest.mock('../../utils/global_query_string', () => {
-  const original = jest.requireActual('../../utils/global_query_string');
+jest.mock('../../common/utils/global_query_string', () => {
+  const original = jest.requireActual('../../common/utils/global_query_string');
 
   return {
     ...original,

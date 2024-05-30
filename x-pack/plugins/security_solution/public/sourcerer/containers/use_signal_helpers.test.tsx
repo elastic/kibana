@@ -9,7 +9,7 @@ import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useSignalHelpers } from './use_signal_helpers';
-import type { State } from '../store';
+import type { State } from '../../common/store';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 
 const mockCreateSourcererDataView = jest.fn(() => {
