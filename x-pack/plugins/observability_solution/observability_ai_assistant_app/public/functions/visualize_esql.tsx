@@ -130,6 +130,7 @@ export function VisualizeESQL({
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isTableVisible, setIsTableVisible] = useState(false);
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(
     userOverrides as TypedLensByValueInput
   );
@@ -275,6 +276,56 @@ export function VisualizeESQL({
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+              {!isTableVisible && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.observabilityAiAssistant.lensESQLFunction.table',
+                      {
+                        defaultMessage: 'Table of results',
+                      }
+                    )}
+                  >
+                    <EuiButtonIcon
+                      size="xs"
+                      iconType="tableDensityExpanded"
+                      onClick={() => setIsTableVisible(true)}
+                      data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
+                      aria-label={i18n.translate(
+                        'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
+                        {
+                          defaultMessage: 'Display results',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {isTableVisible && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
+                      {
+                        defaultMessage: 'Visualization',
+                      }
+                    )}
+                  >
+                    <EuiButtonIcon
+                      size="xs"
+                      iconType="visBarVerticalStacked"
+                      onClick={() => setIsTableVisible(false)}
+                      data-test-subj="observabilityAiAssistantLensESQLDisplayChartButton"
+                      aria-label={i18n.translate(
+                        'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
+                        {
+                          defaultMessage: 'Display chart',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
               <EuiToolTip
                 content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
                   defaultMessage: 'Edit visualization',
@@ -321,13 +372,26 @@ export function VisualizeESQL({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
-            <lens.EmbeddableComponent
-              {...lensInput}
-              style={{
-                height: 240,
-              }}
-              onLoad={onLoad}
-            />
+            {isTableVisible && (
+              <ESQLTable
+                rows={rows}
+                columns={columns}
+                dataView={dataViewAsync.value}
+                query={{ esql: query }}
+                // could possibly be set to push when is being rendered on the conversations app
+                flyoutType="overlay"
+                isTableView
+              />
+            )}
+            {!isTableVisible && (
+              <lens.EmbeddableComponent
+                {...lensInput}
+                style={{
+                  height: 240,
+                }}
+                onLoad={onLoad}
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

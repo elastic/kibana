@@ -32,6 +32,7 @@ interface ESQLDatatableProps {
   columns: DatatableColumn[];
   query: AggregateQuery;
   flyoutType?: 'overlay' | 'push';
+  isTableView?: boolean;
 }
 
 type DataTableColumnsMeta = Record<
@@ -51,7 +52,9 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
   const deps = value?.[0];
   const storage = new Storage(localStorage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-  const [activeColumns, setActiveColumns] = useState<string[]>([]);
+  const [activeColumns, setActiveColumns] = useState<string[]>(
+    props.isTableView ? props.columns.map((c) => c.name) : []
+  );
   const [rowHeight, setRowHeight] = useState<number>(5);
 
   if (props.dataView.fields.getByName('@timestamp')?.type === 'date') {
