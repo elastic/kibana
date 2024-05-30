@@ -13,8 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
@@ -60,7 +62,16 @@ export interface SearchAndFilterBarProps {
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
   latestAgentActionErrors: number;
+  setDataGridView: (showDataGridView: boolean) => void;
+  showDataGridView: boolean;
 }
+
+export const SWITCH_TO_DATA_GRID = i18n.translate(
+  'xpack.fleet.searchFilterBar.dataGridViewToggleButtonTooltip',
+  {
+    defaultMessage: 'Switch to data grid view',
+  }
+);
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
   agentPolicies,
@@ -89,6 +100,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   showAgentActivityTour,
   latestAgentActionErrors,
+  setDataGridView,
+  showDataGridView,
 }) => {
   const authz = useAuthz();
 
@@ -105,6 +118,21 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             {!isFirstTimeAgentUserLoading && !isFirstTimeAgentUser && <DashboardsButtons />}
           </EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem>
+              <EuiToolTip content={SWITCH_TO_DATA_GRID} position="top">
+                <EuiButtonIcon
+                  color="primary"
+                  onClick={() => setDataGridView(!showDataGridView)}
+                  iconType="tableDensityNormal"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.searchFilterBar.dataGridViewToggleButtonLabel',
+                    {
+                      defaultMessage: 'Switch to data grid view',
+                    }
+                  )}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AgentActivityBadge
                 recentErrors={latestAgentActionErrors}
