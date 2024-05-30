@@ -152,6 +152,7 @@ export class AstListener implements ESQLParserListener {
     const node: ESQLAstMetricsCommand = {
       ...crateAstBaseItem('metrics', ctx),
       type: 'command',
+      args: [],
       indices: ctx
         .getTypedRuleContexts(IndexIdentifierContext)
         .map((sourceCtx) => createSource(sourceCtx)),
@@ -165,6 +166,7 @@ export class AstListener implements ESQLParserListener {
     if (grouping && grouping.length) {
       node.grouping = grouping;
     }
+    node.args.push(...node.indices, ...aggregates, ...grouping);
   }
 
   /**

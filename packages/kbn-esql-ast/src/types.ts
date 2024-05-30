@@ -34,14 +34,12 @@ export interface ESQLAstBaseItem<Name = string> {
   incomplete: boolean;
 }
 
-export interface ESQLCommand extends ESQLAstBaseItem {
+export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   type: 'command';
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstMetricsCommand extends ESQLAstBaseItem {
-  type: 'command';
-  name: 'metrics';
+export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
   indices: ESQLSource[];
   aggregates?: ESQLAstItem[];
   grouping?: ESQLAstItem[];
