@@ -3877,6 +3877,62 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.isActionTypeEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "isActionTypeEnabled",
+          "description": [],
+          "signature": [
+            "(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isActionTypeEnabled.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isActionTypeEnabled.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "actions",
+                  "id": "def-server.PluginSetupContract.isActionTypeEnabled.$2.notifyUsage",
+                  "type": "boolean",
+                  "tags": [],
+                  "label": "notifyUsage",
+                  "description": [],
+                  "path": "x-pack/plugins/actions/server/plugin.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

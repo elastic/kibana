@@ -7850,6 +7850,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SavedObject.error",
             "type": "Object",
             "tags": [],
@@ -24153,6 +24169,22 @@
             "label": "updated_at",
             "description": [
               "Timestamp of the last time this document had been updated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
             ],
             "signature": [
               "string | undefined"
