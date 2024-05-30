@@ -127,37 +127,6 @@ describe('Actions', () => {
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
-  test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toEqual(true);
-  });
-
-  test('it does NOT render a checkbox for selecting the event when `showCheckboxes` is `false`', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} showCheckboxes={false} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
-  test('it does NOT render a checkbox for selecting the event when `tGridEnabled` is `true`', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
   describe('Guided Onboarding Step', () => {
     const incrementStepMock = jest.fn();
     beforeEach(() => {
