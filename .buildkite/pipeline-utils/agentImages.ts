@@ -7,7 +7,7 @@
  */
 
 import { dump } from 'js-yaml';
-import { BuildkiteCommandStep } from './buildkite';
+import { BuildkiteClient, BuildkiteCommandStep } from './buildkite';
 
 type AgentImageConfig = BuildkiteCommandStep['agents'];
 
@@ -30,9 +30,15 @@ const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() =
 function getAgentImageConfig(): AgentImageConfig;
 function getAgentImageConfig(options: { returnYaml: true }): string;
 function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageConfig {
+  const bk = new BuildkiteClient();
   let config: AgentImageConfig;
 
   if (FTR_ENABLE_FIPS_AGENT || GITHUB_PR_LABELS.includes('ci:enable-fips-agent')) {
+    bk.setAnnotation(
+      'agent image config',
+      'warning',
+      `#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you didn't intend this remove FTR_ENABLE_FIPS_AGENT environment variable and/or the ci:enable-fips-agent Github label.`
+    );
     config = FIPS_AGENT_IMAGE_CONFIG;
   } else {
     config = DEFAULT_AGENT_IMAGE_CONFIG;
