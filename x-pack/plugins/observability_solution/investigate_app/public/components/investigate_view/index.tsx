@@ -13,10 +13,11 @@ import {
   InvestigateWidget,
   InvestigateWidgetColumnSpan,
   InvestigateWidgetCreate,
+  WorkflowBlock,
 } from '@kbn/investigate-plugin/public';
 import { WidgetDefinition } from '@kbn/investigate-plugin/public/types';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { keyBy, pick } from 'lodash';
+import { keyBy, last, pick } from 'lodash';
 import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
@@ -208,6 +209,16 @@ export function InvestigateView({}: {}) {
 
   createWidgetRef.current = createWidget;
 
+  const [blocks, setBlocks] = useState<Record<string, WorkflowBlock[]>>({});
+
+  useEffect(() => {
+    setBlocks((prevBlocks) => {
+      const itemIds = timeline.items.map((item) => item.id);
+
+      return pick(prevBlocks, itemIds);
+    });
+  }, [timeline.items]);
+
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
 
@@ -224,6 +235,11 @@ export function InvestigateView({}: {}) {
         },
         onWidgetAdd: (create) => {
           return createWidgetRef.current(create);
+        },
+        blocks: {
+          publish: (blocksForItem) => {
+            setBlocks((prevBlocks) => ({ ...prevBlocks, [item.id]: blocksForItem }));
+          },
         },
       });
 
@@ -341,6 +357,12 @@ export function InvestigateView({}: {}) {
   const [scrollableContainer, setScrollableContainer] = useState<HTMLElement | null>(null);
 
   const [searchBarFocused, setSearchBarFocused] = useState(false);
+
+  const lastTimelineItemId = last(timeline.items)?.id;
+
+  const activeWorkflowBlocks = useMemo(() => {
+    return (lastTimelineItemId && blocks[lastTimelineItemId]) || [];
+  }, [blocks, lastTimelineItemId]);
 
   return (
     <MiniMapContextProvider container={scrollableContainer}>
@@ -480,6 +502,7 @@ export function InvestigateView({}: {}) {
 
             <EuiFlexItem grow={false} className={addWidgetContainerClassName}>
               <AddWidgetUI
+                workflowBlocks={activeWorkflowBlocks}
                 user={user}
                 timeline={timeline}
                 assistantAvailable={true}

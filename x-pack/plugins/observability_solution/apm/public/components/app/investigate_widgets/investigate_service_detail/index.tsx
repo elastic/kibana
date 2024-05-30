@@ -7,6 +7,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import React, { useEffect, useState } from 'react';
+import { WidgetRenderAPI } from '@kbn/investigate-plugin/public/types';
+import { i18n } from '@kbn/i18n';
 import type { Environment } from '../../../../../common/environment_rt';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { TransactionTypeSelectBase } from '../../../shared/transaction_type_select';
@@ -177,11 +179,13 @@ export function InvestigateServiceDetail({
   timeRange,
   query,
   transactionType: initialTransactionType,
+  blocks,
 }: {
   environment: Environment;
   serviceName: string;
   transactionType: string | undefined;
-} & GlobalWidgetParameters) {
+} & GlobalWidgetParameters &
+  Pick<WidgetRenderAPI, 'blocks'>) {
   const start = timeRange.from;
   const end = timeRange.to;
   const kuery = query.query;
@@ -223,6 +227,19 @@ export function InvestigateServiceDetail({
       return transactionTypes[0];
     });
   }, [transactionTypes]);
+
+  useEffect(() => {
+    blocks.publish([
+      {
+        id: 'logs',
+        loading: false,
+        color: 'lightShade',
+        content: i18n.translate('xpack.apm.investigateServiceDetail.viewLogsBlock', {
+          defaultMessage: 'View logs',
+        }),
+      },
+    ]);
+  }, [blocks]);
 
   return (
     <InvestigateServiceDetailBase

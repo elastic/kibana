@@ -24,6 +24,7 @@ export {
   InvestigateWidgetColumnSpan,
   type GlobalWidgetParameters,
   type InvestigateUser,
+  type WorkflowBlock,
 } from '../common/types';
 
 export { createWidgetFactory } from './create_widget';

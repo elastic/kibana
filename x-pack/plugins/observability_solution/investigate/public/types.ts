@@ -8,14 +8,20 @@
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 import type { FromSchema } from 'json-schema-to-ts';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
-import type { InvestigateWidget } from '../common';
+import type { InvestigateWidget, WorkflowBlock } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
 
-interface WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> {
-  widget: TInvestigateWidget;
+export interface WidgetRenderAPI {
   onDelete: () => void;
   onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
+  blocks: {
+    publish: (blocks: WorkflowBlock[]) => void;
+  };
 }
+
+type WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> = {
+  widget: TInvestigateWidget;
+} & WidgetRenderAPI;
 
 export interface WidgetDefinition {
   type: string;

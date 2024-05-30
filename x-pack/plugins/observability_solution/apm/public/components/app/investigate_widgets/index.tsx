@@ -168,7 +168,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
     async ({ parameters: { serviceName, environment } }) => {
       return {};
     },
-    ({ widget }) => {
+    ({ widget, blocks }) => {
       const { environment, filters, query, timeRange, serviceName, transactionType } =
         widget.parameters;
       return (
@@ -180,6 +180,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
             query={query}
             timeRange={timeRange}
             transactionType={transactionType}
+            blocks={blocks}
           />
         </WithContext>
       );

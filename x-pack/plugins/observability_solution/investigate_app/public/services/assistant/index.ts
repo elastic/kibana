@@ -15,6 +15,8 @@ import {
 import { once } from 'lodash';
 import { shareReplay, Subject } from 'rxjs';
 import { InvestigateWidgetColumnSpan } from '@kbn/investigate-plugin/public';
+import type { Logger } from '@kbn/logging';
+import dedent from 'dedent';
 import { InvestigateAppAPIClient } from '../../api';
 import { ASSISTANT_RESPONSE_WIDGET_NAME } from '../../constants';
 import type { InvestigateAppStartDependencies } from '../../types';
@@ -45,6 +47,7 @@ export function createAssistantService({
   datasetQuality,
   security,
   apiClient,
+  logger,
 }: Pick<
   InvestigateAppStartDependencies,
   | 'observabilityAIAssistant'
@@ -53,7 +56,7 @@ export function createAssistantService({
   | 'datasetQuality'
   | 'dataViews'
   | 'security'
-> & { apiClient: InvestigateAppAPIClient }): AssistantService {
+> & { apiClient: InvestigateAppAPIClient; logger: Logger }): AssistantService {
   const getChatClient = once(async (signal: AbortSignal) => {
     return {
       client: await observabilityAIAssistant.service.start({ signal }),
@@ -140,6 +143,7 @@ export function createAssistantService({
             signal,
             chat,
             apiClient,
+            logger,
           });
         }
 
@@ -176,13 +180,38 @@ export function createAssistantService({
             {
               system: true,
               doc_id: 'investigate_instructions',
-              text: `${SYSTEM_MESSAGE}
+              text: dedent(`${SYSTEM_MESSAGE}
 
               ## Current goal: generate new widgets
               
               You are now being asked to generate widgets. 
           
               - Add existing visualizations, using the "add_existing_visualizations" function.
+
+              ### Capabilities
+              
+              - You can add existing visualizations, using the "add_existing_visualizations"
+              function.
+              - You can explain to the user what visualizations are available in their library. 
+
+              ### Non-capabilities
+
+              - You CANNOT execute Elasticsearch queries.
+              - You CANNOT see the results of the visualizations, only what kind of visualizations
+              are displayed on the screen, and notes and requests from the user.
+
+              ### Behaviour
+
+              - Try to help the user by displaying the right visualization. Add multiple if needed.
+              - When adding multiple visualizations, prefer to add two or four per row. You
+              can do this by setting the \`columns\` property with the "add_existing_visualizations"
+              function.
+              - If you don't see a good match for the user's request, mention some related
+              visualizations and/or ask them for clarification.
+
+              ### Tone of voice
+
+              The IDs of the visualizations are internal. No need to mention them to the user.
 
               ### Adding multiple visualizations
 
@@ -203,13 +232,13 @@ export function createAssistantService({
               
               ${context}
 
-              ## Stored visualizations
+              ### Stored visualizations
 
               The following stored visualizations are available to display:
 
               ${relevantEmbeddablesWithReplacedIds
                 .map((relevantEmbeddable) => {
-                  return `### Title: ${relevantEmbeddable.title}
+                  return `#### Title: ${relevantEmbeddable.title}
 
                 ID: ${relevantEmbeddable.lookupId}
                 Type: ${relevantEmbeddable.type}
@@ -218,7 +247,7 @@ export function createAssistantService({
                 `;
                 })
                 .join('\n\n')}
-              `,
+              `),
             },
           ],
           messages,
@@ -333,39 +362,6 @@ export function createAssistantService({
                           .map((widget) => widget.title)
                           .join(', ')}`,
                       },
-                    };
-                  }
-                ),
-                createScreenContextAction(
-                  {
-                    name: 'inspect_existing_visualization',
-                    description: 'Request and inspect the attributes of an existing visualization',
-                    parameters: {
-                      type: 'object',
-                      properties: {
-                        id: {
-                          type: 'string',
-                          description: 'The id of the existing visualization',
-                        },
-                      },
-                      required: ['id'],
-                    } as const,
-                  },
-                  async ({ args }) => {
-                    const { id } = args;
-
-                    const savedObjectId = wordIdList.lookup(id);
-
-                    const savedObject = relevantEmbeddables.find(
-                      (embeddableSavedObject) => embeddableSavedObject.id === savedObjectId
-                    );
-
-                    if (!savedObject) {
-                      throw new Error(`Visualization with ID ${id} does not exist`);
-                    }
-
-                    return {
-                      content: savedObject,
                     };
                   }
                 ),

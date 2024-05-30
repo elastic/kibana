@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import React, { useMemo, useRef } from 'react';
-import { createInvestigateServiceInventoryWidget } from '@kbn/apm-plugin/public';
-import { AddWidgetQuickLink } from '.';
-import { useKibana } from '../../hooks/use_kibana';
 
-export function ApmQuickLink({
-  onWidgetAdd,
+import { useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import { createInvestigateServiceInventoryWidget } from '@kbn/apm-plugin/public';
+import { InvestigateWidgetCreate, WorkflowBlock } from '@kbn/investigate-plugin/common';
+import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { useKibana } from '../use_kibana';
+
+export function useApmWorkflowBlock({
   start,
   end,
+  onWidgetAdd,
 }: {
-  onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
   start: string;
   end: string;
+  onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
 }) {
   const {
     dependencies: {
@@ -50,11 +50,13 @@ export function ApmQuickLink({
     [apiClient, start, end]
   );
 
-  const quickLinkProps = useMemo<React.ComponentProps<typeof AddWidgetQuickLink>>(() => {
+  return useMemo<WorkflowBlock>(() => {
+    const id = 'apm';
     if (servicesResult.loading) {
       return {
+        id,
         loading: true,
-        content: i18n.translate('xpack.investigateApp.apmQuickLink.loadingAlerts', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.apm.loadingAlerts', {
           defaultMessage: 'Fetching services',
         }),
       };
@@ -62,8 +64,9 @@ export function ApmQuickLink({
 
     if (servicesResult.error) {
       return {
+        id,
         loading: false,
-        content: i18n.translate('xpack.investigateApp.apmQuickLink.failedLoadingServices', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.apm.failedLoadingServices', {
           defaultMessage: 'Failed to fetch services',
         }),
       };
@@ -73,33 +76,38 @@ export function ApmQuickLink({
 
     if (numServices === 0) {
       return {
+        id,
         loading: false,
         color: 'success',
-        content: i18n.translate('xpack.investigateApp.apmQuickLink.noServices', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.apm.noServices', {
           defaultMessage: 'No APM Services are reporting',
         }),
       };
     }
 
     return {
+      id,
       loading: false,
       color: 'warning',
-      content: i18n.translate('xpack.investigateApp.apmQuickLink.viewServiceInventory', {
+      content: i18n.translate('xpack.investigateApp.workflowBlocks.apm.viewServiceInventory', {
         defaultMessage: 'View service inventory',
       }),
       onClick: () => {
         onWidgetAddRef.current(
           createInvestigateServiceInventoryWidget({
-            title: i18n.translate('xpack.investigateApp.apmQuickLink.serviceInventoryWidgetTitle', {
-              defaultMessage: 'APM Service inventory',
-            }),
+            title: i18n.translate(
+              'xpack.investigateApp.workflowBlocks.apm.serviceInventoryWidgetTitle',
+              {
+                defaultMessage: 'APM Service inventory',
+              }
+            ),
             parameters: {
               environment: 'ENVIRONMENT_ALL',
             },
           })
         );
       },
-      description: i18n.translate('xpack.investigateApp.apmQuickLink.numServicesReporting', {
+      description: i18n.translate('xpack.investigateApp.workflowBlocks.apm.numServicesReporting', {
         defaultMessage: '{numServices, plural, one {# service} other {# services}} reporting data',
         values: {
           numServices,
@@ -107,6 +115,4 @@ export function ApmQuickLink({
       }),
     };
   }, [servicesResult]);
-
-  return <AddWidgetQuickLink {...quickLinkProps} />;
 }

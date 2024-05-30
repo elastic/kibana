@@ -15,6 +15,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { compact, keyBy } from 'lodash';
 import { from, last, lastValueFrom, map, mergeMap, Observable, toArray } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import { InvestigateAppAPIClient } from '../../api';
 import { StoredEmbeddable } from './get_stored_embeddables';
 import { SYSTEM_MESSAGE } from './system_message';
@@ -30,6 +31,7 @@ export async function getRelevantExistingEmbeddables({
   prompt,
   signal,
   apiClient,
+  logger,
 }: {
   storedEmbeddables: StoredEmbeddable[];
   chat: (
@@ -45,6 +47,7 @@ export async function getRelevantExistingEmbeddables({
   prompt: string;
   signal: AbortSignal;
   apiClient: InvestigateAppAPIClient;
+  logger: Logger;
 }): Promise<StoredEmbeddable[]> {
   const wordIdList = await getWordsToReplaceUuidsList();
 
@@ -55,11 +58,8 @@ export async function getRelevantExistingEmbeddables({
       type,
       title,
       description,
-      originalId: id,
     };
   });
-
-  console.log(objectsForLlm);
 
   const { chunks } = await apiClient(
     'POST /internal/investigate_app/assistant/chunk_on_token_count',
@@ -173,13 +173,9 @@ export async function getRelevantExistingEmbeddables({
 
   const flattenedIds = allIds.flat();
 
-  console.log({
-    flattenedIds,
-  });
-
   const storedEmbeddablesById = keyBy(storedEmbeddables, (storedEmbeddable) => storedEmbeddable.id);
 
-  return compact(
+  const relevantEmbeddables = compact(
     flattenedIds.map((id) => {
       const originalId = wordIdList.lookup(id);
       if (originalId) {
@@ -188,4 +184,6 @@ export async function getRelevantExistingEmbeddables({
       return undefined;
     })
   ).filter((storedEmbeddable) => !!storedEmbeddable.title);
+
+  return relevantEmbeddables;
 }

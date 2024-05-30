@@ -90,6 +90,7 @@ export class InvestigateAppPlugin
             dataViews: pluginsStart.dataViews,
             security: pluginsStart.security,
             apiClient,
+            logger: this.logger,
           }),
         };
 
@@ -138,6 +139,7 @@ export class InvestigateAppPlugin
             dataViews: pluginsStart.dataViews,
             security: pluginsStart.security,
             apiClient,
+            logger: this.logger,
           })
         ),
       },

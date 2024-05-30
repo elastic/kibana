@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
 import { AssistantAvatar } from '@kbn/observability-ai-assistant-plugin/public';
@@ -56,7 +63,9 @@ export function TimelineMessage({
       >
         <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
         <EuiFlexItem className={textContainerClassName}>
-          <EuiText size="s">{content}</EuiText>
+          <EuiText size="s" className={containerClassName}>
+            <EuiMarkdownFormat textSize="s">{content}</EuiMarkdownFormat>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <InvestigateTextButton

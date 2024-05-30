@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
-import { AddWidgetQuickLink } from '.';
-import { useKibana } from '../../hooks/use_kibana';
 
-export function SloQuickLink({
-  onWidgetAdd,
+import { useMemo } from 'react';
+import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { WorkflowBlock } from '@kbn/investigate-plugin/common';
+import { useKibana } from '../use_kibana';
+
+export function useSloWorkflowBlock({
+  setFlyout,
 }: {
-  onWidgetAdd: (createOptions: InvestigateWidgetCreate) => Promise<void>;
+  setFlyout: React.Dispatch<React.SetStateAction<React.ReactNode>>;
 }) {
   const {
     dependencies: {
@@ -32,16 +31,17 @@ export function SloQuickLink({
     [slo]
   );
 
-  const [flyout, setFlyout] = useState<React.ReactNode>();
-
-  const sloQuickLinkProps = useMemo<React.ComponentProps<typeof AddWidgetQuickLink>>(() => {
+  const sloWorkflowBlock = useMemo<WorkflowBlock>(() => {
     const isLoading = sloResult.loading;
     const isError = !!sloResult.error;
 
+    const id = 'slo';
+
     if (isLoading) {
       return {
+        id,
         loading: true,
-        content: i18n.translate('xpack.investigateApp.addWidgetQuickLinks.loadingSlos', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.slo.loadingSlos', {
           defaultMessage: 'Fetching SLOs',
         }),
       };
@@ -49,9 +49,10 @@ export function SloQuickLink({
 
     if (isError) {
       return {
+        id,
         color: 'danger',
         loading: false,
-        content: i18n.translate('xpack.investigateApp.addWidgetQuickLinks.errorLoadingSlos', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.slo.errorLoadingSlos', {
           defaultMessage: 'Error loading SLOs',
         }),
       };
@@ -61,12 +62,13 @@ export function SloQuickLink({
 
     if (!results.length) {
       return {
+        id,
         loading: false,
-        content: i18n.translate('xpack.investigateApp.addWidgetQuickLinks.slosEmptyAction', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.slo.slosEmptyAction', {
           defaultMessage: 'Set up a Service Level Objective',
         }),
         description: i18n.translate(
-          'xpack.investigateApp.addWidgetQuickLinks.slosEmptyDescription',
+          'xpack.investigateApp.workflowBlocks.slo.slosEmptyDescription',
           {
             defaultMessage: "You don't have any SLOs yet",
           }
@@ -89,23 +91,20 @@ export function SloQuickLink({
     const isOk = unhealthySlos.length === 0;
 
     return {
+      id,
       color: isOk ? 'success' : 'warning',
       loading: false,
-      content: i18n.translate('xpack.investigateApp.addWidgetQuickLinks.investigateSlos', {
+      content: i18n.translate('xpack.investigateApp.workflowBlocks.slo.investigateSlos', {
         defaultMessage: 'Investigate SLOs',
       }),
-      description: i18n.translate('xpack.investigateApp.addWidgetQuickLinks.unhealthySlos', {
+      description: i18n.translate('xpack.investigateApp.workflowBlocks.slo.unhealthySlos', {
         defaultMessage: `{numUnhealthy, plural, one {# unhealthy SLO} other {# unhealthy SLOs}}`,
         values: {
           numUnhealthy: unhealthySlos.length,
         },
       }),
     };
-  }, [sloResult, slo]);
+  }, [sloResult, slo, setFlyout]);
 
-  return (
-    <AddWidgetQuickLink {...sloQuickLinkProps}>
-      {flyout ? <div style={{ display: 'none' }}>{flyout}</div> : null}
-    </AddWidgetQuickLink>
-  );
+  return sloWorkflowBlock;
 }

@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/alerts-ui-shared/src/common/constants';
-import { i18n } from '@kbn/i18n';
-import { InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import React, { useMemo } from 'react';
-import { AddWidgetQuickLink } from '.';
-import { useKibana } from '../../hooks/use_kibana';
 
-export function AlertsQuickLink({
-  onWidgetAdd,
-}: {
-  onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
-}) {
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/alerts-ui-shared/src/common/constants';
+import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { WorkflowBlock } from '@kbn/investigate-plugin/common';
+import { useKibana } from '../use_kibana';
+
+export function useAlertsWorkflowBlock() {
   const { core } = useKibana();
 
   const alertsResult = useAbortableAsync(
@@ -53,11 +49,14 @@ export function AlertsQuickLink({
     [core.http]
   );
 
-  const quickLinkProps = useMemo<React.ComponentProps<typeof AddWidgetQuickLink>>(() => {
+  return useMemo<WorkflowBlock>(() => {
+    const id = 'alerts';
+
     if (alertsResult.loading) {
       return {
+        id,
         loading: true,
-        content: i18n.translate('xpack.investigateApp.alertsQuickLink.loadingAlerts', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.alerts.loadingAlerts', {
           defaultMessage: 'Fetching open alerts',
         }),
       };
@@ -65,8 +64,9 @@ export function AlertsQuickLink({
 
     if (alertsResult.error) {
       return {
+        id,
         loading: false,
-        content: i18n.translate('xpack.investigateApp.alertsQuickLink.failedLoadingAlerts', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.alerts.failedLoadingAlerts', {
           defaultMessage: 'Failed to retrieve open alerts',
         }),
       };
@@ -75,23 +75,28 @@ export function AlertsQuickLink({
     const numOpenAlerts = alertsResult.value?.hits.total.value;
     if (numOpenAlerts === 0) {
       return {
+        id,
         loading: false,
         color: 'success',
-        content: i18n.translate('xpack.investigateApp.alertsQuickLink.noOpenAlerts', {
+        content: i18n.translate('xpack.investigateApp.workflowBlocks.alerts.noOpenAlerts', {
           defaultMessage: 'No open alerts',
         }),
       };
     }
 
     return {
+      id,
       loading: false,
       color: 'warning',
-      content: i18n.translate('xpack.investigateApp.alertsQuickLink.investigateOpenAlertsAction', {
-        defaultMessage: 'Investigate alerts',
-      }),
+      content: i18n.translate(
+        'xpack.investigateApp.workflowBlocks.alerts.investigateOpenAlertsAction',
+        {
+          defaultMessage: 'Investigate alerts',
+        }
+      ),
       onClick: () => {},
       description: i18n.translate(
-        'xpack.investigateApp.alertsQuickLink.investigateOpenAlertsDescription',
+        'xpack.investigateApp.workflowBlocks.alerts.investigateOpenAlertsDescription',
         {
           defaultMessage: '{numOpenAlerts, plural, one {# open alert} other {# open alerts}}',
           values: {
@@ -101,6 +106,4 @@ export function AlertsQuickLink({
       ),
     };
   }, [alertsResult]);
-
-  return <AddWidgetQuickLink {...quickLinkProps} />;
 }

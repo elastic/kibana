@@ -5,18 +5,21 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { InvestigateTimeline, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
+import type {
+  InvestigateTimeline,
+  InvestigateWidgetCreate,
+  WorkflowBlock,
+} from '@kbn/investigate-plugin/public';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
 import { Filter, Query } from '@kbn/es-query';
 import { AddWidgetMode } from '../../constants/add_widget_mode';
 import { AddFromLibraryButton } from '../add_from_library_button';
 import { AddWidgetModeSelector } from '../add_widget_mode_selector';
-import { AddWidgetQuickLinks } from '../add_widget_quick_links';
 import { AssistantWidgetControl } from '../assistant_widget_control';
-// import { CreateVisualizationButton } from '../create_visualization_button';
 import { EsqlWidgetControl } from '../esql_widget_control';
 import { NoteWidgetControl } from '../note_widget_control';
+import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
 
 interface AddWidgetUIProps {
   user: {
@@ -33,6 +36,7 @@ interface AddWidgetUIProps {
     to: string;
   };
   filters: Filter[];
+  workflowBlocks: WorkflowBlock[];
 }
 
 function getControlsForMode({
@@ -95,15 +99,22 @@ export function AddWidgetUI({
   query,
   filters,
   timeRange,
+  workflowBlocks,
 }: AddWidgetUIProps) {
   const [mode, setMode] = useState(AddWidgetMode.Assistant);
 
+  const workflowBlocksControl = useWorkflowBlocks({
+    start: start.toString(),
+    end: end.toString(),
+    dynamicBlocks: workflowBlocks,
+    isTimelineEmpty: timeline.items.length === 0,
+    onWidgetAdd,
+  });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {timeline.items.length === 0 ? (
-        <EuiFlexItem grow={false}>
-          <AddWidgetQuickLinks onWidgetAdd={onWidgetAdd} start={start} end={end} />
-        </EuiFlexItem>
+      {workflowBlocksControl ? (
+        <EuiFlexItem grow={false}>{workflowBlocksControl}</EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
         {getControlsForMode({

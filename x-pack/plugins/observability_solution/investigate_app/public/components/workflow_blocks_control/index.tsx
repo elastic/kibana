@@ -11,20 +11,13 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiText,
-  EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
+import { WorkflowBlock } from '@kbn/investigate-plugin/common';
 import classNames from 'classnames';
-import { castArray } from 'lodash';
-import { Moment } from 'moment';
 import { rgba } from 'polished';
 import React from 'react';
-import { PickByValue } from 'utility-types';
 import { useTheme } from '../../hooks/use_theme';
-import { AlertsQuickLink } from './alerts_quick_link';
-import { ApmQuickLink } from './apm_quick_link';
-import { SloQuickLink } from './slo_quick_link';
 
 const groupClassName = css`
   height: 100%;
@@ -59,26 +52,20 @@ const loadingContainerClassName = css`
   height: 100%;
 `;
 
-export function AddWidgetQuickLink({
+function WorkflowBlockControl({
   content,
   description,
   loading,
   onClick,
   color = 'lightestShade',
   children,
-}: {
-  content?: string;
-  description?: string;
-  loading: boolean;
-  onClick?: () => void;
-  color?: keyof PickByValue<EuiThemeComputed<{}>['colors'], string>;
-  children?: React.ReactNode;
-}) {
+  compressed,
+}: Omit<WorkflowBlock, 'id'> & { compressed: boolean }) {
   const theme = useTheme();
 
   const panelClassName = css`
     background-color: ${rgba(theme.colors[color], 0.75)};
-    height: 120px;
+    height: ${compressed ? 64 : 128}px;
     transition: all ${theme.animation.fast} ${theme.animation.resistance} !important;
   `;
 
@@ -127,7 +114,7 @@ export function AddWidgetQuickLink({
           justifyContent="center"
           className={groupClassName}
         >
-          {description && (
+          {description && !compressed && (
             <EuiFlexItem grow={false} className={textItemClassName}>
               <EuiText size="xs" color={theme.colors.text} className={descriptionClassName}>
                 {description}
@@ -146,45 +133,22 @@ export function AddWidgetQuickLink({
   );
 }
 
-export function AddWidgetQuickLinkList({
-  children,
+export function WorkflowBlocksControl({
+  blocks,
+  compressed,
 }: {
-  children: React.ReactElement | React.ReactElement[];
+  blocks: WorkflowBlock[];
+  compressed: boolean;
 }) {
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexStart">
-      {castArray(children).map((child, index) => (
-        <EuiFlexItem key={child.key || index} className={itemClassName}>
-          {child}
+      {blocks.map((block) => (
+        <EuiFlexItem key={block.id} className={itemClassName}>
+          <EuiErrorBoundary>
+            <WorkflowBlockControl {...block} compressed={compressed} />
+          </EuiErrorBoundary>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
-  );
-}
-export function AddWidgetQuickLinks({
-  onWidgetAdd,
-  start,
-  end,
-}: {
-  onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
-  start: Moment;
-  end: Moment;
-}) {
-  return (
-    <AddWidgetQuickLinkList>
-      <EuiErrorBoundary>
-        <SloQuickLink onWidgetAdd={onWidgetAdd} />
-      </EuiErrorBoundary>
-      <EuiErrorBoundary>
-        <AlertsQuickLink onWidgetAdd={onWidgetAdd} />
-      </EuiErrorBoundary>
-      <EuiErrorBoundary>
-        <ApmQuickLink
-          onWidgetAdd={onWidgetAdd}
-          start={start.toISOString()}
-          end={end.toISOString()}
-        />
-      </EuiErrorBoundary>
-    </AddWidgetQuickLinkList>
   );
 }
