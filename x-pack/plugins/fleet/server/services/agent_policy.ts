@@ -171,22 +171,15 @@ class AgentPolicyService {
       );
     }
     try {
-      await soClient.update<AgentPolicySOAttributes>(
-        SAVED_OBJECT_TYPE,
-        id,
-        {
-          ...agentPolicy,
-          ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
-          ...(options.removeProtection
-            ? { is_protected: false }
-            : { is_protected: agentPolicy.is_protected }),
-          updated_at: new Date().toISOString(),
-          updated_by: user ? user.username : 'system',
-        },
-        {
-          version: existingAgentPolicy.version,
-        }
-      );
+      await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
+        ...agentPolicy,
+        ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
+        ...(options.removeProtection
+          ? { is_protected: false }
+          : { is_protected: agentPolicy.is_protected }),
+        updated_at: new Date().toISOString(),
+        updated_by: user ? user.username : 'system',
+      });
     } catch (err) {
       logger.error(err);
       throw err;
