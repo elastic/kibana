@@ -462,7 +462,7 @@ describe('SearchSource', () => {
             runtimeFields: {},
           }),
         } as unknown as DataView);
-        searchSource.setField('fields', ['hello', 'a', { foo: 'c' }]);
+        searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
@@ -625,7 +625,7 @@ describe('SearchSource', () => {
             runtimeFields: {},
           }),
         } as unknown as DataView);
-        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
@@ -641,7 +641,7 @@ describe('SearchSource', () => {
             runtimeFields: {},
           }),
         } as unknown as DataView);
-        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);

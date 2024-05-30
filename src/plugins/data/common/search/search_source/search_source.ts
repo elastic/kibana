@@ -717,7 +717,7 @@ export class SearchSource {
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
     bodyFields: SearchFieldValue[]
-  ) {
+  ): SearchFieldValue[] {
     if (!index) {
       return bodyFields;
     }
@@ -727,9 +727,7 @@ export class SearchSource {
       return bodyFields;
     }
     const sourceFiltersValues = sourceFilters.excludes;
-    const wildcardField = bodyFields.find(
-      (el: SearchFieldValue) => el === '*' || (el as Record<string, string>).field === '*'
-    );
+    const wildcardField = bodyFields.find((el) => this.getFieldName(el) === '*');
     const filter = fieldWildcardFilter(
       sourceFiltersValues,
       this.dependencies.getConfig(UI_SETTINGS.META_FIELDS)
@@ -926,7 +924,7 @@ export class SearchSource {
     fields: SearchFieldValue[];
     fieldsFromSource: SearchFieldValue[];
   }) {
-    const bodyFieldNames = fields.map((field: SearchFieldValue) => this.getFieldName(field));
+    const bodyFieldNames = fields.map((field) => this.getFieldName(field));
     return [...new Set([...bodyFieldNames, ...fieldsFromSource])];
   }
 
@@ -1012,13 +1010,11 @@ export class SearchSource {
       }
       return [
         ...fields,
-        ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
+        ...filteredDocvalueFields.filter((fld) => {
           const fldName = this.getFieldName(fld);
           return (
             fieldsFromSource.includes(fldName) &&
-            !(docvalueFields || [])
-              .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
-              .includes(fldName)
+            !(docvalueFields || []).map((d) => this.getFieldName(d)).includes(fldName)
           );
         }),
       ];
