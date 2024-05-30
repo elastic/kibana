@@ -38,6 +38,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   connectorId,
   esClient,
   esStore,
+  kbDataClient,
   langChainMessages,
   llmType,
   logger,
@@ -89,12 +90,14 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
-    anonymizationFields,
     alertsIndexPattern,
-    isEnabledKnowledgeBase,
+    anonymizationFields,
     chain,
-    llm,
     esClient,
+    isEnabledKnowledgeBase,
+    kbDataClient,
+    llm,
+    logger,
     modelExists,
     onNewReplacements,
     replacements,

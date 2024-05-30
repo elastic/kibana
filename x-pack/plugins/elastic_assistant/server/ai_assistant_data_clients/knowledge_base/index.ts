@@ -13,13 +13,16 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import {
+  KnowledgeBaseEntryCreateProps,
+  KnowledgeBaseEntryResponse,
+} from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { GetElser } from '../../types';
-import { transformToCreateSchema } from './create_knowledge_base_entry';
+import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
 import { EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
@@ -260,5 +263,37 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`errors: ${JSON.stringify(errors, null, 2)}`);
 
     return created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [];
+  };
+
+  /**
+   * Creates a new Knowledge Base Entry.
+   *
+   * @param knowledgeBaseEntry
+   */
+  public createKnowledgeBaseEntry = async ({
+    knowledgeBaseEntry,
+  }: {
+    knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
+  }): Promise<KnowledgeBaseEntryResponse | null> => {
+    const authenticatedUser = this.options.currentUser;
+    if (authenticatedUser == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    this.options.logger.debug(
+      `Creating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`
+    );
+    this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
+    const esClient = await this.options.elasticsearchClientPromise;
+    return createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: this.indexTemplateAndPattern.alias,
+      logger: this.options.logger,
+      spaceId: this.spaceId,
+      user: authenticatedUser,
+      knowledgeBaseEntry,
+    });
   };
 }

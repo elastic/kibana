@@ -58,10 +58,10 @@ export const getMsearchQueryBody = ({
       query: vectorSearchQuery,
       size: vectorSearchQuerySize,
     },
-    { index },
-    {
-      query: termsSearchQuery,
-      size: termsSearchQuerySize,
-    },
+    // { index },
+    // {
+    //   query: termsSearchQuery,
+    //   size: termsSearchQuerySize,
+    // },
   ],
 });

@@ -17,6 +17,13 @@ import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/s
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+
+export type OnLlmResponse = (
+  content: string,
+  traceData?: Message['traceData'],
+  isError?: boolean
+) => Promise<void>;
 
 export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
@@ -28,17 +35,14 @@ export interface AgentExecutorParams<T extends boolean> {
   connectorId: string;
   esClient: ElasticsearchClient;
   esStore: ElasticsearchStore;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
   isStream?: T;
-  onLlmResponse?: (
-    content: string,
-    traceData?: Message['traceData'],
-    isError?: boolean
-  ) => Promise<void>;
+  onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   traceOptions?: TraceOptions;

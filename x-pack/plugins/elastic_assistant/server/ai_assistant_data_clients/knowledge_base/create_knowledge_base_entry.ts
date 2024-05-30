@@ -18,8 +18,8 @@ import { CreateKnowledgeBaseEntrySchema } from './types';
 
 export interface CreateKnowledgeBaseEntryParams {
   esClient: ElasticsearchClient;
-  logger: Logger;
   knowledgeBaseIndex: string;
+  logger: Logger;
   spaceId: string;
   user: AuthenticatedUser;
   knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
