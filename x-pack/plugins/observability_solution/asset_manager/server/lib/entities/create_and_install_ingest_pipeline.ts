@@ -8,7 +8,6 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { EntitySecurityException } from './errors/entity_security_exception';
 import { generateSummaryProcessors } from './ingest_pipeline/generate_summary_processors';
 import { generateSummaryIngestPipelineId } from './ingest_pipeline/generate_summary_ingest_pipeline_id';
 import { generateHistoryProcessors } from './ingest_pipeline/generate_history_processors';
@@ -34,9 +33,6 @@ export async function createAndInstallHistoryIngestPipeline(
     logger.error(
       `Cannot create entity history ingest pipelines for [${definition.id}] entity defintion`
     );
-    if (e.meta?.body?.error?.type === 'security_exception') {
-      throw new EntitySecurityException(e.meta.body.error.reason, definition);
-    }
     throw e;
   }
 }
@@ -60,9 +56,6 @@ export async function createAndInstallSummaryIngestPipeline(
     logger.error(
       `Cannot create entity summary ingest pipelines for [${definition.id}] entity defintion`
     );
-    if (e.meta?.body?.error?.type === 'security_exception') {
-      throw new EntitySecurityException(e.meta.body.error.reason, definition);
-    }
     throw e;
   }
 }

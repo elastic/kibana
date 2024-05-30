@@ -43,9 +43,6 @@ export async function createAndInstallSummaryTransform(
     });
   } catch (e) {
     logger.error(`Cannot create entity summary transform for [${definition.id}] entity definition`);
-    if (e.meta?.body?.error?.type === 'security_exception') {
-      throw new EntitySecurityException(e.meta.body.error.reason, definition);
-    }
     throw e;
   }
 }
