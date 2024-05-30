@@ -21,6 +21,7 @@ import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attac
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ResponseActionsClient } from '../..';
+import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
 import {
@@ -43,12 +44,10 @@ import { ACTION_RESPONSE_INDICES } from '../constants';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
-  ResponseActionGetFileRequestBody,
   IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../common/api/endpoint';
-import { NormalizedExternalConnectorClient } from '../..';
-import {} from '@kbn/utility-types-jest';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
   esClient: ElasticsearchClientMock;
@@ -68,6 +67,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
     getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
     getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
+    scan: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 

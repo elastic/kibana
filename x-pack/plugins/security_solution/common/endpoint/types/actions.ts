@@ -221,7 +221,8 @@ export type EndpointActionResponseDataOutput =
   | ResponseActionUploadOutputContent
   | GetProcessesActionOutputContent
   | SuspendProcessActionOutputContent
-  | KillProcessActionOutputContent;
+  | KillProcessActionOutputContent
+  | ResponseActionScanOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property

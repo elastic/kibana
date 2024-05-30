@@ -13,6 +13,7 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ScanActionRequestBody } from '../../../../../../common/api/endpoint/actions/scan_route';
 import { validateActionId } from '../../utils/validate_action_id';
 import {
   fetchActionResponses,
@@ -35,9 +36,9 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
+  GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
-  GetFileDownloadMethodResponse,
 } from './types';
 import type {
   ActionDetails,
@@ -52,13 +53,16 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionParametersWithPidOrEntityId,
+  ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
+  ResponseActionsScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  WithAllKeys,
   UploadedFileInfo,
+  WithAllKeys,
 } from '../../../../../../common/endpoint/types';
+import { ActivityLogItemTypes } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
@@ -70,7 +74,6 @@ import type {
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
-import { ActivityLogItemTypes } from '../../../../../../common/endpoint/types';
 
 const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
   'xpack.securitySolution.responseActionsList.error.licenseTooLow',
@@ -697,6 +700,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw new ResponseActionsNotSupportedError('upload');
+  }
+
+  public async scan(
+    actionRequest: ScanActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+    throw new ResponseActionsNotSupportedError('scan');
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
