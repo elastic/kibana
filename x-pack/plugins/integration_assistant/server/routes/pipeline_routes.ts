@@ -23,12 +23,16 @@ export function registerEcsRoutes(router: IRouter) {
       },
     },
     async (context, req, res) => {
-      const { rawSamples, pipeline } = req.body as TestPipelineApiRequest;
+      const { rawSamples, currentPipeline } = req.body as TestPipelineApiRequest;
       const services = await context.resolve(['core']);
       const { client } = services.core.elasticsearch;
       let results: TestPipelineApiResponse = { pipelineResults: [], errors: [] };
       try {
-        results = (await testPipeline(rawSamples, pipeline, client)) as TestPipelineApiResponse;
+        results = (await testPipeline(
+          rawSamples,
+          currentPipeline,
+          client
+        )) as TestPipelineApiResponse;
         if (results?.errors && results.errors.length > 0) {
           return res.badRequest({ body: JSON.stringify(results.errors) });
         }

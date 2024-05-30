@@ -90,7 +90,7 @@ export interface RelatedApiRequest {
 
 export interface TestPipelineApiRequest {
   rawSamples: string[];
-  pipeline: Pipeline;
+  currentPipeline: Pipeline;
 }
 
 // Server Response Schemas
