@@ -133,4 +133,6 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 export GH_REPO=github.com/elastic/kibana
 
 # used by FIPS agents to link FIPS OpenSSL modules
-export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+if [[ "$FTR_ENABLE_FIPS_AGENT" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
+  export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+fi
