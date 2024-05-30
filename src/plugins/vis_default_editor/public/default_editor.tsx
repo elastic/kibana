@@ -133,6 +133,11 @@ function DefaultEditor({
                       const [, setOpenInspector] = embeddableApiHandler.openInspector;
                       setOpenInspector(() => api.openInspector);
                     });
+                    api.subscribeToNavigateToLens((navigateToLens) => {
+                      if (!navigateToLens) return;
+                      const [, setNavigateToLens] = embeddableApiHandler.navigateToLens;
+                      setNavigateToLens(() => navigateToLens);
+                    });
                     setOnUpdateVis(() => api.setVis);
                   }}
                 />

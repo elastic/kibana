@@ -216,6 +216,11 @@ class VisEditorVisualizationUI extends Component {
                 const [, setOpenInspector] = this.props.embeddableApiHandler.openInspector;
                 setOpenInspector(() => api.openInspector);
               });
+              api.subscribeToNavigateToLens((navigateToLens) => {
+                if (!navigateToLens) return;
+                const [, setNavigateToLens] = this.props.embeddableApiHandler.navigateToLens;
+                setNavigateToLens(() => navigateToLens);
+              });
               api.subscribeToVisData((data) => {
                 this.props.onDataChange(data?.value);
               });

@@ -13,10 +13,12 @@ export type OpenInspectorFn = () => OverlayRef | undefined;
 
 export interface EmbeddableApiHandler {
   openInspector: ReturnType<typeof useState<OpenInspectorFn>>;
+  navigateToLens: ReturnType<typeof useState<() => void>>;
 }
 
 export const useEmbeddableApiHandler = () => {
   const openInspector = useState();
+  const navigateToLens = useState();
 
-  return { openInspector } as EmbeddableApiHandler;
+  return { openInspector, navigateToLens } as EmbeddableApiHandler;
 };

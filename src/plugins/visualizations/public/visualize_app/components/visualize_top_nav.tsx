@@ -45,6 +45,7 @@ interface VisualizeTopNavProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   eventEmitter?: EventEmitter;
   openInspectorFn?: OpenInspectorFn;
+  navigateToLensFn?: () => void;
 }
 
 const TopNav = ({
@@ -64,6 +65,7 @@ const TopNav = ({
   onAppLeave,
   eventEmitter,
   openInspectorFn,
+  navigateToLensFn,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -74,7 +76,7 @@ const TopNav = ({
   } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [navigateToLens, setNavigateToLens] = useState(false);
-  const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
+  const displayEditInLensItem = !!navigateToLensFn;
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(

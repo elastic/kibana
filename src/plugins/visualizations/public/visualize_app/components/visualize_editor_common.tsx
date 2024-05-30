@@ -52,6 +52,7 @@ interface VisualizeEditorCommonProps {
   embeddableId?: string;
   eventEmitter?: EventEmitter;
   openInspectorFn?: OpenInspectorFn;
+  navigateToLensFn?: () => void;
 }
 
 export const VisualizeEditorCommon = ({
@@ -72,6 +73,7 @@ export const VisualizeEditorCommon = ({
   visEditorRef,
   eventEmitter,
   openInspectorFn,
+  navigateToLensFn,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
@@ -156,6 +158,7 @@ export const VisualizeEditorCommon = ({
           onAppLeave={onAppLeave}
           eventEmitter={eventEmitter}
           openInspectorFn={openInspectorFn}
+          navigateToLensFn={navigateToLensFn}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&

@@ -39,6 +39,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   const embeddableApiHandler = useEmbeddableApiHandler();
   const [openInspectorFn] = embeddableApiHandler.openInspector;
+  const [navigateToLensFn] = embeddableApiHandler.navigateToLens;
 
   const isChromeVisible = useChromeVisibility(services.chrome);
   useEffect(() => {
@@ -120,6 +121,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       embeddableId={embeddableIdValue}
       eventEmitter={eventEmitter}
       openInspectorFn={openInspectorFn}
+      navigateToLensFn={navigateToLensFn}
     />
   );
 };

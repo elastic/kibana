@@ -29,7 +29,7 @@ import React, { useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
-import { getInspector, getUiActions } from '../services';
+import { getInspector, getTimeFilter, getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';
 import { createVisInstance } from './create_vis_instance';
@@ -115,6 +115,16 @@ export const getVisualizeEmbeddableFactory: (
         subscribeToVisData: (listener) => visData$.subscribe(listener),
         subscribeToHasInspector: (listener) =>
           inspectorAdapters$.subscribe((value) => listener(!isEmpty(value))),
+        subscribeToNavigateToLens: (listener) =>
+          vis$.subscribe(async (vis) => {
+            if (!vis.type.navigateToLens) return;
+            const expressionVariables = await vis.type.getExpressionVariables?.(
+              vis,
+              getTimeFilter()
+            );
+            if (!expressionVariables?.canNavigateToLens) return;
+            listener(vis.type.navigateToLens);
+          }),
         openInspector: () => {
           const adapters = inspectorAdapters$.getValue();
           if (!adapters) return;

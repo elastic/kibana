@@ -50,5 +50,6 @@ export type VisualizeApi = HasEditCapabilities &
     subscribeToInitialRender: (listener: () => void) => void;
     subscribeToVisData: (listener: (data: unknown) => void) => void;
     subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;
+    subscribeToNavigateToLens: (listener: (navigateFn: () => void) => void) => void;
     openInspector: () => OverlayRef | undefined;
   };
