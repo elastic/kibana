@@ -204,10 +204,6 @@ export class SecurityPlugin
 
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
 
-    this.userProfileSettingsClient = new UserProfileSettingsClient(
-      this.initializerContext.logger.get('user-settings-client')
-    );
-
     this.fipsService = new FipsService(this.initializerContext.logger.get('fips'));
   }
 
