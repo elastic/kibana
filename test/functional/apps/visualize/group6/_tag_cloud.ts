@@ -51,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.visEditor.selectOrderByMetric(2, '_key');
       await PageObjects.visEditor.clickGo();
-      await PageObjects.visChart.waitForVisualization();
     });
 
     after(async () => {
