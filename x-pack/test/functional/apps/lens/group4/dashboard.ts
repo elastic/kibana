@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'lens',
     'discover',
+    'visualize',
   ]);
 
   const find = getService('find');
@@ -29,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const queryBar = getService('queryBar');
+  const listingTable = getService('listingTable');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
@@ -345,10 +347,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.openNewTab();
       await browser.navigateTo(url);
       expect(await PageObjects.lens.getTitle()).to.be('test');
-      // need to delete the lens from the dashboard or it messes up the next test
-      await PageObjects.dashboard.navigateToApp();
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-deletePanel');
+      // need to delete the lens visualization or it messes up the next test
+      await PageObjects.common.navigateToApp('visualize');
+      await listingTable.selectFirstItemInList();
+      await testSubjects.click('deleteSelectedItems');
     });
   });
 }
