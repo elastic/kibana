@@ -59,8 +59,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       it('shows empty state as user cannot read any dataset', async () => {
+        // Existence of `datasetQualityNoPrivilegesEmptyState` cannot be asserted as without the logs-*-* read privilege,
+        // only the management home screen is shown
         await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoPrivilegesEmptyState
+          PageObjects.datasetQuality.testSubjectSelectors.managementHome
         );
       });
     });

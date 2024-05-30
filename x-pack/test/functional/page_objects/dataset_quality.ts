@@ -104,6 +104,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     unifiedHistogramBreakdownSelectorSelectorSearch:
       'unifiedHistogramBreakdownSelectorSelectorSearch',
     unifiedHistogramBreakdownSelectorSelectable: 'unifiedHistogramBreakdownSelectorSelectable',
+    managementHome: 'managementHome',
   };
 
   return {
