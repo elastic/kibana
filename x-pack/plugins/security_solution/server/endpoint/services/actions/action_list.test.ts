@@ -95,6 +95,7 @@ describe('When using `getActionList()', () => {
           agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
           command: 'kill-process',
+          alertIds: undefined,
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
           errors: undefined,
@@ -108,6 +109,7 @@ describe('When using `getActionList()', () => {
           parameters: doc?.EndpointActions.data.parameters,
           agentState: {
             'agent-a': {
+              errors: undefined,
               completedAt: '2022-04-30T16:08:47.449Z',
               isCompleted: true,
               wasSuccessful: true,
@@ -116,17 +118,17 @@ describe('When using `getActionList()', () => {
           outputs: {
             'agent-a': {
               content: {
-                code: 'ra_get-file_success_done',
-                contents: [
-                  {
-                    file_name: 'bad_file.txt',
-                    path: '/some/path/bad_file.txt',
-                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                    size: 1234,
-                    type: 'file',
-                  },
-                ],
-                zip_size: 123,
+                code: 'ra_execute_success_done',
+                cwd: '/some/path',
+                output_file_id: 'some-output-file-id',
+                output_file_stderr_truncated: false,
+                output_file_stdout_truncated: true,
+                shell: 'bash',
+                shell_code: 0,
+                stderr: expect.any(String),
+                stderr_truncated: true,
+                stdout: expect.any(String),
+                stdout_truncated: true,
               },
               type: 'json',
             },
@@ -166,6 +168,7 @@ describe('When using `getActionList()', () => {
     ).resolves.toEqual({
       page: 1,
       pageSize: 10,
+      agentTypes: undefined,
       commands: undefined,
       userIds: undefined,
       startDate: undefined,
@@ -179,8 +182,8 @@ describe('When using `getActionList()', () => {
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
           command: 'kill-process',
           completedAt: '2022-04-30T16:08:47.449Z',
-          wasSuccessful: true,
           errors: undefined,
+          wasSuccessful: true,
           id: '123',
           isCompleted: true,
           isExpired: false,
@@ -189,17 +192,17 @@ describe('When using `getActionList()', () => {
           outputs: {
             'agent-a': {
               content: {
-                code: 'ra_get-file_success_done',
-                contents: [
-                  {
-                    file_name: 'bad_file.txt',
-                    path: '/some/path/bad_file.txt',
-                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-                    size: 1234,
-                    type: 'file',
-                  },
-                ],
-                zip_size: 123,
+                code: 'ra_execute_success_done',
+                cwd: '/some/path',
+                output_file_id: 'some-output-file-id',
+                output_file_stderr_truncated: false,
+                output_file_stdout_truncated: true,
+                shell: 'bash',
+                shell_code: 0,
+                stderr: expect.any(String),
+                stderr_truncated: true,
+                stdout: expect.any(String),
+                stdout_truncated: true,
               },
               type: 'json',
             },
@@ -262,6 +265,7 @@ describe('When using `getActionList()', () => {
       page: 1,
       pageSize: 10,
       commands: undefined,
+      agentTypes: undefined,
       userIds: undefined,
       startDate: undefined,
       elasticAgentIds: undefined,
@@ -277,6 +281,7 @@ describe('When using `getActionList()', () => {
             'agent-b': { name: 'Host-agent-b' },
             'agent-x': { name: '' },
           },
+          alertIds: undefined,
           command: 'kill-process',
           completedAt: undefined,
           wasSuccessful: false,
@@ -289,6 +294,8 @@ describe('When using `getActionList()', () => {
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
+          ruleId: undefined,
+          ruleName: undefined,
           agentState: {
             'agent-a': {
               completedAt: '2022-04-30T16:08:47.449Z',
@@ -309,7 +316,14 @@ describe('When using `getActionList()', () => {
               errors: undefined,
             },
           },
-          outputs: {},
+          outputs: {
+            'agent-a': {
+              content: {
+                code: 'ra_scan_success_done',
+              },
+              type: 'json',
+            },
+          },
         },
       ],
       total: 1,
