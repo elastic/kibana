@@ -131,9 +131,13 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 # tells the gh command what our default repo is
 export GH_REPO=github.com/elastic/kibana
 
+FIPS_ENABLED=false
 # used by FIPS agents to link FIPS OpenSSL modules
 if [[ "${FTR_ENABLE_FIPS_AGENT:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
+  FIPS_ENABLED=true
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
 
   # TODO: adjust node options
 fi
+
+export FIPS_ENABLED
