@@ -78,7 +78,6 @@ export class HttpService
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: IContextContainer;
-  private afterRequestHandledCallback?: any; // InternalCoreDiServiceStart['disposeRequestContainer'];
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -208,11 +207,6 @@ export class HttpService
           env: this.env,
           versionedRouterOptions: getVersionedRouterOptions(config),
           pluginId,
-          afterRequestHandled: (request) => {
-            if (this.afterRequestHandledCallback) {
-              this.afterRequestHandledCallback(request);
-            }
-          },
         });
         registerRouter(router);
         return router;
