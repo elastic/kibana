@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rawConnectorSchema } from './raw_connector_schema';
+import { rawConnectorSchema } from './v1';
 
 const action = {
   actionTypeId: '12345',

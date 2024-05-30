@@ -6,18 +6,13 @@
  */
 
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { taskSchemaV1 } from './schemas/task';
+import { rawConnectorSchemaV1 } from '../schemas/raw_connector';
 
-export const taskModelVersions: SavedObjectsModelVersionMap = {
+export const connectorModelVersions: SavedObjectsModelVersionMap = {
   '1': {
-    changes: [
-      {
-        type: 'mappings_deprecation',
-        deprecatedMappings: ['numSkippedRuns', 'interval'],
-      },
-    ],
+    changes: [],
     schemas: {
-      create: taskSchemaV1,
+      create: rawConnectorSchemaV1,
     },
   },
 };
