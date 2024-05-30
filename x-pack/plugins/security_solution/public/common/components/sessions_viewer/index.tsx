@@ -23,8 +23,6 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { SecurityCellActionsTrigger } from '../cell_actions';
 
@@ -85,7 +83,6 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   defaultColumns = sessionsHeaders,
 }) => {
   const dispatch = useDispatch();
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {
     if (filterQuery && filterQuery !== '') {
       return JSON.parse(filterQuery);
@@ -115,19 +112,12 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
       dataTableActions.initializeDataTableSettings({
         id: tableId,
         title: i18n.SESSIONS_TITLE,
-        defaultColumns: eventsDefaultModel.columns.map((c) =>
-          !tGridEnabled && c.initialWidth == null
-            ? {
-                ...c,
-                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-              }
-            : c
-        ),
+        defaultColumns: eventsDefaultModel.columns,
         showCheckboxes: true,
         selectAll: true,
       })
     );
-  }, [dispatch, tGridEnabled, tableId]);
+  }, [dispatch, tableId]);
 
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT =
