@@ -7,7 +7,7 @@
  */
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -15,36 +15,36 @@ import { registerReactEmbeddableFactory } from './react_embeddable_registry';
 import { ReactEmbeddableRenderer } from './react_embeddable_renderer';
 import { ReactEmbeddableFactory } from './types';
 
-describe('react embeddable renderer', () => {
-  const testEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
-    type: 'test',
-    deserializeState: jest.fn().mockImplementation((state) => state.rawState),
-    buildEmbeddable: async (state, registerApi) => {
-      const api = registerApi(
-        {
-          serializeState: () => ({
-            rawState: {
-              name: state.name,
-              bork: state.bork,
-            },
-          }),
-        },
-        {
-          name: [new BehaviorSubject<string>(state.name), () => {}],
-          bork: [new BehaviorSubject<string>(state.bork), () => {}],
-        }
-      );
-      return {
-        Component: () => (
-          <div data-test-subj="superTestEmbeddable">
-            SUPER TEST COMPONENT, name: {state.name} bork: {state.bork}
-          </div>
-        ),
-        api,
-      };
-    },
-  };
+const testEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+  type: 'test',
+  deserializeState: jest.fn().mockImplementation((state) => state.rawState),
+  buildEmbeddable: async (state, registerApi) => {
+    const api = registerApi(
+      {
+        serializeState: () => ({
+          rawState: {
+            name: state.name,
+            bork: state.bork,
+          },
+        }),
+      },
+      {
+        name: [new BehaviorSubject<string>(state.name), () => {}],
+        bork: [new BehaviorSubject<string>(state.bork), () => {}],
+      }
+    );
+    return {
+      Component: () => (
+        <div data-test-subj="superTestEmbeddable">
+          SUPER TEST COMPONENT, name: {state.name} bork: {state.bork}
+        </div>
+      ),
+      api,
+    };
+  },
+};
 
+describe('react embeddable renderer', () => {
   const getTestEmbeddableFactory = async () => {
     return testEmbeddableFactory;
   };
@@ -185,6 +185,7 @@ describe('react embeddable renderer', () => {
         serializeState: expect.any(Function),
         resetUnsavedChanges: expect.any(Function),
         snapshotRuntimeState: expect.any(Function),
+        phase$: expect.any(Object),
       })
     );
   });
@@ -207,5 +208,106 @@ describe('react embeddable renderer', () => {
         expect.objectContaining({ uuid: expect.any(String) })
       )
     );
+  });
+});
+
+describe('reactEmbeddable phase events', () => {
+  it('publishes rendered phase immediately when dataLoading is not defined', async () => {
+    const immediateLoadEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'immediateLoad',
+    };
+    registerReactEmbeddableFactory('immediateLoad', () =>
+      Promise.resolve(immediateLoadEmbeddableFactory)
+    );
+    setupPresentationPanelServices();
+
+    const renderedEvent = jest.fn();
+    render(
+      <ReactEmbeddableRenderer
+        type={'test'}
+        maybeId={'12345'}
+        onApiAvailable={(api) => {
+          api.phase$.subscribe((phase) => {
+            if (phase?.status === 'rendered') {
+              renderedEvent();
+            }
+          });
+        }}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: { name: 'Kuni Garu' },
+          }),
+        })}
+      />
+    );
+    await waitFor(() => expect(renderedEvent).toHaveBeenCalled());
+  });
+
+  it('publishes rendered phase event when dataLoading is complete', async () => {
+    const dataLoadingEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'loadClicker',
+      buildEmbeddable: async (state, registerApi) => {
+        const dataLoading = new BehaviorSubject<boolean | undefined>(true);
+        const api = registerApi(
+          {
+            serializeState: () => ({
+              rawState: {
+                name: state.name,
+                bork: state.bork,
+              },
+            }),
+            dataLoading,
+          },
+          {
+            name: [new BehaviorSubject<string>(state.name), () => {}],
+            bork: [new BehaviorSubject<string>(state.bork), () => {}],
+          }
+        );
+        return {
+          Component: () => (
+            <>
+              <div data-test-subj="superTestEmbeddable">
+                SUPER TEST COMPONENT, name: {state.name} bork: {state.bork}
+              </div>
+              <button data-test-subj="clickToStopLoading" onClick={() => dataLoading.next(false)}>
+                Done loading
+              </button>
+            </>
+          ),
+          api,
+        };
+      },
+    };
+    registerReactEmbeddableFactory('loadClicker', () =>
+      Promise.resolve(dataLoadingEmbeddableFactory)
+    );
+    setupPresentationPanelServices();
+
+    const phaseFn = jest.fn();
+    render(
+      <ReactEmbeddableRenderer
+        type={'loadClicker'}
+        maybeId={'12345'}
+        onApiAvailable={(api) => {
+          api.phase$.subscribe((phase) => {
+            phaseFn(phase);
+          });
+        }}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: { name: 'Kuni Garu' },
+          }),
+        })}
+      />
+    );
+    await waitFor(() => {
+      expect(phaseFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'loading' }));
+    });
+    await fireEvent.click(screen.getByTestId('clickToStopLoading'));
+    await waitFor(() => {
+      expect(phaseFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'rendered' }));
+    });
   });
 });
