@@ -34,7 +34,6 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/utility-types-jest",
-    "@kbn/safer-lodash-set",
     "@kbn/management-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
@@ -56,7 +55,11 @@
     "@kbn/core-test-helpers-model-versions",
     "@kbn/react-kibana-mount",
     "@kbn/search-types",
+<<<<<<< named-params-system
     "@kbn/esql-utils"
+=======
+    "@kbn/safer-lodash-set",
+>>>>>>> main
   ],
   "exclude": [
     "target/**/*",
