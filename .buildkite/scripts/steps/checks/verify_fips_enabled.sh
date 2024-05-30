@@ -11,7 +11,7 @@ echo --- Verify FIPS enabled
 NODE_BINARY="$KIBANA_BUILD_LOCATION/node/bin/node"
 
 if [[ -x "$NODE_BINARY" ]]; then
-  FIPS_STATUS=$("$NODE_BINARY" --enable-fips --openssl-config="$HOME/nodejs.cnf" -p 'crypto.getFips()')
+  FIPS_STATUS=$("$NODE_BINARY" --enable-fips --openssl-config="$HOME/nodejs.cnf" -p 'crypto.getFips()' | tr -d '\n')
 
   if [[ "$FIPS_STATUS" -eq 1 ]]; then
     echo "FIPS enabled successfully"
