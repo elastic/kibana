@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export const settingsObjectType = 'uptime-dynamic-settings';
-export const settingsObjectId = 'uptime-dynamic-settings-singleton';
+export const plugin = async () => {
+  const { DataQualityPlugin } = await import('./plugin');
+  return new DataQualityPlugin();
+};
