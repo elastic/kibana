@@ -16,7 +16,7 @@ import {
   useInitSourcerer,
   getScopeFromPath,
   useSourcererDataView,
-} from '../../common/containers/sourcerer';
+} from '../../sourcerer/containers';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
