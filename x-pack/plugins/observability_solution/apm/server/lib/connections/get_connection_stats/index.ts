@@ -36,7 +36,7 @@ export function getConnectionStats({
   randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_connection_stats_and_map', async () => {
-    const [allMetrics, destinationMap] = await Promise.all([
+    const [allMetrics, { nodesBydependencyName: destinationMap, sampled }] = await Promise.all([
       getStats({
         apmEventClient,
         start,
@@ -159,6 +159,6 @@ export function getConnectionStats({
       };
     });
 
-    return statsItems;
+    return { statsItems, sampled };
   });
 }

@@ -34,7 +34,7 @@ async function getServiceDependenciesForTimeRange({
   offset,
   randomSampler,
 }: Options) {
-  const statsItems = await getConnectionStats({
+  const { statsItems } = await getConnectionStats({
     apmEventClient,
     start,
     end,

@@ -45,7 +45,7 @@ export async function getAssistantDownstreamDependencies({
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
 
-  const map = await getDestinationMap({
+  const { nodesBydependencyName: map } = await getDestinationMap({
     start,
     end,
     apmEventClient,

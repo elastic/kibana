@@ -239,6 +239,6 @@ export const getDestinationMap = ({
       nodesBydependencyName.set(destination.dependencyName, node);
     });
 
-    return nodesBydependencyName;
+    return { nodesBydependencyName, sampled: samplingProbability !== 1 };
   });
 };

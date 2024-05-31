@@ -35,7 +35,7 @@ export async function getServiceDependenciesBreakdown({
   kuery: string;
   randomSampler: RandomSampler;
 }): Promise<ServiceDependenciesBreakdownResponse> {
-  const items = await getConnectionStats({
+  const { statsItems } = await getConnectionStats({
     apmEventClient,
     start,
     end,
@@ -49,7 +49,7 @@ export async function getServiceDependenciesBreakdown({
     randomSampler,
   });
 
-  return take(sortBy(items, (item) => item.stats.totalTime ?? 0).reverse(), 20).map((item) => {
+  return take(sortBy(statsItems, (item) => item.stats.totalTime ?? 0).reverse(), 20).map((item) => {
     const { stats, location } = item;
 
     return {
