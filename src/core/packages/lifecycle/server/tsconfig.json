@@ -34,7 +34,7 @@
     "@kbn/core-security-server",
     "@kbn/core-user-profile-server",
     "@kbn/core-feature-flags-server",
-    "@kbn/core-di-server",
+    "@kbn/core-di-common",
   ],
   "exclude": [
     "target/**/*",
