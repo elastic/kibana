@@ -11,7 +11,7 @@ export const actionTaskParamsSchema = schema.object({
   actionId: schema.string(),
   executionId: schema.maybe(schema.string()),
   apiKey: schema.nullable(schema.string()),
-  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   consumer: schema.maybe(schema.string()),
   source: schema.maybe(schema.string()),
   relatedSavedObjects: schema.maybe(
