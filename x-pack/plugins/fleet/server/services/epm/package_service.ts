@@ -28,6 +28,7 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
+  TemplateAgentPolicyInput,
 } from '../../types';
 
 import type { FleetAuthzRouteConfig } from '../security/types';
@@ -35,7 +36,7 @@ import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } fr
 import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
 import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
-import type { InstallResult, FullAgentPolicyInput } from '../../../common';
+import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
@@ -112,7 +113,7 @@ export interface PackageClient {
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false
-  ): Promise<Array<Partial<FullAgentPolicyInput>>>;
+  ): Promise<TemplateAgentPolicyInput[]>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -292,8 +293,7 @@ class PackageClientImpl implements PackageClient {
       prerelease
     );
 
-    // The shape of inputs returned by `getTemplateInputs` does not seem to match its type definition so need to manually cast it
-    return inputs as unknown as Array<Partial<FullAgentPolicyInput>>;
+    return inputs;
   }
 
   public async getPackage(

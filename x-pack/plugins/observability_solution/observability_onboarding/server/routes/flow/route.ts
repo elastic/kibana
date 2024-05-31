@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import type { FullAgentPolicyInput } from '@kbn/fleet-plugin/common';
+import type { TemplateAgentPolicyInput } from '@kbn/fleet-plugin/common';
 import { dump } from 'js-yaml';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import {
@@ -249,7 +249,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       } as ObservabilityOnboardingFlow,
     });
 
-    let agentPolicyInputs: Array<Partial<FullAgentPolicyInput>> = [];
+    let agentPolicyInputs: TemplateAgentPolicyInput[] = [];
     try {
       agentPolicyInputs = await ensureInstalledIntegrations(integrationsToInstall, packageClient);
     } catch (error) {
@@ -294,7 +294,7 @@ async function ensureInstalledIntegrations(
   integrationsToInstall: Integration[],
   packageClient: PackageClient
 ) {
-  const agentPolicyInputs: Array<Partial<FullAgentPolicyInput>> = [];
+  const agentPolicyInputs: TemplateAgentPolicyInput[] = [];
   for (const integration of integrationsToInstall) {
     const { pkgName, installSource } = integration;
     if (installSource === 'registry') {
@@ -302,7 +302,7 @@ async function ensureInstalledIntegrations(
       const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
       agentPolicyInputs.push(...inputs);
     } else if (installSource === 'custom') {
-      const input: Partial<FullAgentPolicyInput> = {
+      const input: TemplateAgentPolicyInput = {
         id: `filestream-${pkgName}`,
         type: 'filestream',
         streams: [
@@ -393,7 +393,7 @@ const generateAgentConfig = ({
   inputs = [],
 }: {
   esHost: string[];
-  inputs: Array<Partial<FullAgentPolicyInput>>;
+  inputs: TemplateAgentPolicyInput[];
 }) => {
   return dump({
     outputs: {
