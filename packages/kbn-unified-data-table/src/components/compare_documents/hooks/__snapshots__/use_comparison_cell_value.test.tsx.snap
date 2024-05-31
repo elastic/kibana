@@ -29,6 +29,7 @@ exports[`useComparisonCellValue should render a tooltip when the field is derive
         data-test-subj="unifiedDataTableComparisonFieldName"
       >
         message
+         
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           data-test-subj="smartFieldFallbackTooltipIcon"
