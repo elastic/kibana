@@ -4667,7 +4667,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-datatable@link:src/plugins/esql_datatable":
+"@kbn/esql-datagrid@link:src/plugins/esql_datagrid":
   version "0.0.0"
   uid ""
 

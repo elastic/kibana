@@ -16,7 +16,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import type { ESQLRow } from '@kbn/es-types';
-import { ESQLTable } from '@kbn/esql-datatable/public';
+import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -374,7 +374,7 @@ export function VisualizeESQL({
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
             {isTableVisible && (
-              <ESQLTable
+              <ESQLDataGrid
                 rows={rows}
                 columns={columns}
                 dataView={dataViewAsync.value}
@@ -396,7 +396,7 @@ export function VisualizeESQL({
         </EuiFlexGroup>
       )}
       {isLensInputTable && (
-        <ESQLTable
+        <ESQLDataGrid
           rows={rows}
           columns={columns}
           dataView={dataViewAsync.value}

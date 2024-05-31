@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ESQLDatatablePlugin } from './plugin';
-export { ESQLTable } from './create_table';
+import { ESQLDataGridPlugin } from './plugin';
+export { ESQLDataGrid } from './create_datagrid';
 
 export function plugin() {
-  return new ESQLDatatablePlugin();
+  return new ESQLDataGridPlugin();
 }

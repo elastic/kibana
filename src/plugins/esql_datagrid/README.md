@@ -1,4 +1,4 @@
-# @kbn/esql-datatable
+# @kbn/esql-datagrid
 
 Contains a Discover-like table specifically for ES|QL queries:
  - You have to run the esql query on your application, this is just a UI component
@@ -25,7 +25,7 @@ Contains a Discover-like table specifically for ES|QL queries:
 ### How to use it
 ```tsx
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview, formatESQLColumns } from '@kbn/esql-utils';
-import { ESQLTable } from '@kbn/esql-datatable/public';
+import { ESQLTable } from '@kbn/esql-datagrid/public';
 
 /**
   Run the _query api to get the datatable with the ES|QL query you want. 

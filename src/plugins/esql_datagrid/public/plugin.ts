@@ -12,17 +12,17 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { setKibanaServices } from './kibana_services';
 
-interface ESQLDatatablePluginStart {
+interface ESQLDataGridPluginStart {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
 }
-export class ESQLDatatablePlugin implements Plugin<{}, void> {
+export class ESQLDataGridPlugin implements Plugin<{}, void> {
   public setup(_: CoreSetup, {}: {}) {
     return {};
   }
 
-  public start(core: CoreStart, { data, uiActions, fieldFormats }: ESQLDatatablePluginStart): void {
+  public start(core: CoreStart, { data, uiActions, fieldFormats }: ESQLDataGridPluginStart): void {
     setKibanaServices(core, data, uiActions, fieldFormats);
   }
 

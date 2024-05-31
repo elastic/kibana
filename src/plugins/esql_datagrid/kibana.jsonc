@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/esql-datatable",
+  "id": "@kbn/esql-datagrid",
   "owner": "@elastic/kibana-esql",
   "plugin": {
-    "id": "esqlDatatable",
+    "id": "esqlDataGrid",
     "server": false,
     "browser": true,
     "requiredPlugins": [

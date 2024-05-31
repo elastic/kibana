@@ -125,7 +125,7 @@ export function RowViewer({
     (columnName: string) => {
       onAddColumn(columnName);
       toastNotifications?.toasts?.addSuccess?.(
-        i18n.translate('esqlDatatable.grid.flyout.toastColumnAdded', {
+        i18n.translate('esqlDataGrid.grid.flyout.toastColumnAdded', {
           defaultMessage: `Column '{columnName}' was added`,
           values: { columnName },
         })
@@ -138,7 +138,7 @@ export function RowViewer({
     (columnName: string) => {
       onRemoveColumn(columnName);
       toastNotifications?.toasts?.addSuccess?.(
-        i18n.translate('esqlDatatable.grid.flyout.toastColumnRemoved', {
+        i18n.translate('esqlDataGrid.grid.flyout.toastColumnRemoved', {
           defaultMessage: `Column '{columnName}' was removed`,
           values: { columnName },
         })
@@ -177,10 +177,10 @@ export function RowViewer({
   const bodyContent = renderDefaultContent();
 
   const defaultFlyoutTitle = isEsqlQuery
-    ? i18n.translate('esqlDatatable.grid.tableRow.docViewerEsqlDetailHeading', {
+    ? i18n.translate('esqlDataGrid.grid.tableRow.docViewerEsqlDetailHeading', {
         defaultMessage: 'Result',
       })
-    : i18n.translate('esqlDatatable.grid.tableRow.docViewerDetailHeading', {
+    : i18n.translate('esqlDataGrid.grid.tableRow.docViewerDetailHeading', {
         defaultMessage: 'Document',
       });
   const flyoutTitle = defaultFlyoutTitle;
@@ -226,7 +226,7 @@ export function RowViewer({
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
-                  aria-label={i18n.translate('esqlDatatable.grid.flyout.documentNavigation', {
+                  aria-label={i18n.translate('esqlDataGrid.grid.flyout.documentNavigation', {
                     defaultMessage: 'Document navigation',
                   })}
                   pageCount={pageCount}
@@ -242,7 +242,7 @@ export function RowViewer({
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-            {i18n.translate('esqlDatatable.grid.flyout.close', {
+            {i18n.translate('esqlDataGrid.grid.flyout.close', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>
