@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         describe('Custom Query Rule', () => {
-          // FLAKY: https://github.com/elastic/kibana/issues/179353
-          describe.skip('Define Step', () => {
+          describe('Define Step', () => {
             it('default view meets a11y requirements', async () => {
               await toasts.dismissAll();
               await testSubjects.click('customRuleType');
