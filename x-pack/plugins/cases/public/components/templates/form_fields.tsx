@@ -7,22 +7,25 @@
 
 import React, { memo, useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  TextField,
+  HiddenField,
+  TextAreaField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiSteps } from '@elastic/eui';
 import { CaseFormFields } from '../case_form_fields';
 import * as i18n from './translations';
 import { Connector } from './connector';
 import type { ActionConnector } from '../../containers/configure/types';
 import type { CasesConfigurationUI } from '../../containers/types';
-import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { Tags } from '../create/tags';
+import { TemplateTags } from './template_tags';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
   connectors: ActionConnector[];
   configurationConnectorId: string;
   configurationCustomFields: CasesConfigurationUI['customFields'];
+  configurationTemplateTags: string[];
 }
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({
@@ -30,14 +33,8 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   connectors,
   configurationConnectorId,
   configurationCustomFields,
+  configurationTemplateTags,
 }) => {
-  const { owner } = useCasesContext();
-  const draftStorageKey = getMarkdownEditorStorageKey({
-    appId: owner[0],
-    caseId: 'createCaseTemplate',
-    commentId: 'description',
-  });
-
   const firstStep = useMemo(
     () => ({
       title: i18n.TEMPLATE_FIELDS,
@@ -55,10 +52,10 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
               },
             }}
           />
-          <Tags isLoading={isSubmitting} path="templateTags" dataTestSubject="template-tags" />
+          <TemplateTags isLoading={isSubmitting} tags={configurationTemplateTags} />
           <UseField
             path="templateDescription"
-            component={TextField}
+            component={TextAreaField}
             componentProps={{
               euiFieldProps: {
                 'data-test-subj': 'template-description-input',
@@ -70,7 +67,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
         </>
       ),
     }),
-    [isSubmitting]
+    [isSubmitting, configurationTemplateTags]
   );
 
   const secondStep = useMemo(
@@ -79,12 +76,11 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
       children: (
         <CaseFormFields
           configurationCustomFields={configurationCustomFields}
-          draftStorageKey={draftStorageKey}
           isLoading={isSubmitting}
         />
       ),
     }),
-    [isSubmitting, configurationCustomFields, draftStorageKey]
+    [isSubmitting, configurationCustomFields]
   );
 
   const thirdStep = useMemo(

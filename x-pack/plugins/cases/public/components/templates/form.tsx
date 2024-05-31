@@ -27,6 +27,7 @@ interface Props {
   connectors: ActionConnector[];
   configurationConnectorId: string;
   configurationCustomFields: CasesConfigurationUI['customFields'];
+  configurationTemplateTags: string[];
 }
 
 const FormComponent: React.FC<Props> = ({
@@ -35,6 +36,7 @@ const FormComponent: React.FC<Props> = ({
   connectors,
   configurationConnectorId,
   configurationCustomFields,
+  configurationTemplateTags,
 }) => {
   const keyDefaultValue = useMemo(() => uuidv4(), []);
 
@@ -65,6 +67,7 @@ const FormComponent: React.FC<Props> = ({
         connectors={connectors}
         configurationConnectorId={configurationConnectorId}
         configurationCustomFields={configurationCustomFields}
+        configurationTemplateTags={configurationTemplateTags}
       />
     </Form>
   );

@@ -5,38 +5,34 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { useGetTags } from '../../containers/use_get_tags';
 import * as i18n from './translations';
 interface Props {
   isLoading: boolean;
+  tags: string[];
 }
 
-const TagsComponent: React.FC<Props> = ({ isLoading }) => {
-  const { data: tagOptions = [], isLoading: isLoadingTags } = useGetTags();
-  const options = useMemo(
-    () =>
-      tagOptions.map((label) => ({
-        label,
-      })),
-    [tagOptions]
-  );
+const TemplateTagsComponent: React.FC<Props> = ({ isLoading, tags }) => {
+  const options = tags.map((label) => ({
+    label,
+  }));
 
   return (
     <UseField
-      path="tags"
+      path="templateTags"
       component={ComboBoxField}
       defaultValue={[]}
       componentProps={{
-        idAria: 'caseTags',
-        'data-test-subj': 'caseTags',
+        idAria: 'template-tags',
+        'data-test-subj': 'template-tags',
         euiFieldProps: {
           fullWidth: true,
           placeholder: '',
-          disabled: isLoading || isLoadingTags,
+          disabled: isLoading,
+          isLoading,
           options,
           noSuggestions: false,
           customOptionText: i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX,
@@ -46,6 +42,6 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
   );
 };
 
-TagsComponent.displayName = 'TagsComponent';
+TemplateTagsComponent.displayName = 'TemplateTagsComponent';
 
-export const Tags = memo(TagsComponent);
+export const TemplateTags = memo(TemplateTagsComponent);

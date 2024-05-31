@@ -31,6 +31,7 @@ export interface FlyOutBodyProps<T> {
   configConnectors?: ActionConnector[];
   configConnectorId?: string;
   configCustomFields?: CasesConfigurationUI['customFields'];
+  configTemplateTags?: string[];
 }
 
 export interface FlyoutProps<T> {
@@ -42,6 +43,7 @@ export interface FlyoutProps<T> {
   connectors?: ActionConnector[];
   configurationConnectorId?: string;
   configurationCustomFields?: CasesConfigurationUI['customFields'];
+  configurationTemplateTags?: string[];
   renderHeader: () => React.ReactNode;
   renderBody: ({
     initialValue,
@@ -49,6 +51,7 @@ export interface FlyoutProps<T> {
     configConnectors,
     configConnectorId,
     configCustomFields,
+    configTemplateTags,
   }: FlyOutBodyProps<T>) => React.ReactNode;
 }
 
@@ -63,6 +66,7 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
   connectors,
   configurationConnectorId,
   configurationCustomFields,
+  configurationTemplateTags,
 }: FlyoutProps<T>) => {
   const [formState, setFormState] = useState<CustomFieldFormState | TemplateFormState>({
     isValid: undefined,
@@ -95,6 +99,7 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
           configConnectors: connectors,
           configConnectorId: configurationConnectorId,
           configCustomFields: configurationCustomFields,
+          configTemplateTags: configurationTemplateTags,
           onChange: setFormState,
         })}
       </EuiFlyoutBody>

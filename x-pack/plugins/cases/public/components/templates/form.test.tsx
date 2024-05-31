@@ -26,8 +26,6 @@ import { TemplateForm } from './form';
 jest.mock('../connectors/servicenow/use_get_choices');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;
-const appId = 'securitySolution';
-const draftKey = `cases.${appId}.createCaseTemplate.description.markdownEditor`;
 
 describe('TemplateForm', () => {
   let appMockRenderer: AppMockRenderer;
@@ -35,6 +33,7 @@ describe('TemplateForm', () => {
     connectors: connectorsMock,
     configurationConnectorId: 'none',
     configurationCustomFields: [],
+    configurationTemplateTags: [],
     onChange: jest.fn(),
     initialValue: null,
   };
@@ -43,10 +42,6 @@ describe('TemplateForm', () => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
-  });
-
-  afterEach(() => {
-    sessionStorage.removeItem(draftKey);
   });
 
   it('renders correctly', async () => {
@@ -381,28 +376,6 @@ describe('TemplateForm', () => {
     const name = 'a'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1);
 
     userEvent.paste(await screen.findByTestId('template-name-input'), name);
-
-    await act(async () => {
-      const { data, isValid } = await formState!.submit();
-
-      expect(isValid).toBe(false);
-
-      expect(data).toEqual({});
-    });
-  });
-
-  it('shows from state as invalid when template description missing', async () => {
-    let formState: TemplateFormState;
-
-    const onChangeState = (state: TemplateFormState) => (formState = state);
-
-    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
-
-    await waitFor(() => {
-      expect(formState).not.toBeUndefined();
-    });
-
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();

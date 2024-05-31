@@ -28,18 +28,13 @@ describe('form fields', () => {
     connectors: connectorsMock,
     configurationConnectorId: 'none',
     configurationCustomFields: [],
+    configurationTemplateTags: [],
   };
-  const appId = 'securitySolution';
-  const draftKey = `cases.${appId}.createCaseTemplate.description.markdownEditor`;
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
-  });
-
-  afterEach(() => {
-    sessionStorage.removeItem(draftKey);
   });
 
   it('renders correctly', async () => {

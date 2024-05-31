@@ -21,27 +21,24 @@ import type { CasesConfigurationUI } from '../../containers/types';
 interface Props {
   isLoading: boolean;
   configurationCustomFields: CasesConfigurationUI['customFields'];
-  draftStorageKey: string;
 }
 
-const CaseFormFieldsComponent: React.FC<Props> = ({
-  isLoading,
-  configurationCustomFields,
-  draftStorageKey,
-}) => {
+const CaseFormFieldsComponent: React.FC<Props> = ({ isLoading, configurationCustomFields }) => {
   const { caseAssignmentAuthorized, isSyncAlertsEnabled } = useCasesFeatures();
 
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column">
       <Title isLoading={isLoading} />
+
       {caseAssignmentAuthorized ? <Assignees isLoading={isLoading} /> : null}
+
       <Tags isLoading={isLoading} />
 
       <Category isLoading={isLoading} />
 
       <Severity isLoading={isLoading} />
 
-      <Description isLoading={isLoading} draftStorageKey={draftStorageKey} />
+      <Description isLoading={isLoading} />
 
       {isSyncAlertsEnabled ? <SyncAlertsToggle isLoading={isLoading} /> : null}
 

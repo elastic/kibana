@@ -54,6 +54,16 @@ describe('useMarkdownSessionStorage', () => {
     });
   });
 
+  it('should return hasConflicts as false when sessionKey is empty', async () => {
+    const { result, waitFor } = renderHook(() =>
+      useMarkdownSessionStorage({ field, sessionKey: '', initialValue })
+    );
+
+    await waitFor(() => {
+      expect(result.current.hasConflicts).toBe(false);
+    });
+  });
+
   it('should update the session value with field value when it is first render', async () => {
     const { waitFor } = renderHook<SessionStorageType, { hasConflicts: boolean }>(
       (props) => {

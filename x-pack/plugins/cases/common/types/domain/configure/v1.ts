@@ -69,16 +69,16 @@ export const TemplateConfigurationRt = rt.intersection([
      */
     name: rt.string,
     /**
-     * description of template
-     */
-    description: rt.string,
-    /**
      * case fields of template
      */
     caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRt]),
   }),
   rt.exact(
     rt.partial({
+      /**
+       * description of template
+       */
+      description: rt.string,
       /**
        * tags of template
        */

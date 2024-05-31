@@ -12,7 +12,7 @@ import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
 
 interface Props {
   isLoading: boolean;
-  draftStorageKey: string;
+  draftStorageKey?: string;
 }
 
 export const fieldName = 'description';

@@ -366,12 +366,14 @@ describe('CommonFlyout ', () => {
       configCustomFields,
       configConnectorId,
       configConnectors,
+      configTemplateTags,
     }: FlyOutBodyProps<TemplateFormProps | null>) => (
       <TemplateForm
         initialValue={initialValue}
         connectors={configConnectors ?? []}
         configurationConnectorId={configConnectorId ?? 'none'}
         configurationCustomFields={configCustomFields ?? []}
+        configurationTemplateTags={configTemplateTags ?? []}
         onChange={onChange}
       />
     );
@@ -381,6 +383,7 @@ describe('CommonFlyout ', () => {
       connectors: connectorsMock,
       configurationConnectorId: 'none',
       configurationCustomFields: [],
+      configurationTemplateTags: [],
       renderBody,
     };
 
@@ -466,12 +469,14 @@ describe('CommonFlyout ', () => {
         configCustomFields,
         configConnectorId,
         configConnectors,
+        configTemplateTags,
       }: FlyOutBodyProps<TemplateFormProps | null>) => (
         <TemplateForm
           initialValue={initialValue}
           connectors={configConnectors ?? []}
           configurationConnectorId={configConnectorId ?? 'none'}
           configurationCustomFields={configCustomFields ?? []}
+          configurationTemplateTags={configTemplateTags ?? []}
           onChange={onChange}
         />
       );
@@ -481,6 +486,7 @@ describe('CommonFlyout ', () => {
         connectors: [],
         configurationConnectorId: 'none',
         configurationCustomFields: customFieldsConfigurationMock,
+        configurationTemplateTags: [],
         data: {
           key: 'random_key',
           name: 'Template 1',
@@ -525,12 +531,14 @@ describe('CommonFlyout ', () => {
         configCustomFields,
         configConnectorId,
         configConnectors,
+        configTemplateTags,
       }: FlyOutBodyProps<TemplateFormProps | null>) => (
         <TemplateForm
           initialValue={initialValue}
           connectors={configConnectors ?? []}
           configurationConnectorId={configConnectorId ?? 'none'}
           configurationCustomFields={configCustomFields ?? []}
+          configurationTemplateTags={configTemplateTags ?? []}
           onChange={onChange}
         />
       );
@@ -540,6 +548,7 @@ describe('CommonFlyout ', () => {
         connectors: connectorsMock,
         configurationConnectorId: 'servicenow-1',
         configurationCustomFields: [],
+        configurationTemplateTags: [],
         data: {
           key: 'random_key',
           name: 'Template 1',
@@ -603,20 +612,6 @@ describe('CommonFlyout ', () => {
       expect(
         await screen.findByText(i18n.MAX_LENGTH_ERROR('template name', MAX_TEMPLATE_NAME_LENGTH))
       ).toBeInTheDocument();
-    });
-
-    it('shows error when template description is empty', async () => {
-      appMockRender.render(<CommonFlyout {...newProps} />);
-
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
-
-      userEvent.click(await screen.findByTestId('common-flyout-save'));
-
-      await waitFor(() => {
-        expect(newProps.onSaveField).not.toHaveBeenCalled();
-      });
-
-      expect(await screen.findByText('A Description is required.')).toBeInTheDocument();
     });
 
     it('shows error if template description is too long', async () => {

@@ -21,25 +21,17 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../containers/user_profiles/api');
 
-const appId = 'securitySolution';
-const draftKey = `cases.${appId}.createCaseTemplate.description.markdownEditor`;
-
 describe('CaseFormFields', () => {
   let appMock: AppMockRenderer;
   const onSubmit = jest.fn();
   const defaultProps = {
     isLoading: false,
     configurationCustomFields: [],
-    draftStorageKey: '',
   };
 
   beforeEach(() => {
     appMock = createAppMockRenderer();
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    sessionStorage.removeItem(draftKey);
   });
 
   it('renders correctly', async () => {
@@ -83,7 +75,6 @@ describe('CaseFormFields', () => {
         <CaseFormFields
           isLoading={false}
           configurationCustomFields={customFieldsConfigurationMock}
-          draftStorageKey=""
         />
       </FormTestComponent>
     );

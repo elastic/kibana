@@ -108,6 +108,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
   } = usePersistConfiguration();
 
   const isLoadingCaseConfiguration = loadingCaseConfigure || isPersistingConfiguration;
+  const configurationTemplateTags = templates
+    .map((template) => (template?.tags?.length ? template.tags : []))
+    .flat();
 
   const {
     isLoading: isLoadingConnectors,
@@ -465,12 +468,14 @@ export const ConfigureCases: React.FC = React.memo(() => {
           connectors={connectors}
           configurationConnectorId={connector.id}
           configurationCustomFields={customFields}
+          configurationTemplateTags={configurationTemplateTags}
           renderHeader={() => <span>{i18n.CRATE_TEMPLATE}</span>}
           renderBody={({
             initialValue,
             configConnectors,
             configConnectorId,
             configCustomFields,
+            configTemplateTags,
             onChange,
           }) => (
             <TemplateForm
@@ -478,6 +483,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
               connectors={configConnectors ?? []}
               configurationConnectorId={configConnectorId ?? ''}
               configurationCustomFields={configCustomFields ?? []}
+              configurationTemplateTags={configTemplateTags ?? []}
               onChange={onChange}
             />
           )}

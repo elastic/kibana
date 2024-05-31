@@ -52,9 +52,6 @@ export const schema: FormSchema<TemplateFormProps> = {
     label: i18n.DESCRIPTION,
     validations: [
       {
-        validator: emptyField(i18n.REQUIRED_FIELD(i18n.DESCRIPTION)),
-      },
-      {
         validator: maxLengthField({
           length: MAX_TEMPLATE_DESCRIPTION_LENGTH,
           message: i18n.MAX_LENGTH_ERROR('template description', MAX_TEMPLATE_DESCRIPTION_LENGTH),

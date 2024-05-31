@@ -30,7 +30,7 @@ export const useMarkdownSessionStorage = ({
 
   const [sessionValue, setSessionValue] = useSessionStorage(sessionKey, '', true);
 
-  if (!isEmpty(sessionValue) && isFirstRender.current) {
+  if (!isEmpty(sessionValue) && !isEmpty(sessionKey) && isFirstRender.current) {
     field.setValue(sessionValue);
   }
 

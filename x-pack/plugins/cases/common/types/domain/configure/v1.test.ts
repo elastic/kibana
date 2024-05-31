@@ -81,7 +81,6 @@ describe('configure', () => {
   const templateWithFewCaseFields = {
     key: 'template_sample_2',
     name: 'Sample template 2',
-    description: 'this is second sample template',
     tags: [],
     caseFields: {
       title: 'Case with sample template 2',
@@ -92,7 +91,6 @@ describe('configure', () => {
   const templateWithNoCaseFields = {
     key: 'template_sample_3',
     name: 'Sample template 3',
-    description: 'this is third sample template',
     caseFields: null,
   };
 
