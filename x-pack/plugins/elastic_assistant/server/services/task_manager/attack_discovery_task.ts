@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  LoggerFactory,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { AttackDiscoveryPostRequestBody, Replacements } from '@kbn/elastic-assistant-common';
+import { ActionsClientLlm } from '@kbn/langchain/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { appContextService, GetRegisteredTools } from '../app_context';
+import { ElasticAssistantPluginCoreSetupDependencies } from '../../types';
+import { getLangSmithTracer } from '../../routes/evaluate/utils';
+import { getLlmType } from '../../routes/utils';
+import { getAssistantToolParams } from '../../routes/attack_discovery/helpers';
 const scope = 'elasticAssistantAttackDiscovery';
 export const AttackDiscoveryTaskConstants = {
   TITLE: 'Attack Discovery Background Task',
@@ -37,9 +51,25 @@ const taskManagerQuery = {
   },
 };
 export interface AttackDiscoveryTaskSetupContract {
-  core: CoreSetup;
+  core: ElasticAssistantPluginCoreSetupDependencies;
   logFactory: LoggerFactory;
   taskManager: TaskManagerSetupContract;
+}
+
+interface AttackDiscoveryParams {
+  alertsIndexPattern: string;
+  connectorId: string;
+  currentUser: AuthenticatedUser;
+  pluginName: string;
+  request: KibanaRequest;
+  actionTypeId: AttackDiscoveryPostRequestBody['actionTypeId'];
+  anonymizationFields: AttackDiscoveryPostRequestBody['anonymizationFields'];
+  langSmithApiKey: AttackDiscoveryPostRequestBody['langSmithApiKey'];
+  langSmithProject: AttackDiscoveryPostRequestBody['langSmithProject'];
+  replacements: AttackDiscoveryPostRequestBody['replacements'];
+  size: AttackDiscoveryPostRequestBody['size'];
+  connectorTimeout: number;
+  langChainTimeout: number;
 }
 
 /**
@@ -66,11 +96,35 @@ export class AttackDiscoveryTask {
           timeout: AttackDiscoveryTaskConstants.TIMEOUT,
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             this.logger.info(`createTaskRunner ${AttackDiscoveryTaskConstants.TYPE}.`);
+            const getEsClient = () =>
+              core.getStartServices().then(
+                ([
+                  {
+                    elasticsearch: { client },
+                  },
+                  // TODO is this right?
+                ]) => {
+                  console.log('stephhh currentUser1', taskInstance.state.request.body);
+                  return client.asScoped(taskInstance.state.request).asCurrentUser;
+                }
+              );
+            const getActions = () =>
+              core.getStartServices().then(([, startPlugins]) => startPlugins.actions);
 
             return {
               run: async () => {
+                const actions = await getActions();
+                const esClient = await getEsClient();
+                console.log('stephhh esClient', esClient);
                 this.logger.info(`createTaskRunner run ${AttackDiscoveryTaskConstants.TYPE}.`);
-                return this.runTask(taskInstance, core);
+                return this.runTask({
+                  taskInstance,
+                  esClient,
+                  getRegisteredTools: (pluginName: string) => {
+                    return appContextService.getRegisteredTools(pluginName);
+                  },
+                  actions,
+                });
               },
               cancel: async () => {
                 this.logger.info(`createTaskRunner cancel ${AttackDiscoveryTaskConstants.TYPE}.`);
@@ -90,28 +144,20 @@ export class AttackDiscoveryTask {
     this.taskManager = taskManager;
   }
 
-  public run = async () => {
+  public run = async (params: AttackDiscoveryParams) => {
     this.wasStarted = true;
 
     try {
-      console.log('stephh schedule start');
       const currentTask = await this.taskManager?.schedule({
         taskType: AttackDiscoveryTaskConstants.TYPE,
         scope: AttackDiscoveryTaskConstants.SCOPE,
-        // schedule: {
-        //   interval: AttackDiscoveryTaskConstants.INTERVAL,
-        // },
-        state: {},
-        params: { version: AttackDiscoveryTaskConstants.VERSION },
+        state: { request: params.request },
+        params: {
+          version: AttackDiscoveryTaskConstants.VERSION,
+          ...params,
+        },
       });
-      console.log('stephh schedule end', currentTask);
-
-      // Removes the specified task
-      if (currentTask) {
-        // console.log('stephh remove end');
-        // await this.taskManager?.remove(currentTask.id);
-        // console.log('stephh remove end');
-      }
+      return currentTask;
     } catch (e) {
       this.logger.error(
         `Error scheduling task ${AttackDiscoveryTaskConstants.TYPE}, received ${e.message}`
@@ -133,39 +179,130 @@ export class AttackDiscoveryTask {
     }
   }
 
-  private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
-    console.log('stephh runTask start');
+  private runTask = async ({
+    actions,
+    esClient,
+    taskInstance,
+    getRegisteredTools,
+  }: {
+    esClient: ElasticsearchClient;
+    taskInstance: ConcreteTaskInstance;
+    actions: ActionsPluginStart;
+    getRegisteredTools: GetRegisteredTools;
+  }) => {
     this.logger.info(`runTask start ${AttackDiscoveryTaskConstants.TYPE}.`);
-    this.logger.info(`runTask taskInstance ${JSON.stringify(taskInstance, null, 2)}.`);
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');
       return;
     }
-
+    let result;
     try {
-      const result = await resolveAfterManySeconds(60000);
-      this.logger.info(`Successfully runTask ran attack discovery in ${result}`);
+      const {
+        actionTypeId,
+        alertsIndexPattern,
+        anonymizationFields,
+        connectorId,
+        connectorTimeout,
+        langChainTimeout,
+        langSmithApiKey,
+        langSmithProject,
+        pluginName,
+        replacements,
+        request: _request,
+        size,
+      } = taskInstance.params;
+      const request = JSON.parse(_request);
+
+      let latestReplacements: Replacements = { ...replacements };
+      const onNewReplacements = (newReplacements: Replacements) => {
+        latestReplacements = { ...latestReplacements, ...newReplacements };
+      };
+
+      // get the attack discovery tool:
+      const assistantTools = getRegisteredTools(pluginName);
+      const assistantTool = assistantTools.find((tool) => tool.id === 'attack-discovery');
+      if (!assistantTool) {
+        throw new Error('attack discovery tool not found');
+      }
+
+      const traceOptions = {
+        projectName: langSmithProject,
+        tracers: [
+          ...getLangSmithTracer({
+            apiKey: langSmithApiKey,
+            projectName: langSmithProject,
+            logger: this.logger,
+          }),
+        ],
+      };
+
+      const llm = new ActionsClientLlm({
+        actions,
+        connectorId,
+        llmType: getLlmType(actionTypeId),
+        logger: this.logger,
+        request,
+        temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+        timeout: connectorTimeout,
+        traceOptions,
+      });
+
+      const assistantToolParams = getAssistantToolParams({
+        alertsIndexPattern,
+        anonymizationFields,
+        esClient,
+        latestReplacements,
+        langChainTimeout,
+        llm,
+        onNewReplacements,
+        request: { ...request, body: { replacements } },
+        size,
+      });
+
+      console.log('stephh assistantToolParams', assistantToolParams);
+      const toolInstance = assistantTool.getTool(assistantToolParams);
+      const rawAttackDiscoveries = await toolInstance?.invoke('');
+      console.log('stephh toolInstance', toolInstance);
+      if (rawAttackDiscoveries == null) {
+        result = {
+          isError: true,
+          customError: {
+            body: { message: 'tool returned no attack discoveries' },
+            statusCode: 500,
+          },
+        };
+        this.logger.info(`tool returned no attack discoveries`);
+      } else {
+        const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
+        result = {
+          alertsContextCount,
+          attackDiscoveries,
+          connector_id: connectorId,
+          replacements: latestReplacements,
+        };
+        this.logger.info(`Successfully ran attack discovery`);
+      }
     } catch (err) {
-      this.logger.error(`Failed runTask to run attack discovery: ${err}`);
-      return;
+      this.logger.error(`Failed to run attack discovery: ${err}`);
+      result = {
+        isError: true,
+        customError: {
+          // TODO - add more details to the error message
+          body: { message: 'an error occurred' },
+          statusCode: 500,
+        },
+      };
     }
 
     this.logger.info(`Task completed successfully!`);
 
-    const state = {};
-    console.log('stephh runTask end');
+    const state = result;
+    console.log('stephh whole thing ends here', state);
     return { state };
   };
 
   private get taskId() {
     return AttackDiscoveryTaskId;
   }
-}
-function resolveAfterManySeconds(x: number) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`${x} milliseconds`);
-    }, x);
-  });
 }

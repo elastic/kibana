@@ -64,31 +64,27 @@ export class ElasticAssistantPlugin
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       pluginStop$: this.pluginStop$,
     });
-
-    this.attackDiscoveryTask = new AttackDiscoveryTask({
-      core,
-      logFactory: this.logger.get('service'),
-      taskManager: plugins.taskManager,
-    });
-
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
       core,
       plugins,
       kibanaVersion: this.kibanaVersion,
       assistantService: this.assistantService,
-      attackDiscoveryTask: this.attackDiscoveryTask,
     });
-
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
     core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
       (context, request) => requestContextFactory.create(context, request)
     );
+    this.attackDiscoveryTask = new AttackDiscoveryTask({
+      core,
+      logFactory: this.logger.get('service'),
+      taskManager: plugins.taskManager,
+    });
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     const getElserId = createGetElserId(plugins.ml);
-    registerRoutes(router, this.logger, getElserId);
+    registerRoutes(router, this.logger, getElserId, this.attackDiscoveryTask);
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {

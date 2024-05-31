@@ -13,11 +13,15 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { AttackDiscoveryTask } from '../../services/task_manager/attack_discovery_task';
 import { ATTACK_DISCOVERY } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
-export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const getAttackDiscoveryRoute = (
+  router: IRouter<ElasticAssistantRequestHandlerContext>,
+  attackDiscoveryTask: AttackDiscoveryTask
+) => {
   router.versioned
     .get({
       access: 'internal',
@@ -42,7 +46,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         try {
-          const statusCheck = await assistantContext.attackDiscoveryTask.statusCheck();
+          const statusCheck = await attackDiscoveryTask.statusCheck();
           console.log('steph statusCheck result', statusCheck);
           return response.ok({
             body: {
