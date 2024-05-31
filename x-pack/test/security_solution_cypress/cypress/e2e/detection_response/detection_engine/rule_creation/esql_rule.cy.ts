@@ -67,7 +67,8 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/184558
+describe.skip(
   'Detection ES|QL rules, creation',
   {
     // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
