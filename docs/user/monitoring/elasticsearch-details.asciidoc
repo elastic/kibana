@@ -119,10 +119,10 @@ leader index.
 +
 This is calculated by finding the difference between the minimum and maximum operation 
 sequence number on the leader (`leader_max_seq_no`) and the difference between the minimum 
-and maximum global checkpoint on the follower (`follower_global_checkpoint`) for each shard 
-over the selected time period. The difference in `follower_global_checkpoint` is subtracted 
-from the difference in `leader_max_seq_no` for each shard, and the highest result across all 
-shards is displayed.
+and maximum global sequence number checkpoint on the follower (`follower_global_checkpoint`) 
+for each shard over the selected time period. The difference in `follower_global_checkpoint` 
+is subtracted from the difference in `leader_max_seq_no` for each shard, and the highest result 
+across all shards is displayed.
 - **Last fetch time**: The time elapsed since the last successful fetch from the leader index. 
 Represents the longest time elapsed across all of the shards in the follower index.
 - **Ops synced**: The number of operations indexed (replicated) into the follower index from 
