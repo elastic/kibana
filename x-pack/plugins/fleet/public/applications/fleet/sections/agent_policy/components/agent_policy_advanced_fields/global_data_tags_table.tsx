@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -35,24 +35,26 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
   const [errors, setErrors] = useState<
     Record<number, { name: string | null; value: string | null }>
   >({});
-  const [newTagErrors, setNewTagErrors] = useState<{ name: string | null; value: string | null }>({
-    name: null,
-    value: null,
+  const [newTagErrors, setNewTagErrors] = useState<{ name: string; value: string }>({
+    name: '',
+    value: '',
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-
+  useEffect(() => {
+    setGlobalDataTags(initialTags);
+  }, [initialTags]);
   const handleAddField = () => {
     setIsAdding(true);
     setNewTag({ name: '', value: '' });
-    setNewTagErrors({ name: null, value: null });
+    setNewTagErrors({ name: '', value: '' });
   };
 
   const validateTag = (tag: GlobalDataTag, index?: number) => {
     const trimmedName = tag.name.trim();
     const trimmedValue = tag.value.toString().trim();
-    let nameError = null;
-    let valueError = null;
+    let nameError = '';
+    let valueError = '';
 
     if (!trimmedName) {
       nameError = 'Name cannot be empty';
@@ -85,13 +87,13 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
     updateAgentPolicy({ global_data_tags: updatedTags });
     setNewTag({ name: '', value: '' });
     setIsAdding(false);
-    setNewTagErrors({ name: null, value: null });
+    setNewTagErrors({ name: '', value: '' });
   };
 
   const handleCancel = () => {
     setNewTag({ name: '', value: '' });
     setIsAdding(false);
-    setNewTagErrors({ name: null, value: null });
+    setNewTagErrors({ name: '', value: '' });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

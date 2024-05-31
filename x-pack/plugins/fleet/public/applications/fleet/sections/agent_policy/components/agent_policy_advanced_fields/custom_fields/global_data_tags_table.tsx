@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiBasicTable,
@@ -18,6 +17,7 @@ import {
   EuiButton,
   EuiFormRow,
   EuiFieldText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import type {
@@ -37,16 +37,124 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
 }) => {
   const [globalDataTags, setGlobalDataTags] = useState<GlobalDataTag[]>(initialTags);
   const [editIndexList, setEditIndexList] = useState<Set<number>>(new Set([]));
-
   // Indicates whether a new row is currently being added to the table.
   // When true, the table will display "Confirm" and "Cancel" actions for the new row
   // to allow the user to either confirm the addition or cancel it.
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [newTag, setNewTag] = useState<GlobalDataTag>(null);
+  const [newTag, setNewTag] = useState<GlobalDataTag>({ name: '', value: '' });
+  const [newTagErrors, setNewTagErrors] = useState<{ name: string; value: string }>({
+    name: '',
+    value: '',
+  });
+  const [errors, setErrors] = useState<
+    Record<number, { name: string | null; value: string | null }>
+  >({});
+
+  // Necessary to remove uncommitted tags after save is cancelled
+  useEffect(() => {
+    setGlobalDataTags(initialTags);
+  }, [initialTags]);
 
   const handleAddField = () => {
     setIsAdding(true);
     setNewTag({ name: '', value: '' });
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const updatedTags = globalDataTags.map((tag, i) =>
+      i === index ? { ...tag, [e.target.name]: e.target.value } : tag
+    );
+    setGlobalDataTags(updatedTags);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [index]: { ...prevErrors[index], [e.target.name]: null },
+    }));
+  };
+
+  const handleNewTagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewTag({
+      ...newTag,
+      [e.target.name]: e.target.value,
+    });
+    setNewTagErrors({ ...newTagErrors, [e.target.name]: null });
+  };
+
+  const validateTag = (tag: GlobalDataTag, index?: number) => {
+    const trimmedName = tag.name.trim();
+    const trimmedValue = tag.value.toString().trim();
+
+    let nameError = '';
+    let valueError = '';
+
+    if (!trimmedName) {
+      nameError = 'Name cannot be empty';
+    } else if (/\s/.test(trimmedName)) {
+      nameError = 'Name cannot contain spaces';
+    } else if (globalDataTags.some((t, i) => i !== index && t.name === trimmedName)) {
+      nameError = 'Name must be unique';
+    }
+
+    if (!trimmedValue) {
+      valueError = 'Value cannot be empty';
+    }
+
+    return { nameError, valueError, isValid: !nameError && !valueError };
+  };
+
+  const confirmNewTagChanges = () => {
+    const { nameError, valueError, isValid } = validateTag(newTag);
+    if (!isValid) {
+      setNewTagErrors({ name: nameError, value: valueError });
+      return;
+    }
+
+    const updatedTags = [
+      ...globalDataTags,
+      { ...newTag, name: newTag.name.trim(), value: newTag.value.toString().trim() },
+    ];
+
+    setGlobalDataTags(updatedTags);
+    updateAgentPolicy({ global_data_tags: updatedTags });
+    setNewTag({ name: '', value: '' });
+    setIsAdding(false);
+    setNewTagErrors({ name: '', value: '' });
+  };
+
+  const confirmEditChanges = (index: number) => {
+    const tag = globalDataTags[index];
+    const { nameError, valueError, isValid } = validateTag(tag, index);
+
+    if (!isValid) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [index]: { name: nameError, value: valueError },
+      }));
+      return;
+    }
+
+    const updatedTags = globalDataTags.map((t, i) =>
+      i === index ? { ...tag, name: tag.name.trim(), value: tag.value.toString().trim() } : t
+    );
+    setGlobalDataTags(updatedTags);
+    updateAgentPolicy({ global_data_tags: updatedTags });
+    setEditIndexList((prevIndices: Set<number>) => {
+      const newIndices = new Set(prevIndices);
+      newIndices.delete(index);
+      return newIndices;
+    });
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      delete newErrors[index];
+      return newErrors;
+    });
+  };
+
+  const handleStartEdit = (index: number) => {
+    setEditIndexList((prevIndices) => new Set(prevIndices.add(index)));
+    setErrors((prevErrors: Record<number, { name: string | null; value: string | null }>) => ({
+      ...prevErrors,
+      [index]: { name: null, value: null },
+    }));
   };
 
   const columns = [
@@ -57,16 +165,15 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
         const index = globalDataTags.indexOf(item);
         const isEditing = editIndexList.has(index);
         const isAddingRow = isAdding && item === newTag;
-        // const error = isAddingRow ? newTagErrors : errors[index] || {};
+        const error = isAddingRow ? newTagErrors : errors[index] || {};
         return isEditing || isAddingRow ? (
-          // <EuiFormRow isInvalid={!!error.name} error={error.name}>
-          <EuiFormRow>
+          <EuiFormRow isInvalid={!!error.name} error={error.name}>
             <EuiFieldText
               placeholder="Enter name"
               value={isEditing ? globalDataTags[index].name : newTag.name}
               name="name"
-            // onChange={(e) => (isEditing ? handleEditChange(e, index) : handleChange(e))}
-            // isInvalid={!!error.name}
+              onChange={(e) => (isEditing ? handleEditChange(e, index) : handleNewTagChange(e))}
+              isInvalid={!!error.name}
             />
           </EuiFormRow>
         ) : (
@@ -81,22 +188,53 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
         const index = globalDataTags.indexOf(item);
         const isEditing = editIndexList.has(index);
         const isAddingRow = isAdding && item === newTag;
-        // const error = isAddingRow ? newTagErrors : errors[index] || {};
+        const error = isAddingRow ? newTagErrors : errors[index] || {};
         return isEditing || isAddingRow ? (
-          // <EuiFormRow isInvalid={!!error.name} error={error.name}>
-          <EuiFormRow>
+          <EuiFormRow isInvalid={!!error.name} error={error.name}>
             <EuiFieldText
               placeholder="Enter name"
               value={isEditing ? globalDataTags[index].value : newTag.value}
               name="value"
-            // onChange={(e) => (isEditing ? handleEditChange(e, index) : handleChange(e))}
-            // isInvalid={!!error.name}
+              onChange={(e) => (isEditing ? handleEditChange(e, index) : handleNewTagChange(e))}
+              isInvalid={!!error.name}
             />
           </EuiFormRow>
         ) : (
           <EuiBadge>{value}</EuiBadge>
         );
       },
+    },
+    {
+      actions: [
+        {
+          name: 'Confirm/Edit',
+          render: (item: GlobalDataTag) => {
+            const index = globalDataTags.indexOf(item);
+            const isEditing = editIndexList.has(index);
+            const isAddingRow = isAdding && item === newTag;
+            return isEditing || isAddingRow ? (
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    size="s"
+                    color="primary"
+                    iconType="checkInCircleFilled"
+                    onClick={isAdding ? confirmNewTagChanges : () => confirmEditChanges(index)}
+                    aria-label="Confirm"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiButtonIcon
+                aria-label="Edit"
+                iconType="pencil"
+                color="text"
+                onClick={() => handleStartEdit(index)}
+              />
+            );
+          },
+        },
+      ],
     },
   ];
 
