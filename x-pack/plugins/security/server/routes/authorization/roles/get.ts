@@ -21,6 +21,9 @@ export function defineGetRolesRoutes({
   router.get(
     {
       path: '/api/security/role/{name}',
+      options: {
+        description: `Get a role`,
+      },
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1 }) }),
       },
