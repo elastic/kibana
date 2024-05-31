@@ -8,11 +8,11 @@
  */
 
 import { Container } from 'inversify';
-import type { CoreDiServiceSetup, CoreDiServiceStart } from '@kbn/core-di-server';
+import type { CoreDiServiceSetup, CoreDiServiceStart } from '@kbn/core-di-common';
 import type {
   InternalCoreDiServiceSetup,
   InternalCoreDiServiceStart,
-} from '@kbn/core-di-server-internal';
+} from '@kbn/core-di-common-internal';
 import { MethodKeysOf } from '@kbn/utility-types';
 
 function createContainer() {

@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container } from 'inversify';
-import type { interfaces } from 'inversify';
+import { Container, type interfaces } from 'inversify';
 import { chain } from 'lodash';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { Global } from '@kbn/core-di-common';
-import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './internal_contracts';
+import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './contracts';
 
 /** @internal */
 export class CoreInjectionService {
@@ -59,7 +57,7 @@ export class CoreInjectionService {
 
   private root = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
 
-  constructor(private readonly coreContext: CoreContext) {
+  constructor() {
     this.dispose = this.dispose.bind(this);
     this.fork = this.fork.bind(this);
     this.getContainer = this.getContainer.bind(this);
