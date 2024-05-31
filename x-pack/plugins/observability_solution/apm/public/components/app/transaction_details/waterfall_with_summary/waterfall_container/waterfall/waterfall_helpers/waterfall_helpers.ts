@@ -626,10 +626,10 @@ export const updateTraceTreeNode = ({
     const { parent, index, node } = stack.pop()!;
 
     if (node.id === updatedNode.id) {
-      const newNode = { ...node, ...updatedNode };
+      Object.assign(node, updatedNode);
 
       if (updatedNode.expanded && updatedNode.childrenToLoad !== node.children.length) {
-        newNode.children = buildTree({
+        node.children = buildTree({
           root: node,
           waterfall,
           maxLevelOpen: node.level + 1, // Load only one level above the current node
@@ -638,9 +638,9 @@ export const updateTraceTreeNode = ({
       }
 
       if (parent) {
-        parent.children[index] = newNode;
+        parent.children[index] = node;
       } else {
-        tree = newNode;
+        tree = node;
       }
 
       return tree;
