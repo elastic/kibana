@@ -7,41 +7,38 @@
 
 import nunjucks from 'nunjucks';
 
-import { generateFields, mergeSamples, asyncCreate } from '../util';
+import { generateFields, mergeSamples, createSync } from '../util';
 
 interface Doc {
   [key: string]: any;
 }
 
-export async function createFieldMapping(
+export function createFieldMapping(
   packageName: string,
   dataStreamName: string,
   specificDataStreamDir: string,
   docs: Doc[]
-): Promise<void> {
-  await createBaseFields(specificDataStreamDir, packageName, dataStreamName);
-  await createCustomFields(specificDataStreamDir, docs);
+): void {
+  createBaseFields(specificDataStreamDir, packageName, dataStreamName);
+  createCustomFields(specificDataStreamDir, docs);
 }
 
-async function createBaseFields(
+function createBaseFields(
   specificDataStreamDir: string,
   packageName: string,
   dataStreamName: string
-): Promise<void> {
+): void {
   const datasetName = `${packageName}.${dataStreamName}`;
-  const baseFields = nunjucks.render('base-fields.yml.njk', {
+  const baseFields = nunjucks.render('base_fields.yml.njk', {
     module: packageName,
     dataset: datasetName,
   });
 
-  await asyncCreate(`${specificDataStreamDir}/base-fields.yml`, baseFields);
+  createSync(`${specificDataStreamDir}/base-fields.yml`, baseFields);
 }
 
-async function createCustomFields(
-  specificDataStreamDir: string,
-  pipelineResults: Doc[]
-): Promise<void> {
+function createCustomFields(specificDataStreamDir: string, pipelineResults: Doc[]): void {
   const mergedResults = mergeSamples(pipelineResults);
   const fieldKeys = generateFields(mergedResults);
-  await asyncCreate(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);
+  createSync(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);
 }

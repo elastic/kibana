@@ -8,12 +8,12 @@
 import { join as joinPath } from 'path';
 import nunjucks from 'nunjucks';
 import { Integration } from '../../common';
-import { asyncEnsureDir, asyncCreate } from '../util';
+import { ensureDirSync, createSync } from '../util';
 
-export async function createPackageSystemTests(integrationDir: string, integration: Integration) {
+export function createPackageSystemTests(integrationDir: string, integration: Integration) {
   const systemTestsDockerDir = joinPath(integrationDir, '_dev/deploy/docker/');
   const systemTestsSamplesDir = joinPath(systemTestsDockerDir, 'sample_logs');
-  await asyncEnsureDir(systemTestsSamplesDir);
+  ensureDirSync(systemTestsSamplesDir);
 
   const streamVersion = '0.13.0';
   const dockerComposeVersion = '2.3';
@@ -27,7 +27,7 @@ export async function createPackageSystemTests(integrationDir: string, integrati
       `test-${packageName}-${dataStreamName}.log`
     );
     const rawSamplesContent = stream.rawSamples.join('\n');
-    await asyncCreate(systemTestFileName, rawSamplesContent);
+    createSync(systemTestFileName, rawSamplesContent);
 
     for (const inputType of stream.inputTypes) {
       const mappedValues = {
@@ -35,16 +35,19 @@ export async function createPackageSystemTests(integrationDir: string, integrati
         data_stream_name: dataStreamName,
         stream_version: streamVersion,
       };
-      const renderedService = nunjucks.render(`service-${inputType}.njk`, mappedValues);
+      const renderedService = nunjucks.render(
+        `service_${inputType.replaceAll('_', '-')}.njk`,
+        mappedValues
+      );
       dockerServices.push(renderedService);
     }
   }
 
-  const renderedDockerCompose = nunjucks.render('docker-compose.yml.njk', {
+  const renderedDockerCompose = nunjucks.render('docker_compose.yml.njk', {
     services: dockerServices.join('\n'),
     docker_compose_version: dockerComposeVersion,
   });
 
   const dockerComposeFileName = joinPath(systemTestsDockerDir, 'docker-compose.yml');
-  await asyncCreate(dockerComposeFileName, renderedDockerCompose);
+  createSync(dockerComposeFileName, renderedDockerCompose);
 }
