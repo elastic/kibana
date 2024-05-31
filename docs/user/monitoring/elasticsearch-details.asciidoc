@@ -132,17 +132,15 @@ This metric is a sum of the number of operations indexed across all shards over 
 time period.
 - **Error**: Any exceptions returned for the most recent document in the selected time period.
 
+If you select a follower index, you can view the same information for each shard. 
 For more information on the properties used to calculate these metrics, refer to the 
 {ref}/ccr-get-follow-stats.html[get follower stats API] documentation.
 
-If you select a follower index, you can view the same information for each shard.
-
-If you select a shard, you can see graphs for the fetch and operation delays.
-
+If you select a shard, you can see graphs for the fetch and operation delays. 
 You can also see advanced information, which contains additional stats from the 
 {ref}/ccr-get-follow-stats.html[get follower stats API].
 
-For more information, refer to {ref}/xpack-ccr.html[{ccr-cap}].
+Learn more about {ref}/xpack-ccr.html[{ccr-cap}].
 
 [float]
 [[logs-monitor-page]]
