@@ -10,10 +10,13 @@ import { registerEcsRoutes } from './ecs_routes';
 import { registerIntegrationBuilderRoutes } from './build_integration_routes';
 import { registerCategorizationRoutes } from './categorization_routes';
 import { registerRelatedRoutes } from './related_routes';
+import { registerPipelineRoutes } from './pipeline_routes';
+import { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
-export function registerRoutes(router: IRouter) {
+export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   registerEcsRoutes(router);
   registerIntegrationBuilderRoutes(router);
   registerCategorizationRoutes(router);
   registerRelatedRoutes(router);
+  registerPipelineRoutes(router);
 }

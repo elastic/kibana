@@ -10,8 +10,9 @@ import { schema } from '@kbn/config-schema';
 import { TEST_PIPELINE_PATH } from '../../common';
 import { testPipeline } from '../util/pipeline';
 import { TestPipelineApiRequest, TestPipelineApiResponse } from '../../common/types';
+import { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
-export function registerEcsRoutes(router: IRouter) {
+export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.post(
     {
       path: `${TEST_PIPELINE_PATH}`,

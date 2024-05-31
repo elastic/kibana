@@ -15,7 +15,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-http-browser",
     "@kbn/config-schema",
+    "@kbn/langchain",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/actions-plugin",
   ]
 }

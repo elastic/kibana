@@ -10,9 +10,11 @@ import { schema } from '@kbn/config-schema';
 import { INTEGRATION_BUILDER_PATH } from '../../common';
 import { buildPackage } from '../integration_builder';
 import type { BuildIntegrationApiRequest } from '../../common';
+import { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
-// TODO: Currently not implemented
-export function registerIntegrationBuilderRoutes(router: IRouter) {
+export function registerIntegrationBuilderRoutes(
+  router: IRouter<IntegrationAssistantRouteHandlerContext>
+) {
   router.post(
     {
       path: `${INTEGRATION_BUILDER_PATH}`,
@@ -46,12 +48,10 @@ export function registerIntegrationBuilderRoutes(router: IRouter) {
                 docs: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
               })
             ),
-            initialVersion: schema.maybe(schema.string()),
           }),
         }),
       },
     },
-    // TODO: This needs to implement CustomHttpResponseOptions
     async (_, req, res) => {
       const { integration } = req.body as BuildIntegrationApiRequest;
       try {
