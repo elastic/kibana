@@ -32,7 +32,11 @@ export const ReferenceFieldSelects = ({
     Object.keys(data.mappings.properties).forEach((key) => {
       const field = data.mappings.properties[key];
       if (field.type === 'text') {
-        referenceFieldOptions.push({ value: key, inputDisplay: key });
+        referenceFieldOptions.push({
+          value: key,
+          inputDisplay: key,
+          'data-test-subj': `select-reference-field-${key}`,
+        });
       }
     });
   }
@@ -47,14 +51,15 @@ export const ReferenceFieldSelects = ({
 
     return subscription.unsubscribe;
   }, [subscribe, onChange]);
-
   return (
-    <Form form={form}>
+    <Form form={form} data-test-subj="referenceField">
       <UseField path="main" config={fieldConfigReferenceField}>
         {(field) => (
           <SuperSelectField
             field={field}
-            euiFieldProps={{ options: referenceFieldOptions }}
+            euiFieldProps={{
+              options: referenceFieldOptions,
+            }}
             data-test-subj={dataTestSubj}
           />
         )}

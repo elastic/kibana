@@ -109,7 +109,27 @@ export const SelectInferenceId = ({
 
   const fieldConfigModelId = getFieldConfig('inference_id');
   const defaultInferenceIds: EuiSelectableOption[] = useMemo(() => {
-    return [{ checked: 'on', label: 'elser_model_2' }, { label: 'e5' }];
+    return [
+      {
+        checked: 'on',
+        label: i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.Elser',
+          {
+            defaultMessage: 'elser_model_2',
+          }
+        ),
+        'data-test-subj': 'default-inference_elser_model_2',
+      },
+      {
+        label: i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.E5',
+          {
+            defaultMessage: 'e5',
+          }
+        ),
+        'data-test-subj': 'default-inference_e5',
+      },
+    ];
   }, []);
 
   const { isLoading, data: models, resendRequest } = useLoadInferenceModels();
@@ -119,6 +139,7 @@ export const SelectInferenceId = ({
     const inferenceIdOptions =
       models?.map((model: InferenceAPIConfigResponse) => ({
         label: model.model_id,
+        'data-test-subj': `custom-inference_${model.model_id}`,
       })) || [];
 
     return inferenceIdOptions;
@@ -146,7 +167,13 @@ export const SelectInferenceId = ({
           modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
         if (isDeployable) NotificationToasts({ toasts });
 
-        const combined: EuiSelectableOption[] = [{ label: inferenceId }];
+        const combined: EuiSelectableOption[] = [
+          {
+            checked: 'on',
+            label: inferenceId,
+            'data-test-subj': `custom-inference_${inferenceId}`,
+          },
+        ];
         setOptions([...oldOptions, ...combined]);
 
         const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
