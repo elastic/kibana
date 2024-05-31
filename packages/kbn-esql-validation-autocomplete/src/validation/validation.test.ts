@@ -3109,6 +3109,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
           'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
         ]);
+        testErrorsAndWarnings('from a_index | eval date_trunc("2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_trunc(concat("20", "22"), concat("20", "22"))',
+          [
+            'Argument of [date_trunc] must be [time_literal], found value [concat("20", "22")] type [string]',
+            'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+          ]
+        );
       });
 
       describe('e', () => {
@@ -9893,6 +9902,30 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats by bucket(concat("20", "22"), 1 year)', [
           'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
         ]);
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "a")', []);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 5, "a", "a")', [
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), concat("20", "22"))',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, "a", concat("20", "22"))',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "a")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), "a")',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
       });
 
       describe('cbrt', () => {

@@ -11309,6 +11309,19 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_trunc(\"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [concat(\"20\", \"22\")] type [string]",
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = e()",
       "error": [],
       "warning": []
@@ -24842,6 +24855,54 @@
     },
     {
       "query": "from a_index | stats by bucket(concat(\"20\", \"22\"), 1 year)",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, \"a\", \"a\")",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"a\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, \"a\", concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"2022\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, concat(\"20\", \"22\"), \"a\")",
       "error": [
         "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
       ],

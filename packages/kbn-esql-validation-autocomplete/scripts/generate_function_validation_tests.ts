@@ -138,7 +138,7 @@ function generateImplicitDateCastingTestsForFunction(
   definition: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
-  const firstSignatureWithDateParams = definition.signatures.find((signature) =>
+  const allSignaturesWithDateParams = definition.signatures.filter((signature) =>
     signature.params.some(
       (param, i) =>
         param.type === 'date' &&
@@ -146,56 +146,58 @@ function generateImplicitDateCastingTestsForFunction(
     )
   );
 
-  if (!firstSignatureWithDateParams) {
+  if (!allSignaturesWithDateParams.length) {
     // no signatures contain date params
     return;
   }
 
   const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
 
-  const mappedParams = getFieldMapping(firstSignatureWithDateParams.params);
+  for (const signature of allSignaturesWithDateParams) {
+    const mappedParams = getFieldMapping(signature.params);
 
-  testCases.set(
-    `from a_index | ${commandToTestWith} ${
-      getFunctionSignatures(
-        {
-          ...definition,
-          signatures: [
-            {
-              ...firstSignatureWithDateParams,
-              params: mappedParams.map((param) =>
-                // overwrite dates with a string
-                param.type === 'date' ? { ...param, name: '"2022"' } : param
-              ),
-            },
-          ],
-        },
-        { withTypes: false }
-      )[0].declaration
-    }`,
-    []
-  );
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: '"2022"' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
 
-  testCases.set(
-    `from a_index | ${commandToTestWith} ${
-      getFunctionSignatures(
-        {
-          ...definition,
-          signatures: [
-            {
-              ...firstSignatureWithDateParams,
-              params: mappedParams.map((param) =>
-                // overwrite dates with a string
-                param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
-              ),
-            },
-          ],
-        },
-        { withTypes: false }
-      )[0].declaration
-    }`,
-    []
-  );
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
+  }
 }
 
 function generateRowCommandTestsForEvalFunction(
