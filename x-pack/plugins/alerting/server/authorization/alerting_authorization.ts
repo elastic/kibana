@@ -11,7 +11,10 @@ import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import {
+  KibanaFeature,
+  PluginStartContract as FeaturesPluginStart,
+} from '@kbn/features-plugin/server';
 import { Space } from '@kbn/spaces-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
 import { ALERTING_FEATURE_ID, RuleTypeRegistry } from '../types';
@@ -93,6 +96,8 @@ export class AlertingAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
+  private readonly ruleTypeConsumersMap: Promise<Map<string, Set<string>>>;
+  private readonly features: Promise<KibanaFeature[]>;
   private readonly spaceId: string | undefined;
   constructor({
     ruleTypeRegistry,
@@ -107,7 +112,7 @@ export class AlertingAuthorization {
     this.ruleTypeRegistry = ruleTypeRegistry;
     this.spaceId = getSpaceId(request);
 
-    const alertingFeaturesPromise = getSpace(request)
+    this.features = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
       .then((disabledFeatures) =>
         features.getKibanaFeatures().filter(
@@ -119,7 +124,7 @@ export class AlertingAuthorization {
         )
       );
 
-    this.allPossibleConsumers = alertingFeaturesPromise.then((alertingFeatures) => {
+    this.allPossibleConsumers = this.features.then((alertingFeatures) => {
       const consumers = alertingFeatures.flatMap(
         (alertingFeature) =>
           alertingFeature.alerting
@@ -133,6 +138,23 @@ export class AlertingAuthorization {
             all: true,
           })
         : {};
+    });
+
+    this.ruleTypeConsumersMap = this.features.then((alertingFeatures) => {
+      const map = new Map<string, Set<string>>();
+
+      for (const feature of alertingFeatures) {
+        if (feature.alerting) {
+          for (const entry of feature.alerting) {
+            const consumers = map.get(entry.ruleTypeId) ?? new Set();
+            entry.consumers.forEach((consumer) => consumers.add(consumer));
+
+            map.set(entry.ruleTypeId, consumers);
+          }
+        }
+      }
+
+      return map;
     });
   }
 
@@ -321,8 +343,10 @@ export class AlertingAuthorization {
     hasAllRequested: boolean;
     authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
+    const ruleTypeConsumersMap = await this.ruleTypeConsumersMap;
     const allPossibleConsumers = await this.allPossibleConsumers;
     const consumersToAuthorize = consumers ?? new Set(Object.keys(allPossibleConsumers));
+
     const requiredPrivileges = new Map<
       string,
       [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
@@ -342,7 +366,17 @@ export class AlertingAuthorization {
       );
 
       for (const ruleTypeWithAuth of ruleTypesWithAuthorization) {
+        if (!ruleTypeConsumersMap.has(ruleTypeWithAuth.id)) {
+          continue;
+        }
+
         for (const consumerToAuthorize of consumersToAuthorize) {
+          const ruleTypeConsumers = ruleTypeConsumersMap.get(ruleTypeWithAuth.id);
+
+          if (!ruleTypeConsumers?.has(consumerToAuthorize)) {
+            continue;
+          }
+
           for (const operation of operations) {
             requiredPrivileges.set(
               this.authorization!.actions.alerting.get(
