@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { startQueryPerformanceTracking } from './query_performance_tracking';
-import { BehaviorSubject } from 'rxjs';
+import { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
-import { waitFor } from '@testing-library/react';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { apiPublishesPhaseEvents, PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+import { DashboardAnalyticsService } from '../../../../services/analytics/types';
+import { startQueryPerformanceTracking } from './query_performance_tracking';
 
 const mockMetricEvent = jest.fn();
 jest.mock('@kbn/ebt-tools', () => ({
-  reportPerformanceMetricEvent: (_, args) => {
+  reportPerformanceMetricEvent: (_: DashboardAnalyticsService, args: PerformanceMetricEvent) => {
     mockMetricEvent(args);
   },
 }));

@@ -19,6 +19,7 @@ import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
+import { isNil } from 'lodash';
 import {
   BehaviorSubject,
   map,
@@ -56,10 +57,15 @@ function isVisualizeEmbeddable(
 }
 
 const getEventStatus = (output: EmbeddableOutput): PhaseEventType => {
-  if (output.error) return 'error';
-  if (output.loading) return 'loading';
-  if (output.rendered) return 'rendered';
-  return 'loaded';
+  if (!isNil(output.error)) {
+    return 'error';
+  } else if (output.rendered === true) {
+    return 'rendered';
+  } else if (output.loading === false) {
+    return 'loaded';
+  } else {
+    return 'loading';
+  }
 };
 
 export const legacyEmbeddableToApi = (
