@@ -118,7 +118,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             {!isFirstTimeAgentUserLoading && !isFirstTimeAgentUser && <DashboardsButtons />}
           </EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip content={SWITCH_TO_DATA_GRID} position="top">
                 <EuiButtonIcon
                   color="primary"

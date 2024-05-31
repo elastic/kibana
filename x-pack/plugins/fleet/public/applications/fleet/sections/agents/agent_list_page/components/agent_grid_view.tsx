@@ -13,6 +13,7 @@ import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from
 import type { RenderCellValue, EuiDataGridColumn } from '@elastic/eui';
 
 import type { Agent } from '../../../../types';
+import { getKuery } from '../utils/get_kuery';
 
 import { sendGetAgents } from '../../../../hooks'; // usePagination
 import { useTableState } from '../hooks/use_table_state';
@@ -21,17 +22,25 @@ interface Props {
   showDataGridView: boolean;
   setDataGridView: (showDataGridView: boolean) => void;
 }
+const DEFAULT_PAGE_SIZE = 10;
 
 export const AgentsGridView: React.FunctionComponent<Props> = ({
   showDataGridView,
   setDataGridView,
 }) => {
   const [agents, setAgents] = useState<Agent[]>([]);
-  const { showInactive, showUpgradeable, draftKuery } = useTableState();
+  const { showInactive, showUpgradeable, selectedStatus } = useTableState();
 
-  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
-    { pageIndex: 1, pageSize: 10 }
-  );
+  const kuery = useMemo(() => {
+    return getKuery({
+      selectedStatus,
+    });
+  }, [selectedStatus]);
+
+  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number }>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
 
   const columns: EuiDataGridColumn[] = [
     {
@@ -45,14 +54,22 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
       defaultSortDirection: 'asc',
     },
     {
+      id: 'version',
+      displayAsText: 'Version',
+      defaultSortDirection: 'asc',
+      initialWidth: 70,
+    },
+    {
       id: 'status',
       displayAsText: 'Status',
       defaultSortDirection: 'asc',
+      initialWidth: 80,
     },
     {
       id: 'active',
       displayAsText: 'Active',
       defaultSortDirection: 'asc',
+      initialWidth: 80,
     },
     {
       id: 'last_checkin',
@@ -69,20 +86,18 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
       displayAsText: 'Policy Id',
       defaultSortDirection: 'asc',
     },
-    {
-      id: 'version',
-      displayAsText: 'Version',
-      defaultSortDirection: 'asc',
-    },
+
     {
       id: 'upgradeable',
       displayAsText: 'Upgradeable',
       defaultSortDirection: 'asc',
+      initialWidth: 100,
     },
     {
       id: 'platform',
       displayAsText: 'Platform',
       defaultSortDirection: 'asc',
+      initialWidth: 80,
     },
     // {
     //   id: 'cpu_avg',
@@ -96,25 +111,20 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
     // },
   ];
   const onChangeItemsPerPage = useCallback(
-    (pageSize) =>
-      setPagination(() => ({
-        ...pagination,
-        pageSize,
-        pageIndex: 0,
-      })),
-    [pagination]
+    (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
+    [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex) => setPagination(() => ({ ...pagination, pageIndex })),
-    [pagination]
+    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
+    [setPagination]
   );
 
   const fetchAgents = useCallback(async () => {
     try {
       const agentsResponse = await sendGetAgents({
-        page: pagination?.pageIndex,
-        perPage: pagination?.pageSize,
-        kuery: draftKuery, // fix it
+        page: pagination.pageIndex + 1,
+        perPage: pagination.pageSize,
+        kuery,
         showInactive,
         showUpgradeable,
         getStatusSummary: false,
@@ -122,9 +132,9 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
       });
       setAgents(agentsResponse?.data?.items ?? []);
     } catch (err) {
-      console.log(err);
+      throw err;
     }
-  }, [draftKuery, pagination.pageIndex, pagination.pageSize, showInactive, showUpgradeable]);
+  }, [kuery, pagination.pageIndex, pagination.pageSize, showInactive, showUpgradeable]);
 
   useEffect(() => {
     fetchAgents();
@@ -139,7 +149,7 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
     if (typeof data === 'boolean') {
       return `${data}`;
     } else if (typeof data === 'string' && data.match(dateRe)) {
-      return moment(data).toISOString();
+      return moment.utc(data).format('DD/MM/YYYY HH:mm:ss UTC');
     }
     return data;
   };
@@ -181,11 +191,14 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
     rowIndex: number;
     columnId: string;
   }) => {
-    return agentsDataForGrid &&
-      !!agentsDataForGrid[rowIndex] &&
-      !!agentsDataForGrid[rowIndex][columnId]
-      ? agentsDataForGrid[rowIndex][columnId]
-      : null;
+    if (
+      !agentsDataForGrid ||
+      agentsDataForGrid.length === 0 ||
+      !agentsDataForGrid[rowIndex] ||
+      !agentsDataForGrid[rowIndex][columnId]
+    )
+      return null;
+    return agentsDataForGrid[rowIndex][columnId];
   };
 
   return (
@@ -214,19 +227,21 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem style={{ minWidth: 120 }} grow={false}>
         <EuiDataGrid
           aria-label="Agent data grid view"
+          data-test-subj="agentsDataGrid"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
           rowCount={agentsDataForGrid.length}
           renderCellValue={getRenderCellValue}
           inMemory={{ level: 'sorting' }}
-          // pagination={{
-          //   ...pagination,
-          //   onChangeItemsPerPage,
-          //   onChangePage,
-          // }}
+          pagination={{
+            ...pagination,
+            pageSizeOptions: [DEFAULT_PAGE_SIZE, 20, 50],
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
