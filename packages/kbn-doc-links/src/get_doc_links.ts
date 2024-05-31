@@ -962,11 +962,21 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
     },
     playground: {
-      chatPlayground: `${KIBANA_DOCS}playground.html`,
-      retrievalOptimize: `${KIBANA_DOCS}playground-query.html#playground-query-relevance`,
-      retrieval: `${KIBANA_DOCS}playground-query.html`,
-      context: `${KIBANA_DOCS}playground-context.html`,
-      hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
+      chatPlayground: isServerless
+        ? `${SERVERLESS_ELASTICSEARCH_DOCS}playground`
+        : `${KIBANA_DOCS}playground.html`,
+      retrievalOptimize: isServerless
+        ? `${SERVERLESS_ELASTICSEARCH_DOCS}playground/query#playground-query-relevance`
+        : `${KIBANA_DOCS}playground-query.html#playground-query-relevance`,
+      retrieval: isServerless
+        ? `${SERVERLESS_ELASTICSEARCH_DOCS}playground/query`
+        : `${KIBANA_DOCS}playground-query.html`,
+      context: isServerless
+        ? `${SERVERLESS_ELASTICSEARCH_DOCS}playground/context`
+        : `${KIBANA_DOCS}playground-context.html`,
+      hiddenFields: isServerless
+        ? `${SERVERLESS_ELASTICSEARCH_DOCS}playground/query#playground-hidden-fields`
+        : `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
   });
 };
