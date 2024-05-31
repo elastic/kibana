@@ -11,13 +11,13 @@ import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_d
 import { useEventDetails } from './use_event_details';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 
 jest.mock('../../../../common/hooks/use_space_id');
 jest.mock('../../../../common/utils/route/use_route_spy');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../timelines/containers/details');
 jest.mock('../../../../common/hooks/use_get_fields_data');
 
