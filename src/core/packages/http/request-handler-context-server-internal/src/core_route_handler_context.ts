@@ -37,10 +37,8 @@ import {
 } from '@kbn/core-user-profile-server-internal';
 import { CoreFeatureFlagsRouteHandlerContext } from '@kbn/core-feature-flags-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
-import {
-  CoreInjectionRouteHandlerContext,
-  type InternalCoreDiServiceStart,
-} from '@kbn/core-di-server-internal';
+import type { InternalCoreDiServiceStart } from '@kbn/core-di-common-internal';
+import { CoreInjectionRouteHandlerContext } from '@kbn/core-di-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
