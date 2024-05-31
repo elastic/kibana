@@ -34,10 +34,8 @@ import {
   CoreUserProfileRouteHandlerContext,
   type InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-server-internal';
-import {
-  CoreInjectionRouteHandlerContext,
-  type InternalCoreDiServiceStart,
-} from '@kbn/core-di-server-internal';
+import type { InternalCoreDiServiceStart } from '@kbn/core-di-common-internal';
+import { CoreInjectionRouteHandlerContext } from '@kbn/core-di-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}

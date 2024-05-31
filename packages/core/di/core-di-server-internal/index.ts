@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CoreInjectionService } from './src/di_service';
 export { CoreInjectionRouteHandlerContext } from './src/injection_request_handler_context';
-export type {
-  InternalCoreDiServiceSetup,
-  InternalCoreDiServiceStart,
-} from './src/internal_contracts';
