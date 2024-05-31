@@ -428,7 +428,7 @@ export class VisualizationsPlugin
       },
       embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
-      savedObjectName: i18n.translate('visualization.visualizeSavedObjectName', {
+      savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),
       getIconForSavedObject: (savedObject) => {
