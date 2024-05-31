@@ -7,6 +7,8 @@
 
 import { BaseMessage } from '@langchain/core/messages';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { Logger } from '@kbn/logging';
 
 export interface AgentStateBase {
   agentOutcome?: AgentAction | AgentFinish;
@@ -16,4 +18,9 @@ export interface AgentStateBase {
 export interface AgentState extends AgentStateBase {
   input: string;
   messages: BaseMessage[];
+}
+
+export interface NodeParamsBase {
+  logger: Logger;
+  model: BaseChatModel;
 }

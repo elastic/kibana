@@ -21,7 +21,11 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { i18n } from '@kbn/i18n';
 import { getLlmType } from './utils';
-import { StaticReturnType } from '../lib/langchain/executors/types';
+import {
+  AgentExecutorParams,
+  AssistantDataClients,
+  StaticReturnType,
+} from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -346,8 +350,14 @@ export const postActionsConnectorExecuteRoute = (
             kbDataClient
           );
 
+          const dataClients: AssistantDataClients = {
+            anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
+            conversationsDataClient: conversationsDataClient ?? undefined,
+            kbDataClient,
+          };
+
           // Shared executor params
-          const executorParams = {
+          const executorParams: AgentExecutorParams<boolean> = {
             abortSignal,
             alertsIndexPattern: request.body.alertsIndexPattern,
             anonymizationFields: anonymizationFieldsRes
@@ -357,16 +367,18 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
             assistantTools,
             connectorId,
+            conversationId,
+            dataClients,
             esClient,
             esStore,
             isStream: request.body.subAction !== 'invokeAI',
-            kbDataClient,
             llmType: getLlmType(actionTypeId),
             langChainMessages,
             logger,
             onNewReplacements,
             onLlmResponse,
             request,
+            response,
             replacements: request.body.replacements,
             size: request.body.size,
             traceOptions: {

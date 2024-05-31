@@ -15,12 +15,18 @@ import type { CompiledStateGraph } from '@langchain/langgraph/dist/graph/state';
 import type { Logger } from '@kbn/logging';
 
 import { BaseMessage } from '@langchain/core/messages';
-import { AgentState } from './types';
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { AgentState, NodeParamsBase } from './types';
+import { generateChatTitle } from './generate_chat_title';
+import { AssistantDataClients } from '../../executors/types';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
 interface GetDefaultAssistantGraphParams {
   agentRunnable: AgentRunnableSequence;
+  dataClients?: AssistantDataClients;
+  conversationId?: string;
+  llm: BaseChatModel;
   logger: Logger;
   messages: BaseMessage[];
   tools: StructuredTool[];
@@ -31,6 +37,9 @@ interface GetDefaultAssistantGraphParams {
  */
 export const getDefaultAssistantGraph = ({
   agentRunnable,
+  conversationId,
+  dataClients,
+  llm,
   logger,
   messages,
   tools,
@@ -57,6 +66,11 @@ export const getDefaultAssistantGraph = ({
         value: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
         default: () => messages,
       },
+    };
+
+    const nodeParams: NodeParamsBase = {
+      model: llm,
+      logger,
     };
 
     // Create a tool executor
@@ -103,6 +117,14 @@ export const getDefaultAssistantGraph = ({
     const workflow = new StateGraph<AgentState>({ channels: graphState });
 
     // Define the nodes to cycle between
+    workflow.addNode('generateChatTitle', (state: AgentState) =>
+      generateChatTitle({
+        state,
+        conversationsDataClient: dataClients?.conversationsDataClient,
+        conversationId,
+        ...nodeParams,
+      })
+    );
     workflow.addNode('agent', new RunnableLambda({ func: runAgent }));
     workflow.addNode('action', new RunnableLambda({ func: executeTools }));
 
@@ -110,7 +132,8 @@ export const getDefaultAssistantGraph = ({
     workflow.addConditionalEdges('agent', shouldContinue, { continue: 'action', end: END });
 
     // Add edges for start, and between agent and action (action always followed by agent)
-    workflow.addEdge(START, 'agent');
+    workflow.addEdge(START, 'generateChatTitle');
+    workflow.addEdge('generateChatTitle', 'agent');
     workflow.addEdge('action', 'agent');
 
     return workflow.compile();

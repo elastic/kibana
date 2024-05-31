@@ -13,7 +13,6 @@ export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
     'You are a helpful assistant\n\nUse the below context as a sample of information about the user from their knowledge base:\n\n```{knowledge_history}```',
   ],
   ['placeholder', '{chat_history}'],
-  // ['human', '{knowledge_history}'],
   ['human', '{input}'],
   ['placeholder', '{agent_scratchpad}'],
 ]);
@@ -51,5 +50,8 @@ export const structuredChatAgentPrompt = ChatPromptTemplate.fromMessages([
       'Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation',
   ],
   ['placeholder', '{chat_history}'],
-  ['human', '{input}\n\n{agent_scratchpad}\n(reminder to respond in a JSON blob no matter what)'],
+  [
+    'human',
+    'Use the below context as a sample of information about the user from their knowledge base:\n\n```\n{knowledge_history}\n```\n\n{input}\n\n{agent_scratchpad}\n(reminder to respond in a JSON blob no matter what)',
+  ],
 ]);

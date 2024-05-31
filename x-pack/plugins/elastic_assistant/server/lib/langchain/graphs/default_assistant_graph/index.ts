@@ -21,8 +21,7 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 
 /**
- *
- *
+ * Drop in replacement for the existing `callAgentExecutor` that uses LangGraph
  */
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -32,9 +31,10 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
+  conversationId,
+  dataClients,
   esClient,
   esStore,
-  kbDataClient,
   langChainMessages,
   llmType,
   logger: parentLogger,
@@ -85,7 +85,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     chain,
     esClient,
     isEnabledKnowledgeBase,
-    kbDataClient,
+    kbDataClient: dataClients?.kbDataClient,
     llm: model,
     logger,
     modelExists,
@@ -115,7 +115,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 
-  const assistantGraph = getDefaultAssistantGraph({ agentRunnable, logger, messages, tools });
+  const assistantGraph = getDefaultAssistantGraph({
+    agentRunnable,
+    conversationId,
+    dataClients,
+    llm,
+    logger,
+    messages,
+    tools,
+  });
   const inputs = { input: latestMessage[0].content as string };
 
   if (isStream) {
