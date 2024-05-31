@@ -8,6 +8,7 @@
 
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
@@ -17,9 +18,6 @@ import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
-// For ES|QL we want in case of the following commands to display a table view, otherwise display a document view
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
-
 /**
  * Hook to take care of ES|QL state transformations when a new result is returned
  * If necessary this is setting displayed columns and selected data view
@@ -71,12 +69,9 @@ export function useEsqlMode({
           const hasResults = Boolean(next.result?.length);
           let queryHasTransformationalCommands = false;
           if ('esql' in query) {
-            TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
-              if (query.esql.toLowerCase().includes(command)) {
-                queryHasTransformationalCommands = true;
-                return;
-              }
-            });
+            if (hasTransformationalCommand(query.esql)) {
+              queryHasTransformationalCommands = true;
+            }
           }
 
           if (isEsqlQuery) {
