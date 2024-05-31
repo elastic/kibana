@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const actionTaskParamsSchema = schema.object({
   actionId: schema.string(),
-  executionId: schema.string(),
+  executionId: schema.maybe(schema.string()),
   apiKey: schema.nullable(schema.string()),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   consumer: schema.maybe(schema.string()),
