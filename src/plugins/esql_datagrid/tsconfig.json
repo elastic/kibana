@@ -23,7 +23,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/i18n",
-    "@kbn/unified-doc-viewer",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/shared-ux-utility"
