@@ -8,11 +8,12 @@
 import { omitBy, isUndefined } from 'lodash';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { Logger, SavedObjectsClientContract, SavedObjectsUtils } from '@kbn/core/server';
-import { retryIfConflicts } from '@kbn/alerting-plugin/server/lib/retry_if_conflicts';
+import { retryIfConflicts } from './retry_if_conflicts';
 import { ConnectorToken } from '../types';
 import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 export const MAX_TOKENS_RETURNED = 1;
+const MAX_RETRY_ATTEMPTS = 3;
 
 interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -136,7 +137,7 @@ export class ConnectorTokenClient {
         this.logger,
         `accessToken.create('${id}')`,
         updateOperation,
-        3
+        MAX_RETRY_ATTEMPTS
       );
 
       return result.attributes as ConnectorToken;
