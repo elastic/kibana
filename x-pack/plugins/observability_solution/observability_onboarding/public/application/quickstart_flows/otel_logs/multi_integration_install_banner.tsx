@@ -44,7 +44,7 @@ export function MultiIntegrationInstallBanner() {
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              {i18n.translate('xpack.observability_onboarding.otelLogs.status.failed', {
+              {i18n.translate('xpack.observability_onboarding.otelLogs.status.failedDetails', {
                 defaultMessage: 'Incoming data might not be indexed correctly. Details:',
               })}
             </EuiFlexItem>
