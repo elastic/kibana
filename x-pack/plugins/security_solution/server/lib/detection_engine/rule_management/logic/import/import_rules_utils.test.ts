@@ -59,7 +59,7 @@ describe('importRules', () => {
     ]);
   });
 
-  it('returns 409 error if ruleManagementClient throws with 409 - existing rule', async () => {
+  it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
     clients.rulesManagementClient.importRule.mockImplementationOnce(async () => {
       throw createBulkErrorObject({
         ruleId: importedRule.params.ruleId,

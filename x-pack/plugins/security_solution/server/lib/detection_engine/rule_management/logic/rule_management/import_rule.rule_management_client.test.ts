@@ -19,7 +19,7 @@ jest.mock('../../../../machine_learning/validation');
 
 jest.mock('./read_rules');
 
-describe('RuleManagementClient.importRule', () => {
+describe('DetectionRulesClient.importRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   const immutable = false as const; // Can only take value of false

@@ -21,7 +21,7 @@ import { throwAuthzError } from '../../../../machine_learning/validation';
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 
-describe('RuleManagementClient.createPrebuiltRule', () => {
+describe('DetectionRulesClient.createPrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   const mlAuthz = (buildMlAuthz as jest.Mock)();
 

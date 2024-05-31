@@ -23,7 +23,7 @@ jest.mock('../../../../machine_learning/validation');
 
 jest.mock('./read_rules');
 
-describe('RuleManagementClient.patchRule', () => {
+describe('DetectionRulesClient.patchRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   const mlAuthz = (buildMlAuthz as jest.Mock)();
 
