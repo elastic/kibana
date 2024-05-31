@@ -165,9 +165,7 @@ async function run(opts: TaskClaimerOpts) {
       body: params,
       refresh: true,
     });
-    // eslint-disable-next-line no-console
-    console.log('Bulk lock result', JSON.stringify(result2, null, 2));
-    const promises = filteredTasks.slice(0, config.workerConcurrency).map(async (row) => {
+    const promises = filteredTasks.map(async (row) => {
       const bulkResultForTask = result2.items.find(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (i: any) => i.create._id === `${row._id}:${(row as any)._source.runAt}`
