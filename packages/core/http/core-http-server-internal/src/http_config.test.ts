@@ -494,6 +494,11 @@ describe('cors', () => {
   });
 });
 
+test('oas is disabled by default', () => {
+  const { oas } = config.schema.validate({});
+  expect(oas.enabled).toBe(false);
+});
+
 describe('versioned', () => {
   it('defaults version resolution "oldest" not in dev', () => {
     expect(config.schema.validate({}, { dev: undefined })).toMatchObject({
@@ -544,9 +549,14 @@ describe('cdn', () => {
       cdn: { url: 'https://cdn.example.com' },
     });
   });
+  it('can be "unset" using "null"', () => {
+    expect(config.schema.validate({ cdn: { url: null } })).toMatchObject({
+      cdn: { url: null },
+    });
+  });
   it.each([['foo'], ['http:./']])('throws for invalid URL %s', (url) => {
-    expect(() => config.schema.validate({ cdn: { url } })).toThrowErrorMatchingInlineSnapshot(
-      `"[cdn.url]: expected URI with scheme [http|https]."`
+    expect(() => config.schema.validate({ cdn: { url } })).toThrow(
+      /expected URI with scheme \[http\|https\]/
     );
   });
   it.each([

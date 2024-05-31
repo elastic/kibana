@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mergeSourceMonitor } from './helper';
+import { mapSavedObjectToMonitor, mergeSourceMonitor } from './helper';
 import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
 
 describe('mergeSourceMonitor', () => {
@@ -65,7 +65,66 @@ describe('mergeSourceMonitor', () => {
       },
     ]);
   });
+
+  it('should omit null or undefined values', () => {
+    const result = mapSavedObjectToMonitor({ attributes: testMonitor } as any);
+
+    expect(result).toEqual({
+      __ui: {
+        is_tls_enabled: false,
+      },
+      alert: {
+        status: {
+          enabled: true,
+        },
+        tls: {
+          enabled: true,
+        },
+      },
+      'check.request.method': 'GET',
+      'check.response.status': ['404'],
+      config_id: 'ae88f0aa-9c7d-4a5f-96dc-89d65a0ca947',
+      custom_heartbeat_id: 'todos-lightweight-test-projects-default',
+      enabled: true,
+      id: 'todos-lightweight-test-projects-default',
+      ipv4: true,
+      ipv6: true,
+      locations: [
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_central',
+          isServiceManaged: true,
+          label: 'North America - US Central',
+        },
+      ],
+      max_attempts: 2,
+      max_redirects: '0',
+      mode: 'any',
+      name: 'Todos Lightweight',
+      namespace: 'default',
+      origin: 'project',
+      original_space: 'default',
+      project_id: 'test-projects',
+      'response.include_body': 'on_error',
+      'response.include_body_max_bytes': '1024',
+      'response.include_headers': true,
+      revision: 21,
+      schedule: {
+        number: '3',
+        unit: 'm',
+      },
+      'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+      'ssl.verification_mode': 'full',
+      timeout: '16',
+      type: 'http',
+      url: '${devUrl}',
+    });
+  });
 });
+
 const testMonitor = {
   type: 'http',
   form_monitor_type: 'http',

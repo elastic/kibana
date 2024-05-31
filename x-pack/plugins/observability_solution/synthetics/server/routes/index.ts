@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  createGetDynamicSettingsRoute,
+  createPostDynamicSettingsRoute,
+} from './settings/dynamic_settings';
 import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
@@ -58,15 +62,11 @@ import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
-  addSyntheticsMonitorRoute,
   addSyntheticsProjectMonitorRoute,
   getSyntheticsEnablementRoute,
-  deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
-  editSyntheticsMonitorRoute,
   getServiceLocationsRoute,
-  getSyntheticsMonitorRoute,
   getSyntheticsProjectMonitorsRoute,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorOverviewRoute,
@@ -99,6 +99,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsSuggestionsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,
+  createGetDynamicSettingsRoute,
+  createPostDynamicSettingsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
@@ -109,4 +111,8 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   getPrivateLocationsRoute,
+  getSyntheticsMonitorRoute,
+  addSyntheticsMonitorRoute,
+  editSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorRoute,
 ];

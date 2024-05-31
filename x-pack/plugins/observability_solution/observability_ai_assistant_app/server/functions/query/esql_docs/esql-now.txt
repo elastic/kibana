@@ -1,6 +1,14 @@
 NOW
 
-Returns current date and time.
+Syntax
+NOW()
+DescriptionReturns current date and time.Example
 ```esql
 ROW current_date = NOW()
+```
+
+To retrieve logs from the last hour:
+```esql
+FROM sample_data
+| WHERE @timestamp > NOW() - 1 hour
 ```

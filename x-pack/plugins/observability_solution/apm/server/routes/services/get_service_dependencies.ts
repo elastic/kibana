@@ -36,10 +36,7 @@ async function getServiceDependenciesForTimeRange({
     start,
     end,
     numBuckets,
-    filter: [
-      { term: { [SERVICE_NAME]: serviceName } },
-      ...environmentQuery(environment),
-    ],
+    filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...environmentQuery(environment)],
     offset,
     collapseBy: 'downstream',
   });
@@ -54,16 +51,12 @@ export type ServiceDependenciesResponse = Array<
   }
 >;
 
-export async function getServiceDependencies(
-  opts: Options
-): Promise<ServiceDependenciesResponse> {
+export async function getServiceDependencies(opts: Options): Promise<ServiceDependenciesResponse> {
   const { offset, ...sharedOptions } = opts;
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     getServiceDependenciesForTimeRange(sharedOptions),
-    ...(offset
-      ? [getServiceDependenciesForTimeRange({ ...sharedOptions, offset })]
-      : [[]]),
+    ...(offset ? [getServiceDependenciesForTimeRange({ ...sharedOptions, offset })] : [[]]),
   ]);
 
   return currentPeriod.map((item) => {

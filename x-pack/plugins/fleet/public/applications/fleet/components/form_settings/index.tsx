@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { z, ZodFirstPartyTypeKind } from 'zod';
-import React, { useState } from 'react';
-import {
-  EuiDescribedFormGroup,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiLink,
-} from '@elastic/eui';
+import { ZodFirstPartyTypeKind } from 'zod';
+import React from 'react';
+import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
-import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
+
+import { SettingsFieldGroup } from './settings_field_group';
+import { getInnerType, SettingsFieldWrapper } from './settings_field_wrapper';
 
 export const settingComponentRegistry = new Map<
   string,
-  (settingsconfig: SettingsConfig) => React.ReactElement
+  (settingsconfig: SettingsConfig & { disabled?: boolean }) => React.ReactElement
 >();
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) => {
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, ({ disabled, ...settingsConfig }) => (
+  <SettingsFieldGroup settingsConfig={settingsConfig} disabled={disabled} />
+));
+
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
@@ -31,6 +31,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) =
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
         <EuiFieldNumber
           fullWidth
+          disabled={disabled}
           data-test-subj={fieldKey}
           value={fieldValue}
           onChange={handleChange}
@@ -43,7 +44,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) =
   );
 });
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) => {
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
@@ -51,6 +52,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) =
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid }: any) => (
         <EuiFieldText
           fullWidth
+          disabled={disabled}
           data-test-subj={fieldKey}
           value={fieldValue}
           onChange={handleChange}
@@ -61,97 +63,56 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) =
   );
 });
 
-const SettingsFieldWrapper: React.FC<{
-  settingsConfig: SettingsConfig;
-  typeName: keyof typeof ZodFirstPartyTypeKind;
-  renderItem: Function;
-}> = ({ settingsConfig, typeName, renderItem }) => {
-  const [error, setError] = useState('');
-  const agentPolicyFormContext = useAgentPolicyFormContext();
-
-  const fieldKey = `configuredSetting-${settingsConfig.name}`;
-  const defaultValue: number =
-    settingsConfig.schema instanceof z.ZodDefault
-      ? settingsConfig.schema._def.defaultValue()
-      : undefined;
-  const coercedSchema = settingsConfig.schema as z.ZodString;
-
-  const convertValue = (value: string, type: keyof typeof ZodFirstPartyTypeKind): any => {
-    if (type === ZodFirstPartyTypeKind.ZodNumber) {
-      if (value === '') {
-        return 0;
-      }
-      return parseInt(value, 10);
-    }
-    return value;
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = convertValue(e.target.value, typeName);
-    const validationResults = coercedSchema.safeParse(newValue);
-
-    if (!validationResults.success) {
-      setError(validationResults.error.issues[0].message);
-      agentPolicyFormContext?.updateAdvancedSettingsHasErrors(true);
-    } else {
-      setError('');
-      agentPolicyFormContext?.updateAdvancedSettingsHasErrors(false);
-    }
-
-    const newAdvancedSettings = {
-      ...(agentPolicyFormContext?.agentPolicy.advanced_settings ?? {}),
-      [settingsConfig.api_field.name]: newValue,
-    };
-
-    agentPolicyFormContext?.updateAgentPolicy({ advanced_settings: newAdvancedSettings });
-  };
-
-  const fieldValue =
-    agentPolicyFormContext?.agentPolicy.advanced_settings?.[settingsConfig.api_field.name] ??
-    defaultValue;
-
-  return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h4>{settingsConfig.title}</h4>}
-      description={
-        <>
-          {settingsConfig.description}.{' '}
-          <EuiLink href={settingsConfig.learnMoreLink} external>
-            Learn more.
-          </EuiLink>
-        </>
-      }
-    >
-      <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
-        {renderItem({ fieldValue, handleChange, isInvalid: !!error, fieldKey, coercedSchema })}
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-};
+settingComponentRegistry.set(
+  ZodFirstPartyTypeKind.ZodNativeEnum,
+  ({ disabled, ...settingsConfig }) => {
+    return (
+      <SettingsFieldWrapper
+        disabled={disabled}
+        settingsConfig={settingsConfig}
+        typeName={ZodFirstPartyTypeKind.ZodString}
+        renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
+          <EuiSelect
+            data-test-subj={fieldKey}
+            value={fieldValue}
+            fullWidth
+            disabled={disabled}
+            onChange={handleChange}
+            options={Object.entries(settingsConfig.schema._def.innerType._def.values).map(
+              ([key, value]) => ({
+                text: key,
+                value: value as string,
+              })
+            )}
+          />
+        )}
+      />
+    );
+  }
+);
 
 export function ConfiguredSettings({
   configuredSettings,
+  disabled,
 }: {
   configuredSettings: SettingsConfig[];
+  disabled?: boolean;
 }) {
   return (
     <>
-      {configuredSettings.map((configuredSetting) => {
-        const Component = settingComponentRegistry.get(
-          configuredSetting.schema instanceof z.ZodDefault
-            ? configuredSetting.schema._def.innerType._def.typeName === 'ZodEffects'
-              ? configuredSetting.schema._def.innerType._def.schema._def.typeName
-              : configuredSetting.schema._def.innerType._def.typeName
-            : configuredSetting.schema._def.typeName
-        );
+      {configuredSettings
+        .filter((configuredSetting) => !configuredSetting.hidden)
+        .map((configuredSetting) => {
+          const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
 
-        if (!Component) {
-          throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
-        }
+          if (!Component) {
+            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
+          }
 
-        return <Component key={configuredSetting.name} {...configuredSetting} />;
-      })}
+          return (
+            <Component key={configuredSetting.name} {...configuredSetting} disabled={disabled} />
+          );
+        })}
     </>
   );
 }

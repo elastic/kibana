@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import {
-  NetworkQueries,
-  NetworkKpiQueries,
-} from '../../../../../common/search_strategy/security_solution';
+import { NetworkQueries } from '../../../../../common/search_strategy/security_solution';
 
-import { networkKpiDns } from './kpi/dns';
-import { networkKpiNetworkEvents } from './kpi/network_events';
-import { networkKpiTlsHandshakes } from './kpi/tls_handshakes';
-import { networkKpiUniqueFlows } from './kpi/unique_flows';
-import { networkKpiUniquePrivateIps } from './kpi/unique_private_ips';
 import { networkDetails } from './details';
 import { networkDns } from './dns';
 import { networkHttp } from './http';
@@ -26,7 +18,7 @@ import { networkUsers } from './users';
 
 // TODO: add safer type for the strategy map
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const networkFactory: Record<NetworkQueries | NetworkKpiQueries, any> = {
+export const networkFactory: Record<NetworkQueries, any> = {
   [NetworkQueries.details]: networkDetails,
   [NetworkQueries.dns]: networkDns,
   [NetworkQueries.http]: networkHttp,
@@ -36,9 +28,4 @@ export const networkFactory: Record<NetworkQueries | NetworkKpiQueries, any> = {
   [NetworkQueries.topNFlowCount]: networkTopNFlowCount,
   [NetworkQueries.topNFlow]: networkTopNFlow,
   [NetworkQueries.users]: networkUsers,
-  [NetworkKpiQueries.dns]: networkKpiDns,
-  [NetworkKpiQueries.networkEvents]: networkKpiNetworkEvents,
-  [NetworkKpiQueries.tlsHandshakes]: networkKpiTlsHandshakes,
-  [NetworkKpiQueries.uniqueFlows]: networkKpiUniqueFlows,
-  [NetworkKpiQueries.uniquePrivateIps]: networkKpiUniquePrivateIps,
 };

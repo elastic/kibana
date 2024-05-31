@@ -14,7 +14,7 @@ import { APP_POLICIES_PATH } from '../../../../../common/constants';
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],

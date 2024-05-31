@@ -160,7 +160,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     idleSocket?: number;
   };
 
-  /** Human-friendly description of this endpoint */
+  /** A short, human-friendly description of this endpoint */
   description?: string;
 }
 
@@ -240,7 +240,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidator<P, Q, B> | false;
+  validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

@@ -70,11 +70,17 @@ export function AlertsSearchBar({
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);
 
   const onSearchQuerySubmit = useCallback(
-    ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
-      onQuerySubmit({
-        dateRange,
-        query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
-      });
+    (
+      { dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query },
+      isUpdate?: boolean
+    ) => {
+      onQuerySubmit(
+        {
+          dateRange,
+          query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
+        },
+        isUpdate
+      );
       setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
     },
     [onQuerySubmit, setQueryLanguage]

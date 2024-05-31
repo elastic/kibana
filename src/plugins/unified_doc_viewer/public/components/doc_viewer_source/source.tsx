@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { isLegacyTableEnabled, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { useEsDocSearch } from '../../hooks';
 import { getHeight } from './get_height';
@@ -36,7 +36,7 @@ interface SourceViewerProps {
 // inline limitation was necessary to enable virtualized scrolling, which improves performance
 export const MAX_LINES_CLASSIC_TABLE = 500;
 // Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
-export const MARGIN_BOTTOM = 25;
+export const MARGIN_BOTTOM = 80; // DocViewer flyout has a footer
 // Minimum height for the source content to guarantee minimum space when the flyout is scrollable.
 export const MIN_HEIGHT = 400;
 
@@ -54,7 +54,10 @@ export const DocViewerSource = ({
   const [jsonValue, setJsonValue] = useState<string>('');
   const { uiSettings } = getUnifiedDocViewerServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const useDocExplorer = !uiSettings.get(DOC_TABLE_LEGACY);
+  const useDocExplorer = !isLegacyTableEnabled({
+    uiSettings,
+    isEsqlMode: Array.isArray(textBasedHits),
+  });
   const [requestState, hit] = useEsDocSearch({
     id,
     index,

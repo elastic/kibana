@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiHideFor,
-  EuiShowFor,
-  EuiButtonIcon,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiHideFor, EuiShowFor, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { PercentileRange } from './types';
 
@@ -20,12 +14,8 @@ interface Props {
   percentileRange: PercentileRange;
   setPercentileRange: (value: PercentileRange) => void;
 }
-export function ResetPercentileZoom({
-  percentileRange,
-  setPercentileRange,
-}: Props) {
-  const isDisabled =
-    percentileRange.min === null && percentileRange.max === null;
+export function ResetPercentileZoom({ percentileRange, setPercentileRange }: Props) {
+  const isDisabled = percentileRange.min === null && percentileRange.max === null;
   const onClick = () => {
     setPercentileRange({ min: null, max: null });
   };

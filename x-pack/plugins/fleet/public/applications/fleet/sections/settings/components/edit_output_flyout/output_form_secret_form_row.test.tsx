@@ -42,6 +42,24 @@ describe('SecretFormRow', () => {
     expect(queryByText(initialValue)).not.toBeInTheDocument();
   });
 
+  it('should not enable the replace button if the row is disabled', () => {
+    const { getByText } = render(
+      <SecretFormRow
+        title={title}
+        initialValue={initialValue}
+        clear={clear}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+        cancelEdit={cancelEdit}
+        disabled={true}
+      >
+        <input id="myinput" type="text" value={initialValue} />
+      </SecretFormRow>
+    );
+
+    expect(getByText('Replace Test Secret').closest('button')).toBeDisabled();
+  });
+
   it('should call the cancelEdit function when the cancel button is clicked', () => {
     const { getByText } = render(
       <SecretFormRow

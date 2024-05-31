@@ -22,7 +22,6 @@ import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { SuggestionSelector } from './suggestion_selector';
 import { checkChartAvailability } from './check_chart_availability';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 
@@ -267,14 +266,6 @@ describe('Chart', () => {
     expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
   });
 
-  it('should render the Lens SuggestionsSelector when chart is visible and suggestions exist', async () => {
-    const component = await mountComponent({
-      isPlainRecord: true,
-      allSuggestions: allSuggestionsMock,
-    });
-    expect(component.find(SuggestionSelector).exists()).toBeTruthy();
-  });
-
   it('should render the edit on the fly button when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
       allSuggestions: allSuggestionsMock,
@@ -314,18 +305,5 @@ describe('Chart', () => {
     expect(
       component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()
     ).toBeFalsy();
-  });
-
-  it('should not render the Lens SuggestionsSelector when chart is hidden', async () => {
-    const component = await mountComponent({
-      chartHidden: true,
-      allSuggestions: allSuggestionsMock,
-    });
-    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
-  });
-
-  it('should not render the Lens SuggestionsSelector when chart is visible and suggestions are undefined', async () => {
-    const component = await mountComponent({});
-    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
   });
 });

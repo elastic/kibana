@@ -111,12 +111,9 @@ export function WaterfallWithSummary<TSample extends {}>({
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h5>
-                {i18n.translate(
-                  'xpack.apm.transactionDetails.traceSampleTitle',
-                  {
-                    defaultMessage: 'Trace sample',
-                  }
-                )}
+                {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
+                  defaultMessage: 'Trace sample',
+                })}
               </h5>
             </EuiTitle>
           </EuiFlexItem>
@@ -133,10 +130,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <TransactionActionMenu
-                  isLoading={isLoading}
-                  transaction={entryTransaction}
-                />
+                <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <MaybeViewTraceLink
@@ -160,9 +154,7 @@ export function WaterfallWithSummary<TSample extends {}>({
         <EuiFlexItem grow={false}>
           <TransactionSummary
             errorCount={waterfallFetchResult.waterfall.totalErrorsCount}
-            totalDuration={
-              waterfallFetchResult.waterfall.rootWaterfallTransaction?.duration
-            }
+            totalDuration={waterfallFetchResult.waterfall.rootWaterfallTransaction?.duration}
             transaction={entryTransaction}
           />
         </EuiFlexItem>

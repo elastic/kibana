@@ -42,6 +42,7 @@ function getSettingsFields({
       fields[key] = field;
     }
   });
+
   return fields;
 }
 

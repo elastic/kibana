@@ -194,7 +194,7 @@ export const EntityAnalyticsAnomalies = () => {
           )}
           <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
           <EuiInMemoryTable
-            responsive={false}
+            responsiveBreakpoint={false}
             items={data}
             columns={columns}
             pagination={{

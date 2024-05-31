@@ -52,15 +52,21 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   description?: string;
   'data-test-subj'?: string;
   content: IModalTabContent<S>;
-  modalActionBtn: IModalTabActionBtn<S>;
+  modalActionBtn?: IModalTabActionBtn<S>;
 }
 
 export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalWidth?: number;
   modalTitle?: string;
+  anchorElement?: HTMLElement;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({
+  onClose,
+  modalTitle,
+  modalWidth,
+  anchorElement,
+}) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
 
@@ -70,41 +76,44 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     [selectedTabId, state]
   );
 
-  const {
-    content: SelectedTabContent,
-    modalActionBtn: { handler, dataTestSubj, label, style },
-  } = useMemo(() => {
+  const { content: SelectedTabContent, modalActionBtn } = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
 
-  const onSelectedTabChanged = (id: string) => {
-    dispatch({ type: 'META_selectedTabId', payload: id });
-  };
+  const onSelectedTabChanged = useCallback(
+    (id: string) => {
+      dispatch({ type: 'META_selectedTabId', payload: id });
+    },
+    [dispatch]
+  );
 
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        key={index}
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-        prepend={tab.prepend}
-        append={tab.append}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  };
-
-  const btnClickHandler = useCallback(() => {
-    handler({ state: selectedTabState });
-  }, [handler, selectedTabState]);
+  const renderTabs = useCallback(() => {
+    return tabs.map((tab, index) => {
+      return (
+        <EuiTab
+          key={index}
+          onClick={() => onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          disabled={tab.disabled}
+          prepend={tab.prepend}
+          append={tab.append}
+          data-test-subj={tab.id}
+        >
+          {tab.name}
+        </EuiTab>
+      );
+    });
+  }, [onSelectedTabChanged, selectedTabId, tabs]);
 
   return (
     <EuiModal
-      onClose={onClose}
+      onClose={() => {
+        onClose();
+        setTimeout(() => anchorElement?.focus(), 1);
+      }}
       style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
       maxWidth={true}
+      data-test-subj="shareContextModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
@@ -118,17 +127,20 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           })}
         </Fragment>
       </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton
-          isDisabled={style ? style({ state: selectedTabState }) : false}
-          fill
-          data-test-subj={dataTestSubj}
-          data-share-url={state.url}
-          onClick={btnClickHandler}
-        >
-          {label}
-        </EuiButton>
-      </EuiModalFooter>
+      {modalActionBtn?.id !== undefined && selectedTabState && (
+        <EuiModalFooter>
+          <EuiButton
+            fill
+            data-test-subj={modalActionBtn.dataTestSubj}
+            data-share-url={state.url}
+            onClick={() => {
+              modalActionBtn.handler({ state: selectedTabState });
+            }}
+          >
+            {modalActionBtn.label}
+          </EuiButton>
+        </EuiModalFooter>
+      )}
     </EuiModal>
   );
 };

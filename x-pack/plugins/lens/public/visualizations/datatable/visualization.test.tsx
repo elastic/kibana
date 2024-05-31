@@ -23,6 +23,7 @@ import {
   VisualizationDimensionGroupConfig,
   VisualizationConfigProps,
 } from '../../types';
+import { RowHeightMode } from '../../../common/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -746,18 +747,24 @@ describe('Datatable Visualization', () => {
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
-          .fitRowToContent
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.single,
+        }).fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'custom' })
-          .fitRowToContent
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.custom,
+        }).fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'auto' })
-          .fitRowToContent
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.auto,
+        }).fitRowToContent
       ).toEqual([true]);
     });
 
@@ -767,15 +774,17 @@ describe('Datatable Visualization', () => {
       );
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
-          .rowHeightLines
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.single,
+        }).rowHeightLines
       ).toEqual([1]);
 
       // should ignore lines value based on mode
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'single',
+          rowHeight: RowHeightMode.single,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([1]);
@@ -783,7 +792,7 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'custom',
+          rowHeight: RowHeightMode.custom,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([5]);
@@ -792,41 +801,44 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'custom',
+          rowHeight: RowHeightMode.custom,
         }).rowHeightLines
       ).toEqual([2]);
     });
 
     it('sets headerRowHeight && headerRowHeightLines correctly', () => {
+      // should fallback to 3 lines in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
-      ).toEqual([1]);
+      ).toEqual([3]);
 
-      // should fallback to single in case it's not set
+      // should fallback to custom in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
-      ).toEqual(['single']);
+      ).toEqual([RowHeightMode.custom]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
-          .headerRowHeightLines
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: RowHeightMode.single,
+        }).headerRowHeightLines
       ).toEqual([1]);
 
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: 'custom',
+          headerRowHeight: RowHeightMode.custom,
           headerRowHeightLines: 5,
         }).headerRowHeightLines
       ).toEqual([5]);
 
-      // should fallback to 2 for custom in case it's not set
+      // should fallback to 3 for custom in case it's not set
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: 'custom',
+          headerRowHeight: RowHeightMode.custom,
         }).headerRowHeightLines
-      ).toEqual([2]);
+      ).toEqual([3]);
     });
 
     it('sets alignment correctly', () => {

@@ -11,16 +11,17 @@ import { get, noop } from 'lodash/fp';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
+import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 /**
  * The returned actions only support alerts risk inputs.
  */
-export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => void) => {
+export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => void) => {
   const { from, to } = useGlobalTime();
   const timelineAction = useAddBulkToTimelineAction({
     localFilters: [],
@@ -36,16 +37,16 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(
     () =>
-      alerts.map((alert: AlertRawData) => ({
-        alertId: alert._id,
-        index: alert._index,
+      inputs.map(({ input, alert }: InputAlert) => ({
+        alertId: input.id,
+        index: input.index,
         type: AttachmentType.alert,
         rule: {
-          id: get(ALERT_RULE_UUID, alert.fields)[0],
-          name: get(ALERT_RULE_NAME, alert.fields)[0],
+          id: get(ALERT_RULE_UUID, alert),
+          name: get(ALERT_RULE_NAME, alert),
         },
       })),
-    [alerts]
+    [inputs]
   );
 
   return useMemo(
@@ -61,19 +62,19 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
 
       addToNewTimeline: () => {
         telemetry.reportAddRiskInputToTimelineClicked({
-          quantity: alerts.length,
+          quantity: inputs.length,
         });
 
         closePopover();
         timelineAction.onClick(
-          alerts.map((alert: AlertRawData) => {
+          inputs.map(({ input }: InputAlert) => {
             return {
-              _id: alert._id,
-              _index: alert._index,
+              _id: input.id,
+              _index: input.index,
               data: [],
               ecs: {
-                _id: alert._id,
-                _index: alert._index,
+                _id: input.id,
+                _index: input.index,
               },
             };
           }),
@@ -85,7 +86,7 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
       },
     }),
     [
-      alerts,
+      inputs,
       caseAttachments,
       closePopover,
       createCaseFlyout,

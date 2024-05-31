@@ -7,9 +7,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { parseNextURL } from '@kbn/std';
 
 import type { RouteDefinitionParams } from '..';
-import { parseNext } from '../../../common/parse_next';
 import {
   BasicAuthenticationProvider,
   canRedirectRequest,
@@ -157,7 +157,7 @@ export function defineCommonRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
-      const redirectURL = parseNext(currentURL, basePath.serverBasePath);
+      const redirectURL = parseNextURL(currentURL, basePath.serverBasePath);
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { name: providerName },
         redirectURL,

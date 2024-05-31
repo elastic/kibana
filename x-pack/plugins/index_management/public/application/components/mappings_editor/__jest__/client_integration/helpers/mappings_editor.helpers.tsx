@@ -376,13 +376,19 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 };
 
-export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
-  const setupTestBed = registerTestBed<TestSubjects>(WithAppDependencies(MappingsEditor), {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-    defaultProps: props,
-  });
+export const setup = (
+  props: any = { onUpdate() {} },
+  appDependencies?: any
+): MappingsEditorTestBed => {
+  const setupTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(MappingsEditor, appDependencies),
+    {
+      memoryRouter: {
+        wrapComponent: false,
+      },
+      defaultProps: props,
+    }
+  );
 
   const testBed = setupTestBed() as MappingsEditorTestBed;
 

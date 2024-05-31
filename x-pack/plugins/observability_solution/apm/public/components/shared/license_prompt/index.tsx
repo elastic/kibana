@@ -19,9 +19,7 @@ export function LicensePrompt({ text }: LicensePromptProps) {
   const {
     plugins: { licenseManagement },
   } = useApmPluginContext();
-  const licensePageUrl = useKibanaUrl(
-    '/app/management/stack/license_management'
-  );
+  const licensePageUrl = useKibanaUrl('/app/management/stack/license_management');
   const manageLicenseURL = licenseManagement?.locator
     ? licenseManagement?.locator?.useUrl({
         page: 'dashboard',

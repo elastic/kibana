@@ -25,19 +25,21 @@ export const useFetchPageContext: PreFetchPageContext<RenderCellValueContext> = 
   alerts,
   columns,
 }) => {
-  const uids = new Set<string>();
-  alerts.forEach((alert) => {
-    profileUidColumns.forEach((columnId) => {
-      if (columns.find((column) => column.id === columnId) != null) {
-        const userUids = alert[columnId];
-        userUids?.forEach((uid) => uids.add(uid as string));
-      }
+  const uids = useMemo(() => {
+    const ids = new Set<string>();
+    alerts.forEach((alert) => {
+      profileUidColumns.forEach((columnId) => {
+        if (columns.find((column) => column.id === columnId) != null) {
+          const userUids = alert[columnId];
+          userUids?.forEach((uid) => ids.add(uid as string));
+        }
+      });
     });
-  });
+    return ids;
+  }, [alerts, columns]);
   const result = useBulkGetUserProfiles({ uids });
-  const returnVal = useMemo(
+  return useMemo(
     () => ({ profiles: result.data, isLoading: result.isLoading }),
     [result.data, result.isLoading]
   );
-  return returnVal;
 };

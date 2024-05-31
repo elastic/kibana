@@ -53,7 +53,7 @@ export function SloListCardView({ sloList, loading, error }: Props) {
   });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
-      list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
+      sloList,
     });
 
   const columns = useColumns();

@@ -18,17 +18,20 @@ describe('getDefaultSort function', function () {
   });
 
   test('should return default sort for an data view with timeFieldName', function () {
-    expect(getDefaultSort(stubDataView, 'desc', false)).toEqual([['@timestamp', 'desc']]);
-    expect(getDefaultSort(stubDataView, 'asc', false)).toEqual([['@timestamp', 'asc']]);
+    expect(getDefaultSort(stubDataView, 'desc', false, false)).toEqual([['@timestamp', 'desc']]);
+    expect(getDefaultSort(stubDataView, 'asc', false, false)).toEqual([['@timestamp', 'asc']]);
+    expect(getDefaultSort(stubDataView, 'asc', false, true)).toEqual([]);
   });
 
   test('should return default sort for an data view without timeFieldName', function () {
-    expect(getDefaultSort(stubDataViewWithoutTimeField, 'desc', false)).toEqual([]);
-    expect(getDefaultSort(stubDataViewWithoutTimeField, 'asc', false)).toEqual([]);
+    expect(getDefaultSort(stubDataViewWithoutTimeField, 'desc', false, false)).toEqual([]);
+    expect(getDefaultSort(stubDataViewWithoutTimeField, 'asc', false, false)).toEqual([]);
+    expect(getDefaultSort(stubDataViewWithoutTimeField, 'asc', false, true)).toEqual([]);
   });
 
   test('should return empty sort for data view when time column is hidden', function () {
-    expect(getDefaultSort(stubDataView, 'desc', true)).toEqual([]);
-    expect(getDefaultSort(stubDataView, 'asc', true)).toEqual([]);
+    expect(getDefaultSort(stubDataView, 'desc', true, false)).toEqual([]);
+    expect(getDefaultSort(stubDataView, 'asc', true, false)).toEqual([]);
+    expect(getDefaultSort(stubDataView, 'asc', true, true)).toEqual([]);
   });
 });

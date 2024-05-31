@@ -20,30 +20,40 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 
 import * as t from 'io-ts';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
-} from '@kbn/rule-data-utils';
 import { datemathStringRt } from '@kbn/io-ts-utils';
 import { Filter } from '@kbn/es-query';
+import { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { useKibana } from '../../../common/lib/kibana';
 
-const ALERT_STATUS_ALL = 'all';
-
-export type AlertStatus =
-  | typeof ALERT_STATUS_ACTIVE
-  | typeof ALERT_STATUS_RECOVERED
-  | typeof ALERT_STATUS_UNTRACKED
-  | typeof ALERT_STATUS_ALL;
-
 interface AlertSearchBarContainerState {
+  /**
+   * Time range start
+   */
   rangeFrom: string;
+  /**
+   * Time range end
+   */
   rangeTo: string;
+  /**
+   * KQL bar query
+   */
   kuery: string;
-  status: AlertStatus;
+  /**
+   * Filters applied from the KQL bar
+   */
   filters: Filter[];
+  /**
+   * Saved query ID
+   */
   savedQueryId?: string;
+  /**
+   * Filters applied from the controls bar
+   */
+  controlFilters: Filter[];
+  /**
+   * Filter controls bar configuration
+   */
+  filterControls: FilterControlConfig[];
 }
 
 interface AlertSearchBarStateTransitions {
@@ -56,32 +66,37 @@ interface AlertSearchBarStateTransitions {
   setKuery: (
     state: AlertSearchBarContainerState
   ) => (kuery: string) => AlertSearchBarContainerState;
-  setStatus: (
-    state: AlertSearchBarContainerState
-  ) => (status: AlertStatus) => AlertSearchBarContainerState;
   setFilters: (
     state: AlertSearchBarContainerState
   ) => (filters: Filter[]) => AlertSearchBarContainerState;
+  setControlFilters: (
+    state: AlertSearchBarContainerState
+  ) => (controlFilters: Filter[]) => AlertSearchBarContainerState;
   setSavedQueryId: (
     state: AlertSearchBarContainerState
   ) => (savedQueryId?: string) => AlertSearchBarContainerState;
+  setFilterControls: (
+    state: AlertSearchBarContainerState
+  ) => (filterControls: FilterControlConfig[]) => AlertSearchBarContainerState;
 }
 
 const defaultState: AlertSearchBarContainerState = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
-  status: ALERT_STATUS_ALL,
   filters: [],
+  controlFilters: [],
+  filterControls: [],
 };
 
 const transitions: AlertSearchBarStateTransitions = {
   setRangeFrom: (state) => (rangeFrom) => ({ ...state, rangeFrom }),
   setRangeTo: (state) => (rangeTo) => ({ ...state, rangeTo }),
   setKuery: (state) => (kuery) => ({ ...state, kuery }),
-  setStatus: (state) => (status) => ({ ...state, status }),
   setFilters: (state) => (filters) => ({ ...state, filters }),
+  setControlFilters: (state) => (controlFilters) => ({ ...state, controlFilters }),
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
+  setFilterControls: (state) => (filterControls) => ({ ...state, filterControls }),
 };
 
 export const alertSearchBarStateContainer = createStateContainer(defaultState, transitions);
@@ -100,12 +115,17 @@ export function useAlertSearchBarStateContainer(
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
-    stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId } = useContainerSelector(
-    stateContainer,
-    (state) => state
-  );
+  const {
+    setRangeFrom,
+    setRangeTo,
+    setKuery,
+    setFilters,
+    setSavedQueryId,
+    setControlFilters,
+    setFilterControls,
+  } = stateContainer.transitions;
+  const { rangeFrom, rangeTo, kuery, filters, savedQueryId, controlFilters, filterControls } =
+    useContainerSelector(stateContainer, (state) => state);
 
   useEffect(() => {
     if (!savedQuery) {
@@ -140,14 +160,16 @@ export function useAlertSearchBarStateContainer(
   return {
     kuery,
     onKueryChange: setKuery,
-    onRangeFromChange: setRangeFrom,
-    onRangeToChange: setRangeTo,
-    onStatusChange: setStatus,
-    onFiltersChange: setFilters,
     filters,
+    onFiltersChange: setFilters,
+    controlFilters,
+    onControlFiltersChange: setControlFilters,
+    filterControls,
+    onFilterControlsChange: setFilterControls,
     rangeFrom,
+    onRangeFromChange: setRangeFrom,
     rangeTo,
-    status,
+    onRangeToChange: setRangeTo,
     savedQuery,
     setSavedQuery,
     clearSavedQuery() {
@@ -156,11 +178,35 @@ export function useAlertSearchBarStateContainer(
   };
 }
 
-function useUrlStateSyncEffect(
+const setupUrlStateSync = (
+  stateContainer: AlertSearchBarStateContainer,
+  urlStateStorage: IKbnUrlStateStorage,
+  urlStorageKey: string,
+  replace: boolean = true
+) => {
+  // This handles filling the state when an incomplete URL set is provided
+  const setWithDefaults = (changedState: Partial<AlertSearchBarContainerState> | null) => {
+    stateContainer.set({ ...defaultState, ...changedState });
+  };
+
+  return syncState({
+    storageKey: urlStorageKey,
+    stateContainer: {
+      ...stateContainer,
+      set: setWithDefaults,
+    },
+    stateStorage: {
+      ...urlStateStorage,
+      set: <T,>(key: string, state: T) => urlStateStorage.set(key, state, { replace }),
+    },
+  });
+};
+
+const useUrlStateSyncEffect = (
   stateContainer: AlertSearchBarStateContainer,
   urlStorageKey: string,
   replace: boolean = true
-) {
+) => {
   const history = useHistory();
   const {
     data: {
@@ -195,50 +241,21 @@ function useUrlStateSyncEffect(
 
     return stop;
   }, [stateContainer, history, timeFilterService, urlStorageKey, replace]);
-}
-
-function setupUrlStateSync(
-  stateContainer: AlertSearchBarStateContainer,
-  urlStateStorage: IKbnUrlStateStorage,
-  urlStorageKey: string,
-  replace: boolean = true
-) {
-  // This handles filling the state when an incomplete URL set is provided
-  const setWithDefaults = (changedState: Partial<AlertSearchBarContainerState> | null) => {
-    stateContainer.set({ ...defaultState, ...changedState });
-  };
-
-  return syncState({
-    storageKey: urlStorageKey,
-    stateContainer: {
-      ...stateContainer,
-      set: setWithDefaults,
-    },
-    stateStorage: {
-      ...urlStateStorage,
-      set: <T,>(key: string, state: T) => urlStateStorage.set(key, state, { replace }),
-    },
-  });
-}
+};
 
 export const alertSearchBarState = t.partial({
   rangeFrom: datemathStringRt,
   rangeTo: datemathStringRt,
   kuery: t.string,
-  status: t.union([
-    t.literal(ALERT_STATUS_ACTIVE),
-    t.literal(ALERT_STATUS_RECOVERED),
-    t.literal(ALERT_STATUS_ALL),
-  ]),
 });
 
-function syncUrlStateWithInitialContainerState(
-  timefilterService: TimefilterContract,
+const syncUrlStateWithInitialContainerState = (
+  timeFilterService: TimefilterContract,
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
   urlStorageKey: string,
   replace: boolean = true
-) {
+) => {
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
   );
@@ -254,8 +271,8 @@ function syncUrlStateWithInitialContainerState(
       replace: true,
     });
     return;
-  } else if (timefilterService.isTimeTouched()) {
-    const { from, to } = timefilterService.getTime();
+  } else if (timeFilterService.isTimeTouched()) {
+    const { from, to } = timeFilterService.getTime();
     const newState = {
       ...defaultState,
       rangeFrom: from,
@@ -271,4 +288,4 @@ function syncUrlStateWithInitialContainerState(
   urlStateStorage.set(urlStorageKey, stateContainer.get(), {
     replace,
   });
-}
+};

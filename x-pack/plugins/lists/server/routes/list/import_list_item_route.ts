@@ -51,7 +51,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { deserializer, list_id: listId, serializer, type } = request.query;
+          const { deserializer, list_id: listId, serializer, type, refresh } = request.query;
           const lists = await getListClient(context);
 
           const filename = await lists.getImportFilename({
@@ -112,6 +112,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               deserializer: list.deserializer,
               listId,
               meta: undefined,
+              refresh,
               serializer: list.serializer,
               stream,
               type: list.type,
@@ -129,6 +130,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               deserializer,
               listId: undefined,
               meta: undefined,
+              refresh,
               serializer,
               stream,
               type,

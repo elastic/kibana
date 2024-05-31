@@ -34,9 +34,7 @@ export async function getTransactionsPerMinute({
     'observability_overview_get_transactions_per_minute',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
-        ],
+        events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
       },
       body: {
         track_total_hits: false,
@@ -45,9 +43,7 @@ export async function getTransactionsPerMinute({
           bool: {
             filter: [
               ...rangeQuery(start, end),
-              ...getBackwardCompatibleDocumentTypeFilter(
-                searchAggregatedTransactions
-              ),
+              ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
             ],
           },
         },

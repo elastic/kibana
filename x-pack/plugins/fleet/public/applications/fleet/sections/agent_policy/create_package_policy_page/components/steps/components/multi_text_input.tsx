@@ -38,7 +38,7 @@ interface RowProps {
   onBlur?: () => void;
   autoFocus?: boolean;
   isDisabled?: boolean;
-  showDeleteButton?: boolean;
+  isMultiRow?: boolean;
 }
 
 const Row: FunctionComponent<RowProps> = ({
@@ -50,7 +50,7 @@ const Row: FunctionComponent<RowProps> = ({
   onBlur,
   autoFocus,
   isDisabled,
-  showDeleteButton,
+  isMultiRow,
 }) => {
   const onDeleteHandler = useCallback(() => {
     onDelete(index);
@@ -73,10 +73,21 @@ const Row: FunctionComponent<RowProps> = ({
           autoFocus={autoFocus}
           disabled={isDisabled}
           onBlur={onBlur}
+          aria-label={
+            isMultiRow
+              ? i18n.translate('xpack.fleet.multiTextInput.ariaLabel', {
+                  defaultMessage: '"{fieldLabel}" input {index}',
+                  values: {
+                    fieldLabel,
+                    index: index + 1,
+                  },
+                })
+              : fieldLabel
+          }
           data-test-subj={`multiTextInputRow-${index}`}
         />
       </EuiFlexItem>
-      {showDeleteButton && (
+      {isMultiRow && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             color="text"
@@ -162,7 +173,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
               value={row}
               autoFocus={autoFocus}
               isDisabled={isDisabled}
-              showDeleteButton={rows.length > 1}
+              isMultiRow={rows.length > 1}
             />
           </EuiFlexItem>
         ))}

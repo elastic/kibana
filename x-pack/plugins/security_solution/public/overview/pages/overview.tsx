@@ -32,7 +32,7 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
@@ -104,7 +104,7 @@ const OverviewComponent = () => {
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
                   {hasIndexRead && hasKibanaREAD && (
                     <EuiFlexItem grow={false}>
-                      <SignalsByCategory filters={filters} query={query} />
+                      <SignalsByCategory filters={filters} />
                       <EuiSpacer size="l" />
                     </EuiFlexItem>
                   )}
@@ -115,7 +115,6 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
                       query={query}
                       queryType="overview"
                       setQuery={setQuery}

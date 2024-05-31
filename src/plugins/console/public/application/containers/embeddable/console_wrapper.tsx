@@ -29,10 +29,9 @@ import {
   History,
   Settings,
   Storage,
-  createStorage,
   createHistory,
   createSettings,
-  setStorage,
+  getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
 import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
@@ -78,11 +77,7 @@ const loadDependencies = async (
 
   await loadActiveApi(core.http);
   const autocompleteInfo = getAutocompleteInfo();
-  const storage = createStorage({
-    engine: window.localStorage,
-    prefix: 'sense:',
-  });
-  setStorage(storage);
+  const storage = getStorage();
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
@@ -106,29 +101,34 @@ const loadDependencies = async (
   };
 };
 
-interface ConsoleWrapperProps extends Omit<EmbeddableConsoleDependencies, 'setDispatch'> {
+interface ConsoleWrapperProps
+  extends Omit<
+    EmbeddableConsoleDependencies,
+    'setDispatch' | 'alternateView' | 'setConsoleHeight' | 'getConsoleHeight'
+  > {
   onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
+  isOpen: boolean;
 }
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown } = props;
+  const { core, usageCollection, onKeyDown, isMonacoEnabled, isOpen } = props;
+  const { analytics, i18n, theme } = core;
+  const startServices = { analytics, i18n, theme };
 
   useEffect(() => {
-    if (dependencies === null) {
+    if (dependencies === null && isOpen) {
       loadDependencies(core, usageCollection).then(setDependencies);
     }
-  }, [dependencies, setDependencies, core, usageCollection]);
+  }, [dependencies, setDependencies, core, usageCollection, isOpen]);
 
-  useEffect(() => {
-    return () => {
-      if (dependencies) {
-        dependencies.autocompleteInfo.clearSubscriptions();
-      }
-    };
-  }, [dependencies]);
+  if (!dependencies && !isOpen) {
+    // Console has not been opened
+    return null;
+  }
 
   if (!dependencies) {
+    // Console open for the first time, wait for dependencies to load.
     return <EditorContentSpinner />;
   }
 
@@ -143,7 +143,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     objectStorageClient,
     settings,
     storage,
-    theme$,
     trackUiMetric,
   } = dependencies;
   return (
@@ -163,15 +162,22 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             http,
             autocompleteInfo,
           },
-          theme$,
+          config: {
+            isMonacoEnabled,
+          },
+          startServices,
         }}
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
-              <EuiWindowEvent event="keydown" handler={onKeyDown} />
-              <Main hideWelcome />
-            </div>
+            {isOpen ? (
+              <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
+                <EuiWindowEvent event="keydown" handler={onKeyDown} />
+                <Main hideWelcome />
+              </div>
+            ) : (
+              <span />
+            )}
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

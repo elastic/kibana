@@ -15,16 +15,16 @@ import type {
 import type { StartDeps, SetupDeps } from './types';
 import { registerWithCustomIntegrations } from './register_custom_integration';
 import { routes } from './routes';
+import type { ConfigSchema } from '../common/app';
 
 export class DataVisualizerPlugin implements Plugin {
   private readonly _logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this._logger = initializerContext.logger.get();
   }
 
   setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
-    // home-plugin required
     if (plugins.home && plugins.customIntegrations) {
       registerWithCustomIntegrations(plugins.customIntegrations);
     }

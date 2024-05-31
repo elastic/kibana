@@ -30,6 +30,12 @@ export class ListingTableService extends FtrService {
     toggleButtonTestSubject: 'tagFilterPopoverButton',
   });
 
+  private readonly userPopoverToggle = this.ctx.getService('menuToggle').create({
+    name: 'User Popover',
+    menuTestSubject: 'userSelectableList',
+    toggleButtonTestSubject: 'userFilterPopoverButton',
+  });
+
   private async getSearchFilter() {
     return await this.testSubjects.find('tableListSearchBox');
   }
@@ -69,14 +75,10 @@ export class ListingTableService extends FtrService {
 
   private async getAllSelectableItemsNamesOnCurrentPage(): Promise<string[]> {
     const visualizationNames = [];
-    // TODO - use .euiTableRow-isSelectable when it's working again (https://github.com/elastic/eui/issues/7515)
-    const rows = await this.find.allByCssSelector('.euiTableRow');
+    const rows = await this.find.allByCssSelector('.euiTableRow-isSelectable');
     for (let i = 0; i < rows.length; i++) {
-      const checkbox = await rows[i].findByCssSelector('.euiCheckbox__input');
-      if (await checkbox.isEnabled()) {
-        const link = await rows[i].findByCssSelector('.euiLink');
-        visualizationNames.push(await link.getVisibleText());
-      }
+      const link = await rows[i].findByCssSelector('.euiLink');
+      visualizationNames.push(await link.getVisibleText());
     }
     this.log.debug(`Found ${visualizationNames.length} selectable visualizations on current page`);
     return visualizationNames;
@@ -146,6 +148,29 @@ export class ListingTableService extends FtrService {
   public async closeTagPopover(): Promise<void> {
     this.log.debug('ListingTable.closeTagPopover');
     await this.tagPopoverToggle.close();
+  }
+
+  /**
+   * Select users in the searchbar's user filter.
+   */
+  public async selectUsers(...userNames: string[]): Promise<void> {
+    await this.openUsersPopover();
+    // select users
+    for (const userName of userNames) {
+      await this.testSubjects.click(`userProfileSelectableOption-${userName}`);
+    }
+    await this.closeUsersPopover();
+    await this.waitUntilTableIsLoaded();
+  }
+
+  public async openUsersPopover(): Promise<void> {
+    this.log.debug('ListingTable.openUsersPopover');
+    await this.userPopoverToggle.open();
+  }
+
+  public async closeUsersPopover(): Promise<void> {
+    this.log.debug('ListingTable.closeUsersPopover');
+    await this.userPopoverToggle.close();
   }
 
   /**

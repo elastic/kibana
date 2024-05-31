@@ -7,20 +7,16 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import '../../../../common/mock/match_media';
 import { TestProviders, mockGlobalState, createMockStore } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';
-import { createEmbeddable } from './create_embeddable';
 import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
-import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 
-jest.mock('./create_embeddable');
 jest.mock('./map_config');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../containers/fields');
 jest.mock('./index_patterns_missing_prompt', () => ({
   IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
@@ -33,6 +29,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
         links: {
           siem: { networkMap: '' },
         },
+      },
+      maps: {
+        Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
       },
       storage: {
         get: mockGetStorage,
@@ -47,12 +46,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
     remove: jest.fn(),
   }),
 }));
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  ...jest.requireActual('@kbn/embeddable-plugin/public'),
-  EmbeddablePanel: jest.fn().mockReturnValue(<div data-test-subj="EmbeddablePanel" />),
-}));
 
-const mockCreateEmbeddable = createEmbeddable as jest.Mock;
 const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as jest.Mock;
 const mockGetStorage = jest.fn();
 const mockSetStorage = jest.fn();
@@ -93,35 +87,6 @@ const mockState = {
   },
 };
 const defaultMockStore = createMockStore(mockState);
-const mockUpdateInput = jest.fn();
-const embeddableValue = {
-  destroyed: false,
-  enhancements: { dynamicActions: {} },
-  getActionContext: jest.fn(),
-  getFilterActions: jest.fn(),
-  id: '70969ddc-4d01-4048-8073-4ea63d595638',
-  input: {
-    viewMode: 'view',
-    title: 'Source -> Destination Point-to-Point Map',
-    id: '70969ddc-4d01-4048-8073-4ea63d595638',
-    filters: Array(0),
-    hidePanelTitles: true,
-  },
-  input$: {},
-  isContainer: false,
-  output: {},
-  output$: {},
-  parent: undefined,
-  parentSubscription: undefined,
-  renderComplete: {},
-  runtimeId: 1,
-  reload: jest.fn(),
-  setLayerList: jest.fn(),
-  setEventHandlers: jest.fn(),
-  setRenderTooltipContent: jest.fn(),
-  type: 'map',
-  updateInput: mockUpdateInput,
-};
 const testProps = {
   endDate: '2019-08-28T05:50:57.877Z',
   filters: [],
@@ -133,7 +98,6 @@ describe('EmbeddedMapComponent', () => {
   beforeEach(() => {
     setQuery.mockClear();
     mockGetStorage.mockReturnValue(true);
-    mockCreateEmbeddable.mockResolvedValue(embeddableValue);
     mockUseIsFieldInIndexPattern.mockReturnValue(() => true);
 
     // stub Kibana services for the embeddable plugin to ensure embeddable panel renders.
@@ -155,21 +119,7 @@ describe('EmbeddedMapComponent', () => {
     });
   });
 
-  test('calls updateInput with time range filter', async () => {
-    render(
-      <TestProviders store={defaultMockStore}>
-        <EmbeddedMapComponent {...testProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(mockUpdateInput).toHaveBeenCalledTimes(2);
-      expect(mockUpdateInput).toHaveBeenNthCalledWith(2, {
-        filters: buildTimeRangeFilter(testProps.startDate, testProps.endDate),
-      });
-    });
-  });
-
-  test('renders EmbeddablePanel from embeddable plugin', async () => {
+  test('renders Map', async () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders store={defaultMockStore}>
         <EmbeddedMapComponent {...testProps} />
@@ -177,9 +127,8 @@ describe('EmbeddedMapComponent', () => {
     );
 
     await waitFor(() => {
-      expect(getByTestId('EmbeddablePanel')).toBeInTheDocument();
+      expect(getByTestId('MapPanel')).toBeInTheDocument();
       expect(queryByTestId('IndexPatternsMissingPrompt')).not.toBeInTheDocument();
-      expect(queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
   });
 
@@ -199,24 +148,8 @@ describe('EmbeddedMapComponent', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      expect(queryByTestId('EmbeddablePanel')).not.toBeInTheDocument();
+      expect(queryByTestId('MapPanel')).not.toBeInTheDocument();
       expect(getByTestId('IndexPatternsMissingPrompt')).toBeInTheDocument();
-      expect(queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    });
-  });
-
-  test('renders Loader', async () => {
-    mockCreateEmbeddable.mockResolvedValue(null);
-
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders store={defaultMockStore}>
-        <EmbeddedMapComponent {...testProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(queryByTestId('EmbeddablePanel')).not.toBeInTheDocument();
-      expect(queryByTestId('IndexPatternsMissingPrompt')).not.toBeInTheDocument();
-      expect(getByTestId('loading-spinner')).toBeInTheDocument();
     });
   });
 

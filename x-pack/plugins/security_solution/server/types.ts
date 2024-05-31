@@ -19,6 +19,7 @@ import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/li
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
 
 import type { Readable } from 'stream';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
@@ -32,6 +33,7 @@ import type { EndpointInternalFleetServicesInterface } from './endpoint/services
 import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import type { IRulesManagementClient } from './lib/detection_engine/rule_management/logic/rule_management/rules_management_client';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -43,9 +45,11 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAppClient: () => AppClient;
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
+  getRulesManagementClient: () => IRulesManagementClient;
   getDetectionEngineHealthClient: () => IDetectionEngineHealthClient;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
+  getAuditLogger: () => AuditLogger | undefined;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;

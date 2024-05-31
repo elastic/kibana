@@ -25,10 +25,7 @@ import {
   SPAN_TYPE,
 } from '../../../../../../../common/es_fields/apm';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
-import {
-  MobileSpanSubtype,
-  MobileSpanType,
-} from '../../../../../../../common/mobile/constants';
+import { MobileSpanSubtype, MobileSpanType } from '../../../../../../../common/mobile/constants';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
@@ -40,24 +37,15 @@ const PER_REGION_LAYER_ID = 'per_region';
 const HTTP_REQUEST_PER_COUNTRY = `__kbnjoin__count__${PER_COUNTRY_LAYER_ID}`;
 const HTTP_REQUESTS_PER_REGION = `__kbnjoin__count__${PER_REGION_LAYER_ID}`;
 
-const label = i18n.translate(
-  'xpack.apm.serviceOverview.embeddedMap.httpRequests.metric.label',
-  {
-    defaultMessage: 'HTTP requests',
-  }
-);
+const label = i18n.translate('xpack.apm.serviceOverview.embeddedMap.httpRequests.metric.label', {
+  defaultMessage: 'HTTP requests',
+});
 
-export async function getHttpRequestsLayerList(
-  maps: MapsStartApi | undefined,
-  dataViewId: string
-) {
+export function getHttpRequestsLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
   const whereQuery = {
     language: 'kuery',
     query: `${PROCESSOR_EVENT}:${ProcessorEvent.span} and ${SPAN_SUBTYPE}:${MobileSpanSubtype.Http} and ${SPAN_TYPE}:${MobileSpanType.External}`,
   };
-
-  const basemapLayerDescriptor =
-    await maps?.createLayerDescriptors?.createBasemapLayerDescriptor();
 
   const httpRequestsByCountryLayer: VectorLayerDescriptor = {
     joins: [
@@ -88,12 +76,9 @@ export async function getHttpRequestsLayerList(
     },
     style: getLayerStyle(HTTP_REQUEST_PER_COUNTRY, PalleteColors.BluetoRed),
     id: uuidv4(),
-    label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.httpRequests.country.label',
-      {
-        defaultMessage: 'HTTP requests per country',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.httpRequests.country.label', {
+      defaultMessage: 'HTTP requests per country',
+    }),
     minZoom: 0,
     maxZoom: 2,
     alpha: 0.75,
@@ -130,12 +115,9 @@ export async function getHttpRequestsLayerList(
     },
     style: getLayerStyle(HTTP_REQUESTS_PER_REGION, PalleteColors.YellowtoRed),
     id: uuidv4(),
-    label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.httpRequests.region.label',
-      {
-        defaultMessage: 'HTTP requests per region',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.httpRequests.region.label', {
+      defaultMessage: 'HTTP requests per region',
+    }),
     minZoom: 1,
     maxZoom: 24,
     alpha: 0.75,
@@ -143,9 +125,5 @@ export async function getHttpRequestsLayerList(
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  return [
-    ...(basemapLayerDescriptor ? [basemapLayerDescriptor] : []),
-    httpRequestsByRegionLayer,
-    httpRequestsByCountryLayer,
-  ] as BaseLayerDescriptor[];
+  return [httpRequestsByRegionLayer, httpRequestsByCountryLayer] as BaseLayerDescriptor[];
 }

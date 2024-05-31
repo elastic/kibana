@@ -102,6 +102,7 @@ export const TransformManagement: FC = () => {
     error: transformsStatsErrorMessage,
     data: transformsStats,
   } = useGetTransformsStats({
+    basic: true,
     enabled: !transformNodesInitialLoading && transformNodes > 0,
   });
 

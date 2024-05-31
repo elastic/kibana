@@ -37,7 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
 
       // save the dashboard before adding controls
-      await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
+      await dashboard.saveDashboard('Test Control Group Apply Button', {
+        exitFromEditMode: false,
+        saveAsNew: true,
+      });
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       await dashboard.expectMissingUnsavedChangesBadge();
@@ -189,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('time slider selections', () => {
-      let valueBefore: string;
+      let valueBefore: string | null;
 
       before(async () => {
         valueBefore = await dashboardControls.getTimeSliceFromTimeSlider();

@@ -6,10 +6,11 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
+import { twoMinute } from '../fixtures/duration';
 
 const generator = new SyntheticsAvailabilityTransformGenerator();
 
@@ -24,13 +25,13 @@ describe('Synthetics Availability Transform Generator', () => {
       _meta: {
         managed: true,
         managed_by: 'observability',
-        version: 3,
+        version: 3.2,
       },
       defer_validation: true,
       description: 'Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]',
       dest: {
-        index: '.slo-observability.sli-v3',
-        pipeline: '.slo-observability.sli.pipeline-v3',
+        index: '.slo-observability.sli-v3.2',
+        pipeline: '.slo-observability.sli.pipeline-v3.2',
       },
       frequency: '1m',
       pivot: {
@@ -57,14 +58,24 @@ describe('Synthetics Availability Transform Generator', () => {
               fixed_interval: '1m',
             },
           },
-          config_id: {
+          'monitor.config_id': {
             terms: {
               field: 'config_id',
+            },
+          },
+          'monitor.name': {
+            terms: {
+              field: 'monitor.name',
             },
           },
           'observer.name': {
             terms: {
               field: 'observer.name',
+            },
+          },
+          'observer.geo.name': {
+            terms: {
+              field: 'observer.geo.name',
             },
           },
           'slo.groupings.monitor.name': {
@@ -85,11 +96,6 @@ describe('Synthetics Availability Transform Generator', () => {
           'slo.id': {
             terms: {
               field: 'slo.id',
-            },
-          },
-          'slo.instanceId': {
-            terms: {
-              field: 'slo.instanceId',
             },
           },
           'slo.revision': {
@@ -135,12 +141,6 @@ describe('Synthetics Availability Transform Generator', () => {
             },
             type: 'keyword',
           },
-          'slo.instanceId': {
-            script: {
-              source: "emit('*')",
-            },
-            type: 'keyword',
-          },
           'slo.revision': {
             script: {
               source: 'emit(1)',
@@ -173,7 +173,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
     expect(transform.pivot?.group_by).toEqual(
       expect.objectContaining({
-        config_id: {
+        'monitor.config_id': {
           terms: {
             field: 'config_id',
           },
@@ -197,7 +197,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
     expect(transform.pivot?.group_by).not.toEqual(
       expect.objectContaining({
-        config_id: {
+        'monitor.config_id': {
           terms: {
             field: 'config_id',
           },
@@ -319,7 +319,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           tags,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -349,7 +349,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           monitorIds,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -379,7 +379,7 @@ describe('Synthetics Availability Transform Generator', () => {
           ...indicator.params,
           projects,
         },
-      } as SLO['indicator'],
+      } as SLODefinition['indicator'],
     });
     const transform = generator.getTransformParams(slo, spaceId);
 
@@ -402,6 +402,30 @@ describe('Synthetics Availability Transform Generator', () => {
     expect(transform.source.query?.bool?.filter).toContainEqual({
       term: {
         'meta.space_id': spaceId,
+      },
+    });
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createSyntheticsAvailabilityIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo, 'default');
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
       },
     });
   });

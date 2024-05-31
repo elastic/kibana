@@ -7,12 +7,10 @@
 
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
-import {
-  getAssistantSystemMessage,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { ChatBody as Component } from './chat_body';
+import { buildSystemMessage } from '../../utils/builders';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,
@@ -25,7 +23,7 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
   args: {
     initialTitle: 'My Conversation',
     initialMessages: [
-      getAssistantSystemMessage({ contexts: [] }),
+      buildSystemMessage(),
       {
         '@timestamp': new Date().toISOString(),
         message: {

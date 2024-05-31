@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { DataDriftPage } from '../../../datavisualizer/data_drift/data_drift_page';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
@@ -22,6 +22,10 @@ import {
   getBreadcrumbWithUrlForApp,
 } from '../../breadcrumbs';
 import { basicResolvers } from '../../resolvers';
+
+const DataDriftPage = dynamic(async () => ({
+  default: (await import('../../../datavisualizer/data_drift/data_drift_page')).DataDriftPage,
+}));
 
 export const dataDriftRouteFactory = (
   navigateToPath: NavigateToPath,

@@ -39,9 +39,7 @@ export async function createApmTelemetry({
   isProd,
 }: {
   core: CoreSetup;
-  getApmIndices: (
-    soClient: SavedObjectsClientContract
-  ) => Promise<APMDataAccessConfig['indices']>;
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -112,40 +110,43 @@ export async function createApmTelemetry({
 
   usageCollector.registerCollector(collector);
 
-  core.getStartServices().then(async ([_coreStart, pluginsStart]) => {
-    const { taskManager: taskManagerStart } = pluginsStart as {
-      taskManager: TaskManagerStartContract;
-    };
+  core
+    .getStartServices()
+    .then(async ([_coreStart, pluginsStart]) => {
+      const { taskManager: taskManagerStart } = pluginsStart as {
+        taskManager: TaskManagerStartContract;
+      };
 
-    taskManagerStart.ensureScheduled({
-      id: APM_TELEMETRY_TASK_NAME,
-      taskType: APM_TELEMETRY_TASK_NAME,
-      schedule: {
-        interval: '720m',
-      },
-      scope: ['apm'],
-      params: {},
-      state: {},
-    });
+      await taskManagerStart.ensureScheduled({
+        id: APM_TELEMETRY_TASK_NAME,
+        taskType: APM_TELEMETRY_TASK_NAME,
+        schedule: {
+          interval: '720m',
+        },
+        scope: ['apm'],
+        params: {},
+        state: {},
+      });
 
-    try {
-      const currentData = (
-        await savedObjectsClient.get(
-          APM_TELEMETRY_SAVED_OBJECT_TYPE,
-          APM_TELEMETRY_SAVED_OBJECT_ID
-        )
-      ).attributes as { kibanaVersion?: string };
+      try {
+        const currentData = (
+          await savedObjectsClient.get(
+            APM_TELEMETRY_SAVED_OBJECT_TYPE,
+            APM_TELEMETRY_SAVED_OBJECT_ID
+          )
+        ).attributes as { kibanaVersion?: string };
 
-      if (currentData.kibanaVersion !== kibanaVersion) {
-        logger.debug(
-          `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
-        );
-        await taskManagerStart.runSoon(APM_TELEMETRY_TASK_NAME);
+        if (currentData.kibanaVersion !== kibanaVersion) {
+          logger.debug(
+            `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
+          );
+          await taskManagerStart.runSoon(APM_TELEMETRY_TASK_NAME);
+        }
+      } catch (err) {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          logger.warn('Failed to fetch saved telemetry data.');
+        }
       }
-    } catch (err) {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        logger.warn('Failed to fetch saved telemetry data.');
-      }
-    }
-  });
+    })
+    .catch(() => {});
 }

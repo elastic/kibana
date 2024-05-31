@@ -82,12 +82,15 @@ describe('QueryHistory', () => {
           name: 'Last duration',
           sortable: false,
           width: '120px',
+          css: {
+            justifyContent: 'flex-end',
+          },
         },
         {
           actions: [],
           'data-test-subj': 'actions',
           name: '',
-          width: '40px',
+          width: '60px',
         },
       ]);
     });
@@ -127,6 +130,9 @@ describe('QueryHistory', () => {
         name: 'Last duration',
         sortable: false,
         width: 'auto',
+        css: {
+          justifyContent: 'flex-end',
+        },
       },
       {
         actions: [],
@@ -153,7 +159,7 @@ describe('QueryHistory', () => {
         />
       );
       expect(screen.getByRole('table')).toHaveTextContent(
-        'Time ranRecent queriesLast durationTime ranMar. 25, 24 08:45:27Recent queriesfrom kibana_sample_data_flights | limit 10Last duration2ms'
+        'Time ranRecent queriesLast durationMar. 25, 24 08:45:27from kibana_sample_data_flights | limit 102ms'
       );
     });
   });

@@ -167,7 +167,7 @@ describe('EventLogStart', () => {
         total: 0,
         data: [],
       });
-      expect(
+      await expect(
         eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
           start: 'not a date string',
         })
@@ -181,7 +181,7 @@ describe('EventLogStart', () => {
         total: 0,
         data: [],
       });
-      expect(
+      await expect(
         eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id'], {
           end: 'not a date string',
         })

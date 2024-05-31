@@ -6,20 +6,13 @@
  */
 import React from 'react';
 import { KeyValueFilterList } from '.';
-import {
-  expectTextsInDocument,
-  renderWithTheme,
-} from '../../../utils/test_helpers';
+import { expectTextsInDocument, renderWithTheme } from '../../../utils/test_helpers';
 import { fireEvent } from '@testing-library/react';
 
 describe('KeyValueFilterList', () => {
   it('hides accordion when key value list is empty', () => {
     const { container } = renderWithTheme(
-      <KeyValueFilterList
-        title="foo"
-        keyValueList={[]}
-        onClickFilter={jest.fn}
-      />
+      <KeyValueFilterList title="foo" keyValueList={[]} onClickFilter={jest.fn} />
     );
     expect(container).toBeEmptyDOMElement();
   });
@@ -34,13 +27,7 @@ describe('KeyValueFilterList', () => {
         onClickFilter={jest.fn}
       />
     );
-    expectTextsInDocument(component, [
-      'title',
-      'foo',
-      'foo value',
-      'bar',
-      'bar value',
-    ]);
+    expectTextsInDocument(component, ['title', 'foo', 'foo value', 'bar', 'bar value']);
   });
   it('shows icon and title on accordion', () => {
     const component = renderWithTheme(

@@ -25,7 +25,7 @@ export class ResponseActionsClientError extends CustomHttpRequestError {
   }
 
   toString() {
-    return JSON.stringify(stringify(this.toJSON()), null, 2);
+    return stringify(this.toJSON());
   }
 }
 
@@ -54,3 +54,5 @@ export class ResponseActionsConnectorNotConfiguredError extends ResponseActionsC
     super(`No stack connector instance configured for [${connectorTypeId}]`, statusCode, meta);
   }
 }
+
+export class ResponseActionAgentResponseEsDocNotFound extends ResponseActionsClientError {}

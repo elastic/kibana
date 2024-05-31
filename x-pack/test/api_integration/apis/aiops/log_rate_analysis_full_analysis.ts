@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
               expect(typeof d.type).to.be('string');
             });
 
-            const addSignificantItemsActions = getAddSignificationItemsActions(data, apiVersion);
+            const addSignificantItemsActions = getAddSignificationItemsActions(data);
             expect(addSignificantItemsActions.length).to.greaterThan(
               0,
               'Expected significant items actions to be greater than 0.'
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
               'Significant items do not match expected values.'
             );
 
-            const histogramActions = getHistogramActions(data, apiVersion);
+            const histogramActions = getHistogramActions(data);
             const histograms = histogramActions.flatMap((d) => d.payload);
             // for each significant term we should get a histogram
             expect(histogramActions.length).to.be(significantItems.length);
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
               );
             });
 
-            const groupActions = getGroupActions(data, apiVersion);
+            const groupActions = getGroupActions(data);
             const groups = groupActions.flatMap((d) => d.payload);
 
             const actualGroups = orderBy(groups, ['docCount'], ['desc']);
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
               )}, got ${JSON.stringify(actualGroups)}`
             );
 
-            const groupHistogramActions = getGroupHistogramActions(data, apiVersion);
+            const groupHistogramActions = getGroupHistogramActions(data);
             const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
             // for each significant terms group we should get a histogram
             expect(groupHistograms.length).to.be(groups.length);

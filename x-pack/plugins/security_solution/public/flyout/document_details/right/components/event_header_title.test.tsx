@@ -46,7 +46,7 @@ describe('<EventHeaderTitle />', () => {
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render event details as title if event.kind is not event', () => {
+  it('should render corret title if event.kind is alert', () => {
     const mockGetFieldsData = (field: string) => {
       switch (field) {
         case 'event.kind':
@@ -60,7 +60,24 @@ describe('<EventHeaderTitle />', () => {
       getFieldsData: mockGetFieldsData,
     });
 
-    expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Event details');
+    expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('External alert details');
+  });
+
+  it('should render corret title if event.kind is not alert or event', () => {
+    const mockGetFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'metric';
+        case 'event.category':
+          return 'malware';
+      }
+    };
+    const { getByTestId } = renderHeader({
+      ...mockContextValue,
+      getFieldsData: mockGetFieldsData,
+    });
+
+    expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Metric details');
   });
 
   it('should render event category as title if event.kind is event', () => {
@@ -80,6 +97,21 @@ describe('<EventHeaderTitle />', () => {
     });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('process name');
+  });
+
+  it('should render default title if event.kind is event and event category is not available', () => {
+    const mockGetFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'event';
+      }
+    };
+    const { getByTestId } = renderHeader({
+      ...mockContextValue,
+      getFieldsData: mockGetFieldsData,
+    });
+
+    expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Event details');
   });
 
   it('should fallback title if event kind is null', () => {

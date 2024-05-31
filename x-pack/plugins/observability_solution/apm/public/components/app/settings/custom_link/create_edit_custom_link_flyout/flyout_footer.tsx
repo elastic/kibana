@@ -45,9 +45,7 @@ export function FlyoutFooter({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ display: 'block' }}>
-          {customLinkId && (
-            <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
-          )}
+          {customLinkId && <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />}
           <EuiButton
             data-test-subj="apmCustomLinkFlyoutFooterSaveButton"
             form="customLink_form"

@@ -54,7 +54,7 @@ export interface BulkCreateSuppressedAlertsParams
   >;
   eventsAndTerms: EventsAndTerms[];
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures: ExperimentalFeatures | undefined;
+  experimentalFeatures: ExperimentalFeatures;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -87,7 +87,7 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
     const partitionedEvents = partitionMissingFieldsEvents(
       eventsAndTerms,
       alertSuppression?.groupBy || [],
-      ['event']
+      ['event', 'fields']
     );
 
     unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1]);

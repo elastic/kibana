@@ -1,17 +1,18 @@
 MV_MAX
 
-
-Converts a multivalued field into a single valued field containing the maximum value. For example:
+Syntax
+Parameters
+field
+Multivalue expression.
+DescriptionConverts a multivalued expression into a single valued column containing the maximum value.Supported types
+Examples
 ```esql
 ROW a=[3, 5, 1]
 | EVAL max_a = MV_MAX(a)
 ```
 
-It can be used by any field type, including keyword fields. In that case picks the
-last string, comparing their utf-8 representation byte by byte:
+It can be used by any column type, including keyword columns. In that case it picks the last string, comparing their utf-8 representation byte by byte:
 ```esql
 ROW a=["foo", "zoo", "bar"]
 | EVAL max_a = MV_MAX(a)
 ```
-
-Supported types:

@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInQA upgrade prebuilt rules from package without historical versions with mock rule assets', () => {
+  describe('@ess @serverless @skipInServerlessMKI upgrade prebuilt rules from package without historical versions with mock rule assets', () => {
     const getRuleAssetSavedObjects = () => [
       createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
       createRuleAssetSavedObject({ rule_id: 'rule-2', version: 2 }),

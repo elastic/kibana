@@ -18,7 +18,7 @@ import { ChartSelect } from './chart_select';
 import { ChartCollapse } from './chart_collapse';
 import * as i18n from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
-import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
@@ -201,7 +201,6 @@ const ChartPanelsComponent: React.FC<Props> = ({
             <AlertsHistogramPanel
               alignHeader="flexStart"
               chartHeight={TREND_CHART_HEIGHT}
-              chartOptionsContextMenu={chartOptionsContextMenu}
               comboboxRef={stackByField0ComboboxRef}
               defaultStackByOption={trendChartStackBy}
               extraActions={resetGroupByFieldAction}
@@ -209,10 +208,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               inspectTitle={i18n.TREND}
               onFieldSelected={updateCommonStackBy0}
               panelHeight={CHART_PANEL_HEIGHT}
-              query={query}
-              runtimeMappings={runtimeMappings}
               setComboboxInputRef={setStackByField0ComboboxInputRef}
-              showCountsInLegend={true}
               showGroupByPlaceholder={false}
               showTotalAlertsCount={false}
               signalIndexName={signalIndexName}
@@ -239,13 +235,10 @@ const ChartPanelsComponent: React.FC<Props> = ({
               filters={alertsDefaultFilters}
               inspectTitle={isAlertsPageChartsEnabled ? i18n.COUNTS : i18n.TABLE}
               panelHeight={CHART_PANEL_HEIGHT}
-              query={query}
-              runtimeMappings={runtimeMappings}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={updateCommonStackBy1}
               setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
-              signalIndexName={signalIndexName}
               stackByField0={countTableStackBy0}
               stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={countTableStackBy1}

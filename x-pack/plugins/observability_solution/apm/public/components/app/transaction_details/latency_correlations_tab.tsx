@@ -9,10 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  METRIC_TYPE,
-  useTrackMetric,
-} from '@kbn/observability-shared-plugin/public';
+import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
 
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 
@@ -30,9 +27,7 @@ function LatencyCorrelationsTab({ onFilter }: TabContentProps) {
 
   const metric = {
     app: 'apm' as const,
-    metric: hasActivePlatinumLicense
-      ? 'correlations_tab_view'
-      : 'correlations_license_prompt',
+    metric: hasActivePlatinumLicense ? 'correlations_tab_view' : 'correlations_license_prompt',
     metricType: METRIC_TYPE.COUNT as METRIC_TYPE.COUNT,
   };
   useTrackMetric(metric);

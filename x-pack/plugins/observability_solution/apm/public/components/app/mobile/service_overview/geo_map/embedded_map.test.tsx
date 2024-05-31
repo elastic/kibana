@@ -10,32 +10,18 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
 import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MemoryRouter } from 'react-router-dom';
 import { MapTypes } from '../../../../../../common/mobile/constants';
 
 describe('Embedded Map', () => {
   it('it renders', async () => {
-    const mockSetLayerList = jest.fn();
-    const mockUpdateInput = jest.fn();
-    const mockRender = jest.fn();
-    const mockReload = jest.fn();
-
-    const mockEmbeddable = embeddablePluginMock.createStartContract();
-    mockEmbeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
-      create: () => ({
-        setLayerList: mockSetLayerList,
-        updateInput: mockUpdateInput,
-        render: mockRender,
-        reload: mockReload,
-      }),
-    }));
+    const mockMapsStartService = {
+      Map: jest.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
+    };
 
     const mockSpaces = {
-      getActiveSpace: jest
-        .fn()
-        .mockImplementation(() => ({ id: 'mockSpaceId' })),
+      getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
     };
 
     const mockDataView = {
@@ -51,14 +37,10 @@ describe('Embedded Map', () => {
 
     const { findByTestId } = render(
       <MemoryRouter
-        initialEntries={[
-          '/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&',
-        ]}
+        initialEntries={['/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&']}
       >
         <MockApmPluginContextWrapper>
-          <KibanaContextProvider
-            services={{ embeddable: mockEmbeddable, spaces: mockSpaces }}
-          >
+          <KibanaContextProvider services={{ maps: mockMapsStartService, spaces: mockSpaces }}>
             <EmbeddedMap
               selectedMap={MapTypes.Http}
               filters={[]}
@@ -70,12 +52,7 @@ describe('Embedded Map', () => {
         </MockApmPluginContextWrapper>
       </MemoryRouter>
     );
-    expect(
-      await findByTestId('serviceOverviewEmbeddedMap')
-    ).toBeInTheDocument();
-
-    expect(mockSetLayerList).toHaveBeenCalledTimes(1);
-    expect(mockUpdateInput).toHaveBeenCalledTimes(1);
-    expect(mockRender).toHaveBeenCalledTimes(1);
+    expect(await findByTestId('serviceOverviewEmbeddedMap')).toBeInTheDocument();
+    expect(await findByTestId('mockMap')).toBeInTheDocument();
   });
 });

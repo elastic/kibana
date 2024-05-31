@@ -7,13 +7,10 @@
 
 import expect from '@kbn/expect';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import {
-  ENABLE_ASSET_CRITICALITY_SETTING,
-  RISK_SCORE_PREVIEW_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
+import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
@@ -26,6 +23,7 @@ import {
   cleanAssetCriticality,
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
+  enableAssetCriticalityAdvancedSetting,
   sanitizeScores,
   waitForAssetCriticalityToBePresent,
 } from '../../utils';
@@ -44,7 +42,9 @@ export default ({ getService }: FtrProviderContext): void => {
     body,
   }: {
     body: object;
-  }): Promise<{ scores: { host?: RiskScore[]; user?: RiskScore[] } }> => {
+  }): Promise<{
+    scores: { host?: EntityRiskScoreRecord[]; user?: EntityRiskScoreRecord[] };
+  }> => {
     const defaultBody = { data_view_id: '.alerts-security.alerts-default' };
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
@@ -71,9 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless Risk Scoring Preview API', () => {
     before(async () => {
-      await kibanaServer.uiSettings.update({
-        [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-      });
+      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     context('with auditbeat data', () => {
@@ -509,56 +507,6 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score_norm: 71.39172370958079,
               category_1_count: 50,
               category_1_score: 89.23965463697598,
-              id_field: 'user.name',
-              id_value: 'user-1',
-            },
-          ]);
-        });
-      });
-
-      context('with category weights', () => {
-        it('weights risk inputs from different categories according to the category weight', async () => {
-          const documentId = uuidv4();
-          const userSignal = buildDocument(
-            { 'event.kind': 'signal', 'user.name': 'user-1' },
-            documentId
-          );
-          const hostSignal = buildDocument(
-            { 'event.kind': 'signal', 'host.name': 'host-1' },
-            documentId
-          );
-          await indexListOfDocuments(Array(50).fill(userSignal).concat(Array(50).fill(hostSignal)));
-
-          await createAndSyncRuleAndAlerts({
-            query: `id: ${documentId}`,
-            alerts: 100,
-            riskScore: 100,
-          });
-          const { scores } = await previewRiskScores({
-            body: {
-              weights: [{ type: 'risk_category', value: 'category_1', host: 0.4, user: 0.8 }],
-            },
-          });
-
-          expect(sanitizeScores(scores.host!)).to.eql([
-            {
-              calculated_level: 'Low',
-              calculated_score: 93.2375911647125,
-              calculated_score_norm: 35.695861854790394,
-              category_1_score: 35.69586185479039,
-              category_1_count: 50,
-              id_field: 'host.name',
-              id_value: 'host-1',
-            },
-          ]);
-
-          expect(sanitizeScores(scores.user!)).to.eql([
-            {
-              calculated_level: 'High',
-              calculated_score: 186.475182329425,
-              calculated_score_norm: 71.39172370958079,
-              category_1_score: 71.39172370958077,
-              category_1_count: 50,
               id_field: 'user.name',
               id_value: 'user-1',
             },

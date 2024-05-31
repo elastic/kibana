@@ -136,41 +136,30 @@ export const getDestinationMap = ({
       });
     });
 
-    const transactionResponse = await apmEventClient.search(
-      'get_transactions_for_exit_spans',
-      {
-        apm: {
-          events: [ProcessorEvent.transaction],
-        },
-        body: {
-          track_total_hits: false,
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    [PARENT_ID]: Array.from(destinationsBySpanId.keys()),
-                  },
+    const transactionResponse = await apmEventClient.search('get_transactions_for_exit_spans', {
+      apm: {
+        events: [ProcessorEvent.transaction],
+      },
+      body: {
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  [PARENT_ID]: Array.from(destinationsBySpanId.keys()),
                 },
-                // add a 5m buffer at the end of the time range for long running spans
-                ...rangeQuery(
-                  startWithOffset,
-                  endWithOffset + 1000 * 1000 * 60 * 5
-                ),
-              ],
-            },
+              },
+              // add a 5m buffer at the end of the time range for long running spans
+              ...rangeQuery(startWithOffset, endWithOffset + 1000 * 1000 * 60 * 5),
+            ],
           },
-          size: destinationsBySpanId.size,
-          fields: asMutableArray([
-            SERVICE_NAME,
-            SERVICE_ENVIRONMENT,
-            AGENT_NAME,
-            PARENT_ID,
-          ] as const),
-          _source: false,
         },
-      }
-    );
+        size: destinationsBySpanId.size,
+        fields: asMutableArray([SERVICE_NAME, SERVICE_ENVIRONMENT, AGENT_NAME, PARENT_ID] as const),
+        _source: false,
+      },
+    });
 
     transactionResponse.hits.hits.forEach((hit) => {
       const spanId = String(hit.fields[PARENT_ID]![0]);
@@ -181,8 +170,7 @@ export const getDestinationMap = ({
           ...destination,
           serviceName: String(hit.fields[SERVICE_NAME]![0]),
           environment: String(
-            hit.fields[SERVICE_ENVIRONMENT]?.[0] ??
-              ENVIRONMENT_NOT_DEFINED.value
+            hit.fields[SERVICE_ENVIRONMENT]?.[0] ?? ENVIRONMENT_NOT_DEFINED.value
           ),
           agentName: hit.fields[AGENT_NAME]![0] as AgentName,
         });
@@ -192,8 +180,7 @@ export const getDestinationMap = ({
     const nodesBydependencyName = new Map<string, Node>();
 
     destinationsBySpanId.forEach((destination) => {
-      const existingDestination =
-        nodesBydependencyName.get(destination.dependencyName) ?? {};
+      const existingDestination = nodesBydependencyName.get(destination.dependencyName) ?? {};
 
       const mergedDestination = {
         ...existingDestination,

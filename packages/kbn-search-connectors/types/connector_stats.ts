@@ -121,4 +121,5 @@ export interface SyncJobStatsByState {
   idle: number;
   running: number;
   totalDurationSeconds: number;
+  topErrors: string[];
 }

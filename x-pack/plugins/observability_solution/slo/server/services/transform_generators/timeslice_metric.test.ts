@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { twoMinute } from '../fixtures/duration';
 import {
   createTimesliceMetricIndicator,
   createSLOWithTimeslicesBudgetingMethod,
@@ -161,6 +162,30 @@ describe('Timeslice Metric Transform Generator', () => {
       bucket_script: {
         buckets_path: {},
         script: '1',
+      },
+    });
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      indicator: everythingIndicator,
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-360s/m', // 2m + 2m + 2m slice window
+        },
       },
     });
   });

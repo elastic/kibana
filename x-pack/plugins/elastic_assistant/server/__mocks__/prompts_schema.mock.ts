@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { SearchEsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
+import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
 import {
   PerformBulkActionRequestBody,
   PromptCreateProps,
@@ -15,7 +15,7 @@ import {
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 export const getPromptsSearchEsMock = () => {
-  const searchResponse: estypes.SearchResponse<SearchEsPromptsSchema> = {
+  const searchResponse: estypes.SearchResponse<EsPromptsSchema> = {
     took: 3,
     timed_out: false,
     _shards: {

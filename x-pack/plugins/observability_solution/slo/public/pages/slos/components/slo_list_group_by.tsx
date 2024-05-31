@@ -8,11 +8,12 @@ import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { useGetSettings } from '../../slo_settings/use_get_settings';
 import type { SearchState } from '../hooks/use_url_search_state';
 import type { Option } from './slo_context_menu';
 import { ContextMenuItem, SLOContextMenu } from './slo_context_menu';
 
-export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type';
+export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type' | '_index';
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
   state: SearchState;
@@ -28,6 +29,11 @@ export type Item<T> = EuiSelectableOption & {
 export function SloGroupBy({ onStateChange, state, loading }: Props) {
   const [isGroupByPopoverOpen, setIsGroupByPopoverOpen] = useState(false);
   const groupBy = state.groupBy;
+
+  const { data: settings } = useGetSettings();
+
+  const hasRemoteEnabled =
+    settings && (settings.useAllRemoteClusters || settings.selectedRemoteClusters.length > 0);
 
   const handleChangeGroupBy = (value: GroupByField) => {
     onStateChange({
@@ -75,6 +81,19 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       },
     },
   ];
+
+  if (hasRemoteEnabled) {
+    groupByOptions.push({
+      label: i18n.translate('xpack.slo.list.groupBy.remoteCluster', {
+        defaultMessage: 'Remote cluster',
+      }),
+      checked: groupBy === '_index',
+      value: '_index',
+      onClick: () => {
+        handleChangeGroupBy('_index');
+      },
+    });
+  }
 
   const items = [
     <EuiPanel paddingSize="s" hasShadow={false} key="group_title_panel">

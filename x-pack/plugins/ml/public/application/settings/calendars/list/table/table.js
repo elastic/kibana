@@ -142,7 +142,6 @@ export const CalendarsListTable = ({
         sorting={sorting}
         loading={loading}
         selection={tableSelection}
-        isSelectable={true}
         data-test-subj={loading ? 'mlCalendarTable loading' : 'mlCalendarTable loaded'}
         rowProps={(item) => ({
           'data-test-subj': `mlCalendarListRow row-${item.calendar_id}`,

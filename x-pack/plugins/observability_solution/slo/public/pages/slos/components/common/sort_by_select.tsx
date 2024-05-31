@@ -9,10 +9,9 @@ import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { SearchState } from '../../hooks/use_url_search_state';
+import type { SortField, SearchState } from '../../hooks/use_url_search_state';
 import type { Option } from '../slo_context_menu';
 import { ContextMenuItem, SLOContextMenu } from '../slo_context_menu';
-import type { SortField } from '../slo_list_search_bar';
 
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;

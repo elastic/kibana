@@ -8,13 +8,13 @@
 
 import type {
   ChromeStart,
+  CoreStart,
   IUiSettingsClient,
   OverlayStart,
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
   ApplicationStart,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -30,7 +30,9 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import type { IndexPatternManagementStart } from '.';
 
-export interface IndexPatternManagmentContext {
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
+export interface IndexPatternManagmentContext extends StartServices {
   application: ApplicationStart;
   chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
@@ -49,7 +51,6 @@ export interface IndexPatternManagmentContext {
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
-  theme: ThemeServiceStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   noDataPage?: NoDataPagePluginSetup;
 }

@@ -7,10 +7,7 @@
 
 import type { ESFilter } from '@kbn/es-types';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import {
-  uxLocalUIFilterNames,
-  uxLocalUIFilters,
-} from '../../../common/ux_ui_filter';
+import { uxLocalUIFilterNames, uxLocalUIFilters } from '../../../common/ux_ui_filter';
 import { UxUIFilters } from '../../../typings/ui_filters';
 import { environmentQuery } from '../../components/app/rum_dashboard/local_uifilters/queries';
 
@@ -38,8 +35,6 @@ export function getEsFilter(uiFilters: UxUIFilters, exclude?: boolean) {
 
   return [
     ...mappedFilters,
-    ...(exclude
-      ? []
-      : environmentQuery(uiFilters.environment || ENVIRONMENT_ALL.value)),
+    ...(exclude ? [] : environmentQuery(uiFilters.environment || ENVIRONMENT_ALL.value)),
   ];
 }

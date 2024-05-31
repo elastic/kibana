@@ -4,12 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiAccordionProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiStat,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
-import React from 'react';
+import { isEmpty } from 'lodash';
+import React, { useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { FramesSummary } from '../frames_summary';
+import { APMTransactions } from './apm_transactions';
 import { EmptyFrame } from './empty_frame';
 import { FrameInformationAIAssistant } from './frame_information_ai_assistant';
 import { FrameInformationPanel } from './frame_information_panel';
@@ -32,6 +44,7 @@ export interface Frame {
   totalAnnualCO2Kgs: number;
   selfAnnualCostUSD: number;
   totalAnnualCostUSD: number;
+  subGroups?: Record<string, number>;
 }
 
 export interface Props {
@@ -59,6 +72,7 @@ export function FrameInformationWindow({
   rank,
   compressed = false,
 }: Props) {
+  const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>('closed');
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
   if (!frame) {
@@ -79,6 +93,7 @@ export function FrameInformationWindow({
     functionName,
     sourceFileName,
     sourceLine,
+    subGroups = {},
   } = frame;
 
   const informationRows = getInformationRows({
@@ -143,14 +158,59 @@ export function FrameInformationWindow({
             ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <FrameInformationAIAssistant frame={frame} />
-        </EuiFlexItem>
+        <FrameInformationAIAssistant frame={frame} />
         {showSymbolsStatus && symbolStatus !== FrameSymbolStatus.SYMBOLIZED ? (
           <EuiFlexItem>
             <MissingSymbolsCallout frameType={frame.frameType} />
           </EuiFlexItem>
         ) : null}
+        {isEmpty(subGroups) ? null : (
+          <EuiFlexItem>
+            <EuiAccordion
+              id="apmTransactions"
+              borders="horizontal"
+              buttonProps={{ paddingSize: 'm' }}
+              buttonContent={
+                <div>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="apmApp" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xs">
+                        <h3>
+                          {i18n.translate(
+                            'xpack.profiling.frameInformationWindow.apmTransactions',
+                            { defaultMessage: 'Distributed Tracing Correlation' }
+                          )}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiText size="s">
+                    <p>
+                      <EuiTextColor color="subdued">
+                        {i18n.translate(
+                          'xpack.profiling.frameInformationWindow.apmTransactions.description',
+                          {
+                            defaultMessage:
+                              'A curated view of APM services and transactions that call this function.',
+                          }
+                        )}
+                      </EuiTextColor>
+                    </p>
+                  </EuiText>
+                </div>
+              }
+              forceState={accordionState}
+              onToggle={(isOpen) => setAccordionState(isOpen ? 'open' : 'closed')}
+            >
+              {accordionState === 'open' ? (
+                <APMTransactions functionName={functionName} serviceNames={subGroups} />
+              ) : null}
+            </EuiAccordion>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <FramesSummary
             compressed={compressed}

@@ -95,6 +95,7 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsBulkDelete).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

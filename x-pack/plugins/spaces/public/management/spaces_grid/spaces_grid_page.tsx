@@ -130,7 +130,6 @@ export class SpacesGridPage extends Component<Props, State> {
           })}
           rowHeader="name"
           columns={this.getColumnConfig()}
-          hasActions
           pagination={true}
           sorting={true}
           search={{

@@ -28,10 +28,9 @@ export function Section({ properties }: Props) {
   }
   return (
     <EuiText size="s">
-      {i18n.translate(
-        'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
-        { defaultMessage: 'No data available' }
-      )}
+      {i18n.translate('xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel', {
+        defaultMessage: 'No data available',
+      })}
     </EuiText>
   );
 }

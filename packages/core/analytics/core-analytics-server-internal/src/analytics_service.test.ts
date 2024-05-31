@@ -94,6 +94,34 @@ describe('AnalyticsService', () => {
               },
               "type": "keyword",
             },
+            "key6": Object {
+              "_meta": Object {
+                "description": "Performance metric label 6",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
+            "key7": Object {
+              "_meta": Object {
+                "description": "Performance metric label 7",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
+            "key8": Object {
+              "_meta": Object {
+                "description": "Performance metric label 8",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
+            "key9": Object {
+              "_meta": Object {
+                "description": "Performance metric label 9",
+                "optional": true,
+              },
+              "type": "keyword",
+            },
             "meta": Object {
               "_meta": Object {
                 "description": "Meta data that is searchable but not aggregatable",
@@ -132,6 +160,34 @@ describe('AnalyticsService', () => {
             "value5": Object {
               "_meta": Object {
                 "description": "Performance metric value 5",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value6": Object {
+              "_meta": Object {
+                "description": "Performance metric value 6",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value7": Object {
+              "_meta": Object {
+                "description": "Performance metric value 7",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value8": Object {
+              "_meta": Object {
+                "description": "Performance metric value 8",
+                "optional": true,
+              },
+              "type": "long",
+            },
+            "value9": Object {
+              "_meta": Object {
+                "description": "Performance metric value 9",
                 "optional": true,
               },
               "type": "long",

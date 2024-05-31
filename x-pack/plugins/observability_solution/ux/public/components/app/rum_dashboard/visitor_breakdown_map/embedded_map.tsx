@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React from 'react';
 import styled from 'styled-components';
 
-import { MapEmbeddable, MapEmbeddableInput } from '@kbn/maps-plugin/public';
-import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
-import {
-  ErrorEmbeddable,
-  ViewMode,
-  isErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import { useLayerList } from './use_layer_list';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -42,7 +34,7 @@ const EmbeddedPanel = styled.div`
 `;
 
 export function EmbeddedMapComponent() {
-  const { rangeId, urlParams } = useLegacyUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { start, end, serviceName } = urlParams;
 
@@ -50,38 +42,7 @@ export function EmbeddedMapComponent() {
 
   const layerList = useLayerList();
 
-  const [embeddable, setEmbeddable] = useState<
-    MapEmbeddable | ErrorEmbeddable | undefined
-  >();
-
-  const embeddableRoot: React.RefObject<HTMLDivElement> =
-    useRef<HTMLDivElement>(null);
-
-  const { embeddable: embeddablePlugin, maps } = useKibanaServices();
-
-  if (!embeddablePlugin) {
-    throw new Error('Embeddable start plugin not found');
-  }
-  const factory = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
-
-  const input: MapEmbeddableInput = {
-    attributes: { title: '' },
-    id: uuidv4(),
-    filters: mapFilters,
-    viewMode: ViewMode.VIEW,
-    isLayerTOCOpen: false,
-    query: {
-      query: 'transaction.type : "page-load"',
-      language: 'kuery',
-    },
-    ...(start && {
-      timeRange: {
-        from: new Date(start!).toISOString(),
-        to: new Date(end!).toISOString(),
-      },
-    }),
-    hideFilterActions: true,
-  };
+  const { maps } = useKibanaServices();
 
   function renderTooltipContent({
     addFilters,
@@ -102,71 +63,30 @@ export function EmbeddedMapComponent() {
     return <MapToolTip {...props} features={features} />;
   }
 
-  useEffect(() => {
-    if (embeddable != null && serviceName) {
-      embeddable.updateInput({ filters: mapFilters });
-      embeddable.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapFilters]);
-
-  // DateRange updated useEffect
-  useEffect(() => {
-    if (embeddable != null && start != null && end != null) {
-      const timeRange = {
-        from: new Date(start).toISOString(),
-        to: new Date(end).toISOString(),
-      };
-      embeddable.updateInput({ timeRange });
-      embeddable.reload();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [start, end, rangeId]);
-
-  useEffect(() => {
-    async function setupEmbeddable() {
-      if (!factory) {
-        throw new Error('Map embeddable not found.');
-      }
-      const embeddableObject: any = await factory.create({
-        ...input,
-        title: 'Visitors by region',
-      });
-
-      if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-        embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        const basemapLayerDescriptor = maps
-          ? await maps.createLayerDescriptors.createBasemapLayerDescriptor()
-          : null;
-        if (basemapLayerDescriptor) {
-          layerList.unshift(basemapLayerDescriptor);
-        }
-        await embeddableObject.setLayerList(layerList);
-      }
-
-      setEmbeddable(embeddableObject);
-    }
-
-    setupEmbeddable();
-
-    // we want this effect to execute exactly once after the component mounts
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // We can only render after embeddable has already initialized
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable && serviceName) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable, embeddableRoot, serviceName]);
-
   return (
     <EmbeddedPanel>
-      <div
-        data-test-subj="xpack.ux.regionMap.embeddedPanel"
-        className="embPanel__content"
-        ref={embeddableRoot}
-      />
+      <div data-test-subj="xpack.ux.regionMap.embeddedPanel" className="embPanel__content">
+        {serviceName &&
+          maps &&
+          maps.Map({
+            title: 'Visitors by region',
+            filters: mapFilters,
+            isLayerTOCOpen: false,
+            query: {
+              query: 'transaction.type : "page-load"',
+              language: 'kuery',
+            },
+            ...(start && {
+              timeRange: {
+                from: new Date(start!).toISOString(),
+                to: new Date(end!).toISOString(),
+              },
+            }),
+            hideFilterActions: true,
+            layerList,
+            getTooltipRenderer: () => renderTooltipContent,
+          })}
+      </div>
     </EmbeddedPanel>
   );
 }

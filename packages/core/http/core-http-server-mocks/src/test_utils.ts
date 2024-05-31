@@ -19,6 +19,7 @@ import {
   type ExternalUrlConfigType,
   type CspConfigType,
   HttpService,
+  config,
 } from '@kbn/core-http-server-internal';
 
 const coreId = Symbol('core');
@@ -38,38 +39,43 @@ export const createConfigService = ({
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation((path) => {
     if (path === 'server') {
-      return new BehaviorSubject({
-        name: 'kibana',
-        hosts: ['localhost'],
-        maxPayload: new ByteSizeValue(1024),
-        autoListen: true,
-        ssl: {
-          enabled: false,
-        },
-        cors: {
-          enabled: false,
-        },
-        compression: { enabled: true, brotli: { enabled: false } },
-        xsrf: {
-          disableProtection: true,
-          allowlist: [],
-        },
-        securityResponseHeaders: {},
-        customResponseHeaders: {},
-        requestId: {
-          allowFromAnyIp: true,
-          ipAllowlist: [],
-        },
-        shutdownTimeout: moment.duration(30, 'seconds'),
-        keepaliveTimeout: 120_000,
-        socketTimeout: 120_000,
-        restrictInternalApis: false,
-        versioned: {
-          versionResolution: 'oldest',
-          strictClientVersionCheck: true,
-        },
-        ...server,
-      } as any);
+      return new BehaviorSubject(
+        Object.assign(
+          config.schema.validate({}),
+          {
+            name: 'kibana',
+            hosts: ['localhost'],
+            maxPayload: new ByteSizeValue(1024),
+            autoListen: true,
+            ssl: {
+              enabled: false,
+            },
+            cors: {
+              enabled: false,
+            },
+            compression: { enabled: true, brotli: { enabled: false } },
+            xsrf: {
+              disableProtection: true,
+              allowlist: [],
+            },
+            securityResponseHeaders: {},
+            customResponseHeaders: {},
+            requestId: {
+              allowFromAnyIp: true,
+              ipAllowlist: [],
+            },
+            shutdownTimeout: moment.duration(30, 'seconds'),
+            keepaliveTimeout: 120_000,
+            socketTimeout: 120_000,
+            restrictInternalApis: false,
+            versioned: {
+              versionResolution: 'oldest',
+              strictClientVersionCheck: true,
+            },
+          },
+          server
+        )
+      );
     }
     if (path === 'externalUrl') {
       return new BehaviorSubject({
@@ -105,9 +111,9 @@ export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreCon
 });
 
 /**
- * Creates a concrete HttpServer with a mocked context.
+ * Creates a concrete HttpService with a mocked context.
  */
-export const createHttpServer = ({
+export const createHttpService = ({
   buildNum,
   ...overrides
 }: Partial<CoreContext & { buildNum: number }> = {}): HttpService => {

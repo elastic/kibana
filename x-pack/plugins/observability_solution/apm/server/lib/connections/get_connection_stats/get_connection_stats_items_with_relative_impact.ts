@@ -6,18 +6,13 @@
  */
 
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import {
-  ConnectionStatsItem,
-  ConnectionStatsItemWithImpact,
-} from '../../../../common/connections';
+import { ConnectionStatsItem, ConnectionStatsItemWithImpact } from '../../../../common/connections';
 
 export function getConnectionStatsItemsWithRelativeImpact(
   items: ConnectionStatsItem[]
 ): ConnectionStatsItemWithImpact[] {
   const latencySums = items
-    .map(
-      ({ stats }) => (stats.latency.value ?? 0) * (stats.throughput.value ?? 0)
-    )
+    .map(({ stats }) => (stats.latency.value ?? 0) * (stats.throughput.value ?? 0))
     .filter(isFiniteNumber);
 
   const minLatencySum = Math.min(...latencySums);
@@ -26,8 +21,7 @@ export function getConnectionStatsItemsWithRelativeImpact(
   const itemsWithImpact: ConnectionStatsItemWithImpact[] = items.map((item) => {
     const { stats } = item;
     const impact =
-      isFiniteNumber(stats.latency.value) &&
-      isFiniteNumber(stats.throughput.value)
+      isFiniteNumber(stats.latency.value) && isFiniteNumber(stats.throughput.value)
         ? ((stats.latency.value * stats.throughput.value - minLatencySum) /
             (maxLatencySum - minLatencySum)) *
           100

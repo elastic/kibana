@@ -11,10 +11,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { uniq } from 'lodash';
 import { ApmDataSource } from '../../../../../common/data_source';
 import { PROCESSOR_EVENT } from '../../../../../common/es_fields/apm';
-import {
-  getConfigForDocumentType,
-  getProcessorEventForDocumentType,
-} from '../document_type';
+import { getConfigForDocumentType, getProcessorEventForDocumentType } from '../document_type';
 
 const processorEventIndexMap = {
   [ProcessorEvent.transaction]: 'transaction',
@@ -23,10 +20,7 @@ const processorEventIndexMap = {
   [ProcessorEvent.error]: 'error',
 } as const;
 
-export function processorEventsToIndex(
-  events: ProcessorEvent[],
-  indices: APMIndices
-) {
+export function processorEventsToIndex(events: ProcessorEvent[], indices: APMIndices) {
   return uniq(
     events.flatMap((event) =>
       indices[processorEventIndexMap[event]].split(',').map((str) => str.trim())
@@ -41,9 +35,7 @@ export function getRequestBase(options: {
   const events =
     'events' in options.apm
       ? options.apm.events
-      : options.apm.sources.map((source) =>
-          getProcessorEventForDocumentType(source.documentType)
-        );
+      : options.apm.sources.map((source) => getProcessorEventForDocumentType(source.documentType));
 
   const index = processorEventsToIndex(events, options.indices);
 

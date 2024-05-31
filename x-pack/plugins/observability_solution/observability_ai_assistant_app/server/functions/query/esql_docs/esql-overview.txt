@@ -1,6 +1,5 @@
 
 ES|QLedit
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform,
 and analyze data stored in Elasticsearch, and in the future in other runtimes. It is
 designed to be easy to learn and use, by end users, SRE teams, application
@@ -29,7 +28,7 @@ performance characteristics.
 The ES|QL documentation is organized in these sections:
 Getting started
 A tutorial to help you get started with ES|QL.
-Learning ES|QL
+ES|QL reference
 Reference documentation for the ES|QL syntax,
 commands, and functions and
 operators. Information about working with metadata
@@ -38,7 +37,7 @@ data processing with DISSECT and
 GROK and data enrichment with ENRICH.
 Using ES|QL
 An overview of using the REST API, Using ES|QL in Kibana,
-Using ES|QL in Elastic Security, and Task management.
+Using ES|QL in Elastic Security, Using ES|QL across clusters, and Task management.
 Limitations
 The current limitations of ES|QL.
 Examples

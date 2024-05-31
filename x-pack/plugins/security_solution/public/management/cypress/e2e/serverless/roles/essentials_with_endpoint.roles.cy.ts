@@ -23,11 +23,11 @@ import {
   ensurePolicyDetailsPageAuthzAccess,
 } from '../../../screens';
 
-// Failing: See https://github.com/elastic/kibana/issues/170985
+// FLAKY: https://github.com/elastic/kibana/issues/170985
 describe.skip(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [

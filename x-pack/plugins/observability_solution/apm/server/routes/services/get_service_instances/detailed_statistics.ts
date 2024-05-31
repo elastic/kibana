@@ -59,10 +59,7 @@ async function getServiceInstancesDetailedStatistics(
       }),
     ]);
 
-    const stats = joinByKey(
-      [...transactionStats, ...systemMetricStats],
-      'serviceNodeName'
-    );
+    const stats = joinByKey([...transactionStats, ...systemMetricStats], 'serviceNodeName');
 
     return stats;
   });
@@ -95,73 +92,70 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   end: number;
   offset?: string;
 }): Promise<ServiceInstancesDetailedStatisticsResponse> {
-  return withApmSpan(
-    'get_service_instances_detailed_statistics_periods',
-    async () => {
-      const commonParams = {
-        environment,
-        kuery,
-        latencyAggregationType,
-        apmEventClient,
-        serviceName,
-        transactionType,
-        searchAggregatedTransactions,
-        numBuckets,
-        serviceNodeIds,
-      };
+  return withApmSpan('get_service_instances_detailed_statistics_periods', async () => {
+    const commonParams = {
+      environment,
+      kuery,
+      latencyAggregationType,
+      apmEventClient,
+      serviceName,
+      transactionType,
+      searchAggregatedTransactions,
+      numBuckets,
+      serviceNodeIds,
+    };
 
-      const currentPeriodPromise = getServiceInstancesDetailedStatistics({
-        ...commonParams,
-        start,
-        end,
-      });
+    const currentPeriodPromise = getServiceInstancesDetailedStatistics({
+      ...commonParams,
+      start,
+      end,
+    });
 
-      const previousPeriodPromise = offset
-        ? getServiceInstancesDetailedStatistics({
-            ...commonParams,
-            start,
-            end,
-            offset,
-          })
-        : [];
-      const [currentPeriod, previousPeriod] = await Promise.all([
-        currentPeriodPromise,
-        previousPeriodPromise,
-      ]);
+    const previousPeriodPromise = offset
+      ? getServiceInstancesDetailedStatistics({
+          ...commonParams,
+          start,
+          end,
+          offset,
+        })
+      : [];
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      currentPeriodPromise,
+      previousPeriodPromise,
+    ]);
 
-      const firstCurrentPeriod = currentPeriod?.[0];
+    const firstCurrentPeriod = currentPeriod?.[0];
 
-      return {
-        currentPeriod: keyBy(currentPeriod, 'serviceNodeName'),
-        previousPeriod: keyBy(
-          previousPeriod.map((data) => {
-            return {
-              ...data,
-              cpuUsage: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firstCurrentPeriod?.cpuUsage,
-                previousPeriodTimeseries: data.cpuUsage,
-              }),
-              errorRate: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firstCurrentPeriod?.errorRate,
-                previousPeriodTimeseries: data.errorRate,
-              }),
-              latency: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firstCurrentPeriod?.latency,
-                previousPeriodTimeseries: data.latency,
-              }),
-              memoryUsage: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firstCurrentPeriod?.memoryUsage,
-                previousPeriodTimeseries: data.memoryUsage,
-              }),
-              throughput: offsetPreviousPeriodCoordinates({
-                currentPeriodTimeseries: firstCurrentPeriod?.throughput,
-                previousPeriodTimeseries: data.throughput,
-              }),
-            };
-          }),
-          'serviceNodeName'
-        ),
-      };
-    }
-  );
+    return {
+      currentPeriod: keyBy(currentPeriod, 'serviceNodeName'),
+      previousPeriod: keyBy(
+        previousPeriod.map((data) => {
+          return {
+            ...data,
+            cpuUsage: offsetPreviousPeriodCoordinates({
+              currentPeriodTimeseries: firstCurrentPeriod?.cpuUsage,
+              previousPeriodTimeseries: data.cpuUsage,
+            }),
+            errorRate: offsetPreviousPeriodCoordinates({
+              currentPeriodTimeseries: firstCurrentPeriod?.errorRate,
+              previousPeriodTimeseries: data.errorRate,
+            }),
+            latency: offsetPreviousPeriodCoordinates({
+              currentPeriodTimeseries: firstCurrentPeriod?.latency,
+              previousPeriodTimeseries: data.latency,
+            }),
+            memoryUsage: offsetPreviousPeriodCoordinates({
+              currentPeriodTimeseries: firstCurrentPeriod?.memoryUsage,
+              previousPeriodTimeseries: data.memoryUsage,
+            }),
+            throughput: offsetPreviousPeriodCoordinates({
+              currentPeriodTimeseries: firstCurrentPeriod?.throughput,
+              previousPeriodTimeseries: data.throughput,
+            }),
+          };
+        }),
+        'serviceNodeName'
+      ),
+    };
+  });
 }

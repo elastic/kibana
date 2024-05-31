@@ -38,17 +38,17 @@ export const registerGetRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
+      const { type, id } = request.params;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsGet({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsGet({ request, types: [type] }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
@@ -59,7 +59,7 @@ export const registerGetRoute = (
       const object = await savedObjects.client.get(type, id, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: object });
+      return response.ok({ body: object });
     })
   );
 };

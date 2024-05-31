@@ -45,7 +45,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentlessPolicy } from './setup_technology';
+import { useAgentless } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -97,6 +97,7 @@ export function useOnSubmit({
   queryParamsPolicyId,
   packageInfo,
   integrationToEnable,
+  hasFleetAddAgentsPrivileges,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -105,6 +106,7 @@ export function useOnSubmit({
   agentCount: number;
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
+  hasFleetAddAgentsPrivileges: boolean;
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
@@ -129,7 +131,8 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const { isAgentlessPolicyId } = useAgentlessPolicy();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
+    useAgentless();
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(
@@ -258,7 +261,7 @@ export function useOnSubmit({
       }
       if (
         agentCount !== 0 &&
-        !isAgentlessPolicyId(packagePolicy?.policy_id) &&
+        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
@@ -270,7 +273,8 @@ export function useOnSubmit({
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
             const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            if (packageInfo) {
+            // skip preinstall of input package, to be able to rollback when package policy creation fails
+            if (packageInfo && packageInfo.type !== 'input') {
               packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {
@@ -284,7 +288,6 @@ export function useOnSubmit({
               await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
             }
           }
-
           createdPolicy = await createAgentPolicy({
             newAgentPolicy,
             packagePolicy,
@@ -304,7 +307,12 @@ export function useOnSubmit({
       }
 
       const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const shouldForceInstallOnAgentless = isAgentlessPolicyId(agentPolicyIdToSave);
+
+      const shouldForceInstallOnAgentless =
+        isAgentlessAgentPolicy(createdPolicy) ||
+        isAgentlessIntegration(packageInfo) ||
+        isAgentlessPackagePolicy(packagePolicy);
+
       const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
@@ -325,38 +333,44 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (hasAzureArmTemplate) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+      if (hasFleetAddAgentsPrivileges) {
+        if (hasAzureArmTemplate) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasCloudFormation) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasGoogleCloudShell) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
       } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        setFormState('SUBMITTED');
       }
-      if (hasCloudFormation) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
-      } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-      }
-      if (hasGoogleCloudShell) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
-      } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-      }
+
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
-        const hasAgentsAssigned = agentCount && agentPolicy;
-        if (!hasAgentsAssigned && hasAzureArmTemplate) {
+        const promptForAgentEnrollment =
+          !(agentCount && agentPolicy) && hasFleetAddAgentsPrivileges;
+        if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
         }
-        if (!hasAgentsAssigned && hasCloudFormation) {
+        if (promptForAgentEnrollment && hasCloudFormation) {
           setFormState('SUBMITTED_CLOUD_FORMATION');
           return;
         }
-        if (!hasAgentsAssigned && hasGoogleCloudShell) {
+        if (promptForAgentEnrollment && hasGoogleCloudShell) {
           setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
           return;
         }
-        if (!hasAgentsAssigned) {
+        if (promptForAgentEnrollment) {
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
@@ -369,7 +383,7 @@ export function useOnSubmit({
               packagePolicyName: packagePolicy.name,
             },
           }),
-          text: hasAgentsAssigned
+          text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
                 defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
                 values: {
@@ -402,13 +416,16 @@ export function useOnSubmit({
       formState,
       hasErrors,
       agentCount,
-      packagePolicy,
+      isAgentlessIntegration,
+      packageInfo,
       selectedPolicyTab,
-      isAgentlessPolicyId,
+      packagePolicy,
+      isAgentlessAgentPolicy,
+      isAgentlessPackagePolicy,
+      hasFleetAddAgentsPrivileges,
       withSysMonitoring,
       newAgentPolicy,
       updatePackagePolicy,
-      packageInfo,
       notifications.toasts,
       agentPolicy,
       onSaveNavigate,

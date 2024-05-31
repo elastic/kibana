@@ -10,10 +10,16 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { ContextEditor } from '.';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 describe('ContextEditor', () => {
   const allow = Array.from({ length: 20 }, (_, i) => `field${i + 1}`);
-  const allowReplacement = ['field1'];
+  const anonymizationFields = {
+    total: 20,
+    page: 1,
+    perPage: 1000,
+    data: allow.map((f) => ({ id: f, field: f, allowed: true, anonymized: f === 'field1' })),
+  };
   const rawData = allow.reduce(
     (acc, field, index) => ({ ...acc, [field]: [`value${index + 1}`] }),
     {}
@@ -25,12 +31,13 @@ describe('ContextEditor', () => {
     jest.clearAllMocks();
 
     render(
-      <ContextEditor
-        allow={allow}
-        allowReplacement={allowReplacement}
-        onListUpdated={onListUpdated}
-        rawData={rawData}
-      />
+      <TestProviders>
+        <ContextEditor
+          anonymizationFields={anonymizationFields}
+          onListUpdated={onListUpdated}
+          rawData={rawData}
+        />
+      </TestProviders>
     );
   });
 

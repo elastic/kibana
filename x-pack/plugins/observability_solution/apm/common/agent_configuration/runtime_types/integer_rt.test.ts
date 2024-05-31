@@ -17,13 +17,11 @@ describe('getIntegerRt', () => {
     });
 
     describe('it should not accept', () => {
-      [NaN, undefined, null, '', 'foo', 0, 55, '-1', '-55', '33000'].map(
-        (input) => {
-          it(`${JSON.stringify(input)}`, () => {
-            expect(isRight(integerRt.decode(input))).toBe(false);
-          });
-        }
-      );
+      [NaN, undefined, null, '', 'foo', 0, 55, '-1', '-55', '33000'].map((input) => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(integerRt.decode(input))).toBe(false);
+        });
+      });
     });
 
     describe('it should return correct error message', () => {

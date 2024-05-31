@@ -60,12 +60,7 @@ export function ServiceMetrics() {
         {data.charts.map((chart) => (
           <EuiFlexItem key={chart.key}>
             <EuiPanel hasBorder={true}>
-              <MetricsChart
-                start={start}
-                end={end}
-                chart={chart}
-                fetchStatus={status}
-              />
+              <MetricsChart start={start} end={end} chart={chart} fetchStatus={status} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

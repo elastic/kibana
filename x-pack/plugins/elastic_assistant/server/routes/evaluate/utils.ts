@@ -124,7 +124,7 @@ export const getLangSmithTracer = ({
       return [];
     }
     const lcTracer = new LangChainTracer({
-      projectName: projectName ?? 'default', // Shows as the 'test' run's 'name' in langsmith ui
+      projectName, // Shows as the 'test' run's 'name' in langsmith ui
       exampleId,
       client: new Client({ apiKey }),
     });

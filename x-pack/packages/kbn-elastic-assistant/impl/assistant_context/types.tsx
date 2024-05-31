@@ -21,7 +21,7 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
 }
 
 export interface ConversationTheme {
-  title?: JSX.Element | string;
+  title?: string;
   titleIcon?: string;
   user?: {
     name?: string;
@@ -66,6 +66,9 @@ export interface AssistantTelemetry {
     role: string;
     isEnabledKnowledgeBase: boolean;
     isEnabledRAGAlerts: boolean;
+    actionTypeId: string;
+    model?: string;
+    provider?: string;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: {
@@ -84,4 +87,6 @@ export interface AssistantAvailability {
   hasConnectorsAllPrivilege: boolean;
   // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
   hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
 }

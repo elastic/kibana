@@ -8,14 +8,14 @@
 
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
+  HasParentApi,
+  HasUniqueId,
   PhaseEvent,
+  PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesBlockingError,
-  HasUniqueId,
   PublishesPanelDescription,
   PublishesPanelTitle,
-  HasParentApi,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';

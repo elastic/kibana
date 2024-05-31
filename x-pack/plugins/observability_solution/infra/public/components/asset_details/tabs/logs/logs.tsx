@@ -90,7 +90,7 @@ export const Logs = () => {
   }, [nodeLogsLocator, asset.name, asset.type, state.startTimestamp, textQueryDebounced, logView]);
 
   return (
-    <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent" ref={ref}>
+    <EuiFlexGroup direction="column" ref={ref}>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem>

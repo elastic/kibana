@@ -17,9 +17,7 @@ describe('getCriticalPath', () => {
     const entryTransaction = dedot(events[0]!, {}) as Transaction;
     const waterfall = getWaterfall({
       traceItems: {
-        traceDocs: events.map(
-          (event) => dedot(event, {}) as Transaction | Span
-        ),
+        traceDocs: events.map((event) => dedot(event, {}) as Transaction | Span),
         errorDocs: [],
         exceedsMax: false,
         spanLinksCountById: {},
@@ -45,9 +43,7 @@ describe('getCriticalPath', () => {
         .transaction('/service-a')
         .timestamp(1)
         .duration(100)
-        .children(
-          service.span('foo', 'external', 'db').duration(100).timestamp(1)
-        )
+        .children(service.span('foo', 'external', 'db').duration(100).timestamp(1))
         .serialize()
     );
 
@@ -76,9 +72,7 @@ describe('getCriticalPath', () => {
         .serialize()
     );
 
-    const longerSpan = waterfall.items.find(
-      (item) => (item.doc as Span).span?.name === 'bar'
-    );
+    const longerSpan = waterfall.items.find((item) => (item.doc as Span).span?.name === 'bar');
 
     expect(segments).toEqual([
       { self: false, duration: 100000, item: waterfall.items[0], offset: 0 },
@@ -103,9 +97,7 @@ describe('getCriticalPath', () => {
         .transaction('/service-a')
         .timestamp(1)
         .duration(100)
-        .children(
-          service.span('foo', 'external', 'db').duration(50).timestamp(11)
-        )
+        .children(service.span('foo', 'external', 'db').duration(50).timestamp(11))
         .serialize()
     );
 

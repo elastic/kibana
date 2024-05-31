@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-export interface SearchEsAnonymizationFieldsSchema {
+export interface EsAnonymizationFieldsSchema {
   id: string;
   '@timestamp': string;
   created_at: string;
   created_by: string;
   field: string;
-  default_allow_replacement?: boolean;
-  default_allow?: boolean;
-  users?: Array<{
-    id?: string;
-    name?: string;
-  }>;
+  anonymized?: boolean;
+  allowed?: boolean;
   updated_at?: string;
   updated_by?: string;
   namespace: string;
@@ -25,12 +21,8 @@ export interface SearchEsAnonymizationFieldsSchema {
 export interface UpdateAnonymizationFieldSchema {
   id: string;
   '@timestamp'?: string;
-  default_allow_replacement?: boolean;
-  default_allow?: boolean;
-  users?: Array<{
-    id?: string;
-    name?: string;
-  }>;
+  anonymized?: boolean;
+  allowed?: boolean;
   updated_at?: string;
   updated_by?: string;
 }
@@ -38,12 +30,8 @@ export interface UpdateAnonymizationFieldSchema {
 export interface CreateAnonymizationFieldSchema {
   '@timestamp'?: string;
   field: string;
-  default_allow_replacement?: boolean;
-  default_allow?: boolean;
-  users?: Array<{
-    id?: string;
-    name?: string;
-  }>;
+  anonymized?: boolean;
+  allowed?: boolean;
   updated_at?: string;
   updated_by?: string;
   created_at?: string;

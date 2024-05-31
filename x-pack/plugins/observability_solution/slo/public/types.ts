@@ -13,7 +13,9 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type {
@@ -72,8 +74,10 @@ export interface SloPublicPluginsSetup {
 
 export interface SloPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
+  aiops: AiopsPluginStart;
   cases: CasesPublicStart;
   cloud?: CloudStart;
+  dashboard: DashboardStart;
   dataViewEditor: DataViewEditorStart;
   fieldFormats: FieldFormatsStart;
   observability: ObservabilityPublicStart;

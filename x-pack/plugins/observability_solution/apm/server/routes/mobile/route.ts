@@ -11,21 +11,12 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { offsetRt } from '../../../common/comparison_rt';
-import {
-  getMobileHttpRequests,
-  HttpRequestsTimeseries,
-} from './get_mobile_http_requests';
+import { getMobileHttpRequests, HttpRequestsTimeseries } from './get_mobile_http_requests';
 import { getMobileFilters, MobileFiltersResponse } from './get_mobile_filters';
 import { getMobileSessions, SessionsTimeseries } from './get_mobile_sessions';
 import { getMobileStatsPeriods, MobilePeriodStats } from './get_mobile_stats';
-import {
-  getMobileLocationStatsPeriods,
-  MobileLocationStats,
-} from './get_mobile_location_stats';
-import {
-  getMobileTermsByField,
-  MobileTermsByFieldResponse,
-} from './get_mobile_terms_by_field';
+import { getMobileLocationStatsPeriods, MobileLocationStats } from './get_mobile_location_stats';
+import { getMobileTermsByField, MobileTermsByFieldResponse } from './get_mobile_terms_by_field';
 import {
   getMobileMainStatisticsByField,
   MobileMainStatisticsResponse,
@@ -182,8 +173,7 @@ const mobileLocationStatsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, locationField, offset } =
-      params.query;
+    const { kuery, environment, start, end, locationField, offset } = params.query;
 
     const locationStats = await getMobileLocationStatsPeriods({
       kuery,
@@ -201,8 +191,7 @@ const mobileLocationStatsRoute = createApmServerRoute({
 });
 
 const sessionsChartRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -223,8 +212,7 @@ const sessionsChartRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, transactionName, offset } =
-      params.query;
+    const { kuery, environment, start, end, transactionName, offset } = params.query;
 
     const { currentPeriod, previousPeriod } = await getMobileSessions({
       kuery,
@@ -242,8 +230,7 @@ const sessionsChartRoute = createApmServerRoute({
 });
 
 const httpRequestsChartRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -264,8 +251,7 @@ const httpRequestsChartRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, transactionName, offset } =
-      params.query;
+    const { kuery, environment, start, end, transactionName, offset } = params.query;
 
     const { currentPeriod, previousPeriod } = await getMobileHttpRequests({
       kuery,
@@ -360,8 +346,7 @@ const mobileMainStatisticsByField = createApmServerRoute({
 });
 
 const mobileDetailedStatisticsByField = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -384,8 +369,7 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, field, offset, fieldValues } =
-      params.query;
+    const { kuery, environment, start, end, field, offset, fieldValues } = params.query;
 
     return await getMobileDetailedStatisticsByFieldPeriods({
       kuery,

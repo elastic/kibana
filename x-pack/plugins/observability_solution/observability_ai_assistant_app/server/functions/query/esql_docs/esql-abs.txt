@@ -2,7 +2,7 @@ ABS
 
 Syntax
 Parameters
-n
+number
 Numeric expression. If null, the function returns null.
 DescriptionReturns the absolute value.Supported types
 Examples

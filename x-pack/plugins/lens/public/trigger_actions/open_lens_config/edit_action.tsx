@@ -6,10 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { isLensEmbeddable } from '../utils';
+import type { StartServices } from '../../types';
 
 const ACTION_CONFIGURE_IN_LENS = 'ACTION_CONFIGURE_IN_LENS';
 
@@ -26,8 +26,7 @@ export class ConfigureInLensPanelAction implements Action<Context> {
 
   constructor(
     protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly overlays: OverlayStart,
-    protected readonly theme: ThemeServiceStart
+    protected readonly startServices: StartServices
   ) {}
 
   public getDisplayName({ embeddable }: Context): string {
@@ -52,8 +51,7 @@ export class ConfigureInLensPanelAction implements Action<Context> {
     return executeEditAction({
       embeddable,
       startDependencies: this.startDependencies,
-      overlays: this.overlays,
-      theme: this.theme,
+      ...this.startServices,
     });
   }
 }

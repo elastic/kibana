@@ -13,7 +13,7 @@ import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import type { FilterItemObj } from '../../../common/components/filter_group/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   ALERTS_PATH,
   DEFAULT_ALERTS_INDEX,
@@ -62,7 +62,7 @@ export const AlertDetailsRedirect = () => {
 
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
-  const statusPageFilter: FilterItemObj = {
+  const statusPageFilter: FilterControlConfig = {
     fieldName: ALERT_WORKFLOW_STATUS,
     title: 'Status',
     selectedOptions: [],

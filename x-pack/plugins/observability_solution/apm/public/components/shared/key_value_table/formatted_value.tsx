@@ -15,13 +15,7 @@ const EmptyValue = euiStyled.span`
   text-align: left;
 `;
 
-export function FormattedKey({
-  k,
-  value,
-}: {
-  k: string;
-  value: unknown;
-}): JSX.Element {
+export function FormattedKey({ k, value }: { k: string; value: unknown }): JSX.Element {
   if (value == null) {
     return <EmptyValue>{k}</EmptyValue>;
   }

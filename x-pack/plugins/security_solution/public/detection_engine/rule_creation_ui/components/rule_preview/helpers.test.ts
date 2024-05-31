@@ -268,6 +268,24 @@ describe('query_preview/helpers', () => {
       });
       expect(isDisabled).toEqual(false);
     });
+
+    // ML rule does not have index or data view id properties, so preview should not depend on these fields
+    test('enabled for ML rule when index patterns and data view id are empty', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'machine_learning',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: [],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: ['test-ml-job-id'],
+        queryBar: { filters: [], query: { query: '', language: '' }, saved_id: null },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(false);
+    });
   });
 
   describe('getTimeframeOptions', () => {

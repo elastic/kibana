@@ -23,6 +23,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
       ProductFeatureKey.investigationGuide,
+      ProductFeatureKey.investigationGuideInteractions,
       ProductFeatureKey.threatIntelligence,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,

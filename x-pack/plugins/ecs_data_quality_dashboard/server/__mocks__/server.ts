@@ -113,7 +113,11 @@ class MockServer {
 
   private validateRequest(request: KibanaRequest): KibanaRequest {
     const config = this.getRoute(request).config;
-    const validations = config.validate && config.validate?.request;
+    const validations = config.validate
+      ? typeof config.validate === 'function'
+        ? config.validate().request
+        : config.validate.request
+      : undefined;
     if (!validations) {
       return request;
     }

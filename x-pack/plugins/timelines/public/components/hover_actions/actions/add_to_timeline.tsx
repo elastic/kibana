@@ -11,7 +11,8 @@ import { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { TimelinesStartServices } from '../../..';
 import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
@@ -63,6 +64,7 @@ export interface AddToTimelineButtonProps extends HoverActionComponentProps {
   draggableId?: DraggableId;
   dataProvider?: DataProvider[] | DataProvider;
   timelineType?: string;
+  startServices: TimelinesStartServices;
 }
 
 const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
@@ -78,6 +80,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     showTooltip = false,
     value,
     timelineType = 'default',
+    startServices,
   }) => {
     const dispatch = useDispatch();
     const { addSuccess } = useAppToasts();
@@ -103,7 +106,8 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
                     provider.name,
                     timelineType === 'default'
                   )}
-                </AddSuccessMessage>
+                </AddSuccessMessage>,
+                startServices
               ),
             });
           }
@@ -121,6 +125,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       onClick,
       startDragToTimeline,
       timelineType,
+      startServices,
     ]);
 
     useEffect(() => {

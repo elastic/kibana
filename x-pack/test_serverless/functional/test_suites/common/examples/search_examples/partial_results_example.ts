@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('requestFibonacci');
 
       await retry.waitFor('update progress bar', async () => {
-        const newValue = await progressBar.getAttribute('value');
+        const newValue = (await progressBar.getAttribute('value')) ?? '';
         return parseFloat(newValue) > 0;
       });
     });

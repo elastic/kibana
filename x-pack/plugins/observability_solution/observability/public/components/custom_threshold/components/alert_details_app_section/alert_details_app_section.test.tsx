@@ -136,7 +136,6 @@ describe('AlertDetailsAppSection', () => {
               <EuiLink
                 data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
                 href="/view-in-app-url"
-                target="_blank"
               >
                 View related logs
               </EuiLink>

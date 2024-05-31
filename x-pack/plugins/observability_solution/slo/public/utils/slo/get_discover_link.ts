@@ -136,7 +136,9 @@ function createDiscoverLocator(
     filters,
     dataViewSpec: {
       id: indexId,
-      title: slo.indicator.params.index,
+      title: slo.remote
+        ? `${slo.remote.remoteName}:${slo.indicator.params.index}`
+        : slo.indicator.params.index,
       timeFieldName,
     },
   };

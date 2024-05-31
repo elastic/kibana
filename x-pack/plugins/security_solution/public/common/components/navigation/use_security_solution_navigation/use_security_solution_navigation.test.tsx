@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import { of } from 'rxjs';
 import { useSecuritySolutionNavigation } from './use_security_solution_navigation';
 
+const mockUseBreadcrumbsNav = jest.fn();
 jest.mock('../breadcrumbs', () => ({
-  useBreadcrumbsNav: () => jest.fn(),
+  useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
 }));
 
-const mockIsSideNavEnabled = jest.fn(() => true);
+const mockSecuritySideNav = jest.fn(() => <div data-test-subj="SecuritySideNav" />);
+jest.mock('../security_side_nav', () => ({
+  SecuritySideNav: () => mockSecuritySideNav(),
+}));
+
+const mockGetChromeStyle$ = jest.fn().mockReturnValue(of('classic'));
 jest.mock('../../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
-      services: {
-        configSettings: {
-          sideNavEnabled: mockIsSideNavEnabled(),
-        },
-      },
+      services: { chrome: { getChromeStyle$: () => mockGetChromeStyle$() } },
     }),
   };
 });
@@ -29,23 +34,57 @@ describe('Security Solution Navigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+  describe('when classic navigation is enabled', () => {
+    beforeAll(() => {
+      mockGetChromeStyle$.mockReturnValue(of('classic'));
+    });
 
-  it('should return proper navigation props', () => {
-    const { result } = renderHook(useSecuritySolutionNavigation);
-    expect(result.current).toEqual(
-      expect.objectContaining({
+    it('should return proper navigation props', async () => {
+      const { result } = renderHook(useSecuritySolutionNavigation);
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          canBeCollapsed: true,
+          name: 'Security',
+          icon: 'logoSecurity',
+          closeFlyoutButtonPosition: 'inside',
+        })
+      );
+
+      // check regular props
+      expect(result.current).toEqual({
         canBeCollapsed: true,
         name: 'Security',
         icon: 'logoSecurity',
+        children: expect.anything(),
         closeFlyoutButtonPosition: 'inside',
-      })
-    );
-    expect(result.current?.children).toBeDefined();
+      });
+
+      // check rendering of SecuritySideNav children
+      const { findByTestId } = render(<>{result.current?.children}</>);
+
+      expect(mockSecuritySideNav).toHaveBeenCalled();
+      expect(await findByTestId('SecuritySideNav')).toBeInTheDocument();
+    });
+
+    it('should initialize breadcrumbs', () => {
+      renderHook(useSecuritySolutionNavigation);
+      expect(mockUseBreadcrumbsNav).toHaveBeenCalled();
+    });
   });
 
-  it('should return undefined props when disabled', () => {
-    mockIsSideNavEnabled.mockReturnValueOnce(false);
-    const { result } = renderHook(useSecuritySolutionNavigation);
-    expect(result.current).toEqual(undefined);
+  describe('when solution navigation is enabled', () => {
+    beforeAll(() => {
+      mockGetChromeStyle$.mockReturnValue(of('project'));
+    });
+
+    it('should return undefined props when disabled', () => {
+      const { result } = renderHook(useSecuritySolutionNavigation);
+      expect(result.current).toEqual(undefined);
+    });
+
+    it('should initialize breadcrumbs', () => {
+      renderHook(useSecuritySolutionNavigation);
+      expect(mockUseBreadcrumbsNav).toHaveBeenCalled();
+    });
   });
 });

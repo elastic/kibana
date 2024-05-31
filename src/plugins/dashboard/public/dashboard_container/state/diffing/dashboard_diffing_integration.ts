@@ -8,7 +8,7 @@
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, omit } from 'lodash';
+import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
@@ -16,13 +16,9 @@ import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
+import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
-import {
-  isKeyEqual,
-  isKeyEqualAsync,
-  shouldRefreshDiffingFunctions,
-  unsavedChangesDiffingFunctions,
-} from './dashboard_diffing_functions';
+import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
@@ -59,23 +55,6 @@ export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInpu
   'timeslice',
   'viewMode',
   'id',
-];
-
-/**
- * input keys that will cause a new session to be created.
- */
-const sessionChangeKeys: Array<keyof Omit<DashboardContainerInput, 'panels'>> = [
-  'query',
-  'filters',
-  'timeRange',
-  'timeslice',
-  'timeRestore',
-  'lastReloadRequestTime',
-
-  // also refetch when chart settings change
-  'syncColors',
-  'syncCursor',
-  'syncTooltips',
 ];
 
 /**
@@ -173,13 +152,17 @@ export function startDiffingDashboardState(
         this.dispatch.setHasUnsavedChanges(hasUnsavedChanges);
       }
 
+      const unsavedPanelState = reactEmbeddableChanges.reduce<UnsavedPanelState>(
+        (acc, { childId, unsavedChanges }) => {
+          acc[childId] = unsavedChanges;
+          return acc;
+        },
+        {} as UnsavedPanelState
+      );
+
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
-        backupUnsavedChanges.bind(this)(
-          dashboardChanges,
-          reactEmbeddableChanges,
-          controlGroupChanges
-        );
+        backupUnsavedChanges.bind(this)(dashboardChanges, unsavedPanelState, controlGroupChanges);
       }
     })
   );
@@ -228,67 +211,22 @@ export async function getDashboardUnsavedChanges(
   return inputChanges;
 }
 
-export function getShouldRefresh(
-  this: DashboardContainer,
-  lastInput: DashboardContainerInput,
-  input: DashboardContainerInput
-): boolean {
-  for (const key of sessionChangeKeys) {
-    if (input[key] === undefined && lastInput[key] === undefined) {
-      continue;
-    }
-    if (
-      !isKeyEqual(
-        key,
-        {
-          container: this,
-          currentValue: input[key],
-          currentInput: input,
-          lastValue: lastInput[key],
-          lastInput,
-        },
-        shouldRefreshDiffingFunctions
-      )
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function backupUnsavedChanges(
   this: DashboardContainer,
   dashboardChanges: Partial<DashboardContainerInput>,
-  reactEmbeddableChanges: Array<{
-    childId: string;
-    unsavedChanges: object | undefined;
-  }>,
+  reactEmbeddableChanges: UnsavedPanelState,
   controlGroupChanges: PersistableControlGroupInput | undefined
 ) {
   const { dashboardBackup } = pluginServices.getServices();
-
-  // apply all unsaved state from react embeddables to the unsaved changes object.
-  let hasAnyReactEmbeddableUnsavedChanges = false;
-  const currentPanels = cloneDeep(dashboardChanges.panels ?? this.getInput().panels);
-  for (const { childId, unsavedChanges: childUnsavedChanges } of reactEmbeddableChanges) {
-    if (!childUnsavedChanges) continue;
-    const panelStateToBackup = {
-      ...currentPanels[childId],
-      ...(dashboardChanges.panels?.[childId] ?? {}),
-      explicitInput: {
-        ...currentPanels[childId]?.explicitInput,
-        ...(dashboardChanges.panels?.[childId]?.explicitInput ?? {}),
-        ...childUnsavedChanges,
-      },
-    };
-    hasAnyReactEmbeddableUnsavedChanges = true;
-    currentPanels[childId] = panelStateToBackup;
-  }
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
 
-  dashboardBackup.setState(this.getDashboardSavedObjectId(), {
-    ...dashboardStateToBackup,
-    panels: hasAnyReactEmbeddableUnsavedChanges ? currentPanels : dashboardChanges.panels,
-    controlGroupInput: controlGroupChanges,
-  });
+  dashboardBackup.setState(
+    this.getDashboardSavedObjectId(),
+    {
+      ...dashboardStateToBackup,
+      panels: dashboardChanges.panels,
+      controlGroupInput: controlGroupChanges,
+    },
+    reactEmbeddableChanges
+  );
 }

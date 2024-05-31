@@ -27,12 +27,9 @@ export function FailedTransactionsCorrelationsHelpPopover() {
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
-      title={i18n.translate(
-        'xpack.apm.correlations.failedTransactions.helpPopover.title',
-        {
-          defaultMessage: 'Failed transaction correlations',
-        }
-      )}
+      title={i18n.translate('xpack.apm.correlations.failedTransactions.helpPopover.title', {
+        defaultMessage: 'Failed transaction correlations',
+      })}
     >
       <p>
         <FormattedMessage

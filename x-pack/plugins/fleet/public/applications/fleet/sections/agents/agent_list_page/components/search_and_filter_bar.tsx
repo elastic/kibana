@@ -31,6 +31,7 @@ import { AgentStatusFilter } from './agent_status_filter';
 import { DashboardsButtons } from './dashboards_buttons';
 import { AgentPolicyFilter } from './filter_bar/agent_policy_filter';
 import { TagsFilter } from './filter_bar/tags_filter';
+import { AgentActivityBadge } from './agent_activity_badge';
 
 export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];
@@ -58,6 +59,7 @@ export interface SearchAndFilterBarProps {
   agentsOnCurrentPage: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
+  latestAgentActionErrors: number;
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -86,6 +88,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   agentsOnCurrentPage,
   onClickAgentActivity,
   showAgentActivityTour,
+  latestAgentActionErrors,
 }) => {
   const authz = useAuthz();
 
@@ -101,7 +104,13 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
           <EuiFlexItem>
             {!isFirstTimeAgentUserLoading && !isFirstTimeAgentUser && <DashboardsButtons />}
           </EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <AgentActivityBadge
+                recentErrors={latestAgentActionErrors}
+                onClick={onClickAgentActivity}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}

@@ -58,10 +58,9 @@ export function useModelActions({
     services: {
       application: { navigateToUrl },
       overlays,
-      theme,
-      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
+      ...startServices
     },
   } = useMlKibana();
 
@@ -109,19 +108,18 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme, i18nStart),
-    [i18nStart, overlays, theme]
+    () => getUserConfirmationProvider(overlays, startServices),
+    [overlays, startServices]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
       getUserInputModelDeploymentParamsProvider(
         overlays,
-        theme,
-        i18nStart,
+        startServices,
         startModelDeploymentDocUrl
       ),
-    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -199,9 +197,8 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'play',
-        type: 'button',
+        type: 'icon',
         isPrimary: true,
         enabled: (item) => {
           return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
@@ -409,9 +406,8 @@ export function useModelActions({
           defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'download',
-        type: 'button',
+        type: 'icon',
         isPrimary: true,
         available: (item) =>
           canCreateTrainedModels &&

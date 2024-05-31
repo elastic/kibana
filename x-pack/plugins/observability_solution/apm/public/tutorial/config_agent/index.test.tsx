@@ -7,10 +7,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { HttpStart } from '@kbn/core/public';
 import React from 'react';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../utils/test_helpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../utils/test_helpers';
 import TutorialConfigAgent from '.';
 
 const policyElasticAgentOnCloudAgent = {
@@ -81,14 +78,10 @@ describe('TutorialConfigAgent', () => {
         />
       );
 
-      const policySelectorWrapper = await screen.findByTestId(
-        'policySelector_onPrem'
-      );
+      const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
       expect(policySelectorWrapper).toBeInTheDocument();
 
-      const input = within(policySelectorWrapper).getByTestId(
-        'comboBoxSearchInput'
-      );
+      const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
       expect(input).toHaveValue('Default Standalone configuration');
 
       let commands = component.getByTestId('commands').innerHTML;
@@ -137,14 +130,10 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_onPrem'
-        );
+        const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
-        );
+        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -178,14 +167,10 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_onPrem'
-        );
+        const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
-        );
+        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -225,14 +210,10 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_cloud'
-        );
+        const policySelectorWrapper = await screen.findByTestId('policySelector_cloud');
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
-        );
+        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -274,9 +255,7 @@ describe('TutorialConfigAgent', () => {
         );
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
-        );
+        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
         expect(input).toHaveValue('Elastic Cloud agent policy');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -309,14 +288,10 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_onPrem'
-        );
+        const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
-        );
+        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -353,10 +328,7 @@ describe('TutorialConfigAgent', () => {
         />
       );
 
-      expectTextsNotInDocument(component, [
-        'Get started with fleet',
-        'Manage fleet policies',
-      ]);
+      expectTextsNotInDocument(component, ['Get started with fleet', 'Manage fleet policies']);
     });
     it('shows default standalone on prem', async () => {
       const component = render(
@@ -377,14 +349,10 @@ describe('TutorialConfigAgent', () => {
         />
       );
 
-      const policySelectorWrapper = await screen.findByTestId(
-        'policySelector_onPrem'
-      );
+      const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
       expect(policySelectorWrapper).toBeInTheDocument();
 
-      const input = within(policySelectorWrapper).getByTestId(
-        'comboBoxSearchInput'
-      );
+      const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
       expect(input).toHaveValue('Default Standalone configuration');
 
       const commands = component.getByTestId('commands').innerHTML;
@@ -420,14 +388,10 @@ describe('TutorialConfigAgent', () => {
           kibanaVersion="8.0.0"
         />
       );
-      const policySelectorWrapper = await screen.findByTestId(
-        'policySelector_cloud'
-      );
+      const policySelectorWrapper = await screen.findByTestId('policySelector_cloud');
       expect(policySelectorWrapper).toBeInTheDocument();
 
-      const input = within(policySelectorWrapper).getByTestId(
-        'comboBoxSearchInput'
-      );
+      const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
       expect(input).toHaveValue('Default Standalone configuration');
 
       const commands = component.getByTestId('commands').innerHTML;

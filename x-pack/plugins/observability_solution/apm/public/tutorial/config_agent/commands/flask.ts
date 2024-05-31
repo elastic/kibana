@@ -43,12 +43,9 @@ from elasticapm.contrib.flask import ElasticAPM
 app = Flask(__name__)
 apm = ElasticAPM(app)
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.flaskClient.configure.commands.configureElasticApmComment',
-  {
-    defaultMessage: "Or use ELASTIC_APM in your application's settings",
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.flaskClient.configure.commands.configureElasticApmComment', {
+  defaultMessage: "Or use ELASTIC_APM in your application's settings",
+})}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
   '${flaskVariables.apmServiceName}': '{{{apmServiceName}}}',

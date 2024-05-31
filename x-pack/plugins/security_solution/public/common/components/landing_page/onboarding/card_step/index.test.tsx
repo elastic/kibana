@@ -70,6 +70,7 @@ describe('CardStepComponent', () => {
       stepId: OverviewSteps.getToKnowElasticSecurity,
       cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
       isExpanded: true,
+      trigger: 'click',
     });
   });
 

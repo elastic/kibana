@@ -363,6 +363,28 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreSetup.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "{@link UserProfileServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-common.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
             "id": "def-common.CoreSetup.getStartServices",
             "type": "Function",
             "tags": [],
@@ -647,7 +669,7 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
+                "path": "src/plugins/discover/public/application/main/state_management/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core-plugins-browser-internal",
@@ -883,6 +905,28 @@
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
                 "section": "def-common.SecurityServiceStart",
                 "text": "SecurityServiceStart"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-common.CoreStart.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "{@link UserProfileServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-common.UserProfileService",
+                "text": "UserProfileService"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

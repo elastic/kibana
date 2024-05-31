@@ -6,11 +6,11 @@
  */
 
 import type React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';
-import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { CreateCaseFlyoutProps } from './create_case_flyout';
 
@@ -88,10 +88,12 @@ export const useCasesAddToNewCaseFlyout = ({
       onClose,
     ]
   );
-  return {
-    open: openFlyout,
-    close: closeFlyout,
-  };
+  return useMemo(() => {
+    return {
+      open: openFlyout,
+      close: closeFlyout,
+    };
+  }, [openFlyout, closeFlyout]);
 };
 
 export type UseCasesAddToNewCaseFlyout = typeof useCasesAddToNewCaseFlyout;

@@ -56,10 +56,9 @@ export function TransactionFlyout({
 }: Props) {
   const { data: transaction, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
-        { params: { path: { traceId, transactionId }, query: { start, end } } }
-      );
+      return callApmApi('GET /internal/apm/traces/{traceId}/transactions/{transactionId}', {
+        params: { path: { traceId, transactionId }, query: { start, end } },
+      });
     },
     [traceId, transactionId, start, end]
   );
@@ -86,10 +85,7 @@ export function TransactionFlyout({
 
             {transaction && (
               <EuiFlexItem grow={false}>
-                <TransactionActionMenu
-                  isLoading={false}
-                  transaction={transaction}
-                />
+                <TransactionActionMenu isLoading={false} transaction={transaction} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

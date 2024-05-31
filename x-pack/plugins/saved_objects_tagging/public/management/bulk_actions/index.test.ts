@@ -37,7 +37,7 @@ describe('getBulkActions', () => {
     { assignableTypes = ['foo', 'bar'] }: { assignableTypes?: string[] } = {}
   ) =>
     getBulkActions({
-      core,
+      startServices: core,
       tagClient,
       tagCache,
       assignmentService,

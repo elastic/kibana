@@ -14,8 +14,10 @@ import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { AIAssistantService } from '.';
+import { AIAssistantService, AIAssistantServiceOpts } from '.';
 import { retryUntil } from './create_resource_installation_helper.test';
+import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
@@ -95,6 +97,7 @@ const mockUser1 = {
 
 describe('AI Assistant Service', () => {
   let pluginStop$: Subject<void>;
+  let assistantServiceOpts: AIAssistantServiceOpts;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -107,6 +110,14 @@ describe('AI Assistant Service', () => {
     );
     clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
     clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+    assistantServiceOpts = {
+      logger,
+      elasticsearchClientPromise: Promise.resolve(clusterClient),
+      pluginStop$,
+      kibanaVersion: '8.8.0',
+      ml: mlPluginMock.createSetupContract() as unknown as MlPluginSetup, // Missing SharedServices mock
+      taskManager: taskManagerMock.createSetup(),
+    };
   });
 
   afterEach(() => {
@@ -116,13 +127,7 @@ describe('AI Assistant Service', () => {
 
   describe('AIAssistantService()', () => {
     test('should correctly initialize common resources', async () => {
-      const assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      const assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -140,13 +145,7 @@ describe('AI Assistant Service', () => {
 
     test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
       clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
-      const assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      const assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
 
@@ -163,16 +162,13 @@ describe('AI Assistant Service', () => {
       (AIAssistantConversationsDataClient as jest.Mock).mockImplementation(
         () => conversationsDataClient
       );
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      });
     });
 
     test('should create new AIAssistantConversationsDataClient', async () => {
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -189,7 +185,7 @@ describe('AI Assistant Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         spaceId: 'default',
-        indexPatternsResorceName: '.kibana-elastic-ai-assistant-conversations',
+        indexPatternsResourceName: '.kibana-elastic-ai-assistant-conversations',
         currentUser: mockUser1,
         kibanaVersion: '8.8.0',
       });
@@ -198,13 +194,7 @@ describe('AI Assistant Service', () => {
     test('should retry initializing common resources if common resource initialization failed', async () => {
       clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
 
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
 
@@ -231,7 +221,7 @@ describe('AI Assistant Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         spaceId: 'default',
-        indexPatternsResorceName: '.kibana-elastic-ai-assistant-conversations',
+        indexPatternsResourceName: '.kibana-elastic-ai-assistant-conversations',
         currentUser: mockUser1,
         kibanaVersion: '8.8.0',
       });
@@ -256,13 +246,7 @@ describe('AI Assistant Service', () => {
         return { acknowledged: true };
       });
 
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
 
@@ -295,7 +279,7 @@ describe('AI Assistant Service', () => {
       expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         spaceId: 'default',
-        indexPatternsResorceName: '.kibana-elastic-ai-assistant-conversations',
+        indexPatternsResourceName: '.kibana-elastic-ai-assistant-conversations',
         currentUser: mockUser1,
         kibanaVersion: '8.8.0',
         logger,
@@ -325,6 +309,7 @@ describe('AI Assistant Service', () => {
           mappings: {},
         },
       }));
+
       clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
         template: {
@@ -332,13 +317,7 @@ describe('AI Assistant Service', () => {
           mappings: {},
         },
       }));
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -354,7 +333,7 @@ describe('AI Assistant Service', () => {
       expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         spaceId: 'default',
-        indexPatternsResorceName: '.kibana-elastic-ai-assistant-conversations',
+        indexPatternsResourceName: '.kibana-elastic-ai-assistant-conversations',
         currentUser: mockUser1,
         kibanaVersion: '8.8.0',
         logger,
@@ -393,13 +372,7 @@ describe('AI Assistant Service', () => {
         return SimulateTemplateResponse;
       });
 
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -427,7 +400,7 @@ describe('AI Assistant Service', () => {
       expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         spaceId: 'default',
-        indexPatternsResorceName: '.kibana-elastic-ai-assistant-conversations',
+        indexPatternsResourceName: '.kibana-elastic-ai-assistant-conversations',
         currentUser: mockUser1,
         kibanaVersion: '8.8.0',
         logger,
@@ -471,13 +444,7 @@ describe('AI Assistant Service', () => {
         },
       }));
 
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -519,13 +486,7 @@ describe('AI Assistant Service', () => {
         throw new Error(`fail ${++failCount}`);
       });
 
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil('error log called', async () => logger.error.mock.calls.length > 0, 1);
 
@@ -570,13 +531,7 @@ describe('AI Assistant Service', () => {
     test('should return null if retrying common resources initialization fails again with same error', async () => {
       clusterClient.cluster.putComponentTemplate.mockRejectedValue(new Error('fail'));
 
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
 
@@ -629,13 +584,7 @@ describe('AI Assistant Service', () => {
       }));
       clusterClient.indices.putIndexTemplate.mockRejectedValue(new Error('fail index template'));
 
-      assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -673,13 +622,7 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
-      const assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      const assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -693,13 +636,7 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
-      const assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      const assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -720,13 +657,7 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
-      const assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      const assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -746,13 +677,7 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
-      const assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
-      });
+      const assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',
@@ -775,14 +700,11 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
-
-      const assistantService = new AIAssistantService({
-        logger,
-        elasticsearchClientPromise: Promise.resolve(clusterClient),
-        pluginStop$,
-        kibanaVersion: '8.8.0',
-        taskManager: taskManagerMock.createSetup(),
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
       });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
 
       await retryUntil(
         'AI Assistant service initialized',

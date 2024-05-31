@@ -15,7 +15,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
@@ -73,13 +73,8 @@ function Wrapper({
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>
-          <MockApmPluginContextWrapper
-            history={history}
-            value={mockPluginContext}
-          >
-            <MockUrlParamsContextProvider>
-              {children}
-            </MockUrlParamsContextProvider>
+          <MockApmPluginContextWrapper history={history} value={mockPluginContext}>
+            <MockUrlParamsContextProvider>{children}</MockUrlParamsContextProvider>
           </MockApmPluginContextWrapper>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>

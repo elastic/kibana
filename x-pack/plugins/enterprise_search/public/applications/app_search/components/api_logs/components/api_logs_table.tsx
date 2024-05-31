@@ -108,7 +108,6 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
     <EuiBasicTable
       columns={columns}
       items={apiLogs}
-      responsive
       loading={dataLoading}
       noItemsMessage={<EmptyState />}
       {...paginationProps}

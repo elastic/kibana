@@ -1,13 +1,28 @@
 PERCENTILE
 
-The value at which a certain percentage of observed values occur. For example,
-the 95th percentile is the value which is greater than 95% of the observed values and
-the 50th percentile is the MEDIAN.
+Syntax
+PERCENTILE(expression, percentile)
+Parameters
+expression
+Expression from which to return a percentile.
+percentile
+A constant numeric expression.
+DescriptionReturns the value at which a certain percentage of observed values occur. For
+example, the 95th percentile is the value which is greater than 95% of the
+observed values and the 50th percentile is the MEDIAN.Example
 ```esql
 FROM employees
 | STATS p0 = PERCENTILE(salary,  0)
      , p50 = PERCENTILE(salary, 50)
      , p99 = PERCENTILE(salary, 99)
+```
+
+The expression can use inline functions. For example, to calculate a percentile
+of the maximum values of a multivalued column, first use MV_MAX to get the
+maximum value per row, and use the result with the PERCENTILE function:
+```esql
+FROM employees
+| STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
 ```
 
 PERCENTILE is (usually) approximateeditThere are many different algorithms to calculate percentiles. The naive

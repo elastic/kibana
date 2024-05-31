@@ -173,6 +173,13 @@ export interface SavedObjectUpdateOptions<Attributes = unknown> {
    * Defaults to `0` when `version` is provided, `3` otherwise.
    */
   retryOnConflict?: number;
+  /**
+   * By default, update will merge the provided attributes with the ones present on the document
+   * (performing a standard partial update). Setting this option to `false` will change the behavior, performing
+   * a "full" update instead, where the provided attributes will fully replace the existing ones.
+   * Defaults to `true`.
+   */
+  mergeAttributes?: boolean;
 }
 
 /** Return value for Saved Object get, T is item returned */
@@ -194,6 +201,8 @@ export interface SOWithMetadata<Attributes extends object = object> {
   version?: string;
   createdAt?: string;
   updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
   error?: {
     error: string;
     message: string;

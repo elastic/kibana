@@ -36,12 +36,7 @@ const CentralizedContainer = styled.div`
 
 type APIResponseType = APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
-function TutorialFleetInstructions({
-  http,
-  basePath,
-  isDarkTheme,
-  kibanaVersion,
-}: Props) {
+function TutorialFleetInstructions({ http, basePath, isDarkTheme, kibanaVersion }: Props) {
   const [data, setData] = useState<APIResponseType | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,10 +62,7 @@ function TutorialFleetInstructions({
   const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy;
   const hasRequiredRole = !!data?.has_required_role;
   const shouldLinkToMigration =
-    cloudApmMigrationEnabled &&
-    hasCloudAgentPolicy &&
-    !hasCloudApmPackagePolicy &&
-    hasRequiredRole;
+    cloudApmMigrationEnabled && hasCloudAgentPolicy && !hasCloudApmPackagePolicy && hasRequiredRole;
 
   const apmIntegrationHref = shouldLinkToMigration
     ? `${basePath}/app/apm/settings/schema`
@@ -93,12 +85,9 @@ function TutorialFleetInstructions({
         fill
         href={`${basePath}/app/integrations/detail/apm/policies`}
       >
-        {i18n.translate(
-          'xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button',
-          {
-            defaultMessage: 'Manage APM integration in Fleet',
-          }
-        )}
+        {i18n.translate('xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button', {
+          defaultMessage: 'Manage APM integration in Fleet',
+        })}
       </EuiButton>
     );
   }
@@ -113,13 +102,10 @@ function TutorialFleetInstructions({
             title={i18n.translate('xpack.apm.tutorial.apmServer.fleet.title', {
               defaultMessage: 'Elastic APM now available in Fleet!',
             })}
-            description={i18n.translate(
-              'xpack.apm.tutorial.apmServer.fleet.message',
-              {
-                defaultMessage:
-                  'The APM integration installs Elasticsearch templates and ingest pipelines for APM data.',
-              }
-            )}
+            description={i18n.translate('xpack.apm.tutorial.apmServer.fleet.message', {
+              defaultMessage:
+                'The APM integration installs Elasticsearch templates and ingest pipelines for APM data.',
+            })}
             footer={
               <>
                 <EuiButton
@@ -128,12 +114,9 @@ function TutorialFleetInstructions({
                   color="success"
                   href={apmIntegrationHref}
                 >
-                  {i18n.translate(
-                    'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
-                    {
-                      defaultMessage: 'APM integration',
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.tutorial.apmServer.fleet.apmIntegration.button', {
+                    defaultMessage: 'APM integration',
+                  })}
                 </EuiButton>
                 <EuiSpacer size="m" />
                 <EuiText size="s">

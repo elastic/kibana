@@ -40,13 +40,14 @@ describe('useManagementLink Hook', () => {
     const expectedUrl =
       'http://localhost:5601/app/management/insightsAndAlerting/triggersActionsConnectors';
     mockGetUrl.mockResolvedValue(expectedUrl);
-    const { result, waitForNextUpdate } = renderHook(() => useManagementLink());
+    const connectorId = 'test-connector-id';
+    const { result, waitForNextUpdate } = renderHook(() => useManagementLink(connectorId));
     await waitForNextUpdate();
 
     expect(result.current).toBe(expectedUrl);
     expect(mockGetUrl).toHaveBeenCalledWith({
       sectionId: 'insightsAndAlerting',
-      appId: 'triggersActionsConnectors',
+      appId: 'triggersActionsConnectors/connectors/test-connector-id',
     });
   });
 
@@ -62,8 +63,8 @@ describe('useManagementLink Hook', () => {
         },
       },
     });
-
-    const { result } = renderHook(() => useManagementLink());
+    const connectorId = 'test-connector-id';
+    const { result } = renderHook(() => useManagementLink(connectorId));
 
     expect(result.current).toBe('');
   });

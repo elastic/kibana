@@ -9,12 +9,12 @@ import type { RootSchema } from '@kbn/analytics-client';
 import type { TelemetryEventTypes } from '../../constants';
 
 export interface ReportDetailsFlyoutOpenedParams {
-  tableId: string;
+  location: string;
   panel: 'left' | 'right' | 'preview';
 }
 
 export interface ReportDetailsFlyoutTabClickedParams {
-  tableId: string;
+  location: string;
   panel: 'left' | 'right';
   tabId: string;
 }

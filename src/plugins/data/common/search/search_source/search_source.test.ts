@@ -10,6 +10,7 @@ import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
@@ -18,7 +19,6 @@ import { switchMap } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
 import { SearchSourceSearchOptions } from './types';
-import { ISearchGeneric } from '../types';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -301,6 +301,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['@timestamp'],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['@timestamp']);
@@ -317,6 +318,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['hello'],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
@@ -334,6 +336,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: 'a', format: 'date_time' }],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
@@ -360,6 +363,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', [{ field: 'hello', format: 'strict_date_time' }]);
@@ -376,6 +380,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['hello']);
@@ -397,6 +402,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time', a: 'test', b: 'test' }],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', [{ field: 'hello', a: 'a', c: 'c' }]);
@@ -415,6 +421,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
@@ -435,6 +442,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
@@ -451,6 +459,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['hello', 'a', { foo: 'c' }]);
@@ -467,6 +476,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {} },
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fieldsFromSource', ['hello', 'a']);
@@ -526,6 +536,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['@timestamp', 'exclude-me'],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         // @ts-expect-error Typings for excludes filters need to be fixed.
@@ -542,6 +553,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: ['@timestamp', 'foo-bar', 'foo-baz'],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
 
@@ -556,6 +568,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['hello']);
@@ -571,6 +584,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', [
@@ -592,6 +606,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['*']);
@@ -607,6 +622,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
@@ -622,6 +638,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: [],
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
@@ -644,6 +661,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['timestamp', '*']);
@@ -659,6 +677,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSourceDependencies.scriptedFieldsEnabled = false;
@@ -677,6 +696,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp'],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fieldsFromSource', [
@@ -701,6 +721,7 @@ describe('SearchSource', () => {
             storedFields: ['*'],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date'],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
@@ -747,6 +768,7 @@ describe('SearchSource', () => {
             storedFields: ['*'],
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date', 'time'],
+            runtimeFields: {},
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
@@ -770,6 +792,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: '@timestamp' }],
+            runtimeFields: {},
           }),
           fields: {
             getByType: () => [{ name: '@timestamp', esTypes: ['date_nanos'] }],
@@ -800,6 +823,7 @@ describe('SearchSource', () => {
             storedFields: [],
             scriptFields: {},
             docvalueFields: [{ field: '@timestamp' }, { field: 'custom_date' }],
+            runtimeFields: {},
           }),
           fields: indexPatternFields,
           getSourceFiltering: () => ({ excludes: ['custom_date'] }),
@@ -1003,6 +1027,7 @@ describe('SearchSource', () => {
           storedFields: ['*'],
           scriptFields: {},
           docvalueFields: [],
+          runtimeFields: {},
         }),
       } as unknown as DataView);
       const request = searchSource.getSearchRequestBody();
@@ -1271,7 +1296,7 @@ describe('SearchSource', () => {
         expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
       });
 
-      test('calls post flight requests, fires 1 extra response, returns last response', async () => {
+      test('doesnt fire postFlightRequest if other bucket is not enabled', async () => {
         const typesRegistry = mockAggTypesRegistry();
         typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
           other: 5,
@@ -1311,6 +1336,57 @@ describe('SearchSource', () => {
         const resp = await lastValueFrom(fetch$);
 
         expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
+        expect(fetchSub.next).toHaveBeenCalledTimes(2);
+        expect(fetchSub.complete).toHaveBeenCalledTimes(1);
+        expect(fetchSub.error).toHaveBeenCalledTimes(0);
+        expect(resp.rawResponse).toStrictEqual({ test: 2 });
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
+      });
+
+      test('calls post flight requests, fires 1 extra response, returns last response', async () => {
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
+          other: 5,
+        });
+
+        const allac = new AggConfigs(
+          indexPattern3,
+          [
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field1' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field2' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'foo-bar' },
+            },
+          ],
+          {
+            typesRegistry,
+          },
+          jest.fn()
+        );
+
+        allac.aggs.forEach((agg) => {
+          agg.params.otherBucket = 'other';
+        });
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', allac);
+        const fetch$ = searchSource.fetch$({});
+        fetch$.subscribe(fetchSub);
+
+        const resp = await lastValueFrom(fetch$);
+
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
@@ -1339,6 +1415,10 @@ describe('SearchSource', () => {
           jest.fn()
         );
 
+        allac.aggs.forEach((agg) => {
+          agg.params.otherBucket = 'other';
+        });
+
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);
         searchSource.setField('aggs', allac);
@@ -1363,6 +1443,7 @@ describe('SearchSource', () => {
         const typesRegistry = mockAggTypesRegistry();
         typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockRejectedValue(undefined);
         const ac = getAggConfigs(typesRegistry, true);
+        ac.aggs[0].params.otherBucket = 'other';
 
         searchSource = new SearchSource({}, searchSourceDependencies);
         searchSource.setField('index', indexPattern);

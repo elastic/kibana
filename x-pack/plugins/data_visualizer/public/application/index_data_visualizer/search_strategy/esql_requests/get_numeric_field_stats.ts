@@ -8,7 +8,7 @@
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { appendToESQLQuery } from '@kbn/esql-utils';
 import { chunk } from 'lodash';
 import pLimit from 'p-limit';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
@@ -66,11 +66,11 @@ const getESQLNumericFieldStatsInChunk = async ({
   if (numericFields.length > 0) {
     const numericStatsQuery = '| STATS ' + numericFields.map(({ query }) => query).join(',');
 
+    const query = appendToESQLQuery(esqlBaseQuery, numericStatsQuery);
     const request = {
       params: {
-        query: esqlBaseQuery + numericStatsQuery,
+        query,
         ...(filter ? { filter } : {}),
-        version: ESQL_LATEST_VERSION,
       },
     };
     try {

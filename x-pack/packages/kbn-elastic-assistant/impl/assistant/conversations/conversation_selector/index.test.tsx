@@ -45,7 +45,7 @@ const onConversationDeleted = jest.fn();
 const defaultProps = {
   isDisabled: false,
   onConversationSelected,
-  selectedConversationTitle: 'Welcome',
+  selectedConversationId: 'Welcome',
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
   conversations: mockConversations,
@@ -154,7 +154,7 @@ describe('Conversation selector', () => {
       <TestProviders>
         <ConversationSelector
           {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
-          selectedConversationTitle={customConvo.title}
+          selectedConversationId={customConvo.title}
         />
       </TestProviders>
     );
@@ -166,46 +166,6 @@ describe('Conversation selector', () => {
     expect(onConversationSelected).toHaveBeenCalledWith({
       cId: '',
       cTitle: welcomeConvo.title,
-    });
-  });
-
-  it('Left arrow selects first conversation', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ConversationSelector
-          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
-        />
-      </TestProviders>
-    );
-
-    fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
-      key: 'ArrowLeft',
-      ctrlKey: true,
-      code: 'ArrowLeft',
-      charCode: 27,
-    });
-    expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: '',
-      cTitle: alertConvo.title,
-    });
-  });
-
-  it('Right arrow selects last conversation', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ConversationSelector {...defaultProps} conversations={mockConversationsWithCustom} />
-      </TestProviders>
-    );
-
-    fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
-      key: 'ArrowRight',
-      ctrlKey: true,
-      code: 'ArrowRight',
-      charCode: 26,
-    });
-    expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: '',
-      cTitle: customConvo.title,
     });
   });
 

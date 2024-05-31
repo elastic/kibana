@@ -14,11 +14,7 @@ describe('Custom link API helper', () => {
     });
     it('removes white spaces', () => {
       expect(splitFilterValueByComma('foo, bar,   ')).toEqual(['foo', 'bar']);
-      expect(splitFilterValueByComma('foo , bar ,  baz,  ')).toEqual([
-        'foo',
-        'bar',
-        'baz',
-      ]);
+      expect(splitFilterValueByComma('foo , bar ,  baz,  ')).toEqual(['foo', 'bar', 'baz']);
     });
     it('doesnt slipt when comma is not found', () => {
       expect(splitFilterValueByComma('foo bar')).toEqual(['foo bar']);

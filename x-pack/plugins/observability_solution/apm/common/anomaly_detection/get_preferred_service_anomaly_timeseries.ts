@@ -20,9 +20,7 @@ export function getPreferredServiceAnomalyTimeseries({
   allAnomalyTimeseries: ServiceAnomalyTimeseries[];
   fallbackToTransactions: boolean;
 }) {
-  const seriesForType = allAnomalyTimeseries.filter(
-    (serie) => serie.type === detectorType
-  );
+  const seriesForType = allAnomalyTimeseries.filter((serie) => serie.type === detectorType);
 
   return seriesForType.find(
     (serie) =>

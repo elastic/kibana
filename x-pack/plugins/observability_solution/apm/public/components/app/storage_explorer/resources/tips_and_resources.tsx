@@ -38,29 +38,20 @@ export function TipsAndResources() {
   const cards = [
     {
       icon: 'beaker',
-      title: i18n.translate(
-        'xpack.apm.storageExplorer.resources.errorMessages.title',
-        {
-          defaultMessage: 'Reduce transactions',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.apm.storageExplorer.resources.errorMessages.description',
-        {
-          defaultMessage:
-            'Configure a more aggressive transaction sampling policy. Transaction sampling lowers the amount of data ingested without negatively impacting the usefulness of that data.',
-        }
-      ),
+      title: i18n.translate('xpack.apm.storageExplorer.resources.errorMessages.title', {
+        defaultMessage: 'Reduce transactions',
+      }),
+      description: i18n.translate('xpack.apm.storageExplorer.resources.errorMessages.description', {
+        defaultMessage:
+          'Configure a more aggressive transaction sampling policy. Transaction sampling lowers the amount of data ingested without negatively impacting the usefulness of that data.',
+      }),
       href: docLinks.links.apm.transactionSampling,
     },
     {
       icon: 'visLine',
-      title: i18n.translate(
-        'xpack.apm.storageExplorer.resources.compressedSpans.title',
-        {
-          defaultMessage: 'Reduce spans',
-        }
-      ),
+      title: i18n.translate('xpack.apm.storageExplorer.resources.compressedSpans.title', {
+        defaultMessage: 'Reduce spans',
+      }),
       description: i18n.translate(
         'xpack.apm.storageExplorer.resources.compressedSpans.description',
         {
@@ -72,41 +63,29 @@ export function TipsAndResources() {
     },
     {
       icon: 'indexEdit',
-      title: i18n.translate(
-        'xpack.apm.storageExplorer.resources.samplingRate.title',
-        {
-          defaultMessage: 'Manage the index lifecycle',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.apm.storageExplorer.resources.samplingRate.description',
-        {
-          defaultMessage:
-            'Customize your index lifecycle policies. Index lifecycle policies allow you to manage indices according to your performance, resiliency, and retention requirements.',
-        }
-      ),
+      title: i18n.translate('xpack.apm.storageExplorer.resources.samplingRate.title', {
+        defaultMessage: 'Manage the index lifecycle',
+      }),
+      description: i18n.translate('xpack.apm.storageExplorer.resources.samplingRate.description', {
+        defaultMessage:
+          'Customize your index lifecycle policies. Index lifecycle policies allow you to manage indices according to your performance, resiliency, and retention requirements.',
+      }),
       href: docLinks.links.apm.indexLifecycleManagement,
     },
   ];
 
   const resourcesListItems = [
     {
-      label: i18n.translate(
-        'xpack.apm.storageExplorer.resources.indexManagement',
-        {
-          defaultMessage: 'Index management',
-        }
-      ),
+      label: i18n.translate('xpack.apm.storageExplorer.resources.indexManagement', {
+        defaultMessage: 'Index management',
+      }),
       href: getIndexManagementHref(core),
       iconType: 'indexEdit',
     },
     {
-      label: i18n.translate(
-        'xpack.apm.storageExplorer.resources.serviceInventory',
-        {
-          defaultMessage: 'Service inventory',
-        }
-      ),
+      label: i18n.translate('xpack.apm.storageExplorer.resources.serviceInventory', {
+        defaultMessage: 'Service inventory',
+      }),
       href: router.link('/services', {
         query: {
           rangeFrom,
@@ -120,23 +99,17 @@ export function TipsAndResources() {
       iconType: 'tableDensityExpanded',
     },
     {
-      label: i18n.translate(
-        'xpack.apm.storageExplorer.resources.documentation',
-        {
-          defaultMessage: 'Documentation',
-        }
-      ),
+      label: i18n.translate('xpack.apm.storageExplorer.resources.documentation', {
+        defaultMessage: 'Documentation',
+      }),
       href: docLinks.links.apm.storageExplorer,
       target: '_blank',
       iconType: 'documentation',
     },
     {
-      label: i18n.translate(
-        'xpack.apm.storageExplorer.resources.sendFeedback',
-        {
-          defaultMessage: 'Give feedback',
-        }
-      ),
+      label: i18n.translate('xpack.apm.storageExplorer.resources.sendFeedback', {
+        defaultMessage: 'Give feedback',
+      }),
       href: getStorageExplorerFeedbackHref(),
       target: '_blank',
       iconType: 'editorComment',
@@ -150,12 +123,9 @@ export function TipsAndResources() {
         buttonContent={
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate(
-                'xpack.apm.storageExplorer.resources.accordionTitle',
-                {
-                  defaultMessage: 'Tips and tricks',
-                }
-              )}
+              {i18n.translate('xpack.apm.storageExplorer.resources.accordionTitle', {
+                defaultMessage: 'Tips and tricks',
+              })}
             </h2>
           </EuiTitle>
         }
@@ -175,12 +145,9 @@ export function TipsAndResources() {
                     href={href}
                     target="_blank"
                   >
-                    {i18n.translate(
-                      'xpack.apm.storageExplorer.resources.learnMoreButton',
-                      {
-                        defaultMessage: 'Learn more',
-                      }
-                    )}
+                    {i18n.translate('xpack.apm.storageExplorer.resources.learnMoreButton', {
+                      defaultMessage: 'Learn more',
+                    })}
                   </EuiButton>
                 }
               />
@@ -194,11 +161,7 @@ export function TipsAndResources() {
                 })}
               </h3>
             </EuiTitle>
-            <EuiListGroup
-              listItems={resourcesListItems}
-              color="primary"
-              size="s"
-            />
+            <EuiListGroup listItems={resourcesListItems} color="primary" size="s" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiAccordion>

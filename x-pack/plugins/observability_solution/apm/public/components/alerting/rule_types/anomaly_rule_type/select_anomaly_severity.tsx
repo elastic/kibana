@@ -15,14 +15,9 @@ import {
 } from '../../../../../common/rules/apm_rule_types';
 
 export function AnomalySeverity({ type }: { type: AnomalyAlertSeverityType }) {
-  const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
-    (option) => option.type === type
-  )!;
+  const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find((option) => option.type === type)!;
   return (
-    <EuiHealth
-      color={getSeverityColor(selectedOption.threshold)}
-      style={{ lineHeight: 'inherit' }}
-    >
+    <EuiHealth color={getSeverityColor(selectedOption.threshold)} style={{ lineHeight: 'inherit' }}>
       {selectedOption.label}
     </EuiHealth>
   );

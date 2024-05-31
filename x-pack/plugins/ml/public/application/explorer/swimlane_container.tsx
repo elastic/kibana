@@ -61,7 +61,7 @@ import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
+import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
 import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
 
 declare global {
@@ -81,8 +81,6 @@ const BORDER_WIDTH = 1;
 export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
-
-export const SWIM_LANE_LABEL_WIDTH = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');

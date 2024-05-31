@@ -14,17 +14,21 @@ import {
   useRefreshIntervalUpdates,
   useTimefilter,
 } from '@kbn/ml-date-picker';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../locator';
 import type { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import type { MlRoute } from '../router';
 import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
-import { JobsPage } from '../../jobs/jobs_list';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { basicResolvers } from '../resolvers';
+
+const JobsPage = dynamic(async () => ({
+  default: (await import('../../jobs/jobs_list')).JobsPage,
+}));
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   id: 'anomaly_detection',

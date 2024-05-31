@@ -11,10 +11,7 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
-import {
-  isMobileAgentName,
-  isRumAgentName,
-} from '../../../../../common/agent_name';
+import { isMobileAgentName, isRumAgentName } from '../../../../../common/agent_name';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -43,10 +40,7 @@ export function AnalyzeDataButton() {
 
   const {
     query: { rangeFrom, rangeTo, environment },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const basepath = services.http?.basePath.get();
   const canShowDashboard = services.application?.capabilities.dashboard.show;

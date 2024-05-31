@@ -35,7 +35,6 @@ import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
 import { useLicense } from '../../../../hooks/use_license';
 
-const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({
@@ -224,19 +223,6 @@ const AlertDetailsAppSection = ({
     } else return null;
   };
 
-  const getLogsHistoryChart = () => {
-    return (
-      rule &&
-      rule.params.criteria.length === 1 && (
-        <EuiFlexItem>
-          <LogsHistoryChart
-            rule={{ ...rule, params: { ...rule.params, timeSize: 12, timeUnit: 'h' } }}
-          />
-        </EuiFlexItem>
-      )
-    );
-  };
-
   const getLogRateAnalysisSection = () => {
     return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
@@ -246,7 +232,6 @@ const AlertDetailsAppSection = ({
       {getLogRatioChart()}
       {getLogCountChart()}
       {getLogRateAnalysisSection()}
-      {getLogsHistoryChart()}
     </EuiFlexGroup>
   );
 };

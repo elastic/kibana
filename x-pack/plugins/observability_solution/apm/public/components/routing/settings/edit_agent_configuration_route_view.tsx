@@ -12,29 +12,17 @@ import { AgentConfigurationCreateEdit } from '../../app/settings/agent_configura
 
 export function EditAgentConfigurationRouteView() {
   const {
-    query: {
-      name,
-      environment,
-      pageStep = AgentConfigurationPageStep.ChooseSettings,
-    },
+    query: { name, environment, pageStep = AgentConfigurationPageStep.ChooseSettings },
   } = useApmParams('/settings/agent-configuration/edit');
 
   const res = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /api/apm/settings/agent-configuration/view 2023-10-31',
-        {
-          params: { query: { name, environment } },
-        }
-      );
+      return callApmApi('GET /api/apm/settings/agent-configuration/view 2023-10-31', {
+        params: { query: { name, environment } },
+      });
     },
     [name, environment]
   );
 
-  return (
-    <AgentConfigurationCreateEdit
-      pageStep={pageStep}
-      existingConfigResult={res}
-    />
-  );
+  return <AgentConfigurationCreateEdit pageStep={pageStep} existingConfigResult={res} />;
 }

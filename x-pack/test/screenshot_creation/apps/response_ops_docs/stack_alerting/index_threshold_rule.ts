@@ -23,27 +23,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', ruleName);
-      await testSubjects.click('tagsComboBox');
-      await testSubjects.setValue('tagsComboBox', 'sample-data');
-      await testSubjects.click('solutionsFilterButton');
-      await testSubjects.click('solutionstackAlertsFilterOption');
-      await testSubjects.setValue('solutionsFilterButton', 'solutionstackAlertsFilterOption');
-      await commonScreenshots.takeScreenshot(
-        'rule-types-index-threshold-select',
-        screenshotDirectories,
-        1400,
-        1024
-      );
-
       await testSubjects.click('.index-threshold-SelectOption');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-conditions',
         screenshotDirectories,
         1400,
         1300
       );
-
+      await testSubjects.setValue('ruleNameInput', ruleName);
+      await testSubjects.click('tagsComboBox');
+      await testSubjects.setValue('tagsComboBox', 'sample-data');
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
       await comboBox.set('thresholdIndexesComboBox', 'kibana_sample_data_logs ');

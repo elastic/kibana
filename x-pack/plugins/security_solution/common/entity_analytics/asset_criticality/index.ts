@@ -7,3 +7,4 @@
 
 export * from './indices';
 export * from './constants';
+export * from './parse_asset_criticality_csv_row';

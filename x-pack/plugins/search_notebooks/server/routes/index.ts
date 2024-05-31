@@ -6,21 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
+import { NotebookDefinition } from '@kbn/ipynb';
 
-import { DEFAULT_NOTEBOOKS, NOTEBOOKS_MAP, getNotebook } from '../lib/notebook_catalog';
-import { NotebookDefinition } from '../types';
+import { INTRODUCTION_NOTEBOOK } from '../../common/constants';
+import { getNotebookCatalog, getNotebook, getNotebookMetadata } from '../lib/notebook_catalog';
+import type { RouteDependencies } from '../types';
 
-export function defineRoutes(router: IRouter, logger: Logger) {
+export function defineRoutes({ config, notebooksCache, logger, router }: RouteDependencies) {
   router.get(
     {
       path: '/internal/search_notebooks/notebooks',
       validate: {},
+      options: {
+        access: 'internal',
+      },
     },
     async (_context, _request, response) => {
+      const notebooks = await getNotebookCatalog({ cache: notebooksCache, config, logger });
+
       return response.ok({
-        body: DEFAULT_NOTEBOOKS,
+        body: notebooks,
         headers: { 'content-type': 'application/json' },
       });
     }
@@ -34,21 +39,36 @@ export function defineRoutes(router: IRouter, logger: Logger) {
           notebookId: schema.string(),
         }),
       },
+      options: {
+        access: 'internal',
+      },
     },
-    async (context, request, response) => {
+    async (_, request, response) => {
       const notebookId = request.params.notebookId;
 
-      if (!NOTEBOOKS_MAP.hasOwnProperty(notebookId)) {
+      if (notebookId === INTRODUCTION_NOTEBOOK.id) {
+        return response.ok({
+          body: INTRODUCTION_NOTEBOOK,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+
+      const notebookMetadata = getNotebookMetadata(notebookId, notebooksCache);
+      if (!notebookMetadata) {
         logger.warn(`Unknown search notebook requested ${notebookId}`);
         return response.notFound();
       }
-
-      const notebookMetadata = NOTEBOOKS_MAP[notebookId];
-      let notebook: NotebookDefinition;
+      let notebook: NotebookDefinition | undefined;
       try {
-        notebook = await getNotebook(notebookId, { logger });
+        notebook = await getNotebook(notebookId, { cache: notebooksCache, config, logger });
       } catch (e) {
+        logger.warn(`Error getting search notebook ${notebookId}.`);
+        logger.warn(e);
         return response.customError(e.message);
+      }
+      if (!notebook) {
+        logger.warn(`Search notebook requested ${notebookId} not found or failed to fetch.`);
+        return response.notFound();
       }
       return response.ok({
         body: {

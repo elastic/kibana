@@ -37,6 +37,8 @@ import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/risk_engine_data_client.mock';
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { rulesManagementClientMock } from '../../rule_management/logic/rule_management/__mocks__/rules_management_client';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -56,6 +58,7 @@ export const createMockClients = () => {
       exceptionListClient: listMock.getExceptionListClient(core.savedObjects.client),
     },
     rulesClient: rulesClientMock.create(),
+    rulesManagementClient: rulesManagementClientMock.create(),
     actionsClient: actionsClientMock.create(),
     ruleDataService: ruleRegistryMocks.createRuleDataService(),
 
@@ -114,6 +117,7 @@ const createSecuritySolutionRequestContextMock = (
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
+  const mockAuditLogger = auditLoggerMock.create();
 
   return {
     core,
@@ -138,6 +142,7 @@ const createSecuritySolutionRequestContextMock = (
     }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
+    getRulesManagementClient: jest.fn(() => clients.rulesManagementClient),
     getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
@@ -148,6 +153,7 @@ const createSecuritySolutionRequestContextMock = (
     getRiskEngineDataClient: jest.fn(() => clients.riskEngineDataClient),
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
+    getAuditLogger: jest.fn(() => mockAuditLogger),
   };
 };
 

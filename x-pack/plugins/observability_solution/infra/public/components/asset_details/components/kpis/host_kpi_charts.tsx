@@ -10,7 +10,7 @@ import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Kpi } from './kpi';
-import { useHostKpiCharts } from '../../hooks/use_metrics_charts';
+import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
 
 export interface HostKpiChartsProps {
   dataView?: DataView;
@@ -19,7 +19,7 @@ export interface HostKpiChartsProps {
   filters?: Filter[];
   searchSessionId?: string;
   options?: {
-    subtitle?: string;
+    getSubtitle?: (formulaValue: string) => string;
   };
   loading?: boolean;
 }
@@ -37,7 +37,7 @@ export const HostKpiCharts = ({
   const charts = useHostKpiCharts({
     dataViewId: dataView?.id,
     options: {
-      subtitle: options?.subtitle,
+      getSubtitle: options?.getSubtitle,
       seriesColor: euiTheme.colors.lightestShade,
     },
   });

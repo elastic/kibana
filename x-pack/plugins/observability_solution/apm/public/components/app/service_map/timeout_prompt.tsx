@@ -10,11 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-export function TimeoutPrompt({
-  isGlobalServiceMap,
-}: {
-  isGlobalServiceMap: boolean;
-}) {
+export function TimeoutPrompt({ isGlobalServiceMap }: { isGlobalServiceMap: boolean }) {
   return (
     <EuiEmptyPrompt
       iconType="warning"

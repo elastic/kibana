@@ -10,23 +10,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-const SETUP_INSTRUCTIONS_LABEL = i18n.translate(
-  'xpack.apm.setupInstructionsButtonLabel',
-  {
-    defaultMessage: 'Setup instructions',
-  }
-);
+const SETUP_INSTRUCTIONS_LABEL = i18n.translate('xpack.apm.setupInstructionsButtonLabel', {
+  defaultMessage: 'Setup instructions',
+});
 
 const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
   defaultMessage: 'Add data',
 });
 
 // renders a filled button or a link as a kibana link to setup instructions
-export function SetupInstructionsLink({
-  buttonFill = false,
-}: {
-  buttonFill?: boolean;
-}) {
+export function SetupInstructionsLink({ buttonFill = false }: { buttonFill?: boolean }) {
   const { core } = useApmPluginContext();
   return (
     <EuiLink

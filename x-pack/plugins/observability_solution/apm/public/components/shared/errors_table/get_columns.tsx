@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  RIGHT_ALIGNMENT,
-  CENTER_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
@@ -23,10 +19,7 @@ import { ErrorDetailLink } from '../links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../links/apm/error_overview_link';
 import { TimestampTooltip } from '../timestamp_tooltip';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ApmRoutes } from '../../routing/apm_route_config';
 
 const ErrorLink = euiStyled(ErrorOverviewLink)`
@@ -74,10 +67,7 @@ export function getColumns({
                     {
                       ...query,
                       kuery: `error.exception.type:"${type}"`,
-                    } as TypeOf<
-                      ApmRoutes,
-                      '/services/{serviceName}/errors'
-                    >['query']
+                    } as TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query']
                   }
                 >
                   {type}
@@ -97,10 +87,7 @@ export function getColumns({
           <TruncateWithTooltip
             text={name}
             content={
-              <ErrorDetailLink
-                serviceName={serviceName}
-                errorGroupId={errorGroupId}
-              >
+              <ErrorDetailLink serviceName={serviceName} errorGroupId={errorGroupId}>
                 {name}
               </ErrorDetailLink>
             }
@@ -130,11 +117,9 @@ export function getColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { occurrences, groupId: errorGroupId }) => {
         const currentPeriodTimeseries =
-          errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
-            ?.timeseries;
+          errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]?.timeseries;
         const previousPeriodTimeseries =
-          errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]
-            ?.timeseries;
+          errorGroupDetailedStatistics?.previousPeriod?.[errorGroupId]?.timeseries;
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.ERROR_OCCURRENCES
         );
@@ -152,9 +137,7 @@ export function getColumns({
               },
             })}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimeseries
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimeseries : undefined
             }
             comparisonSeriesColor={previousPeriodColor}
           />

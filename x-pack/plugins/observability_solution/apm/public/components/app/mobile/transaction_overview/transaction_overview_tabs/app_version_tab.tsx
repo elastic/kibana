@@ -21,20 +21,16 @@ function AppVersionTab({
   comparisonEnabled,
   offset,
 }: TabContentProps) {
-  const {
-    mainStatistics,
-    mainStatisticsStatus,
-    detailedStatistics,
-    detailedStatisticsStatus,
-  } = useMobileStatisticsFetcher({
-    field: SERVICE_VERSION,
-    environment,
-    kuery,
-    start,
-    end,
-    comparisonEnabled,
-    offset,
-  });
+  const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
+    useMobileStatisticsFetcher({
+      field: SERVICE_VERSION,
+      environment,
+      kuery,
+      start,
+      end,
+      comparisonEnabled,
+      offset,
+    });
 
   return (
     <StatsList
@@ -51,11 +47,8 @@ function AppVersionTab({
 export const appVersionTab = {
   dataTestSubj: 'apmAppVersionTab',
   key: 'app_version_tab',
-  label: i18n.translate(
-    'xpack.apm.mobile.transactions.overview.tabs.app.version',
-    {
-      defaultMessage: 'App version',
-    }
-  ),
+  label: i18n.translate('xpack.apm.mobile.transactions.overview.tabs.app.version', {
+    defaultMessage: 'App version',
+  }),
   component: AppVersionTab,
 };

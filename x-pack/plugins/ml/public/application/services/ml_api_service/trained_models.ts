@@ -26,7 +26,6 @@ import type {
   NodesOverviewResponse,
   MemoryUsageInfo,
 } from '../../../../common/types/trained_models';
-
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
   from?: number;

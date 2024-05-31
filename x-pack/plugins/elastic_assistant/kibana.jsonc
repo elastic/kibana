@@ -12,6 +12,7 @@
       "data",
       "ml",
       "taskManager",
+      "licensing",
       "spaces",
       "security"
     ]

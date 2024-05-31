@@ -21,9 +21,11 @@ const AnonymizedButton = styled(EuiButtonEmpty)`
 export const getColumns = ({
   onListUpdated,
   rawData,
+  hasUpdateAIAssistantAnonymization,
 }: {
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
   rawData: Record<string, string[]> | null;
+  hasUpdateAIAssistantAnonymization: boolean;
 }): Array<EuiBasicTableColumn<ContextEditorRow>> => {
   const actionsColumn: EuiBasicTableColumn<ContextEditorRow> = {
     field: FIELDS.ACTIONS,
@@ -38,7 +40,6 @@ export const getColumns = ({
           disableAnonymize={!row.allowed || (row.allowed && row.anonymized)}
           disableUnanonymize={!row.allowed || (row.allowed && !row.anonymized)}
           onListUpdated={onListUpdated}
-          onlyDefaults={rawData == null}
           selected={[row]}
         />
       );
@@ -64,6 +65,7 @@ export const getColumns = ({
         <EuiSwitch
           data-test-subj="allowed"
           checked={allowed}
+          disabled={!hasUpdateAIAssistantAnonymization}
           label=""
           showLabel={false}
           onChange={() => {
@@ -74,17 +76,6 @@ export const getColumns = ({
                 update: rawData == null ? 'defaultAllow' : 'allow',
               },
             ]);
-
-            if (rawData == null && allowed) {
-              // when editing defaults, remove the default replacement if the field is no longer allowed
-              onListUpdated([
-                {
-                  field,
-                  operation: 'remove',
-                  update: 'defaultAllowReplacement',
-                },
-              ]);
-            }
           }}
         />
       ),
@@ -97,7 +88,7 @@ export const getColumns = ({
       render: (_, { allowed, anonymized, field }) => (
         <AnonymizedButton
           data-test-subj="anonymized"
-          disabled={!allowed}
+          disabled={!allowed || !hasUpdateAIAssistantAnonymization}
           color={anonymized ? 'primary' : 'text'}
           flush="both"
           iconType={anonymized ? 'eyeClosed' : 'eye'}
@@ -127,6 +118,6 @@ export const getColumns = ({
   ];
 
   return rawData == null
-    ? [...baseColumns, actionsColumn]
-    : [...baseColumns, valuesColumn, actionsColumn];
+    ? [...baseColumns, ...(hasUpdateAIAssistantAnonymization ? [actionsColumn] : [])]
+    : [...baseColumns, valuesColumn, ...(hasUpdateAIAssistantAnonymization ? [actionsColumn] : [])];
 };

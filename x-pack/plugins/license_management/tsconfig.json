@@ -27,6 +27,7 @@
     "@kbn/shared-ux-router",
     "@kbn/utility-types",
     "@kbn/share-plugin",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

@@ -13,10 +13,11 @@ export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 export interface AssetDetailsLocatorParams extends SerializableRecord {
   assetType: string;
   assetId: string;
+  state?: SerializableRecord;
   _a?: {
     time?: {
-      from: string;
-      to: string;
+      from?: string;
+      to?: string;
     };
     interval?: string;
   };
@@ -30,7 +31,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
   };
 }
 
-const ASSET_DETAILS_LOCATOR_ID = 'ASSET_DETAILS_LOCATOR';
+export const ASSET_DETAILS_LOCATOR_ID = 'ASSET_DETAILS_LOCATOR';
 
 export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDetailsLocatorParams> {
   public readonly id = ASSET_DETAILS_LOCATOR_ID;
@@ -41,7 +42,7 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
     return {
       app: 'metrics',
       path: `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}&_a=${searchPath}`,
-      state: {},
+      state: params.state ? params.state : {},
     };
   };
 }

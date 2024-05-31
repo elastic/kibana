@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { CoreTheme } from '@kbn/core/public';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '../../../../common/rules/types';
 import { kibanaService } from '../../state/kibana_service';
 import { getUrlForAlert } from './common';
 
-export const simpleAlertEnabled = (
-  defaultActions: ActionConnector[],
-  theme$: Observable<CoreTheme>,
-  rule: Rule
-) => {
+export const simpleAlertEnabled = (defaultActions: ActionConnector[], rule: Rule) => {
   const alertUrl = getUrlForAlert(rule.id, kibanaService.core.http.basePath.get());
 
   return {
@@ -53,7 +47,7 @@ export const simpleAlertEnabled = (
           })}
         </EuiLink>
       </RedirectAppLinks>,
-      { theme$ }
+      kibanaService.core
     ),
   };
 };

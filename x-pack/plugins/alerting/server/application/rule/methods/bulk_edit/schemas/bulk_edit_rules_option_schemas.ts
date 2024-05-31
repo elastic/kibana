@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { rRuleRequestSchema } from '../../../../r_rule/schemas';
-import { notifyWhenSchema, actionAlertsFilterSchema } from '../../../schemas';
+import { notifyWhenSchema, actionRequestSchema, systemActionRequestSchema } from '../../../schemas';
 import { validateDuration } from '../../../validation';
 import { validateSnoozeSchedule } from '../validation';
 
@@ -26,31 +26,6 @@ const bulkEditRuleSnoozeScheduleSchemaWithValidation = schema.object(
   { validate: validateSnoozeSchedule }
 );
 
-const bulkEditDefaultActionSchema = schema.object({
-  group: schema.string(),
-  id: schema.string(),
-  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  uuid: schema.maybe(schema.string()),
-  frequency: schema.maybe(
-    schema.object({
-      summary: schema.boolean(),
-      throttle: schema.nullable(schema.string()),
-      notifyWhen: notifyWhenSchema,
-    })
-  ),
-  alertsFilter: schema.maybe(actionAlertsFilterSchema),
-});
-
-export const bulkEditDefaultActionsSchema = schema.arrayOf(bulkEditDefaultActionSchema);
-
-export const bulkEditSystemActionSchema = schema.object({
-  id: schema.string(),
-  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
-  uuid: schema.maybe(schema.string()),
-});
-
-export const bulkEditSystemActionsSchema = schema.arrayOf(bulkEditSystemActionSchema);
-
 const bulkEditTagSchema = schema.object({
   operation: schema.oneOf([schema.literal('add'), schema.literal('delete'), schema.literal('set')]),
   field: schema.literal('tags'),
@@ -60,7 +35,7 @@ const bulkEditTagSchema = schema.object({
 const bulkEditActionsSchema = schema.object({
   operation: schema.oneOf([schema.literal('add'), schema.literal('set')]),
   field: schema.literal('actions'),
-  value: schema.arrayOf(schema.oneOf([bulkEditDefaultActionSchema, bulkEditSystemActionSchema])),
+  value: schema.arrayOf(schema.oneOf([actionRequestSchema, systemActionRequestSchema])),
 });
 
 const bulkEditScheduleSchema = schema.object({

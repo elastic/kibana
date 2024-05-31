@@ -76,6 +76,7 @@ export {
   createKibanaReactContext,
   reactRouterNavigate,
   useKibana,
-  KibanaThemeProvider,
   useExecutionContext,
 } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

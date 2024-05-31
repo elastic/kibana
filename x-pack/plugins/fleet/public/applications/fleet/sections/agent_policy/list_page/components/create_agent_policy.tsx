@@ -46,7 +46,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults()
   );
@@ -140,7 +140,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                 fill
                 isLoading={isLoading}
                 isDisabled={
-                  !hasFleetAllPrivileges ||
+                  !hasFleetAllAgentPoliciesPrivileges ||
                   isLoading ||
                   Object.keys(validation).length > 0 ||
                   hasAdvancedSettingsErrors

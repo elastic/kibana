@@ -31,14 +31,7 @@ interface TimelineProps {
   width?: number;
 }
 
-function TimeLineContainer({
-  width,
-  xMin,
-  xMax,
-  height,
-  marks,
-  margins,
-}: TimelineProps) {
+function TimeLineContainer({ width, xMin, xMax, height, marks, margins }: TimelineProps) {
   if (xMax == null || !width) {
     return null;
   }
@@ -47,16 +40,8 @@ function TimeLineContainer({
 
   return (
     <>
-      <TimelineAxis
-        plotValues={plotValues}
-        marks={marks}
-        topTraceDuration={topTraceDuration}
-      />
-      <VerticalLines
-        plotValues={plotValues}
-        marks={marks}
-        topTraceDuration={topTraceDuration}
-      />
+      <TimelineAxis plotValues={plotValues} marks={marks} topTraceDuration={topTraceDuration} />
+      <VerticalLines plotValues={plotValues} marks={marks} topTraceDuration={topTraceDuration} />
     </>
   );
 }

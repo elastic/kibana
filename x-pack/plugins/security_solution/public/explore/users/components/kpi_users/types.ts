@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import type { UpdateDateRange } from '../../../../common/components/charts/common';
-import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
-
 export interface UsersKpiProps {
-  filterQuery?: string;
   from: string;
   to: string;
-  indexNames: string[];
-  updateDateRange: UpdateDateRange;
-  setQuery: GlobalTimeArgs['setQuery'];
-  skip: boolean;
 }

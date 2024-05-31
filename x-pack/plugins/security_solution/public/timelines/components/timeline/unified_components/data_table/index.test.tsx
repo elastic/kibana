@@ -12,14 +12,14 @@ import { defaultUdtHeaders } from '../default_headers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { timelineActions } from '../../../../store';
 import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 
-jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../sourcerer/containers');
 
 const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();
@@ -30,6 +30,8 @@ const initialEnrichedColumns = getColumnHeaders(
   defaultUdtHeaders,
   mockSourcererScope.browserFields
 );
+
+const initialEnrichedColumnsIds = initialEnrichedColumns.map((c) => c.id);
 
 type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
   store?: ReturnType<typeof createMockStore>;
@@ -46,11 +48,13 @@ const TestComponent = (props: TestComponentProps) => {
     <TestProviders store={store}>
       <TimelineDataTable
         columns={initialEnrichedColumns}
+        columnIds={initialEnrichedColumnsIds}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
         itemsPerPage={50}
         itemsPerPageOptions={[10, 25, 50, 100]}
         rowRenderers={[]}
+        leadingControlColumns={[]}
         sort={[['@timestamp', 'desc']]}
         events={mockTimelineData}
         onFieldEdited={onFieldEditedMock}

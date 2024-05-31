@@ -81,7 +81,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
           analysis.overridesHandler();
           responseStream.pushPingWithTimeout();
 
-          // Step 1: Index Info: Field candidates, total doc count, sample probability
+          // Step 1: Index Info: Field candidates and zero docs fallback flag
           const indexInfo = await analysis.indexInfoHandler();
 
           if (!indexInfo) {
@@ -133,7 +133,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
       }
 
       // Do not call this using `await` so it will run asynchronously while we return the stream already.
-      runAnalysis();
+      void runAnalysis();
 
       return response.ok(responseWithHeaders);
     });

@@ -26,6 +26,7 @@ import {
   VERSION,
   ALERT_TIME_RANGE,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { alertRule } from './test_fixtures';
 
@@ -52,6 +53,7 @@ describe('buildNewAlert', () => {
       [ALERT_FLAPPING_HISTORY]: [],
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -76,6 +78,7 @@ describe('buildNewAlert', () => {
     ).toEqual({
       ...alertRule,
       [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [EVENT_ACTION]: 'open',
       [EVENT_KIND]: 'signal',
       [ALERT_ACTION_GROUP]: 'default',
@@ -112,6 +115,7 @@ describe('buildNewAlert', () => {
     ).toEqual({
       ...alertRule,
       [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [EVENT_ACTION]: 'open',
       [EVENT_KIND]: 'signal',
       [ALERT_ACTION_GROUP]: 'default',
@@ -153,6 +157,7 @@ describe('buildNewAlert', () => {
       url: `https://url1`,
       'kibana.alert.nested_field': 2,
       [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [EVENT_ACTION]: 'open',
       [EVENT_KIND]: 'signal',
       [ALERT_ACTION_GROUP]: 'default',
@@ -161,6 +166,39 @@ describe('buildNewAlert', () => {
       [ALERT_FLAPPING_HISTORY]: [],
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_STATUS]: 'active',
+      [ALERT_UUID]: legacyAlert.getUuid(),
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.9.0',
+      [TAGS]: ['rule-', '-tags'],
+    });
+  });
+
+  test('should use runTimestamp if provided', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+
+    expect(
+      buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        rule: alertRule,
+        runTimestamp: '2030-12-15T02:44:13.124Z',
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      })
+    ).toEqual({
+      ...alertRule,
+      [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [EVENT_ACTION]: 'open',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'default',
+      [ALERT_CONSECUTIVE_MATCHES]: 0,
+      [ALERT_FLAPPING]: false,
+      [ALERT_FLAPPING_HISTORY]: [],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2030-12-15T02:44:13.124Z',
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -199,6 +237,7 @@ describe('buildNewAlert', () => {
       url: `https://url1`,
       'kibana.alert.nested_field': 2,
       [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [EVENT_ACTION]: 'open',
       [EVENT_KIND]: 'signal',
       [ALERT_ACTION_GROUP]: 'default',
@@ -250,6 +289,7 @@ describe('buildNewAlert', () => {
       url: `https://url1`,
       'kibana.alert.nested_field': 2,
       [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [EVENT_ACTION]: 'open',
       [EVENT_KIND]: 'signal',
       [ALERT_ACTION_GROUP]: 'default',
@@ -303,6 +343,7 @@ describe('buildNewAlert', () => {
       url: `https://url1`,
       'kibana.alert.nested_field': 2,
       [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [EVENT_ACTION]: 'open',
       [EVENT_KIND]: 'signal',
       [ALERT_ACTION_GROUP]: 'default',

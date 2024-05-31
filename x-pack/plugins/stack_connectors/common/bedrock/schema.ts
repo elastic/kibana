@@ -22,6 +22,9 @@ export const SecretsSchema = schema.object({
 export const RunActionParamsSchema = schema.object({
   body: schema.string(),
   model: schema.maybe(schema.string()),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const InvokeAIActionParamsSchema = schema.object({
@@ -37,15 +40,11 @@ export const InvokeAIActionParamsSchema = schema.object({
   system: schema.maybe(schema.string()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
-});
-
-export const StreamActionParamsSchema = schema.object({
-  body: schema.string(),
-  model: schema.maybe(schema.string()),
 });
 
 export const RunApiLatestResponseSchema = schema.object(

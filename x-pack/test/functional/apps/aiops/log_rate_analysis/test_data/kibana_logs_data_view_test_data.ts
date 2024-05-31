@@ -13,6 +13,7 @@ import type { TestData } from '../../types';
 export const kibanaLogsDataViewTestData: TestData = {
   suiteTitle: 'kibana sample data logs',
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+  autoRun: true,
   dataGenerator: 'kibana_sample_data_logs',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'kibana_sample_data_logstsdb',

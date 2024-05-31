@@ -14,10 +14,7 @@ describe('tls_settings', () => {
         it(`return false when  ${key} lower then 1ms`, () => {
           const settings = getTLSSettings();
           expect(
-            isTLSFormValid(
-              { tls_enabled: { value: true, type: 'bool' } },
-              settings
-            )
+            isTLSFormValid({ tls_enabled: { value: true, type: 'bool' } }, settings)
           ).toBeFalsy();
         });
       });
@@ -26,10 +23,7 @@ describe('tls_settings', () => {
     it('returns true when tls_enabled is disabled', () => {
       const settings = getTLSSettings();
       expect(
-        isTLSFormValid(
-          { tls_enabled: { value: false, type: 'bool' } },
-          settings
-        )
+        isTLSFormValid({ tls_enabled: { value: false, type: 'bool' } }, settings)
       ).toBeTruthy();
     });
   });

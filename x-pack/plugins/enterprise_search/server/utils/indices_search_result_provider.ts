@@ -18,6 +18,8 @@ import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
 import { getIndexData } from '../lib/indices/utils/get_index_data';
 
+import { calculateScore } from './calculate_search_score';
+
 export function getIndicesSearchResultProvider(
   staticAssets: IStaticAssets
 ): GlobalSearchResultProvider {
@@ -31,18 +33,7 @@ export function getIndicesSearchResultProvider(
 
         const searchResults: GlobalSearchProviderResult[] = indexNames
           .map((indexName) => {
-            let score = 0;
-            const searchTerm = (term || '').toLowerCase();
-            const searchName = indexName.toLowerCase();
-            if (!searchTerm) {
-              score = 80;
-            } else if (searchName === searchTerm) {
-              score = 100;
-            } else if (searchName.startsWith(searchTerm)) {
-              score = 90;
-            } else if (searchName.includes(searchTerm)) {
-              score = 75;
-            }
+            const score = calculateScore(term, indexName);
 
             return {
               id: indexName,

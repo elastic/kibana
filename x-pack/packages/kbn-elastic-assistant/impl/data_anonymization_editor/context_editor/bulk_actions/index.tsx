@@ -27,7 +27,6 @@ export interface Props {
   disableDeny?: boolean;
   disableUnanonymize?: boolean;
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  onlyDefaults: boolean;
   selected: ContextEditorRow[];
 }
 
@@ -39,7 +38,6 @@ const BulkActionsComponent: React.FC<Props> = ({
   disableDeny = false,
   disableUnanonymize = false,
   onListUpdated,
-  onlyDefaults,
   selected,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -79,7 +77,6 @@ const BulkActionsComponent: React.FC<Props> = ({
         disableUnanonymize,
         closePopover,
         onListUpdated,
-        onlyDefaults,
         selected,
       }),
     [
@@ -89,7 +86,6 @@ const BulkActionsComponent: React.FC<Props> = ({
       disableDeny,
       disableUnanonymize,
       onListUpdated,
-      onlyDefaults,
       selected,
     ]
   );

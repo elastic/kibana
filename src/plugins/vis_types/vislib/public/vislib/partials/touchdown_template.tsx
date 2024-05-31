@@ -9,8 +9,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { EuiIcon } from '@elastic/eui';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { getTheme } from '../../services';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getAnalytics, getI18n, getTheme } from '../../services';
 
 interface Props {
   wholeBucket: boolean;
@@ -18,7 +18,7 @@ interface Props {
 
 export const touchdownTemplate = ({ wholeBucket }: Props) => {
   return ReactDOM.renderToStaticMarkup(
-    <KibanaThemeProvider theme$={getTheme().theme$}>
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <p className="visTooltip__header">
         <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />
         <span className="visTooltip__headerText">
@@ -26,6 +26,6 @@ export const touchdownTemplate = ({ wholeBucket }: Props) => {
           time range does not fully cover it.
         </span>
       </p>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 };

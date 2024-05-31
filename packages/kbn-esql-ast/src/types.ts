@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type ESQLAst = ESQLCommand[];
+export type ESQLAst = ESQLAstCommand[];
+
+export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
 
 export type ESQLSingleAstItem =
   | ESQLFunction
@@ -25,16 +27,22 @@ export interface ESQLLocation {
   max: number;
 }
 
-interface ESQLAstBaseItem {
-  name: string;
+export interface ESQLAstBaseItem<Name = string> {
+  name: Name;
   text: string;
   location: ESQLLocation;
   incomplete: boolean;
 }
 
-export interface ESQLCommand extends ESQLAstBaseItem {
+export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   type: 'command';
   args: ESQLAstItem[];
+}
+
+export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
+  indices: ESQLSource[];
+  aggregates?: ESQLAstItem[];
+  grouping?: ESQLAstItem[];
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
@@ -72,10 +80,38 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
-export interface ESQLLiteral extends ESQLAstBaseItem {
+export type ESQLLiteral =
+  | ESQLNumberLiteral
+  | ESQLBooleanLiteral
+  | ESQLNullLiteral
+  | ESQLStringLiteral;
+
+// @internal
+export interface ESQLNumberLiteral extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'string' | 'number' | 'boolean' | 'null';
-  value: string | number;
+  literalType: 'number';
+  value: number;
+}
+
+// @internal
+export interface ESQLBooleanLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'boolean';
+  value: string;
+}
+
+// @internal
+export interface ESQLNullLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'null';
+  value: string;
+}
+
+// @internal
+export interface ESQLStringLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'string';
+  value: string;
 }
 
 export interface ESQLMessage {
@@ -85,10 +121,12 @@ export interface ESQLMessage {
   code: string;
 }
 
-export type AstProviderFn = (text: string | undefined) => Promise<{
-  ast: ESQLAst;
-  errors: EditorError[];
-}>;
+export type AstProviderFn = (text: string | undefined) =>
+  | Promise<{
+      ast: ESQLAst;
+      errors: EditorError[];
+    }>
+  | { ast: ESQLAst; errors: EditorError[] };
 
 export interface EditorError {
   startLineNumber: number;

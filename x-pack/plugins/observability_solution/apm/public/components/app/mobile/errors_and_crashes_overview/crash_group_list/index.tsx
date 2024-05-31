@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-  LEFT_ALIGNMENT,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiToolTip, RIGHT_ALIGNMENT, LEFT_ALIGNMENT, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
@@ -73,9 +68,7 @@ function MobileCrashGroupList({
   initialSortDirection,
   isLoading,
 }: Props) {
-  const { query } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes'
-  );
+  const { query } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes');
   const { offset } = query;
   const columns = useMemo(() => {
     return [
@@ -92,13 +85,10 @@ function MobileCrashGroupList({
               iconProps={{
                 className: 'eui-alignTop',
               }}
-              content={i18n.translate(
-                'xpack.apm.crashTable.groupIdColumnDescription',
-                {
-                  defaultMessage:
-                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
-                }
-              )}
+              content={i18n.translate('xpack.apm.crashTable.groupIdColumnDescription', {
+                defaultMessage:
+                  'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+              })}
             />
           </>
         ),
@@ -107,11 +97,7 @@ function MobileCrashGroupList({
         width: `${unit * 6}px`,
         render: (_, item) => {
           return (
-            <GroupIdLink
-              serviceName={serviceName}
-              groupId={item.groupId}
-              query={query}
-            >
+            <GroupIdLink serviceName={serviceName} groupId={item.groupId} query={query}>
               {item.groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -139,27 +125,17 @@ function MobileCrashGroupList({
         },
       },
       {
-        name: i18n.translate(
-          'xpack.apm.crashTable.crashMessageAndCulpritColumnLabel',
-          {
-            defaultMessage: 'Crash message',
-          }
-        ),
+        name: i18n.translate('xpack.apm.crashTable.crashMessageAndCulpritColumnLabel', {
+          defaultMessage: 'Crash message',
+        }),
         field: 'message',
         sortable: false,
         width: '30%',
         render: (_, item) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip
-                id="error-message-tooltip"
-                content={item.name || NOT_AVAILABLE_LABEL}
-              >
-                <MessageLink
-                  serviceName={serviceName}
-                  groupId={item.groupId}
-                  query={query}
-                >
+              <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
+                <MessageLink serviceName={serviceName} groupId={item.groupId} query={query}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
@@ -175,11 +151,7 @@ function MobileCrashGroupList({
         }),
         align: LEFT_ALIGNMENT,
         render: (_, { lastSeen }) =>
-          lastSeen ? (
-            <TimestampTooltip time={lastSeen} timeUnit="minutes" />
-          ) : (
-            NOT_AVAILABLE_LABEL
-          ),
+          lastSeen ? <TimestampTooltip time={lastSeen} timeUnit="minutes" /> : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'occurrences',
@@ -190,12 +162,12 @@ function MobileCrashGroupList({
         dataType: 'number',
         align: RIGHT_ALIGNMENT,
         render: (_, { occurrences, groupId }) => {
-          const currentPeriodTimeseries =
-            detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
+          const currentPeriodTimeseries = detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
-          const { currentPeriodColor, previousPeriodColor } =
-            getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+          const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+            ChartType.FAILED_TRANSACTION_RATE
+          );
 
           return (
             <SparkPlot
@@ -203,19 +175,14 @@ function MobileCrashGroupList({
               color={currentPeriodColor}
               isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
-              valueLabel={i18n.translate(
-                'xpack.apm.serviceOverview.crashTableOccurrences',
-                {
-                  defaultMessage: `{occurrences} occ.`,
-                  values: {
-                    occurrences: asInteger(occurrences),
-                  },
-                }
-              )}
+              valueLabel={i18n.translate('xpack.apm.serviceOverview.crashTableOccurrences', {
+                defaultMessage: `{occurrences} occ.`,
+                values: {
+                  occurrences: asInteger(occurrences),
+                },
+              })}
               comparisonSeries={
-                comparisonEnabled && isTimeComparison(offset)
-                  ? previousPeriodTimeseries
-                  : undefined
+                comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimeseries : undefined
               }
               comparisonSeriesColor={previousPeriodColor}
             />

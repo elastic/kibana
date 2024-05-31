@@ -26,11 +26,7 @@ interface Props {
   }) => void;
 }
 
-export function WaterfallFlyout({
-  waterfallItemId,
-  waterfall,
-  toggleFlyout,
-}: Props) {
+export function WaterfallFlyout({ waterfallItemId, waterfall, toggleFlyout }: Props) {
   const history = useHistory();
   const {
     query: { flyoutDetailTab, rangeFrom, rangeTo },
@@ -40,9 +36,7 @@ export function WaterfallFlyout({
     '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
-  const currentItem = waterfall.items.find(
-    (item) => item.id === waterfallItemId
-  );
+  const currentItem = waterfall.items.find((item) => item.id === waterfallItemId);
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -53,9 +47,7 @@ export function WaterfallFlyout({
   switch (currentItem.docType) {
     case 'span':
       const parentTransactionId =
-        currentItem.parent?.docType === 'transaction'
-          ? currentItem.parentId
-          : undefined;
+        currentItem.parent?.docType === 'transaction' ? currentItem.parentId : undefined;
 
       return (
         <SpanFlyout

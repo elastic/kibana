@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { betaBadgeProps } from '../beta_badge_props';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -103,8 +103,8 @@ const FlyoutHeaderComponent: React.FC<{
                 <EuiFlexItem grow={false}>
                   {isExperimental && (
                     <EuiBetaBadge
-                      label={betaBadgeProps.label}
-                      tooltipContent={betaBadgeProps.tooltipContent}
+                      label={TECH_PREVIEW_LABEL}
+                      tooltipContent={TECH_PREVIEW_DESCRIPTION}
                     />
                   )}
                 </EuiFlexItem>
@@ -132,8 +132,8 @@ const FlyoutHeaderComponent: React.FC<{
               {isExperimental && (
                 <EuiFlexItem grow={false}>
                   <EuiBetaBadge
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
                 </EuiFlexItem>
               )}

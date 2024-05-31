@@ -6,6 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { twoMinute } from '../fixtures/duration';
 import {
   createAPMTransactionDurationIndicator,
   createSLO,
@@ -27,6 +28,21 @@ describe('APM Transaction Duration Transform Generator', () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'irrelevant',
       indicator: createAPMTransactionDurationIndicator(),
+    });
+    const transform = generator.getTransformParams(slo);
+
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo using a timesliceTarget = 0', () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createAPMTransactionDurationIndicator(),
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0,
+        timesliceWindow: twoMinute(),
+      },
     });
     const transform = generator.getTransformParams(slo);
 
@@ -133,5 +149,29 @@ describe('APM Transaction Duration Transform Generator', () => {
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createAPMTransactionDurationIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
+      },
+    });
   });
 });

@@ -25,6 +25,13 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const ASSET_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.navigation.assetCriticality',
+  {
+    defaultMessage: 'Asset criticality',
+  }
+);
+
 export const DETECTION_RESPONSE = i18n.translate(
   'xpack.securitySolution.navigation.detectionResponse',
   {
@@ -89,6 +96,13 @@ export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exce
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
 });
+
+export const ATTACK_DISCOVERY = i18n.translate(
+  'xpack.securitySolution.navigation.attackDiscovery',
+  {
+    defaultMessage: 'Attack discovery',
+  }
+);
 
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',

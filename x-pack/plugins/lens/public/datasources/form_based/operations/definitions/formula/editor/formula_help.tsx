@@ -154,7 +154,7 @@ export function getDocumentationSections({
 
   const sections = {
     groups: helpGroups,
-    initialSection: <Markdown>{formulasSections.howTo}</Markdown>,
+    initialSection: <Markdown readOnly>{formulasSections.howTo}</Markdown>,
   };
 
   return sections;

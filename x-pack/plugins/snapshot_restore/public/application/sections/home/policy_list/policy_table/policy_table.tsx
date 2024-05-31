@@ -418,7 +418,6 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       sorting={sorting}
       selection={selection}
       pagination={pagination}
-      isSelectable={true}
       rowProps={() => ({
         'data-test-subj': 'row',
       })}

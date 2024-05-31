@@ -37,13 +37,7 @@ describe('getLensAttributesFromSuggestion', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
-      references: [
-        {
-          id: 'index-pattern-with-timefield-id',
-          name: 'textBasedLanguages-datasource-layer-suggestion',
-          type: 'index-pattern',
-        },
-      ],
+      references: [],
       title: currentSuggestionMock.title,
       visualizationType: 'lnsHeatmap',
     });

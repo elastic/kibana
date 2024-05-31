@@ -531,6 +531,30 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
             "searchable": true,
             "type": "date",
           },
+          "event.kind": Object {
+            "aggregatable": true,
+            "category": "event",
+            "description": "This defined the type of event eg. alerts",
+            "esTypes": Array [
+              "keyword",
+            ],
+            "example": "signal",
+            "format": "string",
+            "indexes": Array [
+              "apm-*-transaction*",
+              "auditbeat-*",
+              "endgame-*",
+              "filebeat-*",
+              "logs-*",
+              "packetbeat-*",
+              "traces-apm*",
+              "winlogbeat-*",
+              "-*elastic-cloud-logs-*",
+            ],
+            "name": "event.kind",
+            "searchable": true,
+            "type": "string",
+          },
           "event.severity": Object {
             "aggregatable": true,
             "category": "event",
@@ -782,7 +806,11 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
         "headerCellRender": Object {
           "$$typeof": Symbol(react.memo),
           "compare": null,
-          "type": [Function],
+          "type": Object {
+            "$$typeof": Symbol(react.memo),
+            "compare": null,
+            "type": [Function],
+          },
         },
         "id": "default-timeline-control-column",
         "rowCellRender": Object {

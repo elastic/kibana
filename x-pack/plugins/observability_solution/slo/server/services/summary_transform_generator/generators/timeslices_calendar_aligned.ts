@@ -6,18 +6,18 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DurationUnit, SLO } from '../../../domain/models';
+import { DurationUnit, SLODefinition } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_DESTINATION_INDEX_NAME,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
 import { getGroupBy } from './common';
 
 export function generateSummaryTransformForTimeslicesAndCalendarAligned(
-  slo: SLO
+  slo: SLODefinition
 ): TransformPutTransformRequest {
   const isWeeklyAligned = slo.timeWindow.duration.unit === DurationUnit.Week;
   const sliceDurationInSeconds = slo.objective.timesliceWindow!.asSeconds();
@@ -29,7 +29,7 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
       index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
     },
     source: {
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: `${SLO_DESTINATION_INDEX_NAME}*`,
       query: {
         bool: {
           filter: [
@@ -98,9 +98,10 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
             buckets_path: {
               goodEvents: 'goodEvents',
               totalEvents: 'totalEvents',
+              totalSlicesInPeriod: '_totalSlicesInPeriod',
             },
             script:
-              'if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }',
+              'if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return 1 - (params.totalEvents - params.goodEvents) / params.totalSlicesInPeriod }',
           },
         },
         errorBudgetInitial: {
@@ -112,13 +113,11 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
         errorBudgetConsumed: {
           bucket_script: {
             buckets_path: {
-              goodEvents: 'goodEvents',
-              totalEvents: 'totalEvents',
-              totalSlicesInPeriod: '_totalSlicesInPeriod',
+              sliValue: 'sliValue',
               errorBudgetInitial: 'errorBudgetInitial',
             },
             script:
-              'if (params.totalEvents == 0) { return 0 } else { return (params.totalEvents - params.goodEvents) / (params.totalSlicesInPeriod * params.errorBudgetInitial) }',
+              'if (params.sliValue == -1) { return 0 } else { return (1 - params.sliValue) / params.errorBudgetInitial }',
           },
         },
         errorBudgetRemaining: {

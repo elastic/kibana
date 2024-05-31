@@ -724,11 +724,17 @@ describe('Textbased Data Source', () => {
             },
             Object {
               "arguments": Object {
+                "descriptionForInspector": Array [
+                  "This request queries Elasticsearch to fetch the data for the visualization.",
+                ],
                 "locale": Array [
                   "en",
                 ],
                 "query": Array [
                   "FROM foo",
+                ],
+                "titleForInspector": Array [
+                  "Visualization",
                 ],
               },
               "function": "esql",
@@ -829,6 +835,47 @@ describe('Textbased Data Source', () => {
           isBucketed: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
+          scale: 'ratio',
+        });
+      });
+
+      it('should get an operation for col2', () => {
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'col1',
+                  fieldName: 'Test 1',
+                  meta: {
+                    type: 'number',
+                  },
+                },
+                {
+                  columnId: 'col2',
+                  fieldName: 'Test 2',
+                  meta: {
+                    type: 'date',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+        });
+        expect(publicAPI.getOperationForColumnId('col2')).toEqual({
+          label: 'Test 2',
+          dataType: 'date',
+          isBucketed: true,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'interval',
         });
       });
 

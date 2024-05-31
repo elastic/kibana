@@ -56,6 +56,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
+import { registerDashboardPanelPlacementSetting } from './dashboard_container/panel_placement';
 import {
   type DashboardAppLocator,
   DashboardAppLocatorDefinition,
@@ -70,6 +71,7 @@ import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { addPanelMenuTrigger } from './triggers';
+import { GetPanelPlacementSettings } from './dashboard_container/panel_placement';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -119,6 +121,10 @@ export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
+  registerDashboardPanelPlacementSetting: (
+    embeddableType: string,
+    getPanelPlacementSettings: GetPanelPlacementSettings
+  ) => void;
 }
 
 export let resolveServicesReady: () => void;
@@ -164,6 +170,11 @@ export class DashboardPlugin
     // this trigger enables external consumers to register actions for
     // adding items to the add panel menu
     uiActions.registerTrigger(addPanelMenuTrigger);
+
+    core.analytics.registerEventType({
+      eventType: 'dashboard_loaded_with_data',
+      schema: {},
+    });
 
     if (share) {
       this.locator = share.url.locators.create(
@@ -216,7 +227,7 @@ export class DashboardPlugin
 
         // We also don't want to store the table list view state.
         // The question is: what _do_ we want to save here? :)
-        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir', 'created_by'];
         return replaceUrlHashQuery(newNavLink, (query) => {
           [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
             delete query[param];
@@ -252,6 +263,8 @@ export class DashboardPlugin
         const { mountApp } = await import('./dashboard_app/dashboard_router');
         appMounted();
 
+        const [coreStart] = await core.getStartServices();
+
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
           scopedHistory: () => this.currentHistory!,
@@ -260,7 +273,7 @@ export class DashboardPlugin
         };
 
         return mountApp({
-          core,
+          coreStart,
           appUnMounted,
           element: params.element,
           mountContext,
@@ -337,6 +350,7 @@ export class DashboardPlugin
     return {
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
+      registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { pluginServices } = await import('./services/plugin_services');
         const {

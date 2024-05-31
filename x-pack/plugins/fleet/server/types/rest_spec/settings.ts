@@ -38,3 +38,11 @@ export const PutSettingsRequestSchema = {
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
   }),
 };
+
+export const GetEnrollmentSettingsRequestSchema = {
+  query: schema.maybe(
+    schema.object({
+      agentPolicyId: schema.maybe(schema.string()),
+    })
+  ),
+};

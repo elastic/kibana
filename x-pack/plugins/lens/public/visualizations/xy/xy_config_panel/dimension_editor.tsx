@@ -271,7 +271,6 @@ export function DataDimensionEditor(
             defaultMessage: 'Axis side',
           })}
           data-test-subj="lnsXY_axisSide_groups"
-          name="axisSide"
           buttonSize="compressed"
           options={[
             {

@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import {
-  isOpenTelemetryAgentName,
-  isRumAgentName,
-} from '../../../../common/agent_name';
+import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
@@ -36,6 +26,7 @@ import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -92,17 +83,11 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
 
+  const { observabilityAIAssistant } = useApmPluginContext();
+
   const {
     path: { groupId },
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      serviceGroup,
-      comparisonEnabled,
-      errorId,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, serviceGroup, comparisonEnabled, errorId },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -138,15 +123,11 @@ export function ErrorGroupDetails() {
     ]
   );
 
-  const {
-    data: errorSamplesData = emptyErrorSamples,
-    status: errorSamplesFetchStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
-          {
+  const { data: errorSamplesData = emptyErrorSamples, status: errorSamplesFetchStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (start && end) {
+          return callApmApi('GET /internal/apm/services/{serviceName}/errors/{groupId}/samples', {
             params: {
               path: {
                 serviceName,
@@ -159,25 +140,21 @@ export function ErrorGroupDetails() {
                 end,
               },
             },
-          }
-        );
-      }
-    },
-    [environment, kuery, serviceName, start, end, groupId]
-  );
+          });
+        }
+      },
+      [environment, kuery, serviceName, start, end, groupId]
+    );
 
-  const { errorDistributionData, errorDistributionStatus } =
-    useErrorGroupDistributionFetcher({
-      serviceName,
-      groupId,
-      environment,
-      kuery,
-    });
+  const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
+    serviceName,
+    groupId,
+    environment,
+    kuery,
+  });
 
   useEffect(() => {
-    const selectedSample = errorSamplesData?.errorSampleIds.find(
-      (sample) => sample === errorId
-    );
+    const selectedSample = errorSamplesData?.errorSampleIds.find((sample) => sample === errorId);
 
     if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
@@ -200,14 +177,17 @@ export function ErrorGroupDetails() {
   // If there are 0 occurrences, show only charts w. empty message
   const showDetails = errorSamplesData.occurrencesCount !== 0;
 
+  useEffect(() => {
+    return observabilityAIAssistant?.service.setScreenContext({
+      screenDescription: `The user is looking at the error details view. The current error group name is ${groupId}. There have been ${errorSamplesData.occurrencesCount} occurrences in the currently selected time range`,
+    });
+  }, [observabilityAIAssistant, errorSamplesData.occurrencesCount, groupId]);
+
   return (
     <>
       <EuiSpacer size={'s'} />
 
-      <ErrorGroupHeader
-        groupId={groupId}
-        occurrencesCount={errorSamplesData?.occurrencesCount}
-      />
+      <ErrorGroupHeader groupId={groupId} occurrencesCount={errorSamplesData?.occurrencesCount} />
 
       <EuiSpacer size={'m'} />
       <EuiFlexGroup>
@@ -216,12 +196,9 @@ export function ErrorGroupDetails() {
             <ErrorDistribution
               fetchStatus={errorDistributionStatus}
               distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-                {
-                  defaultMessage: 'Error occurrences',
-                }
-              )}
+              title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
+                defaultMessage: 'Error occurrences',
+              })}
             />
           </EuiPanel>
         </EuiFlexItem>

@@ -1,0 +1,14 @@
+MV_SORT
+
+Syntax
+Parameters
+field
+Multivalue expression. If null, the function returns null.
+order
+Sort order. The valid options are ASC and DESC, the default is ASC.
+DescriptionSorts a multivalued field in lexicographical order.Supported types
+Example
+```esql
+ROW a = [4, 2, -3, 2]
+| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
+```

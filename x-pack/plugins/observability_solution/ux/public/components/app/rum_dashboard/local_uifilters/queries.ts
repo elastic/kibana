@@ -15,9 +15,7 @@ import {
 
 type QueryDslQueryContainer = ESFilter;
 
-export function environmentQuery(
-  environment: string
-): QueryDslQueryContainer[] {
+export function environmentQuery(environment: string): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }

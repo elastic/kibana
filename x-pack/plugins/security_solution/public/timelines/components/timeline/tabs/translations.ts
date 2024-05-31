@@ -53,13 +53,6 @@ export const DISCOVER_ESQL_IN_TIMELINE_TAB = i18n.translate(
   }
 );
 
-export const DISCOVER_ESQL_IN_TIMELINE_TECHNICAL_PREVIEW = i18n.translate(
-  'xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewLabel',
-  {
-    defaultMessage: 'Technical Preview',
-  }
-);
-
 export const SESSION_TAB = i18n.translate(
   'xpack.securitySolution.timeline.tabs.sessionTabTimelineTitle',
   {

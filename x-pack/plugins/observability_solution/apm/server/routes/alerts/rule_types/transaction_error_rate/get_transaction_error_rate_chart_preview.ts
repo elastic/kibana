@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getParsedFilterQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   SERVICE_NAME,
@@ -61,10 +57,7 @@ export async function getTransactionErrorRateChartPreview({
     kuery: '',
   });
 
-  const allGroupByFields = getAllGroupByFields(
-    ApmRuleType.TransactionErrorRate,
-    groupByFields
-  );
+  const allGroupByFields = getAllGroupByFields(ApmRuleType.TransactionErrorRate, groupByFields);
 
   const termFilterQuery = !searchConfiguration
     ? [
@@ -92,13 +85,9 @@ export async function getTransactionErrorRateChartPreview({
         bool: {
           filter: [
             ...termFilterQuery,
-            ...getParsedFilterQuery(
-              searchConfiguration?.query?.query as string
-            ),
+            ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
             ...rangeQuery(start, end),
-            ...getBackwardCompatibleDocumentTypeFilter(
-              searchAggregatedTransactions
-            ),
+            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
             {
               terms: {
                 [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
@@ -108,21 +97,21 @@ export async function getTransactionErrorRateChartPreview({
         },
       },
       aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: interval,
-            extended_bounds: {
-              min: start,
-              max: end,
-            },
+        series: {
+          multi_terms: {
+            terms: getGroupByTerms(allGroupByFields),
+            size: 1000,
+            order: { _count: 'desc' as const },
           },
           aggs: {
-            series: {
-              multi_terms: {
-                terms: [...getGroupByTerms(allGroupByFields)],
-                size: 1000,
-                order: { _count: 'desc' as const },
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: interval,
+                extended_bounds: {
+                  min: start,
+                  max: end,
+                },
               },
               aggs: {
                 outcomes: {
@@ -138,33 +127,27 @@ export async function getTransactionErrorRateChartPreview({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_transaction_error_rate_chart_preview',
-    params
-  );
+  const resp = await apmEventClient.search('get_transaction_error_rate_chart_preview', params);
 
   if (!resp.aggregations) {
     return { series: [], totalGroups: 0 };
   }
 
-  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
-    (acc, bucket) => {
-      const x = bucket.key;
-      bucket.series.buckets.forEach((seriesBucket) => {
-        const bucketKey = seriesBucket.key.join('_');
-        const y = calculateErrorRate(seriesBucket.outcomes.buckets);
+  const seriesDataMap = resp.aggregations.series.buckets.reduce((acc, bucket) => {
+    const bucketKey = bucket.key.join('_');
+    bucket.timeseries.buckets.forEach((timeseriesBucket) => {
+      const x = timeseriesBucket.key;
+      const y = calculateErrorRate(timeseriesBucket.outcomes.buckets);
 
-        if (acc[bucketKey]) {
-          acc[bucketKey].push({ x, y });
-        } else {
-          acc[bucketKey] = [{ x, y }];
-        }
-      });
+      if (acc[bucketKey]) {
+        acc[bucketKey].push({ x, y });
+      } else {
+        acc[bucketKey] = [{ x, y }];
+      }
+    });
 
-      return acc;
-    },
-    {} as BarSeriesDataMap
-  );
+    return acc;
+  }, {} as BarSeriesDataMap);
 
   const series = Object.keys(seriesDataMap).map((key) => ({
     name: key,
@@ -186,12 +169,10 @@ const calculateErrorRate = (
   }>
 ) => {
   const failed =
-    buckets.find((outcomeBucket) => outcomeBucket.key === EventOutcome.failure)
-      ?.doc_count ?? 0;
+    buckets.find((outcomeBucket) => outcomeBucket.key === EventOutcome.failure)?.doc_count ?? 0;
 
   const succesful =
-    buckets.find((outcomeBucket) => outcomeBucket.key === EventOutcome.success)
-      ?.doc_count ?? 0;
+    buckets.find((outcomeBucket) => outcomeBucket.key === EventOutcome.success)?.doc_count ?? 0;
 
   return (failed / (failed + succesful)) * 100;
 };

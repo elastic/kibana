@@ -60,11 +60,7 @@ export function Example() {
   const serviceName = 'opbeans-python';
 
   return (
-    <Cytoscape
-      elements={elements}
-      height={window.innerHeight}
-      serviceName={serviceName}
-    >
+    <Cytoscape elements={elements} height={window.innerHeight} serviceName={serviceName}>
       <Centerer />
     </Cytoscape>
   );

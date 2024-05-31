@@ -8,30 +8,18 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import { addProfile, getProfile } from '../../common/customizations';
 import type { DiscoverServices } from '../build_services';
 
 const rootPath = '#/';
 
-const getRootPath = ({ history }: DiscoverServices) => {
-  const { profile } = getProfile(history.location.pathname);
-  return profile ? addProfile(rootPath, profile) : rootPath;
-};
-
-function getRootBreadcrumbs({
-  breadcrumb,
-  services,
-}: {
-  breadcrumb?: string;
-  services: DiscoverServices;
-}): ChromeBreadcrumb[] {
+function getRootBreadcrumbs({ breadcrumb }: { breadcrumb?: string }): ChromeBreadcrumb[] {
   return [
     {
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
       deepLinkId: 'discover',
-      href: breadcrumb || getRootPath(services),
+      href: breadcrumb || rootPath,
     },
   ];
 }
@@ -51,7 +39,6 @@ export function setBreadcrumbs({
 }) {
   const rootBreadcrumbs = getRootBreadcrumbs({
     breadcrumb: rootBreadcrumbPath,
-    services,
   });
   const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',

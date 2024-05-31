@@ -1,3 +1,15 @@
 # Search Notebooks plugin
 
 This plugin contains endpoints and components for rendering search python notebooks in the persistent dev console.
+
+### Cached Notebooks
+
+There is a limited set of search notebooks that we cache in `/server/data` directory to be served from this plugin. These should be available in all environments.
+
+To update the cached notebooks, run the following command:
+
+```shell
+./scripts/download-notebooks.sh
+```
+
+This script reads the `scripts/notebooks.txt` file and downloads each notebook from the url in the file and then saves it in the `server/data` directory with a snake_case filename and `.json` extension. The `.json` extension is just to make loading the files with node.js easier using an `async require()` instead of writing custom loading code with `fs` and implementing in-memory caching with the same loading code.

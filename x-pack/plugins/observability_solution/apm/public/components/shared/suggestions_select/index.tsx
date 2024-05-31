@@ -46,9 +46,7 @@ export function SuggestionsSelect({
   if (defaultValue) {
     defaultOption = { label: defaultValue, value: defaultValue };
   }
-  const [selectedOptions, setSelectedOptions] = useState(
-    defaultOption ? [defaultOption] : []
-  );
+  const [selectedOptions, setSelectedOptions] = useState(defaultOption ? [defaultOption] : []);
 
   const [searchValue, setSearchValue] = useState('');
 
@@ -80,9 +78,7 @@ export function SuggestionsSelect({
 
       if (changedOptions.length === 1) {
         onChange(
-          changedOptions[0].value
-            ? changedOptions[0].value.trim()
-            : changedOptions[0].value
+          changedOptions[0].value ? changedOptions[0].value.trim() : changedOptions[0].value
         );
       }
     },

@@ -16,7 +16,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-deprecations-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/core-user-profile-server"
   ],
   "exclude": [
     "target/**/*",

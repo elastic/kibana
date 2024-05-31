@@ -20,7 +20,8 @@ const ESQL_QUERY = 'from auditbeat-* | where ecs.version == "8.0.0"';
 const KQL_QUERY = '_index : "auditbeat-*" and ecs.version : "8.0.0"';
 const EQL_QUERY = 'process where process.name == "zsh"';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/180756
+describe.skip(
   'Basic Assistant tests',
   {
     tags: ['@ess'],

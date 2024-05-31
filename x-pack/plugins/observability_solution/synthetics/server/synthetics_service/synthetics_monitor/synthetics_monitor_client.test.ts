@@ -153,7 +153,6 @@ describe('SyntheticsMonitorClient', () => {
         {
           id,
           monitor,
-          previousMonitor,
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
@@ -186,7 +185,6 @@ describe('SyntheticsMonitorClient', () => {
         {
           monitor,
           id,
-          previousMonitor,
           decryptedPreviousMonitor: previousMonitor,
         },
       ],

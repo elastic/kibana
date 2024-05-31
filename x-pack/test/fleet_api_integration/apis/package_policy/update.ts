@@ -9,13 +9,12 @@ import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/mod
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { testUsers } from '../test_users';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const superTestWithoutAuth = getService('supertestWithoutAuth');
-  const dockerServers = getService('dockerServers');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
@@ -48,7 +47,6 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  const server = dockerServers.get('registry');
   // use function () {} and not () => {} here
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
@@ -71,7 +69,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     before(async function () {
-      if (!server.enabled) {
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
       }
       const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
@@ -516,6 +514,62 @@ export default function (providerContext: FtrProviderContext) {
             name: 'filetest',
             title: 'For File Tests',
             version: '0.1.0',
+          },
+        })
+        .expect(400);
+    });
+
+    it('should allow to override inputs', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            inputs: {
+              'policy-id': {
+                log_level: 'debug',
+              },
+            },
+          },
+        })
+        .expect(200);
+    });
+
+    it('should not allow to override compiled_streams', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            inputs: {
+              compiled_streams: {},
+            },
+          },
+        })
+        .expect(400);
+    });
+
+    it('should not allow to override compiled_inputs', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            inputs: {
+              compiled_inputs: {},
+            },
+          },
+        })
+        .expect(400);
+    });
+
+    it('should not allow to override properties other than inputs', async function () {
+      await supertest
+        .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          overrides: {
+            name: 'test',
           },
         })
         .expect(400);

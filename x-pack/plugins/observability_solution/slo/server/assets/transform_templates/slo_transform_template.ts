@@ -15,7 +15,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export interface TransformSettings {
   frequency: TransformPutTransformRequest['frequency'];
@@ -31,7 +31,7 @@ export const getSLOTransformTemplate = (
   groupBy: TransformPivot['group_by'] = {},
   aggregations: TransformPivot['aggregations'] = {},
   settings: TransformSettings,
-  slo: SLO
+  slo: SLODefinition
 ): TransformPutTransformRequest => {
   const formattedSource = buildSourceWithFilters(source, slo);
   return {
@@ -63,13 +63,13 @@ export const getSLOTransformTemplate = (
   };
 };
 
-const buildGroupingFilters = (slo: SLO): QueryDslQueryContainer[] => {
+const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
   // build exists filters for each groupBy field to make sure the field exists
   const groups = [slo.groupBy].flat().filter((group) => !!group && group !== ALL_VALUE);
   return groups.map((group) => ({ exists: { field: group } }));
 };
 
-const buildSourceWithFilters = (source: TransformSource, slo: SLO): TransformSource => {
+const buildSourceWithFilters = (source: TransformSource, slo: SLODefinition): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
   const sourceFilters = [source.query?.bool?.filter].flat() || [];
   return {

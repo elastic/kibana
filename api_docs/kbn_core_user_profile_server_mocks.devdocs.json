@@ -1,0 +1,178 @@
+{
+  "id": "@kbn/core-user-profile-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-server-mocks",
+        "id": "def-common.userProfileServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "userProfileServiceMock",
+        "description": [],
+        "path": "packages/core/user-profile/core-user-profile-server-mocks/src/user_profile_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-mocks",
+            "id": "def-common.userProfileServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => { setup: jest.Mock<any, any, any>; start: jest.Mock<any, any, any>; stop: jest.Mock<any, any, any>; }"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-server-mocks/src/user_profile_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-mocks",
+            "id": "def-common.userProfileServiceMock.createSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-server-mocks/src/user_profile_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-mocks",
+            "id": "def-common.userProfileServiceMock.createStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createStart",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileService",
+                "text": "UserProfileService"
+              },
+              ">"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-server-mocks/src/user_profile_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-mocks",
+            "id": "def-common.userProfileServiceMock.createInternalSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-server-mocks/src/user_profile_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-mocks",
+            "id": "def-common.userProfileServiceMock.createInternalStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStart",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerInternalPluginApi",
+                "section": "def-common.InternalUserProfileServiceStart",
+                "text": "InternalUserProfileServiceStart"
+              },
+              ">"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-server-mocks/src/user_profile_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-mocks",
+            "id": "def-common.userProfileServiceMock.createRequestHandlerContext",
+            "type": "Function",
+            "tags": [],
+            "label": "createRequestHandlerContext",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileRequestHandlerContext",
+                "text": "UserProfileRequestHandlerContext"
+              },
+              ">"
+            ],
+            "path": "packages/core/user-profile/core-user-profile-server-mocks/src/user_profile_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

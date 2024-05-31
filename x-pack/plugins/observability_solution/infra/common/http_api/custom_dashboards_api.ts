@@ -21,7 +21,7 @@ const SavedObjectIdRT = rt.type({
   id: rt.string,
 });
 
-const InfraCustomDashboardRT = rt.intersection([AssetTypeRT, PayloadRT, SavedObjectIdRT]);
+export const InfraCustomDashboardRT = rt.intersection([AssetTypeRT, PayloadRT, SavedObjectIdRT]);
 
 /**
  GET endpoint
@@ -59,3 +59,4 @@ export const InfraDeleteCustomDashboardsRequestParamsRT = rt.intersection([
   AssetTypeRT,
   SavedObjectIdRT,
 ]);
+export const InfraDeleteCustomDashboardsResponseBodyRT = rt.string;

@@ -102,8 +102,7 @@ export const fetchPValues = async ({
     }
   });
 
-  const index =
-    apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
+  const index = apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
   const ccsWarning = rejected.length > 0 && index.includes(':');
 

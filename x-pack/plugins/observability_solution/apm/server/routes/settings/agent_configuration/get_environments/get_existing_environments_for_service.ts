@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../../../common/es_fields/apm';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../../apm_indices/apm_system_index_constants';
@@ -43,13 +40,8 @@ export async function getExistingEnvironmentsForService({
     },
   };
 
-  const resp = await internalESClient.search(
-    'get_existing_environments_for_service',
-    params
-  );
+  const resp = await internalESClient.search('get_existing_environments_for_service', params);
   const existingEnvironments =
-    resp.aggregations?.environments.buckets.map(
-      (bucket) => bucket.key as string
-    ) || [];
+    resp.aggregations?.environments.buckets.map((bucket) => bucket.key as string) || [];
   return existingEnvironments;
 }

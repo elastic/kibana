@@ -205,6 +205,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   ]);
 
   // Trigger an alert on the SentinelOn host so that we get an alert back in Kibana
+  log.info(`Triggering SentinelOne alert`);
   await s1HostVm.exec('nslookup elastic.co');
 
   log.info(`Done!

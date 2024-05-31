@@ -31,10 +31,7 @@ function applyCubicBezierStyles(edges: cytoscape.EdgeCollection) {
     const alpha = 0.25;
     // Two values for control-point-distances represent a pair symmetric quadratic
     // bezier curves joined in the middle as a seamless cubic bezier curve:
-    edge.style('control-point-distances', [
-      -alpha * y * costheta,
-      alpha * y * costheta,
-    ]);
+    edge.style('control-point-distances', [-alpha * y * costheta, alpha * y * costheta]);
     edge.style('control-point-weights', [alpha, 1 - alpha]);
   });
 }
@@ -76,10 +73,7 @@ function setCursor(cursor: string, event: cytoscape.EventObjectCore) {
   }
 }
 
-function resetConnectedEdgeStyle(
-  cytoscapeInstance: cytoscape.Core,
-  node?: cytoscape.NodeSingular
-) {
+function resetConnectedEdgeStyle(cytoscapeInstance: cytoscape.Core, node?: cytoscape.NodeSingular) {
   cytoscapeInstance.edges().removeClass('highlight');
   if (node) {
     node.connectedEdges().addClass('highlight');
@@ -191,10 +185,7 @@ export function useCytoscapeEventHandlers({
     };
 
     if (cy) {
-      cy.on(
-        'custom:data drag dragfree layoutstop select tapstart tapend unselect',
-        debugHandler
-      );
+      cy.on('custom:data drag dragfree layoutstop select tapstart tapend unselect', debugHandler);
       cy.on('custom:data', dataHandler);
       cy.on('layoutstop', layoutstopHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);

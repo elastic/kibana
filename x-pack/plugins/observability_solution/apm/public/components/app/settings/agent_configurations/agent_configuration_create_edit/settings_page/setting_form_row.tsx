@@ -117,10 +117,7 @@ function FormRow({
               value={unit}
               options={setting.units?.map((text) => ({ text, value: text }))}
               onChange={(e) =>
-                onChange(
-                  setting.key,
-                  amountAndUnitToString({ amount, unit: e.target.value })
-                )
+                onChange(setting.key, amountAndUnitToString({ amount, unit: e.target.value }))
               }
             />
           </EuiFlexItem>
@@ -157,10 +154,9 @@ export function SettingFormRow({
             <EuiIconTip
               type={'dot'}
               color={'warning'}
-              content={i18n.translate(
-                'xpack.apm.agentConfig.unsavedSetting.tooltip',
-                { defaultMessage: 'Unsaved' }
-              )}
+              content={i18n.translate('xpack.apm.agentConfig.unsavedSetting.tooltip', {
+                defaultMessage: 'Unsaved',
+              })}
             />
           )}
         </h3>

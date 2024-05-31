@@ -147,8 +147,6 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(0);
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').exists()).toBeTruthy();
     });
   });
 
@@ -157,7 +155,15 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
-      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').hostNodes().length).toBe(1);
+    });
+  });
+
+  it('"View alert details" menu item should open alert details page', async () => {
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj~="viewAlertDetailsPage"]').hostNodes().length).toBe(1);
+      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').exists()).toBeFalsy();
     });
   });
 

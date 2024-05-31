@@ -6,7 +6,7 @@
  */
 
 import { EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import type { LeftPanelPaths } from '.';
@@ -36,7 +36,7 @@ export interface PanelHeaderProps {
  * Header at the top of the left section.
  * Displays the insights, investigation and response tabs (visualize is hidden for 8.9+).
  */
-export const PanelHeader: VFC<PanelHeaderProps> = memo(
+export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
     const { getFieldsData } = useLeftPanelContext();
     const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;

@@ -10,10 +10,10 @@ import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { AlertsTableContext } from '../../../../..';
 import { Alert } from '../../../../../types';
 
-export const useAlertMutedState = (alert: Alert) => {
+export const useAlertMutedState = (alert?: Alert) => {
   const { mutedAlerts } = useContext(AlertsTableContext);
-  const alertInstanceId = alert[ALERT_INSTANCE_ID]?.[0];
-  const ruleId = alert[ALERT_RULE_UUID]?.[0];
+  const alertInstanceId = alert && alert[ALERT_INSTANCE_ID]?.[0];
+  const ruleId = alert && alert[ALERT_RULE_UUID]?.[0];
   return useMemo(() => {
     const rule = ruleId ? mutedAlerts[ruleId] : [];
     return {

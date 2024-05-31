@@ -21,7 +21,7 @@ import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SLO } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -192,7 +192,11 @@ describe('UpdateSLO', () => {
       const slo = createSLO();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
-      const newSettings = { ...slo.settings, timestamp_field: 'newField' };
+      const newSettings = {
+        ...slo.settings,
+        frequency: fiveMinute(),
+        preventInitialBackfill: true,
+      };
       await updateSLO.execute(slo.id, { settings: newSettings });
 
       expectDeletionOfOriginalSLOResources(slo);
@@ -331,7 +335,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.index).toHaveBeenCalled();
   }
 
-  function expectDeletionOfOriginalSLOResources(originalSlo: SLO) {
+  function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
     expect(mockTransformManager.stop).toHaveBeenCalledWith(transformId);
     expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);

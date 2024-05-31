@@ -96,7 +96,7 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({ signals, responseActions });
+      await scheduleNotificationResponseActions({ signals, responseActions });
 
       expect(osqueryActionMock.create).toHaveBeenCalledWith({
         ...defaultQueryResultParams,
@@ -123,7 +123,7 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({ signals, responseActions });
+      await scheduleNotificationResponseActions({ signals, responseActions });
 
       expect(osqueryActionMock.create).toHaveBeenCalledWith({
         ...defaultPackResultParams,
@@ -149,7 +149,7 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({ signals, responseActions });
+      await scheduleNotificationResponseActions({ signals, responseActions });
 
       expect(endpointActionMock.getInternalResponseActionsClient).toHaveBeenCalledTimes(1);
       expect(endpointActionMock.getInternalResponseActionsClient).toHaveBeenCalledWith({
@@ -188,7 +188,7 @@ describe('ScheduleNotificationResponseActions', () => {
           },
         },
       ];
-      scheduleNotificationResponseActions({
+      await scheduleNotificationResponseActions({
         signals,
         responseActions,
       });

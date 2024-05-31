@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 
 import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
 import { imageClickTrigger } from '../actions';
 import { ImageEmbeddableApi } from '../image_embeddable/types';
 import { FileImageMetadata, FilesClient, imageEmbeddableFileKind } from '../imports';
@@ -32,7 +33,7 @@ interface ImageEmbeddableProps {
 export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
   const [imageConfig, dynamicActionsState] = useBatchedPublishingSubjects(
     api.imageConfig$,
-    api.dynamicActionsState$
+    api.dynamicActionsState$ ?? new BehaviorSubject<undefined>(undefined)
   );
   const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
@@ -62,7 +63,9 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
       }}
     >
       <ImageViewer
-        data-rendering-count={1} // TODO: Remove this as part of https://github.com/elastic/kibana/issues/179376
+        // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
+        data-shared-item={''}
+        data-rendering-count={1}
         className="imageEmbeddableImage"
         imageConfig={imageConfig}
         isScreenshotMode={screenshotModeService?.isScreenshotMode()}

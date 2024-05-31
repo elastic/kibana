@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { EventOutcome } from '../../../common/event_outcome';
 import {
   EVENT_OUTCOME,
@@ -55,90 +51,81 @@ async function getErrorRateChartsForDependencyForTimeRange({
     offset,
   });
 
-  const response = await apmEventClient.search(
-    'get_error_rate_for_dependency',
-    {
-      apm: {
-        events: [
-          getProcessorEventForServiceDestinationStatistics(
-            searchServiceDestinationMetrics
-          ),
-        ],
+  const response = await apmEventClient.search('get_error_rate_for_dependency', {
+    apm: {
+      events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...termQuery(SPAN_NAME, spanName || null),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(
+              searchServiceDestinationMetrics
+            ),
+            { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
+            {
+              terms: {
+                [EVENT_OUTCOME]: [EventOutcome.success, EventOutcome.failure],
+              },
+            },
+          ],
+        },
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...termQuery(SPAN_NAME, spanName || null),
-              ...getDocumentTypeFilterForServiceDestinationStatistics(
-                searchServiceDestinationMetrics
-              ),
-              { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
-              {
-                terms: {
-                  [EVENT_OUTCOME]: [EventOutcome.success, EventOutcome.failure],
+      aggs: {
+        timeseries: {
+          date_histogram: getMetricsDateHistogramParams({
+            start: startWithOffset,
+            end: endWithOffset,
+            metricsInterval: 60,
+          }),
+          aggs: {
+            ...(searchServiceDestinationMetrics
+              ? {
+                  total_count: {
+                    sum: {
+                      field: getDocCountFieldForServiceDestinationStatistics(
+                        searchServiceDestinationMetrics
+                      ),
+                    },
+                  },
+                }
+              : {}),
+            failures: {
+              filter: {
+                term: {
+                  [EVENT_OUTCOME]: EventOutcome.failure,
                 },
               },
-            ],
-          },
-        },
-        aggs: {
-          timeseries: {
-            date_histogram: getMetricsDateHistogramParams({
-              start: startWithOffset,
-              end: endWithOffset,
-              metricsInterval: 60,
-            }),
-            aggs: {
-              ...(searchServiceDestinationMetrics
-                ? {
-                    total_count: {
-                      sum: {
-                        field: getDocCountFieldForServiceDestinationStatistics(
-                          searchServiceDestinationMetrics
-                        ),
-                      },
-                    },
-                  }
-                : {}),
-              failures: {
-                filter: {
-                  term: {
-                    [EVENT_OUTCOME]: EventOutcome.failure,
-                  },
-                },
-                aggs: {
-                  ...(searchServiceDestinationMetrics
-                    ? {
-                        total_count: {
-                          sum: {
-                            field:
-                              getDocCountFieldForServiceDestinationStatistics(
-                                searchServiceDestinationMetrics
-                              ),
-                          },
+              aggs: {
+                ...(searchServiceDestinationMetrics
+                  ? {
+                      total_count: {
+                        sum: {
+                          field: getDocCountFieldForServiceDestinationStatistics(
+                            searchServiceDestinationMetrics
+                          ),
                         },
-                      }
-                    : {}),
-                },
+                      },
+                    }
+                  : {}),
               },
             },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {
       const totalCount = bucket.total_count?.value ?? bucket.doc_count;
-      const failureCount =
-        bucket.failures.total_count?.value ?? bucket.failures.doc_count;
+      const failureCount = bucket.failures.total_count?.value ?? bucket.failures.doc_count;
 
       return {
         x: bucket.key + offsetInMs,

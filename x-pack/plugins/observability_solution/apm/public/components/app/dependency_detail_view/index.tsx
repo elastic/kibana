@@ -11,11 +11,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { DependenciesInventoryTitle } from '../../routing/home/dependencies';
 import { DependencyDetailTemplate } from '../../routing/templates/dependency_detail_template';
 
-export function DependencyDetailView({
-  children,
-}: {
-  children: React.ReactChild;
-}) {
+export function DependencyDetailView({ children }: { children: React.ReactChild }) {
   const {
     query: {
       dependencyName,

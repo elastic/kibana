@@ -53,8 +53,7 @@ export function getConnectionStats({
 
     const statsWithLocationIds = allMetrics.map((statsItem) => {
       const { from, timeseries, value } = statsItem;
-      const to =
-        destinationMap.get(statsItem.to.dependencyName) ?? statsItem.to;
+      const to = destinationMap.get(statsItem.to.dependencyName) ?? statsItem.to;
 
       const location = collapseBy === 'upstream' ? from : to;
 
@@ -81,16 +80,12 @@ export function getConnectionStats({
               latency_sum: prev.value.latency_sum + current.value.latency_sum,
               error_count: prev.value.error_count + current.value.error_count,
             },
-            timeseries: joinByKey(
-              [...prev.timeseries, ...current.timeseries],
-              'x',
-              (a, b) => ({
-                x: a.x,
-                count: a.count + b.count,
-                latency_sum: a.latency_sum + b.latency_sum,
-                error_count: a.error_count + b.error_count,
-              })
-            ),
+            timeseries: joinByKey([...prev.timeseries, ...current.timeseries], 'x', (a, b) => ({
+              x: a.x,
+              count: a.count + b.count,
+              latency_sum: a.latency_sum + b.latency_sum,
+              error_count: a.error_count + b.error_count,
+            })),
           };
         },
         {

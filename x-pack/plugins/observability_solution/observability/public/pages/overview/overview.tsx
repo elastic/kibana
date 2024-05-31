@@ -33,14 +33,19 @@ import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
+import {
+  DataContextApps,
+  HasDataMap,
+  appLabels,
+} from '../../context/has_data_context/has_data_context';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 
 export function OverviewPage() {
   const {
-    charts,
     http,
+    observabilityAIAssistant,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       getAlertsStateTable: AlertsStateTable,
@@ -49,7 +54,7 @@ export function OverviewPage() {
     kibanaVersion,
   } = useKibana().services;
 
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
   useBreadcrumbs([
     {
@@ -63,7 +68,52 @@ export function OverviewPage() {
     () => getNewsFeed({ http, kibanaVersion }),
     [http, kibanaVersion]
   );
-  const { hasAnyData, isAllRequestsComplete } = useHasData();
+  const { hasAnyData, isAllRequestsComplete, hasDataMap } = useHasData();
+
+  const { setScreenContext } = observabilityAIAssistant?.service || {};
+
+  const appsWithoutData = Object.keys(hasDataMap)
+    .sort()
+    .reduce((acc, app) => {
+      const data = hasDataMap[app as keyof HasDataMap];
+      if (data?.status === 'success' && !data?.hasData) {
+        const appName = appLabels[app as DataContextApps];
+
+        return `${acc}${appName}, `;
+      }
+      return acc;
+    }, '')
+    .slice(0, -2);
+
+  useEffect(() => {
+    return setScreenContext?.({
+      screenDescription: `The user is viewing the Overview page which shows a summary of the following apps: ${JSON.stringify(
+        hasDataMap
+      )}`,
+      starterPrompts: [
+        ...(appsWithoutData.length > 0
+          ? [
+              {
+                title: i18n.translate(
+                  'xpack.observability.aiAssistant.starterPrompts.explainNoData.title',
+                  {
+                    defaultMessage: 'Explain',
+                  }
+                ),
+                prompt: i18n.translate(
+                  'xpack.observability.aiAssistant.starterPrompts.explainNoData.prompt',
+                  {
+                    defaultMessage: `Why don't I see any data for the {appsWithoutData} sections?`,
+                    values: { appsWithoutData },
+                  }
+                ),
+                icon: 'sparkles',
+              },
+            ]
+          : []),
+      ],
+    });
+  }, [appsWithoutData, hasDataMap, setScreenContext]);
 
   const [isDataAssistantFlyoutVisible, setIsDataAssistantFlyoutVisible] = useState(false);
 
@@ -102,10 +152,6 @@ export function OverviewPage() {
       ),
     [bucketSize, relativeEnd, relativeStart]
   );
-
-  const chartProps = {
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
 
   useEffect(() => {
     setEsQuery(
@@ -184,7 +230,6 @@ export function OverviewPage() {
             hasError={false}
           >
             <AlertSummaryWidget
-              chartProps={chartProps}
               featureIds={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
@@ -199,6 +244,7 @@ export function OverviewPage() {
               pageSize={ALERTS_PER_PAGE}
               query={esQuery}
               showAlertStatusWithFlapping
+              cellContext={{ observabilityRuleTypeRegistry }}
             />
           </SectionContainer>
         </EuiFlexItem>

@@ -20,10 +20,7 @@ function callDateMath(value: unknown): number {
   return DEFAULT_RETURN_VALUE;
 }
 
-export function useJsErrorsQuery(pagination: {
-  pageIndex: number;
-  pageSize: number;
-}) {
+export function useJsErrorsQuery(pagination: { pageIndex: number; pageSize: number }) {
   const {
     rangeId,
     urlParams: { start, end, searchTerm },
@@ -58,8 +55,7 @@ export function useJsErrorsQuery(pagination: {
   const data = useMemo(() => {
     if (!esQueryResponse) return {};
 
-    const { totalErrorGroups, totalErrorPages, errors } =
-      esQueryResponse?.aggregations ?? {};
+    const { totalErrorGroups, totalErrorPages, errors } = esQueryResponse?.aggregations ?? {};
 
     return {
       totalErrorPages: totalErrorPages?.value ?? 0,

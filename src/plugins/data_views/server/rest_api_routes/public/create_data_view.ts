@@ -71,9 +71,10 @@ const registerCreateDataViewRouteFactory =
           },
           response: {
             200: {
-              body: schema.object({
-                [serviceKey]: dataViewSpecSchema,
-              }),
+              body: () =>
+                schema.object({
+                  [serviceKey]: dataViewSpecSchema,
+                }),
             },
           },
         },

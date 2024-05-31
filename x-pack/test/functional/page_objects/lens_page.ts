@@ -44,6 +44,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'dashboard',
     'timeToVisualize',
     'unifiedSearch',
+    'share',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -746,7 +747,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
@@ -754,6 +756,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
         saveToLibrary,
+        description,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -774,7 +777,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
@@ -785,7 +789,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         saveToLibrary,
         addToDashboard,
-        dashboardId
+        dashboardId,
+        description
       );
     },
 
@@ -1044,13 +1049,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Returns the current index pattern of the data panel
-     */
-    async getDataPanelIndexPattern() {
-      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
-    },
-
-    /**
      * Returns the current index pattern of the first layer
      */
     async getFirstLayerIndexPattern() {
@@ -1133,7 +1131,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1145,7 +1143,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
       const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1224,7 +1222,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click(`lns_colorEditing_trigger`);
         // wait for the UI to settle
         await PageObjects.common.sleep(100);
-        await testSubjects.existOrFail('lns-indexPattern-SettingWithSiblingFlyout', {
+        await testSubjects.existOrFail('lns-palettePanelFlyout', {
           timeout: 2500,
         });
       });
@@ -1324,7 +1322,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1485,17 +1483,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         return firstCount === secondCount;
       });
-    },
-
-    async clickAddField() {
-      await testSubjects.click('lns-dataView-switch-link');
-      await testSubjects.existOrFail('indexPattern-add-field');
-      await testSubjects.click('indexPattern-add-field');
-    },
-
-    async createAdHocDataView(name: string, hasTimeField?: boolean) {
-      await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
     },
 
     async switchToTextBasedLanguage(language: string) {
@@ -1810,77 +1797,65 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return Promise.all(
         allFieldsForType.map(async (el) => {
           const parent = await el.findByXpath('./..');
-          return parent.getAttribute('data-test-subj');
+          return (await parent.getAttribute('data-test-subj')) ?? '';
         })
       );
     },
 
-    async clickShareMenu() {
-      await testSubjects.click('lnsApp_shareButton');
+    async clickShareModal() {
+      return await testSubjects.click('lnsApp_shareButton');
     },
 
     async isShareable() {
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
+    async isShareActionEnabled(action: 'export' | 'link') {
       switch (action) {
-        case 'csvDownload':
-          return await testSubjects.isEnabled('sharePanel-CSVDownload');
-        case 'permalinks':
-          return await testSubjects.isEnabled('sharePanel-Permalinks');
+        case 'link':
+          return await testSubjects.isEnabled('link');
         default:
-          return await testSubjects.isEnabled(`sharePanel-${action}`);
+          return await testSubjects.isEnabled(action);
       }
     },
 
-    async ensureShareMenuIsOpen(
-      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
-    ) {
-      await this.clickShareMenu();
+    async ensureShareMenuIsOpen(action: 'export' | 'link') {
+      await this.clickShareModal();
 
-      if (!(await testSubjects.exists('shareContextMenu'))) {
-        await this.clickShareMenu();
+      if (!(await testSubjects.exists('shareContextModal'))) {
+        await this.clickShareModal();
       }
       if (!(await this.isShareActionEnabled(action))) {
         throw Error(`${action} sharing feature is disabled`);
       }
+      return await testSubjects.click(action);
     },
 
     async openPermalinkShare() {
-      await this.ensureShareMenuIsOpen('permalinks');
-      await testSubjects.click('sharePanel-Permalinks');
+      await this.ensureShareMenuIsOpen('link');
+      await testSubjects.click('link');
     },
 
-    async getAvailableUrlSharingOptions() {
-      if (!(await testSubjects.exists('shareUrlForm'))) {
-        await this.openPermalinkShare();
-      }
-      const el = await testSubjects.find('shareUrlForm');
-      const available = await el.findAllByCssSelector('input:not([disabled])');
-      const ids = await Promise.all(available.map((node) => node.getAttribute('id')));
-      return ids;
+    closeShareModal() {
+      return PageObjects.share.closeShareModal();
     },
 
-    async getUrl(type: 'snapshot' | 'savedObject' = 'snapshot') {
-      if (!(await testSubjects.exists('shareUrlForm'))) {
-        await this.openPermalinkShare();
+    async getUrl() {
+      await this.ensureShareMenuIsOpen('link');
+      const url = await PageObjects.share.getSharedUrl();
+
+      if (!url) {
+        throw Error('No data-share-url attribute found');
       }
-      const options = await this.getAvailableUrlSharingOptions();
-      const optionIndex = options.findIndex((option) => option === type);
-      if (optionIndex < 0) {
-        throw Error(`Sharing URL of type ${type} is not available`);
-      }
-      const testSubFrom = `exportAs${type[0].toUpperCase()}${type.substring(1)}`;
-      await testSubjects.click(testSubFrom);
-      const copyButton = await testSubjects.find('copyShareUrlButton');
-      const url = await copyButton.getAttribute('data-share-url');
+
+      // close share modal after url is copied
+      await this.closeShareModal();
       return url;
     },
 
     async openCSVDownloadShare() {
-      await this.ensureShareMenuIsOpen('csvDownload');
-      await testSubjects.click('sharePanel-CSVDownload');
+      await this.ensureShareMenuIsOpen('export');
+      await testSubjects.click('export');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -1890,12 +1865,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openReportingShare(type: 'PNG' | 'PDF') {
-      await this.ensureShareMenuIsOpen(`${type}Reports`);
-      await testSubjects.click(`sharePanel-${type}Reports`);
+      await this.ensureShareMenuIsOpen(`export`);
+      await testSubjects.click(`export`);
+      if (type === 'PDF') {
+        return await testSubjects.click('printablePdfV2-radioOption');
+      }
+      if (type === 'PNG') {
+        return await testSubjects.click('pngV2-radioOption');
+      }
     },
 
     async getCSVContent() {
-      await testSubjects.click('lnsApp_downloadCSVButton');
+      await testSubjects.click('generateReportButton');
       return await browser.execute<
         [void],
         Record<string, { content: string; type: string }> | undefined

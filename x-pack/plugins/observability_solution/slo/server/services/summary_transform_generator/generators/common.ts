@@ -6,9 +6,9 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLO } from '../../../domain/models/slo';
+import { SLODefinition } from '../../../domain/models/slo';
 
-export const getGroupBy = (slo: SLO) => {
+export const getGroupBy = (slo: SLODefinition) => {
   const groups = [slo.groupBy].flat().filter((group) => !!group);
 
   const groupings =
@@ -64,6 +64,31 @@ export const getGroupBy = (slo: SLO) => {
     'transaction.type': {
       terms: {
         field: 'transaction.type',
+        missing_bucket: true,
+      },
+    },
+    // optional fields: only specified for Synthetics indicators. Must include missing_bucket:true
+    'observer.geo.name': {
+      terms: {
+        field: 'observer.geo.name',
+        missing_bucket: true,
+      },
+    },
+    'observer.name': {
+      terms: {
+        field: 'observer.name',
+        missing_bucket: true,
+      },
+    },
+    'monitor.config_id': {
+      terms: {
+        field: 'monitor.config_id',
+        missing_bucket: true,
+      },
+    },
+    'monitor.name': {
+      terms: {
+        field: 'monitor.name',
         missing_bucket: true,
       },
     },

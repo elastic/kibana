@@ -18,7 +18,6 @@ export default async function ({ readConfigFile }) {
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./hello_world'),
-      require.resolve('./embeddables'),
       require.resolve('./bfetch_explorer'),
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
@@ -32,6 +31,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./unified_field_list_examples'),
       require.resolve('./discover_customization_examples'),
       require.resolve('./error_boundary'),
+      require.resolve('./response_stream'),
     ],
     services: {
       ...functionalConfig.get('services'),

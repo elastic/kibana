@@ -46,6 +46,13 @@ export const flyoutOpenInLogsExplorerText = i18n.translate(
   }
 );
 
+export const flyoutOpenInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',
   {
@@ -88,6 +95,10 @@ export const flyoutIntegrationNameText = i18n.translate(
   }
 );
 
+export const flyoutSummaryText = i18n.translate('xpack.datasetQuality.flyoutSummaryTitle', {
+  defaultMessage: 'Summary',
+});
+
 export const flyoutDegradedDocsText = i18n.translate(
   'xpack.datasetQuality.flyout.degradedDocsTitle',
   {
@@ -110,6 +121,56 @@ export const flyoutDegradedDocsPercentageText = i18n.translate(
   }
 );
 
+export const flyoutDocsCountTotalText = i18n.translate(
+  'xpack.datasetQuality.flyoutDocsCountTotal',
+  {
+    defaultMessage: 'Docs count (total)',
+  }
+);
+
+export const flyoutSizeText = i18n.translate('xpack.datasetQuality.flyoutSizeText', {
+  defaultMessage: 'Size',
+});
+
+export const flyoutServicesText = i18n.translate('xpack.datasetQuality.flyoutServicesText', {
+  defaultMessage: 'Services',
+});
+
+export const flyoutHostsText = i18n.translate('xpack.datasetQuality.flyoutHostsText', {
+  defaultMessage: 'Hosts',
+});
+
+export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShowAllText', {
+  defaultMessage: 'Show all',
+});
+
+export const flyoutImprovementText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Degraded Fields',
+  }
+);
+
+export const flyoutImprovementTooltip = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of degraded fields found in your dataset.',
+  }
+);
+
+export const flyoutDegradedFieldsTableLoadingText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableLoadingText',
+  {
+    defaultMessage: 'Loading degraded fields',
+  }
+);
+
+export const flyoutDegradedFieldsTableNoData = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableNoData',
+  {
+    defaultMessage: 'No degraded fields found',
+  }
+);
 /*
 Summary Panel
 */
@@ -166,7 +227,7 @@ export const summaryPanelDatasetsActivityText = i18n.translate(
 export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
   {
-    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+    defaultMessage: 'The number of datasets with activity in the selected time range.',
   }
 );
 
@@ -180,7 +241,7 @@ export const summaryPanelEstimatedDataText = i18n.translate(
 export const summaryPanelEstimatedDataTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelEstimatedDataTooltipText',
   {
-    defaultMessage: 'The approximate amount of data stored in the last 24 hours.',
+    defaultMessage: 'The approximate amount of data stored in the selected time range.',
   }
 );
 

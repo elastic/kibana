@@ -19,8 +19,7 @@ export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const device = 'device' in query ? query.device : undefined;
   const osVersion = 'osVersion' in query ? query.osVersion : undefined;
   const appVersion = 'appVersion' in query ? query.appVersion : undefined;
-  const netConnectionType =
-    'netConnectionType' in query ? query.netConnectionType : undefined;
+  const netConnectionType = 'netConnectionType' in query ? query.netConnectionType : undefined;
 
   const kueryWithFilters = getKueryWithMobileFilters({
     device,

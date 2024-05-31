@@ -23,7 +23,7 @@ export interface Props {
   actionTypeId: string;
   logger: Logger;
 }
-interface StaticResponse {
+export interface StaticResponse {
   connector_id: string;
   data: string;
   status: string;
@@ -92,7 +92,7 @@ export const executeAction = async ({
     logger,
     responseStream: readable,
     abortSignal,
-  });
+  }).catch(() => {});
 
   return readable.pipe(new PassThrough());
 };

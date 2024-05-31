@@ -7,11 +7,7 @@
  */
 
 export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
-export type {
-  UnifiedDataTableProps,
-  UnifiedDataTableRenderCustomToolbar,
-  UnifiedDataTableRenderCustomToolbarProps,
-} from './src/components/data_table';
+export type { UnifiedDataTableProps } from './src/components/data_table';
 export {
   RowHeightSettings,
   type RowHeightSettingsProps,
@@ -31,3 +27,12 @@ export { popularizeField } from './src/utils/popularize_field';
 export { useColumns } from './src/hooks/use_data_grid_columns';
 export { OPEN_DETAILS, SELECT_ROW } from './src/components/data_table_columns';
 export { DataTableRowControl } from './src/components/data_table_row_control';
+
+export type {
+  UnifiedDataTableRenderCustomToolbar,
+  UnifiedDataTableRenderCustomToolbarProps,
+} from './src/components/custom_toolbar/render_custom_toolbar';
+export {
+  getRenderCustomToolbarWithElements,
+  renderCustomToolbar,
+} from './src/components/custom_toolbar/render_custom_toolbar';

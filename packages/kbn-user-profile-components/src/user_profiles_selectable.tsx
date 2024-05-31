@@ -44,6 +44,7 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
     | 'noMatchesMessage'
     | 'emptyMessage'
     | 'errorMessage'
+    | 'data-test-subj'
   > {
   /**
    * List of users to be rendered as suggestions.
@@ -117,6 +118,11 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
   nullOptionLabel?: string;
 
   /**
+   * Additional props for "no users" option.
+   */
+  nullOptionProps?: NullOptionProps;
+
+  /**
    * Label for default options group separator.
    */
   defaultOptionsLabel?: string;
@@ -144,8 +150,10 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   selectedStatusMessage,
   limitReachedMessage,
   nullOptionLabel,
+  nullOptionProps,
   defaultOptionsLabel,
   clearButtonLabel,
+  ...props
 }: UserProfilesSelectableProps<Option>) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -156,7 +164,9 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   // Resets all displayed options
   const resetDisplayedOptions = () => {
     if (options) {
-      setDisplayedOptions(options.map((option) => toSelectableOption(option, nullOptionLabel)));
+      setDisplayedOptions(
+        options.map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
+      );
       return;
     }
 
@@ -194,7 +204,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       const selectedOptionsToAdd: SelectableOption[] = selectedOptions
         ? selectedOptions
             .filter((profile) => !nextOptions.find((option) => isMatchingOption(option, profile)))
-            .map((option) => toSelectableOption(option, nullOptionLabel))
+            .map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
         : [];
 
       // Get any newly added default options
@@ -205,7 +215,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
                 !nextOptions.find((option) => isMatchingOption(option, profile)) &&
                 !selectedOptionsToAdd.find((option) => isMatchingOption(option, profile))
             )
-            .map((option) => toSelectableOption(option, nullOptionLabel))
+            .map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
         : [];
 
       // Merge in any new options and add group separator if necessary
@@ -254,6 +264,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
 
   return (
     <EuiSelectable
+      data-test-subj={props['data-test-subj']}
       options={displayedOptions}
       // @ts-expect-error: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
       onChange={(
@@ -329,12 +340,17 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
               gutterSize="s"
               responsive={false}
             >
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              <EuiFlexItem css={{ maxWidth: '100%' }}>
+                <EuiHighlight className="eui-textTruncate" search={searchValue}>
+                  {option.label}
+                </EuiHighlight>
               </EuiFlexItem>
               {option.user.email && option.user.email !== option.label ? (
-                <EuiFlexItem grow={false}>
-                  <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
+                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                  <EuiTextColor
+                    color={option.disabled ? 'disabled' : 'subdued'}
+                    className="eui-textTruncate"
+                  >
                     {searchValue ? (
                       <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
                     ) : (
@@ -425,16 +441,19 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
 };
 
 type SelectableOption = EuiSelectableOption<Partial<UserProfileWithAvatar>>;
+export type NullOptionProps = Partial<Pick<EuiSelectableOption, 'append'>>;
 
 function toSelectableOption(
   userProfile: UserProfileWithAvatar | null,
-  nullOptionLabel?: string
+  nullOptionLabel?: string,
+  nullOptionProps?: NullOptionProps
 ): SelectableOption {
   if (userProfile) {
     return {
       key: userProfile.uid,
       label: getUserDisplayName(userProfile.user),
       data: userProfile,
+      'data-test-subj': `userProfileSelectableOption-${userProfile.user.username}`,
     };
   }
   return {
@@ -444,6 +463,8 @@ function toSelectableOption(
       i18n.translate('userProfileComponents.userProfilesSelectable.nullOptionLabel', {
         defaultMessage: 'No users',
       }),
+    'data-test-subj': 'userProfileSelectableOption-null',
+    ...nullOptionProps,
   };
 }
 

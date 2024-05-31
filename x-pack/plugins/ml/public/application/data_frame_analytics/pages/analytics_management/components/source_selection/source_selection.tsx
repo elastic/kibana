@@ -160,7 +160,12 @@ export const SourceSelection: FC = () => {
               uiSettings,
             }}
           >
-            <CreateDataViewButton onDataViewCreated={onSearchSelected} allowAdHocDataView={true} />
+            <CreateDataViewButton
+              onDataViewCreated={(dataView) => {
+                onSearchSelected(dataView.id!, 'index-pattern', dataView.getIndexPattern());
+              }}
+              allowAdHocDataView={true}
+            />
           </SavedObjectFinder>
         </EuiPanel>
       </EuiPageBody>

@@ -288,10 +288,13 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects);
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+
+    registerSavedObjects(core.savedObjects, {
+      useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
+    });
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -613,12 +616,14 @@ export class FleetPlugin
       uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
-    this.telemetryEventsSender.start(plugins.telemetry, core);
-    this.bulkActionsResolver?.start(plugins.taskManager);
-    this.fleetUsageSender?.start(plugins.taskManager);
-    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
-    startFleetUsageLogger(plugins.taskManager);
-    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
+    this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
+    this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
+    this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    startFleetUsageLogger(plugins.taskManager).catch(() => {});
+    this.fleetMetricsTask
+      ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -651,18 +656,24 @@ export class FleetPlugin
           )
           .toPromise();
 
+        const randomIntFromInterval = (min: number, max: number) => {
+          return Math.floor(Math.random() * (max - min + 1) + min);
+        };
+
         // Retry Fleet setup w/ backoff
         await backOff(
           async () => {
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-              core.elasticsearch.client.asInternalUser
+              core.elasticsearch.client.asInternalUser,
+              { useLock: true }
             );
           },
           {
             numOfAttempts: setupAttempts,
+            delayFirstAttempt: true,
             // 1s initial backoff
-            startingDelay: 1000,
+            startingDelay: randomIntFromInterval(100, 1000),
             // 5m max backoff
             maxDelay: 60000 * 5,
             timeMultiple: 2,
@@ -686,7 +697,7 @@ export class FleetPlugin
         );
 
         // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
-        this.initializeUninstallTokens();
+        this.initializeUninstallTokens().catch(() => {});
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,

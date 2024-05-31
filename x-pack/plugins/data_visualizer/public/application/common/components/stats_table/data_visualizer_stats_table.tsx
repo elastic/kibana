@@ -15,6 +15,7 @@ import {
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
@@ -26,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
 import { css } from '@emotion/react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import type { SupportedFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
@@ -102,13 +104,16 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     },
     [items]
   );
+  const isMounted = useMountedState();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       // When window or table is resized,
       // update the column widths and other settings accordingly
-      setDimensions(calculateTableColumnsDimensions(e.width));
+      if (isMounted()) {
+        setDimensions(calculateTableColumnsDimensions(e.width));
+      }
     }, 500),
     []
   );
@@ -226,19 +231,13 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
               defaultMessage: 'Documents (%)',
             })}
-            {
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip',
-                  {
-                    defaultMessage:
-                      'Document count found is based on a smaller set of sampled records.',
-                  }
-                )}
-              >
-                <EuiIcon type="questionInCircle" />
-              </EuiToolTip>
-            }
+            <EuiIconTip
+              content={i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip', {
+                defaultMessage:
+                  'Document count found is based on a smaller set of sampled records.',
+              })}
+              type="questionInCircle"
+            />
           </div>
         ),
 
@@ -395,7 +394,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       backgroundColor: euiTheme.colors.emptyShade,
       boxShadow: `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`,
     },
-    '.euiTableRow > .euiTableRowCel': {
+    '.euiTableRow > .euiTableRowCell': {
       borderTop: 0,
     },
     [useEuiMinBreakpoint('s')]: {
@@ -466,7 +465,11 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
-        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
+        <div
+          data-test-subj="dataVisualizerTableContainer"
+          ref={resizeRef}
+          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
+        >
           <EuiInMemoryTable<T>
             message={
               loading
@@ -481,9 +484,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             columns={columns}
             pagination={pagination}
             sorting={sorting}
-            isExpandable={true}
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isSelectable={false}
             onTableChange={onTableChange}
             data-test-subj={`dataVisualizerTable-${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({

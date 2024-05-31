@@ -4,18 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { BoolQuery } from '@kbn/es-query';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -25,6 +17,7 @@ import { Maybe } from '../../../typings/common';
 interface Options {
   environment: string;
   kuery: string;
+  filters?: BoolQuery;
   serviceName: string;
   apmEventClient: APMEventClient;
   transactionType: string;
@@ -42,6 +35,7 @@ export type ServiceThroughputResponse = Array<{ x: number; y: Maybe<number> }>;
 export async function getThroughput({
   environment,
   kuery,
+  filters,
   serviceName,
   apmEventClient,
   transactionType,
@@ -75,7 +69,9 @@ export async function getThroughput({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...termQuery(TRANSACTION_NAME, transactionName),
+            ...(filters?.filter ?? []),
           ],
+          must_not: [...(filters?.must_not ?? [])],
         },
       },
       aggs: {
@@ -96,10 +92,7 @@ export async function getThroughput({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_throughput_for_service',
-    params
-  );
+  const response = await apmEventClient.search('get_throughput_for_service', params);
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {

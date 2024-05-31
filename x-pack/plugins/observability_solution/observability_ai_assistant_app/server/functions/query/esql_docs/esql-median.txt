@@ -1,12 +1,25 @@
 MEDIAN
 
-The value that is greater than half of all values and less than half of
+Syntax
+MEDIAN(expression)
+Parameters
+expression
+Expression from which to return the median value.
+DescriptionReturns the value that is greater than half of all values and less than half of
 all values, also known as the 50% PERCENTILE.
+Like PERCENTILE, MEDIAN is usually approximate.
+MEDIAN is also non-deterministic.
+This means you can get slightly different results using the same data.
+Example
 ```esql
 FROM employees
 | STATS MEDIAN(salary), PERCENTILE(salary, 50)
 ```
 
-Like PERCENTILE, MEDIAN is usually approximate.
-MEDIAN is also non-deterministic.
-This means you can get slightly different results using the same data.
+The expression can use inline functions. For example, to calculate the median of
+the maximum values of a multivalued column, first use MV_MAX to get the
+maximum value per row, and use the result with the MEDIAN function:
+```esql
+FROM employees
+| STATS median_max_salary_change = MEDIAN(MV_MAX(salary_change))
+```

@@ -62,7 +62,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
     async getActionHrefByText(text: string) {
       log.debug(`getActionHref: "${text}"`);
       const item = await this.getActionWebElementByText(text);
-      return item.getAttribute('href');
+      return (await item.getAttribute('href')) ?? '';
     }
 
     async openHrefByText(text: string) {

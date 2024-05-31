@@ -16,14 +16,10 @@ export function EnvironmentBadge({ environments = [] }: Props) {
   return (
     <ItemsBadge
       items={environments ?? []}
-      multipleItemsMessage={i18n.translate(
-        'xpack.apm.servicesTable.environmentCount',
-        {
-          values: { environmentCount: environments.length },
-          defaultMessage:
-            '{environmentCount, plural, one {1 environment} other {# environments}}',
-        }
-      )}
+      multipleItemsMessage={i18n.translate('xpack.apm.servicesTable.environmentCount', {
+        values: { environmentCount: environments.length },
+        defaultMessage: '{environmentCount, plural, one {1 environment} other {# environments}}',
+      })}
     />
   );
 }

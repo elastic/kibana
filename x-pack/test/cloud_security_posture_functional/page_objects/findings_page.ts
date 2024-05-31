@@ -134,9 +134,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getColumnIndex(columnName: string) {
       const element = await this.getElement();
-      const columnIndex = await (
+      const columnIndexAttr = await (
         await element.findByCssSelector(`[data-gridcell-column-id="${columnName}"]`)
       ).getAttribute('data-gridcell-column-index');
+      expect(columnIndexAttr).to.not.be(null);
+      const columnIndex = parseInt(columnIndexAttr ?? '-1', 10);
       expect(columnIndex).to.be.greaterThan(-1);
       return columnIndex;
     },

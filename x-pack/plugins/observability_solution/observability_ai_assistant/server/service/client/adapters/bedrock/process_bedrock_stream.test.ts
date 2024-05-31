@@ -11,7 +11,9 @@ import { Logger } from '@kbn/logging';
 import { concatenateChatCompletionChunks } from '../../../../../common/utils/concatenate_chat_completion_chunks';
 import { processBedrockStream } from './process_bedrock_stream';
 import { MessageRole } from '../../../../../common';
-import { rejectTokenCountEvents } from '../../../util/reject_token_count_events';
+import { TOOL_USE_END, TOOL_USE_START } from '../simulate_function_calling/constants';
+import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
+import { withoutTokenCountEvents } from '../../../../../common/utils/without_token_count_events';
 
 describe('processBedrockStream', () => {
   const encodeChunk = (body: unknown) => {
@@ -63,8 +65,11 @@ describe('processBedrockStream', () => {
           encode(' text'),
           stop()
         ).pipe(
-          processBedrockStream({ logger: getLoggerMock() }),
-          rejectTokenCountEvents(),
+          processBedrockStream(),
+          parseInlineFunctionCalls({
+            logger: getLoggerMock(),
+          }),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -86,29 +91,17 @@ describe('processBedrockStream', () => {
       await lastValueFrom(
         of(
           start(),
-          encode('<function_calls><invoke'),
-          encode('><tool_name>my_tool</tool_name><parameters'),
-          encode('><my_param>my_value</my_param'),
-          encode('></parameters></invoke>'),
-          stop('</function_calls>')
+          encode(TOOL_USE_START),
+          encode('```json\n'),
+          encode('{ "name": "my_tool", "input": { "my_param": "my_value" } }\n'),
+          encode('```'),
+          stop(TOOL_USE_END)
         ).pipe(
-          processBedrockStream({
+          processBedrockStream(),
+          parseInlineFunctionCalls({
             logger: getLoggerMock(),
-            functions: [
-              {
-                name: 'my_tool',
-                description: '',
-                parameters: {
-                  properties: {
-                    my_param: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            ],
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -131,30 +124,18 @@ describe('processBedrockStream', () => {
         of(
           start(),
           encode('This is'),
-          encode(' my text\n<function_calls><invoke'),
-          encode('><tool_name>my_tool</tool_name><parameters'),
-          encode('><my_param>my_value</my_param'),
-          encode('></parameters></invoke'),
-          encode('>'),
-          stop('</function_calls>')
+          encode(` my text${TOOL_USE_START.substring(0, 4)}`),
+          encode(`${TOOL_USE_START.substring(4)}\n\`\`\`json\n{"name":`),
+          encode(` "my_tool", "input`),
+          encode(`": { "my_param": "my_value" } }\n`),
+          encode('```'),
+          stop(TOOL_USE_END)
         ).pipe(
-          processBedrockStream({
+          processBedrockStream(),
+          parseInlineFunctionCalls({
             logger: getLoggerMock(),
-            functions: [
-              {
-                name: 'my_tool',
-                description: '',
-                parameters: {
-                  properties: {
-                    my_param: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            ],
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )
@@ -171,83 +152,29 @@ describe('processBedrockStream', () => {
     });
   });
 
-  it('throws an error if the XML cannot be parsed', async () => {
+  it('throws an error if the JSON cannot be parsed', async () => {
     async function fn() {
       return lastValueFrom(
         of(
           start(),
-          encode('<function_calls><invoke'),
-          encode('><tool_name>my_tool</tool><parameters'),
-          encode('><my_param>my_value</my_param'),
-          encode('></parameters></invoke'),
-          encode('>'),
-          stop('</function_calls>')
+          encode(TOOL_USE_START),
+          encode('```json\n'),
+          encode('invalid json\n'),
+          encode('```'),
+          stop(TOOL_USE_END)
         ).pipe(
-          processBedrockStream({
+          processBedrockStream(),
+          parseInlineFunctionCalls({
             logger: getLoggerMock(),
-            functions: [
-              {
-                name: 'my_tool',
-                description: '',
-                parameters: {
-                  properties: {
-                    my_param: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            ],
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       );
     }
 
-    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unexpected close tag
-      Line: 0
-      Column: 49
-      Char: >"
-    `);
-  });
-
-  it('throws an error if the function does not exist', async () => {
-    expect(
-      async () =>
-        await lastValueFrom(
-          of(
-            start(),
-            encode('<function_calls><invoke'),
-            encode('><tool_name>my_other_tool</tool_name><parameters'),
-            encode('><my_param>my_value</my_param'),
-            encode('></parameters></invoke'),
-            encode('>'),
-            stop('</function_calls>')
-          ).pipe(
-            processBedrockStream({
-              logger: getLoggerMock(),
-              functions: [
-                {
-                  name: 'my_tool',
-                  description: '',
-                  parameters: {
-                    properties: {
-                      my_param: {
-                        type: 'string',
-                      },
-                    },
-                  },
-                },
-              ],
-            }),
-            rejectTokenCountEvents(),
-            concatenateChatCompletionChunks()
-          )
-        )
-    ).rejects.toThrowError(
-      'Function definition for my_other_tool not found. Available are: my_tool'
+    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unexpected token 'i', \\"invalid json\\" is not valid JSON"`
     );
   });
 
@@ -255,29 +182,18 @@ describe('processBedrockStream', () => {
     expect(
       await lastValueFrom(
         of(
-          encode('<function_calls><invoke'),
-          encode('><tool_name>my_tool</tool_name><parameters'),
-          encode('></parameters></invoke'),
-          encode('>'),
-          stop('</function_calls>')
+          start(),
+          encode(TOOL_USE_START),
+          encode('```json\n'),
+          encode('{ "name": "my_tool" }\n'),
+          encode('```'),
+          stop(TOOL_USE_END)
         ).pipe(
-          processBedrockStream({
+          processBedrockStream(),
+          parseInlineFunctionCalls({
             logger: getLoggerMock(),
-            functions: [
-              {
-                name: 'my_tool',
-                description: '',
-                parameters: {
-                  properties: {
-                    my_param: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            ],
           }),
-          rejectTokenCountEvents(),
+          withoutTokenCountEvents(),
           concatenateChatCompletionChunks()
         )
       )

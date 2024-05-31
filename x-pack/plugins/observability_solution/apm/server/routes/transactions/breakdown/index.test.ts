@@ -113,9 +113,7 @@ describe('getTransactionBreakdown', () => {
       const appTimeseries = timeseries.find((series) => series.title === 'app');
 
       // missing values should be 0 if other span types do have data for that timestamp
-      expect(
-        (appTimeseries as NonNullable<typeof appTimeseries>).data[1].y
-      ).toBe(0);
+      expect((appTimeseries as NonNullable<typeof appTimeseries>).data[1].y).toBe(0);
     });
   });
 });

@@ -137,6 +137,8 @@ describe('DomainsTable', () => {
     });
 
     describe('actions column', () => {
+      const simulatedClickEvent = { persist: () => {} }; // Required for EUI action clicks. Can be removed if switching away from Enzyme to RTL
+
       const getActions = () => getTableBody().find('ExpandedItemActions');
       const getActionItems = () => getActions().first().dive().find('DefaultItemAction');
 
@@ -157,7 +159,7 @@ describe('DomainsTable', () => {
           it('sends the user to the engine overview on click', () => {
             const { navigateToUrl } = mockKibanaValues;
 
-            getManageAction().simulate('click');
+            getManageAction().simulate('click', simulatedClickEvent);
 
             expect(navigateToUrl).toHaveBeenCalledWith(
               '/search_indices/index-name/domain_management/1234'
@@ -167,7 +169,7 @@ describe('DomainsTable', () => {
 
         describe('delete action', () => {
           it('clicking the action and confirming deletes the domain', () => {
-            getDeleteAction().simulate('click');
+            getDeleteAction().simulate('click', simulatedClickEvent);
 
             expect(actions.showModal).toHaveBeenCalled();
           });

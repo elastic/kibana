@@ -51,9 +51,9 @@
       "stackConnectors",
       "discover",
       "notifications",
-      "savedObjects",
       "savedSearch",
       "unifiedDocViewer",
+      "charts"
     ],
     "optionalPlugins": [
       "cloudExperiments",
@@ -65,6 +65,7 @@
       "usageCollection",
       "lists",
       "home",
+      "management",
       "telemetry",
       "dataViewFieldEditor",
       "osquery",

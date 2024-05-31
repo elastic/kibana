@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EqlSearchRequest as EqlSearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const EQL_SEARCH_STRATEGY = 'eql';
 

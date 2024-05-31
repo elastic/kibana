@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode, useMemo } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
+import { map as _map, groupBy as _groupBy } from 'lodash';
 
 import {
   FieldValidateResponse,
@@ -28,9 +29,10 @@ import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../s
 
 export const extractProcessorDetails = flow(
   Object.entries,
-  map(([type, { label, forLicenseAtLeast }]) => ({
+  map(([type, { label, forLicenseAtLeast, category }]) => ({
     label,
     value: type,
+    category,
     ...(forLicenseAtLeast ? { forLicenseAtLeast } : {}),
   })),
   (arr) => arr.sort((a, b) => a.label.localeCompare(b.label))
@@ -41,6 +43,10 @@ interface ProcessorTypeAndLabel {
   label: string;
 }
 
+type ProcessorWithCategory = ProcessorTypeAndLabel & {
+  category: string;
+};
+
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
   return (
     extractProcessorDetails(mapProcessorTypeToDescriptor)
@@ -48,9 +54,19 @@ export const getProcessorTypesAndLabels = (license: ILicense | null) => {
       .filter((option) => {
         return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
       })
-      // Convert to EuiComboBox options
-      .map(({ value, label }) => ({ label, value }))
+      // Pick properties we need to build the categories
+      .map(({ value, label, category }) => ({ label, value, category }))
   );
+};
+
+export const groupProcessorsByCategory = (filteredProcessors: ProcessorWithCategory[]) => {
+  return _map(_groupBy(filteredProcessors, 'category'), (options, optionLabel) => ({
+    label: optionLabel,
+    options: _map(options, ({ label, value }) => ({
+      label,
+      value,
+    })),
+  }));
 };
 
 interface Props {
@@ -82,7 +98,12 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
   } = useKibana();
   const esDocUrl = documentation.getEsDocsBasePath();
   // Some processors are only available for certain license types
-  const processorOptions = useMemo(() => getProcessorTypesAndLabels(license), [license]);
+  const processorOptions = useMemo(() => {
+    // Get all processors
+    const processors = getProcessorTypesAndLabels(license);
+    // Group them by category so that they can be properly rendered by the EuiComboBox
+    return groupProcessorsByCategory(processors);
+  }, [license]);
 
   return (
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">

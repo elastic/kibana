@@ -46,12 +46,12 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
-import { AddModelFlyout } from './add_model_flyout';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
-import { ModelsTableToConfigMapping } from '.';
+import { ModelsTableToConfigMapping } from './config_mapping';
 import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';
@@ -65,7 +65,6 @@ import type {
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { ListingPageUrlState } from '../../../common/types/common';
-import { ExpandedRow } from './expanded_row';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
@@ -103,6 +102,14 @@ interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
   pageUrlState: ListingPageUrlState;
 }
+
+const ExpandedRow = dynamic(async () => ({
+  default: (await import('./expanded_row')).ExpandedRow,
+}));
+
+const AddModelFlyout = dynamic(async () => ({
+  default: (await import('./add_model_flyout')).AddModelFlyout,
+}));
 
 const modelIdColumnName = i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
   defaultMessage: 'ID',
@@ -479,7 +486,7 @@ export const ModelsList: FC<Props> = ({
   const columns: Array<EuiBasicTableColumn<ModelItem>> = [
     {
       align: 'left',
-      width: '40px',
+      width: '32px',
       isExpander: true,
       render: (item: ModelItem) => {
         if (!item.stats) {
@@ -505,7 +512,7 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: modelIdColumnName,
-      width: '215px',
+      width: '15%',
       sortable: ({ model_id: modelId }: ModelItem) => modelId,
       truncateText: false,
       textOnly: false,
@@ -526,7 +533,6 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
-      width: '300px',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.modelDescriptionHeader', {
         defaultMessage: 'Description',
       }),
@@ -560,6 +566,7 @@ export const ModelsList: FC<Props> = ({
       },
     },
     {
+      width: '15%',
       field: ModelsTableToConfigMapping.type,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.typeHeader', {
         defaultMessage: 'Type',
@@ -579,9 +586,9 @@ export const ModelsList: FC<Props> = ({
         </EuiFlexGroup>
       ),
       'data-test-subj': 'mlModelsTableColumnType',
-      width: '130px',
     },
     {
+      width: '10%',
       field: 'state',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
@@ -597,9 +604,9 @@ export const ModelsList: FC<Props> = ({
         ) : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
-      width: '130px',
     },
     {
+      width: '20%',
       field: ModelsTableToConfigMapping.createdAt,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
         defaultMessage: 'Created at',
@@ -608,10 +615,9 @@ export const ModelsList: FC<Props> = ({
       render: (v: number) => dateFormatter(v),
       sortable: true,
       'data-test-subj': 'mlModelsTableColumnCreatedAt',
-      width: '210px',
     },
     {
-      width: '150px',
+      width: '15%',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
@@ -761,10 +767,7 @@ export const ModelsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
-          css={{ overflowX: 'auto' }}
-          isSelectable={true}
-          isExpandable={true}
-          hasActions={true}
+          responsiveBreakpoint={'xl'}
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}

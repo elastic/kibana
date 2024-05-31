@@ -27,12 +27,8 @@ export function getTimepickerRisonData(currentSearch: Location['search']) {
       to: currentQuery.rangeTo || '',
     },
     refreshInterval: {
-      pause: currentQuery.refreshPaused
-        ? Boolean(currentQuery.refreshPaused)
-        : true,
-      value: currentQuery.refreshInterval
-        ? parseInt(currentQuery.refreshInterval, 10)
-        : 0,
+      pause: currentQuery.refreshPaused ? Boolean(currentQuery.refreshPaused) : true,
+      value: currentQuery.refreshInterval ? parseInt(currentQuery.refreshInterval, 10) : 0,
     },
   };
 }

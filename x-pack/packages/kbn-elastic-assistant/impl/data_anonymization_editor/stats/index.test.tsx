@@ -8,26 +8,38 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { Stats } from '.';
 
 describe('Stats', () => {
-  const selectedPromptContext: SelectedPromptContext = {
-    allow: ['field1', 'field2'],
-    allowReplacement: ['field1'],
-    promptContextId: 'abcd',
-    rawData: {
-      field1: ['value1', 'value2'],
-      field2: ['value3, value4', 'value5'],
-      field3: ['value6'],
+  const anonymizationFields = [
+    {
+      id: 'field1',
+      field: 'field1',
+      anonymized: true,
+      allowed: true,
     },
+    {
+      id: 'field2',
+      field: 'field2',
+      anonymized: false,
+      allowed: true,
+    },
+  ];
+  const rawData = {
+    field1: ['value1', 'value2'],
+    field2: ['value3, value4', 'value5'],
+    field3: ['value6'],
   };
 
   it('renders the expected allowed stat content', () => {
     render(
       <TestProviders>
-        <Stats isDataAnonymizable={true} selectedPromptContext={selectedPromptContext} />
+        <Stats
+          isDataAnonymizable={true}
+          anonymizationFields={anonymizationFields}
+          rawData={rawData}
+        />
       </TestProviders>
     );
 
@@ -37,7 +49,11 @@ describe('Stats', () => {
   it('renders the expected anonymized stat content', () => {
     render(
       <TestProviders>
-        <Stats isDataAnonymizable={true} selectedPromptContext={selectedPromptContext} />
+        <Stats
+          isDataAnonymizable={true}
+          anonymizationFields={anonymizationFields}
+          rawData={rawData}
+        />
       </TestProviders>
     );
 
@@ -47,7 +63,11 @@ describe('Stats', () => {
   it('renders the expected available stat content', () => {
     render(
       <TestProviders>
-        <Stats isDataAnonymizable={true} selectedPromptContext={selectedPromptContext} />
+        <Stats
+          isDataAnonymizable={true}
+          anonymizationFields={anonymizationFields}
+          rawData={rawData}
+        />
       </TestProviders>
     );
 
@@ -57,7 +77,11 @@ describe('Stats', () => {
   it('should not display the allowed stat when isDataAnonymizable is false', () => {
     render(
       <TestProviders>
-        <Stats isDataAnonymizable={false} selectedPromptContext={selectedPromptContext} />
+        <Stats
+          isDataAnonymizable={false}
+          anonymizationFields={anonymizationFields}
+          rawData={rawData}
+        />
       </TestProviders>
     );
 
@@ -67,7 +91,11 @@ describe('Stats', () => {
   it('should not display the available stat when isDataAnonymizable is false', () => {
     render(
       <TestProviders>
-        <Stats isDataAnonymizable={false} selectedPromptContext={selectedPromptContext} />
+        <Stats
+          isDataAnonymizable={false}
+          anonymizationFields={anonymizationFields}
+          rawData={rawData}
+        />
       </TestProviders>
     );
 

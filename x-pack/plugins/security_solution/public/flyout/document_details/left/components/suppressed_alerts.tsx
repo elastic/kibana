@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -16,6 +18,7 @@ import {
 } from './test_ids';
 import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../../common/components/event_details/insights/translations';
 import { InvestigateInTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 export interface SuppressedAlertsProps {
   /**
@@ -31,10 +34,12 @@ export interface SuppressedAlertsProps {
 /**
  * Displays number of suppressed alerts and investigate in timeline icon
  */
-export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
+export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
   dataAsNestedObject,
   alertSuppressionCount,
 }) => {
+  const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
+
   const title = (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem>
@@ -44,14 +49,16 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
           values={{ count: alertSuppressionCount }}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiBetaBadge
-          label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
-          style={{ verticalAlign: 'middle' }}
-          size="s"
-          data-test-subj={SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID}
-        />
-      </EuiFlexItem>
+      {isSuppressionRuleInGA(ruleType) ? null : (
+        <EuiFlexItem>
+          <EuiBetaBadge
+            label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
+            style={{ verticalAlign: 'middle' }}
+            size="s"
+            data-test-subj={SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 

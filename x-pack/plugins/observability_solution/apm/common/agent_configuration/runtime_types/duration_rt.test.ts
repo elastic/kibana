@@ -13,19 +13,7 @@ describe('getDurationRt', () => {
   describe('must be at least 1m', () => {
     const customDurationRt = getDurationRt({ min: '1m' });
     describe('it should not accept', () => {
-      [
-        undefined,
-        null,
-        '',
-        0,
-        'foo',
-        true,
-        false,
-        '0m',
-        '-1m',
-        '1ms',
-        '1s',
-      ].map((input) => {
+      [undefined, null, '', 0, 'foo', true, false, '0m', '-1m', '1ms', '1s'].map((input) => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(customDurationRt.decode(input))).toBeFalsy();
         });
@@ -98,13 +86,11 @@ describe('getDurationRt', () => {
     const customDurationRt = getDurationRt({ max: '1m' });
 
     describe('it should not accept', () => {
-      [undefined, null, '', 0, 'foo', true, false, '2m', '61s', '60001ms'].map(
-        (input) => {
-          it(`${JSON.stringify(input)}`, () => {
-            expect(isRight(customDurationRt.decode(input))).toBeFalsy();
-          });
-        }
-      );
+      [undefined, null, '', 0, 'foo', true, false, '2m', '61s', '60001ms'].map((input) => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(customDurationRt.decode(input))).toBeFalsy();
+        });
+      });
     });
     describe('it should return correct error message', () => {
       ['2m', '61s', '60001ms'].map((input) => {

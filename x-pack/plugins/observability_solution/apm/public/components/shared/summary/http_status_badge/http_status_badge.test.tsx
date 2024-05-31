@@ -21,9 +21,7 @@ describe('HttpStatusBadge', () => {
       it('renders with neutral color', () => {
         const wrapper = mount(<HttpStatusBadge status={100} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          neutralColor
-        );
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(neutralColor);
       });
     });
 
@@ -31,9 +29,7 @@ describe('HttpStatusBadge', () => {
       it('renders with success color', () => {
         const wrapper = mount(<HttpStatusBadge status={200} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          successColor
-        );
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(successColor);
       });
     });
 
@@ -41,9 +37,7 @@ describe('HttpStatusBadge', () => {
       it('renders with neutral color', () => {
         const wrapper = mount(<HttpStatusBadge status={301} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          neutralColor
-        );
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(neutralColor);
       });
     });
 
@@ -51,9 +45,7 @@ describe('HttpStatusBadge', () => {
       it('renders with warning color', () => {
         const wrapper = mount(<HttpStatusBadge status={404} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          warningColor
-        );
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(warningColor);
       });
     });
 
@@ -61,9 +53,7 @@ describe('HttpStatusBadge', () => {
       it('renders with error color', () => {
         const wrapper = mount(<HttpStatusBadge status={502} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          errorColor
-        );
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(errorColor);
       });
     });
 
@@ -71,9 +61,7 @@ describe('HttpStatusBadge', () => {
       it('renders with default color', () => {
         const wrapper = mount(<HttpStatusBadge status={700} />);
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          'default'
-        );
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual('default');
       });
     });
   });

@@ -759,7 +759,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"active\" | \"recovered\" | \"untracked\""
+              "\"recovered\" | \"active\" | \"untracked\""
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,
@@ -1497,9 +1497,21 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
               {
                 "pluginId": "dataViews",
@@ -1551,6 +1563,445 @@
               ">; }"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.FilterContextType",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterContextType",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterContextType.allControls",
+            "type": "Array",
+            "tags": [],
+            "label": "allControls",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.FilterControlConfig",
+                "text": "FilterControlConfig"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterContextType.addControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addControl",
+            "description": [],
+            "signature": [
+              "(controls: ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.FilterControlConfig",
+                "text": "FilterControlConfig"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-common.FilterContextType.addControl.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "controls",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/alerts-ui-shared",
+                    "scope": "common",
+                    "docId": "kibKbnAlertsUiSharedPluginApi",
+                    "section": "def-common.FilterControlConfig",
+                    "text": "FilterControlConfig"
+                  }
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.FilterGroupProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterGroupProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "common",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-common.FilterGroupProps",
+            "text": "FilterGroupProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupInput",
+            "text": "ControlGroupInput"
+          },
+          ", \"query\" | \"filters\" | \"timeRange\" | \"chainingSystem\">"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.dataViewId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.featureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "featureIds",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.AlertConsumers",
+                "text": "AlertConsumers"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.onFiltersChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onFiltersChange",
+            "description": [
+              "\nFilters changed callback"
+            ],
+            "signature": [
+              "((newFilters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]) => void) | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-common.FilterGroupProps.onFiltersChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "newFilters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.defaultControls",
+            "type": "Array",
+            "tags": [],
+            "label": "defaultControls",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.FilterControlConfig",
+                "text": "FilterControlConfig"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.controlsUrlState",
+            "type": "Array",
+            "tags": [],
+            "label": "controlsUrlState",
+            "description": [
+              "\nThe controls configuration stored in the URL\n(takes precedence over the localStorage configuration)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.FilterControlConfig",
+                "text": "FilterControlConfig"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.setControlsUrlState",
+            "type": "Function",
+            "tags": [],
+            "label": "setControlsUrlState",
+            "description": [
+              "\nSetter for the controls url state"
+            ],
+            "signature": [
+              "((controls: ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "common",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-common.FilterControlConfig",
+                "text": "FilterControlConfig"
+              },
+              "[]) => void) | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-common.FilterGroupProps.setControlsUrlState.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "controls",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/alerts-ui-shared",
+                    "scope": "common",
+                    "docId": "kibKbnAlertsUiSharedPluginApi",
+                    "section": "def-common.FilterControlConfig",
+                    "text": "FilterControlConfig"
+                  },
+                  "[]"
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.onInit",
+            "type": "Function",
+            "tags": [],
+            "label": "onInit",
+            "description": [
+              "\nInit callback"
+            ],
+            "signature": [
+              "((controlGroupHandler: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-common.FilterGroupProps.onInit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlGroupHandler",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.ControlGroupContainer",
+                    "text": "ControlGroupContainer"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.maxControls",
+            "type": "number",
+            "tags": [],
+            "label": "maxControls",
+            "description": [
+              "\nMaximum number of controls that can be added to the group"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.ControlGroupRenderer",
+            "type": "Function",
+            "tags": [],
+            "label": "ControlGroupRenderer",
+            "description": [
+              "\nThe control embeddable renderer"
+            ],
+            "signature": [
+              "React.ForwardRefExoticComponent<",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupRendererProps",
+                "text": "ControlGroupRendererProps"
+              },
+              " & React.RefAttributes<",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.AwaitingControlGroupAPI",
+                "text": "AwaitingControlGroupAPI"
+              },
+              ">>"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-common.FilterGroupProps.ControlGroupRenderer.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.FilterGroupProps.Storage",
+            "type": "Object",
+            "tags": [],
+            "label": "Storage",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              }
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1850,9 +2301,21 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
               {
                 "pluginId": "dataViews",
@@ -2092,7 +2555,75 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.FilterControlConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "FilterControlConfig",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.AddOptionsListControlProps",
+            "text": "AddOptionsListControlProps"
+          },
+          ", \"dataViewId\" | \"controlId\"> & { persist?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.FilterGroupHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "FilterGroupHandler",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupContainer",
+            "text": "ControlGroupContainer"
+          }
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.FilterUrlFormat",
+        "type": "Type",
+        "tags": [],
+        "label": "FilterUrlFormat",
+        "description": [],
+        "signature": [
+          "{ [x: string]: Pick<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.OptionsListEmbeddableInput",
+            "text": "OptionsListEmbeddableInput"
+          },
+          ", \"selectedOptions\" | \"title\" | \"fieldName\" | \"existsSelected\" | \"exclude\">; }"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/alerts-ui-shared",

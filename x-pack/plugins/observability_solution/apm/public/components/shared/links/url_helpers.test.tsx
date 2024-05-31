@@ -70,9 +70,7 @@ describe('fromQuery', () => {
         rangeFrom: '2019-03-03T12:00:00.000Z',
         rangeTo: '2019-03-05T12:00:00.000Z',
       })
-    ).toEqual(
-      'rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
-    );
+    ).toEqual('rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z');
   });
 
   it('should handle undefined, boolean, and number values without throwing errors', () => {
@@ -89,11 +87,7 @@ describe('fromQuery', () => {
 describe('fromQuery and toQuery', () => {
   it('should encode and decode correctly', () => {
     expect(
-      fromQuery(
-        toQuery(
-          '?name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z'
-        )
-      )
+      fromQuery(toQuery('?name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z'))
     ).toEqual('name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z');
   });
 });

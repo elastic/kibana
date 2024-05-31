@@ -133,6 +133,16 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await this.assertHistogramBrushesExist();
     },
 
+    async clickNoAutoRunButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        'aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton'
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
+      });
+    },
+
     async clickRerunAnalysisButton(shouldRerun: boolean) {
       await testSubjects.clickWhenNotDisabledWithoutRetry(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
@@ -248,6 +258,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await testSubjects.existOrFail(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
       );
+    },
+
+    async assertNoAutoRunButtonExists() {
+      await testSubjects.existOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
     },
 
     async assertProgressTitle(expectedProgressTitle: string) {

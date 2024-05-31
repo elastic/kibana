@@ -17,11 +17,11 @@ export const RISK_SCORING_SUM_VALUE = 1.5;
 export const RISK_SCORING_SUM_MAX = 261.2;
 
 /**
- * The risk scoring algorithm can only process a finite number of risk inputs per identity; this value represents the maximum number of inputs that will be processed.
- */
-export const RISK_SCORING_INPUTS_COUNT_MAX = 999999;
-
-/**
  * This value represents the maximum possible risk score after normalization.
  */
 export const RISK_SCORING_NORMALIZATION_MAX = 100;
+
+/**
+ * This value represents the max amount of alert inputs we store, per entity, in the risk document.
+ */
+export const MAX_INPUTS_COUNT = 10;

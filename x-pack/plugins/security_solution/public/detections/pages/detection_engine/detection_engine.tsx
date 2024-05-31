@@ -32,7 +32,9 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { isEqual } from 'lodash';
-import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
@@ -71,23 +73,22 @@ import {
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
 import { ChartPanels } from './chart_panels';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
-import { DetectionPageFilterSet } from '../../components/detection_page_filters';
+
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -168,6 +169,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     sourcererDataView,
     runtimeMappings,
     loading: isLoadingIndexPattern,
+    indexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
@@ -291,7 +293,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
+  const onFilterControlsChange = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
     if (newFilters.length) {
       const newStatusFilter = newFilters.find(
@@ -365,24 +367,25 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <DetectionPageFilterSet
-          onFilterChange={pageFiltersUpdateHandler}
+        <DetectionEngineFilters
           filters={topLevelFilters}
+          onFiltersChange={onFilterControlsChange}
           query={query}
           timeRange={{
             from,
             to,
             mode: 'absolute',
           }}
-          chainingSystem={'HIERARCHICAL'}
           onInit={setDetectionPageFilterHandler}
+          indexPattern={indexPattern}
         />
       ),
     [
       arePageFiltersEnabled,
       from,
+      indexPattern,
+      onFilterControlsChange,
       onFilterGroupChangedCallback,
-      pageFiltersUpdateHandler,
       query,
       showUpdating,
       statusFilter,

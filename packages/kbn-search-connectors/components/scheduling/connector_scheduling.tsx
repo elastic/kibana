@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -31,7 +31,11 @@ interface SchedulePanelProps {
   description: string;
   title: string;
 }
-export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description, children }) => {
+export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({
+  title,
+  description,
+  children,
+}) => {
   return (
     <>
       <EuiSplitPanel.Outer>

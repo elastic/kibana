@@ -83,6 +83,10 @@ export function rangeQuery(
   ];
 }
 
+export function existsQuery(field: string): QueryDslQueryContainer[] {
+  return [{ exists: { field } }];
+}
+
 export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
@@ -100,4 +104,8 @@ export async function typedSearch<
   params: TParams
 ): Promise<ESSearchResponse<DocumentSource, TParams>> {
   return (await esClient.search(params)) as unknown as ESSearchResponse<DocumentSource, TParams>;
+}
+
+export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
+  return params;
 }

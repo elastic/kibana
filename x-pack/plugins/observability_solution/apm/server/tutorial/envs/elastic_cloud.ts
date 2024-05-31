@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  INSTRUCTION_VARIANT,
-  TutorialSchema,
-  InstructionSetSchema,
-} from '@kbn/home-plugin/server';
+import { INSTRUCTION_VARIANT, TutorialSchema, InstructionSetSchema } from '@kbn/home-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
@@ -44,9 +40,7 @@ export function createElasticCloudInstructions({
     instructionSets.push(getApmServerInstructionSet(cloudSetup));
   }
 
-  instructionSets.push(
-    getOnPremApmServerInstructionSet({ apmIndices, isFleetPluginEnabled })
-  );
+  instructionSets.push(getOnPremApmServerInstructionSet({ apmIndices, isFleetPluginEnabled }));
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 
   return {
@@ -54,9 +48,7 @@ export function createElasticCloudInstructions({
   };
 }
 
-function getApmServerInstructionSet(
-  cloudSetup?: CloudSetup
-): InstructionSetSchema {
+function getApmServerInstructionSet(cloudSetup?: CloudSetup): InstructionSetSchema {
   const deploymentId = cloudSetup?.deploymentId;
 
   return {
@@ -81,9 +73,7 @@ function getApmServerInstructionSet(
   };
 }
 
-function getApmAgentInstructionSet(
-  cloudSetup?: CloudSetup
-): InstructionSetSchema {
+function getApmAgentInstructionSet(cloudSetup?: CloudSetup): InstructionSetSchema {
   const apmServerUrl = cloudSetup?.apm.url;
   const secretToken = cloudSetup?.apm.secretToken;
 
@@ -134,10 +124,7 @@ function getApmAgentInstructionSet(
       },
       {
         id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
-        instructions: createOpenTelemetryAgentInstructions(
-          apmServerUrl,
-          secretToken
-        ),
+        instructions: createOpenTelemetryAgentInstructions(apmServerUrl, secretToken),
       },
     ],
   };

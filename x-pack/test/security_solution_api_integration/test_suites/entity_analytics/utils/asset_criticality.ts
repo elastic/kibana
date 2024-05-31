@@ -14,15 +14,56 @@ import {
   ASSET_CRITICALITY_STATUS_URL,
   ASSET_CRITICALITY_URL,
   ASSET_CRITICALITY_PRIVILEGES_URL,
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
+import { KbnClient } from '@kbn/test';
 import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;
+
+export const enableAssetCriticalityAdvancedSetting = async (
+  kibanaServer: KbnClient,
+  log: ToolingLog
+) => {
+  await kibanaServer.uiSettings.update({
+    [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+  });
+
+  // and wait for the setting to be applied
+  await waitFor(
+    async () => {
+      const setting = await kibanaServer.uiSettings.get(ENABLE_ASSET_CRITICALITY_SETTING);
+      return setting === true;
+    },
+    'disableAssetCriticalityAdvancedSetting',
+    log
+  );
+};
+
+export const disableAssetCriticalityAdvancedSetting = async (
+  kibanaServer: KbnClient,
+  log: ToolingLog
+) => {
+  await kibanaServer.uiSettings.update({
+    [ENABLE_ASSET_CRITICALITY_SETTING]: false,
+  });
+
+  // and wait for the setting to be applied
+  await waitFor(
+    async () => {
+      const setting = await kibanaServer.uiSettings.get(ENABLE_ASSET_CRITICALITY_SETTING);
+      return setting === false;
+    },
+    'disableAssetCriticalityAdvancedSetting',
+    log
+  );
+};
 
 export const cleanAssetCriticality = async ({
   log,
@@ -48,7 +89,7 @@ export const getAssetCriticalityDoc = async (opts: {
   es: Client;
   idField: string;
   idValue: string;
-}) => {
+}): Promise<AssetCriticalityRecord | undefined> => {
   const { es, idField, idValue } = opts;
   try {
     const doc = await es.get({
@@ -56,14 +97,14 @@ export const getAssetCriticalityDoc = async (opts: {
       id: `${idField}:${idValue}`,
     });
 
-    return doc._source;
+    return doc._source as AssetCriticalityRecord;
   } catch (e) {
     return undefined;
   }
 };
 
 export const assetCriticalityRouteHelpersFactory = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   namespace?: string
 ) => ({
   status: async () =>
@@ -85,7 +126,11 @@ export const assetCriticalityRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
       .expect(expectStatusCode),
-  delete: async (idField: string, idValue: string) => {
+  delete: async (
+    idField: string,
+    idValue: string,
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
     const qs = querystring.stringify({ id_field: idField, id_value: idValue });
     const route = `${routeWithNamespace(ASSET_CRITICALITY_URL, namespace)}?${qs}`;
     return supertest
@@ -93,7 +138,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .expect(200);
+      .expect(expectStatusCode);
   },
   get: async (
     idField: string,
@@ -109,10 +154,23 @@ export const assetCriticalityRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(expectStatusCode);
   },
+  uploadCsv: async (
+    fileContent: string | Buffer,
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
+    const file = fileContent instanceof Buffer ? fileContent : Buffer.from(fileContent);
+    return supertest
+      .post(routeWithNamespace(ASSET_CRITICALITY_CSV_UPLOAD_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .attach('file', file, { filename: 'asset_criticality.csv' })
+      .expect(expectStatusCode);
+  },
 });
 
 export const assetCriticalityRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  supertestWithoutAuth: SuperTest.Agent,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>

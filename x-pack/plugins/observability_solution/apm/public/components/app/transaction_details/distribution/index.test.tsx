@@ -58,10 +58,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>
-          <MockApmPluginContextWrapper
-            history={history}
-            value={mockPluginContext}
-          >
+          <MockApmPluginContextWrapper history={history} value={mockPluginContext}>
             <MockUrlParamsContextProvider
               params={{
                 rangeFrom: 'now-15m',

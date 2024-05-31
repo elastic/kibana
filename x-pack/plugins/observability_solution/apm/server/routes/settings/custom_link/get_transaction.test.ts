@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  inspectSearchParams,
-  SearchParamsMock,
-} from '../../../utils/test_helpers';
+import { inspectSearchParams, SearchParamsMock } from '../../../utils/test_helpers';
 import { getTransaction } from './get_transaction';
 import {
   SERVICE_NAME,

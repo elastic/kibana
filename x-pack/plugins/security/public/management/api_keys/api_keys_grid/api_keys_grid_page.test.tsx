@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { APIKeysGridPage } from './api_keys_grid_page';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
@@ -33,7 +33,6 @@ describe('APIKeysGridPage', () => {
   const consoleWarnMock = jest.spyOn(console, 'error').mockImplementation();
 
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  const theme$ = themeServiceMock.createTheme$();
   const { authc } = securityMock.createSetup();
 
   beforeEach(() => {
@@ -43,7 +42,7 @@ describe('APIKeysGridPage', () => {
     coreStart.http.post.mockClear();
     authc.getCurrentUser.mockClear();
 
-    coreStart.http.get.mockResolvedValue({
+    coreStart.http.post.mockResolvedValue({
       apiKeys: [
         {
           type: 'rest',
@@ -73,6 +72,43 @@ describe('APIKeysGridPage', () => {
       canManageCrossClusterApiKeys: true,
       canManageApiKeys: true,
       canManageOwnApiKeys: true,
+      total: 2,
+      aggregationTotal: 2,
+      aggregations: {
+        usernames: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'elastic',
+              doc_count: 4256,
+            },
+          ],
+        },
+        types: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'rest',
+              doc_count: 2,
+            },
+          ],
+        },
+        expired: {
+          doc_count: 0,
+        },
+        managed: {
+          buckets: {
+            metadataBased: {
+              doc_count: 0,
+            },
+            namePrefixBased: {
+              doc_count: 0,
+            },
+          },
+        },
+      },
     });
 
     authc.getCurrentUser.mockResolvedValue(
@@ -102,12 +138,12 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText, queryByTestId, getByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
 
-    expect(await queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
 
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
 
@@ -122,7 +158,7 @@ describe('APIKeysGridPage', () => {
   it('displays callout when API keys are disabled', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    coreStart.http.get.mockRejectedValueOnce({
+    coreStart.http.post.mockRejectedValueOnce({
       body: { message: 'disabled.feature="api_keys"' },
     });
 
@@ -134,7 +170,7 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
@@ -146,7 +182,7 @@ describe('APIKeysGridPage', () => {
   it('displays error when user does not have required permissions', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
-    coreStart.http.get.mockRejectedValueOnce({
+    coreStart.http.post.mockRejectedValueOnce({
       body: { statusCode: 403, message: 'forbidden' },
     });
 
@@ -158,7 +194,7 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
@@ -168,7 +204,7 @@ describe('APIKeysGridPage', () => {
   });
 
   it('displays error when fetching API keys fails', async () => {
-    coreStart.http.get.mockRejectedValueOnce({
+    coreStart.http.post.mockRejectedValueOnce({
       body: {
         error: 'Internal Server Error',
         message: 'Internal Server Error',
@@ -185,7 +221,7 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
@@ -196,11 +232,14 @@ describe('APIKeysGridPage', () => {
 
   describe('Read Only View', () => {
     beforeEach(() => {
-      coreStart.http.get.mockResolvedValue({
+      coreStart.http.post.mockResolvedValue({
         apiKeys: [],
         canManageCrossClusterApiKeys: false,
         canManageApiKeys: false,
         canManageOwnApiKeys: false,
+        total: 0,
+        aggregations: {},
+        aggregationTotal: 0,
       });
     });
 
@@ -215,7 +254,7 @@ describe('APIKeysGridPage', () => {
       };
 
       const { findByText, queryByText } = render(
-        <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+        <Providers services={coreStart} authc={authc} history={history}>
           <APIKeysGridPage />
         </Providers>
       );

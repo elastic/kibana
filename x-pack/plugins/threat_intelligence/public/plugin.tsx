@@ -56,7 +56,7 @@ export const createApp =
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
   public async setup(
-    core: CoreSetup,
+    _core: CoreSetup,
     plugins: SetupPlugins
   ): Promise<ThreatIntelligencePluginSetup> {
     const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
@@ -73,11 +73,11 @@ export class ThreatIntelligencePlugin implements Plugin<void, void> {
       storage: new Storage(localStorage),
     };
 
-    const services = {
+    const services: Services = {
       ...localPluginServices,
       ...core,
       ...plugins,
-    } as Services;
+    };
 
     return {
       getComponent: createApp(services),

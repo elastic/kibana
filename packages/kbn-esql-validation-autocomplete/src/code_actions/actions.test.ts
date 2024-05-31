@@ -57,7 +57,6 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
-    getMetaFields: jest.fn(async () => ['_index', '_id', '_source', '_score']),
   };
 }
 
@@ -145,6 +144,14 @@ describe('quick fixes logic', () => {
       // Too far for the levenstein distance and should not fix with a hidden index
       testQuickFixes('FROM secretIndex', [], options);
       testQuickFixes('FROM secretIndex2', [], options);
+      testQuickFixes('from index | stats var0 = aveg(bytes) | eval ab(var0) | limit 1', [
+        'avg(bytes)',
+        'abs(var0)',
+        'e(var0)',
+        'pi(var0)',
+        'tan(var0)',
+        'tau(var0)',
+      ]);
     }
   });
 
@@ -412,7 +419,6 @@ describe('quick fixes logic', () => {
           getFieldsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
-          getMetaFields: undefined,
         });
       } catch {
         fail('Should not throw');
@@ -438,7 +444,6 @@ describe('quick fixes logic', () => {
             getFieldsFor: undefined,
             getSources: undefined,
             getPolicies: undefined,
-            getMetaFields: undefined,
           }
         );
       } catch {

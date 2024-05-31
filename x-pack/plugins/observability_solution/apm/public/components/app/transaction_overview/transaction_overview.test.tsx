@@ -17,10 +17,7 @@ import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_fetcher';
-import {
-  disableConsoleWarning,
-  renderWithTheme,
-} from '../../../utils/test_helpers';
+import { disableConsoleWarning, renderWithTheme } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from '.';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -51,23 +48,19 @@ function setup({
   });
 
   // mock transaction types
-  jest
-    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
-    .mockReturnValue({
-      transactionTypes: serviceTransactionTypes,
-      status: useFetcherHook.FETCH_STATUS.SUCCESS,
-    });
+  jest.spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher').mockReturnValue({
+    transactionTypes: serviceTransactionTypes,
+    status: useFetcherHook.FETCH_STATUS.SUCCESS,
+  });
 
   // mock agent
-  jest
-    .spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher')
-    .mockReturnValue({
-      agentName: 'nodejs',
-      runtimeName: 'node',
-      serverlessType: undefined,
-      error: undefined,
-      status: useFetcherHook.FETCH_STATUS.SUCCESS,
-    });
+  jest.spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher').mockReturnValue({
+    agentName: 'nodejs',
+    runtimeName: 'node',
+    serverlessType: undefined,
+    error: undefined,
+    status: useFetcherHook.FETCH_STATUS.SUCCESS,
+  });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 

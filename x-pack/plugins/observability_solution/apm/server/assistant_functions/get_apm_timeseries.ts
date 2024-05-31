@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import { FromSchema } from 'json-schema-to-ts';
 import { omit } from 'lodash';
+import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { FunctionRegistrationParameters } from '.';
-import {
-  ApmTimeseries,
-  getApmTimeseries,
-} from '../routes/assistant_functions/get_apm_timeseries';
+import { ApmTimeseries, getApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
 const parameters = {
@@ -19,13 +16,11 @@ const parameters = {
   properties: {
     start: {
       type: 'string',
-      description:
-        'The start of the time range, in Elasticsearch date math, like `now`.',
+      description: 'The start of the time range, in Elasticsearch date math, like `now-24h`.',
     },
     end: {
       type: 'string',
-      description:
-        'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+      description: 'The end of the time range, in Elasticsearch date math, like `now`.',
     },
     stats: {
       type: 'array',
@@ -40,10 +35,7 @@ const parameters = {
                 properties: {
                   name: {
                     type: 'string',
-                    enum: [
-                      'transaction_throughput',
-                      'transaction_failure_rate',
-                    ],
+                    enum: ['transaction_throughput', 'transaction_failure_rate'],
                   },
                   'transaction.type': {
                     type: 'string',
@@ -57,16 +49,11 @@ const parameters = {
                 properties: {
                   name: {
                     type: 'string',
-                    enum: [
-                      'exit_span_throughput',
-                      'exit_span_failure_rate',
-                      'exit_span_latency',
-                    ],
+                    enum: ['exit_span_throughput', 'exit_span_failure_rate', 'exit_span_latency'],
                   },
                   'span.destination.service.resource': {
                     type: 'string',
-                    description:
-                      'The name of the downstream dependency for the service',
+                    description: 'The name of the downstream dependency for the service',
                   },
                 },
                 required: ['name'],
@@ -115,13 +102,11 @@ const parameters = {
           },
           title: {
             type: 'string',
-            description:
-              'A unique, human readable, concise title for this specific group series.',
+            description: 'A unique, human readable, concise title for this specific group series.',
           },
           offset: {
             type: 'string',
-            description:
-              'The offset. Right: 15m. 8h. 1d. Wrong: -15m. -8h. -1d.',
+            description: 'The offset. Right: 15m. 8h. 1d. Wrong: -15m. -8h. -1d.',
           },
         },
         required: ['service.name', 'timeseries', 'title'],
@@ -137,30 +122,20 @@ export function registerGetApmTimeseriesFunction({
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
-      contexts: ['apm'],
       name: 'get_apm_timeseries',
-      descriptionForUser: i18n.translate(
-        'xpack.apm.observabilityAiAssistant.functions.registerGetApmTimeseries.descriptionForUser',
-        {
-          defaultMessage: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
-        }
-      ),
       description: `Visualise and analyse different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. A visualisation will be displayed above your reply - DO NOT attempt to display or generate an image yourself, or any other placeholder. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions.`,
       parameters,
+      // deprecated
+      visibility: FunctionVisibility.Internal,
     },
-    async (
-      { arguments: args },
-      signal
-    ): Promise<GetApmTimeseriesFunctionResponse> => {
+    async ({ arguments: args }, signal): Promise<GetApmTimeseriesFunctionResponse> => {
       const timeseries = await getApmTimeseries({
         apmEventClient,
         arguments: args as any,
       });
 
       return {
-        content: timeseries.map(
-          (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')
-        ),
+        content: timeseries.map((series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')),
         data: timeseries,
       };
     }

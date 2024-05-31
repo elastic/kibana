@@ -62,9 +62,16 @@ export interface FieldVisStats {
   };
   fieldName?: string;
   isTopValuesSampled?: boolean;
+  topValuesSampleSize?: number;
   max?: number;
   median?: number;
   min?: number;
+  sampledValues?: Array<{
+    key: number | string;
+    doc_count: number;
+    percent: number;
+    key_as_string?: string;
+  }>;
   topValues?: Array<{
     key: number | string;
     doc_count: number;

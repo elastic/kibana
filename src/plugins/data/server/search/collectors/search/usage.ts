@@ -8,7 +8,7 @@
 
 import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { IEsSearchResponse, ISearchOptions } from '../../../../common';
+import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '../../../../common';
 import { CollectedUsage } from './register';
 
@@ -88,11 +88,11 @@ export function searchUsageObserver(
     next(response: IEsSearchResponse) {
       if (isRestore || isRunningResponse(response)) return;
       logger.debug(`trackSearchStatus:success, took:${response.rawResponse.took}`);
-      usage?.trackSuccess(response.rawResponse.took);
+      void usage?.trackSuccess(response.rawResponse.took);
     },
     error(e: Error) {
       logger.debug(`trackSearchStatus:error, ${e}`);
-      usage?.trackError();
+      void usage?.trackError();
     },
   };
 }

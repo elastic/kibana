@@ -12,7 +12,7 @@ import {
   apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
-  useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -55,15 +55,17 @@ export const PresentationPanelInternal = <
     hidePanelTitle,
     panelDescription,
     defaultPanelTitle,
+    defaultPanelDescription,
     rawViewMode,
     parentHidePanelTitle,
-  ] = useBatchedPublishingSubjects(
+  ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
     api?.blockingError,
     api?.panelTitle,
     api?.hidePanelTitle,
     api?.panelDescription,
     api?.defaultPanelTitle,
+    api?.defaultPanelDescription,
     viewModeSubject,
     api?.parentApi?.hidePanelTitle
   );
@@ -82,7 +84,7 @@ export const PresentationPanelInternal = <
   useEffect(() => {
     let subscription: Subscription;
     if (api && onPanelStatusChange && apiPublishesPhaseEvents(api)) {
-      subscription = api.onPhaseChange.subscribe((phase) => {
+      subscription = api.phase$.subscribe((phase) => {
         if (phase) onPanelStatusChange(phase);
       });
     }
@@ -124,9 +126,9 @@ export const PresentationPanelInternal = <
           showBadges={showBadges}
           getActions={getActions}
           actionPredicate={actionPredicate}
-          panelDescription={panelDescription}
           showNotifications={showNotifications}
           panelTitle={panelTitle ?? defaultPanelTitle}
+          panelDescription={panelDescription ?? defaultPanelDescription}
         />
       )}
       {blockingError && api && (

@@ -10,7 +10,6 @@ import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { createMockStore } from '../../../../common/mock';
-import '../../../../common/mock/match_media';
 import { NetworkKpiComponent } from '.';
 
 describe('NetworkKpiComponent', () => {

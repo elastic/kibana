@@ -20,12 +20,14 @@ export interface Asset {
 export enum ContentTabIds {
   OVERVIEW = 'overview',
   METADATA = 'metadata',
+  METRICS = 'metrics',
   PROCESSES = 'processes',
   PROFILING = 'profiling',
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',
   LINK_TO_APM = 'linkToApm',
+  DASHBOARDS = 'dashboards',
 }
 
 export type TabIds = `${ContentTabIds}`;
@@ -78,9 +80,6 @@ export interface AssetDetailsProps {
   overrides?: OverridableTabState;
   renderMode: RenderMode;
   links?: LinkOptions[];
-  // This is temporary. Once we start using the asset details in other plugins,
-  // It will have to retrieve the metricAlias internally rather than receive it via props
-  metricAlias: string;
 }
 
 export type TabsStateChangeFn = (state: TabState) => void;
@@ -96,5 +95,12 @@ export interface RouteState {
 export type DataViewOrigin = 'logs' | 'metrics';
 
 export enum INTEGRATION_NAME {
-  kubernetes = 'kubernetes',
+  kubernetesNode = 'kubernetesNode',
+  kubernetesContainer = 'kubernetesContainer',
+  docker = 'docker',
+}
+
+export enum ASSET_DETAILS_ASSET_TYPE {
+  container = 'container',
+  host = 'host',
 }

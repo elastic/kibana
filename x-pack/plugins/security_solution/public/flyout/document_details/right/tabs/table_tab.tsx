@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { get } from 'lodash';
@@ -82,7 +81,7 @@ export const getColumns: ColumnsProvider = ({
 /**
  * Table view displayed in the document details expandable flyout right section
  */
-export const TableTab: FC = memo(() => {
+export const TableTab = memo(() => {
   const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useRightPanelContext();
 
   return (

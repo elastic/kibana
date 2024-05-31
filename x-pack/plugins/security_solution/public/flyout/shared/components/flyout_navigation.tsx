@@ -22,6 +22,7 @@ import {
   HEADER_ACTIONS_TEST_ID,
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
+  HEADER_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 
 export interface FlyoutNavigationProps {
@@ -114,7 +115,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
             height: ${euiTheme.size.xxl};
           `}
         >
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj={HEADER_NAVIGATION_BUTTON_TEST_ID}>
             {flyoutIsExpandable && expandDetails && (isExpanded ? collapseButton : expandButton)}
           </EuiFlexItem>
           {actions && (

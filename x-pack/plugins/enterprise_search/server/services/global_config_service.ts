@@ -38,8 +38,8 @@ export class GlobalConfigService {
    */
   private globalConfigElasticsearchUrl?: string;
 
-  setup(config$: Observable<ElasticsearchConfig>, cloud: CloudSetup) {
-    this.cloudUrl = cloud.elasticsearchUrl;
+  setup(config$: Observable<ElasticsearchConfig>, cloud?: CloudSetup) {
+    this.cloudUrl = cloud?.elasticsearchUrl ?? '';
     this.config$ = config$;
     this.configSub = this.config$.subscribe((config) => {
       const rawHost = config.hosts[0];

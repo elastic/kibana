@@ -18,10 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import {
-  asDynamicBytes,
-  asInteger,
-} from '../../../../../common/utils/formatters';
+import { asDynamicBytes, asInteger } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SizeLabel } from './size_label';
@@ -38,9 +35,7 @@ interface Props {
 export function IndexStatsPerService({ indicesStats, status }: Props) {
   const { core } = useApmPluginContext();
 
-  const columns: Array<
-    EuiBasicTableColumn<ValuesType<StorageExplorerIndicesStats>>
-  > = [
+  const columns: Array<EuiBasicTableColumn<ValuesType<StorageExplorerIndicesStats>>> = [
     {
       field: 'indexName',
       name: i18n.translate('xpack.apm.storageExplorer.indicesStats.indexName', {
@@ -66,12 +61,9 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
     },
     {
       field: 'numberOfDocs',
-      name: i18n.translate(
-        'xpack.apm.storageExplorer.indicesStats.numberOfDocs',
-        {
-          defaultMessage: 'Docs count',
-        }
-      ),
+      name: i18n.translate('xpack.apm.storageExplorer.indicesStats.numberOfDocs', {
+        defaultMessage: 'Docs count',
+      }),
       render: (_, { numberOfDocs }) => asInteger(numberOfDocs),
       sortable: true,
     },
@@ -83,12 +75,9 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
     },
     {
       field: 'dataStream',
-      name: i18n.translate(
-        'xpack.apm.storageExplorer.indicesStats.dataStream',
-        {
-          defaultMessage: 'Data stream',
-        }
-      ),
+      name: i18n.translate('xpack.apm.storageExplorer.indicesStats.dataStream', {
+        defaultMessage: 'Data stream',
+      }),
       render: (_, { dataStream }) =>
         (
           <EuiLink
@@ -102,12 +91,9 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
     },
     {
       field: 'lifecyclePhase',
-      name: i18n.translate(
-        'xpack.apm.storageExplorer.indicesStats.lifecyclePhase',
-        {
-          defaultMessage: 'Lifecycle phase',
-        }
-      ),
+      name: i18n.translate('xpack.apm.storageExplorer.indicesStats.lifecyclePhase', {
+        defaultMessage: 'Lifecycle phase',
+      }),
       render: (_, { lifecyclePhase }) => lifecyclePhase ?? NOT_AVAILABLE_LABEL,
       sortable: true,
     },
@@ -127,12 +113,9 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
       <EuiSpacer />
       <EuiPanel>
         <EuiInMemoryTable
-          tableCaption={i18n.translate(
-            'xpack.apm.storageExplorer.indicesStats.table.caption',
-            {
-              defaultMessage: 'Storage Explorer indices breakdown',
-            }
-          )}
+          tableCaption={i18n.translate('xpack.apm.storageExplorer.indicesStats.table.caption', {
+            defaultMessage: 'Storage Explorer indices breakdown',
+          })}
           items={indicesStats}
           columns={columns}
           pagination={true}
@@ -141,28 +124,19 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
           data-test-subj="storageExplorerIndicesStatsTable"
           error={
             status === FETCH_STATUS.FAILURE
-              ? i18n.translate(
-                  'xpack.apm.storageExplorer.indicesStats.table.errorMessage',
-                  {
-                    defaultMessage: 'Failed to fetch',
-                  }
-                )
+              ? i18n.translate('xpack.apm.storageExplorer.indicesStats.table.errorMessage', {
+                  defaultMessage: 'Failed to fetch',
+                })
               : ''
           }
           message={
             loading
-              ? i18n.translate(
-                  'xpack.apm.storageExplorer.indicesStats.table.loading',
-                  {
-                    defaultMessage: 'Loading...',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.apm.storageExplorer.indicesStats.table.noResults',
-                  {
-                    defaultMessage: 'No data found',
-                  }
-                )
+              ? i18n.translate('xpack.apm.storageExplorer.indicesStats.table.loading', {
+                  defaultMessage: 'Loading...',
+                })
+              : i18n.translate('xpack.apm.storageExplorer.indicesStats.table.noResults', {
+                  defaultMessage: 'No data found',
+                })
           }
         />
       </EuiPanel>

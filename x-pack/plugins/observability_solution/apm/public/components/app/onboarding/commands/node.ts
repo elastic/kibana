@@ -22,8 +22,7 @@ export const nodeLineNumbers = () => ({
 export const node = `// ${i18n.translate(
   'xpack.apm.onboarding.nodeClient.configure.commands.addThisToTheFileTopComment',
   {
-    defaultMessage:
-      'Add this to the very top of the first file loaded in your app',
+    defaultMessage: 'Add this to the very top of the first file loaded in your app',
   }
 )}
 var apm = require('elastic-apm-node').start({

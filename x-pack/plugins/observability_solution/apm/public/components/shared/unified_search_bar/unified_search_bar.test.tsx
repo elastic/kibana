@@ -25,13 +25,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(),
 }));
 
-function setup({
-  urlParams,
-  history,
-}: {
-  urlParams: UrlParams;
-  history: MemoryHistory;
-}) {
+function setup({ urlParams, history }: { urlParams: UrlParams; history: MemoryHistory }) {
   history.replace({
     pathname: '/services',
     search: fromQuery(urlParams),
@@ -68,9 +62,7 @@ function setup({
   } as Partial<CoreStart>);
 
   // mock transaction types
-  jest
-    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
-    .mockReturnValue({ dataView: undefined });
+  jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({ dataView: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
@@ -99,9 +91,7 @@ describe('when kuery is already present in the url, the search bar must reflect 
     jest.spyOn(history, 'push');
     jest.spyOn(history, 'replace');
   });
-  jest
-    .spyOn(useProcessorEventHook, 'useProcessorEvent')
-    .mockReturnValue(undefined);
+  jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
 
   const search = '?method=json';
   const pathname = '/services';
@@ -137,9 +127,7 @@ describe('when kuery is already present in the url, the search bar must reflect 
       refreshPaused: refreshInterval.pause,
       refreshInterval: refreshInterval.value,
     };
-    jest
-      .spyOn(useApmParamsHook, 'useApmParams')
-      .mockReturnValue({ query: urlParams, path: {} });
+    jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
 
     const { setQuerySpy, setTimeSpy, setRefreshIntervalSpy } = setup({
       history,

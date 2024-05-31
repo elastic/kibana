@@ -29,13 +29,46 @@ export interface ReportAddRiskInputToTimelineClickedParams {
   quantity: number;
 }
 
+export interface ReportAssetCriticalityFileSelectedParams {
+  valid: boolean;
+  errorCode?: string;
+  file: {
+    size: number;
+  };
+}
+
+export interface ReportAssetCriticalityCsvPreviewGeneratedParams {
+  file: {
+    size: number;
+  };
+  processing: {
+    startTime: string;
+    endTime: string;
+    tookMs: number;
+  };
+  stats: {
+    validLines: number;
+    invalidLines: number;
+    totalLines: number;
+  };
+}
+
+export interface ReportAssetCriticalityCsvImportedParams {
+  file: {
+    size: number;
+  };
+}
+
 export type ReportEntityAnalyticsTelemetryEventParams =
   | ReportEntityDetailsClickedParams
   | ReportEntityAlertsClickedParams
   | ReportEntityRiskFilteredParams
   | ReportToggleRiskSummaryClickedParams
   | ReportRiskInputsExpandedFlyoutOpenedParams
-  | ReportAddRiskInputToTimelineClickedParams;
+  | ReportAddRiskInputToTimelineClickedParams
+  | ReportAssetCriticalityCsvPreviewGeneratedParams
+  | ReportAssetCriticalityFileSelectedParams
+  | ReportAssetCriticalityCsvImportedParams;
 
 export type EntityAnalyticsTelemetryEvent =
   | {
@@ -61,4 +94,16 @@ export type EntityAnalyticsTelemetryEvent =
   | {
       eventType: TelemetryEventTypes.RiskInputsExpandedFlyoutOpened;
       schema: RootSchema<ReportRiskInputsExpandedFlyoutOpenedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AssetCriticalityCsvPreviewGenerated;
+      schema: RootSchema<ReportAssetCriticalityCsvPreviewGeneratedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AssetCriticalityFileSelected;
+      schema: RootSchema<ReportAssetCriticalityFileSelectedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AssetCriticalityCsvImported;
+      schema: RootSchema<ReportAssetCriticalityCsvImportedParams>;
     };

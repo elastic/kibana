@@ -43,8 +43,12 @@ import {
   HIGH_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
+  SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import { evaluate } from './lib/evaluate';
+import { evaluateDependencies } from './lib/evaluate_dependencies';
+import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
+import { getSloSummary } from './lib/summary_repository';
 
 export const getRuleExecutor = ({
   basePath,
@@ -91,6 +95,19 @@ export const getRuleExecutor = ({
     const { dateEnd } = getTimeRange('1m');
     const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
+    const suppressResults =
+      params.dependencies && results.some((res) => res.shouldAlert)
+        ? (
+            await evaluateDependencies(
+              soClient,
+              esClient.asCurrentUser,
+              sloRepository,
+              params.dependencies,
+              new Date(dateEnd)
+            )
+          ).activeRules
+        : [];
+
     if (results.length > 0) {
       const alertLimit = alertsClient.getAlertLimitValue();
       let hasReachedLimit = false;
@@ -113,11 +130,15 @@ export const getRuleExecutor = ({
           `/app/observability/slos/${slo.id}${urlQuery}`
         );
         if (shouldAlert) {
+          const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
           if (scheduledActionsCount >= alertLimit) {
             // need to set this so that warning is displayed in the UI and in the logs
             hasReachedLimit = true;
             break; // once limit is reached, we break out of the loop and don't schedule any more alerts
           }
+
+          const sloSummary = await getSloSummary(esClient.asCurrentUser, slo, instanceId);
+
           const reason = buildReason(
             instanceId,
             windowDef.actionGroup,
@@ -125,14 +146,18 @@ export const getRuleExecutor = ({
             longWindowBurnRate,
             shortWindowDuration,
             shortWindowBurnRate,
-            windowDef
+            windowDef,
+            shouldSuppress
           );
 
           const alertId = instanceId;
+          const actionGroup = shouldSuppress
+            ? SUPPRESSED_PRIORITY_ACTION.id
+            : windowDef.actionGroup;
 
           const { uuid, start } = alertsClient.report({
             id: alertId,
-            actionGroup: windowDef.actionGroup,
+            actionGroup,
             state: {
               alertState: AlertStates.ALERT,
             },
@@ -167,12 +192,18 @@ export const getRuleExecutor = ({
             sloName: slo.name,
             sloInstanceId: instanceId,
             slo,
+            sliValue: sloSummary?.sliValue ?? -1,
+            sloStatus: sloSummary?.status ?? 'NO_DATA',
+            sloErrorBudgetRemaining: sloSummary?.errorBudgetRemaining ?? 1,
+            sloErrorBudgetConsumed: sloSummary?.errorBudgetConsumed ?? 0,
+            suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
           };
 
           alertsClient.setAlertData({ id: alertId, context });
           scheduledActionsCount++;
         }
       }
+
       alertsClient.setAlertLimitReached(hasReachedLimit);
     }
 
@@ -234,14 +265,20 @@ function buildReason(
   longWindowBurnRate: number,
   shortWindowDuration: Duration,
   shortWindowBurnRate: number,
-  windowDef: WindowSchema
+  windowDef: WindowSchema,
+  suppressed: boolean
 ) {
+  const actionGroupName = suppressed
+    ? `${upperCase(SUPPRESSED_PRIORITY_ACTION.name)} - ${upperCase(
+        getActionGroupName(actionGroup)
+      )}`
+    : upperCase(getActionGroupName(actionGroup));
   if (instanceId === ALL_VALUE) {
     return i18n.translate('xpack.slo.alerting.burnRate.reason', {
       defaultMessage:
         '{actionGroupName}: The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate}. Alert when above {burnRateThreshold} for both windows',
       values: {
-        actionGroupName: upperCase(getActionGroupName(actionGroup)),
+        actionGroupName,
         longWindowDuration: longWindowDuration.format(),
         longWindowBurnRate: numeral(longWindowBurnRate).format('0.[00]'),
         shortWindowDuration: shortWindowDuration.format(),
@@ -254,7 +291,7 @@ function buildReason(
     defaultMessage:
       '{actionGroupName}: The burn rate for the past {longWindowDuration} is {longWindowBurnRate} and for the past {shortWindowDuration} is {shortWindowBurnRate} for {instanceId}. Alert when above {burnRateThreshold} for both windows',
     values: {
-      actionGroupName: upperCase(getActionGroupName(actionGroup)),
+      actionGroupName,
       longWindowDuration: longWindowDuration.format(),
       longWindowBurnRate: numeral(longWindowBurnRate).format('0.[00]'),
       shortWindowDuration: shortWindowDuration.format(),

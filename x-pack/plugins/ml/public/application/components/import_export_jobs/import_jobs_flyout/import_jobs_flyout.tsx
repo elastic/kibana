@@ -43,9 +43,10 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
-interface Props {
+export interface Props {
   isDisabled: boolean;
 }
+
 export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     services: {

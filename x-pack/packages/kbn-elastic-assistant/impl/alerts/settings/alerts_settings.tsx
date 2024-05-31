@@ -81,7 +81,6 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
             aria-label={i18n.ALERTS_RANGE}
             compressed
             data-test-subj="alertsRange"
-            disabled={!knowledgeBase.isEnabledRAGAlerts}
             id={inputRangeSliderId}
             max={MAX_LATEST_ALERTS}
             min={MIN_LATEST_ALERTS}

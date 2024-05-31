@@ -24,15 +24,9 @@ export interface AnomalyDetectionJobsContextValue {
   anomalyDetectionSetupState: AnomalyDetectionSetupState;
 }
 
-export const AnomalyDetectionJobsContext = createContext(
-  {} as AnomalyDetectionJobsContextValue
-);
+export const AnomalyDetectionJobsContext = createContext({} as AnomalyDetectionJobsContextValue);
 
-export function AnomalyDetectionJobsContextProvider({
-  children,
-}: {
-  children: ReactChild;
-}) {
+export function AnomalyDetectionJobsContextProvider({ children }: { children: ReactChild }) {
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();
@@ -53,8 +47,7 @@ export function AnomalyDetectionJobsContextProvider({
 
   const { query } = useApmParams('/*');
 
-  const environment =
-    ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
+  const environment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
 
   const anomalyDetectionSetupState = getAnomalyDetectionSetupState({
     environment,

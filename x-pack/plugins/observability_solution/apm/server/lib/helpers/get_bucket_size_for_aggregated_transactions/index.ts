@@ -21,8 +21,6 @@ export function getBucketSizeForAggregatedTransactions({
   searchAggregatedServiceMetrics?: boolean;
 }) {
   const minBucketSize =
-    searchAggregatedTransactions || searchAggregatedServiceMetrics
-      ? 60
-      : undefined;
+    searchAggregatedTransactions || searchAggregatedServiceMetrics ? 60 : undefined;
   return getBucketSize({ start, end, numBuckets, minBucketSize });
 }

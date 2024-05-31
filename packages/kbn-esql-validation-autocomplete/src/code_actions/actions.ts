@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import levenshtein from 'js-levenshtein';
-import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError, ESQLMessage } from '@kbn/esql-ast';
+import type { AstProviderFn, ESQLAst, EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
   getFieldsByTypeHelper,
@@ -23,7 +23,7 @@ import {
 } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
-import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX, METADATA_FIELDS } from '../shared/constants';
 import type { CodeAction, Callbacks, CodeActionOptions } from './types';
 import { getAstContext } from '../shared/context';
 import { wrapAsEditorMessage } from './utils';
@@ -59,19 +59,6 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
     const list = (await helper()) || [];
     // hide indexes that start with .
     return list.filter(({ hidden }) => !hidden).map(({ name }) => name);
-  };
-}
-
-export function getMetaFieldsRetriever(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-) {
-  return async () => {
-    if (!callbacks || !callbacks.getMetaFields) {
-      return [];
-    }
-    return await callbacks.getMetaFields();
   };
 }
 
@@ -157,7 +144,7 @@ function extractUnquotedFieldText(
       };
     }
   }
-  return { start: possibleStart + 1, name: query.substring(possibleStart, end).trimEnd() };
+  return { start: possibleStart + 1, name: query.substring(possibleStart, end - 1).trimEnd() };
 }
 
 async function getQuotableActionForColumns(
@@ -167,8 +154,11 @@ async function getQuotableActionForColumns(
   options: CodeActionOptions,
   { getFieldsByType }: Partial<Callbacks>
 ): Promise<CodeAction[]> {
-  const commandEndIndex = ast.find((command) => command.location.max > error.endColumn)?.location
-    .max;
+  const commandEndIndex = ast.find(
+    (command) =>
+      error.startColumn > command.location.min && error.startColumn < command.location.max
+  )?.location.max;
+
   // the error received is unknwonColumn here, but look around the column to see if there's more
   // which broke the grammar and the validation code couldn't identify as unquoted column
   const remainingCommandText = queryString.substring(
@@ -176,8 +166,10 @@ async function getQuotableActionForColumns(
     commandEndIndex ? commandEndIndex + 1 : undefined
   );
   const stopIndex = Math.max(
-    /,/.test(remainingCommandText)
-      ? remainingCommandText.indexOf(',')
+    /[()]/.test(remainingCommandText)
+      ? remainingCommandText.indexOf(')')
+      : /,/.test(remainingCommandText)
+      ? remainingCommandText.indexOf(',') - 1
       : /\s/.test(remainingCommandText)
       ? remainingCommandText.indexOf(' ')
       : remainingCommandText.length,
@@ -192,13 +184,17 @@ async function getQuotableActionForColumns(
     error.code || 'syntaxError',
     ast,
     error.startColumn - 1,
-    error.endColumn + possibleUnquotedText.length
+    error.endColumn + possibleUnquotedText.length - 1
   );
   const actions: CodeAction[] = [];
   if (shouldBeQuotedText(errorText)) {
     const solution = `\`${errorText.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``;
     if (!getFieldsByType) {
       if (!options.relaxOnMissingCallbacks) {
+        return [];
+      }
+      const textHasAlreadyQuotes = /`/.test(errorText);
+      if (textHasAlreadyQuotes) {
         return [];
       }
       actions.push(
@@ -281,7 +277,10 @@ async function getSpellingActionForFunctions(
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
   // fallback to the last command if not found
   const commandContext =
-    ast.find((command) => command.location.max > error.endColumn) || ast[ast.length - 1];
+    ast.find(
+      (command) =>
+        error.startColumn > command.location.min && error.startColumn < command.location.max
+    ) || ast[ast.length - 1];
   if (!commandContext) {
     return [];
   }
@@ -303,14 +302,18 @@ async function getSpellingActionForMetadata(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  options: CodeActionOptions,
-  { getMetaFields }: Partial<Callbacks>
+  options: CodeActionOptions
 ) {
-  if (!getMetaFields) {
-    return [];
-  }
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
-  const possibleMetafields = await getSpellingPossibilities(getMetaFields, errorText);
+  const allSolutions = METADATA_FIELDS.reduce((solutions, item) => {
+    const distance = levenshtein(item, errorText);
+    if (distance < 3) {
+      solutions.push(item);
+    }
+    return solutions;
+  }, [] as string[]);
+  // filter duplicates
+  const possibleMetafields = Array.from(new Set(allSolutions));
   return wrapIntoSpellingChangeAction(error, possibleMetafields);
 }
 
@@ -397,14 +400,12 @@ export async function getActions(
   const { getFieldsByType } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
   const getSources = getSourcesRetriever(resourceRetriever);
   const { getPolicies, getPolicyFields } = getPolicyRetriever(resourceRetriever);
-  const getMetaFields = getMetaFieldsRetriever(innerText, ast, resourceRetriever);
 
   const callbacks = {
     getFieldsByType: resourceRetriever?.getFieldsFor ? getFieldsByType : undefined,
     getSources: resourceRetriever?.getSources ? getSources : undefined,
     getPolicies: resourceRetriever?.getPolicies ? getPolicies : undefined,
     getPolicyFields: resourceRetriever?.getPolicies ? getPolicyFields : undefined,
-    getMetaFields: resourceRetriever?.getMetaFields ? getMetaFields : undefined,
   };
 
   // Markers are sent only on hover and are limited to the hovered area
@@ -461,8 +462,7 @@ export async function getActions(
           error,
           innerText,
           ast,
-          options,
-          callbacks
+          options
         );
         actions.push(...metadataSpellChanges);
         break;
