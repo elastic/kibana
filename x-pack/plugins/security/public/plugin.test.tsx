@@ -132,6 +132,12 @@ describe('Security Plugin', () => {
             "addUserMenuLinks": [Function],
             "getUserMenuLinks$": [Function],
           },
+          "roles": Object {
+            "deleteRole": [Function],
+            "getRole": [Function],
+            "getRoles": [Function],
+            "saveRole": [Function],
+          },
           "uiApi": Object {
             "components": Object {
               "getChangePassword": [Function],

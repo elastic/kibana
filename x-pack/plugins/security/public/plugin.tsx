@@ -223,7 +223,12 @@ export class SecurityPlugin
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
       authz: this.authz as AuthorizationServiceStart,
-      roles: this.securityApiClients.roles,
+      roles: {
+        getRoles: this.securityApiClients.roles.getRoles,
+        getRole: this.securityApiClients.roles.getRole,
+        deleteRole: this.securityApiClients.roles.deleteRole,
+        saveRole: this.securityApiClients.roles.saveRole,
+      },
       userProfiles: {
         getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
           this.securityApiClients.userProfiles
