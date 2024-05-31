@@ -53,16 +53,6 @@ export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
 
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
 
-export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;
-
-export const INSIGHTS_RELATED_ALERTS_BY_SESSION = `[data-test-subj='related-alerts-by-session']`;
-
-export const INSIGHTS_INVESTIGATE_IN_TIMELINE_BUTTON = `${INSIGHTS_RELATED_ALERTS_BY_SESSION} [aria-label='Investigate in timeline']`;
-
-export const INSIGHTS_RELATED_ALERTS_BY_ANCESTRY = `[data-test-subj='related-alerts-by-ancestry']`;
-
-export const INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON = `[data-test-subj='investigate-ancestry-in-timeline']`;
-
 export const ENRICHED_DATA_ROW = `[data-test-subj='EnrichedDataRow']`;
 
 export const COPY_ALERT_FLYOUT_LINK = `[data-test-subj="copy-alert-flyout-link"]`;

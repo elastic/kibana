@@ -24,7 +24,7 @@ jest.mock('@kbn/expandable-flyout');
 const onFlyoutCloseMock = jest.fn();
 
 describe('useUnifiedTimelineExpandableFlyout', () => {
-  it('should have expandable flyout disabled when expandable flyout is disabled in Experimental Features', () => {
+  it('should disable expandable flyout when expandableFlyoutDisabled flag is true', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useLocation as jest.Mock).mockReturnValue({
       search: `?${URL_PARAM_KEY.timelineFlyout}=(test:value)`,

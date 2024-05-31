@@ -29,8 +29,7 @@ import { visit } from '../../../tasks/navigation';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-// re-enable this when https://github.com/elastic/kibana/pull/181442 is merged
-describe.skip('Guided onboarding tour', { tags: ['@ess'] }, () => {
+describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule({ query: 'user.name:*' }));
