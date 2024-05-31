@@ -241,6 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
     });
 
+    // always failing
     it.skip('should return the task manager runtime stats', async () => {
       await scheduleTask({
         taskType: 'sampleTask',

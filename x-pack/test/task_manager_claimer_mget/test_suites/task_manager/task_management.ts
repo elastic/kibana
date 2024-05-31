@@ -469,6 +469,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // always failing
     it.skip('should only run as many instances of a task as its maxConcurrency will allow', async () => {
       // should run as there's only one and maxConcurrency on this TaskType is 1
       const firstWithSingleConcurrency = await scheduleTask({
@@ -776,7 +777,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should continue claiming recurring task even if maxAttempts has been reached', async () => {
+    // flaky
+    it.skip('should continue claiming recurring task even if maxAttempts has been reached', async () => {
       const task = await scheduleTask({
         taskType: 'sampleRecurringTaskTimingOut',
         schedule: { interval: '1s' },

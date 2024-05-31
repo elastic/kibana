@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-/*
- * new task claiming strategy for https://github.com/elastic/kibana/issues/155770
- *
- * Does not yet handle:
- * - marking tasks as `unused` (search for updateFieldsAndMarkAsFailed for how it's done today)
- */
-
-/*
- * This module contains helpers for managing the task manager storage layer.
- */
 import type { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -285,7 +275,6 @@ async function searchAvailableTasks({
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
 
-  // console.log(`query: ${JSON.stringify(query, null, 4)}`);
   return await taskStore.fetch({
     query,
     sort,

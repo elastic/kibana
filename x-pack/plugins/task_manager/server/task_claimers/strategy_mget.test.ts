@@ -80,6 +80,7 @@ const mockApmTrans = {
   end: jest.fn(),
 };
 
+// needs more tests in the similar to the `strategy_default.test.ts` test suite
 describe('TaskClaiming', () => {
   beforeEach(() => {
     jest.clearAllMocks();
