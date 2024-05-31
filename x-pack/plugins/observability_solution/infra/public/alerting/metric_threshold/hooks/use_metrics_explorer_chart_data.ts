@@ -6,10 +6,8 @@
  */
 
 import DateMath from '@kbn/datemath';
-import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
-import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression, TimeRange } from '../types';
 import {
   MetricsExplorerOptions,
@@ -20,15 +18,19 @@ import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_
 
 const DEFAULT_TIME_RANGE = {};
 
-export const useMetricsExplorerChartData = (
-  expression: MetricExpression,
-  derivedIndexPattern: DataViewBase,
-  source?: MetricsSourceConfiguration,
-  filterQuery?: string,
-  groupBy?: string | string[],
-  groupInstance?: string | string[],
-  timeRange: TimeRange = DEFAULT_TIME_RANGE
-) => {
+export const useMetricsExplorerChartData = ({
+  expression,
+  filterQuery,
+  groupBy,
+  groupInstance,
+  timeRange = DEFAULT_TIME_RANGE,
+}: {
+  expression: MetricExpression;
+  filterQuery?: string;
+  groupBy?: string | string[];
+  groupInstance?: string | string[];
+  timeRange?: TimeRange;
+}) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
 
   const options: MetricsExplorerOptions = useMemo(
@@ -74,7 +76,7 @@ export const useMetricsExplorerChartData = (
     };
   }, [timeRange, timeSize, timeUnit]);
 
-  return useMetricsExplorerData(options, source?.configuration, derivedIndexPattern, timestamps);
+  return useMetricsExplorerData({ options, timestamps });
 };
 
 const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {
