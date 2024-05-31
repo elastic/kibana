@@ -14,8 +14,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-di-server",
-    "@kbn/core-di-server-internal",
+    "@kbn/core-di-common",
+    "@kbn/core-di-common-internal",
     "@kbn/utility-types",
   ]
 }
