@@ -22,7 +22,7 @@ const TitleComponent: React.FC<Props> = ({ isLoading, autoFocus = false }) => (
       idAria: 'caseTitle',
       'data-test-subj': 'caseTitle',
       euiFieldProps: {
-        autoFocus: autoFocus,
+        autoFocus,
         fullWidth: true,
         disabled: isLoading,
       },
