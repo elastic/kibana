@@ -11,14 +11,15 @@ import { find, some } from 'lodash/fp';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 
 // FIXME:PT Move these constants below
-import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../utils/crowdstrike_alert_check';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../utils/sentinelone_alert_check';
 import { getFieldValue } from '../../../detections/components/host_isolation/helpers';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD,
+} from '../../../../common/endpoint/service/response_actions/constants';
 
 export interface AlertResponseActionsSupport {
   isSupported: boolean;
@@ -37,6 +38,8 @@ export interface AlertResponseActionsSupport {
      * supported, not what the user has privileges to execute.
      */
     agentSupport: AlertAgentActionsSupported;
+    /** The field that was/is used to store the agent ID in the ES document */
+    agentIdField: string;
   };
 }
 
@@ -89,18 +92,34 @@ export const useAlertResponseActionsSupport = (
     }
 
     if (agentType === 'sentinel_one') {
-      return getFieldValue({ category: 'observer', field: SENTINEL_ONE_AGENT_ID_FIELD }, eventData);
+      return getFieldValue(
+        { category: 'observer', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one },
+        eventData
+      );
     }
 
     if (agentType === 'crowdstrike') {
       return getFieldValue(
-        { category: 'crowdstrike', field: CROWDSTRIKE_AGENT_ID_FIELD },
+        { category: 'crowdstrike', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike },
         eventData
       );
     }
 
     return '';
   }, [agentType, eventData, isAlert]);
+
+  const agentIdField = useMemo(() => {
+    switch (agentType) {
+      case 'endpoint':
+        return 'agent.id';
+      case 'sentinel_one':
+        return RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one;
+      case 'crowdstrike':
+        return RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike;
+    }
+
+    return '';
+  }, [agentType]);
 
   const supportedActions = useMemo(() => {
     return RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<AlertAgentActionsSupported>(
@@ -122,7 +141,7 @@ export const useAlertResponseActionsSupport = (
   }, [agentType, isFeatureEnabled]);
 
   const hostName = useMemo(() => {
-    return getFieldValue({ category: 'host', field: 'host.os.name' }, eventData);
+    return getFieldValue({ category: 'host', field: 'host.name' }, eventData);
   }, [eventData]);
 
   const platform = useMemo(() => {
@@ -137,8 +156,9 @@ export const useAlertResponseActionsSupport = (
         agentId,
         hostName,
         platform,
+        agentIdField,
         agentSupport: supportedActions,
       },
     };
-  }, [agentId, agentType, hostName, isFeatureEnabled, platform, supportedActions]);
+  }, [agentId, agentIdField, agentType, hostName, isFeatureEnabled, platform, supportedActions]);
 };

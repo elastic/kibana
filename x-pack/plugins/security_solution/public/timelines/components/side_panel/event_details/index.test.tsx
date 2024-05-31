@@ -46,11 +46,12 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
-  return {
-    isIsolationSupported: jest.fn().mockReturnValue(true),
-  };
-});
+// FIXME:PT Fix tests after refactor
+// jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
+//   return {
+//     isIsolationSupported: jest.fn().mockReturnValue(true),
+//   };
+// });
 
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('testSpace'),
@@ -97,12 +98,12 @@ jest.mock(
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
 
-jest.mock('../../../../common/utils/endpoint_alert_check', () => {
-  return {
-    isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
-    isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
-  };
-});
+// jest.mock('../../../../common/utils/endpoint_alert_check', () => {
+//   return {
+//     isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
+//     isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
+//   };
+// });
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => {

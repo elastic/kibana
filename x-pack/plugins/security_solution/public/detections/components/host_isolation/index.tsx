@@ -6,14 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
-import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut } from '@elastic/eui';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { getFieldValue } from './helpers';
 import { IsolateHost } from './isolate';
 import { UnisolateHost } from './unisolate';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 
 export const HostIsolationPanel = React.memo(
   ({
@@ -27,18 +27,10 @@ export const HostIsolationPanel = React.memo(
     successCallback?: () => void;
     isolateAction: string;
   }) => {
-    const elasticAgentId = useMemo(
-      () => getFieldValue({ category: 'agent', field: 'agent.id' }, details),
-      [details]
-    );
-
-    const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
-    const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(details), [details]);
-
-    const hostName = useMemo(
-      () => getFieldValue({ category: 'host', field: 'host.name' }, details),
-      [details]
-    );
+    const {
+      isSupported: alertHostSupportsResponseActions,
+      details: { agentId, agentType, hostName },
+    } = useAlertResponseActionsSupport(details);
 
     const alertId = useMemo(
       () => getFieldValue({ category: '_id', field: '_id' }, details),
@@ -47,39 +39,34 @@ export const HostIsolationPanel = React.memo(
 
     const { casesInfo } = useCasesFromAlerts({ alertId });
 
-    const agentType: ResponseActionAgentType = useMemo(() => {
-      if (sentinelOneAgentId) {
-        return 'sentinel_one';
-      } else if (crowdstrikeAgentId) {
-        return 'crowdstrike';
-      } else {
-        return 'endpoint';
-      }
-    }, [sentinelOneAgentId, crowdstrikeAgentId]);
+    const formProps: React.ComponentProps<typeof IsolateHost> &
+      React.ComponentProps<typeof UnisolateHost> = useMemo(() => {
+      return {
+        endpointId: agentId,
+        hostName,
+        casesInfo,
+        agentType,
+        cancelCallback,
+        successCallback,
+      };
+    }, [agentId, agentType, cancelCallback, casesInfo, hostName, successCallback]);
 
-    const endpointId = useMemo(
-      () => sentinelOneAgentId ?? crowdstrikeAgentId ?? elasticAgentId,
-      [elasticAgentId, sentinelOneAgentId, crowdstrikeAgentId]
-    );
+    if (!alertHostSupportsResponseActions) {
+      return (
+        <EuiCallOut color="warning">
+          <FormattedMessage
+            id="xpack.securitySolution.detections.hostIsolation.alertHostNotSupported"
+            defaultMessage="The alert's host ({hostName}) does not support host isolation response actions."
+            values={{ hostName }}
+          />
+        </EuiCallOut>
+      );
+    }
 
     return isolateAction === 'isolateHost' ? (
-      <IsolateHost
-        endpointId={endpointId}
-        hostName={hostName}
-        casesInfo={casesInfo}
-        agentType={agentType}
-        cancelCallback={cancelCallback}
-        successCallback={successCallback}
-      />
+      <IsolateHost {...formProps} />
     ) : (
-      <UnisolateHost
-        endpointId={endpointId}
-        hostName={hostName}
-        casesInfo={casesInfo}
-        agentType={agentType}
-        cancelCallback={cancelCallback}
-        successCallback={successCallback}
-      />
+      <UnisolateHost {...formProps} />
     );
   }
 );

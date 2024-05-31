@@ -23,8 +23,7 @@ import {
   AGENT_STATUS_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../utils/sentinelone_alert_check';
-import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../utils/crowdstrike_alert_check';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -183,8 +182,8 @@ export function getEnrichedFieldInfo({
 export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
   [AGENT_STATUS_FIELD_NAME]: true,
   [QUARANTINED_PATH_FIELD_NAME]: true,
-  [SENTINEL_ONE_AGENT_ID_FIELD]: true,
-  [CROWDSTRIKE_AGENT_ID_FIELD]: true,
+  [RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one]: true,
+  [RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike]: true,
 };
 
 /**

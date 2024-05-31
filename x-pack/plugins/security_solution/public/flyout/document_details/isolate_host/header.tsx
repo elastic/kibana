@@ -7,11 +7,10 @@
 
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -21,10 +20,14 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
  */
 export const PanelHeader: FC = () => {
   const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
-  const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
+  const {
+    isSupported: supportsResponseActions,
+    details: { agentType },
+  } = useAlertResponseActionsSupport(data);
+
+  const showTechPreviewBadge: boolean = useMemo(() => {
+    return supportsResponseActions && (agentType === 'sentinel_one' || agentType === 'crowdstrike');
+  }, [agentType, supportsResponseActions]);
 
   const title = (
     <EuiFlexGroup responsive gutterSize="s">
@@ -41,7 +44,7 @@ export const PanelHeader: FC = () => {
           />
         )}
       </EuiFlexItem>
-      {isSentinelOneV1Enabled && isSentinelOneAlert && (
+      {showTechPreviewBadge && (
         <EuiFlexItem grow={false}>
           <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
         </EuiFlexItem>

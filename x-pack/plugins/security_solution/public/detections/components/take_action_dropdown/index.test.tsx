@@ -29,10 +29,11 @@ import {
 } from '../endpoint_responder/translations';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
-import {
-  isAlertFromEndpointAlert,
-  isAlertFromEndpointEvent,
-} from '../../../common/utils/endpoint_alert_check';
+// FIXME:PT cleanup
+// import {
+// isAlertFromEndpointAlert,
+// isAlertFromEndpointEvent,
+// } from '../../../common/utils/endpoint_alert_check';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -70,22 +71,26 @@ jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../../common/utils/endpoint_alert_check', () => {
-  const realEndpointAlertCheckUtils = jest.requireActual(
-    '../../../common/utils/endpoint_alert_check'
-  );
-  return {
-    isTimelineEventItemAnAlert: realEndpointAlertCheckUtils.isTimelineEventItemAnAlert,
-    isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
-    isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
-  };
-});
+// jest.mock('../../../common/utils/endpoint_alert_check', () => {
+//   const realEndpointAlertCheckUtils = jest.requireActual(
+//     '../../../common/utils/endpoint_alert_check'
+//   );
+//   return {
+//     isTimelineEventItemAnAlert: realEndpointAlertCheckUtils.isTimelineEventItemAnAlert,
+//
+//     // FIXME:PT fix test after refactor
+//
+//     // isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
+//     // isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
+//   };
+// });
 
-jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
-  return {
-    isIsolationSupported: jest.fn().mockReturnValue(true),
-  };
-});
+// FIXME:PT Fix tests after refactor
+// jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
+//   return {
+//     isIsolationSupported: jest.fn().mockReturnValue(true),
+//   };
+// });
 
 jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', () => {
   return {
@@ -461,19 +466,20 @@ describe('take action dropdown', () => {
 
       beforeAll(() => {
         // Un-Mock endpoint alert check hooks
-        const actualChecks = jest.requireActual('../../../common/utils/endpoint_alert_check');
-        (isAlertFromEndpointEvent as jest.Mock).mockImplementation(
-          actualChecks.isAlertFromEndpointEvent
-        );
-        (isAlertFromEndpointAlert as jest.Mock).mockImplementation(
-          actualChecks.isAlertFromEndpointAlert
-        );
+        // const actualChecks = jest.requireActual('../../../common/utils/endpoint_alert_check');
+        // (isAlertFromEndpointEvent as jest.Mock).mockImplementation(
+        //   actualChecks.isAlertFromEndpointEvent
+        // );
+        // FIXME:PT Refactor tests and remove comment out code
+        // (isAlertFromEndpointAlert as jest.Mock).mockImplementation(
+        //   actualChecks.isAlertFromEndpointAlert
+        // );
       });
 
       afterAll(() => {
         // Set the mock modules back to what they were
-        (isAlertFromEndpointEvent as jest.Mock).mockImplementation(() => true);
-        (isAlertFromEndpointAlert as jest.Mock).mockImplementation(() => true);
+        // (isAlertFromEndpointEvent as jest.Mock).mockImplementation(() => true);
+        // (isAlertFromEndpointAlert as jest.Mock).mockImplementation(() => true);
       });
 
       beforeEach(() => {

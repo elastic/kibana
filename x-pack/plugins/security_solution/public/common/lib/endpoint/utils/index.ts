@@ -6,3 +6,4 @@
  */
 
 export * from './is_agent_type_and_action_supported';
+export * from './is_response_actions_alert_agent_id_field';

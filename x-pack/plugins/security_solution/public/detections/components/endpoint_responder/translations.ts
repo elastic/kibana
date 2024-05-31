@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../common/utils/sentinelone_alert_check';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
@@ -27,12 +27,13 @@ export const METADATA_API_ERROR_TOOLTIP = i18n.translate(
   { defaultMessage: 'Failed to retrieve Endpoint metadata' }
 );
 
+// FIXME:PT check if still in use
 export const SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.missingSentinelOneAgentId',
   {
     defaultMessage: 'Event data missing SentinelOne agent identifier ({field})',
     values: {
-      field: SENTINEL_ONE_AGENT_ID_FIELD,
+      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
     },
   }
 );

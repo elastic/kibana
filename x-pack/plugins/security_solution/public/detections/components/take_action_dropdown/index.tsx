@@ -11,6 +11,7 @@ import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-typ
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import {
   AlertsCasesTourSteps,
@@ -27,7 +28,6 @@ import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Status } from '../../../../common/api/detection_engine';
-import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
@@ -108,11 +108,11 @@ export const TakeActionDropdown = React.memo(
 
     const isEvent = actionsData.eventKind === 'event';
 
-    const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
-
+    const responseActionsSupport = useAlertResponseActionsSupport(detailsData);
+    const isAgentEndpoint = responseActionsSupport.details.agentType === 'endpoint';
     const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
 
-    const agentId = useMemo(
+    const osQueryAgentId = useMemo(
       () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
       [detailsData]
     );
@@ -159,7 +159,7 @@ export const TakeActionDropdown = React.memo(
     );
 
     const { exceptionActionItems } = useAlertExceptionActions({
-      isEndpointAlert: isAlertFromEndpointAlert({ ecsData }),
+      isEndpointAlert: isAgentEndpoint,
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 
@@ -210,13 +210,13 @@ export const TakeActionDropdown = React.memo(
     });
 
     const osqueryAvailable = osquery?.isOsqueryAvailable({
-      agentId,
+      agentId: osQueryAgentId,
     });
 
     const handleOnOsqueryClick = useCallback(() => {
-      onOsqueryClick(agentId);
+      onOsqueryClick(osQueryAgentId);
       setIsPopoverOpen(false);
-    }, [onOsqueryClick, setIsPopoverOpen, agentId]);
+    }, [onOsqueryClick, setIsPopoverOpen, osQueryAgentId]);
 
     const osqueryActionItem = useMemo(
       () =>
