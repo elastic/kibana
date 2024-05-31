@@ -177,7 +177,7 @@ describe('setupFleet', () => {
     expect(soClient.delete).not.toHaveBeenCalled();
   });
 
-  it('should not create lock but delete it if created more than 1 hour ago', async () => {
+  it('should delete previous lock if created more than 1 hour ago', async () => {
     soClient.get.mockResolvedValue({
       attributes: { started_at: new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString() },
     } as any);
@@ -188,9 +188,7 @@ describe('setupFleet', () => {
       isInitialized: true,
       nonFatalErrors: [],
     });
-    expect(soClient.create).not.toHaveBeenCalled();
-    expect(soClient.delete).toHaveBeenCalledWith('fleet-setup-lock', 'fleet-setup-lock', {
-      refresh: true,
-    });
+    expect(soClient.create).toHaveBeenCalled();
+    expect(soClient.delete).toHaveBeenCalledTimes(2);
   });
 });

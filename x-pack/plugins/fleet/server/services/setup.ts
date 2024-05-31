@@ -105,12 +105,12 @@ async function createLock(
       FLEET_SETUP_LOCK_TYPE
     );
 
-    // started more than 1 hour ago
+    // started more than 1 hour ago, delete previous lock
     if (
       fleetSetupLock.attributes.started_at &&
       new Date(fleetSetupLock.attributes.started_at).getTime() < Date.now() - 60 * 60 * 1000
     ) {
-      created = fleetSetupLock;
+      await deleteLock(soClient);
     } else {
       logger.info('Fleet setup already in progress, abort setup');
       return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
@@ -121,23 +121,20 @@ async function createLock(
     }
   }
 
-  // if lock is already created more than 1 hour ago, retry setup
-  if (!created) {
-    try {
-      created = await soClient.create<FleetSetupLock>(
-        FLEET_SETUP_LOCK_TYPE,
-        {
-          status: 'in_progress',
-          uuid: uuidv4(),
-          started_at: new Date().toISOString(),
-        },
-        { id: FLEET_SETUP_LOCK_TYPE }
-      );
-      logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
-    } catch (error) {
-      logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
-      return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
-    }
+  try {
+    created = await soClient.create<FleetSetupLock>(
+      FLEET_SETUP_LOCK_TYPE,
+      {
+        status: 'in_progress',
+        uuid: uuidv4(),
+        started_at: new Date().toISOString(),
+      },
+      { id: FLEET_SETUP_LOCK_TYPE }
+    );
+    logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
+  } catch (error) {
+    logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
+    return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
   }
   return { created: !!created };
 }
