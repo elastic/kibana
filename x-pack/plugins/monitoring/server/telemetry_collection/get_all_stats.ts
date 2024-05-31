@@ -19,7 +19,8 @@ import {
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
-import { getLogstashStats, LogstashStatsByClusterUuid } from './get_logstash_stats';
+import { getLogstashStats } from './get_logstash_stats';
+import { LogstashStatsByClusterUuid } from './logstash_monitoring';
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
@@ -91,7 +92,7 @@ export function handleAllStats(
 
   // Logstash agent driven monitoring isn't based on cluster UUID
   // or standalone LS clusters will be reported with monitoring cluster UUIDs
-  return Object.entries(logstash)
+  const logstashOrphanClusterStats = Object.entries(logstash)
     .filter(([clusterUuid]) => !mappedClusterUuids.includes(clusterUuid))
     .map(([clusterUuid, logstashBaseStats]) => ({
       cluster_name: LOGSTASH_SYSTEM_ID,
@@ -103,6 +104,7 @@ export function handleAllStats(
       },
       cluster_stats: {},
     }));
+  return mappedClusters.concat(logstashOrphanClusterStats);
 }
 
 export function getStackStats<T extends { [clusterUuid: string]: K }, K>(

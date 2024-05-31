@@ -11,193 +11,24 @@ import {
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
   TELEMETRY_QUERY_SOURCE,
 } from '../../common/constants';
-import { collectLogstashAgentMonitoringMetrics } from './get_logstash_agent_monitoring_stats';
-import { collectLogstashMetricbeatMonitoringMetrics } from './get_logstash_metricbeat_monitoring_stats';
-import { collectLogstashSelfMonitoringMetrics } from './get_logstash_self_monitoring_stats';
+import { LogstashSelfMonitoring } from './logstash_self_monitoring';
+import { LogstashMetricbeatMonitoring } from './logstash_metricbeat_monitoring';
+import { LogstashAgentMonitoring } from './logstash_agent_monitoring';
+import {
+  LogstashMonitoring,
+  LogstashProcessOptions,
+  LogstashStatsByClusterUuid,
+} from './logstash_monitoring';
 
-export type Counter = Map<string, number>;
-export const HITS_SIZE = 10000; // maximum hits to receive from ES with each search
+const SELF_MONITORING: string = 'self';
+const METRICBEAT_MONITORING: string = 'metricbeat';
+const AGENT_MONITORING: string = 'agent';
 
-const SELF_MONITORING: string = 'self_monitoring';
-const METRICBEAT_MONITORING: string = 'metricbeat_monitoring';
-const AGENT_MONITORING: string = 'agent_monitoring';
-
-export interface LogstashBaseStats {
-  // stats
-  versions: Array<{ version: string; count: number }>;
-  count: number;
-
-  cluster_stats?: {
-    collection_types?: { [collection_type_type: string]: number };
-    queues?: { [queue_type: string]: number };
-    plugins?: Array<{ name: string; count: number }>;
-    monitoringClusterUuid?: string;
-    pipelines?: {
-      count?: number;
-      batch_size_max?: number;
-      batch_size_avg?: number;
-      batch_size_min?: number;
-      batch_size_total?: number;
-      workers_max?: number;
-      workers_avg?: number;
-      workers_min?: number;
-      workers_total?: number;
-      sources?: { [source_type: string]: boolean };
-    };
-  };
-}
-
-export const getLogstashBaseStats = () => ({
-  versions: [],
-  count: 0,
-  cluster_stats: {
-    pipelines: {},
-    plugins: [],
-  },
-});
-
-export interface LogstashStats {
-  cluster_uuid: string;
-  source_node: string;
-  type: string;
-  agent?: {
-    type: string;
-  };
-  host?: {
-    id?: string;
-  };
-  // legacy monitoring shape
-  logstash_stats?: {
-    pipelines?: [
-      {
-        id?: string;
-        ephemeral_id: string;
-        queue?: {
-          type: string;
-        };
-      }
-    ];
-    logstash?: {
-      version?: string;
-      uuid?: string;
-      snapshot?: string;
-    };
-  };
-  // metricbeat and agent driven monitoring shape
-  logstash?: {
-    node?: {
-      stats?: {
-        pipelines?: [
-          {
-            id?: string;
-            ephemeral_id: string;
-            queue?: {
-              type: string;
-            };
-          }
-        ];
-        logstash?: {
-          version?: string;
-          uuid?: string;
-          snapshot?: string;
-          ephemeral_id: string;
-          pipelines?: [];
-        };
-      };
-    };
-    elasticsearch?: {
-      cluster?: {
-        id?: string;
-      };
-    };
-  };
-}
-
-export interface LogstashState {
-  // legacy monitoring shape
-  cluster_uuid: string;
-  logstash_state?: {
-    pipeline?: {
-      batch_size?: number;
-      workers?: number;
-      representation?: {
-        graph?: {
-          vertices?: [
-            {
-              config_name?: string;
-              plugin_type?: string;
-              meta?: {
-                source?: {
-                  protocol?: string;
-                };
-              };
-            }
-          ];
-        };
-      };
-    };
-  };
-  logstash?: {
-    // metricbeat monitoring shape
-    node?: {
-      state?: {
-        pipeline?: {
-          batch_size?: number;
-          workers?: number;
-          representation?: {
-            graph?: {
-              vertices?: [
-                {
-                  config_name?: string;
-                  plugin_type?: string;
-                  meta?: {
-                    source?: {
-                      protocol?: string;
-                    };
-                  };
-                }
-              ];
-            };
-          };
-        };
-      };
-    };
-    elasticsearch?: {
-      cluster?: {
-        id?: string;
-      };
-    };
-    // agent monitoring shape
-    pipeline?: {
-      elasticsearch?: {
-        cluster?: {
-          id?: string;
-        };
-      };
-      id: string;
-      plugin?: {
-        // <plugin type: PluginName>
-        [key: string]: PluginName;
-      };
-    };
-  };
-}
-
-export interface LogstashProcessOptions {
-  clusters: { [clusterUuid: string]: LogstashBaseStats };
-  allEphemeralIds: { [clusterUuid: string]: string[] }; // pipeline ephemeral IDs
-  allHostIds: { [clusterUuid: string]: string[] };
-  versions: { [clusterUuid: string]: Counter };
-  plugins: { [clusterUuid: string]: Counter };
-}
-
-export interface PluginName {
-  name: string;
-}
-
-export interface LogstashStatsByClusterUuid {
-  [clusterUuid: string]: LogstashBaseStats;
-}
+const logstashMonitoringInstances: { [key: string]: LogstashMonitoring } = {
+  self: new LogstashSelfMonitoring(),
+  metricbeat: new LogstashMetricbeatMonitoring(),
+  agent: new LogstashAgentMonitoring(),
+};
 
 /*
  * Call the function for fetching and summarizing Logstash stats
@@ -226,35 +57,16 @@ export async function getLogstashStats(
 
   // collect all _method_ (:self, :metricbeat, :agent) metrics in a given period
   for (const monitoringMethod of monitoringMethods) {
-    switch (monitoringMethod) {
-      case SELF_MONITORING:
-        await collectLogstashSelfMonitoringMetrics(
-          callCluster,
-          clusterUuids,
-          monitoringClusterUuid,
-          start,
-          end,
-          options
-        );
-        break;
-      case METRICBEAT_MONITORING:
-        await collectLogstashMetricbeatMonitoringMetrics(
-          callCluster,
-          monitoringClusterUuid,
-          start,
-          end,
-          options
-        );
-        break;
-      case AGENT_MONITORING:
-        await collectLogstashAgentMonitoringMetrics(
-          callCluster,
-          monitoringClusterUuid,
-          start,
-          end,
-          options
-        );
-        break;
+    const monitoringInstance = logstashMonitoringInstances[monitoringMethod];
+    if (monitoringInstance) {
+      await monitoringInstance.collectMetrics(
+        callCluster,
+        clusterUuids,
+        monitoringClusterUuid,
+        start,
+        end,
+        options
+      );
     }
   }
   return options.clusters;
@@ -276,8 +88,10 @@ export async function getLogstashMonitoringMethods(
   for (const record of response) {
     if (record.index!.indexOf('monitoring-logstash-') !== -1) {
       if (record.index!.indexOf(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) !== -1) {
+        // legacy driven metricbeat monitoring
         if (!monitoringMethods.includes(METRICBEAT_MONITORING)) {
           monitoringMethods.push(METRICBEAT_MONITORING);
+          logstashMonitoringInstances.metricbeat.setIndexPattern('legacy');
         }
       } else {
         if (!monitoringMethods.includes(SELF_MONITORING)) {
@@ -287,6 +101,11 @@ export async function getLogstashMonitoringMethods(
     } else if (record.index!.indexOf('metrics-logstash.node') !== -1) {
       if (!monitoringMethods.includes(AGENT_MONITORING)) {
         monitoringMethods.push(AGENT_MONITORING);
+      }
+    } else if (record.index!.indexOf('metrics-logstash.stack_monitoring') !== -1) {
+      if (!monitoringMethods.includes(METRICBEAT_MONITORING)) {
+        monitoringMethods.push(METRICBEAT_MONITORING);
+        logstashMonitoringInstances.metricbeat.setIndexPattern('stack');
       }
     }
   }
