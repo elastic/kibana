@@ -183,10 +183,10 @@ const xyLegendValues: Array<{
   },
   {
     value: LegendValue.LastNonNullValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
+    label: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValue', {
       defaultMessage: 'Last non-null value',
     }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastNonNullValueDesc', {
       defaultMessage: 'Last non-null value in the series.',
     }),
   },
