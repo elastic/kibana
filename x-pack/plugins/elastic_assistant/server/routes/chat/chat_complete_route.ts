@@ -13,6 +13,8 @@ import {
   API_VERSIONS,
   Message,
   Replacements,
+  transformRawData,
+  getAnonymizedValue,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -25,6 +27,10 @@ import {
   hasAIAssistantLicense,
   langChainExecute,
 } from '../helpers';
+
+export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
+  return `CONTEXT:\n"""\n${context}\n"""`;
+};
 
 export const chatCompleteRoute = (
   router: ElasticAssistantPluginRouter,
@@ -95,7 +101,35 @@ export const chatCompleteRoute = (
             (await actionsClient.getAllSystemConnectors()).find((c) => c.id === connectorId)
               ?.actionTypeId ?? '.gen-ai';
 
-          // replacements
+          if (request.body.messages) {
+            // replacements
+            const systemAnonymizationFields = await anonymizationFieldsDataClient?.findDocuments({
+              page: 1,
+              perPage: 1000,
+            });
+
+            messages = request.body.messages.map((m) => {
+              let content = m.content ?? '';
+              if (m.data && m.data.length > 0) {
+                const anonymizedData = transformRawData({
+                  anonymizationFields: systemAnonymizationFields?.data,
+                  currentReplacements: latestReplacements,
+                  getAnonymizedValue,
+                  onNewReplacements,
+                  rawData: m.data as unknown as Record<string, unknown[]>,
+                });
+                const wr = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(anonymizedData)}\n`;
+
+                content = `${wr}\n${m.content}`;
+              }
+              const transformedMessage = {
+                role: m.role,
+                content,
+                timestamp: m['@timestamp'],
+              };
+              return transformedMessage;
+            });
+          }
 
           if (request.body.persist && conversationsDataClient) {
             const updatedConversation = await createOrUpdateConversationWithUserInput({
@@ -108,12 +142,7 @@ export const chatCompleteRoute = (
               promptId: request.body.promptId,
               logger,
               replacements: latestReplacements,
-              newMessages: request.body.messages
-                .filter((f) => f.role === 'assistant' || f.role === 'user')
-                .map((m) => ({
-                  role: m.role,
-                  content: m.content ?? '',
-                })) as Message[],
+              newMessages: messages,
               model: request.body.model,
             });
             if (updatedConversation == null) {
