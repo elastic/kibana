@@ -97,12 +97,7 @@ async function run(opts: TaskClaimerOpts) {
   ).hits.hits;
 
   if (tasksToClaim.length === 0) {
-    // eslint-disable-next-line no-console
-    console.log('*** No tasks to claim');
     return;
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(tasksToClaim.length, 'tasks to claim');
   }
 
   const filteredTasks = await (async () => {
@@ -124,16 +119,7 @@ async function run(opts: TaskClaimerOpts) {
   })();
 
   if (filteredTasks.length === 0) {
-    // eslint-disable-next-line no-console
-    console.log('*** All tasks filtered out');
     return;
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(
-      'Filtered out the following num of tasks',
-      tasksToClaim.length - filteredTasks.length,
-      'tasks'
-    );
   }
 
   const params = [];
@@ -169,13 +155,6 @@ async function run(opts: TaskClaimerOpts) {
       if (bulkResultForTask?.create?.status === 201) {
         await runTask(row);
         await scheduleNextRun(row, opts);
-      } else {
-        // eslint-disable-next-line no-console
-        console.log(
-          'Cannot run task because:',
-          !!bulkResultForTask,
-          bulkResultForTask?.create?.status
-        );
       }
     }
   }
