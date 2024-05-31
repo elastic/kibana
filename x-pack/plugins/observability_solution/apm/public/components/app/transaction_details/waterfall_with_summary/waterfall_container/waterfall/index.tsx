@@ -86,8 +86,7 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   return maxLevel;
 }
 
-// level starts with 0
-const maxLevelOpen = 2;
+const MAX_DEPTH_OPEN_LIMIT = 2;
 
 export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Props) {
   const history = useHistory();
@@ -174,7 +173,9 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
               toggleFlyout({ history, item, flyoutDetailTab })
             }
             showCriticalPath={showCriticalPath}
-            maxLevelOpen={waterfall.traceDocsTotal > 500 ? maxLevelOpen : waterfall.traceDocsTotal}
+            maxLevelOpen={
+              waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal
+            }
           />
         )}
       </WaterfallItemsContainer>

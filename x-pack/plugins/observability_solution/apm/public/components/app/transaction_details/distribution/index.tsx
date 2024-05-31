@@ -93,7 +93,7 @@ export function TransactionDistribution({
   );
 
   const onSampleClick = useCallback(
-    (sample: any) => {
+    (sample: { transactionId: string; traceId: string }) => {
       history.push({
         ...history.location,
         search: fromQuery({

@@ -188,6 +188,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const segments = criticalPathSegmentsById[node.item.id]
     ?.filter((segment) => segment.self)
     .map((segment) => ({
+      id: segment.item.id,
       color: theme.eui.euiColorAccent,
       left: (segment.offset - node.item.offset - node.item.skew) / node.item.duration,
       width: segment.duration / node.item.duration,

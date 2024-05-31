@@ -115,6 +115,7 @@ interface IWaterfallItemProps {
   errorCount: number;
   marginLeftLevel: number;
   segments?: Array<{
+    id: string;
     left: number;
     width: number;
     color: string;
@@ -265,9 +266,9 @@ export function WaterfallItem({
       >
         {segments?.length ? (
           <CriticalPathItemBar>
-            {segments?.map((segment, index) => (
+            {segments?.map((segment) => (
               <CriticalPathItemSegment
-                key={index}
+                key={segment.id}
                 color={segment.color}
                 left={segment.left}
                 width={segment.width}
