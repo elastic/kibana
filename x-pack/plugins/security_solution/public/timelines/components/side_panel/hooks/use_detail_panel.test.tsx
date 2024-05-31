@@ -10,7 +10,7 @@ import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
 import { timelineActions } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../../common/mock';
@@ -26,7 +26,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   const mockSourcererReturn = {
     browserFields: {},
     loading: true,

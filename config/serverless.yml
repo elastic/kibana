@@ -141,6 +141,7 @@ uiSettings:
   overrides:
     # Disables ESQL in advanced settings (hides it from the UI)
     enableESQL: true
+    bfetch:disable: true
     # Disables `Defer loading panels below "the fold"`
     labs:dashboard:deferBelowFold: false
 
