@@ -21,7 +21,7 @@ import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_tr
 import { SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { GetHistogramIndicatorAggregation } from '../aggregations';
-import { getTimesliceTargetComparator } from './common';
+import { getTimesliceTargetComparator, getFilterRange } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
@@ -52,13 +52,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}/d`,
-                },
-              },
-            },
+            getFilterRange(slo, indicator.params.timestampField),
             getElasticsearchQueryOrThrow(indicator.params.filter),
           ],
         },

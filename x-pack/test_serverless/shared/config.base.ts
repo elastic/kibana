@@ -159,7 +159,7 @@ export default async () => {
       try: 120 * 1000,
       waitFor: 20 * 1000,
       esRequestTimeout: 30 * 1000,
-      kibanaReportCompletion: 60 * 1000,
+      kibanaReportCompletion: 80 * 1000,
       kibanaStabilize: 15 * 1000,
       navigateStatusPageCheck: 250,
       waitForExists: 2500,

@@ -18,6 +18,13 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
   return indices?.map((index) => index.text).join(',');
 }
 
+// For ES|QL we consider the following commands as transformational commands
+export function hasTransformationalCommand(esql?: string) {
+  const transformationalCommands = ['stats', 'keep', 'metrics'];
+  const { ast } = getAstAndSyntaxErrors(esql);
+  return transformationalCommands.some((command) => ast.find(({ name }) => name === command));
+}
+
 export function getLimitFromESQLQuery(esql: string): number {
   const limitCommands = esql.match(new RegExp(/LIMIT\s[0-9]+/, 'ig'));
   if (!limitCommands) {
