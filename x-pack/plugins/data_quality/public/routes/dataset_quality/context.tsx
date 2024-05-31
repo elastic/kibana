@@ -43,6 +43,14 @@ export function DatasetQualityContextProvider({
         initialState,
       });
       datasetQualityController.service.start();
+
+      if (initialState?.flyout?.dataset) {
+        datasetQualityController.service.send({
+          type: 'OPEN_FLYOUT',
+          dataset: initialState.flyout.dataset,
+        });
+      }
+
       setController(datasetQualityController);
 
       const datasetQualityStateSubscription = datasetQualityController.state$.subscribe((state) => {
