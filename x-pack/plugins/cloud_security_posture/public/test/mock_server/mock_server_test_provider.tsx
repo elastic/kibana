@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import React from 'react';
 import { render } from '@testing-library/react';
+import type { CoreStart } from '@kbn/core/public';
 import { CspClientPluginStartDeps } from '../../types';
 import { TestProvider } from '../test_provider';
 import { getMockServerDependencies } from './mock_server';
-
 interface MockServerDependencies {
   deps: Partial<CspClientPluginStartDeps>;
   core: CoreStart;
