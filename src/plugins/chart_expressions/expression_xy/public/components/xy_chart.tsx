@@ -1054,14 +1054,13 @@ function getLegendTitle(
   if (!isTitleVisible) {
     return undefined;
   }
-  if (typeof title === 'string') {
+  if (typeof title === 'string' && title.length > 0) {
     return title;
   }
   if (!layer) {
     return defaultLegendTitle;
   }
-  const breakdownByColumn = layer.splitAccessors?.[0]
-    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)
-    : undefined;
-  return breakdownByColumn?.name || defaultLegendTitle;
+  return layer.splitAccessors?.[0]
+    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
+    : defaultLegendTitle;
 }

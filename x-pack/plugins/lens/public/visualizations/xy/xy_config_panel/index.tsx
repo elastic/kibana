@@ -285,6 +285,10 @@ const xyLegendValues: Array<{
   },
 ];
 
+const defaultLegendTitle = i18n.translate('xpack.lens.xyChart.legendTitle', {
+  defaultMessage: 'Legend',
+});
+
 export const XyToolbar = memo(function XyToolbar(
   props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
 ) {
@@ -502,7 +506,6 @@ export const XyToolbar = memo(function XyToolbar(
   ).truncateText;
 
   const legendSize = state.legend.legendSize;
-
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -529,7 +532,7 @@ export const XyToolbar = memo(function XyToolbar(
             titlePlaceholder={
               frame.activeData?.[dataLayers[0].layerId].columns.find(
                 (col) => col.id === dataLayers[0].splitAccessor
-              )?.name
+              )?.name ?? defaultLegendTitle
             }
             legendTitle={state?.legend.title}
             onLegendTitleChange={({ title, visible }) => {
@@ -544,35 +547,18 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             isTitleVisible={state?.legend.isTitleVisible}
             onDisplayChange={(optionId) => {
-              const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-              if (newMode === 'auto') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: true,
-                    showSingleSeries: false,
-                  },
-                });
-              } else if (newMode === 'show') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: true,
-                    showSingleSeries: true,
-                  },
-                });
-              } else if (newMode === 'hide') {
-                setState({
-                  ...state,
-                  legend: {
-                    ...state.legend,
-                    isVisible: false,
-                    showSingleSeries: false,
-                  },
-                });
+              const newMode = legendOptions.find(({ id }) => id === optionId);
+              if (!newMode) {
+                return;
               }
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  isVisible: newMode.id !== 'hide',
+                  showSingleSeries: newMode.id === 'show',
+                },
+              });
             }}
             position={state?.legend.position}
             horizontalAlignment={state?.legend.horizontalAlignment}
