@@ -109,11 +109,16 @@ import {
   setSavedSearch,
   setDataViews,
   setInspector,
+  getTypes,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
-import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
+import {
+  LATEST_VERSION,
+  CONTENT_ID,
+  VisualizationSavedObjectAttributes,
+} from '../common/content_management';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -393,6 +398,43 @@ export class VisualizationsPlugin
 
       const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
       return getVisualizeEmbeddableFactory(embeddableStart);
+    });
+    embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
+      onAdd: (container, savedObject) => {
+        const {
+          title,
+          description,
+          visState = '{}',
+          savedSearchRefName,
+          kibanaSavedObjectMeta,
+        } = savedObject.attributes;
+        container.addNewPanel({
+          panelType: VISUALIZE_EMBEDDABLE_TYPE,
+          initialState: {
+            title,
+            description,
+            savedVis: {
+              ...JSON.parse(visState),
+              data: {
+                savedSearchRefName,
+                ...(kibanaSavedObjectMeta?.searchSourceJSON
+                  ? { searchSource: JSON.parse(kibanaSavedObjectMeta.searchSourceJSON) }
+                  : {}),
+              },
+            },
+            references: savedObject.references,
+          },
+        });
+      },
+      embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectName: i18n.translate('visualization.visualizeSavedObjectName', {
+        defaultMessage: 'Visualization',
+      }),
+      getIconForSavedObject: (savedObject) => {
+        const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
+        return getTypes().get(visState.type)?.icon ?? '';
+      },
     });
 
     contentManagement.registry.register({

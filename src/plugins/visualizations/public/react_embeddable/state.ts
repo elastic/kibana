@@ -46,12 +46,16 @@ export const deserializeState = async (
         data: {},
       },
     } as VisualizeRuntimeState;
-  let serializedState = cloneDeep(state.rawState);
+  // TODO Remove this when references can be passed in through Add From Library
+  const rawState = omit(state.rawState, 'references') as VisualizeSerializedState;
+  let serializedState = cloneDeep(rawState);
   if (isVisualizeSavedObjectState(serializedState)) {
     serializedState = await deserializeSavedObjectState(serializedState);
   }
 
-  const references: Reference[] = state.references ?? [];
+  const references: Reference[] =
+    // TODO Remove Reflect.get call when references can be passed in through Add From Library
+    Reflect.get(state.rawState, 'references') ?? state.references ?? [];
 
   const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
   const vis = await createVisInstance(deserializedSavedVis);
