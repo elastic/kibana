@@ -1844,8 +1844,8 @@ export const ECS_EXAMPLE_ANSWER = {
           confidence: 0.85,
           type: 'date',
           date_formats: ['UNIX'],
-          version: null,
         },
+        version: null,
         event: {
           DeviceId: null,
           CustomerId: null,
