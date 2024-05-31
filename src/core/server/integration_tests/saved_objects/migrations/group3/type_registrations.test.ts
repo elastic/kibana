@@ -141,6 +141,7 @@ const previouslyRegisteredTypes = [
   'upgrade-assistant-reindex-operation',
   'upgrade-assistant-telemetry',
   'uptime-dynamic-settings',
+  'synthetics-dynamic-settings',
   'uptime-synthetics-api-key',
   'url',
   'usage-counters',

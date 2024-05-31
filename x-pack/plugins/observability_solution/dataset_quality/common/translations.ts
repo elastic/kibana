@@ -147,8 +147,7 @@ export const flyoutImprovementText = i18n.translate(
 export const flyoutImprovementTooltip = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
   {
-    defaultMessage:
-      'Set of degraded fields in the dataset. Please not that this list may not be exhaustive.',
+    defaultMessage: 'A partial list of degraded fields found in your dataset.',
   }
 );
 

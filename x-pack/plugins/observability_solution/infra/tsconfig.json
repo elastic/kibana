@@ -103,7 +103,8 @@
     "@kbn/search-types",
     "@kbn/router-utils",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": [
     "target/**/*"
