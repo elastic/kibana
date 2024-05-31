@@ -41,7 +41,7 @@ const mockIndexPatternFields: DataViewFieldBase[] = [
     type: 'string',
   },
 ];
-const mockesqlDataGrid = {
+const mockEsqlDatatable = {
   type: 'datatable',
   rows: [],
   columns: [{ id: '_custom_field', name: '_custom_field', meta: { type: 'string' } }],
@@ -57,7 +57,7 @@ describe('useAllEsqlRuleFields', () => {
               { id: 'agent.name', name: 'agent.name', meta: { type: 'string' } }, // agent.name is already present in mockIndexPatternFields
               { id: '_custom_field_0', name: '_custom_field_0', meta: { type: 'string' } },
             ]
-          : mockesqlDataGrid.columns
+          : mockEsqlDatatable.columns
       )
     );
     parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
