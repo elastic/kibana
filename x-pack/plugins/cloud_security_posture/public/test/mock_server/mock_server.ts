@@ -47,14 +47,16 @@ export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}) => 
       // eslint-disable-next-line no-console
       console.log('MSW intercepted request:', request.method, request.url, payload);
     });
-    server.events.on('response:mocked', ({ request, requestId, response }) => {
+    server.events.on('response:mocked', async ({ request, response }) => {
+      const body = await response.json();
       // eslint-disable-next-line no-console
       console.log(
-        '%s %s received %s %s',
+        '%s %s received %s %s %s',
         request.method,
         request.url,
         response.status,
-        response.statusText
+        response.statusText,
+        body
       );
     });
   }
