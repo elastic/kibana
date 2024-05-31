@@ -99,6 +99,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     esClient,
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    skipIfInstalled: true, // force flag alone would reinstall packages that are already installed
     spaceId,
   });
 
