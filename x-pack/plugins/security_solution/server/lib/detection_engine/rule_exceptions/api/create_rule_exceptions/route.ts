@@ -83,7 +83,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           ]);
           const rulesClient = ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const { items } = request.body;
           const { id: ruleId } = request.params;
@@ -106,7 +106,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             items,
             rule,
             listsClient,
-            rulesManagementClient,
+            rulesManagementClient: detectionRulesClient,
           });
 
           const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));

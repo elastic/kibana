@@ -113,7 +113,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
-      getRulesManagementClient: () =>
+      getDetectionRulesClient: () =>
         createDetectionRulesClient(
           startPlugins.alerting.getRulesClientWithRequest(request),
           request,

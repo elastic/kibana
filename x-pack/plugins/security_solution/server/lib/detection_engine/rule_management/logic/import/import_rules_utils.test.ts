@@ -32,7 +32,7 @@ describe('importRules', () => {
       ruleChunks: [],
       rulesResponseAcc: [],
       overwriteRules: false,
-      rulesManagementClient: context.securitySolution.getRulesManagementClient(),
+      rulesManagementClient: context.securitySolution.getDetectionRulesClient(),
       existingLists: {},
     });
 
@@ -44,7 +44,7 @@ describe('importRules', () => {
       ruleChunks: [[new Error('error importing')]],
       rulesResponseAcc: [],
       overwriteRules: false,
-      rulesManagementClient: context.securitySolution.getRulesManagementClient(),
+      rulesManagementClient: context.securitySolution.getDetectionRulesClient(),
       existingLists: {},
     });
 
@@ -72,7 +72,7 @@ describe('importRules', () => {
       ruleChunks: [ruleChunk],
       rulesResponseAcc: [],
       overwriteRules: false,
-      rulesManagementClient: context.securitySolution.getRulesManagementClient(),
+      rulesManagementClient: context.securitySolution.getDetectionRulesClient(),
       existingLists: {},
     });
 
@@ -92,7 +92,7 @@ describe('importRules', () => {
       ruleChunks: [ruleChunk],
       rulesResponseAcc: [],
       overwriteRules: false,
-      rulesManagementClient: context.securitySolution.getRulesManagementClient(),
+      rulesManagementClient: context.securitySolution.getDetectionRulesClient(),
       existingLists: {},
     });
 
