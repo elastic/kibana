@@ -6,24 +6,33 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type { SearchRequest } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-} from '../../../common/endpoint/constants';
-import type { SecuritySolutionRequestHandlerContext } from '../../types';
+} from '../../../../common/endpoint/constants';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type {
   ActivityLog,
+  ActivityLogEntry,
   EndpointAction,
+  EndpointActionResponse,
   LogsEndpointAction,
-} from '../../../common/endpoint/types';
-import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
-import { getDateFilters } from '../services/actions/utils';
-import { ACTION_REQUEST_INDICES, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
+  LogsEndpointActionResponse,
+} from '../../../../common/endpoint/types';
+import { doesLogsEndpointActionsIndexExist } from '../../utils';
+
+import {
+  categorizeActionResults,
+  categorizeResponseResults,
+  getDateFilters,
+  getUniqueLogData,
+} from './utils';
+import { ACTION_REQUEST_INDICES, ACTION_RESPONSE_INDICES } from './constants';
 
 const queryOptions = {
   headers: {
@@ -32,13 +41,134 @@ const queryOptions = {
   ignore: [404],
 };
 
-export const getTimeSortedData = (data: ActivityLog['data']): ActivityLog['data'] => {
+/**
+ * Used only for the deprecated `/api/endpoint/action_log/{agent_id}` legacy API route
+ *
+ * Use newer response action services instead
+ *
+ * @deprecated
+ */
+export const getAuditLogResponse = async ({
+  elasticAgentId,
+  page,
+  pageSize,
+  startDate,
+  endDate,
+  context,
+  logger,
+}: {
+  elasticAgentId: string;
+  page: number;
+  pageSize: number;
+  startDate: string;
+  endDate: string;
+  context: SecuritySolutionRequestHandlerContext;
+  logger: Logger;
+}): Promise<ActivityLog> => {
+  const size = Math.floor(pageSize / 2);
+  const from = page <= 1 ? 0 : page * size - size + 1;
+
+  const data = await getActivityLog({
+    context,
+    from,
+    size,
+    startDate,
+    endDate,
+    elasticAgentId,
+    logger,
+  });
+
+  return {
+    page,
+    pageSize,
+    startDate,
+    endDate,
+    data,
+  };
+};
+
+const getActivityLog = async ({
+  context,
+  size,
+  from,
+  startDate,
+  endDate,
+  elasticAgentId,
+  logger,
+}: {
+  context: SecuritySolutionRequestHandlerContext;
+  elasticAgentId: string;
+  size: number;
+  from: number;
+  startDate: string;
+  endDate: string;
+  logger: Logger;
+}): Promise<ActivityLogEntry[]> => {
+  let actionsResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
+  let responsesResult: TransportResult<estypes.SearchResponse<unknown>, unknown>;
+
+  try {
+    // fetch actions with matching agent_id
+    const { actionIds, actionRequests } = await getActionRequestsResult({
+      context,
+      logger,
+      elasticAgentId,
+      startDate,
+      endDate,
+      size,
+      from,
+    });
+    actionsResult = actionRequests;
+
+    // fetch responses with matching unique set of `action_id`s
+    responsesResult = await getActionResponsesResult({
+      actionIds: [...new Set(actionIds)], // de-dupe `action_id`s
+      context,
+      logger,
+      elasticAgentId,
+      startDate,
+      endDate,
+    });
+  } catch (error) {
+    logger.error(error);
+    throw error;
+  }
+  if (actionsResult?.statusCode !== 200) {
+    logger.error(`Error fetching actions log for agent_id ${elasticAgentId}`);
+    throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
+  }
+
+  // label record as `action`, `fleetAction`
+  const responses = categorizeResponseResults({
+    results: responsesResult?.body?.hits?.hits as Array<
+      estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+    >,
+  });
+
+  // label record as `response`, `fleetResponse`
+  const actions = categorizeActionResults({
+    results: actionsResult?.body?.hits?.hits as Array<
+      estypes.SearchHit<EndpointAction | LogsEndpointAction>
+    >,
+  });
+
+  // filter out the duplicate endpoint actions that also have fleetActions
+  // include endpoint actions that have no fleet actions
+  const uniqueLogData = getUniqueLogData([...responses, ...actions]);
+
+  // sort by @timestamp in desc order, newest first
+  const sortedData = getTimeSortedData(uniqueLogData);
+
+  return sortedData;
+};
+
+const getTimeSortedData = (data: ActivityLog['data']): ActivityLog['data'] => {
   return data.sort((a, b) =>
     new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
   );
 };
 
-export const getActionRequestsResult = async ({
+const getActionRequestsResult = async ({
   context,
   logger,
   elasticAgentId,
@@ -109,7 +239,7 @@ export const getActionRequestsResult = async ({
   }
 };
 
-export const getActionResponsesResult = async ({
+const getActionResponsesResult = async ({
   context,
   logger,
   elasticAgentId,
