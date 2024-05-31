@@ -9,13 +9,24 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import moment from 'moment';
-import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButton,
+  EuiToolTip,
+  EuiLink,
+  type EuiDataGridSorting,
+  type EuiDataGridCellValueElementProps,
+} from '@elastic/eui';
 import type { RenderCellValue, EuiDataGridColumn } from '@elastic/eui';
 
 import type { Agent } from '../../../../types';
 import { getKuery } from '../utils/get_kuery';
 
-import { sendGetAgents } from '../../../../hooks'; // usePagination
+import { sendGetAgents, useLink } from '../../../../hooks';
 import { useTableState } from '../hooks/use_table_state';
 
 interface Props {
@@ -24,10 +35,15 @@ interface Props {
 }
 const DEFAULT_PAGE_SIZE = 10;
 
+export const BACK_TO_MAIN_VIEW = i18n.translate('xpack.fleet.agentsDataGridView.ButtonTooltip', {
+  defaultMessage: 'Back to main view',
+});
+
 export const AgentsGridView: React.FunctionComponent<Props> = ({
   showDataGridView,
   setDataGridView,
 }) => {
+  const { getHref } = useLink();
   const [agents, setAgents] = useState<Agent[]>([]);
   const { showInactive, showUpgradeable, selectedStatus } = useTableState();
 
@@ -41,6 +57,7 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   });
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
   const columns: EuiDataGridColumn[] = [
     {
@@ -99,16 +116,6 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
       defaultSortDirection: 'asc',
       initialWidth: 80,
     },
-    // {
-    //   id: 'cpu_avg',
-    //   displayAsText: 'CPU',
-    //   defaultSortDirection: 'asc',
-    // },
-    // {
-    //   id: 'memory_size_byte_avg',
-    //   displayAsText: 'Memory',
-    //   defaultSortDirection: 'asc',
-    // },
   ];
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
@@ -144,15 +151,28 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
     columns.map(({ id }) => id) // initialize to the full set of columns
   );
 
-  const formatData = (data: any) => {
-    const dateRe = /\d{4}\-\d{2}\-\d{2}[T]\d{2}\:\d{2}:\d{2}[Z]/;
-    if (typeof data === 'boolean') {
-      return `${data}`;
-    } else if (typeof data === 'string' && data.match(dateRe)) {
-      return moment.utc(data).format('DD/MM/YYYY HH:mm:ss UTC');
-    }
-    return data;
-  };
+  const onSort = useCallback(
+    (newSortingColumns: EuiDataGridSorting['columns']) => {
+      setSortingColumns(newSortingColumns);
+    },
+    [setSortingColumns]
+  );
+
+  const formatData = useCallback(
+    (data: any, path: string) => {
+      if (typeof data === 'boolean') {
+        return `${data}`;
+      } else if (typeof data === 'string' && (path === 'last_checkin' || path === 'enrolled_at')) {
+        return moment.utc(data).format('DD/MM/YYYY HH:mm:ss UTC');
+      } else if (typeof data === 'string' && path === 'id') {
+        return <EuiLink href={getHref('agent_details', { agentId: data })}>{data}</EuiLink>;
+      } else if (typeof data === 'string' && path === 'policy_id') {
+        return <EuiLink href={getHref('policy_details', { policyId: data })}>{data}</EuiLink>;
+      }
+      return data;
+    },
+    [getHref]
+  );
 
   const agentsDataForGrid = useMemo(() => {
     const keysToDisplay = [
@@ -166,8 +186,6 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
       'local_metadata.elastic.agent.version',
       'local_metadata.elastic.agent.upgradeable',
       'local_metadata.os.platform',
-      // 'local_metadata.host.metrics.cpu_avg',
-      // 'local_metadata.host.metrics.memory_size_byte_avg',
     ];
     return agents.map((agent) => {
       const row: { [key: string]: string } = {};
@@ -176,42 +194,64 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
           const regex = path.match(/(\.?)(\w+$)/);
           const key = regex ? regex[2] : path;
           const value = get(agent, path);
-          const formatted = formatData(value);
+          const formatted = formatData(value, path);
           Object.assign(row, { [key]: formatted });
         });
         return row;
       }
     });
-  }, [agents]);
+  }, [agents, formatData]);
 
   const getRenderCellValue: RenderCellValue = ({
     rowIndex,
     columnId,
-  }: {
-    rowIndex: number;
-    columnId: string;
-  }) => {
-    if (
-      !agentsDataForGrid ||
-      agentsDataForGrid.length === 0 ||
-      !agentsDataForGrid[rowIndex] ||
-      !agentsDataForGrid[rowIndex][columnId]
-    )
-      return null;
-    return agentsDataForGrid[rowIndex][columnId];
+    setCellProps,
+  }: EuiDataGridCellValueElementProps) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      if (
+        columnId === 'status' &&
+        agentsDataForGrid.hasOwnProperty(rowIndex) &&
+        agentsDataForGrid[rowIndex][columnId] === 'online'
+      ) {
+        setCellProps({
+          style: {
+            backgroundColor: `#6dccb1`,
+          },
+        });
+      }
+      if (
+        columnId === 'status' &&
+        agentsDataForGrid.hasOwnProperty(rowIndex) &&
+        agentsDataForGrid[rowIndex][columnId] === 'unhealthy'
+      ) {
+        setCellProps({
+          style: {
+            backgroundColor: `#f1d86f`,
+          },
+        });
+      }
+    }, [rowIndex, columnId, setCellProps]);
+    return agentsDataForGrid &&
+      agentsDataForGrid.hasOwnProperty(rowIndex) &&
+      agentsDataForGrid[rowIndex][columnId]
+      ? agentsDataForGrid[rowIndex][columnId]
+      : null;
   };
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            display="base"
-            iconType="arrowLeft"
-            size="m"
-            aria-label="Back"
-            onClick={() => setDataGridView(!showDataGridView)}
-          />
+          <EuiToolTip content={BACK_TO_MAIN_VIEW} position="top">
+            <EuiButtonIcon
+              display="base"
+              iconType="arrowLeft"
+              size="m"
+              aria-label="Back"
+              onClick={() => setDataGridView(!showDataGridView)}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -233,6 +273,7 @@ export const AgentsGridView: React.FunctionComponent<Props> = ({
           data-test-subj="agentsDataGrid"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
+          sorting={{ columns: sortingColumns, onSort }}
           rowCount={agentsDataForGrid.length}
           renderCellValue={getRenderCellValue}
           inMemory={{ level: 'sorting' }}
