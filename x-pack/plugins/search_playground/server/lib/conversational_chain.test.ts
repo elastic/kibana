@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain } from './conversational_chain';
 import { FakeListChatModel } from '@langchain/core/utils/testing';
-import { FakeListLLM } from 'langchain/llms/fake';
+import { FakeListLLM } from '@langchain/core/utils/testing';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { Message } from 'ai';
 
