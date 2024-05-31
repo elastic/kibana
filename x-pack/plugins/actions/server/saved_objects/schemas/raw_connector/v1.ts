@@ -11,8 +11,9 @@ export const rawConnectorSchema = schema.object({
   actionTypeId: schema.string(),
   name: schema.string(),
   isMissingSecrets: schema.boolean(),
-  config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  config: schema.any({ defaultValue: {} }),
+  secrets: schema.any({ defaultValue: {} }),
+
   isPreconfigured: schema.maybe(schema.boolean()),
   isSystemAction: schema.maybe(schema.boolean()),
   id: schema.maybe(schema.string()),
