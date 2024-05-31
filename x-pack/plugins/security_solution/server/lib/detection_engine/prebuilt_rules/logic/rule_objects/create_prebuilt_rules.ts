@@ -12,7 +12,7 @@ import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_as
 import type { IDetectionRulesClient } from '../../../rule_management/logic/rule_management/detection_rules_client';
 
 export const createPrebuiltRules = (
-  rulesManagementClient: IDetectionRulesClient,
+  detectionRulesClient: IDetectionRulesClient,
   rules: PrebuiltRuleAsset[]
 ) => {
   return withSecuritySpan('createPrebuiltRules', async () => {
@@ -20,7 +20,7 @@ export const createPrebuiltRules = (
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: rules,
       executor: async (rule) => {
-        return rulesManagementClient.createPrebuiltRule({
+        return detectionRulesClient.createPrebuiltRule({
           ruleAsset: rule,
         });
       },

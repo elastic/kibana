@@ -34,7 +34,7 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
- * @param rulesManagementClient {object}
+ * @param detectionRulesClient {object}
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -43,14 +43,14 @@ export const importRules = async ({
   ruleChunks,
   rulesResponseAcc,
   overwriteRules,
-  rulesManagementClient,
+  detectionRulesClient,
   existingLists,
   allowMissingConnectorSecrets,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
-  rulesManagementClient: IDetectionRulesClient;
+  detectionRulesClient: IDetectionRulesClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {
@@ -88,7 +88,7 @@ export const importRules = async ({
 
               importRuleResponse = [...importRuleResponse, ...exceptionErrors];
 
-              const importedRule = await rulesManagementClient.importRule({
+              const importedRule = await detectionRulesClient.importRule({
                 ruleToImport: {
                   ...parsedRule,
                   exceptions_list: [...exceptions],

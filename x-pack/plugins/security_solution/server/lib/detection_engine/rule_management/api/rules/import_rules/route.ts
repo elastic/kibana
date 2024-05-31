@@ -154,7 +154,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ruleChunks: chunkParseObjects,
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             overwriteRules: request.query.overwrite,
-            rulesManagementClient: detectionRulesClient,
+            detectionRulesClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });
