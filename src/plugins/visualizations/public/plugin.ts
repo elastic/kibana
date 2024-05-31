@@ -401,28 +401,10 @@ export class VisualizationsPlugin
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
       onAdd: (container, savedObject) => {
-        const {
-          title,
-          description,
-          visState = '{}',
-          savedSearchRefName,
-          kibanaSavedObjectMeta,
-        } = savedObject.attributes;
         container.addNewPanel({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
           initialState: {
-            title,
-            description,
-            savedVis: {
-              ...JSON.parse(visState),
-              data: {
-                savedSearchRefName,
-                ...(kibanaSavedObjectMeta?.searchSourceJSON
-                  ? { searchSource: JSON.parse(kibanaSavedObjectMeta.searchSourceJSON) }
-                  : {}),
-              },
-            },
-            references: savedObject.references,
+            savedObjectId: savedObject.id,
           },
         });
       },

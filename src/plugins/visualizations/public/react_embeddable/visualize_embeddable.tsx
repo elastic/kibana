@@ -51,6 +51,7 @@ export const getVisualizeEmbeddableFactory: (
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
     const vis$ = new BehaviorSubject<Vis>(state.vis);
+    const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
     const visData$ = new BehaviorSubject<unknown>({});
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
@@ -149,6 +150,21 @@ export const getVisualizeEmbeddableFactory: (
               }),
           });
         },
+        // library transforms
+        saveToLibrary: (newTitle: string) => {
+          titlesApi.setPanelTitle(newTitle);
+          return uuid;
+        },
+        canLinkToLibrary: () => !state.savedObjectId,
+        canUnlinkFromLibrary: () => !!state.savedObjectId,
+        checkForDuplicateTitle: () => false,
+        getByValueState: () =>
+          serializeState({
+            serializedVis: vis$.getValue().serialize(),
+            titles: serializeTitles(),
+          }).rawState,
+        getByReferenceState: async (libraryId) =>
+          await deserializeState({ rawState: { savedObjectId: libraryId } }),
       },
       {
         ...titleComparators,
@@ -159,6 +175,7 @@ export const getVisualizeEmbeddableFactory: (
           },
           (a, b) => isEqual(a, b),
         ],
+        savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
       }
     );
 

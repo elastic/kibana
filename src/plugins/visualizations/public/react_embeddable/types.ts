@@ -16,6 +16,7 @@ import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_
 
 export type VisualizeRuntimeState = SerializedTitles & {
   vis: Vis<VisParams>;
+  savedObjectId?: string;
 };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
@@ -53,4 +54,10 @@ export type VisualizeApi = HasEditCapabilities &
     subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;
     subscribeToNavigateToLens: (listener: (navigateFn: NavigateToLensFn) => void) => void;
     openInspector: () => OverlayRef | undefined;
+    saveToLibrary: (title: string) => string;
+    canLinkToLibrary: () => boolean;
+    canUnlinkFromLibrary: () => boolean;
+    checkForDuplicateTitle: (title: string) => boolean;
+    getByValueState: () => VisualizeSerializedState;
+    getByReferenceState: (id: string) => Promise<VisualizeRuntimeState>;
   };
