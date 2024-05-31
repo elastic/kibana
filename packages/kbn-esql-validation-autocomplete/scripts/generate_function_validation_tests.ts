@@ -53,6 +53,7 @@ function generateTestsForEvalFunction(definition: FunctionDefinition) {
   generateEvalCommandTestsForEvalFunction(definition, testCases);
   generateSortCommandTestsForEvalFunction(definition, testCases);
   generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -63,6 +64,7 @@ function generateTestsForAggFunction(definition: FunctionDefinition) {
   generateWhereCommandTestsForAggFunction(definition, testCases);
   generateEvalCommandTestsForAggFunction(definition, testCases);
   generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -71,6 +73,7 @@ function generateTestsForGroupingFunction(definition: FunctionDefinition) {
   generateStatsCommandTestsForGroupingFunction(definition, testCases);
   generateSortCommandTestsForGroupingFunction(definition, testCases);
   generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -114,6 +117,77 @@ function generateNullAcceptanceTestsForFunction(
             {
               ...signatureWithGreatestNumberOfParams,
               params: new Array(numberOfArgsToTest).fill({ name: 'nullVar' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+}
+
+/**
+ * Tests for strings being casted to dates
+ *
+ * @param definition
+ * @param testCases
+ * @returns
+ */
+function generateImplicitDateCastingTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const firstSignatureWithDateParams = definition.signatures.find((signature) =>
+    signature.params.some(
+      (param, i) =>
+        param.type === 'date' &&
+        !definition.signatures.some((def) => def.params[i].type === 'string') // don't count parameters that already accept a string
+    )
+  );
+
+  if (!firstSignatureWithDateParams) {
+    // no signatures contain date params
+    return;
+  }
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  const mappedParams = getFieldMapping(firstSignatureWithDateParams.params);
+
+  testCases.set(
+    `from a_index | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...firstSignatureWithDateParams,
+              params: mappedParams.map((param) =>
+                // overwrite dates with a string
+                param.type === 'date' ? { ...param, name: '"2022"' } : param
+              ),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+
+  testCases.set(
+    `from a_index | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...firstSignatureWithDateParams,
+              params: mappedParams.map((param) =>
+                // overwrite dates with a string
+                param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
+              ),
             },
           ],
         },
