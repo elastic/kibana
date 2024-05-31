@@ -45,15 +45,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
-      // await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
-      // await kibanaServer.importExport.unload(
-      //   'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
-      // );
-      // await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
-      // await kibanaServer.importExport.unload(
-      //   'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
-      // );
+      await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
+      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+      );
     });
 
     it('should allow building a map with multiple data views', async () => {

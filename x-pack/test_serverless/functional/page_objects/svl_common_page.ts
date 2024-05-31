@@ -147,25 +147,31 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
       await cleanBrowserState();
 
-      log.debug(`Navigating to ${deployment.getHostPort()}/logout to force the logout`);
-      await browser.get(deployment.getHostPort() + '/logout');
+      const performForceLogout = async () => {
+        log.debug(`Navigating to ${deployment.getHostPort()}/logout to force the logout`);
+        await browser.get(deployment.getHostPort() + '/logout');
 
-      // After logging out, the user can be redirected to various locations depending on the context. By default, we
-      // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
-      // we should simply wait until the user is redirected *elsewhere*.
-      // Timeout has been doubled here in attempt to quiet the flakiness
-      await retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
-        const urlBefore = await browser.getCurrentUrl();
-        delay(1000);
-        const urlAfter = await browser.getCurrentUrl();
-        log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
-        return urlAfter === urlBefore;
+        // After logging out, the user can be redirected to various locations depending on the context. By default, we
+        // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+        // we should simply wait until the user is redirected *elsewhere*.
+        // Timeout has been doubled to 40s here in attempt to quiet the flakiness
+        await retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
+          const urlBefore = await browser.getCurrentUrl();
+          delay(1000);
+          const urlAfter = await browser.getCurrentUrl();
+          log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
+          return urlAfter === urlBefore;
+        });
+
+        const currentUrl = await browser.getCurrentUrl();
+
+        // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+        return currentUrl.includes('/login') || currentUrl.includes('/projects');
+      };
+
+      await retry.tryWithRetries('force logout with retries', performForceLogout, {
+        retryCount: 2,
       });
-
-      const currentUrl = await browser.getCurrentUrl();
-
-      // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
-      return currentUrl.includes('/login') || currentUrl.includes('/projects');
     },
 
     async login() {

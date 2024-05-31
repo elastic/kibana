@@ -315,17 +315,35 @@ components:
 
     RequiredField:
       type: object
+      description: Describes an Elasticsearch field that is needed for the rule to function
       properties:
         name:
           $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Name of an Elasticsearch field
         type:
           $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Type of the Elasticsearch field
         ecs:
           type: boolean
+          description: Whether the field is an ECS field
       required:
         - name
         - type
         - ecs
+
+    RequiredFieldInput:
+      type: object
+      description: Input parameters to create a RequiredField. Does not include the `ecs` field, because `ecs` is calculated on the backend based on the field name and type.
+      properties:
+        name:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Name of an Elasticsearch field
+        type:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Type of an Elasticsearch field
+      required:
+        - name
+        - type
 
     RequiredFieldArray:
       type: array

@@ -40,6 +40,7 @@ import type {
 } from '@hello-pangea/dnd';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );

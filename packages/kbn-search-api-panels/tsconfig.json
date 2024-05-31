@@ -22,6 +22,8 @@
     "@kbn/i18n-react",
     "@kbn/security-plugin",
     "@kbn/console-plugin",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/try-in-console",
+    "@kbn/test-jest-helpers"
   ]
 }
