@@ -20,6 +20,7 @@ export type {
   MessageSigningServiceInterface,
 } from './services';
 export { getRegistryUrl } from './services';
+export { NamingCollisionError } from './services/epm/packages/custom_integrations/validation/check_naming_collision';
 
 export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
 export type {

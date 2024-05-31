@@ -335,6 +335,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       request.body.agentPolicyId,
       {
         user: user || undefined,
+        force: request.body.force,
       }
     );
     return response.ok({
