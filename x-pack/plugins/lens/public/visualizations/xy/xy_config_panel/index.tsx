@@ -626,6 +626,8 @@ export const XyToolbar = memo(function XyToolbar(
                     ...state.legend,
                     legendStats,
                     legendSize: LegendSize.AUTO,
+                    isVisible: true,
+                    showSingleSeries: true,
                   },
                 });
                 return;
@@ -635,6 +637,8 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: {
                   ...state.legend,
                   legendStats,
+                  isVisible: true,
+                  showSingleSeries: true,
                 },
               });
             }}
