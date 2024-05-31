@@ -53,7 +53,7 @@ export const Threshold = ({
         minWidth: '100%',
       }}
       hasShadow={false}
-      data-test-subj={`threshold-${threshold}-${value}`}
+      data-test-subj={`threshold-${threshold.join('-')}-${value}`}
     >
       <Chart>
         <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
