@@ -83,6 +83,7 @@ import { ESQLCallbacks } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
+  getQueryForFields,
   isAggFunctionUsedAlready,
 } from './helper';
 import { FunctionArgSignature } from '../definitions/types';
@@ -196,7 +197,7 @@ export async function suggest(
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = buildQueryUntilPreviousCommand(ast, finalText);
+  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
