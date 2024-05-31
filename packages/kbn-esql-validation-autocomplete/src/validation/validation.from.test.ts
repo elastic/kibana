@@ -10,7 +10,7 @@ import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { ESQLCallbacks } from '../shared/types';
 import { ValidationOptions } from './types';
 import { validateQuery } from './validation';
-import { getCallbackMocks } from './__tests__/helpers';
+import { getCallbackMocks } from '../__tests__/helpers';
 
 const setup = async () => {
   const callbacks = getCallbackMocks();
@@ -30,6 +30,7 @@ const setup = async () => {
 
 test('does not load fields when validating only a single FROM, SHOW, ROW command', async () => {
   const { validate, callbacks } = await setup();
+
   await validate('FROM kib');
   await validate('FROM kibana_ecommerce METADATA _i');
   await validate('FROM kibana_ecommerce METADATA _id | ');
@@ -41,6 +42,7 @@ test('does not load fields when validating only a single FROM, SHOW, ROW command
 
 test('loads fields with FROM source when commands after pipe present', async () => {
   const { validate, callbacks } = await setup();
+
   await validate('FROM kibana_ecommerce METADATA _id | eval');
 
   expect(callbacks.getFieldsFor.mock.calls.length).toBe(1);

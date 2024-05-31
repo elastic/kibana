@@ -27,7 +27,7 @@ import {
   indexes,
   policies,
   unsupported_field,
-} from './__tests__/helpers';
+} from '../__tests__/helpers';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)

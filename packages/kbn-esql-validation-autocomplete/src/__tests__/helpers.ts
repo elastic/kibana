@@ -7,7 +7,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { supportedFieldTypes } from '../../definitions/types';
+import { supportedFieldTypes } from '../definitions/types';
 
 export const fields = [
   ...supportedFieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
