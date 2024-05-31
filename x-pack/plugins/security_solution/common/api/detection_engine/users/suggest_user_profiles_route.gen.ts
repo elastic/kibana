@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Suggest user profiles API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 export type SuggestUserProfilesRequestQuery = z.infer<typeof SuggestUserProfilesRequestQuery>;
