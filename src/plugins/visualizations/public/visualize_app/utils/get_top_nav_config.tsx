@@ -518,9 +518,9 @@ export const getTopNavConfig = (
                     input: {
                       savedVis: {
                         ...vis.serialize(),
-                        title: newTitle,
-                        description: newDescription,
                       },
+                      title: newTitle,
+                      description: newDescription,
                     } as VisualizeSerializedState,
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,

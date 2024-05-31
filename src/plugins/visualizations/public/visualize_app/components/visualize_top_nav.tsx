@@ -109,20 +109,6 @@ const TopNav = ({
     [doReload]
   );
 
-  // useEffect(() => {
-  //   if (!embeddableHandler) return;
-  //   const subscription = embeddableHandler
-  //     .getExpressionVariables$()
-  //     .subscribe((expressionVariables) => {
-  //       setDisplayEditInLensItem(
-  //         Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
-  //       );
-  //     });
-  //   return () => {
-  //     subscription.unsubscribe();
-  //   };
-  // }, [embeddableHandler, vis]);
-
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
