@@ -91,28 +91,30 @@ export async function bulkInstallPackages({
       }
 
       const pkgKeyProps = result.value;
-      const installedPackageResult = await isPackageVersionOrLaterInstalled({
-        savedObjectsClient,
-        pkgName: pkgKeyProps.name,
-        pkgVersion: pkgKeyProps.version,
-      });
+      if (!force) {
+        const installedPackageResult = await isPackageVersionOrLaterInstalled({
+          savedObjectsClient,
+          pkgName: pkgKeyProps.name,
+          pkgVersion: pkgKeyProps.version,
+        });
 
-      if (installedPackageResult) {
-        const {
-          name,
-          version,
-          installed_es: installedEs,
-          installed_kibana: installedKibana,
-        } = installedPackageResult.package;
-        return {
-          name,
-          version,
-          result: {
-            assets: [...installedEs, ...installedKibana],
-            status: 'already_installed',
-            installType: 'unknown',
-          } as InstallResult,
-        };
+        if (installedPackageResult) {
+          const {
+            name,
+            version,
+            installed_es: installedEs,
+            installed_kibana: installedKibana,
+          } = installedPackageResult.package;
+          return {
+            name,
+            version,
+            result: {
+              assets: [...installedEs, ...installedKibana],
+              status: 'already_installed',
+              installType: 'unknown',
+            } as InstallResult,
+          };
+        }
       }
 
       const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
