@@ -22,7 +22,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { sourcererPaths } from '../../../common/containers/sourcerer';
+import { sourcererPaths } from '../../../sourcerer/containers';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -35,7 +35,7 @@ jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
-jest.mock('../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
