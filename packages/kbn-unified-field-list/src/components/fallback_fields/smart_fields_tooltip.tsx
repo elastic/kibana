@@ -10,13 +10,9 @@ import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-interface SmartFieldFallbackTooltipProps {
+const SmartFieldFallbackTooltip: React.FC<{
   associatedSmartFields: string;
-}
-
-const SmartFieldFallbackTooltip: React.FC<SmartFieldFallbackTooltipProps> = ({
-  associatedSmartFields,
-}) => {
+}> = ({ associatedSmartFields }) => {
   return (
     <EuiIconTip
       anchorProps={{ 'data-test-subj': 'smartFieldFallbackTooltipIcon' }}
