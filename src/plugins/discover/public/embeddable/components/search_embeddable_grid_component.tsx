@@ -17,7 +17,10 @@ import {
 } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -62,57 +65,83 @@ export function SearchEmbeddableGridComponent({
   onAddFilter,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
-  const [savedSearch, rows] = useBatchedPublishingSubjects(api.savedSearch$, api.rows$);
+  const [dataViews, rows, columns, sort, savedSearchId] = useBatchedPublishingSubjects(
+    api.dataViews,
+    api.rows$,
+    api.columns$,
+    api.sort$,
+    api.savedObjectId
+  );
+
+  const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
+    useBatchedOptionalPublishingSubjects(
+      api.panelTitle,
+      api.panelDescription,
+      api.defaultPanelTitle,
+      api.defaultPanelDescription
+    );
 
   const savedSearchProps: SavedSearchProps = useMemo(() => {
     return {
-      title: savedSearch.title,
-      searchTitle: savedSearch.title,
-      description: savedSearch.description,
-      searchDescription: savedSearch.description,
-      savedSearchId: savedSearch.id,
-      dataView: savedSearch.searchSource.getField('index'),
-      columns: savedSearch.columns ?? [],
-      sort: getSortForEmbeddable(savedSearch, savedSearch.sort, discoverServices.uiSettings),
-      rowHeightState: savedSearch.rowHeight,
-      headerRowHeightState: savedSearch.headerRowHeight,
-      rowsPerPageState: savedSearch.rowsPerPage,
-      sampleSizeState: savedSearch.sampleSize,
-      onUpdateRowHeight: (rowHeight: number | undefined) => {
-        api.savedSearch$.next({ ...savedSearch, rowHeight });
-      },
-      onUpdateHeaderRowHeight: (headerRowHeight: number | undefined) => {
-        api.savedSearch$.next({ ...savedSearch, headerRowHeight });
-      },
-      onUpdateRowsPerPage: (rowsPerPage: number | undefined) => {
-        api.savedSearch$.next({ ...savedSearch, rowsPerPage });
-      },
-      onUpdateSampleSize: (sampleSize: number | undefined) => {
-        api.savedSearch$.next({ ...savedSearch, sampleSize });
-      },
-      onSetColumns: (updatedColumns: string[]) => {
-        api.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
-      },
-      onSort: (nextSort: string[][]) => {
-        const sortOrderArr: SortOrder[] = [];
-        nextSort.forEach((arr) => {
-          sortOrderArr.push(arr as SortOrder);
-        });
-        api.savedSearch$.next({ ...savedSearch, sort: sortOrderArr });
-      },
+      title: panelTitle,
+      searchTitle: savedSearchTitle,
+      description: panelDescription,
+      searchDescription: savedSearchDescription,
+      savedSearchId,
+      dataView: dataViews?.[0],
+      columns: columns ?? [],
+      sort,
+      // sort: getSortForEmbeddable(savedSearch, savedSearch.sort, discoverServices.uiSettings),
+      // rowHeightState: savedSearch.rowHeight,
+      // headerRowHeightState: savedSearch.headerRowHeight,
+      // rowsPerPageState: savedSearch.rowsPerPage,
+      // sampleSizeState: savedSearch.sampleSize,
+      // onUpdateRowHeight: (rowHeight: number | undefined) => {
+      //   api.savedSearch$.next({ ...savedSearch, rowHeight });
+      // },
+      // onUpdateHeaderRowHeight: (headerRowHeight: number | undefined) => {
+      //   api.savedSearch$.next({ ...savedSearch, headerRowHeight });
+      // },
+      // onUpdateRowsPerPage: (rowsPerPage: number | undefined) => {
+      //   api.savedSearch$.next({ ...savedSearch, rowsPerPage });
+      // },
+      // onUpdateSampleSize: (sampleSize: number | undefined) => {
+      //   api.savedSearch$.next({ ...savedSearch, sampleSize });
+      // },
+      // onSetColumns: (updatedColumns: string[]) => {
+      //   api.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
+      // },
+      // onSort: (nextSort: string[][]) => {
+      //   const sortOrderArr: SortOrder[] = [];
+      //   nextSort.forEach((arr) => {
+      //     sortOrderArr.push(arr as SortOrder);
+      //   });
+      //   api.savedSearch$.next({ ...savedSearch, sort: sortOrderArr });
+      // },
     };
-  }, [api.savedSearch$, savedSearch, discoverServices]);
+  }, [
+    panelTitle,
+    panelDescription,
+    savedSearchTitle,
+    savedSearchDescription,
+    savedSearchId,
+    dataViews,
+    columns,
+    sort,
+  ]);
 
-  const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+  // const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
-  const useLegacyTable = useMemo(
-    () =>
-      isLegacyTableEnabled({
-        uiSettings: discoverServices.uiSettings,
-        isEsqlMode: isEsql,
-      }),
-    [discoverServices, isTextBasedQueryMode]
-  );
+  // const useLegacyTable = useMemo(
+  //   () =>
+  //     isLegacyTableEnabled({
+  //       uiSettings: discoverServices.uiSettings,
+  //       isEsqlMode: isEsql,
+  //     }),
+  //   [discoverServices, isEsql]
+  // );
+
+  const useLegacyTable = false;
 
   const searchProps: EmbeddableComponentSearchProps | undefined = useMemo(() => {
     const { dataView } = savedSearchProps;

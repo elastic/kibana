@@ -135,6 +135,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   public isCompatible = async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
 
+    console.log('cONTEXT', context);
+
     if (!compatibilityCheck(embeddable)) {
       return false;
     }

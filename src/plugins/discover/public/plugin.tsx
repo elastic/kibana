@@ -9,6 +9,9 @@
 import React, { ComponentType } from 'react';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -23,19 +26,27 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -76,9 +87,6 @@ import { HistoryService } from './history_service';
 import { registerFeature } from './register_feature';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { injectTruncateStyles } from './utils/truncate_styles';
-import { SavedSearchType } from '@kbn/saved-search-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 
 /**
  * @public

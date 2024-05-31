@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, lastValueFrom, switchMap } from 'rxjs';
+import { lastValueFrom, switchMap } from 'rxjs';
 
 import {
   buildDataTableRecord,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { EsHitRecord } from '@kbn/discover-utils/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { fetch$, FetchContext, PublishingSubject } from '@kbn/presentation-publishing';
+import { fetch$, FetchContext } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 
+import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SearchEmbeddableApi } from './types';
 import { updateSearchSource } from './utils/update_search_source';
-import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 
-export const isEsqlMode = (savedSearch: SavedSearch): boolean => {
+export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');
   return isOfAggregateQueryType(query);
 };
@@ -36,13 +36,7 @@ export function initializeFetch({
   api,
   discoverServices,
 }: {
-  api: SearchEmbeddableApi & {
-    savedSearch$: PublishingSubject<SavedSearch>;
-    dataLoading$: BehaviorSubject<boolean | undefined>;
-    blockingError$: BehaviorSubject<Error | undefined>;
-    rows$: BehaviorSubject<DataTableRecord[]>;
-    fetchContext$: BehaviorSubject<FetchContext | undefined>;
-  };
+  api: SearchEmbeddableApi & { fetchContext$: BehaviorSubject<FetchContext | undefined> };
   discoverServices: DiscoverServices;
 }) {
   const requestAdapter = new RequestAdapter();
@@ -51,13 +45,15 @@ export function initializeFetch({
   const fetchSubscription = fetch$(api)
     .pipe(
       switchMap(async (fetchContext) => {
-        api.blockingError$.next(undefined);
-        const savedSearch = api.savedSearch$.getValue();
-        const dataView = savedSearch.searchSource.getField('index');
-        if (!dataView) {
+        // api.blockingError$.next(undefined);
+        const dataView = api.dataViews.getValue()?.[0];
+        const searchSource = api.searchSource$.getValue();
+        if (!dataView || !searchSource) {
           return;
         }
-        const query = savedSearch.searchSource.getField('query');
+        const query = searchSource.getField('query');
+        const sort = api.sort$.getValue();
+        const sampleSize = api.sampleSize$.getValue();
 
         // Abort any in-progress requests
         abortController.abort();
@@ -68,10 +64,10 @@ export function initializeFetch({
 
         updateSearchSource(
           discoverServices,
-          savedSearch.searchSource,
+          searchSource,
           dataView,
-          savedSearch.sort,
-          getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings),
+          sort,
+          getAllowedSampleSize(sampleSize, discoverServices.uiSettings),
           useNewFieldsApi,
           fetchContext,
           {
@@ -80,15 +76,15 @@ export function initializeFetch({
         );
 
         try {
-          api.dataLoading$.next(true);
+          // api.dataLoading$.next(true);
           // Log request to inspector
           requestAdapter.reset();
 
-          const esqlMode = isEsqlMode(savedSearch);
+          const esqlMode = isEsqlMode({ searchSource });
 
           if (esqlMode && query) {
             const result = await fetchEsql(
-              savedSearch.searchSource.getField('query')!,
+              searchSource.getField('query')!,
               dataView,
               this.services.data,
               this.services.expressions,
@@ -118,7 +114,7 @@ export function initializeFetch({
            * Fetch via saved search
            */
           const { rawResponse: resp } = await lastValueFrom(
-            savedSearch.searchSource.fetch$({
+            searchSource.fetch$({
               abortSignal: abortController.signal,
               sessionId: searchSessionId,
               inspector: {
@@ -152,7 +148,7 @@ export function initializeFetch({
       })
     )
     .subscribe((next) => {
-      api.dataLoading$.next(false);
+      // api.dataLoading$.next(false);
       if (next) {
         if (next.hasOwnProperty('rows')) {
           api.rows$.next(next.rows ?? []);
@@ -161,7 +157,7 @@ export function initializeFetch({
           api.fetchContext$.next(next.fetchContext);
         }
         if (next.hasOwnProperty('error')) {
-          api.blockingError$.next(next.error);
+          // api.blockingError$.next(next.error);
         }
       }
     });

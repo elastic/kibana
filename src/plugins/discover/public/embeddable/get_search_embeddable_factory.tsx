@@ -12,7 +12,6 @@ import { BehaviorSubject } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -23,10 +22,12 @@ import {
   apiHasParentApi,
   FetchContext,
   initializeTitles,
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
+import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { DiscoverServices } from '../build_services';
@@ -51,7 +52,7 @@ export const getSearchEmbeddableFactory = ({
   };
   discoverServices: DiscoverServices;
 }) => {
-  const { attributeService } = discoverServices.savedSearch.byValue;
+  const { attributeService, toSavedSearch } = discoverServices.savedSearch.byValue;
 
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
@@ -59,33 +60,65 @@ export const getSearchEmbeddableFactory = ({
     SearchEmbeddableRuntimeState
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
-    deserializeState: (state) => {
-      if (!state.rawState) return {};
-      const serializedState = state.rawState as EmbeddableStateWithType;
-      const deserializedState = inject(serializedState, state.references ?? []);
-      // console.log('deserializedState', { state, deserializedState });
-      return deserializedState;
+    deserializeState: async (serializedState) => {
+      console.log('serializedState', serializedState);
+
+      const savedObjectId = serializedState.rawState.savedObjectId;
+      const savedSearch = await toSavedSearch(
+        savedObjectId,
+        savedObjectId
+          ? await attributeService.unwrapMethod(savedObjectId)
+          : (inject(
+              serializedState.rawState,
+              serializedState.references ?? []
+            ) as SavedSearchUnwrapResult)
+      );
+
+      // const { searchSourceJSON, references: originalReferences } =
+      //   savedSearch.searchSource.serialize();
+      // console.log(searchSourceJSON, originalReferences);
+      /** TODO: Remove unused state? kibanaSavedObjectMeta for example */
+
+      return savedSearch;
+      // return {
+      //   ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
+      //   searchSource: savedSearch.searchSource,
+      // };
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       console.log('initialState', initialState);
+
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
+      const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
+
       const {
-        onUnmount,
         searchEmbeddableApi,
         searchEmbeddableComparators,
-        serializeSearchEmbeddable,
+        searchEmbeddableStateManager,
+        // serializeSearchEmbeddable,
+        // stateManager
+        // snapshotState,
       } = await initializeSearchEmbeddableApi(initialState, { startServices, discoverServices });
 
       const serializeState = (): SerializedPanelState<SearchEmbeddableSerializedState> => {
-        const { state: rawState, references } = extract({
-          ...initialState,
-          type: SEARCH_EMBEDDABLE_TYPE,
-          ...serializeTitles(),
-          ...serializeSearchEmbeddable(),
-        } as unknown as EmbeddableStateWithType);
+        const searchSource = searchEmbeddableApi.searchSource$.getValue();
+        const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
+        const savedSearchAttributes = toSavedSearchAttributes(
+          searchEmbeddableApi.getSavedSearch(),
+          searchSourceJSON
+        );
+
+        // const references = savedObjectsTagging
+        // ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
+        // : originalReferences;
+
+        const { rawState, references } = extract({
+          attributes: savedSearchAttributes,
+        });
+        console.log({ rawState, references, originalReferences });
         return {
           rawState: rawState as unknown as SearchEmbeddableSerializedState,
           references,
@@ -94,12 +127,12 @@ export const getSearchEmbeddableFactory = ({
 
       const getAppTarget = async () => {
         const savedObjectId = fetchContext$.getValue()?.searchSessionId;
-        const dataView = searchEmbeddableApi.savedSearch$.getValue().searchSource.getField('index');
+        const dataViews = searchEmbeddableApi.dataViews.getValue();
         const locatorParams = getDiscoverLocatorParams(searchEmbeddableApi);
 
         // We need to use a redirect URL if this is a by value saved search using
         // an ad hoc data view to ensure the data view spec gets encoded in the URL
-        const useRedirect = !savedObjectId && !dataView?.isPersisted();
+        const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
         const editUrl = useRedirect
           ? discoverServices.locator.getRedirectUrl(locatorParams)
           : await discoverServices.locator.getUrl(locatorParams);
@@ -114,6 +147,7 @@ export const getSearchEmbeddableFactory = ({
           ...searchEmbeddableApi,
           dataLoading: dataLoading$,
           blockingError: blockingError$,
+          savedObjectId: savedObjectId$,
           getTypeDisplayName: () =>
             i18n.translate('discover.embeddable.search.displayName', {
               defaultMessage: 'search',
@@ -123,14 +157,13 @@ export const getSearchEmbeddableFactory = ({
           },
           canLinkToLibrary: async () => {
             return (
-              discoverServices.capabilities.discover.save &&
-              !Boolean(searchEmbeddableApi.savedObjectId.getValue())
+              discoverServices.capabilities.discover.save && !Boolean(savedObjectId$.getValue())
             );
           },
-          canUnlinkFromLibrary: async () => Boolean(searchEmbeddableApi.savedObjectId.getValue()),
+          canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
           saveToLibrary: async (title: string) => {
             const savedObjectId = await attributeService.saveMethod({
-              ...searchEmbeddableApi.attributes$.getValue(),
+              // ...searchEmbeddableApi.attributes$.getValue(),
               title,
             });
             return savedObjectId;
@@ -150,7 +183,7 @@ export const getSearchEmbeddableFactory = ({
             const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
             return {
               ...byValueState,
-              attributes: searchEmbeddableApi.attributes$.getValue(),
+              // attributes: searchEmbeddableApi.attributes$.getValue(),
             };
           },
           serializeState,
@@ -158,6 +191,7 @@ export const getSearchEmbeddableFactory = ({
         {
           ...titleComparators,
           ...searchEmbeddableComparators,
+          savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
         }
       );
 
@@ -193,11 +227,11 @@ export const getSearchEmbeddableFactory = ({
       const unsubscribeFromFetch = initializeFetch({
         api: {
           ...api,
-          dataLoading$,
-          blockingError$,
+          dataLoading: dataLoading$,
+          blockingError: blockingError$,
           fetchContext$,
           rows$: searchEmbeddableApi.rows$,
-          savedSearch$: searchEmbeddableApi.savedSearch$,
+          // savedSearch$: searchEmbeddableApi.savedSearch$,
         },
         discoverServices,
       });
@@ -205,7 +239,15 @@ export const getSearchEmbeddableFactory = ({
       return {
         api,
         Component: () => {
-          const savedSearch = useStateFromPublishingSubject(searchEmbeddableApi.savedSearch$);
+          // const searchSource = useStateFromPublishingSubject(searchEmbeddableApi.dataViews);
+          const [dataViews, columns, rows, searchSource, savedSearchViewMode] =
+            useBatchedPublishingSubjects(
+              searchEmbeddableApi.dataViews,
+              searchEmbeddableApi.columns$,
+              searchEmbeddableApi.rows$,
+              searchEmbeddableApi.searchSource$,
+              searchEmbeddableApi.savedSearchViewMode$
+            );
 
           useEffect(() => {
             return () => {
@@ -214,20 +256,16 @@ export const getSearchEmbeddableFactory = ({
             };
           }, []);
 
-          const { dataView, columns, viewMode } = useMemo(() => {
-            return {
-              dataView: savedSearch.searchSource.getField('index'),
-              columns: savedSearch.columns ?? [],
-              viewMode: getValidViewMode({
-                viewMode: savedSearch.viewMode,
-                isEsqlMode: isEsqlMode(savedSearch),
-                // isTextBasedQueryMode: isTextBasedQuery(savedSearch.searchSource.getField('query')),
-              }),
-            };
-          }, [savedSearch]);
+          const viewMode = useMemo(() => {
+            return getValidViewMode({
+              viewMode: savedSearchViewMode,
+              isEsqlMode: isEsqlMode({ searchSource }),
+            });
+          }, [savedSearchViewMode, searchSource]);
 
           const onAddFilter = useCallback(
             async (field, value, operator) => {
+              const dataView = dataViews?.[0];
               if (!dataView) return;
 
               let newFilters = generateFilters(
@@ -247,16 +285,16 @@ export const getSearchEmbeddableFactory = ({
                 filters: newFilters,
               });
             },
-            [dataView]
+            [dataViews]
           );
 
           const renderAsFieldStatsTable = useMemo(
             () =>
               discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) &&
               viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-              dataView &&
+              dataViews?.[0] &&
               Array.isArray(columns),
-            [viewMode, dataView, columns]
+            [dataViews, columns, viewMode]
           );
 
           return (
@@ -267,7 +305,7 @@ export const getSearchEmbeddableFactory = ({
                   api={{
                     ...api,
                     fetchContext$,
-                    savedSearch$: searchEmbeddableApi.savedSearch$,
+                    // savedSearch$: searchEmbeddableApi.savedSearch$,
                   }}
                   onAddFilter={onAddFilter}
                 />
@@ -280,8 +318,7 @@ export const getSearchEmbeddableFactory = ({
                   <SearchEmbeddableGridComponent
                     api={{
                       ...api,
-                      rows$: searchEmbeddableApi.rows$,
-                      savedSearch$: searchEmbeddableApi.savedSearch$,
+                      ...searchEmbeddableApi,
                     }}
                     onAddFilter={onAddFilter}
                   />

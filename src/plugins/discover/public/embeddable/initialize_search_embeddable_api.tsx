@@ -6,24 +6,28 @@
  * Side Public License, v 1.
  */
 
-import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import type { PublishesSavedObjectId, StateComparators } from '@kbn/presentation-publishing';
-import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import {
-  SavedSearch,
-  SavedSearchByValueAttributes,
-  SavedSearchUnwrapResult,
-} from '@kbn/saved-search-plugin/public';
+import type { StateComparators } from '@kbn/presentation-publishing';
+import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { DiscoverServices } from '../build_services';
-import { getSortForEmbeddable } from '../utils';
-import { HasSavedSearch, PublishesRows, SearchEmbeddableSerializedState } from './types';
+import {
+  PublishesSavedSearchAttributes,
+  SearchEmbeddableAttributes,
+  SearchEmbeddableRuntimeState,
+} from './types';
+
+export type SavedSearchAttributesManager = {
+  [key in keyof Required<SearchEmbeddableAttributes>]: BehaviorSubject<
+    SearchEmbeddableAttributes[key]
+  >;
+};
 
 export const initializeSearchEmbeddableApi = async (
-  initialState: SearchEmbeddableSerializedState,
+  initialState: SearchEmbeddableRuntimeState,
   {
     startServices,
     discoverServices,
@@ -35,106 +39,79 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices: DiscoverServices;
   }
 ): Promise<{
-  onUnmount: () => void;
-  searchEmbeddableApi: HasSavedSearch &
-    PublishesSavedObjectId &
-    PublishesRows & {
-      attributes$: BehaviorSubject<SavedSearchByValueAttributes>;
-      savedSearch$: BehaviorSubject<SavedSearch>;
-    };
-  searchEmbeddableComparators: StateComparators<
-    Omit<SearchEmbeddableSerializedState, 'title' | 'description' | 'hidePanelTitles'>
-  >;
-  serializeSearchEmbeddable: () => SearchEmbeddableSerializedState;
+  searchEmbeddableApi: PublishesSavedSearchAttributes;
+  searchEmbeddableStateManager: SavedSearchAttributesManager;
+  searchEmbeddableComparators: StateComparators<SearchEmbeddableAttributes>;
 }> => {
-  const { attributeService, toSavedSearch } = discoverServices.savedSearch.byValue;
-
-  const unwrapResult = initialState?.savedObjectId
-    ? await attributeService.unwrapMethod(initialState.savedObjectId)
-    : initialState;
-  const { attributes: initialAttributes } = unwrapResult;
-  // console.log('initialAttributes', initialState, initialAttributes, unwrapResult);
-
-  // console.log('toSavedSearch');
-  const savedSearch = await toSavedSearch(
-    initialState?.savedObjectId,
-    unwrapResult as SavedSearchUnwrapResult
-  );
-  // console.log('saved search', savedSearch);
   const parentSearchSource = await discoverServices.data.search.searchSource.create();
-  savedSearch.searchSource.setParent(parentSearchSource);
+  initialState.searchSource.setParent(parentSearchSource);
+  const dataView = initialState.searchSource.getField('index');
 
-  const savedSearch$ = new BehaviorSubject<SavedSearch>(savedSearch);
+  const searchSource$ = new BehaviorSubject(initialState.searchSource);
+  const managed$ = new BehaviorSubject(initialState.managed);
+  const dataViews = new BehaviorSubject(dataView ? [dataView] : undefined);
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
+  const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
+  const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
+  const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
+  const sort$ = new BehaviorSubject<SortOrder | undefined>(initialState.sort);
+  const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
+  const breakdownField$ = new BehaviorSubject<string | undefined>(initialState.breakdownField);
+  const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
-  // by reference
-  const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
-  // by value
-  const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes>(
-    initialAttributes ??
-      ({
-        columns: [] as string[],
-        sort: getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
-      } as SavedSearchByValueAttributes)
-  );
-
-  const savedSearchToAttributesSubscription = savedSearch$
-    .pipe(skip(1))
-    .subscribe((newSavedSearch) => {
-      // console.log('savedSearchToAttributes', newSavedSearch);
-      const { searchSourceJSON, references: originalReferences } =
-        savedSearch.searchSource.serialize();
-      attributes$.next({
-        ...toSavedSearchAttributes(newSavedSearch, searchSourceJSON),
-        references: originalReferences,
-      });
-    });
-
-  const cleanup = () => {
-    savedSearchToAttributesSubscription.unsubscribe();
+  const stateManager: SavedSearchAttributesManager = {
+    columns: columns$,
+    rowHeight: rowHeight$,
+    rowsPerPage: rowsPerPage$,
+    headerRowHeight: headerRowHeight$,
+    sort: sort$,
+    sampleSize: sampleSize$,
+    breakdownField: breakdownField$,
+    viewMode: savedSearchViewMode$,
+    managed: managed$,
+    searchSource: searchSource$,
   };
 
-  // savedSearchToAttributes - unsubscribe
-
   const getSearchEmbeddableComparators = (): StateComparators<
-    Omit<SearchEmbeddableSerializedState, 'title' | 'description' | 'hidePanelTitles'>
+    Omit<
+      SearchEmbeddableRuntimeState,
+      'title' | 'description' | 'hidePanelTitles' | 'savedObjectId'
+    >
   > => {
     return {
-      savedObjectId: [
-        savedObjectId$,
-        (nextSavedObjectId?: string) => savedObjectId$.next(nextSavedObjectId),
-      ],
-      attributes: [
-        attributes$ as BehaviorSubject<SavedSearchByValueAttributes | undefined>,
-        (attributes: SavedSearchByValueAttributes | undefined) =>
-          attributes$.next(attributes as SavedSearchByValueAttributes),
-        (a, b) => (savedObjectId$.getValue() ? true : deepEqual(a, b)),
-      ],
+      searchSource: [searchSource$, (value) => searchSource$.next(value)],
+      rowHeight: [rowHeight$, (value) => rowHeight$.next(value)],
+      rowsPerPage: [rowsPerPage$, (value) => rowsPerPage$.next(value)],
+      headerRowHeight: [headerRowHeight$, (value) => headerRowHeight$.next(value)],
+      columns: [columns$, (value) => columns$.next(value)],
+      sort: [sort$, (value) => sort$.next(value)],
+      sampleSize: [sampleSize$, (value) => sampleSize$.next(value)],
+      breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
+      viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
+      managed: [managed$, (value) => managed$.next(value)],
     };
   };
 
   return {
-    onUnmount: cleanup,
     searchEmbeddableApi: {
-      savedObjectId: savedObjectId$,
-      attributes$,
-      savedSearch$,
       rows$,
-      getSavedSearch: () => savedSearch$.getValue(),
+      columns$,
+      sort$,
+      searchSource$,
+      sampleSize$,
+      dataViews,
+      savedSearchViewMode$,
+      getSavedSearch: (): SavedSearch => {
+        return Object.keys(stateManager).reduce((prev, key) => {
+          return {
+            ...prev,
+            [key]: stateManager[key as keyof SavedSearchAttributesManager].getValue(),
+          };
+        }, {} as SavedSearch);
+      },
     },
+    searchEmbeddableStateManager: stateManager,
     searchEmbeddableComparators: getSearchEmbeddableComparators(),
-    serializeSearchEmbeddable: () => {
-      // console.log('serializeSearchEmbeddable');
-      const savedObjectId = savedObjectId$.getValue();
-      if (savedObjectId) {
-        return {
-          savedObjectId,
-        };
-      }
-      // console.log('---> attributes', attributes$.getValue())
-      return {
-        attributes: attributes$.getValue(),
-      };
-    },
   };
 };

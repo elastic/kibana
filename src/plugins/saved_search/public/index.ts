@@ -12,8 +12,6 @@ export type { SortOrder } from '../common/types';
 export type {
   SavedSearch,
   SaveSavedSearchOptions,
-  SearchByReferenceInput,
-  SearchByValueInput,
   SavedSearchByValueAttributes,
   SavedSearchAttributeService,
   SavedSearchUnwrapMetaInfo,

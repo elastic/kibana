@@ -8,10 +8,10 @@
 
 import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { inject, extract } from '../../common/embeddable';
+// import { inject, extract } from '../../common/embeddable';
 
 export const createSearchEmbeddableFactory = (): EmbeddableRegistryDefinition => ({
   id: SEARCH_EMBEDDABLE_TYPE,
-  inject,
-  extract,
+  // inject,
+  // extract,
 });

@@ -7,17 +7,17 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { SearchByValueInput } from '@kbn/saved-search-plugin/public';
+import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SearchEmbeddableSerializedState } from './types';
 
 export const inject = (
-  state: EmbeddableStateWithType,
+  state: SearchEmbeddableSerializedState,
   injectedReferences: SavedObjectReference[]
-): EmbeddableStateWithType => {
+): SearchEmbeddableSerializedState => {
   if (hasAttributes(state)) {
     // Filter out references that are not in the state
     // https://github.com/elastic/kibana/pull/119079
-    const references = state.attributes.references
+    const references = state.attributes?.references
       .map((stateRef) =>
         injectedReferences.find((injectedRef) => injectedRef.name === stateRef.name)
       )
@@ -29,24 +29,25 @@ export const inject = (
         ...state.attributes,
         references,
       },
-    } as EmbeddableStateWithType;
+    } as SearchEmbeddableSerializedState;
   }
 
   return state;
 };
 
-export const extract = (
-  state: EmbeddableStateWithType
-): { state: EmbeddableStateWithType; references: SavedObjectReference[] } => {
+export const extract = (state: {
+  attributes: SearchEmbeddableSerializedState;
+}): SerializedPanelState<{
+  attributes: SearchEmbeddableSerializedState;
+}> => {
   let references: SavedObjectReference[] = [];
 
   if (hasAttributes(state)) {
     references = state.attributes.references;
   }
 
-  return { state, references };
+  return { rawState: state, references };
 };
 
-const hasAttributes = (
-  state: EmbeddableStateWithType
-): state is EmbeddableStateWithType & SearchByValueInput => 'attributes' in state;
+const hasAttributes = (state: unknown): state is SearchEmbeddableSerializedState =>
+  'attributes' in (state as SearchEmbeddableSerializedState);

@@ -6,37 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { ISearchSource, SearchSource } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import type {
-  DefaultEmbeddableApi,
-  Embeddable,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
   HasLibraryTransforms,
   PublishesBlockingError,
   PublishesDataLoading,
+  PublishesDataViews,
   PublishesSavedObjectId,
-  PublishingSubject,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type {
-  SavedSearch,
-  SavedSearchByValueAttributes,
-  SearchByReferenceInput,
-  SearchByValueInput,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/common/types';
+import type { SavedSearchByValueAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DiscoverServices } from '../build_services';
 import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
 import type { DiscoverGridEmbeddableSearchProps } from './components/saved_search_grid';
-
-export type SearchInput = SearchByValueInput | SearchByReferenceInput; // TODO: Delete
 
 export type SearchEmbeddableSerializedState = SerializedTitles & {
   // by value
@@ -46,37 +35,59 @@ export type SearchEmbeddableSerializedState = SerializedTitles & {
   savedObjectId?: string;
 };
 
-export type SearchEmbeddableRuntimeState = SavedSearchByValueAttributes;
+export type SearchEmbeddableAttributes = Pick<
+  SavedSearch,
+  | 'searchSource'
+  | 'managed'
+  | 'rowHeight'
+  | 'rowsPerPage'
+  | 'headerRowHeight'
+  | 'columns'
+  | 'sort'
+  | 'sampleSize'
+  | 'breakdownField'
+  | 'viewMode'
+>;
 
-export interface PublishesRows {
-  rows$: BehaviorSubject<DataTableRecord[]>;
-}
+export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
+  SerializedTitles & { savedObjectId?: string };
+
+// export type SearchEmbeddableRuntimeState = Omit<
+//   SavedSearchByValueAttributes,
+//   | 'title'
+//   | 'description'
+//   | 'kibanaSavedObjectMeta'
+//   | 'visContext'
+//   | 'timeRestore'
+//   | 'refreshInterval'
+// > &
+//   SerializedTitles & { savedObjectId?: string };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
-  HasSavedSearch &
+  // HasSavedSearch &
+  HasSearchSource &
+  PublishesDataViews &
+  PublishesSavedObjectId &
   HasLibraryTransforms &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesRows &
+  PublishesSavedSearchAttributes &
+  // PublishesSearchSession
+  // PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
-// TODO: Delete
-export interface SearchOutput extends EmbeddableOutput {
-  indexPatterns?: DataView[];
-  editable: boolean;
-}
-// TODO: Delete
-export type ISearchEmbeddable = IEmbeddable<SearchInput, SearchOutput> &
-  HasSavedSearch &
-  HasTimeRange;
-
-// TODO: Delete
-export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
-  type: string;
+export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
+  rows$: BehaviorSubject<DataTableRecord[]>;
+  columns$: BehaviorSubject<string[] | undefined>;
+  sort$: BehaviorSubject<SortOrder | undefined>;
+  sampleSize$: BehaviorSubject<number | undefined>;
+  searchSource$: BehaviorSubject<ISearchSource>;
+  savedSearchViewMode$: BehaviorSubject<VIEW_MODE | undefined>;
+  // dataViewId$: BehaviorSubject<string | undefined>;
 }
 
 export interface HasSavedSearch {
-  getSavedSearch: () => SavedSearch | undefined;
+  getSavedSearch: () => SavedSearch;
 }
 
 export const apiHasSavedSearch = (
@@ -85,6 +96,10 @@ export const apiHasSavedSearch = (
   const embeddable = api as HasSavedSearch;
   return Boolean(embeddable.getSavedSearch) && typeof embeddable.getSavedSearch === 'function';
 };
+
+export interface HasSearchSource {
+  getSavedSearch: () => SearchSource | undefined;
+}
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;

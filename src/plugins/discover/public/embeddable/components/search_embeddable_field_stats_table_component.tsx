@@ -28,24 +28,23 @@ export function SearchEmbeddablFieldStatsTableComponent({
   api,
   onAddFilter,
 }: SavedSearchEmbeddableComponentProps) {
-  const [savedSearch, fetchContext] = useBatchedPublishingSubjects(
+  const [savedSearch, fetchContext, dataViews, columns] = useBatchedPublishingSubjects(
     api.savedSearch$,
-    api.fetchContext$
+    api.fetchContext$,
+    api.dataViews,
+    api.columns$
   );
 
-  const { dataView, columns } = useMemo(() => {
-    return {
-      dataView: savedSearch.searchSource.getField('index'),
-      columns: savedSearch.columns ?? [],
-    };
-  }, [savedSearch]);
+  const dataView = useMemo(() => {
+    return dataViews?.[0];
+  }, [dataViews]);
 
   if (!dataView) return <></>;
 
   return (
     <FieldStatisticsTable
       dataView={dataView}
-      columns={columns}
+      columns={columns ?? []}
       savedSearch={savedSearch}
       filters={fetchContext?.filters}
       query={fetchContext?.query}
