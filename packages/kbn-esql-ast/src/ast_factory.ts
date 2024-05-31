@@ -39,7 +39,7 @@ import {
   createLiteral,
   textExistsAndIsValid,
   createSource,
-  crateAstBaseItem,
+  createAstBaseItem,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import {
@@ -150,7 +150,7 @@ export class AstListener implements ESQLParserListener {
    */
   exitMetricsCommand(ctx: MetricsCommandContext): void {
     const node: ESQLAstMetricsCommand = {
-      ...crateAstBaseItem('metrics', ctx),
+      ...createAstBaseItem('metrics', ctx),
       type: 'command',
       args: [],
       indices: ctx

@@ -38,7 +38,7 @@ export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
 }
 
-export function crateAstBaseItem<Name = string>(
+export function createAstBaseItem<Name = string>(
   name: Name,
   ctx: ParserRuleContext
 ): ESQLAstBaseItem<Name> {
