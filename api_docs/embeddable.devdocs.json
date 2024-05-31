@@ -4230,10 +4230,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.onPhaseChange",
+            "id": "def-public.Embeddable.phase$",
             "type": "Object",
             "tags": [],
-            "label": "onPhaseChange",
+            "label": "phase$",
             "description": [],
             "signature": [
               "{ source: ",
@@ -9630,6 +9630,14 @@
             "text": "HasType"
           },
           "<string>,",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPhaseEvents",
+            "text": "PublishesPhaseEvents"
+          },
+          ",",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

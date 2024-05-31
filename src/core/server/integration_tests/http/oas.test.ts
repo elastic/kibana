@@ -88,11 +88,7 @@ it.each([
         '/api/include-test/{id}': {},
       },
     },
-    excludes: {
-      paths: {
-        '/my-other-plugin': {},
-      },
-    },
+    excludes: ['/my-other-plugin'],
   },
   {
     queryParam: { pluginId: 'myPlugin' },
@@ -105,24 +101,18 @@ it.each([
         '/api/include-test/{id}': {},
       },
     },
-    excludes: {
-      paths: {
-        '/my-other-plugin': {},
-      },
-    },
+    excludes: ['/my-other-plugin'],
   },
   {
     queryParam: { pluginId: 'nonExistant' },
     includes: {},
-    excludes: {
-      paths: {
-        '/my-include-test': {},
-        '/my-other-plugin': {},
-      },
-    },
+    excludes: ['/my-include-test', '/my-other-plugin'],
   },
   {
-    queryParam: { pluginId: 'myOtherPlugin', pathStartsWith: '/api/my-other-plugin' },
+    queryParam: {
+      pluginId: 'myOtherPlugin',
+      pathStartsWith: ['/api/my-other-plugin', '/api/versioned'],
+    },
     includes: {
       paths: {
         '/api/my-other-plugin': {
@@ -132,11 +122,35 @@ it.each([
         },
       },
     },
-    excludes: {
+    excludes: ['/my-include-test'],
+  },
+  {
+    queryParam: { access: 'public', version: '2023-10-31' },
+    includes: {
       paths: {
-        '/my-include-test': {},
+        '/api/include-test': {
+          get: {},
+        },
+        '/api/versioned': {
+          get: {},
+        },
       },
     },
+    excludes: ['/api/my-include-test/{id}', '/api/exclude-test', '/api/my-other-plugin'],
+  },
+  {
+    queryParam: { excludePathsMatching: ['/api/exclude-test', '/api/my-other-plugin'] },
+    includes: {
+      paths: {
+        '/api/include-test': {
+          get: {},
+        },
+        '/api/versioned': {
+          get: {},
+        },
+      },
+    },
+    excludes: ['/api/exclude-test', '/api/my-other-plugin'],
   },
 ])(
   'can filter paths based on query params $queryParam',
@@ -145,10 +159,17 @@ it.each([
       config: { server: { oas: { enabled: true } } },
       createRoutes: (getRouter) => {
         const router1 = getRouter(Symbol('myPlugin'));
-        router1.get({ path: '/api/include-test', validate: false }, (_, __, res) => res.ok());
+        router1.get(
+          { path: '/api/include-test', validate: false, options: { access: 'public' } },
+          (_, __, res) => res.ok()
+        );
         router1.post({ path: '/api/include-test', validate: false }, (_, __, res) => res.ok());
         router1.get({ path: '/api/include-test/{id}', validate: false }, (_, __, res) => res.ok());
         router1.get({ path: '/api/exclude-test', validate: false }, (_, __, res) => res.ok());
+
+        router1.versioned
+          .get({ path: '/api/versioned', access: 'public' })
+          .addVersion({ version: '2023-10-31', validate: false }, (_, __, res) => res.ok());
 
         const router2 = getRouter(Symbol('myOtherPlugin'));
         router2.get({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
@@ -159,6 +180,17 @@ it.each([
     const result = await supertest(server.listener).get('/api/oas').query(queryParam);
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject(includes);
-    expect(result.body).not.toMatchObject(excludes);
+    excludes.forEach((exclude) => {
+      expect(result.body.paths).not.toHaveProperty(exclude);
+    });
   }
 );
+
+it('only accepts "public" or "internal" for "access" query param', async () => {
+  const server = await startService({ config: { server: { oas: { enabled: true } } } });
+  const result = await supertest(server.listener).get('/api/oas').query({ access: 'invalid' });
+  expect(result.body.message).toBe(
+    'Invalid access query parameter. Must be one of "public" or "internal".'
+  );
+  expect(result.status).toBe(400);
+});
