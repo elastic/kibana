@@ -85,7 +85,7 @@ const SortableControlInner = forwardRef<
         <EuiIcon type="grabHorizontal" />
       </button>
     ) : (
-      <EuiIcon type="empty" />
+      <EuiIcon type="empty" size="s" />
     );
 
     return (
