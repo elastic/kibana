@@ -617,7 +617,7 @@ export const updateTraceTreeNode = ({
     return;
   }
 
-  let tree = { ...root };
+  const tree = { ...root };
   const stack: Array<{ parent: IWaterfallNode | null; index: number; node: IWaterfallNode }> = [
     { parent: null, index: 0, node: root },
   ];
@@ -632,7 +632,7 @@ export const updateTraceTreeNode = ({
         node.children = buildTree({
           root: node,
           waterfall,
-          maxLevelOpen: node.level + 1, // Load only one level above the current node
+          maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
           path,
         }).children;
       }
@@ -640,7 +640,7 @@ export const updateTraceTreeNode = ({
       if (parent) {
         parent.children[index] = node;
       } else {
-        tree = node;
+        Object.assign(tree, node);
       }
 
       return tree;
