@@ -18,6 +18,8 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiButtonIcon,
+  EuiOverlayMask,
+  EuiConfirmModal,
 } from '@elastic/eui';
 
 import type {
@@ -49,6 +51,8 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
   const [errors, setErrors] = useState<
     Record<number, { name: string | null; value: string | null }>
   >({});
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
   // Necessary to remove uncommitted tags after save is cancelled
   useEffect(() => {
@@ -157,6 +161,72 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
     }));
   };
 
+  const cancelNewTagChanges = () => {
+    setNewTag({ name: '', value: '' });
+    setIsAdding(false);
+    setNewTagErrors({ name: '', value: '' });
+  };
+
+  const cancelEditChanges = (index: number) => {
+    setEditIndexList((prevIndices) => {
+      const newIndices = new Set(prevIndices);
+      newIndices.delete(index);
+      return newIndices;
+    });
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      delete newErrors[index];
+      return newErrors;
+    });
+  };
+
+  const showModal = (index: number) => {
+    setDeleteIndex(index);
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setDeleteIndex(null);
+  };
+
+  const handleDelete = (index: number) => {
+    const updatedTags = globalDataTags.filter((_, i) => i !== index);
+    setGlobalDataTags(updatedTags);
+    updateAgentPolicy({ global_data_tags: updatedTags });
+    setEditIndexList((prevIndices: Set<number>) => {
+      const newIndices = new Set(prevIndices);
+      newIndices.delete(index);
+      return newIndices;
+    });
+    setErrors((prevErrors) => {
+      const { [index]: removedError, ...remainingErrors } = prevErrors;
+      return remainingErrors;
+    });
+    closeModal();
+  };
+
+  const deleteConfirmModal = (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title={`Remove the ${deleteIndex ? globalDataTags[deleteIndex].name : ''} field?`}
+        onCancel={closeModal}
+        onConfirm={() => handleDelete(deleteIndex!)}
+        cancelButtonText="Cancel"
+        confirmButtonText="Remove"
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>Removing the field will affect the next sync. This action cannot be undone.</p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
+  );
+
+  const badgeStyle = {
+    backgroundColor: '#f5f7fa',
+    color: '#6a52b3',
+  };
+
   const columns = [
     {
       field: 'name',
@@ -174,10 +244,11 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
               name="name"
               onChange={(e) => (isEditing ? handleEditChange(e, index) : handleNewTagChange(e))}
               isInvalid={!!error.name}
+              compressed={true}
             />
           </EuiFormRow>
         ) : (
-          <EuiBadge>{name}</EuiBadge>
+          <EuiBadge style={badgeStyle}>{name}</EuiBadge>
         );
       },
     },
@@ -190,17 +261,18 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
         const isAddingRow = isAdding && item === newTag;
         const error = isAddingRow ? newTagErrors : errors[index] || {};
         return isEditing || isAddingRow ? (
-          <EuiFormRow isInvalid={!!error.name} error={error.name}>
+          <EuiFormRow isInvalid={!!error.value} error={error.value}>
             <EuiFieldText
               placeholder="Enter name"
               value={isEditing ? globalDataTags[index].value : newTag.value}
               name="value"
               onChange={(e) => (isEditing ? handleEditChange(e, index) : handleNewTagChange(e))}
               isInvalid={!!error.name}
+              compressed={true}
             />
           </EuiFormRow>
         ) : (
-          <EuiBadge>{value}</EuiBadge>
+          <EuiBadge style={badgeStyle}>{value}</EuiBadge>
         );
       },
     },
@@ -216,7 +288,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
-                    size="s"
+                    size="xs"
                     color="primary"
                     iconType="checkInCircleFilled"
                     onClick={isAdding ? confirmNewTagChanges : () => confirmEditChanges(index)}
@@ -234,6 +306,35 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
             );
           },
         },
+        {
+          name: 'Cancel/Delete',
+          render: (item: GlobalDataTag) => {
+            const index = globalDataTags.indexOf(item);
+            const isEditing = editIndexList.has(index);
+            const isAddingRow = isAdding && item === newTag;
+
+            return isEditing || isAddingRow ? (
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    size="xs"
+                    color="danger"
+                    iconType="errorFilled"
+                    onClick={isAddingRow ? cancelNewTagChanges : () => cancelEditChanges(index)}
+                    aria-label="Cancel"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiButtonIcon
+                aria-label="Delete"
+                iconType="trash"
+                color="text"
+                onClick={() => showModal(index)}
+              />
+            );
+          },
+        },
       ],
     },
   ];
@@ -243,7 +344,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
   return (
     <>
       {globalDataTags.length === 0 && !isAdding ? (
-        <EuiPanel>
+        <EuiPanel hasShadow={false}>
           <EuiText>
             <h4>This policy has no custom fields</h4>
           </EuiText>
@@ -280,6 +381,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </>
       )}
+      {isModalVisible && deleteConfirmModal}
     </>
   );
 };
