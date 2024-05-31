@@ -936,7 +936,7 @@ describe('Action Executor', () => {
         expect(e.message).toBe(
           'Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
         );
-        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+        expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
       }
     });
 
@@ -1286,6 +1286,27 @@ describe('Action Executor', () => {
           params: { foo: true },
           logger: loggerMock,
         });
+      }
+    });
+
+    test(`${label} throws error when license is not valid for the type of action`, async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+      connectorTypeRegistry.isActionExecutable.mockReturnValue(false);
+      connectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+        throw new Error('nope');
+      });
+
+      if (executeUnsecure) {
+        await expect(() => actionExecutor.executeUnsecured(executeUnsecuredParams)).rejects.toThrow(
+          'nope'
+        );
+        expect(connectorType.executor).not.toHaveBeenCalled();
+      } else {
+        await expect(() => actionExecutor.execute(executeParams)).rejects.toThrow('nope');
+        expect(connectorType.executor).not.toHaveBeenCalled();
       }
     });
   }
