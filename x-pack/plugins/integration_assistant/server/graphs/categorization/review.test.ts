@@ -6,7 +6,6 @@
  */
 
 import { FakeLLM } from '@langchain/core/utils/testing';
-import { getModel } from '../../providers/bedrock';
 import { handleReview } from './review';
 import { CategorizationState } from '../../types';
 import {
@@ -19,18 +18,11 @@ const mockLlm = new FakeLLM({
   response: JSON.stringify(categorizationMockProcessors, null, 2),
 });
 
-jest.mock('../../providers/bedrock', () => ({
-  getModel: jest.fn(),
-}));
-
 const testState: CategorizationState = categorizationTestState;
 
 describe('Testing categorization handler', () => {
-  beforeEach(() => {
-    (getModel as jest.Mock).mockReturnValue(mockLlm);
-  });
   it('handleReview()', async () => {
-    const response = await handleReview(testState);
+    const response = await handleReview(testState, mockLlm);
     expect(response.currentPipeline).toStrictEqual(
       categorizationExpectedHandlerResponse.currentPipeline
     );

@@ -8,7 +8,6 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { getRelatedGraph } from './graph';
-import { getModel } from '../../providers/bedrock';
 import {
   relatedExpectedResults,
   relatedErrorMockedResponse,
@@ -31,22 +30,10 @@ const mockLlm = new FakeLLM({
 jest.mock('./errors');
 jest.mock('./review');
 jest.mock('./related');
-jest.mock('../../providers/bedrock', () => ({
-  getModel: jest.fn(),
-}));
 
 jest.mock('../../util/pipeline', () => ({
   testPipeline: jest.fn(),
 }));
-
-jest.mock('../../util/es', () => {
-  return {
-    ESClient: {
-      setClient: jest.fn(),
-      getClient: jest.fn(),
-    },
-  };
-});
 
 describe('runRelatedGraph', () => {
   const mockClient = {
@@ -61,9 +48,6 @@ describe('runRelatedGraph', () => {
     const mockInvokeRelated = jest.fn().mockResolvedValue(relatedInitialMockedResponse);
     const mockInvokeError = jest.fn().mockResolvedValue(relatedErrorMockedResponse);
     const mockInvokeReview = jest.fn().mockResolvedValue(relatedReviewMockedResponse);
-
-    // Return a fake LLM to prevent API calls from being made, or require API credentials
-    (getModel as jest.Mock).mockReturnValue(mockLlm);
 
     // After this is triggered, the mock of TestPipeline will trigger the expected error, to route to error handler
     (handleRelated as jest.Mock).mockImplementation(async () => ({
@@ -97,14 +81,14 @@ describe('runRelatedGraph', () => {
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getRelatedGraph(mockClient);
+      await getRelatedGraph(mockClient, mockLlm);
     } catch (error) {
       // noop
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const relatedGraph = await getRelatedGraph(mockClient);
+    const relatedGraph = await getRelatedGraph(mockClient, mockLlm);
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)
