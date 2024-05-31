@@ -1,5 +1,5 @@
 import { estypes } from '@elastic/elasticsearch';
-import { Limits, PodCpu, toPct, extractFieldValue } from './utils';
+import { Limits, PodCpu, toPct, extractFieldValue, round } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 // Define the global CPU limits to categorise cpu utilisation
@@ -169,8 +169,8 @@ export async function calulcatePodsCpuUtilisation(podName: string, namespace: st
             'name': podName,
             'namespace': namespace,
             'node': node,
-            'cpu_utilization': cpu_utilization_avg,
-            'cpu_utilization_median_deviation': cpu_utilization_median_deviation,
+            'cpu_utilization': round(cpu_utilization_avg, 3),
+            'cpu_utilization_median_deviation': round(cpu_utilization_median_deviation, 3),
             'reason': '',
             'message': message,
             'alarm': alarm,

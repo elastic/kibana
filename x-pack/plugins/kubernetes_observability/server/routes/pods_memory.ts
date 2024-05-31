@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { checkDefaultNamespace, checkDefaultPeriod } from '../lib/utils';
+import { checkDefaultNamespace, checkDefaultPeriod, round } from '../lib/utils';
 import { getPodsMemory} from '../lib/pods_memory_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -74,7 +74,7 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
                 'memory_available': pod.memory_available,
                 'memory_usage': pod.memory_usage,
                 'memory_usage_median_deviation': pod.memory_usage_median_deviation,
-                'memory_utilization': pod.memory_utilization,
+                'memory_utilization': round(pod.memory_utilization, 3),
                 'reason': pod.reason,
                 'message': pod.message,
                 'alarm': pod.alarm

@@ -5,18 +5,13 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { checkDefaultNamespace, checkDefaultPeriod, Limits } from '../lib/utils';
+import { checkDefaultNamespace, checkDefaultPeriod, round } from '../lib/utils';
 import { getPodsCpu } from '../lib/pods_cpu_utils';
 
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   POD_CPU_ROUTE,
 } from '../../common/constants';
-
-const limits: Limits = {
-  medium: 0.7,
-  high: 0.9,
-};
 
 export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -77,8 +72,8 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
                 'name': pod.name,
                 'namespace': pod.namespace,
                 'node': pod.node,
-                'cpu_utilization': pod.cpu_utilization,
-                'cpu_utilization_median_deviation': pod.cpu_utilization_median_deviation,
+                'cpu_utilization': round(pod.cpu_utilization, 3),
+                'cpu_utilization_median_deviation': round(pod.cpu_utilization_median_deviation, 3),
                 'reason': pod.reason,
                 'message': pod.message,
                 'alarm': pod.alarm,

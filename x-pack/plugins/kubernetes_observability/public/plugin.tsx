@@ -7,17 +7,23 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  useEuiTheme,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiButton,
   EuiFlyoutFooter,
   EuiTab,
   EuiTabs,
   EuiLink,
-  EuiBasicTable,
+  EuiToolTip,
+  EuiLoadingSpinner,
+  EuiIcon,
+  EuiBasicTableColumn,
+  EuiInMemoryTable,
   EuiTableSortingType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -156,7 +162,7 @@ const  KubernetesObservabilityComp = ({
 }: {
   client?: any;
 }) => {
-
+  const { euiTheme, colorMode } = useEuiTheme();
   const [nodesMem, setNodesMem] = useState([]);
   const [nodeMemtime, setNodeMemTime] = useState([]);
   const [nodeCpuTime, setNodeCpuTime] = useState([]);
@@ -351,8 +357,15 @@ const  KubernetesObservabilityComp = ({
       console.log(data);
       setPodsStatusTime(data.time);
       const podsArray = data.pods;
-      const keys = ['name', 'namespace', 'message', 'node', 'failingReason'];
-
+      const keys = ['name', 'namespace', 'status', 'message', 'node', 'failingReason'];
+      podsArray.map((pod: any) => {
+        const reason = pod.failingReason;
+        if (Object.keys(reason).length === 0) {
+          pod["status"] = "OK"
+        } else {
+          pod["status"] = "Warning"
+        }
+      });
       const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
       setPodsStatus(pods);
       })
@@ -360,6 +373,955 @@ const  KubernetesObservabilityComp = ({
           console.log(error)
       });
   }, [client]); // *** Note the dependency
+
+  const nodeMemcolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'memory_utilization',
+      name: 'Utilization',
+      sortable: true,
+      width: '80px',
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      // name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.nodesMemColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.nodesMemColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+    }
+  ]
+
+  const nodeCpucolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'cpu_utilization',
+      name: 'Utilization',
+      width: '80px',
+      sortable: true,
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.nodesCpuColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.nodesCpuColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+    }
+  ]
+
+  const deployStatuscolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'status',
+      name: 'Notification',
+      width: '80px',
+      render: (value: any, item: any) => {
+        if (value === 'OK') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      sortable: ({ status }) => {
+        if (status == 'Warning'){
+          return 1;
+        } else {
+          return 0;
+        }
+      },
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'reason',
+      name: 'Reason',
+      width: '80px',
+    },
+    {
+      field: 'events',
+      name: 'Pod Events',
+      width: '80px',
+    }
+  ]
+
+  const daemonsStatuscolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'status',
+      name: 'Notification',
+      width: '80px',
+      render: (value: any, item: any) => {
+        if (value === 'OK') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      sortable: ({ status }) => {
+        if (status == 'Warning'){
+          return 1;
+        } else {
+          return 0;
+        }
+      },
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'reason',
+      name: 'Reason',
+      width: '80px',
+    },
+    {
+      field: 'events',
+      name: 'Pod Events',
+      width: '80px',
+    }
+  ]
+
+  const deploysMemcolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.deploysMemColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.deploysMemColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+      sortable: ({ alarm }) => {
+        if (alarm == 'Low'){
+          return 0;
+        } else if (alarm == 'Medium'){
+          return 1;
+        } else {
+          return 2;
+        }
+      },
+    },
+    {
+      field: 'reason',
+      name: 'Status Reason',
+      width: '80px',
+    }
+  ]
+
+  const deploysCpucolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.deploysCpuColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.deploysCpuColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+      sortable: ({ alarm }) => {
+        if (alarm == 'Low'){
+          return 0;
+        } else if (alarm == 'Medium'){
+          return 1;
+        } else {
+          return 2;
+        }
+      },
+    },
+    {
+      field: 'reason',
+      name: 'Status Reason',
+      width: '80px',
+    }
+  ]
+
+  const daemonsMemcolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.daemonsMemColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.daemonsMemColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+      sortable: ({ alarm }) => {
+        if (alarm == 'Low'){
+          return 0;
+        } else if (alarm == 'Medium'){
+          return 1;
+        } else {
+          return 2;
+        }
+      },
+    },
+    {
+      field: 'reason',
+      name: 'Status Reason',
+      width: '80px',
+    }
+  ]
+
+  const daemonsCpucolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.daemonsCpuColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.daemonsCpuColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+      sortable: ({ alarm }) => {
+        if (alarm == 'Low'){
+          return 0;
+        } else if (alarm == 'Medium'){
+          return 1;
+        } else {
+          return 2;
+        }
+      },
+    },
+    {
+      field: 'reason',
+      name: 'Status Reason',
+      width: '80px',
+    }
+  ]
+
+  const podsMemcolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'node',
+      name: 'Node',
+      width: '80px',
+    },
+    {
+      field: 'memory_utilization',
+      name: 'Memory Utilization',
+      width: '80px',
+      sortable: true,
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.podsMemColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.podsMemColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+    }
+  ]
+
+  const pocsCpucolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'node',
+      name: 'Node',
+      width: '80px',
+    },
+    {
+      field: 'cpu_utilization',
+      name: 'Cpu Utilization',
+      width: '80px',
+      sortable: true,
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'alarm',
+      name: (
+        <div className={'columnHeader__title'}>
+          {i18n.translate('xpack.dataVisualizer.dataGrid.podsCpuColumnName', {
+            defaultMessage: 'Notification',
+          })}
+          {
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.dataVisualizer.dataGrid.podsCpuColumnTooltip',
+                {
+                  defaultMessage:
+                    'Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          }
+        </div>
+      ),
+      render: (value: any, item: any) => {
+        if (value === 'Low') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        } else if (value === 'Medium') {
+          return(
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+    }
+  ]
+
+  const podsStatuscolumns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      width: '80px',
+    },
+    {
+      field: 'namespace',
+      name: 'Namespace',
+      width: '80px',
+    },
+    {
+      field: 'status',
+      name: 'Notification',
+      render: (value: any, item: any) => {
+        if (value === 'OK') {
+          return (
+            <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="success"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+                    defaultMessage={value}
+                  />
+            </EuiButton>
+          );
+        }
+        return (
+          <EuiButton
+                  onClick={() => console.log(value)}
+                  size={'s'}
+                  color="warning"
+          >
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.viewSelectedButtonLabel"
+              defaultMessage={value}
+            />
+          </EuiButton>
+        );    
+      },
+      width: '80px',
+      sortable: ({ status }) => {
+        if (status == 'Warning'){
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    },
+    {
+      field: 'message',
+      name: 'Message',
+      width: '80px',
+    },
+    {
+      field: 'node',
+      name: 'Node',
+      width: '80px',
+    },
+    {
+      field: 'failingReason',
+      name: 'Failing Reason',
+      width: '80px',
+    }
+  ]
 
   return (
     <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
@@ -376,26 +1338,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {nodeMemtime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {nodesMem}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'memory_utilization',
-                  name: 'Utilization',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                }
-              ]}
+              columns= {nodeMemcolumns}
               sorting={{
                 sort: {
                   field: 'memory_utilization',
@@ -416,26 +1361,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {nodeCpuTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {nodesCpu}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'cpu_utilization',
-                  name: 'Utilization',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                }
-              ]}
+              columns= {nodeCpucolumns}
               sorting={{
                 sort: {
                   field: 'cpu_utilization',
@@ -456,34 +1384,15 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {deploysStatusTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {deploysStatus}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
+              columns= {deployStatuscolumns}
+              sorting={{
+                sort: {
                   field: 'status',
-                  name: 'Notification',
+                  direction: 'desc',
                 },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'reason',
-                  name: 'Reason',
-                },
-                {
-                  field: 'events',
-                  name: 'Pod Events',
-                }
-              ]}
+              }}
             />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -498,34 +1407,15 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {daemonsStatusTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {daemonsStatus}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
+              columns= {daemonsStatuscolumns}
+              sorting={{
+                sort: {
                   field: 'status',
-                  name: 'Notification',
+                  direction: 'desc',
                 },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'reason',
-                  name: 'Reason',
-                },
-                {
-                  field: 'events',
-                  name: 'Pod Events',
-                }
-              ]}
+              }}
             />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -540,30 +1430,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {deploysMemTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {deploysMem}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                },
-                {
-                  field: 'reason',
-                  name: 'Status Reason',
-                }
-              ]}
+              columns= {deploysMemcolumns}
               sorting={{
                 sort: {
                   field: 'alarm',
@@ -584,30 +1453,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {deploysCpuTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {deploysCpu}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                },
-                {
-                  field: 'reason',
-                  name: 'Status Reason',
-                }
-              ]}
+              columns= {deploysCpucolumns}
               sorting={{
                 sort: {
                   field: 'alarm',
@@ -628,30 +1476,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {daemonsMemTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {daemonsMem}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                },
-                {
-                  field: 'reason',
-                  name: 'Status Reason',
-                }
-              ]}
+              columns= {daemonsMemcolumns}
               sorting={{
                 sort: {
                   field: 'alarm',
@@ -672,30 +1499,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {daemonsCpuTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {daemonsCpu}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                },
-                {
-                  field: 'reason',
-                  name: 'Status Reason',
-                }
-              ]}
+              columns= {daemonsCpucolumns}
               sorting={{
                 sort: {
                   field: 'alarm',
@@ -716,34 +1522,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {podsMemTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {podsMem}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
-                  field: 'node',
-                  name: 'Node',
-                },
-                {
-                  field: 'memory_utilization',
-                  name: 'Memory Utilization',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                }
-              ]}
+              columns= {podsMemcolumns}
               sorting={{
                 sort: {
                   field: 'memory_utilization',
@@ -764,34 +1545,9 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {podsCpuTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {podsCpu}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
-                },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
-                  field: 'node',
-                  name: 'Node',
-                },
-                {
-                  field: 'cpu_utilization',
-                  name: 'Memory Cpu',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'alarm',
-                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
-                }
-              ]}
+              columns= {pocsCpucolumns}
               sorting={{
                 sort: {
                   field: 'cpu_utilization',
@@ -812,30 +1568,15 @@ const  KubernetesObservabilityComp = ({
             <EuiSpacer size="m" />
             <EuiText size="s"><b>Timestamp</b>: {podsStatusTime}</EuiText>
             <EuiSpacer size="s" />
-            <EuiBasicTable
+            <EuiInMemoryTable
               items= {podsStatus}
-              columns= {[
-                {
-                  field: 'name',
-                  name: 'Name',
+              columns= {podsStatuscolumns}
+              sorting={{
+                sort: {
+                  field: 'status',
+                  direction: 'desc',
                 },
-                {
-                  field: 'namespace',
-                  name: 'Namespace',
-                },
-                {
-                  field: 'message',
-                  name: 'Message',
-                },
-                {
-                  field: 'node',
-                  name: 'Node',
-                },
-                {
-                  field: 'failingReason',
-                  name: 'Failing Reason',
-                }
-              ]}
+              }}
             />
         </EuiFlexItem>
       </EuiFlexGroup>
