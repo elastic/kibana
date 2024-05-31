@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('viewer');
-      await synthtrace.clean();
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
       await PageObjects.datasetQuality.navigateTo();
