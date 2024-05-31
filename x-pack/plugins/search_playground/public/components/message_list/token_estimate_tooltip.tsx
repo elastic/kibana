@@ -191,7 +191,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                                   data-test-subj="context-optimization-documentation-link"
                                 >
                                   <FormattedMessage
-                                    id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.learnMoreLink"
+                                    id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.optimizeYourIndex"
                                     defaultMessage="optimize your context"
                                   />
                                 </EuiLink>
