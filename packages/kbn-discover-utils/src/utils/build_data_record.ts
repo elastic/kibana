@@ -8,6 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-service';
+import { applyEcsCategoryInformation } from './ecs';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { getDocId } from './get_doc_id';
 
@@ -22,6 +23,7 @@ export function buildDataTableRecord(
   dataView?: DataView,
   isAnchor?: boolean
 ): DataTableRecord {
+  applyEcsCategoryInformation(doc);
   return {
     id: getDocId(doc),
     raw: doc,
