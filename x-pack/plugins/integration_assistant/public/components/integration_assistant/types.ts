@@ -6,10 +6,12 @@
  */
 
 export interface IntegrationSettings {
-  name?: string;
+  title?: string;
   description?: string;
-  dataStreamName?: string;
+  dataStreamTitle?: string;
   dataStreamDescription?: string;
+  name?: string;
+  dataStreamName?: string;
   format?: string;
   logsSampleFileName?: string;
   logsSampleParsed?: string[];

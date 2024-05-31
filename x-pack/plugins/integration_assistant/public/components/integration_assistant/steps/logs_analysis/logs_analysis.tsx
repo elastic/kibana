@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiFieldText,
   EuiFilePicker,
@@ -62,10 +62,51 @@ const parseLogsContent = (
   return { isTruncated, logsSampleParsed };
 };
 
+const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);
+const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
+
 export const LogsAnalysis = React.memo<LogsAnalysisProps>(
   ({ integrationSettings, setIntegrationSettings }) => {
     const { notifications } = useKibana().services;
     const [isParsing, setIsParsing] = React.useState(false);
+    const [invalidField, setInvalidField] = React.useState({ name: false, dataStreamName: false });
+
+    const setIntegrationValues = useCallback(
+      (settings: Partial<IntegrationSettings>) =>
+        setIntegrationSettings({ ...integrationSettings, ...settings }),
+      [integrationSettings, setIntegrationSettings]
+    );
+
+    const onChange = useMemo(() => {
+      return {
+        name: (e: React.ChangeEvent<HTMLInputElement>) => {
+          const name = e.target.value;
+          if (!isValidName(name)) {
+            return setInvalidField((current) => ({ ...current, name: true }));
+          }
+          setIntegrationValues({ name });
+        },
+        dataStreamName: (e: React.ChangeEvent<HTMLInputElement>) => {
+          const dataStreamName = e.target.value;
+          if (!isValidName(dataStreamName)) {
+            return setInvalidField((current) => ({ ...current, dataStreamName: true }));
+          }
+          setIntegrationValues({ dataStreamName: e.target.value });
+        },
+      };
+    }, [setIntegrationValues, setInvalidField]);
+
+    useEffect(() => {
+      if (integrationSettings?.title && !integrationSettings.name) {
+        setIntegrationValues({ name: getNameFromTitle(integrationSettings.title) });
+      }
+      if (integrationSettings?.dataStreamTitle && !integrationSettings.dataStreamName) {
+        setIntegrationValues({
+          dataStreamName: getNameFromTitle(integrationSettings.dataStreamTitle),
+        });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const onChangeLogsSample = useCallback(
       (files: FileList | null) => {
@@ -114,14 +155,36 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h6>{i18n.INTEGRATION_DETAILS_TITLE}</h6>
+            <h6>{i18n.LOGS_ANALYSIS_TITLE}</h6>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <p>{i18n.INTEGRATION_DETAILS_DESCRIPTION}</p>
+          <p>{i18n.LOGS_ANALYSIS_DESCRIPTION}</p>
           <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiForm component="form" fullWidth>
+            <EuiFormRow
+              label={i18n.NAME_LABEL}
+              helpText="It can only contain lowercase letters, numbers and _"
+            >
+              <EuiFieldText
+                name="name"
+                value={integrationSettings?.name ?? ''}
+                onChange={onChange.name}
+                isInvalid={invalidField.name}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.DATA_STREAM_NAME_LABEL}
+              helpText="It can only contain lowercase letters, numbers and _"
+            >
+              <EuiFieldText
+                name="dataStreamName"
+                value={integrationSettings?.dataStreamName ?? ''}
+                onChange={onChange.dataStreamName}
+                isInvalid={invalidField.dataStreamName}
+              />
+            </EuiFormRow>
             <EuiFormRow label={i18n.FORMAT_LABEL}>
               <EuiFieldText
                 name="format"
@@ -130,7 +193,7 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
                 disabled
               />
             </EuiFormRow>
-            <EuiFormRow label={i18n.DESCRIPTION_LABEL}>
+            <EuiFormRow label={i18n.LOGS_SAMPLE_LABEL}>
               <EuiFilePicker
                 id="logsSampleFilePicker"
                 initialPromptText="Select or drag and drop the logs sample file"

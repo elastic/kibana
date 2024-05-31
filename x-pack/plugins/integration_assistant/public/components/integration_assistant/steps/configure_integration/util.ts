@@ -12,8 +12,8 @@ export const isConfigureIntegrationReady = ({
   integrationSettings: IntegrationSettings | undefined;
 }) =>
   Boolean(
-    integrationSettings?.name &&
+    integrationSettings?.title &&
       integrationSettings?.description &&
-      integrationSettings?.dataStreamName &&
+      integrationSettings?.dataStreamTitle &&
       integrationSettings?.dataStreamDescription
   );

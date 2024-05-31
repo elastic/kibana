@@ -6,15 +6,13 @@
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { CATEGORIZATION_VALIDATION_PROMPT } from './prompts';
-import { getModel } from '../../providers/bedrock';
 import { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 import { Pipeline } from '../../../common';
 
-export async function handleInvalidCategorization(state: CategorizationState) {
+export async function handleInvalidCategorization(state: CategorizationState, model) {
   const categorizationInvalidPrompt = CATEGORIZATION_VALIDATION_PROMPT;
-  const model = getModel();
 
   const outputParser = new JsonOutputParser();
   const categorizationInvalidGraph = categorizationInvalidPrompt.pipe(model).pipe(outputParser);

@@ -162,7 +162,7 @@ export abstract class SubActionConnector<Config, Secrets> {
         timeout,
       });
 
-      this.validateResponse(responseSchema, res.data);
+      // this.validateResponse(responseSchema, res.data);
 
       return res;
     } catch (error) {

@@ -22,7 +22,6 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   const agentTemplates = joinPath(templateDir, 'agent');
   const manifestTemplates = joinPath(templateDir, 'manifest');
   const systemTestTemplates = joinPath(templateDir, 'system_tests');
-  // TODO: A bit unsure how we are going to translate this autoescape false or not, needs to be investigated before merging.
   nunjucks.configure([templateDir, agentTemplates, manifestTemplates, systemTestTemplates], {
     autoescape: false,
   });
@@ -46,14 +45,14 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     );
   }
 
-  const tmpPackageDir = joinPath(tmpDir, `${integration.name}-${integration.initialVersion}`);
+  const tmpPackageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
 
   const zipBuffer = await createZipArchive(tmpPackageDir);
   return zipBuffer;
 }
 
 async function createDirectories(tmpDir: string, integration: Integration): Promise<string> {
-  const packageDir = joinPath(tmpDir, `${integration.name}-${integration.initialVersion}`);
+  const packageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
   await asyncEnsureDir(tmpDir);
   await asyncEnsureDir(packageDir);
   await createPackage(packageDir, integration);
@@ -66,15 +65,20 @@ async function createPackage(packageDir: string, integration: Integration): Prom
   await createBuildFile(packageDir);
   await createPackageManifest(packageDir, integration);
   await createPackageSystemTests(packageDir, integration);
-  await createDefaultLogo(packageDir);
+  await createLogo(packageDir, integration);
 }
 
-async function createDefaultLogo(packageDir: string): Promise<void> {
+async function createLogo(packageDir: string, integration: Integration): Promise<void> {
   const logoDir = joinPath(packageDir, 'img');
-  const imgTemplateDir = joinPath(__dirname, '../templates/img');
-
   await asyncEnsureDir(logoDir);
-  await asyncCopy(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
+
+  if (integration?.logo !== undefined) {
+    const buffer = Buffer.from(integration.logo, 'base64');
+    await asyncCreate(joinPath(logoDir, 'logo.svg'), buffer);
+  } else {
+    const imgTemplateDir = joinPath(__dirname, '../templates/img');
+    await asyncCopy(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
+  }
 }
 
 async function createBuildFile(packageDir: string): Promise<void> {
@@ -87,7 +91,7 @@ async function createBuildFile(packageDir: string): Promise<void> {
 
 async function createChangelog(packageDir: string, integration: Integration): Promise<void> {
   const changelogTemplate = nunjucks.render('changelog.yml.njk', {
-    initial_version: integration.initialVersion,
+    initial_version: '0.1.0',
   });
 
   await asyncCreate(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
@@ -128,10 +132,10 @@ async function createPackageManifest(packageDir: string, integration: Integratio
   const uniqueInputsList = Object.values(uniqueInputs);
 
   const packageManifest = nunjucks.render('package_manifest.yml.njk', {
-    format_version: integration.formatVersion,
+    format_version: '3.1.4',
     package_title: integration.title,
     package_name: integration.name,
-    package_version: integration.initialVersion,
+    package_version: '0.1.0',
     package_description: integration.description,
     package_owner: integration.owner,
     min_version: integration.minKibanaVersion,

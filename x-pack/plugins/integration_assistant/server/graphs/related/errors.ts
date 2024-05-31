@@ -5,15 +5,14 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { RELATED_ERROR_PROMPT } from './prompts';
-import { getModel } from '../../providers/bedrock';
 import { RelatedState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 
-export async function handleErrors(state: RelatedState) {
+export async function handleErrors(state: RelatedState, model: BedrockChat) {
   const relatedErrorPrompt = RELATED_ERROR_PROMPT;
-  const model = getModel();
   const outputParser = new JsonOutputParser();
   const relatedErrorGraph = relatedErrorPrompt.pipe(model).pipe(outputParser);
 

@@ -19,6 +19,7 @@ import { ProgressItem, usePipelineGeneration } from './use_pipeline_generation';
 
 interface PipelineGenerationProps {
   integrationSettings: IntegrationSettings | undefined;
+  connectorId: string | undefined;
   setIntegrationSettings: (param: IntegrationSettings) => void;
   setIsGenerating: (param: boolean) => void;
   setResult: (param: object | undefined) => void;
@@ -32,8 +33,11 @@ const progressText: Record<ProgressItem, string> = {
 };
 
 export const PipelineGeneration = React.memo<PipelineGenerationProps>(
-  ({ integrationSettings, setIsGenerating, setResult }) => {
-    const { isLoading, progress, error, result } = usePipelineGeneration({ integrationSettings });
+  ({ integrationSettings, connectorId, setIsGenerating, setResult }) => {
+    const { isLoading, progress, error, result } = usePipelineGeneration({
+      integrationSettings,
+      connectorId,
+    });
 
     useEffect(() => {
       setIsGenerating(isLoading);

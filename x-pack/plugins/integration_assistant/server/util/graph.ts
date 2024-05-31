@@ -6,14 +6,16 @@
  */
 import { EcsMappingState, CategorizationState, RelatedState } from '../types';
 import { testPipeline } from './pipeline';
+import { ESClient } from './es';
 
 export async function handleValidatePipeline(
   state: EcsMappingState | CategorizationState | RelatedState
 ): Promise<Partial<CategorizationState> | Partial<RelatedState> | Partial<EcsMappingState>> {
-  const [errors, results] = await testPipeline(state.rawSamples, state.currentPipeline);
+  const client = ESClient.getClient();
+  const results = await testPipeline(state.rawSamples, state.currentPipeline, client);
   return {
-    errors,
-    pipelineResults: results,
+    errors: results.errors,
+    pipelineResults: results.pipelineResults,
     lastExecutedChain: 'validate_pipeline',
   };
 }

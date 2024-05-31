@@ -5,9 +5,25 @@
  * 2.0.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import {
+  Plugin,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  CustomRequestHandlerContext,
+} from '@kbn/core/server';
+import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { registerRoutes } from './routes';
 import { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
+
+export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
+  integrationAssistant: {
+    getStartServices: CoreSetup<{
+      actions: ActionsPluginsStart;
+    }>['getStartServices'];
+  };
+}>;
 
 export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
@@ -17,9 +33,20 @@ export class IntegrationAssistantPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup<{
+      actions: ActionsPluginsStart;
+    }>
+  ) {
+    core.http.registerRouteHandlerContext<
+      IntegrationAssistantRouteHandlerContext,
+      'integrationAssistant'
+    >('integrationAssistant', () => ({
+      getStartServices: core.getStartServices,
+    }));
     const router = core.http.createRouter();
     this.logger.debug('integrationAssistant api: Setup');
+
     registerRoutes(router);
 
     return {};

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 import { IntegrationAssistantHeader } from './header';
@@ -34,17 +34,7 @@ export const IntegrationAssistant = React.memo(() => {
 
   const {
     assistantAvailability: { isAssistantEnabled },
-    http,
   } = useAssistantContext();
-
-  const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({ http });
-  const { setConnectorId } = actions;
-  useEffect(() => {
-    // If there is only one connector, set it as the selected connector
-    if (aiConnectors != null && aiConnectors.length === 1) {
-      setConnectorId(aiConnectors[0].id);
-    }
-  }, [aiConnectors, setConnectorId]);
 
   const isNextStepEnabled = useMemo(() => {
     if (state.step === 1) {
@@ -86,9 +76,8 @@ export const IntegrationAssistant = React.memo(() => {
           <EuiFlexItem css={contendCss}>
             {state.step === 1 && (
               <ConnectorSetup
-                isLoadingConnectors={isLoadingConnectors}
-                selectedConnectorId={state.connectorId}
-                onConnectorIdSelected={actions.setConnectorId}
+                connectorId={state.connectorId}
+                setConnectorId={actions.setConnectorId}
               />
             )}
             {state.step === 2 && (
@@ -106,6 +95,7 @@ export const IntegrationAssistant = React.memo(() => {
             {state.step === 4 && (
               <PipelineGeneration
                 integrationSettings={state.integrationSettings}
+                connectorId={state.connectorId}
                 setIntegrationSettings={actions.setIntegrationSettings}
                 setIsGenerating={actions.setIsGenerating}
                 setResult={actions.setResult}

@@ -5,16 +5,14 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { getModel } from '../../providers/bedrock';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 
-export async function handleCategorization(state: CategorizationState) {
+export async function handleCategorization(state: CategorizationState, model: BedrockChat) {
   const categorizationMainPrompt = CATEGORIZATION_MAIN_PROMPT;
-  const model = getModel();
-
   const outputParser = new JsonOutputParser();
   const categorizationMainGraph = categorizationMainPrompt.pipe(model).pipe(outputParser);
 

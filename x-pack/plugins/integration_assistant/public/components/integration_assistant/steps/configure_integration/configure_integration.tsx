@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -26,18 +26,24 @@ interface ConfigureIntegrationProps {
 
 export const ConfigureIntegration = React.memo<ConfigureIntegrationProps>(
   ({ integrationSettings, setIntegrationSettings }) => {
+    const setIntegrationValues = useCallback(
+      (settings: Partial<IntegrationSettings>) =>
+        setIntegrationSettings({ ...integrationSettings, ...settings }),
+      [integrationSettings, setIntegrationSettings]
+    );
+
     const onChange = useMemo(() => {
       return {
-        name: (e: React.ChangeEvent<HTMLInputElement>) =>
-          setIntegrationSettings({ ...integrationSettings, name: e.target.value }),
+        title: (e: React.ChangeEvent<HTMLInputElement>) =>
+          setIntegrationValues({ title: e.target.value }),
         description: (e: React.ChangeEvent<HTMLInputElement>) =>
-          setIntegrationSettings({ ...integrationSettings, description: e.target.value }),
-        dataStreamName: (e: React.ChangeEvent<HTMLInputElement>) =>
-          setIntegrationSettings({ ...integrationSettings, dataStreamName: e.target.value }),
+          setIntegrationValues({ description: e.target.value }),
+        dataStreamTitle: (e: React.ChangeEvent<HTMLInputElement>) =>
+          setIntegrationValues({ dataStreamTitle: e.target.value }),
         dataStreamDescription: (e: React.ChangeEvent<HTMLInputElement>) =>
-          setIntegrationSettings({ ...integrationSettings, dataStreamDescription: e.target.value }),
+          setIntegrationValues({ dataStreamDescription: e.target.value }),
       };
-    }, [integrationSettings, setIntegrationSettings]);
+    }, [setIntegrationValues]);
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -53,9 +59,9 @@ export const ConfigureIntegration = React.memo<ConfigureIntegrationProps>(
           <EuiForm component="form" fullWidth>
             <EuiFormRow label={i18n.NAME_LABEL}>
               <EuiFieldText
-                name="name"
-                value={integrationSettings?.name ?? ''}
-                onChange={onChange.name}
+                name="title"
+                value={integrationSettings?.title ?? ''}
+                onChange={onChange.title}
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.DESCRIPTION_LABEL}>
@@ -68,8 +74,8 @@ export const ConfigureIntegration = React.memo<ConfigureIntegrationProps>(
             <EuiFormRow label={i18n.DATASTREAM_NAME_LABEL}>
               <EuiFieldText
                 name="datastream_name"
-                value={integrationSettings?.dataStreamName ?? ''}
-                onChange={onChange.dataStreamName}
+                value={integrationSettings?.dataStreamTitle ?? ''}
+                onChange={onChange.dataStreamTitle}
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.DATASTREAM_DESCRIPTION_LABEL}>

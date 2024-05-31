@@ -19,14 +19,15 @@ export type {
   DataStream,
   Integration,
   InputTypes,
+  TestPipelineApiRequest,
+  TestPipelineApiResponse,
 } from './types';
 
 export {
-  PLUGIN_ID,
-  INTEGRATION_ASSISTANT_APP_ROUTE,
   ECS_GRAPH_PATH,
   CATEGORIZATION_GRAPH_PATH,
   RELATED_GRAPH_PATH,
+  TEST_PIPELINE_PATH,
   INTEGRATION_BUILDER_PATH,
   INTEGRATION_ASSISTANT_BASE_PATH,
 } from './constants';

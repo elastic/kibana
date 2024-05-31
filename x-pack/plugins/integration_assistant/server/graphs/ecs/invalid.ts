@@ -5,14 +5,12 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { ECS_INVALID_PROMPT } from './prompts';
-import { getModel } from '../../providers/bedrock';
 import { EcsMappingState } from '../../types';
 
-export async function handleInvalidEcs(state: EcsMappingState) {
+export async function handleInvalidEcs(state: EcsMappingState, model: BedrockChat) {
   const ecsInvalidEcsPrompt = ECS_INVALID_PROMPT;
-  const model = getModel();
-
   const outputParser = new JsonOutputParser();
   const ecsInvalidEcsGraph = ecsInvalidEcsPrompt.pipe(model).pipe(outputParser);
 

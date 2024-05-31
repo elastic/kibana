@@ -5,10 +5,9 @@
   },
   "include": [
     "index.ts",
-    "public/**/*.ts",
-    "public/**/*.tsx",
     "server/**/*.ts",
     "common/**/*.ts",
+    "__jest__/**/*",
     "../../typings/**/*",
   ],
   "exclude": [

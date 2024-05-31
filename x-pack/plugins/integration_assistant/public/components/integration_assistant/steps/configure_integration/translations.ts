@@ -24,7 +24,7 @@ export const INTEGRATION_DETAILS_DESCRIPTION = i18n.translate(
 export const NAME_LABEL = i18n.translate(
   'xpack.integrationAssistant.integrationSettings.label.name',
   {
-    defaultMessage: 'Integration name',
+    defaultMessage: 'Integration title',
   }
 );
 export const DESCRIPTION_LABEL = i18n.translate(
@@ -37,7 +37,7 @@ export const DESCRIPTION_LABEL = i18n.translate(
 export const DATASTREAM_NAME_LABEL = i18n.translate(
   'xpack.integrationAssistant.integrationSettings.label.datastream.name',
   {
-    defaultMessage: 'Data stream name',
+    defaultMessage: 'Data stream title',
   }
 );
 export const DATASTREAM_DESCRIPTION_LABEL = i18n.translate(

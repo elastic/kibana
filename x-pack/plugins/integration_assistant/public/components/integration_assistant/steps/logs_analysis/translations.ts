@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INTEGRATION_DETAILS_TITLE = i18n.translate(
-  'xpack.integrationAssistant.integrationSettings.label.integrationDetails.title',
+export const LOGS_ANALYSIS_TITLE = i18n.translate(
+  'xpack.integrationAssistant.integrationSettings.label.logsAnalysis.title',
   {
-    defaultMessage: 'Define the integration details',
+    defaultMessage: 'Upload Logs and Define Package',
   }
 );
-export const INTEGRATION_DETAILS_DESCRIPTION = i18n.translate(
-  'xpack.integrationAssistant.integrationSettings.label.integrationDetails.description',
+export const LOGS_ANALYSIS_DESCRIPTION = i18n.translate(
+  'xpack.integrationAssistant.integrationSettings.label.logsAnalysis.description',
   {
     defaultMessage:
-      'Fill out the form to name your integration and provide a brief description. Clearly define the data stream title and description to ensure accurate representation.',
+      'Upload the log files you want to analyze. Additionally, specify the data stream and package names for better organization and tracking.',
   }
 );
 
@@ -27,28 +27,24 @@ export const NAME_LABEL = i18n.translate(
     defaultMessage: 'Integration name',
   }
 );
-export const DESCRIPTION_LABEL = i18n.translate(
-  'xpack.integrationAssistant.integrationSettings.label.description',
-  {
-    defaultMessage: 'Integration description',
-  }
-);
 
-export const DATASTREAM_NAME_LABEL = i18n.translate(
+export const DATA_STREAM_NAME_LABEL = i18n.translate(
   'xpack.integrationAssistant.integrationSettings.label.datastreamName',
   {
     defaultMessage: 'Data stream name',
   }
 );
-export const DATASTREAM_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.integrationAssistant.integrationSettings.label.datastreamDescription',
-  {
-    defaultMessage: 'Data stream description',
-  }
-);
+
 export const FORMAT_LABEL = i18n.translate(
   'xpack.integrationAssistant.integrationSettings.label.format',
   {
     defaultMessage: 'Format',
+  }
+);
+
+export const LOGS_SAMPLE_LABEL = i18n.translate(
+  'xpack.integrationAssistant.integrationSettings.label.logsSample',
+  {
+    defaultMessage: 'Logs sample upload',
   }
 );

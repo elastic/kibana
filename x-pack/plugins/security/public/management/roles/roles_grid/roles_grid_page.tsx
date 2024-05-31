@@ -165,6 +165,7 @@ export class RolesGridPage extends Component<Props, State> {
       <>
         <EuiPageHeader
           bottomBorder
+          data-test-subj="rolesGridPageHeader"
           pageTitle={rolesTitle}
           description={rolesDescription}
           rightSideItems={this.props.readOnly ? undefined : pageRightSideItems}
@@ -183,6 +184,7 @@ export class RolesGridPage extends Component<Props, State> {
         ) : null}
 
         <EuiInMemoryTable
+          data-test-subj="rolesTable"
           itemId="name"
           columns={this.getColumnConfig()}
           selection={

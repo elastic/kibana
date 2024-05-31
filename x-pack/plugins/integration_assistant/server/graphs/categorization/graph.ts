@@ -6,6 +6,7 @@
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CategorizationState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
@@ -144,19 +145,23 @@ function chainRouter(state: CategorizationState): string {
   return END;
 }
 
-export async function getCategorizationGraph(client: IScopedClusterClient) {
+export async function getCategorizationGraph(client: IScopedClusterClient, model: BedrockChat) {
   ESClient.setClient(client);
   const workflow = new StateGraph({
     channels: graphState,
   })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
-    .addNode('handleCategorization', handleCategorization)
+    .addNode('handleCategorization', (state: CategorizationState) =>
+      handleCategorization(state, model)
+    )
     .addNode('handleValidatePipeline', handleValidatePipeline)
     .addNode('handleCategorizationValidation', handleCategorizationValidation)
-    .addNode('handleInvalidCategorization', handleInvalidCategorization)
-    .addNode('handleErrors', handleErrors)
-    .addNode('handleReview', handleReview)
+    .addNode('handleInvalidCategorization', (state: CategorizationState) =>
+      handleInvalidCategorization(state, model)
+    )
+    .addNode('handleErrors', (state: CategorizationState) => handleErrors(state, model))
+    .addNode('handleReview', (state: CategorizationState) => handleReview(state, model))
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('modelInput', 'handleValidatePipeline')

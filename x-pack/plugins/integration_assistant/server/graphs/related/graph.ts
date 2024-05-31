@@ -6,6 +6,7 @@
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { RelatedState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
 import { handleValidatePipeline } from '../../util/graph';
@@ -132,15 +133,15 @@ function chainRouter(state: RelatedState): string {
   return END;
 }
 
-export async function getRelatedGraph(client: IScopedClusterClient) {
+export async function getRelatedGraph(client: IScopedClusterClient, model: BedrockChat) {
   ESClient.setClient(client);
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
-    .addNode('handleRelated', handleRelated)
+    .addNode('handleRelated', (state: RelatedState) => handleRelated(state, model))
     .addNode('handleValidatePipeline', handleValidatePipeline)
-    .addNode('handleErrors', handleErrors)
-    .addNode('handleReview', handleReview)
+    .addNode('handleErrors', (state: RelatedState) => handleErrors(state, model))
+    .addNode('handleReview', (state: RelatedState) => handleReview(state, model))
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('handleRelated', 'handleValidatePipeline')

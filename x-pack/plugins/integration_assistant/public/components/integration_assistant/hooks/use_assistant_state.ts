@@ -16,10 +16,22 @@ interface AssistantState {
   result?: object; // TODO: type result properly
 }
 
+// const initialState: AssistantState = {
+//   step: 1,
+//   connectorId: undefined,
+//   integrationSettings: undefined,
+//   isGenerating: false,
+//   result: undefined,
+// };
 const initialState: AssistantState = {
   step: 1,
   connectorId: undefined,
-  integrationSettings: undefined,
+  integrationSettings: {
+    title: 'My Integration',
+    description: 'My manual integration description',
+    dataStreamTitle: 'My data stream title',
+    dataStreamDescription: 'My manual data stream description',
+  },
   isGenerating: false,
   result: undefined,
 };

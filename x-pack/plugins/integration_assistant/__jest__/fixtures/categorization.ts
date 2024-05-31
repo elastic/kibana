@@ -155,20 +155,23 @@ export const categorizationReviewMockedResponse = [
   },
 ];
 
-export const testPipelineError: [object[], object[]] = [
-  [{ error: 'Sample error message 1' }, { error: 'Sample error message 2' }],
-  [],
-];
+export const testPipelineError: { pipelineResults: object[]; errors: object[] } = {
+  pipelineResults: [],
+  errors: [{ error: 'Sample error message 1' }, { error: 'Sample error message 2' }],
+};
 
-export const testPipelineValidResult: [object[], object[]] = [
-  [],
-  [{ key: 'value', anotherKey: 'anotherValue' }],
-];
+export const testPipelineValidResult: { pipelineResults: object[]; errors: object[] } = {
+  pipelineResults: [{ key: 'value', anotherKey: 'anotherValue' }],
+  errors: [],
+};
 
-export const testPipelineInvalidEcs: [object[], object[]] = [
-  [],
-  [{ event: { type: ['database'], category: ['creation'] }, anotherKey: 'anotherValue' }],
-];
+export const testPipelineInvalidEcs: { pipelineResults: object[]; errors: object[] } = {
+  pipelineResults: [
+    { event: { type: ['database'], category: ['creation'] }, anotherKey: 'anotherValue' },
+  ],
+  errors: [],
+};
+
 export const categorizationTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],

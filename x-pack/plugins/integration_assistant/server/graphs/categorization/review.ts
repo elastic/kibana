@@ -5,17 +5,16 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CATEGORIZATION_REVIEW_PROMPT } from './prompts';
-import { getModel } from '../../providers/bedrock';
+
 import { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 import { Pipeline } from '../../../common';
 
-export async function handleReview(state: CategorizationState) {
+export async function handleReview(state: CategorizationState, model: BedrockChat) {
   const categorizationReviewPrompt = CATEGORIZATION_REVIEW_PROMPT;
-  const model = getModel();
-
   const outputParser = new JsonOutputParser();
   const categorizationReview = categorizationReviewPrompt.pipe(model).pipe(outputParser);
 

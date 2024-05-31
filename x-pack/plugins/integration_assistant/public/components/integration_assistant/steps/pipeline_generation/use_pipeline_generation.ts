@@ -13,6 +13,7 @@ import { runCategorizationGraph, runEcsGraph, runIntegrationBuilder, runRelatedG
 
 interface PipelineGenerationProps {
   integrationSettings: IntegrationSettings | undefined;
+  connectorId: string | undefined;
 }
 
 export type ProgressItem = 'ecs' | 'categorization' | 'related_graph' | 'integration_builder';
@@ -21,12 +22,16 @@ interface Parameters {
   packageName: string;
   dataStreamName: string;
   rawSamples: string[];
+  connectorId?: string;
 }
 interface ParametersWithPipeline extends Parameters {
   currentPipeline: object;
 }
 
-export const usePipelineGeneration = ({ integrationSettings }: PipelineGenerationProps) => {
+export const usePipelineGeneration = ({
+  integrationSettings,
+  connectorId,
+}: PipelineGenerationProps) => {
   const { http, notifications } = useKibana().services;
   const [result, setResult] = useState<object | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -54,10 +59,10 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: integrationSettings.logsSampleParsed ?? [],
+          connectorId,
         };
         addProgress('ecs');
         const ecsGraphResult = await runEcsGraph(parameters, deps);
-        console.log({ ecsGraphResult });
         if (abortController.signal.aborted) return;
         if (isEmpty(ecsGraphResult?.results)) {
           setError('No results from ECS graph');
@@ -71,7 +76,6 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
 
         addProgress('categorization');
         const categorizationResult = await runCategorizationGraph(parametersWithPipeline, deps);
-        console.log({ categorizationResult });
         if (abortController.signal.aborted) return;
         if (!isEmpty(categorizationResult?.results)) {
           parametersWithPipeline.currentPipeline = categorizationResult.results.pipeline;
@@ -79,7 +83,6 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
 
         // addProgress('related_graph');
         // const relatedGraphResult = await runRelatedGraph(parametersWithPipeline, deps);
-        // console.log({ relatedGraphResult });
         // if (abortController.signal.aborted) return;
         // if (!isEmpty(relatedGraphResult?.results)) {
         //   parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
@@ -87,7 +90,6 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
 
         // addProgress('integration_builder');
         // const integrationBuilderResult = await runIntegrationBuilder(parametersWithPipeline, deps);
-        // console.log({ integrationBuilderResult });
         // if (abortController.signal.aborted) return;
 
         // setResult
@@ -103,7 +105,7 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
       console.log('aborting');
       abortController.abort();
     };
-  }, [http, integrationSettings, notifications?.toasts]);
+  }, [addProgress, connectorId, http, integrationSettings, notifications?.toasts]);
 
   return {
     result,

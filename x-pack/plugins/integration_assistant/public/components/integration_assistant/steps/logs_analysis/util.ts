@@ -10,4 +10,10 @@ export const isLogsAnalysisReady = ({
   integrationSettings,
 }: {
   integrationSettings: IntegrationSettings | undefined;
-}) => Boolean(integrationSettings?.logsSampleFileName && integrationSettings?.logsSampleParsed);
+}) =>
+  Boolean(
+    integrationSettings?.name &&
+      integrationSettings?.dataStreamName &&
+      integrationSettings?.logsSampleFileName &&
+      integrationSettings?.logsSampleParsed
+  );
