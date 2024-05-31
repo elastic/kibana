@@ -21,11 +21,11 @@ export interface PhaseEvent {
 }
 
 export interface PublishesPhaseEvents {
-  onPhaseChange: PublishingSubject<PhaseEvent | undefined>;
+  phase$: PublishingSubject<PhaseEvent | undefined>;
 }
 
 export const apiPublishesPhaseEvents = (
   unknownApi: null | unknown
 ): unknownApi is PublishesPhaseEvents => {
-  return Boolean(unknownApi && (unknownApi as PublishesPhaseEvents)?.onPhaseChange !== undefined);
+  return Boolean(unknownApi && (unknownApi as PublishesPhaseEvents)?.phase$ !== undefined);
 };
