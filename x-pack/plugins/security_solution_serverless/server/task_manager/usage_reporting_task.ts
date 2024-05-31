@@ -163,7 +163,7 @@ export class SecurityUsageReportingTask {
 
         if (!usageReportResponse.ok) {
           const errorResponse = await usageReportResponse.json();
-          this.logger.warn(`API error ${usageReportResponse.status}, ${errorResponse}`);
+          this.logger.error(`API error ${usageReportResponse.status}, ${errorResponse}`);
           return { state: taskInstance.state, runAt: new Date() };
         }
 
@@ -175,7 +175,7 @@ export class SecurityUsageReportingTask {
           }, ${usageReportResponse.statusText}`
         );
       } catch (err) {
-        this.logger.warn(
+        this.logger.error(
           `Failed to send (${
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
