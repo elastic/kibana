@@ -154,7 +154,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
         // After logging out, the user can be redirected to various locations depending on the context. By default, we
         // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
         // we should simply wait until the user is redirected *elsewhere*.
-        // Timeout has been doubled here in attempt to quiet the flakiness
+        // Timeout has been doubled to 40s here in attempt to quiet the flakiness
         await retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
           const urlBefore = await browser.getCurrentUrl();
           delay(1000);

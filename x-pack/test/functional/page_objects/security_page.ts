@@ -327,7 +327,7 @@ export class SecurityPageObject extends FtrService {
             await alert.accept();
           }
 
-          // Timeout has been doubled here in attempt to quiet the flakiness
+          // Timeout has been doubled to 40s here in attempt to quiet the flakiness
           await this.retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
             const urlBefore = await this.browser.getCurrentUrl();
             await this.delay(1000);
