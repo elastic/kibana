@@ -122,17 +122,8 @@ export const GcpCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_SHELL_URL
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const cloudShellCredentialsCommand = `gcloud config set project <PROJECT_ID> ${
-    isOrganization ? `&& ORG_ID=<ORG_ID_VALUE>` : ''
-  } && ./deploy_service_account.sh`;
-
   return (
     <>
-      <EuiSpacer size="m" />
-      <GoogleCloudShellCredentialsGuide
-        commandText={cloudShellCredentialsCommand}
-        isOrganization={isOrganization}
-      />
       <EuiSpacer size="m" />
       <EuiButton
         data-test-subj="agentlessLaunchGoogleCloudShellButtonTestId"

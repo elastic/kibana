@@ -194,7 +194,6 @@ export const AwsCredentialsFormAgentless = ({
       {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
         automationCredentialTemplate && (
           <>
-            <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
             <EuiSpacer size="m" />
             <EuiButton
               data-test-subj="launchCloudFormationAgentlessButton"
