@@ -43,6 +43,7 @@ import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs'
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { VisualizeSerializedState } from '../../react_embeddable/types';
+import { NavigateToLensFn } from './use/use_embeddable_api_handler';
 import './visualize_navigation.scss';
 
 interface VisualizeCapabilities {
@@ -69,6 +70,7 @@ export interface TopNavConfigParams {
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
+  navigateToLensFn?: NavigateToLensFn;
   showBadge: boolean;
   eventEmitter?: EventEmitter;
   hasInspector: boolean;
@@ -101,6 +103,7 @@ export const getTopNavConfig = (
     displayEditInLensItem,
     hideLensBadge,
     setNavigateToLens,
+    navigateToLensFn,
     showBadge,
     eventEmitter,
     hasInspector,
@@ -307,7 +310,7 @@ export const getTopNavConfig = (
               if (eventEmitter && visInstance.vis.data.savedSearchId) {
                 eventEmitter.emit('unlinkFromSavedSearch', false);
               }
-              const navigateToLensConfig = await visInstance.vis.type.navigateToLens?.(
+              const navigateToLensConfig = await navigateToLensFn?.(
                 vis,
                 data.query.timefilter.timefilter
               );

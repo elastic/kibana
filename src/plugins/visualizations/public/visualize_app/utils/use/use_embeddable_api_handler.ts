@@ -7,13 +7,20 @@
  */
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import { useState } from 'react';
+import { NavigateToLensContext } from '../../../../common';
+import type Vis from '../../../vis';
 
 export type OpenInspectorFn = () => OverlayRef | undefined;
+export type NavigateToLensFn = (
+  vis: Vis,
+  timefilter: TimefilterContract
+) => Promise<NavigateToLensContext | undefined | null> | undefined;
 
 export interface EmbeddableApiHandler {
   openInspector: ReturnType<typeof useState<OpenInspectorFn>>;
-  navigateToLens: ReturnType<typeof useState<() => void>>;
+  navigateToLens: ReturnType<typeof useState<NavigateToLensFn>>;
 }
 
 export const useEmbeddableApiHandler = () => {

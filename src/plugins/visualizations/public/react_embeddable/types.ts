@@ -12,6 +12,7 @@ import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publish
 import { HasVisualizeConfig } from '../embeddable';
 import type { Vis, VisParams } from '../types';
 import type { SerializedVis } from '../vis';
+import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_handler';
 
 export type VisualizeRuntimeState = SerializedTitles & {
   vis: Vis<VisParams>;
@@ -50,6 +51,6 @@ export type VisualizeApi = HasEditCapabilities &
     subscribeToInitialRender: (listener: () => void) => void;
     subscribeToVisData: (listener: (data: unknown) => void) => void;
     subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;
-    subscribeToNavigateToLens: (listener: (navigateFn: () => void) => void) => void;
+    subscribeToNavigateToLens: (listener: (navigateFn: NavigateToLensFn) => void) => void;
     openInspector: () => OverlayRef | undefined;
   };

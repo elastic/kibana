@@ -37,6 +37,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   const embeddableApiHandler = useEmbeddableApiHandler();
   const [openInspectorFn] = embeddableApiHandler.openInspector;
+  const [navigateToLensFn] = embeddableApiHandler.navigateToLens;
   useEffect(() => {
     const { stateTransferService, history, data } = services;
     const {
@@ -116,6 +117,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       onAppLeave={onAppLeave}
       eventEmitter={eventEmitter}
       openInspectorFn={openInspectorFn}
+      navigateToLensFn={navigateToLensFn}
     />
   );
 };

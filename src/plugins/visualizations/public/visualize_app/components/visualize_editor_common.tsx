@@ -32,7 +32,7 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
-import { OpenInspectorFn } from '../utils/use/use_embeddable_api_handler';
+import { NavigateToLensFn, OpenInspectorFn } from '../utils/use/use_embeddable_api_handler';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -52,7 +52,7 @@ interface VisualizeEditorCommonProps {
   embeddableId?: string;
   eventEmitter?: EventEmitter;
   openInspectorFn?: OpenInspectorFn;
-  navigateToLensFn?: () => void;
+  navigateToLensFn?: NavigateToLensFn;
 }
 
 export const VisualizeEditorCommon = ({
