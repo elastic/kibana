@@ -55,6 +55,7 @@ const expectedValidEsqlQuery =
 // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
 // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
 // Failing: See https://github.com/elastic/kibana/issues/184556
+// Failing: See https://github.com/elastic/kibana/issues/184557
 describe.skip(
   'Detection ES|QL rules, edit',
   {
