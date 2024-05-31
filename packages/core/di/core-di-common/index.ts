@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
 export type { ServiceType } from './src/interfaces';
 export { Global } from './src/services';

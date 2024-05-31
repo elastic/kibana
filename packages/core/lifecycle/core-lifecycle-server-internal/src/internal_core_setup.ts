@@ -28,7 +28,7 @@ import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-serv
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-server-internal';
-import type { InternalCoreDiServiceSetup } from '@kbn/core-di-server-internal';
+import type { InternalCoreDiServiceSetup } from '@kbn/core-di-common-internal';
 
 /** @internal */
 export interface InternalCoreSetup {
