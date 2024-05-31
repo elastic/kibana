@@ -85,6 +85,7 @@ interface VisualizeESQLProps {
   uiActions: UiActionsStart;
   /** Datatable columns as returned from the ES|QL _query api, slightly processed to be kibana compliant */
   columns: DatatableColumn[];
+  /** Datatable rows as returned from the ES|QL _query api */
   rows: ESQLRow[];
   /** The ES|QL query */
   query: string;
@@ -372,8 +373,8 @@ export function VisualizeESQL({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
-            {isTableVisible && (
+          {isTableVisible && (
+            <EuiFlexItem data-test-subj="observabilityAiAssistantESQLDataGrid">
               <ESQLDataGrid
                 rows={rows}
                 columns={columns}
@@ -382,8 +383,10 @@ export function VisualizeESQL({
                 flyoutType="overlay"
                 isTableView
               />
-            )}
-            {!isTableVisible && (
+            </EuiFlexItem>
+          )}
+          {!isTableVisible && (
+            <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
               <lens.EmbeddableComponent
                 {...lensInput}
                 style={{
@@ -391,18 +394,20 @@ export function VisualizeESQL({
                 }}
                 onLoad={onLoad}
               />
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       )}
       {isLensInputTable && (
-        <ESQLDataGrid
-          rows={rows}
-          columns={columns}
-          dataView={dataViewAsync.value}
-          query={{ esql: query }}
-          flyoutType="overlay"
-        />
+        <div data-test-subj="observabilityAiAssistantESQLDataGrid">
+          <ESQLDataGrid
+            rows={rows}
+            columns={columns}
+            dataView={dataViewAsync.value}
+            query={{ esql: query }}
+            flyoutType="overlay"
+          />
+        </div>
       )}
       {isSaveModalOpen ? (
         <lens.SaveModalComponent

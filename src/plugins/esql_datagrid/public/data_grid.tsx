@@ -69,7 +69,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         hits={displayedRows}
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        onFilter={undefined}
         flyoutType={props.flyoutType ?? 'push'}
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));
@@ -79,10 +78,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         }}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
-        query={props.query}
       />
     ),
-    [activeColumns, props.core.notifications, props.dataView, props.flyoutType, props.query]
+    [activeColumns, props.core.notifications, props.dataView, props.flyoutType]
   );
 
   const columnsMeta = props.columns.reduce((acc, column) => {
