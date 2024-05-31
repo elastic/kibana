@@ -39,7 +39,7 @@ function executeCommand(
     // const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
     const childProcess = exec(command, { env: envVars }, (error, stdout, stderr) => {
       if (error) {
-        console.error(`exec error: ${error}`);
+        log.error(`exec error: ${error}`);
         process.exitCode = error.code;
       }
     });
