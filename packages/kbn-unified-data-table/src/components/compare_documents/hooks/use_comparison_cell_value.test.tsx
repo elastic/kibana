@@ -455,7 +455,7 @@ describe('useComparisonCellValue', () => {
       renderCellValue,
     });
 
-    await screen.findByTestId('smartFieldFallbackTooltipIcon');
+    expect(await screen.findByTestId('smartFieldFallbackTooltipIcon')).toBeInTheDocument();
     expect(baseCell.getCell()).toMatchSnapshot();
   });
 });

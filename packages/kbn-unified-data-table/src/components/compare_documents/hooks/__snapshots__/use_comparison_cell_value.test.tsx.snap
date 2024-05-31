@@ -31,13 +31,14 @@ exports[`useComparisonCellValue should render a tooltip when the field is derive
         message
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          data-test-subj="smartFieldFallbackTooltipIcon"
         >
           <span
             data-euiicon-type="questionInCircle"
-            data-test-subj="smartFieldFallbackTooltipIcon"
             tabindex="0"
-            title="Smart Fields information"
-          />
+          >
+            Info
+          </span>
         </span>
       </div>
     </div>

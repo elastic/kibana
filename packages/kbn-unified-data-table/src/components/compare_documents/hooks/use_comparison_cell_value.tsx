@@ -174,12 +174,10 @@ const FieldCellValue = ({
           className={FIELD_NAME_CLASS}
           data-test-subj="unifiedDataTableComparisonFieldName"
         >
-          <>
-            {field?.displayName ?? fieldName}
-            {isDerivedAsPartOfSmartField ? (
-              <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
-            ) : null}
-          </>
+          {field?.displayName ?? fieldName}{' '}
+          {isDerivedAsPartOfSmartField ? (
+            <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
+          ) : null}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

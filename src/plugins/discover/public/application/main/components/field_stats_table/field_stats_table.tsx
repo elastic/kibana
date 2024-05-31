@@ -68,7 +68,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
       return (
         <>
-          {displayName}
+          {displayName}{' '}
           {isDerivedAsPartOfSmartField ? (
             <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
           ) : null}
