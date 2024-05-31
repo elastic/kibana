@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // this test does not pass because of discover using short urls - investigate in separate PR
-      xit('generates a report with single timefilter', async () => {
+      it('generates a report with single timefilter', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.discover.saveSearch('single-timefilter-search');
