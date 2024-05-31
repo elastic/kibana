@@ -42,9 +42,6 @@ async function run(opts: TaskClaimerOpts) {
   if (partitions.length === 0) {
     // eslint-disable-next-line no-console
     console.log('*** Skipping claim cycle as no paritions found');
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Running on the following paritions', JSON.stringify(partitions));
   }
 
   const tasksToClaim = (
