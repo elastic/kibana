@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { Suspense, lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
+import { EventEmitter } from 'events';
+import React, { lazy, Suspense } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 
-import { EmbeddableApiHandler, Vis } from '@kbn/visualizations-plugin/public';
-import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
+import { Reference } from '@kbn/content-management-utils';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import {
+  EditorRenderProps,
+  EmbeddableApiHandler,
+  IEditorController,
+  Vis,
+} from '@kbn/visualizations-plugin/public';
 import { getAnalytics, getI18n, getTheme } from './services';
 
 // @ts-ignore
@@ -24,7 +29,8 @@ class DefaultEditorController implements IEditorController {
     private el: HTMLElement,
     private vis: Vis,
     private eventEmitter: EventEmitter,
-    private embeddableApiHandler: EmbeddableApiHandler
+    private embeddableApiHandler: EmbeddableApiHandler,
+    private references: Reference[]
   ) {}
 
   render(props: EditorRenderProps) {
@@ -49,6 +55,7 @@ class DefaultEditorController implements IEditorController {
               eventEmitter={this.eventEmitter}
               embeddableApiHandler={this.embeddableApiHandler}
               vis={this.vis}
+              references={this.references}
               {...props}
             />
           </Suspense>

@@ -14,4 +14,5 @@ export {
   injectReferences,
   serializeReferences,
   deserializeReferences,
+  convertSavedObjectAttributesToReferences,
 } from './saved_visualization_references';

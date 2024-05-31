@@ -40,6 +40,7 @@ import {
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
 ) => {
+  console.log('DESERIALIZE STATE', state);
   if (!state.rawState)
     return {
       vis: {
@@ -106,7 +107,7 @@ export const deserializeSavedVisState = (
 };
 
 export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInputState) => {
-  const { title, description, visState, searchSource, searchSourceFields, savedSearchId } =
+  const { title, description, visState, searchSource, searchSourceFields, savedSearchId, ...rest } =
     await getSavedVisualization(
       {
         dataViews: getDataViews(),
@@ -120,6 +121,8 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
       },
       state.savedObjectId
     );
+
+  console.log('DESERIALIZE', searchSourceFields, searchSource, rest);
 
   return {
     savedVis: {

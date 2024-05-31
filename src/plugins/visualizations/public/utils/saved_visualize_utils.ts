@@ -17,6 +17,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { Reference } from '@kbn/content-management-utils';
 import { VisualizationSavedObject } from '../../common/content_management';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
@@ -321,7 +322,8 @@ export async function saveVisualization(
   }: SaveVisOptions,
   services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
-  }
+  },
+  baseReferences: Reference[] = []
 ) {
   // Save the original id in case the save fails.
   const originalId = savedObject.id;
@@ -344,7 +346,7 @@ export async function saveVisualization(
     version: savedObject.version,
     kibanaSavedObjectMeta: {},
   };
-  let references: SavedObjectReference[] = [];
+  let references: SavedObjectReference[] = baseReferences;
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =

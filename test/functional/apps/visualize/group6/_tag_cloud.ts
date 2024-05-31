@@ -29,9 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'tagCloud',
   ]);
 
-  // TODO: These tests succeed when run in isolation, but the entire test suite fails when run together.
-  // Rework these tests so that they correctly reset state after being run
-  describe.skip('tag cloud chart', function () {
+  describe('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
     const termsField = 'machine.ram';
 

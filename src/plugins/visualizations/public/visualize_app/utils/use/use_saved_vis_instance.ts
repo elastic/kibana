@@ -11,6 +11,7 @@ import { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { useEffect, useRef, useState } from 'react';
 
+import { convertSavedObjectAttributesToReferences } from '../../..';
 import { VisualizeEditorInput } from '../../../react_embeddable/types';
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
@@ -109,6 +110,7 @@ export const useSavedVisInstance = (
           savedVisInstance.panelTimeRange = embeddableInput.timeRange;
         }
         const { savedVis, vis } = savedVisInstance;
+        const references = convertSavedObjectAttributesToReferences(savedVis);
 
         const originatingAppName = originatingApp
           ? stateTransferService.getAppNameFromId(originatingApp)
@@ -158,7 +160,8 @@ export const useSavedVisInstance = (
                 visEditorRef.current,
                 vis,
                 eventEmitter,
-                embeddableApiHandler
+                embeddableApiHandler,
+                references
               );
             }
           }

@@ -12,6 +12,7 @@ import EventEmitter from 'events';
 import moment from 'moment';
 import { parse } from 'query-string';
 import React from 'react';
+import { omit } from 'lodash';
 
 import { Capabilities } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
@@ -43,7 +44,7 @@ import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs'
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { VisualizeSerializedState } from '../../react_embeddable/types';
-import { NavigateToLensFn } from './use/use_embeddable_api_handler';
+import { NavigateToLensFn, SerializeStateFn } from './use/use_embeddable_api_handler';
 import './visualize_navigation.scss';
 
 interface VisualizeCapabilities {
@@ -71,6 +72,7 @@ export interface TopNavConfigParams {
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
   navigateToLensFn?: NavigateToLensFn;
+  serializeStateFn?: SerializeStateFn;
   showBadge: boolean;
   eventEmitter?: EventEmitter;
   hasInspector: boolean;
@@ -104,6 +106,7 @@ export const getTopNavConfig = (
     hideLensBadge,
     setNavigateToLens,
     navigateToLensFn,
+    serializeStateFn,
     showBadge,
     eventEmitter,
     hasInspector,
@@ -126,7 +129,25 @@ export const getTopNavConfig = (
   }: VisualizeServices
 ) => {
   const { vis } = visInstance;
-  const savedVis = visInstance.savedVis;
+  const baseSavedVis = visInstance.savedVis;
+  const serializedVis = serializeStateFn?.().rawState.savedVis ?? null;
+  const savedVis = serializedVis
+    ? {
+        ...omit(baseSavedVis, 'kibanaSavedObjectMeta'),
+        title: serializedVis.title,
+        description: serializedVis.description,
+        visState: {
+          type: serializedVis.type,
+          params: serializedVis.params,
+          aggs: serializedVis.data.aggs,
+          title: serializedVis.title,
+        },
+        savedSearchId: serializedVis.data.savedSearchId,
+        savedSearchRefName: String(serializedVis.data.savedSearchRefName),
+        searchSourceFields: serializedVis.data.searchSource,
+        uiStateJSON: vis.uiState.toString(),
+      }
+    : baseSavedVis;
 
   /**
    * Called when the user clicks "Save" button.
@@ -140,18 +161,18 @@ export const getTopNavConfig = (
       title: savedVis.title,
     });
 
-    savedVis.savedSearchId = vis.data.savedSearchId;
-    savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
-    savedVis.visState = stateContainer.getState().vis;
-    savedVis.uiStateJSON = vis.uiState.toString();
-
     setHasUnsavedChanges(false);
 
     try {
-      const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsTagging,
-        ...startServices,
-      });
+      const id = await saveVisualization(
+        savedVis,
+        saveOptions,
+        {
+          savedObjectsTagging,
+          ...startServices,
+        },
+        serializeStateFn?.().references
+      );
 
       if (id) {
         toastNotifications.addSuccess({

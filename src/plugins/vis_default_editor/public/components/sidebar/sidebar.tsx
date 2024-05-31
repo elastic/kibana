@@ -96,6 +96,8 @@ function DefaultEditorSideBarComponent({
       return;
     }
     const serializedVis = vis.serialize();
+    vis.setState(serializedVis);
+
     const updatedVis = {
       ...serializedVis,
       params: state.params,
@@ -105,7 +107,6 @@ function DefaultEditorSideBarComponent({
       },
     };
     onUpdateVis(updatedVis);
-    vis.setState(updatedVis);
     eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });

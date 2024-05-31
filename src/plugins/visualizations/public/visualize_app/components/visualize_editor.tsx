@@ -40,6 +40,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const embeddableApiHandler = useEmbeddableApiHandler();
   const [openInspectorFn] = embeddableApiHandler.openInspector;
   const [navigateToLensFn] = embeddableApiHandler.navigateToLens;
+  const [serializeStateFn] = embeddableApiHandler.serializeState;
 
   const isChromeVisible = useChromeVisibility(services.chrome);
   useEffect(() => {
@@ -122,6 +123,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       eventEmitter={eventEmitter}
       openInspectorFn={openInspectorFn}
       navigateToLensFn={navigateToLensFn}
+      serializeStateFn={serializeStateFn}
     />
   );
 };

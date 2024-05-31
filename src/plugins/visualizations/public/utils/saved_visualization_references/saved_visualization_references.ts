@@ -14,6 +14,7 @@ import {
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import { isObject } from 'lodash';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { VisualizeSavedVisInputState } from '../../react_embeddable/types';
 import { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
@@ -88,9 +89,32 @@ export function deserializeReferences(
   return { references: updatedReferences, deserializedSearchSource };
 }
 
-/**
- * @deprecated Use serializeReferences
- */
+export function convertSavedObjectAttributesToReferences(attributes: {
+  kibanaSavedObjectMeta?: { searchSourceJSON: string };
+  savedSearchId?: string;
+}) {
+  const references: Reference[] = [];
+  if (attributes.kibanaSavedObjectMeta?.searchSourceJSON) {
+    const searchSource = JSON.parse(attributes.kibanaSavedObjectMeta.searchSourceJSON);
+    const indexId = searchSource.index.id;
+    const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+    references.push({
+      name: refName,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+      id: indexId,
+    });
+  }
+  if (attributes.savedSearchId) {
+    references.push({
+      name: 'search_0',
+      type: 'search',
+      id: attributes.savedSearchId,
+    });
+  }
+  console.log('CONVERT REFS', references);
+  return references;
+}
+
 export function extractReferences({
   attributes,
   references = [],
@@ -138,9 +162,6 @@ export function extractReferences({
   };
 }
 
-/**
- * @deprecated Use deserializeReferences
- */
 export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
   if (savedObject.searchSourceFields) {
     savedObject.searchSourceFields = injectSearchSourceReferences(

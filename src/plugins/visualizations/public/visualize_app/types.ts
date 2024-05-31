@@ -9,6 +9,7 @@
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { Reference } from '@kbn/content-management-utils';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -133,7 +134,8 @@ export type VisEditorConstructor<TVisParams extends VisParams = VisParams> = new
   element: HTMLElement,
   vis: Vis<TVisParams>,
   eventEmitter: EventEmitter,
-  embeddableApiHandler: EmbeddableApiHandler
+  embeddableApiHandler: EmbeddableApiHandler,
+  references?: Reference[]
 ) => IEditorController;
 
 export interface IEditorController {

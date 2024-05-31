@@ -19,16 +19,18 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   EditorRenderProps,
   EmbeddableApiHandler,
-  Vis,
   SerializedVis,
+  Vis,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
 
+import { Reference } from '@kbn/content-management-utils';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   VisualizeApi,
   VisualizeSerializedState,
 } from '@kbn/visualizations-plugin/public/react_embeddable/types';
+import { SerializeStateFn } from '@kbn/visualizations-plugin/public/visualize_app/utils/use/use_embeddable_api_handler';
 import { BehaviorSubject } from 'rxjs';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';
@@ -47,10 +49,12 @@ function DefaultEditor({
   eventEmitter,
   linked,
   savedSearch,
+  references = [],
 }: EditorRenderProps & {
   vis: Vis;
   eventEmitter: EventEmitter;
   embeddableApiHandler: EmbeddableApiHandler;
+  references: Reference[];
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [parentApi] = useState({
@@ -73,6 +77,8 @@ function DefaultEditor({
    * Here is the existing React issue: https://github.com/facebook/react/issues/17064
    */
   const onEditorMouseLeave = useCallback(() => {}, []);
+
+  console.log('REFERENCES', references);
 
   useEffect(() => {
     parentApi.timeRange$.next(timeRange);
@@ -123,7 +129,7 @@ function DefaultEditor({
                         title: vis.title,
                         description: vis.description,
                       },
-                      references: [],
+                      references,
                     }),
                   })}
                   onApiAvailable={(api) => {
@@ -139,6 +145,8 @@ function DefaultEditor({
                       setNavigateToLens(() => navigateToLens);
                     });
                     setOnUpdateVis(() => api.setVis);
+                    const [, setSerializeState] = embeddableApiHandler.serializeState;
+                    setSerializeState(() => api.serializeState as SerializeStateFn);
                   }}
                 />
               </EuiResizablePanel>
