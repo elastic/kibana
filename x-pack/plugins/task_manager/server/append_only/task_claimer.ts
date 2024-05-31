@@ -165,7 +165,7 @@ async function run(opts: TaskClaimerOpts) {
       body: params,
       refresh: true,
     });
-    const promises = filteredTasks.map(async (row) => {
+    for (const row of filteredTasks) {
       const bulkResultForTask = result2.items.find(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (i: any) => i.create._id === `${row._id}:${(row as any)._source.runAt}`
@@ -181,12 +181,6 @@ async function run(opts: TaskClaimerOpts) {
           bulkResultForTask?.create?.status
         );
       }
-    });
-    try {
-      await Promise.all(promises);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('One of the all promises failed', e);
     }
   }
 }
