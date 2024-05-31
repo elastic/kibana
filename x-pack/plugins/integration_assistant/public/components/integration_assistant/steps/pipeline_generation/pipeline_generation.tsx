@@ -12,6 +12,7 @@ import {
   EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 // import { JsonEditor } from '@kbn/es-ui-shared-plugin/public';
 import React, { useEffect } from 'react';
 import { IntegrationSettings } from '../../types';
@@ -20,6 +21,7 @@ import { ProgressItem, usePipelineGeneration } from './use_pipeline_generation';
 interface PipelineGenerationProps {
   integrationSettings: IntegrationSettings | undefined;
   connectorId: string | undefined;
+  result: object | undefined;
   setIntegrationSettings: (param: IntegrationSettings) => void;
   setIsGenerating: (param: boolean) => void;
   setResult: (param: object | undefined) => void;
@@ -82,7 +84,13 @@ export const PipelineGeneration = React.memo<PipelineGenerationProps>(
               </EuiFlexGroup>
             </>
           )}
-          {result && <>{result}</>}
+          {result && (
+            <CodeEditor
+              value={JSON.stringify(result.pipeline)}
+              languageId="json"
+              onChange={() => {}}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );

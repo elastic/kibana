@@ -48,24 +48,25 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             (connectorItem) => connectorItem.actionTypeId === '.bedrock'
           )[0];
 
-      const model = new BedrockChat({
-        actionsClient,
-        connectorId: connector.id,
-        model: req.body.model || connector.config?.defaultModel,
-        region: req.body.region || connector.config?.apiUrl.split('.')[1],
-        temperature: 0.05,
-        maxTokens: 4096,
-        modelKwargs: {
-          top_k: 200,
-          temperature: 0.05,
-          top_p: 0.4,
-          stop_sequences: ['Human:'],
-        },
-      });
-
-      const graph = await getEcsGraph(model);
       let results = { results: { mapping: {}, pipeline: {} } };
       try {
+        const model = new BedrockChat({
+          actionsClient,
+          connectorId: connector.id,
+          model: req.body.model || connector.config?.defaultModel,
+          region: req.body.region || connector.config?.apiUrl.split('.')[1],
+          temperature: 0.05,
+          maxTokens: 4096,
+          modelKwargs: {
+            top_k: 200,
+            temperature: 0.05,
+            top_p: 0.4,
+            stop_sequences: ['Human:'],
+          },
+        });
+
+        const graph = await getEcsGraph(model);
+
         if (req.body?.mapping) {
           results = (await graph.invoke({
             packageName,
@@ -80,7 +81,6 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             rawSamples,
           })) as EcsMappingApiResponse;
       } catch (e) {
-        console.log(e);
         return res.badRequest({ body: e });
       }
 

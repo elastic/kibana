@@ -81,18 +81,18 @@ export const usePipelineGeneration = ({
           parametersWithPipeline.currentPipeline = categorizationResult.results.pipeline;
         }
 
-        // addProgress('related_graph');
-        // const relatedGraphResult = await runRelatedGraph(parametersWithPipeline, deps);
-        // if (abortController.signal.aborted) return;
-        // if (!isEmpty(relatedGraphResult?.results)) {
-        //   parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
-        // }
+        addProgress('related_graph');
+        const relatedGraphResult = await runRelatedGraph(parametersWithPipeline, deps);
+        if (abortController.signal.aborted) return;
+        if (!isEmpty(relatedGraphResult?.results)) {
+          parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
+        }
 
         // addProgress('integration_builder');
         // const integrationBuilderResult = await runIntegrationBuilder(parametersWithPipeline, deps);
         // if (abortController.signal.aborted) return;
 
-        // setResult
+        setResult(relatedGraphResult.results);
       } catch (e) {
         if (abortController.signal.aborted) return;
         setError(`Error: ${e.message}`);

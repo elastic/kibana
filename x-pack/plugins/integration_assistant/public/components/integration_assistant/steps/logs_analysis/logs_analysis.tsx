@@ -82,14 +82,18 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
         name: (e: React.ChangeEvent<HTMLInputElement>) => {
           const name = e.target.value;
           if (!isValidName(name)) {
-            return setInvalidField((current) => ({ ...current, name: true }));
+            setInvalidField((current) => ({ ...current, name: true }));
+          } else {
+            setInvalidField((current) => ({ ...current, name: false }));
           }
           setIntegrationValues({ name });
         },
         dataStreamName: (e: React.ChangeEvent<HTMLInputElement>) => {
           const dataStreamName = e.target.value;
           if (!isValidName(dataStreamName)) {
-            return setInvalidField((current) => ({ ...current, dataStreamName: true }));
+            setInvalidField((current) => ({ ...current, dataStreamName: true }));
+          } else {
+            setInvalidField((current) => ({ ...current, dataStreamName: false }));
           }
           setIntegrationValues({ dataStreamName: e.target.value });
         },
@@ -97,10 +101,11 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
     }, [setIntegrationValues, setInvalidField]);
 
     useEffect(() => {
-      if (integrationSettings?.title && !integrationSettings.name) {
+      if (integrationSettings?.title && integrationSettings.name == null) {
+        console.log('set name', getNameFromTitle(integrationSettings.title));
         setIntegrationValues({ name: getNameFromTitle(integrationSettings.title) });
       }
-      if (integrationSettings?.dataStreamTitle && !integrationSettings.dataStreamName) {
+      if (integrationSettings?.dataStreamTitle && integrationSettings.dataStreamName == null) {
         setIntegrationValues({
           dataStreamName: getNameFromTitle(integrationSettings.dataStreamTitle),
         });
