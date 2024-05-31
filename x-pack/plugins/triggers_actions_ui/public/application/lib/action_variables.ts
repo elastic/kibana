@@ -115,8 +115,12 @@ const AlertProvidedActionVariableDescriptions: Record<
 > = {
   [LegacyAlertProvidedActionVariables.alertId]: {
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertIdLabel', {
-      defaultMessage: 'The ID of the alert that scheduled actions for the rule.',
+      defaultMessage: 'This has been deprecated in favor of {variable}.',
+      values: {
+        variable: AlertProvidedActionVariables.ruleId,
+      },
     }),
+    deprecated: true,
   },
   [LegacyAlertProvidedActionVariables.alertName]: {
     deprecated: true,
@@ -230,7 +234,6 @@ const AlertProvidedActionVariableDescriptions: Record<
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleParamsLabel', {
       defaultMessage: 'The parameters of the rule.',
     }),
-    usesPublicBaseUrl: true,
   },
   [AlertProvidedActionVariables.ruleUrl]: {
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleUrlLabel', {
