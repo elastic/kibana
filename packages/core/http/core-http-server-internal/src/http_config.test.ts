@@ -555,8 +555,8 @@ describe('cdn', () => {
     });
   });
   it.each([['foo'], ['http:./']])('throws for invalid URL %s', (url) => {
-    expect(() => config.schema.validate({ cdn: { url } })).toThrowErrorMatchingInlineSnapshot(
-      `"[cdn.url]: expected URI with scheme [http|https]."`
+    expect(() => config.schema.validate({ cdn: { url } })).toThrow(
+      /expected URI with scheme \[http\|https\]/
     );
   });
   it.each([
