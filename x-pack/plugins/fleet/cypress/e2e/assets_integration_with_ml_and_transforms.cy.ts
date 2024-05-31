@@ -84,7 +84,7 @@ const assets: Asset[] = [
     links: [
       {
         text: destinationIndex,
-        expectedEsApi: `/internal/index_management/indices/${destinationIndex}`,
+        expectedEsApi: `/internal/index_management/indices/ml-rdp-lmd`,
         expectedResponseStatus: 200,
       },
     ],
@@ -158,7 +158,10 @@ describe('Assets - Real API for integration with ML and transforms', () => {
           method: 'GET',
           url: `/internal/transform/transforms/${transformId}/_stats`,
           headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '1' },
-        }).then((response) => {
+        }).then((resp) => {
+          const response = resp as unknown as Cypress.Response<{
+            transforms: Array<{ health: { status: string } }>;
+          }>;
           expect(response.status).to.equal(200);
           expect(response.body.transforms[0].health.status).to.equal('green');
         });
