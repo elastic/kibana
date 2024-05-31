@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiBetaBadge, EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
@@ -16,6 +15,7 @@ import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { ExperimentalBadge } from '../../shared_components';
 
 const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 
@@ -65,22 +65,7 @@ export function LayerSettingsPanel({
             {i18n.translate('xpack.lens.indexPattern.randomSampling.label', {
               defaultMessage: 'Sampling',
             })}{' '}
-            <EuiToolTip
-              content={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
-                defaultMessage: 'Technical preview',
-              })}
-            >
-              <EuiBetaBadge
-                css={css`
-                  vertical-align: middle;
-                `}
-                iconType="beaker"
-                label={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
-                  defaultMessage: 'Technical preview',
-                })}
-                size="s"
-              />
-            </EuiToolTip>
+            <ExperimentalBadge />
           </>
         }
       >

@@ -6,19 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {} from '../utils';

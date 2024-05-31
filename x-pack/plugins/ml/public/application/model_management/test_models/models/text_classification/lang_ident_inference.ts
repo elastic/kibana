@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferenceType } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getLangIdentOutputComponent } from './lang_ident_output';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
-import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType: InferenceType = 'classification';

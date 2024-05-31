@@ -103,6 +103,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private isOptedIn?: boolean;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
+  private readonly shouldStartSnapshotTelemetryFetcher: boolean;
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
@@ -132,6 +133,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       ...initializerContext,
       logger: this.logger,
     });
+
+    // Only generate and report the snapshot telemetry in the UI node.
+    // This allows better cache optimizations and allowing background tasks to focus on alerts and similar.
+    this.shouldStartSnapshotTelemetryFetcher = initializerContext.node.roles.ui;
 
     // If the opt-in selection cannot be changed, set it as early as possible.
     const { optIn, allowChangingOptInStatus } = this.initialConfig;
@@ -240,7 +245,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.security = security;
 
-    this.startFetcher(core, telemetryCollectionManager);
+    if (this.shouldStartSnapshotTelemetryFetcher) {
+      // Only generate and report the snapshot telemetry if we are on the appropriate node role
+      this.startFetcher(core, telemetryCollectionManager);
+    }
 
     return {
       getIsOptedIn: async () => this.isOptedIn === true,

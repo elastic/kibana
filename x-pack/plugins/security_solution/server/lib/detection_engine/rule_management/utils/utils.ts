@@ -9,6 +9,8 @@ import { partition } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -18,6 +20,8 @@ import type {
   AlertSuppression,
   AlertSuppressionCamel,
   InvestigationFields,
+  RequiredField,
+  RequiredFieldInput,
   RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
@@ -95,23 +99,6 @@ export const getIdBulkError = ({
 
 export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule));
-};
-
-/**
- * Transforms a rule object to exportable format. Exportable format shouldn't contain runtime fields like
- * `execution_summary`
- */
-export const transformRuleToExportableFormat = (
-  rule: RuleResponse
-): Omit<RuleResponse, 'execution_summary'> => {
-  const exportedRule = {
-    ...rule,
-  };
-
-  // Fields containing runtime information shouldn't be exported. It causes import failures.
-  delete exportedRule.execution_summary;
-
-  return exportedRule;
 };
 
 export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): FindRulesResponse => {
@@ -405,3 +392,19 @@ export const migrateLegacyInvestigationFields = (
 
   return investigationFields;
 };
+
+/*
+  Computes the boolean "ecs" property value for each required field based on the ECS field map.
+  "ecs" property indicates whether the required field is an ECS field or not.
+*/
+export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]): RequiredField[] =>
+  (requiredFields ?? []).map((requiredFieldWithoutEcs) => {
+    const isEcsField = Boolean(
+      ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
+    );
+
+    return {
+      ...requiredFieldWithoutEcs,
+      ecs: isEcsField,
+    };
+  });

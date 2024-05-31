@@ -11,10 +11,9 @@ import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
-import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { ResponseButton } from './response_button';
 import type { SearchHit } from '../../../../../common/search_strategy';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 const mockValidSearchHit = {
   fields: {
@@ -34,11 +33,11 @@ const mockValidSearchHit = {
 const renderResponseButton = (panelContextValue: RightPanelContext = mockContextValue) =>
   render(
     <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+      <TestProvider>
         <RightPanelContext.Provider value={panelContextValue}>
           <ResponseButton />
         </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     </IntlProvider>
   );
 describe('<ResponseButton />', () => {

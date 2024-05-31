@@ -79,6 +79,10 @@ describe('PrivilegeSpaceForm', () => {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
         },
+        "with_require_all_spaces_for_feature_and_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
         "with_require_all_spaces_sub_features": Object {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
@@ -132,6 +136,12 @@ describe('PrivilegeSpaceForm', () => {
         "with_excluded_sub_features": Object {
           "primaryFeaturePrivilege": "all",
           "subFeaturePrivileges": Array [],
+        },
+        "with_require_all_spaces_for_feature_and_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [
+            "cool_toggle_1",
+          ],
         },
         "with_require_all_spaces_sub_features": Object {
           "primaryFeaturePrivilege": "all",
@@ -192,6 +202,10 @@ describe('PrivilegeSpaceForm', () => {
           "subFeaturePrivileges": Array [],
         },
         "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_require_all_spaces_for_feature_and_sub_features": Object {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
         },
@@ -300,6 +314,10 @@ describe('PrivilegeSpaceForm', () => {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
         },
+        "with_require_all_spaces_for_feature_and_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
         "with_require_all_spaces_sub_features": Object {
           "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
@@ -365,6 +383,7 @@ describe('PrivilegeSpaceForm', () => {
             no_sub_features: ['read'],
             with_sub_features: ['read'],
             with_require_all_spaces_sub_features: ['read'],
+            with_require_all_spaces_for_feature_and_sub_features: ['read'],
           },
           spaces: ['foo'],
         },
@@ -471,6 +490,7 @@ describe('PrivilegeSpaceForm', () => {
               no_sub_features: ['read'],
               with_sub_features: ['read'],
               with_require_all_spaces_sub_features: ['read'],
+              with_require_all_spaces_for_feature_and_sub_features: ['read'],
             },
             spaces: ['foo'],
           },
@@ -591,6 +611,7 @@ describe('PrivilegeSpaceForm', () => {
               no_sub_features_require_all_space: ['read'],
               with_sub_features: ['read'],
               with_require_all_spaces_sub_features: ['read'],
+              with_require_all_spaces_for_feature_and_sub_features: ['read'],
             },
             spaces: ['foo'],
           },
@@ -695,6 +716,7 @@ describe('PrivilegeSpaceForm', () => {
               no_sub_features_require_all_space: ['all'],
               with_sub_features: ['all'],
               with_require_all_spaces_sub_features: ['all'],
+              with_require_all_spaces_for_feature_and_sub_features: ['all'],
             },
             spaces: ['*'],
           },

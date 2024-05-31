@@ -6,10 +6,41 @@
  * Side Public License, v 1.
  */
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ManagementStart } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
+export interface ReportingPublicPluginStartDependencies {
+  home: HomePublicPluginStart;
+  data: DataPublicPluginStart;
+  management: ManagementStart;
+  licensing: LicensingPluginStart;
+  uiActions: UiActionsStart;
+  share: SharePluginStart;
+}
+
 export interface ClientConfigType {
-  csv: { scroll: { duration: string; size: number } };
-  poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
+  csv: {
+    enablePanelActionDownload: boolean;
+    scroll: {
+      duration: string;
+      size: number;
+    };
+  };
+  poll: {
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
   roles: { enabled: boolean };
-  export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
+  export_types: {
+    pdf: { enabled: boolean };
+    png: { enabled: boolean };
+    csv: { enabled: boolean };
+  };
   statefulSettings: { enabled: boolean };
 }

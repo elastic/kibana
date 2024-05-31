@@ -49,6 +49,7 @@ export type OpenTelemetryAgentName =
   | 'opentelemetry/ruby'
   | 'opentelemetry/rust'
   | 'opentelemetry/swift'
+  | 'opentelemetry/android'
   | 'opentelemetry/webjs';
 export const OPEN_TELEMETRY_AGENT_NAMES: OpenTelemetryAgentName[] = [
   'otlp',
@@ -63,6 +64,7 @@ export const OPEN_TELEMETRY_AGENT_NAMES: OpenTelemetryAgentName[] = [
   'opentelemetry/ruby',
   'opentelemetry/rust',
   'opentelemetry/swift',
+  'opentelemetry/android',
   'opentelemetry/webjs',
 ];
 

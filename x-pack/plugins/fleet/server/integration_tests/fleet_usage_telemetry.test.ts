@@ -135,6 +135,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '22.04.2 LTS (Jammy Jellyfish)',
             },
+            elastic: { agent: { unprivileged: false } }, // Root agent
           },
           components: [
             {
@@ -146,6 +147,13 @@ describe('fleet usage telemetry', () => {
               status: 'HEALTHY',
             },
           ],
+          upgrade_details: {
+            target_version: '8.12.0',
+            state: 'UPG_FAILED',
+            metadata: {
+              error_msg: 'Download failed',
+            },
+          },
         },
         {
           create: {
@@ -165,6 +173,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '20.04.5 LTS (Focal Fossa)',
             },
+            elastic: { agent: { unprivileged: true } }, // Non root agent
           },
           components: [
             {
@@ -176,6 +185,13 @@ describe('fleet usage telemetry', () => {
               status: 'HEALTHY',
             },
           ],
+          upgrade_details: {
+            target_version: '8.12.0',
+            state: 'UPG_FAILED',
+            metadata: {
+              error_msg: 'Agent crash detected',
+            },
+          },
         },
         {
           create: {
@@ -220,6 +236,11 @@ describe('fleet usage telemetry', () => {
           last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
           active: true,
           policy_id: 'policy2',
+          upgrade_details: {
+            target_version: '8.11.0',
+            state: 'UPG_ROLLBACK',
+            metadata: {},
+          },
         },
         {
           create: {
@@ -460,9 +481,15 @@ describe('fleet usage telemetry', () => {
           unhealthy: 0,
           offline: 0,
           updating: 0,
+          inactive: 0,
+          unenrolled: 0,
           num_host_urls: 0,
         },
         packages: [],
+        agents_per_privileges: {
+          root: 3,
+          unprivileged: 1,
+        },
         agents_per_version: [
           {
             version: '8.6.0',
@@ -557,5 +584,24 @@ describe('fleet usage telemetry', () => {
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
     );
+    expect(usage?.upgrade_details.length).toBe(3);
+    expect(usage?.upgrade_details).toContainEqual({
+      target_version: '8.12.0',
+      state: 'UPG_FAILED',
+      error_msg: 'Download failed',
+      agent_count: 1,
+    });
+    expect(usage?.upgrade_details).toContainEqual({
+      target_version: '8.12.0',
+      state: 'UPG_FAILED',
+      error_msg: 'Agent crash detected',
+      agent_count: 1,
+    });
+    expect(usage?.upgrade_details).toContainEqual({
+      target_version: '8.11.0',
+      state: 'UPG_ROLLBACK',
+      error_msg: '',
+      agent_count: 1,
+    });
   });
 });

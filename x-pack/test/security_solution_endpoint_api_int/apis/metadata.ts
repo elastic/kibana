@@ -47,8 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/151854
-  describe.skip('test metadata apis', function () {
+  describe('test metadata apis', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     describe('list endpoints GET route', () => {
@@ -404,7 +403,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('get metadata transforms', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175791
+    describe.skip('get metadata transforms', () => {
       const testRegex = /(endpoint|logs-endpoint)\.metadata_(united|current)-default-*/;
       let currentTransformName = metadataTransformPrefix;
       let unitedTransformName = METADATA_UNITED_TRANSFORM;

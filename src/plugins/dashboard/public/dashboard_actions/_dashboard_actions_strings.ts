@@ -41,12 +41,17 @@ export const dashboardAddToLibraryActionStrings = {
       defaultMessage: `Panel {panelTitle} was added to the library`,
       values: { panelTitle },
     }),
+  getErrorMessage: (panelTitle?: string) =>
+    i18n.translate('dashboard.panel.addToLibrary.errorMessage', {
+      defaultMessage: `An error was encountered adding panel {panelTitle} to the library`,
+      values: { panelTitle },
+    }),
 };
 
 export const dashboardClonePanelActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.clonePanel', {
-      defaultMessage: 'Clone panel',
+      defaultMessage: 'Duplicate',
     }),
   getClonedTag: () =>
     i18n.translate('dashboard.panel.title.clonedTag', {
@@ -54,7 +59,7 @@ export const dashboardClonePanelActionStrings = {
     }),
   getSuccessMessage: () =>
     i18n.translate('dashboard.panel.clonedToast', {
-      defaultMessage: 'Cloned panel',
+      defaultMessage: 'Duplicated panel',
     }),
 };
 
@@ -65,14 +70,14 @@ export const dashboardExpandPanelActionStrings = {
     }),
   getMaximizeTitle: () =>
     i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
-      defaultMessage: 'Maximize panel',
+      defaultMessage: 'Maximize',
     }),
 };
 
 export const dashboardExportCsvActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.actions.DownloadCreateDrilldownAction.displayName', {
-      defaultMessage: 'Download as CSV',
+      defaultMessage: 'Download CSV',
     }),
   getUntitledFilename: () =>
     i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {
@@ -87,7 +92,12 @@ export const dashboardUnlinkFromLibraryActionStrings = {
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
-      defaultMessage: `Panel {panelTitle} is no longer connected to the library`,
+      defaultMessage: `Panel {panelTitle} is no longer connected to the library.`,
+      values: { panelTitle },
+    }),
+  getFailureMessage: (panelTitle: string) =>
+    i18n.translate('dashboard.panel.unlinkFromLibrary.failureMessage', {
+      defaultMessage: `An error occured while unlinking {panelTitle} from the library.`,
       values: { panelTitle },
     }),
 };
@@ -105,28 +115,6 @@ export const dashboardLibraryNotificationStrings = {
   getPopoverAriaLabel: () =>
     i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
       defaultMessage: 'View library information and unlink this panel',
-    }),
-};
-
-export const dashboardReplacePanelActionStrings = {
-  getDisplayName: () =>
-    i18n.translate('dashboard.panel.removePanel.replacePanel', {
-      defaultMessage: 'Replace panel',
-    }),
-  getSuccessMessage: (savedObjectName?: string) =>
-    savedObjectName
-      ? i18n.translate('dashboard.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
-          defaultMessage: '{savedObjectName} was added',
-          values: {
-            savedObjectName: `'${savedObjectName}'`,
-          },
-        })
-      : i18n.translate('dashboard.addPanel.panelAddedToContainerSuccessMessageTitle', {
-          defaultMessage: 'A panel was added',
-        }),
-  getNoMatchingObjectsMessage: () =>
-    i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
-      defaultMessage: 'No matching objects found.',
     }),
 };
 

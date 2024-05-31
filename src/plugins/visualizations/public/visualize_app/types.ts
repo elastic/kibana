@@ -137,7 +137,7 @@ export type SavedVisInstance = VisInstance;
 export type ByValueVisInstance = VisInstance;
 export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
-export type VisEditorConstructor<TVisParams = VisParams> = new (
+export type VisEditorConstructor<TVisParams extends VisParams = VisParams> = new (
   element: HTMLElement,
   vis: Vis<TVisParams>,
   eventEmitter: EventEmitter,

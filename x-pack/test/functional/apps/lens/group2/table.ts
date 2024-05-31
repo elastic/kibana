@@ -124,6 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         from: 'lnsDatatable_rows > lns-dimensionTrigger',
         to: 'lnsDatatable_columns > lns-empty-dimension',
       });
+      // await PageObjects.common.sleep(100000);
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal(
         '169.228.188.120 › Average of bytes'
@@ -161,7 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open the palette panel to customize the palette look', async () => {
-      await PageObjects.lens.openPalettePanel('lnsDatatable');
+      await PageObjects.lens.openPalettePanel();
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.changePaletteTo('temperature');
       await PageObjects.lens.waitForVisualization();

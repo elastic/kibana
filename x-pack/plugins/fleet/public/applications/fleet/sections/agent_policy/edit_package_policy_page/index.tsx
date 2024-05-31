@@ -47,10 +47,20 @@ import {
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
 
-import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../common/constants';
+import {
+  AGENTLESS_POLICY_ID,
+  HIDDEN_API_REFERENCE_PACKAGES,
+} from '../../../../../../common/constants';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
+
+import {
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+} from '../../../../../../common/services';
+
+import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
@@ -187,7 +197,7 @@ export const EditPackagePolicyForm = memo<{
       setFormState('INVALID');
       return;
     }
-    if (agentCount !== 0 && formState !== 'CONFIRM') {
+    if (agentCount !== 0 && policyId !== AGENTLESS_POLICY_ID && formState !== 'CONFIRM') {
       setFormState('CONFIRM');
       return;
     }
@@ -384,6 +394,7 @@ export const EditPackagePolicyForm = memo<{
       ),
     [packagePolicyId, packagePolicy]
   );
+  const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
@@ -423,6 +434,12 @@ export const EditPackagePolicyForm = memo<{
                 onCancel={() => setFormState('VALID')}
               />
             )}
+            {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+              <>
+                <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             {isUpgrade && upgradeDryRunData && (
               <>
                 <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />

@@ -6,7 +6,6 @@
  */
 import React, { useState, useMemo } from 'react';
 import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
-import { type DataView } from '@kbn/data-views-plugin/common';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
@@ -17,11 +16,12 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudPostureTableResult } from '../../common/hooks/use_cloud_posture_table';
+import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
 import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
+import { useDataViewContext } from '../../common/contexts/data_view_context';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
@@ -40,8 +40,7 @@ const useNewFieldsApi = true;
 // Hide Checkbox, enable open details Flyout
 const controlColumnIds = ['openDetails'];
 
-interface CloudSecurityDataGridProps {
-  dataView: DataView;
+export interface CloudSecurityDataTableProps {
   isLoading: boolean;
   defaultColumns: CloudSecurityDefaultColumn[];
   rows: DataTableRecord[];
@@ -52,10 +51,10 @@ interface CloudSecurityDataGridProps {
    */
   flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   /**
-   * This is the object that contains all the data and functions from the useCloudPostureTable hook.
+   * This is the object that contains all the data and functions from the useCloudPostureDataTable hook.
    * This is also used to manage the table state from the parent component.
    */
-  cloudPostureTable: CloudPostureTableResult;
+  cloudPostureDataTable: CloudPostureDataTableResult;
   title: string;
   /**
    * This is a function that returns a map of column ids to custom cell renderers.
@@ -77,24 +76,31 @@ interface CloudSecurityDataGridProps {
   /**
    * Height override for the data grid.
    */
-  height?: number;
+  height?: number | string;
+  /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
+  columnHeaders?: Record<string, string>;
+  /**
+   * Specify if distribution bar is shown on data table, used to calculate height of data table in virtualized mode
+   */
+  hasDistributionBar?: boolean;
 }
 
 export const CloudSecurityDataTable = ({
-  dataView,
   isLoading,
   defaultColumns,
   rows,
   total,
   flyoutComponent,
-  cloudPostureTable,
+  cloudPostureDataTable,
   loadMore,
   title,
   customCellRenderer,
   groupSelectorComponent,
   height,
+  columnHeaders,
+  hasDistributionBar = true,
   ...rest
-}: CloudSecurityDataGridProps) => {
+}: CloudSecurityDataTableProps) => {
   const {
     columnsLocalStorageKey,
     pageSize,
@@ -104,7 +110,7 @@ export const CloudSecurityDataTable = ({
     onResetFilters,
     filters,
     sort,
-  } = cloudPostureTable;
+  } = cloudPostureDataTable;
 
   const [columns, setColumns] = useLocalStorage(
     columnsLocalStorageKey,
@@ -114,12 +120,16 @@ export const CloudSecurityDataTable = ({
     `${columnsLocalStorageKey}:settings`,
     {
       columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
+        const columnDefaultSettings = curr.width
+          ? { width: curr.width, display: columnHeaders?.[curr.id] }
+          : { display: columnHeaders?.[curr.id] };
         const newColumn = { [curr.id]: columnDefaultSettings };
         return { ...prev, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
     }
   );
+
+  const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -171,6 +181,32 @@ export const CloudSecurityDataTable = ({
     sort,
   });
 
+  /**
+   * This object is used to determine if the table rendering will be virtualized and the virtualization wrapper height.
+   * mode should be passed as a key to the UnifiedDataTable component to force a re-render when the mode changes.
+   */
+  const computeDataTableRendering = useMemo(() => {
+    // Enable virtualization mode when the table is set to a large page size.
+    const isVirtualizationEnabled = pageSize >= 100;
+
+    const getWrapperHeight = () => {
+      if (height) return height;
+
+      // If virtualization is not needed the table will render unconstrained.
+      if (!isVirtualizationEnabled) return 'auto';
+
+      const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
+      const filterBarHeight = filters?.length > 0 ? 40 : 0;
+      const distributionBarHeight = hasDistributionBar ? 52 : 0;
+      return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+    };
+
+    return {
+      wrapperHeight: getWrapperHeight(),
+      mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
+    };
+  }, [pageSize, height, filters?.length, hasDistributionBar]);
+
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
       filterManager && dataView
@@ -196,6 +232,7 @@ export const CloudSecurityDataTable = ({
     const newColumns = { ...(grid.columns || {}) };
     newColumns[colSettings.columnId] = {
       width: Math.round(colSettings.width),
+      display: columnHeaders?.[colSettings.columnId],
     };
     const newGrid = { ...grid, columns: newColumns };
     setSettings(newGrid);
@@ -207,6 +244,10 @@ export const CloudSecurityDataTable = ({
     }
     return customCellRenderer(rows);
   }, [customCellRenderer, rows]);
+
+  const onResetColumns = () => {
+    setColumns(defaultColumns.map((c) => c.id));
+  };
 
   if (!isLoading && !rows.length) {
     return <EmptyState onResetFilters={onResetFilters} />;
@@ -221,15 +262,9 @@ export const CloudSecurityDataTable = ({
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       groupSelectorComponent={groupSelectorComponent}
+      onResetColumns={onResetColumns}
     />
   );
-
-  const dataTableStyle = {
-    // Change the height of the grid to fit the page
-    // If there are filters, leave space for the filter bar
-    // Todo: Replace this component with EuiAutoSizer
-    height: height ?? `calc(100vh - ${filters?.length > 0 ? 443 : 403}px)`,
-  };
 
   const rowHeightState = 0;
 
@@ -237,21 +272,27 @@ export const CloudSecurityDataTable = ({
     opacity: isLoading ? 1 : 0,
   };
 
+  const loadingState =
+    isLoading || dataViewIsRefetching ? DataLoadingState.loading : DataLoadingState.loaded;
+
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
         data-test-subj={rest['data-test-subj']}
         className={styles.gridContainer}
-        style={dataTableStyle}
+        style={{
+          height: computeDataTableRendering.wrapperHeight,
+        }}
       >
         <EuiProgress size="xs" color="accent" style={loadingStyle} />
         <UnifiedDataTable
+          key={computeDataTableRendering.mode}
           className={styles.gridStyle}
           ariaLabelledBy={title}
           columns={currentColumns}
           expandedDoc={expandedDoc}
           dataView={dataView}
-          loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+          loadingState={loadingState}
           onFilter={onAddFilter as DocViewFilterFn}
           onResize={onResize}
           onSetColumns={onSetColumns}
@@ -276,6 +317,7 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
+          onFieldEdited={dataViewRefetch}
         />
       </div>
     </CellActionsProvider>

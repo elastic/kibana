@@ -6,9 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConnectorStatus } from '@kbn/search-connectors';
+import { Connector, ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
 
-export function connectorStatusToText(connectorStatus: ConnectorStatus): string {
+const incompleteText = i18n.translate(
+  'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
+  { defaultMessage: 'Incomplete' }
+);
+
+export function connectorStatusToText(connector: Connector): string {
+  const hasIndexName = !!connector.index_name;
+  const connectorStatus = connector.status;
   if (
     connectorStatus === ConnectorStatus.CREATED ||
     connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION
@@ -18,11 +25,24 @@ export function connectorStatusToText(connectorStatus: ConnectorStatus): string 
       { defaultMessage: 'Needs Configuration' }
     );
   }
+  if (
+    connector.error === SyncStatus.ERROR ||
+    connector.last_sync_error !== null ||
+    connector.last_access_control_sync_error !== null
+  ) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndices.connectorStatus.syncFailure.label',
+      { defaultMessage: 'Sync Failure' }
+    );
+  }
   if (connectorStatus === ConnectorStatus.ERROR) {
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.connectorStatus.connectorFailure.label',
       { defaultMessage: 'Connector Failure' }
     );
+  }
+  if (!hasIndexName) {
+    return incompleteText;
   }
   if (connectorStatus === ConnectorStatus.CONFIGURED) {
     return i18n.translate(
@@ -30,21 +50,32 @@ export function connectorStatusToText(connectorStatus: ConnectorStatus): string 
       { defaultMessage: 'Configured' }
     );
   }
+  if (connectorStatus === ConnectorStatus.CONNECTED) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.connected.label',
+      { defaultMessage: 'Connected' }
+    );
+  }
 
-  return i18n.translate(
-    'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
-    { defaultMessage: 'Incomplete' }
-  );
+  return incompleteText;
 }
 
-export function connectorStatusToColor(
-  connectorStatus: ConnectorStatus
-): 'warning' | 'danger' | 'success' {
+export function connectorStatusToColor(connector: Connector): 'warning' | 'danger' | 'success' {
+  const hasIndexName = !!connector.index_name;
+  const connectorStatus = connector.status;
+  if (!hasIndexName) {
+    return 'warning';
+  }
+  if (
+    connectorStatus === ConnectorStatus.ERROR ||
+    connector.error === SyncStatus.ERROR ||
+    connector.last_sync_error !== null ||
+    connector.last_access_control_sync_error !== null
+  ) {
+    return 'danger';
+  }
   if (connectorStatus === ConnectorStatus.CONNECTED) {
     return 'success';
-  }
-  if (connectorStatus === ConnectorStatus.ERROR) {
-    return 'danger';
   }
   return 'warning';
 }

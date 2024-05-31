@@ -24,9 +24,9 @@ export async function untarBuffer(
   const inflateStream = tar.list().on('entry', (entry) => {
     const path = entry.path || '';
     if (!filter({ path })) return;
-    streamToBuffer(entry as unknown as NodeJS.ReadableStream).then((entryBuffer) =>
-      onEntry({ buffer: entryBuffer, path })
-    );
+    streamToBuffer(entry as unknown as NodeJS.ReadableStream)
+      .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }))
+      .catch(() => {});
   });
 
   deflatedStream.pipe(inflateStream);

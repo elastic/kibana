@@ -31,6 +31,7 @@ export const createTag = (parts: Partial<Tag> = {}): Tag => ({
   name: 'some-tag',
   description: 'Some tag',
   color: '#FF00CC',
+  managed: false,
   ...parts,
 });
 

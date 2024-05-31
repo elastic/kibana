@@ -27,7 +27,7 @@ import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
 import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 
-export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
+export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
   registerAppRoutes(fleetAuthzRouter);
 

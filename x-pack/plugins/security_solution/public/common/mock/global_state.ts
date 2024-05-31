@@ -6,7 +6,7 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
@@ -36,14 +36,14 @@ import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
 import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from '../store/sourcerer/helpers';
+import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
-import type { SourcererState } from '../store/sourcerer';
+import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
 
@@ -58,7 +58,7 @@ export const mockSourcererState: SourcererState = {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
-    indexFields: mockIndexFields,
+    indexFields: mockIndexFields as FieldSpec[],
     fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
@@ -381,9 +381,9 @@ export const mockGlobalState: State = {
         isSaving: false,
         itemsPerPageOptions: [10, 25, 50, 100],
         savedSearchId: null,
-        isDiscoverSavedSearchLoaded: false,
         savedSearch: null,
         isDataProviderVisible: true,
+        sampleSize: 500,
       },
     },
     insertTimeline: null,
@@ -477,6 +477,16 @@ export const mockGlobalState: State = {
         selectedPatterns: getScopePatternListSelection(
           mockSourcererState.defaultDataView,
           SourcererScopeName.timeline,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [SourcererScopeName.analyzer]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
           mockSourcererState.signalIndexName,
           true
         ),

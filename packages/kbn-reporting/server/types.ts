@@ -12,7 +12,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CancellationToken } from '@kbn/reporting-common';
-import type { BaseParams, BasePayload, TaskRunResult } from '@kbn/reporting-common/types';
+import type {
+  BaseParams,
+  BasePayload,
+  TaskInstanceFields,
+  TaskRunResult,
+} from '@kbn/reporting-common/types';
 
 import { ConfigSchema } from './config_schema';
 import type { ExportType } from './export_type';
@@ -38,6 +43,7 @@ export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload
 export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
   payload: TaskPayloadType,
+  taskInstanceFields: TaskInstanceFields,
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;

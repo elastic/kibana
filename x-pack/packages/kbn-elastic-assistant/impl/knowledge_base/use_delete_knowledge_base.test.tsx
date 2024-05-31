@@ -58,6 +58,8 @@ describe('useDeleteKnowledgeBase', () => {
         '/internal/elastic_assistant/knowledge_base/',
         {
           method: 'DELETE',
+          signal: undefined,
+          version: '1',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -80,6 +82,8 @@ describe('useDeleteKnowledgeBase', () => {
         '/internal/elastic_assistant/knowledge_base/something',
         {
           method: 'DELETE',
+          signal: undefined,
+          version: '1',
         }
       );
     });

@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, ReactElement, useEffect, useState } from 'react';
 import classNames from 'classnames';
+import React, { FC, ReactElement, useEffect, useState } from 'react';
 
 import {
-  type ViewMode,
-  type IEmbeddable,
-  type EmbeddableInput,
   panelHoverTrigger,
   PANEL_HOVER_TRIGGER,
+  type EmbeddableInput,
+  type IEmbeddable,
+  type ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
@@ -41,13 +41,13 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
-
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
 
   useEffect(() => {
     if (!embeddable) return;
 
     const getActions = async () => {
+      let mounted = true;
       const context = {
         embeddable,
         trigger: panelHoverTrigger,
@@ -57,6 +57,8 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      if (!mounted) return;
       if (actions.length > 0) {
         setFloatingActions(
           <>
@@ -71,6 +73,9 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       } else {
         setFloatingActions(undefined);
       }
+      return () => {
+        mounted = false;
+      };
     };
 
     getActions();
@@ -80,7 +85,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     <div className="presentationUtil__floatingActionsWrapper">
       {children}
       {isEnabled && floatingActions && (
-        <div className={classNames('presentationUtil__floatingActions', className)}>
+        <div
+          data-test-subj={`presentationUtil__floatingActions__${embeddable?.id}`}
+          className={classNames('presentationUtil__floatingActions', className)}
+        >
           {floatingActions}
         </div>
       )}

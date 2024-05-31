@@ -11,10 +11,25 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'header']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   describe('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
+    });
+
+    describe('Layer with invalid descriptor', () => {
+      const INVALID_LAYER_NAME = 'fff76ebb-57a6-4067-a373-1d191b9bd1a3';
+
+      it('should diplay error icon in legend', async () => {
+        await PageObjects.maps.hasErrorIconExistsOrFail(INVALID_LAYER_NAME);
+      });
+
+      it('should allow deletion of layer', async () => {
+        await PageObjects.maps.removeLayer(INVALID_LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(INVALID_LAYER_NAME);
+        expect(exists).to.be(false);
+      });
     });
 
     describe('Layer with EsError', () => {
@@ -33,8 +48,9 @@ export default function ({ getPageObjects, getService }) {
       it('should open request in inspector', async () => {
         await testSubjects.click('viewEsErrorButton');
 
-        const selectedRequest = await testSubjects.getVisibleText('euiComboBoxPill');
-        expect(selectedRequest).to.equal('load layer features (connections)');
+        expect(await comboBox.getComboBoxSelectedOptions('inspectorRequestChooser')).to.eql([
+          'load layer features (connections)',
+        ]);
       });
     });
 

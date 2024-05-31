@@ -14,6 +14,7 @@ const createTag = (parts: Partial<Tag>): Tag => ({
   name: 'some-tag',
   description: 'Some tag',
   color: '#FF00CC',
+  managed: false,
   ...parts,
 });
 
@@ -92,6 +93,7 @@ describe('TagsCache', () => {
       expect(cacheState.map((tag) => tag.id)).toEqual(['tag-1', 'tag-2', 'tag-3']);
       expect(cacheState[1]).toEqual({
         id: 'tag-2',
+        managed: false,
         ...updatedAttributes,
       });
     });

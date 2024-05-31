@@ -20,7 +20,7 @@ download "kibana-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image-aarch64.tar.gz"
-download "kibana-ubi8-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-image.tar.gz"
 
 download "kibana-$FULL_VERSION-arm64.deb"
 download "kibana-$FULL_VERSION-amd64.deb"
@@ -30,7 +30,7 @@ download "kibana-$FULL_VERSION-aarch64.rpm"
 download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
-download "kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
 
 download "kibana-$FULL_VERSION-linux-aarch64.tar.gz"
 download "kibana-$FULL_VERSION-linux-x86_64.tar.gz"
@@ -49,14 +49,12 @@ chmod -R a+r target/*
 chmod -R a+w target
 
 echo "--- Pull latest Release Manager CLI"
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
 docker pull docker.elastic.co/infra/release-manager:latest
 
 echo "--- Publish artifacts"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
-  export VAULT_ROLE_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-role-id)"
-  export VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
+  export VAULT_ROLE_ID="$(get_vault_role_id)"
+  export VAULT_SECRET_ID="$(get_vault_secret_id)"
   export VAULT_ADDR="https://secrets.elastic.co:8200"
 
   download_artifact beats_manifest.json /tmp --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"

@@ -7,14 +7,14 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
+import type { ScreenshotModePublicSetup, ScreenshotModePublicStart } from './types';
 
 export const screenshotModePluginMock = {
-  createSetupContract: (): DeeplyMockedKeys<ScreenshotModePluginSetup> => ({
+  createSetupContract: (): DeeplyMockedKeys<ScreenshotModePublicSetup> => ({
     getScreenshotContext: jest.fn(),
     isScreenshotMode: jest.fn(() => false),
   }),
-  createStartContract: (): DeeplyMockedKeys<ScreenshotModePluginStart> => ({
+  createStartContract: (): DeeplyMockedKeys<ScreenshotModePublicStart> => ({
     getScreenshotContext: jest.fn(),
     isScreenshotMode: jest.fn(() => false),
   }),

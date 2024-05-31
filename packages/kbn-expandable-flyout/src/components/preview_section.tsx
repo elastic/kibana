@@ -24,7 +24,7 @@ import {
   PREVIEW_SECTION_HEADER_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { useExpandableFlyoutContext } from '../..';
+import { useExpandableFlyoutApi } from '../..';
 import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
 
 export interface PreviewBanner {
@@ -89,7 +89,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
   banner,
 }: PreviewSectionProps) => {
   const { euiTheme } = useEuiTheme();
-  const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutContext();
+  const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutApi();
 
   const left = leftPosition + 4;
 

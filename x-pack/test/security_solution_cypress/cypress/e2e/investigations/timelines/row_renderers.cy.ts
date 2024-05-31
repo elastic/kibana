@@ -16,7 +16,7 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
   TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
 } from '../../../screens/timeline';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
@@ -27,7 +27,8 @@ import { addNameToTimelineAndSave, populateTimeline, saveTimeline } from '../../
 
 import { hostsUrl } from '../../../urls/navigation';
 
-describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/182021
+describe.skip('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
     login();
@@ -116,7 +117,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     // A follw-up ticket to tackle this issue has been created.
     it.skip('Signature tooltips do not overlap', () => {
       // Hover the signature to show the tooltips
-      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE).parents('.euiPopover__anchor').realHover();
+      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE).parents('.euiPopover').realHover();
 
       cy.get(TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP).then(($googleLinkTooltip) => {
         cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP).then(($signatureTooltip) => {

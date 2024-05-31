@@ -13,7 +13,10 @@
     "@kbn/core-base-server-internal",
     "@kbn/logging",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-user-settings-server",
+    "@kbn/core-ui-settings-common",
+    "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-user-profile-server-internal",
   ],
   "include": [
     "**/*.ts",

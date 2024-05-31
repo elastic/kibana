@@ -10,7 +10,7 @@ import { range } from 'lodash';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'svlCommonPage']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
@@ -20,6 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
 
   describe('lens smokescreen tests', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+    });
+
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -281,7 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 
-    it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
+    it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -298,7 +302,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.createLayer();
+      await PageObjects.lens.createLayer('data', undefined, 'bar');
+      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar vertical');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -313,10 +318,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.save('twolayerchart');
-      await testSubjects.click('lnsSuggestion-donut > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
@@ -351,12 +356,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should transition from bar chart to line chart using layer chart switch', async () => {
+    it('should transition from bar chart to line chart', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchLayerSeriesType('line');
+      await PageObjects.lens.switchToVisualization('line');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
         '@timestamp'

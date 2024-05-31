@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isEqual, pick } from 'lodash';
 import React, {
   forwardRef,
   useEffect,
@@ -14,28 +15,31 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import { compareFilters } from '@kbn/es-query';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { compareFilters } from '@kbn/es-query';
 
 import {
-  ControlGroupInput,
-  CONTROL_GROUP_TYPE,
-  ControlGroupOutput,
-  ControlGroupCreationOptions,
-} from '../types';
-import {
-  ControlGroupAPI,
-  AwaitingControlGroupAPI,
-  buildApiFromControlGroupContainer,
-} from './control_group_api';
-import { getDefaultControlGroupInput } from '../../../common';
-import { controlGroupInputBuilder, ControlGroupInputBuilder } from './control_group_input_builder';
+  getDefaultControlGroupInput,
+  getDefaultControlGroupPersistableInput,
+  persistableControlGroupInputKeys,
+} from '../../../common';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlGroupContainerFactory } from '../embeddable/control_group_container_factory';
+import {
+  ControlGroupCreationOptions,
+  ControlGroupInput,
+  ControlGroupOutput,
+  CONTROL_GROUP_TYPE,
+} from '../types';
+import {
+  AwaitingControlGroupAPI,
+  buildApiFromControlGroupContainer,
+  ControlGroupAPI,
+} from './control_group_api';
+import { controlGroupInputBuilder, ControlGroupInputBuilder } from './control_group_input_builder';
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];
@@ -87,7 +91,13 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
             ...initialInput,
           },
           undefined,
-          settings,
+          {
+            ...settings,
+            lastSavedInput: {
+              ...getDefaultControlGroupPersistableInput(),
+              ...pick(initialInput, persistableControlGroupInputKeys),
+            },
+          },
           fieldFilterPredicate
         )) as ControlGroupContainer;
 

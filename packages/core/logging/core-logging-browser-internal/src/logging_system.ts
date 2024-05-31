@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { LogLevel, Logger, LoggerFactory, LogLevelId, DisposableAppender } from '@kbn/logging';
-import { getLoggerContext } from '@kbn/core-logging-common-internal';
+import { LogLevel, Logger, LoggerFactory, DisposableAppender } from '@kbn/logging';
+import { getLoggerContext, BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
 import type { LoggerConfigType } from './types';
 import { BaseLogger } from './logger';
 import { PatternLayout } from './layouts';
 import { ConsoleAppender } from './appenders';
-
-export interface BrowserLoggingConfig {
-  logLevel: LogLevelId;
-}
 
 const CONSOLE_APPENDER_ID = 'console';
 
@@ -54,7 +50,7 @@ export class BrowserLoggingSystem implements IBrowserLoggingSystem {
 
   private getLoggerConfigByContext(context: string): LoggerConfigType {
     return {
-      level: this.loggingConfig.logLevel,
+      level: this.loggingConfig.root.level,
       appenders: [CONSOLE_APPENDER_ID],
       name: context,
     };

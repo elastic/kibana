@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Moment } from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Moment } from 'moment';
 
-import { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';

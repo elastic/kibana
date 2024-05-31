@@ -9,10 +9,11 @@
 import React from 'react';
 import { EuiRange, EuiRangeTick } from '@elastic/eui';
 import { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
+import { TimeSlice } from '../../../common/types';
 
 interface Props {
-  value: [number, number];
-  onChange: (value?: [number, number]) => void;
+  value: TimeSlice;
+  onChange: (value?: TimeSlice) => void;
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;

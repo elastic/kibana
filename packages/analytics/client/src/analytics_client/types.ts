@@ -13,7 +13,7 @@ import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 
 import type { IShipper } from '../shippers';
-import type { EventContext, EventType, TelemetryCounter } from '../events';
+import type { EventType, TelemetryCounter } from '../events';
 import type { RootSchema } from '../schema';
 
 /**
@@ -93,7 +93,7 @@ export interface OptInConfigPerType {
 }
 
 /**
- *
+ * Options for the optIn API
  */
 export interface OptInConfig {
   /**
@@ -128,7 +128,7 @@ export type ContextProviderName = string;
 /**
  * Definition of a context provider
  */
-export interface ContextProviderOpts<Context extends Partial<EventContext>> {
+export interface ContextProviderOpts<Context> {
   /**
    * The name of the provider.
    */

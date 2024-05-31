@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import md5 from 'md5';
+import { sha256 } from 'js-sha256';
 import { createCalloutId } from './helpers';
 
 describe('createCalloutId', () => {
   it('creates id correctly with one id', () => {
-    const digest = md5('one');
+    const digest = sha256('one');
     const id = createCalloutId(['one']);
     expect(id).toBe(digest);
   });
 
   it('creates id correctly with multiples ids', () => {
-    const digest = md5('one|two|three');
+    const digest = sha256('one|two|three');
     const id = createCalloutId(['one', 'two', 'three']);
     expect(id).toBe(digest);
   });
 
   it('creates id correctly with multiples ids and delimiter', () => {
-    const digest = md5('one,two,three');
+    const digest = sha256('one,two,three');
     const id = createCalloutId(['one', 'two', 'three'], ',');
     expect(id).toBe(digest);
   });

@@ -10,12 +10,13 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { omit } from 'lodash';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { openAlertsPopover } from './open_alerts_popover';
 import type { TopNavCustomization } from '../../../../customizations';
 
@@ -27,15 +28,15 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  isPlainRecord,
+  isEsqlMode,
   adHocDataViews,
   topNavCustomization,
 }: {
-  dataView: DataView;
+  dataView: DataView | undefined;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  isPlainRecord: boolean;
+  isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
@@ -53,7 +54,7 @@ export const getTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
-        isPlainRecord,
+        isEsqlMode,
       });
     },
     testId: 'discoverAlertsButton',
@@ -122,24 +123,23 @@ export const getTopNavLinks = ({
     run: async (anchorElement: HTMLElement) => {
       if (!services.share) return;
       const savedSearch = state.savedSearchState.getState();
-      const sharingData = await getSharingData(
+      const searchSourceSharingData = await getSharingData(
         savedSearch.searchSource,
         state.appState.getState(),
         services,
-        isPlainRecord
+        isEsqlMode
       );
 
-      const { locator } = services;
+      const { locator, notifications } = services;
       const appState = state.appState.getState();
       const { timefilter } = services.data.query.timefilter;
       const timeRange = timefilter.getTime();
       const refreshInterval = timefilter.getRefreshInterval();
-      const { grid, ...otherState } = appState;
       const filters = services.filterManager.getFilters();
 
       // Share -> Get links -> Snapshot
       const params: DiscoverAppLocatorParams = {
-        ...otherState,
+        ...omit(appState, 'dataSource'),
         ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
@@ -183,8 +183,15 @@ export const getTopNavLinks = ({
         shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
         objectType: 'search',
+        objectTypeMeta: {
+          title: i18n.translate('discover.share.shareModal.title', {
+            defaultMessage: 'Share this search',
+          }),
+        },
         sharingData: {
-          ...sharingData,
+          isTextBased: isEsqlMode,
+          locatorParams: [{ id: locator.id, params }],
+          ...searchSourceSharingData,
           // CSV reports can be generated without a saved search so we provide a fallback title
           title:
             savedSearch.title ||
@@ -197,6 +204,7 @@ export const getTopNavLinks = ({
         onClose: () => {
           anchorElement?.focus();
         },
+        toasts: notifications.toasts,
       });
     },
   };

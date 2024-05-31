@@ -87,6 +87,7 @@ export interface SavedObjectsRawDocSource {
   typeMigrationVersion?: string;
   updated_at?: string;
   created_at?: string;
+  created_by?: string;
   references?: SavedObjectReference[];
   originId?: string;
   managed?: boolean;
@@ -99,7 +100,7 @@ export interface SavedObjectsRawDocSource {
  *
  * @public
  */
-interface SavedObjectDoc<T = unknown> {
+export interface SavedObjectDoc<T = unknown> {
   attributes: T;
   id: string;
   type: string;
@@ -110,7 +111,9 @@ interface SavedObjectDoc<T = unknown> {
   typeMigrationVersion?: string;
   version?: string;
   updated_at?: string;
+  updated_by?: string;
   created_at?: string;
+  created_by?: string;
   originId?: string;
   managed?: boolean;
 }

@@ -28,7 +28,7 @@ const columnExists = (cols: string[], colName: string): boolean =>
   cols.includes(unquoteString(colName));
 
 function keysOf<T, K extends keyof T>(obj: T): K[] {
-  return Object.keys(obj) as K[];
+  return Object.keys(obj as any) as K[];
 }
 
 type Arguments = { [key in PointSeriesColumnName]: string | null };

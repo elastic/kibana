@@ -13,6 +13,7 @@ import {
   updateSourceMappingsProperties,
   type UpdateSourceMappingsPropertiesParams,
 } from './update_source_mappings_properties';
+import { getBaseMappings } from '../core';
 
 describe('updateSourceMappingsProperties', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
@@ -22,11 +23,18 @@ describe('updateSourceMappingsProperties', () => {
     client = elasticsearchClientMock.createInternalClient();
     params = {
       client,
+      indexTypes: ['a', 'b', 'c'],
+      latestMappingsVersions: {
+        a: '10.1.0',
+        b: '10.2.0',
+        c: '10.5.0',
+      },
       sourceIndex: '.kibana_8.7.0_001',
-      sourceMappings: {
+      indexMappings: {
         properties: {
           a: { type: 'keyword' },
           b: { type: 'long' },
+          ...getBaseMappings().properties,
         },
         _meta: {
           migrationMappingPropertyHashes: {
@@ -35,23 +43,33 @@ describe('updateSourceMappingsProperties', () => {
           },
         },
       },
-      targetMappings: {
+      appMappings: {
         properties: {
           a: { type: 'keyword' },
           c: { type: 'long' },
+          ...getBaseMappings().properties,
         },
         _meta: {
-          migrationMappingPropertyHashes: {
-            a: '000',
-            c: '222',
+          mappingVersions: {
+            a: '10.1.0',
+            b: '10.3.0',
+            c: '10.5.0',
           },
         },
+      },
+      hashToVersionMap: {
+        'a|000': '10.1.0',
+        'b|111': '10.1.0',
       },
     };
   });
 
   it('should not update mappings when there are no changes', async () => {
-    const sameMappingsParams = chain(params).set('targetMappings', params.sourceMappings).value();
+    // we overwrite the app mappings to have the "unchanged" values with respect to the index mappings
+    const sameMappingsParams = chain(params)
+      // even if the app versions are more recent, we emulate a scenario where mappings haven NOT changed
+      .set('latestMappingsVersions', { a: '10.1.0', b: '10.1.0', c: '10.1.0' })
+      .value();
     const result = await updateSourceMappingsProperties(sameMappingsParams)();
 
     expect(client.indices.putMapping).not.toHaveBeenCalled();

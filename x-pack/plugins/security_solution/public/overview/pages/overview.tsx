@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiShowFor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiShowFor,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 
+import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
@@ -25,13 +32,13 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -69,6 +76,10 @@ const OverviewComponent = () => {
 
   return (
     <>
+      <EuiScreenReaderOnly>
+        <h1>{OVERVIEW}</h1>
+      </EuiScreenReaderOnly>
+
       {indicesExist ? (
         <>
           <FiltersGlobal>
@@ -93,7 +104,7 @@ const OverviewComponent = () => {
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
                   {hasIndexRead && hasKibanaREAD && (
                     <EuiFlexItem grow={false}>
-                      <SignalsByCategory filters={filters} query={query} />
+                      <SignalsByCategory filters={filters} />
                       <EuiSpacer size="l" />
                     </EuiFlexItem>
                   )}
@@ -104,7 +115,6 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
                       query={query}
                       queryType="overview"
                       setQuery={setQuery}
@@ -144,7 +154,7 @@ const OverviewComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.overview} />

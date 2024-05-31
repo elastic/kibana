@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, ReactEventHandler, useCallback, useMemo, useState } from 'react';
+import type { FC, ReactEventHandler } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
   EuiFieldNumber,
   EuiFlexItem,
   EuiForm,
@@ -29,32 +32,26 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { useTableSeverity } from '../components/controls/select_severity';
-import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/anomaly_charts_embeddable';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
-import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  AnomalyChartsEmbeddableInput,
-} from '../../embeddables';
+import type { AnomalyChartsEmbeddableState } from '../../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
-import {
-  AppStateSelectedCells,
-  ExplorerJob,
-  getSelectionInfluencers,
-  getSelectionTimeRange,
-} from './explorer_utils';
-import { TimeRangeBounds } from '../util/time_buckets';
+import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
+import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
+import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/utils';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
@@ -136,7 +133,9 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   }, [chartsData.seriesToPlot, globalTimeRange, selectedCells, bounds, interval]);
 
   const isMaxSeriesToPlotValid =
-    maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
+    typeof maxSeriesToPlot === 'number' &&
+    maxSeriesToPlot >= 1 &&
+    maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
 
   const jobIds = selectedJobs.map(({ id }) => id);
 
@@ -183,7 +182,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const embeddableInput: Partial<AnomalyChartsEmbeddableInput> = {
+      const embeddableInput: Partial<AnomalyChartsEmbeddableState> = {
         ...getEmbeddableInput(),
         title: newTitle,
         description: newDescription,

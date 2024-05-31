@@ -1,0 +1,20 @@
+MV_CONCAT
+
+Syntax
+Parameters
+string
+Multivalue expression.
+delim
+Delimiter.
+DescriptionConverts a multivalued string expression into a single valued column containing the concatenation of all values separated by a delimiter.Supported types
+Examples
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL j = MV_CONCAT(a, ", ")
+```
+
+To concat non-string columns, call TO_STRING first:
+```esql
+ROW a=[10, 9, 8]
+| EVAL j = MV_CONCAT(TO_STRING(a), ", ")
+```

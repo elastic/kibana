@@ -15,6 +15,9 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/monaco",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

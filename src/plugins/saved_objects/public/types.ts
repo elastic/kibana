@@ -8,6 +8,7 @@
 
 import {
   ChromeStart,
+  CoreStart,
   OverlayStart,
   SavedObjectsClientContract,
   SavedObjectAttributes,
@@ -67,6 +68,8 @@ export interface SavedObjectKibanaServices {
   chrome: ChromeStart;
   overlays: OverlayStart;
 }
+
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export interface SavedObjectAttributesAndRefs {
   attributes: SavedObjectAttributes;

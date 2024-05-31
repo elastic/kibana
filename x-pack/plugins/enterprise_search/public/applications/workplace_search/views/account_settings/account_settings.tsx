@@ -21,18 +21,20 @@ export const AccountSettings: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
 
   useEffect(() => {
-    security.authc
-      .getCurrentUser()
-      .then(setCurrentUser)
-      .catch(() => {
-        setCurrentUser(null);
-      });
-  }, [security.authc]);
+    if (security) {
+      security.authc
+        .getCurrentUser()
+        .then(setCurrentUser)
+        .catch(() => {
+          setCurrentUser(null);
+        });
+    }
+  }, [security?.authc]);
 
-  const PersonalInfo = useMemo(() => security.uiApi.components.getPersonalInfo, [security.uiApi]);
+  const PersonalInfo = useMemo(() => security?.uiApi.components.getPersonalInfo, [security?.uiApi]);
   const ChangePassword = useMemo(
-    () => security.uiApi.components.getChangePassword,
-    [security.uiApi]
+    () => security?.uiApi.components.getChangePassword,
+    [security?.uiApi]
   );
 
   if (!currentUser) {
@@ -41,8 +43,8 @@ export const AccountSettings: React.FC = () => {
 
   return (
     <PersonalDashboardLayout pageChrome={[ACCOUNT_SETTINGS_TITLE]}>
-      <PersonalInfo user={currentUser} />
-      <ChangePassword user={currentUser} />
+      {PersonalInfo ? <PersonalInfo user={currentUser} /> : null}
+      {ChangePassword ? <ChangePassword user={currentUser} /> : null}
     </PersonalDashboardLayout>
   );
 };

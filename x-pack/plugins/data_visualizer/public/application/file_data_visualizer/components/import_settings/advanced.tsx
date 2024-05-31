@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import {
   EuiFieldText,
@@ -18,8 +19,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { CombinedField, CombinedFieldsForm } from '../../../common/components/combined_fields';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { CombinedField } from '../../../common/components/combined_fields';
+import { CombinedFieldsForm } from '../../../common/components/combined_fields';
 import { JsonEditor, EDITOR_MODE } from '../json_editor';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';
 const EDITOR_HEIGHT = '300px';

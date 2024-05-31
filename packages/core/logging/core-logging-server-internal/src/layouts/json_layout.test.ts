@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { LogLevel, LogRecord } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 

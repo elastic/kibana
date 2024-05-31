@@ -13,13 +13,14 @@ import {
 } from '../../common/options_list/types';
 
 export interface EsBucket {
-  key: string;
+  key: any;
+  key_as_string?: string;
   doc_count: number;
 }
 
 export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse) => string[];
+  parse: (response: SearchResponse, req: OptionsListRequestBody) => string[];
 }
 
 export interface OptionsListSuggestionAggregationBuilder {

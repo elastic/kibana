@@ -17,15 +17,12 @@ import type {
   ErrorHttpResponseOptions,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
+  KibanaNotModifiedResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from '@kbn/core-http-server';
 import mime from 'mime';
-
-export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
-  return typeof response.status === 'number' && typeof response.options === 'object';
-}
 
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
@@ -49,6 +46,10 @@ const successResponseFactory: KibanaSuccessResponseFactory = {
 
 const redirectionResponseFactory: KibanaRedirectionResponseFactory = {
   redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, options.body, options),
+};
+
+const notModifiedResponseFactory: KibanaNotModifiedResponseFactory = {
+  notModified: (options: HttpResponseOptions = {}) => new KibanaResponse(304, undefined, options),
 };
 
 const errorResponseFactory: KibanaErrorResponseFactory = {
@@ -120,6 +121,7 @@ export const fileResponseFactory = {
 export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,
   ...redirectionResponseFactory,
+  ...notModifiedResponseFactory,
   ...errorResponseFactory,
   ...fileResponseFactory,
   custom: <T extends HttpResponsePayload | ResponseError>(

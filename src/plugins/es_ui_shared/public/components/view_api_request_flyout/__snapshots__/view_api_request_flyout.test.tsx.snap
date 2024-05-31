@@ -25,7 +25,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     class="euiFlyoutBody emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
+      class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
       tabindex="0"
     >
       <div

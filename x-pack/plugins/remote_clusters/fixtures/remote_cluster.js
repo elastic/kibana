@@ -19,6 +19,7 @@ export const getRemoteClusterMock = ({
   mode = SNIFF_MODE,
   proxyAddress,
   hasDeprecatedProxySetting = false,
+  securityModel = 'certificate',
 } = {}) => ({
   name,
   seeds,
@@ -32,4 +33,5 @@ export const getRemoteClusterMock = ({
   connectedSocketsCount,
   proxyAddress,
   hasDeprecatedProxySetting,
+  securityModel,
 });

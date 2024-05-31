@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 

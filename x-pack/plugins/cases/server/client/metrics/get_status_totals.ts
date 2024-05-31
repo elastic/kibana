@@ -7,12 +7,11 @@
 
 import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/types/api';
 import { CasesStatusRequestRt, CasesStatusResponseRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import { constructQueryOptions } from '../utils';
 import { createCaseError } from '../../common/error';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 export async function getStatusTotalsByType(
   params: CasesStatusRequest,

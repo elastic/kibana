@@ -37,6 +37,12 @@ describe('filter manager utilities', () => {
   });
 
   describe('getRangeDisplayValue()', () => {
+    test('no boundaries defined', () => {
+      const params = {};
+      const filter = { meta: { params } } as RangeFilter;
+      const result = getRangeDisplayValue(filter);
+      expect(result).toMatchInlineSnapshot(`"-"`);
+    });
     test('gt & lt', () => {
       const params = { gt: 10, lt: 100 };
       const filter = { meta: { params } } as RangeFilter;
@@ -69,28 +75,28 @@ describe('filter manager utilities', () => {
       const params = { gt: 50 };
       const filter = { meta: { params } } as RangeFilter;
       const result = getRangeDisplayValue(filter);
-      expect(result).toMatchInlineSnapshot(`"50 to Infinity"`);
+      expect(result).toMatchInlineSnapshot(`"> 50"`);
     });
 
     test('gte', () => {
       const params = { gte: 60 };
       const filter = { meta: { params } } as RangeFilter;
       const result = getRangeDisplayValue(filter);
-      expect(result).toMatchInlineSnapshot(`"60 to Infinity"`);
+      expect(result).toMatchInlineSnapshot(`"≥ 60"`);
     });
 
     test('lt', () => {
       const params = { lt: 70 };
       const filter = { meta: { params } } as RangeFilter;
       const result = getRangeDisplayValue(filter);
-      expect(result).toMatchInlineSnapshot(`"-Infinity to 70"`);
+      expect(result).toMatchInlineSnapshot(`"< 70"`);
     });
 
     test('lte', () => {
       const params = { lte: 80 };
       const filter = { meta: { params } } as RangeFilter;
       const result = getRangeDisplayValue(filter);
-      expect(result).toMatchInlineSnapshot(`"-Infinity to 80"`);
+      expect(result).toMatchInlineSnapshot(`"≤ 80"`);
     });
   });
 });

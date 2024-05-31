@@ -14,21 +14,21 @@ import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererReducer, sourcererModel } from './sourcerer';
+import { sourcererReducer, sourcererModel } from '../../sourcerer/store';
 
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
 import type { UsersPluginReducer } from '../../explore/users/store';
-import type { TimelinePluginReducer } from '../../timelines/store/timeline';
+import type { TimelinePluginReducer } from '../../timelines/store';
 
 import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
 import type { State } from './types';
 import type { AppAction } from './actions';
-import type { SourcererModel } from './sourcerer/model';
-import { initDataView, SourcererScopeName } from './sourcerer/model';
+import type { SourcererModel } from '../../sourcerer/store/model';
+import { initDataView, SourcererScopeName } from '../../sourcerer/store/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from './sourcerer/helpers';
+import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
@@ -55,11 +55,13 @@ export const createInitialState = (
     defaultDataView,
     kibanaDataViews,
     signalIndexName,
+    signalIndexMappingOutdated,
     enableExperimental,
   }: {
     defaultDataView: SourcererModel['defaultDataView'];
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
+    signalIndexMappingOutdated: SourcererModel['signalIndexMappingOutdated'];
     enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
@@ -115,6 +117,7 @@ export const createInitialState = (
       defaultDataView,
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
+      signalIndexMappingOutdated,
     },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,

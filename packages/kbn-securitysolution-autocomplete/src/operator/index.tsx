@@ -29,6 +29,7 @@ interface OperatorState {
   operatorOptions?: OperatorOption[];
   placeholder: string;
   selectedField: DataViewFieldBase | undefined;
+  'aria-label'?: string;
 }
 
 export const OperatorComponent: React.FC<OperatorState> = ({
@@ -41,6 +42,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
   operatorInputWidth = 150,
   placeholder,
   selectedField,
+  'aria-label': ariaLabel,
 }): JSX.Element => {
   const getLabel = useCallback(({ message }): string => message, []);
   const optionsMemo = useMemo(
@@ -90,6 +92,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
       singleSelection={AS_PLAIN_TEXT}
       data-test-subj="operatorAutocompleteComboBox"
       style={inputWidth}
+      aria-label={ariaLabel}
     />
   );
 };

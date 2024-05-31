@@ -62,23 +62,33 @@ describe('ChartSelect', () => {
     );
 
     expect(screen.getByTestId('chart-select-tabs')).toBeInTheDocument();
-    expect(screen.getByTestId('trend')).toBeChecked();
+    expect(screen.getByTitle('Trend')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('changing selection render correctly when alertsPageChartsEnabled is true', async () => {
+  test('changing selection render correctly when alertsPageChartsEnabled is true', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const setAlertViewSelection = jest.fn();
-    const { container } = render(
+    const { rerender } = render(
       <TestProviders>
         <ChartSelect alertViewSelection="trend" setAlertViewSelection={setAlertViewSelection} />
       </TestProviders>
     );
 
-    const button = container.querySelector('input[value="treemap"]');
-    if (button) {
-      fireEvent.change(button, { target: { checked: true, type: 'radio' } });
-    }
-    expect(screen.getByTestId('treemap')).toBeChecked();
-    expect(screen.getByTestId('trend')).not.toBeChecked();
+    expect(screen.getByTitle('Trend')).toHaveAttribute('aria-pressed', 'true');
+
+    const treemapButton = screen.getByTitle('Treemap');
+    expect(treemapButton).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(treemapButton);
+    expect(setAlertViewSelection).toHaveBeenCalledWith('treemap');
+
+    rerender(
+      <TestProviders>
+        <ChartSelect alertViewSelection="treemap" setAlertViewSelection={setAlertViewSelection} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTitle('Treemap')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTitle('Trend')).toHaveAttribute('aria-pressed', 'false');
   });
 });

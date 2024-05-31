@@ -17,14 +17,14 @@ import type {
 import { DataSourceType } from '../../../detections/pages/detection_engine/rules/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useForm, useFormData } from '../../../shared_imports';
-import { schema as defineRuleSchema } from '../../../detections/components/rules/step_define_rule/schema';
+import { schema as defineRuleSchema } from '../components/step_define_rule/schema';
 import type { EqlOptionsSelected } from '../../../../common/search_strategy';
 import {
   schema as aboutRuleSchema,
   threatMatchAboutSchema,
-} from '../../../detections/components/rules/step_about_rule/schema';
-import { schema as scheduleRuleSchema } from '../../../detections/components/rules/step_schedule_rule/schema';
-import { getSchema as getActionsRuleSchema } from '../../../detections/components/rules/step_rule_actions/get_schema';
+} from '../components/step_about_rule/schema';
+import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
+import { getSchema as getActionsRuleSchema } from '../../rule_creation/components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
 
 export interface UseRuleFormsProps {

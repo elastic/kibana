@@ -17,7 +17,6 @@
       "urlForwarding",
       "navigation",
       "uiActions",
-      "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch",
@@ -30,6 +29,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "dataVisualizer",
       "home",
       "share",
       "usageCollection",
@@ -38,9 +38,11 @@
       "savedObjectsTaggingOss",
       "lens",
       "noDataPage",
-      "globalSearch"
+      "globalSearch",
+      "observabilityAIAssistant",
+      "aiops"
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]
   }
 }

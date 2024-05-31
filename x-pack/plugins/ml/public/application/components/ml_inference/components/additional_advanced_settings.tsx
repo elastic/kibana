@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, memo, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, memo, useMemo } from 'react';
 
 import {
   EuiAccordion,

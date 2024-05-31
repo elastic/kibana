@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -125,7 +126,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -338,7 +339,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;

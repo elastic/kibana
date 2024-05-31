@@ -9,11 +9,13 @@
 export type {
   ApiVersion,
   AddVersionOpts,
-  FullValidationConfig,
+  VersionedRouteValidation,
   VersionedRouteRequestValidation,
   VersionedRouteResponseValidation,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
+  VersionedRouteCustomResponseBodyValidation,
+  VersionedResponseBodyValidation,
 } from './types';

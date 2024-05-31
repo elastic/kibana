@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getAll } from './get_all';
+export { getAll, getAllUnsecured } from './get_all';

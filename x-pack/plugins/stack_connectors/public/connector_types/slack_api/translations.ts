@@ -69,3 +69,17 @@ export const ERROR_INVALID_CHANNELS = (invalidChannels: string[]) =>
       channels: invalidChannels.join(', '),
     },
   });
+
+export const JSON_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.error.slackBlockkitJsonRequired',
+  {
+    defaultMessage: 'Block kit must be valid JSON.',
+  }
+);
+
+export const BLOCKS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.error.slackBlockkitBlockRequired',
+  {
+    defaultMessage: `JSON must contain field "blocks".`,
+  }
+);

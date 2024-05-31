@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { Rule, RawRule, RuleTypeParams } from '../../types';
+import { RawRule, RuleTypeParams } from '../../types';
 import { RuleActionAttributes } from '../../data/rule/types';
 import {
   preconfiguredConnectorActionRefPrefix,
@@ -45,7 +45,7 @@ export function injectReferencesIntoActions(
       ...omit(action, 'actionRef'),
       id: reference.id,
     };
-  }) as Rule['actions'];
+  });
 }
 
 export function injectReferencesIntoParams<

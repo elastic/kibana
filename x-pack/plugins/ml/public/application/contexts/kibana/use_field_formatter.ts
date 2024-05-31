@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  FIELD_FORMAT_IDS,
-  FieldFormatParams,
-  FieldFormatsRegistry,
-} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useMlKibana } from './kibana_context';
 
 /**

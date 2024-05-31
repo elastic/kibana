@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
-import { cleanString, lowerCaseFirstLetter, upperCaseFirstLetter } from './utils';
+import { geti18nIdentifierFromString, lowerCaseFirstLetter } from './utils';
 
 const EXEMPTED_TAG_NAMES = ['EuiCode', 'EuiBetaBadge', 'FormattedMessage'];
 
@@ -14,13 +14,7 @@ export function getIntentFromNode(
   value: string,
   parent: TSESTree.Node | undefined
 ): string | false {
-  const processedValue = lowerCaseFirstLetter(
-    cleanString(value)
-      .split(' ')
-      .filter((_, i) => i < 4)
-      .map(upperCaseFirstLetter)
-      .join('')
-  );
+  const intent = geti18nIdentifierFromString(value);
 
   if (
     parent &&
@@ -36,10 +30,10 @@ export function getIntentFromNode(
     }
 
     if (parentTagName.includes('Eui')) {
-      return `${processedValue}${parentTagName.replace('Eui', '')}Label`;
+      return `${intent}${parentTagName.replace('Eui', '')}Label`;
     }
 
-    return `${lowerCaseFirstLetter(parentTagName)}.${processedValue}Label`;
+    return `${lowerCaseFirstLetter(parentTagName)}.${intent}Label`;
   }
 
   if (
@@ -57,8 +51,8 @@ export function getIntentFromNode(
       return false;
     }
 
-    return `${lowerCaseFirstLetter(parentTagName)}.${processedValue}Label`;
+    return `${lowerCaseFirstLetter(parentTagName)}.${intent}Label`;
   }
 
-  return `${processedValue}Label`;
+  return `${intent}Label`;
 }

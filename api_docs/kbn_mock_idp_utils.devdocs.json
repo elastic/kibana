@@ -1,0 +1,368 @@
+{
+  "id": "@kbn/mock-idp-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.createMockIdpMetadata",
+        "type": "Function",
+        "tags": [],
+        "label": "createMockIdpMetadata",
+        "description": [
+          "\nCreates XML metadata for our mock identity provider.\n\nThis can be saved to file and used to configure Elasticsearch SAML realm.\n"
+        ],
+        "signature": [
+          "(kibanaUrl: string) => Promise<string>"
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.createMockIdpMetadata.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [
+              "Fully qualified URL where Kibana is hosted (including base path)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.createSAMLResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "createSAMLResponse",
+        "description": [
+          "\nCreates a SAML response that can be passed directly to the Kibana ACS endpoint to authenticate a user.\n"
+        ],
+        "signature": [
+          "(options: { kibanaUrl: string; authnRequestId?: string | undefined; username: string; full_name?: string | undefined; email?: string | undefined; roles: string[]; }) => Promise<string>"
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.createSAMLResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createSAMLResponse.$1.kibanaUrl",
+                "type": "string",
+                "tags": [],
+                "label": "kibanaUrl",
+                "description": [
+                  "Fully qualified URL where Kibana is hosted (including base path)"
+                ],
+                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createSAMLResponse.$1.authnRequestId",
+                "type": "string",
+                "tags": [],
+                "label": "authnRequestId",
+                "description": [
+                  "ID from SAML authentication request"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createSAMLResponse.$1.username",
+                "type": "string",
+                "tags": [],
+                "label": "username",
+                "description": [],
+                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createSAMLResponse.$1.full_name",
+                "type": "string",
+                "tags": [],
+                "label": "full_name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createSAMLResponse.$1.email",
+                "type": "string",
+                "tags": [],
+                "label": "email",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/mock-idp-utils",
+                "id": "def-common.createSAMLResponse.$1.roles",
+                "type": "Array",
+                "tags": [],
+                "label": "roles",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.ensureSAMLRoleMapping",
+        "type": "Function",
+        "tags": [],
+        "label": "ensureSAMLRoleMapping",
+        "description": [
+          "\nCreates the role mapping required for developers to authenticate using SAML."
+        ],
+        "signature": [
+          "(client: ",
+          "default",
+          ") => Promise<unknown>"
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.ensureSAMLRoleMapping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "packages/kbn-mock-idp-utils/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_EMAIL",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_EMAIL",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/email\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_NAME",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/name\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_PRINCIPAL",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_PRINCIPAL",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/principal\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ATTRIBUTE_ROLES",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ATTRIBUTE_ROLES",
+        "description": [],
+        "signature": [
+          "\"http://saml.elastic-cloud.com/attributes/roles\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ENTITY_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ENTITY_ID",
+        "description": [],
+        "signature": [
+          "\"urn:mock-idp\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_LOGIN_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_LOGIN_PATH",
+        "description": [],
+        "signature": [
+          "\"/mock_idp/login\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_LOGOUT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_LOGOUT_PATH",
+        "description": [],
+        "signature": [
+          "\"/mock_idp/logout\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_REALM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_REALM_NAME",
+        "description": [],
+        "signature": [
+          "\"cloud-saml-kibana\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_REALM_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_REALM_TYPE",
+        "description": [],
+        "signature": [
+          "\"saml\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_ROLE_MAPPING_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_ROLE_MAPPING_NAME",
+        "description": [],
+        "signature": [
+          "\"mock-idp-mapping\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -47,9 +47,11 @@ jest.mock('../../../hooks', () => ({
   },
   useFleetStatus: jest.fn().mockReturnValue({}),
   sendGetAgentStatus: jest.fn(),
-  sendGetAgentPolicies: jest.fn().mockReturnValue({ data: { items: [] } }),
+  sendGetAgentPolicies: jest.fn().mockResolvedValue({ data: { items: [] } }),
   sendGetAgentTags: jest.fn().mockReturnValue({ data: { items: ['tag1', 'tag2'] } }),
-  useAuthz: jest.fn().mockReturnValue({ fleet: { all: true } }),
+  useAuthz: jest
+    .fn()
+    .mockReturnValue({ fleet: { all: true, allAgents: true, readAgents: true }, integrations: {} }),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
       toasts: {

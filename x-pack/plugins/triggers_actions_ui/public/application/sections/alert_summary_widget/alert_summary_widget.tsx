@@ -14,6 +14,7 @@ import {
   AlertSummaryWidgetFullSize,
   AlertSummaryWidgetLoader,
 } from './components';
+import { AlertSummaryWidgetDependencies, DependencyProps } from './types';
 
 export const AlertSummaryWidget = ({
   chartProps,
@@ -23,8 +24,10 @@ export const AlertSummaryWidget = ({
   onClick = () => {},
   timeRange,
   hideChart,
+  hideStats,
   onLoaded,
-}: AlertSummaryWidgetProps) => {
+  dependencies: { charts },
+}: AlertSummaryWidgetProps & AlertSummaryWidgetDependencies) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
     isLoading,
@@ -37,9 +40,14 @@ export const AlertSummaryWidget = ({
 
   useEffect(() => {
     if (!isLoading && onLoaded) {
-      onLoaded();
+      onLoaded({ activeAlertCount, recoveredAlertCount });
     }
-  }, [isLoading, onLoaded]);
+  }, [activeAlertCount, isLoading, onLoaded, recoveredAlertCount]);
+
+  const dependencyProps: DependencyProps = {
+    baseTheme: charts.theme.useChartsBaseTheme(),
+    sparklineTheme: charts.theme.useSparklineOverrides(),
+  };
 
   if (isLoading)
     return <AlertSummaryWidgetLoader fullSize={fullSize} isLoadingWithoutChart={hideChart} />;
@@ -56,6 +64,8 @@ export const AlertSummaryWidget = ({
         dateFormat={timeRange.dateFormat}
         recoveredAlertCount={recoveredAlertCount}
         hideChart={hideChart}
+        hideStats={hideStats}
+        dependencyProps={dependencyProps}
       />
     ) : null
   ) : (
@@ -66,6 +76,7 @@ export const AlertSummaryWidget = ({
       onClick={onClick}
       recoveredAlertCount={recoveredAlertCount}
       timeRangeTitle={timeRange.title}
+      dependencyProps={dependencyProps}
     />
   );
 };

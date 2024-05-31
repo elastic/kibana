@@ -47,9 +47,11 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
     );
   }
 
-  // otherwise stay on the vulnerabilities tab, since it's the first one.
+  // otherwise stay on the misconfigurations tab, since it's the first one.
   return (
-    <Redirect to={{ search: location.search, pathname: findingsNavigation.vulnerabilities.path }} />
+    <Redirect
+      to={{ search: location.search, pathname: findingsNavigation.findings_default.path }}
+    />
   );
 };
 

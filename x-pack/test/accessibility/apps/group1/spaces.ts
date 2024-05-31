@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for manage spaces page', async () => {
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await retry.waitFor(
         'Manage spaces page visible',
         async () => await testSubjects.exists('createSpace')

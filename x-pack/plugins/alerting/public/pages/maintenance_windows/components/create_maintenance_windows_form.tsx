@@ -155,7 +155,10 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       };
 
       if (isEditMode) {
-        updateMaintenanceWindow({ maintenanceWindowId, maintenanceWindow }, { onSuccess });
+        updateMaintenanceWindow(
+          { maintenanceWindowId, updateParams: maintenanceWindow },
+          { onSuccess }
+        );
       } else {
         createMaintenanceWindow(maintenanceWindow, { onSuccess });
       }

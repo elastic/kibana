@@ -104,9 +104,9 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
             euiCodeEditorProps: {
               height: '200px',
               isReadOnly: readOnly,
-              'data-test-subj': 'webhookUpdateIncidentJson',
               ['aria-label']: i18n.CODE_EDITOR,
             },
+            dataTestSubj: 'webhookUpdateIncidentJson',
             messageVariables: [...casesVars, ...urlVars],
             paramsProperty: 'updateIncidentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,
@@ -192,9 +192,9 @@ export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
             euiCodeEditorProps: {
               height: '200px',
               isReadOnly: readOnly,
-              'data-test-subj': 'webhookCreateCommentJson',
               ['aria-label']: i18n.CODE_EDITOR,
             },
+            dataTestSubj: 'webhookCreateCommentJson',
             messageVariables: [...commentVars, ...urlVars],
             paramsProperty: 'createCommentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,

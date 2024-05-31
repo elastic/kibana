@@ -22,6 +22,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/data-plugin",
     "@kbn/ui-theme",
+    "@kbn/visualization-utils",
   ],
   "exclude": [
     "target/**/*",

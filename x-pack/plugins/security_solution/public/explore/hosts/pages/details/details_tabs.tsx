@@ -9,7 +9,7 @@ import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskDetailsTabBody } from '../../../components/risk_score/risk_details_tab_body';
+import { RiskDetailsTabBody } from '../../../../entity_analytics/components/risk_details_tab_body';
 import { HostsType, HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';

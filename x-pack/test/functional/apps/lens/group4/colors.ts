@@ -64,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.assertPalette(ElasticBrandPalette.id, false);
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should carry over palette to the pie chart', async () => {
@@ -72,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsPie_sliceByDimensionPanel > lns-dimensionTrigger'
       );
       await PageObjects.lens.assertPalette(ElasticBrandPalette.id, false);
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should carry palette back to the bar chart', async () => {

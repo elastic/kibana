@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryConfigurationTaskConfig } from './configuration';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import {
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockTaskMetrics,
+} from '../__mocks__';
 
 describe('telemetry configuration task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -24,12 +28,14 @@ describe('telemetry configuration task test', () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const telemetryDiagnoticsTaskConfig = createTelemetryConfigurationTaskConfig();
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryDiagnoticsTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
 

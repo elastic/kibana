@@ -8,9 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import { AppFeaturesPrivilegeId, AppFeaturesPrivileges } from '../app_features_privileges';
+import {
+  ProductFeaturesPrivilegeId,
+  ProductFeaturesPrivileges,
+} from '../product_features_privileges';
 
-import { SecuritySubFeatureId } from '../app_features_keys';
+import { SecuritySubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
@@ -551,6 +554,47 @@ const executeActionSubFeature: SubFeatureConfig = {
   ],
 };
 
+// 8.15 feature
+const scanActionSubFeature: SubFeatureConfig = {
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Scan Operations access.',
+    }
+  ),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations',
+    {
+      defaultMessage: 'Scan Operations',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations.description',
+    {
+      defaultMessage: 'Perform folder scan response actions in the response console.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeScanOperations`],
+          id: 'scan_operations_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeScanOperations'],
+        },
+      ],
+    },
+  ],
+};
+
 const endpointExceptionsSubFeature: SubFeatureConfig = {
   requireAllSpaces: true,
   privilegesTooltip: i18n.translate(
@@ -583,7 +627,7 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ...AppFeaturesPrivileges[AppFeaturesPrivilegeId.endpointExceptions].all,
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
         },
         {
           id: 'endpoint_exceptions_read',
@@ -593,7 +637,7 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ...AppFeaturesPrivileges[AppFeaturesPrivilegeId.endpointExceptions].read,
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
         },
       ],
     },
@@ -612,8 +656,11 @@ export const getSecurityBaseKibanaSubFeatureIds = (
  * Defines all the Security Assistant subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const securitySubFeaturesMap = Object.freeze(
-  new Map<SecuritySubFeatureId, SubFeatureConfig>([
+
+export const getSecuritySubFeaturesMap = ({
+  experimentalFeatures,
+}: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
+  const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature],
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature],
@@ -626,5 +673,15 @@ export const securitySubFeaturesMap = Object.freeze(
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature],
-  ])
-);
+  ];
+
+  if (experimentalFeatures.responseActionScanEnabled) {
+    securitySubFeaturesList.push([SecuritySubFeatureId.scanAction, scanActionSubFeature]);
+  }
+
+  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
+    securitySubFeaturesList
+  );
+
+  return Object.freeze(securitySubFeaturesMap);
+};

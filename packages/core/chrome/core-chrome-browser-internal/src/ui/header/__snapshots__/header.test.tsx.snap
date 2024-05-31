@@ -21,7 +21,7 @@ Array [
     </div>
   </div>,
   <button
-    class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+    class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
     tabindex="0"
     type="button"
   >
@@ -108,37 +108,33 @@ Array [
             class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
           >
             <div
-              class="euiPopover emotion-euiPopover"
+              class="euiPopover emotion-euiPopover-inline-block"
               data-test-subj="helpMenuButton"
               id="headerHelpMenu"
             >
-              <div
-                class="euiPopover__anchor css-16vtueo-render"
+              <button
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Help menu"
+                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+                type="button"
               >
-                <button
-                  aria-expanded="false"
-                  aria-haspopup="true"
-                  aria-label="Help menu"
-                  class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
-                  type="button"
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                     >
                       <span
-                        class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
-                      >
-                        <span
-                          data-euiicon-type="help"
-                        />
-                      </span>
+                        data-euiicon-type="help"
+                      />
                     </span>
                   </span>
-                </button>
-              </div>
+                </span>
+              </button>
             </div>
           </div>
           <div
@@ -198,7 +194,7 @@ Array [
             >
               <span
                 aria-current="page"
-                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast"
                 data-test-subj="breadcrumb first last"
                 title="test"
               >

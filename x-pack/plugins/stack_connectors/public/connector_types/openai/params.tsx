@@ -67,7 +67,7 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
       label={i18n.translate('xpack.stackConnectors.components.genAi.bodyFieldLabel', {
         defaultMessage: 'Body',
       })}
-      aria-label={i18n.translate('xpack.stackConnectors.components.genAi.bodyCodeEditorAriaLabel', {
+      ariaLabel={i18n.translate('xpack.stackConnectors.components.genAi.bodyCodeEditorAriaLabel', {
         defaultMessage: 'Code editor',
       })}
       errors={errors.body as string[]}
@@ -79,7 +79,7 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
           editSubActionParams({ body: '' });
         }
       }}
-      data-test-subj="genAi-bodyJsonEditor"
+      dataTestSubj="genAi-bodyJsonEditor"
     />
   );
 };

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/stack-management-usage-test-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "stackManagementUsageTest",
     "server": false,

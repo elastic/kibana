@@ -7,7 +7,9 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
@@ -24,10 +26,15 @@ import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebui
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
-import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
-import * as i18n from './translations';
-
+import {
+  RuleDetailsFlyout,
+  TabContentPadding,
+} from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
+import * as i18n from './translations';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -78,6 +85,8 @@ export interface UpgradePrebuiltRulesTableState {
   selectedRules: RuleUpgradeInfoForReview[];
 }
 
+export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
+
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeOneRule: (ruleId: string) => void;
@@ -110,6 +119,14 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     filter: '',
     tags: [],
   });
+
+  const isJsonPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
+    'jsonPrebuiltRulesDiffingEnabled'
+  );
+
+  const isPerFieldPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
+    'perFieldPrebuiltRulesDiffingEnabled'
+  );
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -257,6 +274,62 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     actions,
   ]);
 
+  const extraTabs = useMemo<EuiTabbedContentTab[]>(() => {
+    const activeRule = previewedRule && filteredRules.find(({ id }) => id === previewedRule.id);
+
+    if (!activeRule) {
+      return [];
+    }
+
+    return [
+      ...(isPerFieldPrebuiltRulesDiffingEnabled
+        ? [
+            {
+              id: 'updates',
+              name: (
+                <EuiToolTip
+                  position="top"
+                  content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}
+                >
+                  <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
+                </EuiToolTip>
+              ),
+              content: (
+                <TabContentPadding>
+                  <PerFieldRuleDiffTab ruleDiff={activeRule.diff} />
+                </TabContentPadding>
+              ),
+            },
+          ]
+        : []),
+      ...(isJsonPrebuiltRulesDiffingEnabled
+        ? [
+            {
+              id: 'jsonViewUpdates',
+              name: (
+                <EuiToolTip
+                  position="top"
+                  content={i18n.UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION}
+                >
+                  <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
+                </EuiToolTip>
+              ),
+              content: (
+                <TabContentPadding>
+                  <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
+                </TabContentPadding>
+              ),
+            },
+          ]
+        : []),
+    ];
+  }, [
+    previewedRule,
+    filteredRules,
+    isJsonPrebuiltRulesDiffingEnabled,
+    isPerFieldPrebuiltRulesDiffingEnabled,
+  ]);
+
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
       <>
@@ -271,6 +344,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         {previewedRule && (
           <RuleDetailsFlyout
             rule={previewedRule}
+            size={isJsonPrebuiltRulesDiffingEnabled ? 'l' : 'm'}
+            id={PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR}
             dataTestSubj="updatePrebuiltRulePreview"
             closeFlyout={closeRulePreview}
             ruleActions={
@@ -286,6 +361,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
                 {i18n.UPDATE_BUTTON_LABEL}
               </EuiButton>
             }
+            extraTabs={extraTabs}
           />
         )}
       </>

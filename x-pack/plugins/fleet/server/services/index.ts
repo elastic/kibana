@@ -5,24 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
 
-export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
-
-/**
- * Service to return the index pattern of EPM packages
- */
-export interface ESIndexPatternService {
-  getESIndexPattern(
-    savedObjectsClient: SavedObjectsClientContract,
-    pkgName: string,
-    datasetPath: string
-  ): Promise<string | undefined>;
-}
 
 /**
  * Service that provides exported function that return information about EPM packages
@@ -33,12 +19,15 @@ export interface AgentPolicyServiceInterface {
   list: typeof agentPolicyService['list'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
+  turnOffAgentTamperProtections: typeof agentPolicyService['turnOffAgentTamperProtections'];
+  fetchAllAgentPolicyIds: typeof agentPolicyService['fetchAllAgentPolicyIds'];
+  fetchAllAgentPolicies: typeof agentPolicyService['fetchAllAgentPolicies'];
 }
 
 // Agent services
 export { AgentServiceImpl } from './agents';
 export type { AgentClient, AgentService } from './agents';
-export { getAvailableVersions, getLatestAvailableVersion } from './agents';
+export { getAvailableVersions, getLatestAvailableAgentVersion } from './agents';
 
 // Saved object services
 export { agentPolicyService } from './agent_policy';

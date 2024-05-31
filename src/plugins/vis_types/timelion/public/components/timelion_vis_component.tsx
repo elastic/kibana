@@ -18,6 +18,7 @@ import {
   LayoutDirection,
   Placement,
   Tooltip,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -113,8 +114,6 @@ export const TimelionVisComponent = ({
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
   const chartsService = getCharts();
-
-  const chartTheme = chartsService.theme.useChartsTheme();
   const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
@@ -209,14 +208,13 @@ export const TimelionVisComponent = ({
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
-          showLegendExtra={true}
+          legendValues={[LegendValue.CurrentAndLastValue]}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}
-          theme={chartTheme}
           baseTheme={chartBaseTheme}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}

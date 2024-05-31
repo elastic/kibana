@@ -10,6 +10,7 @@ import { join } from 'path';
 import fs from 'fs';
 import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
+import { handleProcessInterruptions } from './nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { SettingsStorage } from './settings_storage';
 
@@ -172,42 +173,6 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     }
   }
 }
-
-const handleProcessInterruptions = async <T>(
-  runFn: (() => T) | (() => Promise<T>),
-  /** The synchronous cleanup callback */
-  cleanup: () => void
-): Promise<T> => {
-  const eventNames = ['SIGINT', 'exit', 'uncaughtException', 'unhandledRejection'];
-  const stopListeners = () => {
-    for (const eventName of eventNames) {
-      process.off(eventName, cleanup);
-    }
-  };
-
-  for (const eventName of eventNames) {
-    process.on(eventName, cleanup);
-  }
-
-  let runnerResponse: T | Promise<T>;
-
-  try {
-    runnerResponse = runFn();
-  } catch (e) {
-    stopListeners();
-    throw e;
-  }
-
-  if ('finally' in runnerResponse) {
-    (runnerResponse as Promise<T>).finally(() => {
-      stopListeners();
-    });
-  } else {
-    stopListeners();
-  }
-
-  return runnerResponse;
-};
 
 const agentDownloadsClient = new AgentDownloadStorage();
 

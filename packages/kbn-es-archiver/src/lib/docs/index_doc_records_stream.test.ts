@@ -140,6 +140,7 @@ it('indexes documents using the bulk client helper', async () => {
       "calls": Array [
         Array [
           Object {
+            "concurrency": 4,
             "datasource": Array [
               Object {
                 "hello": "world",
@@ -157,6 +158,7 @@ it('indexes documents using the bulk client helper', async () => {
         ],
         Array [
           Object {
+            "concurrency": 4,
             "datasource": Array [
               Object {
                 "hello": "world",

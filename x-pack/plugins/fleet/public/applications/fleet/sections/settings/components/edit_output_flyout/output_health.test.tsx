@@ -72,7 +72,7 @@ describe('OutputHealth', () => {
 
     await waitFor(async () => {
       expect(utils.getByTestId('outputHealthDegradedCallout').textContent).toContain(
-        'Unable to connect to "Remote ES" at https://remote-es:443. Please check the details are correct.'
+        'Unable to connect to "Remote ES" at https://remote-es:443.Please check the details are correct.'
       );
     });
   });

@@ -92,6 +92,7 @@ export function searchHitToAgent(
     // key-value pairs
     user_provided_metadata: hit._source?.user_provided_metadata!,
     local_metadata: hit._source?.local_metadata!,
+    unhealthy_reason: hit._source?.unhealthy_reason,
   };
 
   if (!hit.fields?.status?.length) {

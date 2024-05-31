@@ -36,8 +36,7 @@ export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): 
     const browserField = browserFieldFactory(field, category);
 
     if (browserFields[category] && browserFields[category]) {
-      // @ts-expect-error ts upgrade to v4.7.4
-      Object.assign(browserFields[category].fields, browserField);
+      Object.assign(browserFields[category].fields || {}, browserField);
     } else {
       browserFields[category] = { fields: browserField };
     }

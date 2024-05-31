@@ -7,9 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-// @ts-ignore
 import { GrokdebuggerRequest } from '../../../models/grokdebugger_request';
-// @ts-ignore
 import { GrokdebuggerResponse } from '../../../models/grokdebugger_response';
 
 import { handleEsError } from '../../../shared_imports';

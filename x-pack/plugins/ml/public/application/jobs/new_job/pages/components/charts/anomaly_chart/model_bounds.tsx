@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { ScaleType, AreaSeries, CurveType } from '@elastic/charts';
-import { ModelItem } from '../../../../common/results_loader';
+import type { ModelItem } from '../../../../common/results_loader';
 import { seriesStyle, useChartColors } from '../common/settings';
 
 interface Props {

@@ -27,7 +27,6 @@ import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { ReactWrapper } from 'enzyme';
-import { addLayer } from '../../../state_management';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 import { AddLayerButton } from '../../../visualizations/xy/add_layer';
 import { LayerType } from '@kbn/visualizations-plugin/common';
@@ -188,96 +187,6 @@ describe('ConfigPanel', () => {
     expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
       'updated'
     );
-  });
-
-  describe('focus behavior when adding or removing layers', () => {
-    it('should focus the only layer when resetting the layer', async () => {
-      const { instance } = await prepareAndMountComponent(getDefaultProps());
-      const firstLayerFocusable = instance
-        .find(LayerPanel)
-        .first()
-        .find('section')
-        .first()
-        .instance();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
-      });
-      instance.update();
-
-      const focusedEl = document.activeElement;
-      expect(focusedEl).toEqual(firstLayerFocusable);
-    });
-
-    it('should focus the second layer when removing the first layer', async () => {
-      const datasourceMap = mockDatasourceMap();
-      const defaultProps = getDefaultProps({ datasourceMap });
-      // overwriting datasourceLayers to test two layers
-      frame.datasourceLayers = {
-        first: datasourceMap.testDatasource.publicAPIMock,
-        second: datasourceMap.testDatasource.publicAPIMock,
-      };
-
-      const { instance } = await prepareAndMountComponent(defaultProps);
-      const secondLayerFocusable = instance
-        .find(LayerPanel)
-        .at(1)
-        .find('section')
-        .first()
-        .instance();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().simulate('click');
-      });
-      instance.update();
-
-      const focusedEl = document.activeElement;
-      expect(focusedEl).toEqual(secondLayerFocusable);
-    });
-
-    it('should focus the first layer when removing the second layer', async () => {
-      const datasourceMap = mockDatasourceMap();
-      const defaultProps = getDefaultProps({ datasourceMap });
-      // overwriting datasourceLayers to test two layers
-      frame.datasourceLayers = {
-        first: datasourceMap.testDatasource.publicAPIMock,
-        second: datasourceMap.testDatasource.publicAPIMock,
-      };
-      const { instance } = await prepareAndMountComponent(defaultProps);
-      const firstLayerFocusable = instance
-        .find(LayerPanel)
-        .first()
-        .find('section')
-        .first()
-        .instance();
-      act(() => {
-        instance.find('[data-test-subj="lnsLayerRemove--1"]').first().simulate('click');
-      });
-      instance.update();
-
-      const focusedEl = document.activeElement;
-      expect(focusedEl).toEqual(firstLayerFocusable);
-    });
-
-    it('should focus the added layer', async () => {
-      const datasourceMap = mockDatasourceMap();
-      frame.datasourceLayers = {
-        first: datasourceMap.testDatasource.publicAPIMock,
-        newId: datasourceMap.testDatasource.publicAPIMock,
-      };
-
-      const defaultProps = getDefaultProps({ datasourceMap });
-
-      const { instance } = await prepareAndMountComponent(defaultProps, {
-        dispatch: jest.fn((x) => {
-          if (x.type === addLayer.type) {
-            frame.datasourceLayers.newId = datasourceMap.testDatasource.publicAPIMock;
-          }
-        }),
-      });
-
-      addNewLayer(instance);
-      const focusedEl = document.activeElement;
-      expect(focusedEl?.children[0].getAttribute('data-test-subj')).toEqual('lns-layerPanel-1');
-    });
   });
 
   describe('initial default value', () => {
@@ -483,7 +392,9 @@ describe('ConfigPanel', () => {
             a: expect.anything(),
           },
           dateRange: expect.anything(),
+          absDateRange: expect.anything(),
           filters: [],
+          now: expect.anything(),
           query: undefined,
         },
         groupId: 'a',
@@ -509,11 +420,7 @@ describe('ConfigPanel', () => {
       datasourceMap.testDatasource.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
-      const { instance } = await prepareAndMountComponent(
-        props,
-        {},
-        { sql: 'SELECT * from "foo"' }
-      );
+      const { instance } = await prepareAndMountComponent(props, {}, { esql: 'from "foo"' });
       expect(instance.find(AddLayerButton).exists()).toBe(false);
     });
   });

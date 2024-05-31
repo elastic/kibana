@@ -28,7 +28,6 @@
     "@kbn/inspector-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/core-http-browser",
-    "@kbn/core-theme-browser",
     "@kbn/core-doc-links-browser",
     "@kbn/analytics",
     "@kbn/i18n-react",
@@ -45,6 +44,10 @@
     "@kbn/home-plugin",
     "@kbn/std",
     "@kbn/tinymath",
+    "@kbn/visualization-utils",
+    "@kbn/code-editor",
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

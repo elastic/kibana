@@ -1,14 +1,31 @@
 .rangeSliderAnchor__button {
   .euiFormControlLayout {
+    align-items: center;
     box-shadow: none;
     background-color: transparent;
-    padding: 0 0 2px 0;
 
     .euiFormControlLayout__childrenWrapper {
+      background-color: transparent;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
-      border-top-right-radius: $euiBorderRadius - 1px;
-      border-bottom-right-radius: $euiBorderRadius - 1px;
+      border-top-right-radius: $euiBorderRadius;
+      border-bottom-right-radius: $euiBorderRadius;
+
+      .euiFormControlLayoutDelimited__delimiter, .euiFormControlLayoutIcons--static {
+        height: auto !important;
+      }
+    }
+  }
+
+  .rangeSlider__invalidToken {
+    height: $euiSizeS * 2;
+    padding: 0 $euiSizeS;
+
+    .euiIcon {
+      background-color: transparent;
+      width: $euiSizeS * 2;
+      border-radius: $euiSizeXS;
+      padding: 0 calc($euiSizeXS / 2);
     }
   }
 }
@@ -19,11 +36,12 @@
   text-align: center;
   background-color: transparent;
 
-  &:invalid {
-    color: $euiTextSubduedColor;
-    text-decoration: line-through;
-    font-weight: $euiFontWeightRegular;
-    background-image: none; // hide the red bottom border
+  &.rangeSliderAnchor__fieldNumber--valid:invalid:not(:focus) {
+    background-image: none; // override the red underline for values between steps
+  }
+
+  &.rangeSliderAnchor__fieldNumber--invalid {
+    color: $euiColorWarningText;
   }
 
   &:placeholder-shown, &::placeholder {

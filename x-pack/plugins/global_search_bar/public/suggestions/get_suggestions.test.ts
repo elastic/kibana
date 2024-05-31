@@ -14,6 +14,7 @@ const createTag = (parts: Partial<Tag> = {}): Tag => ({
   name: 'some-tag',
   description: 'Some tag',
   color: '#FF00CC',
+  managed: false,
   ...parts,
 });
 
@@ -89,6 +90,20 @@ describe('getSuggestions', () => {
 
       expect(suggestions).toHaveLength(1);
       expect(suggestions[0]).toEqual(
+        expect.objectContaining({
+          label: 'tag: BAR',
+          suggestedSearch: 'tag:BAR',
+        })
+      );
+
+      const suggestions1 = getSuggestions({
+        searchTerm: 'Bar',
+        tagCache,
+        searchableTypes: [],
+      });
+
+      expect(suggestions1).toHaveLength(1);
+      expect(suggestions1[0]).toEqual(
         expect.objectContaining({
           label: 'tag: BAR',
           suggestedSearch: 'tag:BAR',

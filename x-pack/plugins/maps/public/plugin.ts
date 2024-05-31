@@ -10,7 +10,6 @@ import type { Setup as InspectorSetupContract } from '@kbn/inspector-plugin/publ
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -25,7 +24,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
@@ -77,12 +76,20 @@ import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_a
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
+import {
+  setIsCloudEnabled,
+  setMapAppConfig,
+  setSpaceId,
+  setStartServices,
+} from './kibana_services';
 import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
-import { setupLensChoroplethChart } from './lens';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
+import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
+import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
+import { MapByValueInput } from './embeddable';
+import { MapComponentLazy } from './embeddable/map_component_lazy';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -113,7 +120,6 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
@@ -198,9 +204,13 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
-        const [coreStart, { savedObjectsTagging }] = await core.getStartServices();
+        const [coreStart, { savedObjectsTagging, spaces }] = await core.getStartServices();
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
+        const activeSpace = await spaces?.getActiveSpace();
+        if (activeSpace) {
+          setSpaceId(activeSpace.id);
+        }
         const { renderApp } = await import('./render_app');
         return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
@@ -213,6 +223,19 @@ export class MapsPlugin
       },
       name: APP_NAME,
     });
+
+    plugins.embeddable.registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        return {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+      }
+    );
 
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
@@ -250,6 +273,8 @@ export class MapsPlugin
     return {
       createLayerDescriptors,
       suggestEMSTermJoinConfig,
+      Map: MapComponentLazy,
+      PassiveMap: PassiveMapLazy,
     };
   }
 }

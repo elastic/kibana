@@ -56,14 +56,15 @@ describe(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'all_users');
+      cy.task('esArchiverUnload', { archiveName: 'all_users' });
     });
 
     it('renders page as expected', () => {
       cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
     });
 
-    describe('Risk preview', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/184133
+    describe.skip('Risk preview', () => {
       it('risk scores reacts on change in datepicker', () => {
         const START_DATE = 'Jan 18, 2019 @ 20:33:29.186';
         const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';

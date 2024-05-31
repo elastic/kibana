@@ -24,7 +24,7 @@ import {
   setInjectedVars,
   setData,
   setNotifications,
-  setUISettings,
+  setThemeService,
   setDataViews,
 } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
@@ -121,7 +121,7 @@ describe('vega_map_view/view', () => {
     setData(dataPluginStart);
     setDataViews(dataViewsStart);
     setNotifications(coreStart.notifications);
-    setUISettings(coreStart.uiSettings);
+    setThemeService(coreStart.theme);
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();
@@ -176,7 +176,7 @@ describe('vega_map_view/view', () => {
           layers: [],
         },
         customAttribution: 'tilemap-attribution',
-        container: vegaMapView._$container.get(0),
+        container: vegaMapView._container,
         minZoom: 0,
         maxZoom: 20,
         zoom: 3,
@@ -200,7 +200,7 @@ describe('vega_map_view/view', () => {
           layers: [],
         },
         customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],
-        container: vegaMapView._$container.get(0),
+        container: vegaMapView._container,
         minZoom: 0,
         maxZoom: 20,
         zoom: 3,

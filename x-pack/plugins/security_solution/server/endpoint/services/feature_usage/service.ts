@@ -7,37 +7,19 @@
 
 import type { Values } from '@kbn/utility-types';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-
-const FEATURES = {
-  HOST_ISOLATION: 'Host isolation',
-  HOST_ISOLATION_EXCEPTION: 'Host isolation exception',
-  HOST_ISOLATION_EXCEPTION_BY_POLICY: 'Host isolation exception by policy',
-  TRUSTED_APP_BY_POLICY: 'Trusted app by policy',
-  EVENT_FILTERS_BY_POLICY: 'Event filters by policy',
-  BLOCKLIST_BY_POLICY: 'Blocklists by policy',
-  RANSOMWARE_PROTECTION: 'Ransomeware protection',
-  MEMORY_THREAT_PROTECTION: 'Memory threat protection',
-  BEHAVIOR_PROTECTION: 'Behavior protection',
-  KILL_PROCESS: 'Kill process',
-  SUSPEND_PROCESS: 'Suspend process',
-  RUNNING_PROCESSES: 'Get running processes',
-  GET_FILE: 'Get file',
-  EXECUTE: 'Execute command',
-  ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
-  ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
-} as const;
-
-export type FeatureKeys = keyof typeof FEATURES;
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { FeatureKeys } from './feature_keys';
+import { getResponseActionFeatureKey, FEATURE_KEYS } from './feature_keys';
 
 export class FeatureUsageService {
   private licensingPluginStart: LicensingPluginStart | undefined;
 
-  private get notify(): (featureName: Values<typeof FEATURES>) => void {
+  private get notify(): (featureName: Values<typeof FEATURE_KEYS>) => void {
     return this.licensingPluginStart?.featureUsage.notifyUsage || function () {};
   }
 
   public setup(licensingPluginSetup: LicensingPluginSetup): void {
-    Object.values(FEATURES).map((featureValue) =>
+    Object.values(FEATURE_KEYS).map((featureValue) =>
       licensingPluginSetup.featureUsage.register(featureValue, 'platinum')
     );
   }
@@ -47,6 +29,12 @@ export class FeatureUsageService {
   }
 
   public notifyUsage(featureKey: FeatureKeys): void {
-    this.notify(FEATURES[featureKey]);
+    this.notify(FEATURE_KEYS[featureKey]);
+  }
+
+  public getResponseActionFeatureKey(
+    responseAction: ResponseActionsApiCommandNames
+  ): FeatureKeys | undefined {
+    return getResponseActionFeatureKey(responseAction);
   }
 }

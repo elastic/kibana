@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useCallback, useEffect, useState, useMemo } from 'react';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
@@ -19,16 +19,14 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 
 import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
@@ -122,20 +120,11 @@ export async function getLensServices(
     savedObjectsTagging,
     attributeService,
     eventAnnotationService,
-    executionContext: coreStart.executionContext,
-    http: coreStart.http,
     uiActions: startDependencies.uiActions,
-    chrome: coreStart.chrome,
-    overlays: coreStart.overlays,
-    uiSettings: coreStart.uiSettings,
-    settings: coreStart.settings,
-    application: coreStart.application,
-    notifications: coreStart.notifications,
     savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
-    dashboard: startDependencies.dashboard,
     charts: startDependencies.charts,
     getOriginatingAppName: () => {
       const originatingApp =
@@ -143,14 +132,12 @@ export async function getLensServices(
       return originatingApp ? stateTransfer?.getAppNameFromId(originatingApp) : undefined;
     },
     dataViews: startDependencies.dataViews,
-    // Temporarily required until the 'by value' paradigm is default.
-    dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
     share,
     unifiedSearch,
-    docLinks: coreStart.docLinks,
     locator,
     serverless,
+    ...coreStart,
   };
 }
 
@@ -160,7 +147,7 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     attributeService: LensAttributeService;
-    getPresentationUtilContext: () => FC;
+    getPresentationUtilContext: () => FC<PropsWithChildren<{}>>;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
     locator?: LensAppLocator;
   }
@@ -188,7 +175,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data, savedObjectStore } = lensServices;
+  const { stateTransfer, data, savedObjectStore, share } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -346,7 +333,24 @@ export async function mountApp(
           coreStart,
           dataViews: data.dataViews,
           dataViewEditor: startDependencies.dataViewEditor,
+          share,
         };
+        const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+        const AnalyticsNoDataPageKibanaProvider = withSuspense(
+          React.lazy(() =>
+            importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+              return { default: NoDataProvider };
+            })
+          )
+        );
+        const AnalyticsNoDataPage = withSuspense(
+          React.lazy(() =>
+            importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+              return { default: NoDataPage };
+            })
+          )
+        );
+
         return (
           <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
             <AnalyticsNoDataPage
@@ -410,26 +414,24 @@ export async function mountApp(
   const PresentationUtilContext = getPresentationUtilContext();
 
   render(
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-      <I18nProvider>
-        <KibanaContextProvider services={lensServices}>
-          <PresentationUtilContext>
-            <HashRouter>
-              <Routes>
-                <Route exact path="/edit/:id" component={EditorRoute} />
-                <Route
-                  exact
-                  path={`/${LENS_EDIT_BY_VALUE}`}
-                  render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-                />
-                <Route exact path="/" component={EditorRoute} />
-                <Route path="/" component={NotFound} />
-              </Routes>
-            </HashRouter>
-          </PresentationUtilContext>
-        </KibanaContextProvider>
-      </I18nProvider>
-    </KibanaThemeProvider>,
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider services={lensServices}>
+        <PresentationUtilContext>
+          <HashRouter>
+            <Routes>
+              <Route exact path="/edit/:id" component={EditorRoute} />
+              <Route
+                exact
+                path={`/${LENS_EDIT_BY_VALUE}`}
+                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+              />
+              <Route exact path="/" component={EditorRoute} />
+              <Route path="/" component={NotFound} />
+            </Routes>
+          </HashRouter>
+        </PresentationUtilContext>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     params.element
   );
   return () => {

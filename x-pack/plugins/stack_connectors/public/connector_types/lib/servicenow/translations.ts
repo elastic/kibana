@@ -77,7 +77,7 @@ export const SECURITY_INCIDENT = i18n.translate(
 export const SHORT_DESCRIPTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.titleFieldLabel',
   {
-    defaultMessage: 'Short description (required)',
+    defaultMessage: 'Short description',
   }
 );
 
@@ -209,14 +209,14 @@ export const UNKNOWN = i18n.translate('xpack.stackConnectors.components.serviceN
 export const CORRELATION_ID = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.correlationID',
   {
-    defaultMessage: 'Correlation ID (optional)',
+    defaultMessage: 'Correlation ID',
   }
 );
 
 export const CORRELATION_DISPLAY = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.correlationDisplay',
   {
-    defaultMessage: 'Correlation display (optional)',
+    defaultMessage: 'Correlation display',
   }
 );
 
@@ -389,5 +389,55 @@ export const REQUIRED_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.requiredLabel',
   {
     defaultMessage: 'Required',
+  }
+);
+
+export const EVENT_ACTION_TRIGGER = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.eventActionTriggerOptionLabel',
+  {
+    defaultMessage: 'Trigger',
+  }
+);
+
+export const EVENT_ACTION_RESOLVE = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.eventActionResolveOptionLabel',
+  {
+    defaultMessage: 'Resolve',
+  }
+);
+
+export const EVENT_ACTION_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITSM.eventActionFieldLabel',
+  {
+    defaultMessage: 'Event action',
+  }
+);
+
+export const ADDITIONAL_INFO = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoLabel',
+  {
+    defaultMessage: 'Additional info',
+  }
+);
+
+export const ADDITIONAL_INFO_HELP = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltip',
+  {
+    defaultMessage: 'Additional info help',
+  }
+);
+
+export const ADDITIONAL_INFO_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltipText',
+  {
+    defaultMessage:
+      'The rule automatically generates information about each event. You can change or add more custom fields in JSON format.',
+  }
+);
+
+export const ADDITIONAL_INFO_JSON_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoError',
+  {
+    defaultMessage: 'The additional info field does not have a valid JSON format.',
   }
 );

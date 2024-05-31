@@ -34,7 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/175756
+  registry.when.skip(
     'Agent name when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {

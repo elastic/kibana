@@ -8,3 +8,4 @@ export * from './get_slack_action';
 export * from './get_web_hook_action';
 export * from './create_new_webhook_action';
 export * from './legacy_actions';
+export * from './remove_uuid_from_actions';

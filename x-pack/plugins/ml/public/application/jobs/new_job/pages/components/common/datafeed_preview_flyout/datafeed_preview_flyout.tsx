@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useContext } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,

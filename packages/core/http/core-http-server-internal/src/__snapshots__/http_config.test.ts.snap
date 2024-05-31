@@ -73,6 +73,10 @@ Object {
     "valueInBytes": 1048576,
   },
   "name": "kibana-hostname",
+  "oas": Object {
+    "enabled": false,
+  },
+  "payloadTimeout": 20000,
   "port": 5601,
   "requestId": Object {
     "allowFromAnyIp": false,
@@ -83,7 +87,7 @@ Object {
     "crossOriginOpenerPolicy": "same-origin",
     "disableEmbedding": false,
     "permissionsPolicy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
-    "referrerPolicy": "no-referrer-when-downgrade",
+    "referrerPolicy": "strict-origin-when-cross-origin",
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
@@ -128,6 +132,7 @@ Object {
   },
   "versioned": Object {
     "strictClientVersionCheck": true,
+    "useVersionResolutionStrategyForInternalPaths": Array [],
     "versionResolution": "oldest",
   },
   "xsrf": Object {

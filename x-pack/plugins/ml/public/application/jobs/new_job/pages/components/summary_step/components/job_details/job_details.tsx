@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import type { FC } from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +19,8 @@ import {
   isAdvancedJobCreator,
 } from '../../../../../common/job_creator';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
-import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
+import type { ListItems } from '../common';
+import { falseLabel, trueLabel, defaultLabel, Italic } from '../common';
 
 export const JobDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);

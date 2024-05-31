@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-export const getMarkdownEditorStorageKey = (
-  appId: string,
-  caseId: string,
-  commentId: string
-): string => {
-  const appIdKey = appId !== '' ? appId : 'cases';
+export const getMarkdownEditorStorageKey = ({
+  caseId,
+  commentId,
+  appId,
+}: {
+  caseId: string;
+  commentId: string;
+  appId?: string;
+}): string => {
+  const appIdKey = appId && appId !== '' ? appId : 'cases';
   const caseIdKey = caseId !== '' ? caseId : 'case';
   const commentIdKey = commentId !== '' ? commentId : 'comment';
 

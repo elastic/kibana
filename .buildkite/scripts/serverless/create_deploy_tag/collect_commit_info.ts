@@ -13,6 +13,7 @@ import {
   getSelectedCommitHash,
   getCommitByHash,
   makeCommitInfoHtml,
+  getRecentCommits,
 } from './info_sections/commit_info';
 import {
   getArtifactBuild,
@@ -45,7 +46,8 @@ async function main() {
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
   const nextBuildContainingCommit = await getQAFBuildContainingCommit(
     selectedSha,
-    selectedCommitInfo.date!
+    selectedCommitInfo.date!,
+    await getRecentCommits(50)
   );
   const artifactBuild = await getArtifactBuild(selectedSha);
   addBuildkiteInfoSection(

@@ -17,7 +17,7 @@ import {
   reauthorizeActionNameText,
 } from './reauthorize_action_name';
 
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities } from '../../../../hooks';
 
 export type ReauthorizeAction = ReturnType<typeof useReauthorizeAction>;

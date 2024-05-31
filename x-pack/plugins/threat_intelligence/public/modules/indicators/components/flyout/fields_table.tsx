@@ -15,7 +15,7 @@ import { IndicatorValueActions } from './indicator_value_actions';
 export interface IndicatorFieldsTableProps {
   fields: string[];
   indicator: Indicator;
-  search: EuiInMemoryTableProps<string>['search'];
+  search: EuiInMemoryTableProps['search'];
   ['data-test-subj']?: string;
 }
 
@@ -59,13 +59,16 @@ export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
             },
           ],
         },
+        // @ts-expect-error - EuiBasicTable wants an array of objects, but will accept strings if coerced
       ] as Array<EuiBasicTableColumn<string>>,
     [indicator, dataTestSubj]
   );
 
   return (
     <EuiInMemoryTable
+      // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
       items={fields.sort()}
+      // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
       columns={columns}
       sorting={true}
       data-test-subj={dataTestSubj}

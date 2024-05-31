@@ -11,7 +11,8 @@ import { EuiSelectable } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { DataViewsList, DataViewsListProps } from './dataview_list';
+import { DataViewListItemEnhanced, DataViewsList, DataViewsListProps } from './dataview_list';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 function getDataViewPickerList(instance: ShallowWrapper) {
   return instance.find(EuiSelectable).first();
@@ -47,6 +48,7 @@ describe('DataView list component', () => {
   ];
   const changeDataViewSpy = jest.fn();
   let props: DataViewsListProps;
+
   beforeEach(() => {
     props = {
       currentDataViewId: 'dataview-1',
@@ -55,6 +57,7 @@ describe('DataView list component', () => {
       isTextBasedLangSelected: false,
     };
   });
+
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {
     const component = shallow(<DataViewsList {...props} />);
     await act(async () => {
@@ -63,7 +66,7 @@ describe('DataView list component', () => {
     expect(changeDataViewSpy).toHaveBeenCalled();
   });
 
-  it('should list all dataviiew', () => {
+  it('should list all dataviews', () => {
     const component = shallow(<DataViewsList {...props} />);
 
     expect(getDataViewPickerOptions(component)!.map((option: any) => option.label)).toEqual([
@@ -76,5 +79,55 @@ describe('DataView list component', () => {
     const component = shallow(<DataViewsList {...props} isTextBasedLangSelected />);
 
     expect(getDataViewPickerOptions(component)!.map((option: any) => option.append)).not.toBeNull();
+  });
+
+  describe('ad hoc data views', () => {
+    const runAdHocDataViewTest = (
+      esqlMode: boolean,
+      esqlDataViews: DataViewListItemEnhanced[] = []
+    ) => {
+      const dataViewList = [
+        ...list,
+        {
+          id: 'dataview-3',
+          title: 'dataview-3',
+          isAdhoc: true,
+        },
+        ...esqlDataViews,
+      ];
+      const component = shallow(
+        <DataViewsList {...props} dataViewsList={dataViewList} isTextBasedLangSelected={esqlMode} />
+      );
+      expect(getDataViewPickerOptions(component)!.map((option: any) => option.label)).toEqual([
+        'dataview-1',
+        'dataview-2',
+        'dataview-3',
+      ]);
+    };
+
+    const esqlDataViews: DataViewListItemEnhanced[] = [
+      {
+        id: 'dataview-4',
+        title: 'dataview-4',
+        type: ESQL_TYPE,
+        isAdhoc: true,
+      },
+    ];
+
+    it('should show ad hoc data views for text based mode', () => {
+      runAdHocDataViewTest(true);
+    });
+
+    it('should show ad hoc data views for data view mode', () => {
+      runAdHocDataViewTest(false);
+    });
+
+    it('should not show ES|QL ad hoc data views for text based mode', () => {
+      runAdHocDataViewTest(true, esqlDataViews);
+    });
+
+    it('should not show ES|QL ad hoc data views for data view mode', () => {
+      runAdHocDataViewTest(false, esqlDataViews);
+    });
   });
 });

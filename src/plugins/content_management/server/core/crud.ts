@@ -79,17 +79,17 @@ export class ContentCrud<T = unknown> {
     });
 
     try {
-      const item = await this.storage.get(ctx, contentId, options);
+      const result = await this.storage.get(ctx, contentId, options);
 
       this.eventBus.emit({
         type: 'getItemSuccess',
         contentId,
         contentTypeId: this.contentTypeId,
-        data: item,
+        data: result,
         options,
       });
 
-      return { contentTypeId: this.contentTypeId, result: item };
+      return { contentTypeId: this.contentTypeId, result };
     } catch (e) {
       this.eventBus.emit({
         type: 'getItemError',

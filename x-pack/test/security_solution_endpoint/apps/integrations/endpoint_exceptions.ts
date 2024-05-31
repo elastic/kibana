@@ -11,12 +11,12 @@ import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/com
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
@@ -26,11 +26,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
   const unzipPromisify = promisify(unzip);
+  const comboBox = getService('comboBox');
+  const toasts = getService('toasts');
+
+  const MINUTES = 60_000;
 
   describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
-    this.timeout(10 * 60_000);
+    this.timeout(10 * MINUTES);
 
     const clearPrefilledEntries = async () => {
       const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
@@ -47,6 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const openNewEndpointExceptionFlyout = async () => {
+      await testSubjects.scrollIntoView('timeline-context-menu-button');
       await testSubjects.click('timeline-context-menu-button');
       await testSubjects.click('add-endpoint-exception-menu-item');
       await testSubjects.existOrFail('addExceptionFlyout');
@@ -59,7 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const setLastFieldsValue = async ({
       testSubj,
       value,
-      optionSelector = `button[title="${value}"]`,
     }: {
       testSubj: string;
       value: string;
@@ -70,11 +74,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const lastField = fields[fields.length - 1];
       await lastField.click();
 
-      const inputField = await lastField.findByTagName('input');
-      await inputField.type(value);
-
-      const dropdownOptionSelector = `[data-test-subj="comboBoxOptionsList ${testSubj}-optionsList"] ${optionSelector}`;
-      await find.clickByCssSelector(dropdownOptionSelector);
+      await retry.try(
+        async () => {
+          await comboBox.setElement(lastField, value);
+        },
+        async () => {
+          // If the above fails due to an option not existing, create the value custom instead
+          await comboBox.setFilterValue(lastField, value);
+          await pageObjects.common.pressEnterKey();
+        }
+      );
     };
 
     const setLastEntry = async ({
@@ -91,12 +100,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastFieldsValue({
         testSubj: operator === 'matches' ? 'valuesAutocompleteWildcard' : 'valuesAutocompleteMatch',
         value,
-        optionSelector: 'p',
       });
     };
 
     const checkArtifact = (expectedArtifact: object) => {
-      return retry.tryForTime(120_000, async () => {
+      return retry.tryForTime(2 * MINUTES, async () => {
         const artifacts = await endpointArtifactTestResources.getArtifacts();
 
         const manifestArtifact = artifacts.find((artifact) =>
@@ -127,7 +135,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const waitForAlertsToAppear = async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await retry.waitForWithTimeout('alerts to appear', 10 * 60_000, async () => {
+        await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
+        await retry.waitForWithTimeout('alerts to appear', 10 * MINUTES, async () => {
           await queryBar.clickQuerySubmitButton();
           return testSubjects.exists('timeline-context-menu-button');
         });
@@ -158,6 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();
@@ -168,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastEntry({ field: 'process.executable', operator: 'matches', value: 'ex*' });
 
       await testSubjects.click('addExceptionConfirmButton');
-      await pageObjects.common.closeToast();
+      await toasts.dismiss();
 
       await checkArtifact({
         entries: [
@@ -202,6 +212,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should NOT add `event.module=endpoint` to entry if there is another operator', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();
@@ -212,7 +223,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastEntry({ field: 'process.executable', operator: 'is', value: 'something' });
 
       await testSubjects.click('addExceptionConfirmButton');
-      await pageObjects.common.closeToast();
+      await toasts.dismiss();
 
       await checkArtifact({
         entries: [

@@ -9,6 +9,7 @@ import { URL } from 'url';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
+import { Logger } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -54,7 +55,7 @@ const SecretsSchema = schema.object(secretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const ParamsSchema = schema.object({
+export const ParamsSchema = schema.object({
   message: schema.string({ minLength: 1 }),
 });
 
@@ -94,11 +95,12 @@ export function getConnectorType({
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   return {
-    message: renderMustacheString(params.message, variables, 'slack'),
+    message: renderMustacheString(logger, params.message, variables, 'slack'),
   };
 }
 

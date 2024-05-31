@@ -35,6 +35,7 @@ exports[`SavedObjectEdition should render normally 1`] = `
         },
       },
       "theme": Object {
+        "getTheme": [MockFunction],
         "theme$": Observable {
           "_subscribe": [Function],
         },

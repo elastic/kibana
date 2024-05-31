@@ -36,9 +36,11 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async getSidebarAriaDescription(): Promise<string> {
-    return await (
-      await this.testSubjects.find('fieldListGrouped__ariaDescription')
-    ).getAttribute('innerText');
+    return (
+      (await (
+        await this.testSubjects.find('fieldListGrouped__ariaDescription')
+      ).getAttribute('innerText')) ?? ''
+    );
   }
 
   public async cleanSidebarLocalStorage(): Promise<void> {
@@ -78,7 +80,7 @@ export class UnifiedFieldListPageObject extends FtrService {
     }
 
     return Promise.all(
-      elements.map(async (element) => await element.getAttribute('data-attr-field'))
+      elements.map(async (element) => (await element.getAttribute('data-attr-field')) ?? '')
     );
   }
 
@@ -86,6 +88,22 @@ export class UnifiedFieldListPageObject extends FtrService {
     return await this.find.clickByCssSelector(
       `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__arrow`
     );
+  }
+
+  public async openSidebarSection(sectionName: SidebarSectionName) {
+    const openedSectionSelector = `${this.getSidebarSectionSelector(
+      sectionName,
+      true
+    )}.euiAccordion-isOpen`;
+
+    if (await this.find.existsByCssSelector(openedSectionSelector)) {
+      return;
+    }
+
+    await this.retry.waitFor(`${sectionName} fields section to open`, async () => {
+      await this.toggleSidebarSection(sectionName);
+      return await this.find.existsByCssSelector(openedSectionSelector);
+    });
   }
 
   public async waitUntilFieldPopoverIsOpen() {
@@ -97,6 +115,13 @@ export class UnifiedFieldListPageObject extends FtrService {
   public async waitUntilFieldPopoverIsLoaded() {
     await this.retry.waitFor('popover is loaded', async () => {
       return !(await this.find.existsByCssSelector('[data-test-subj*="-statsLoading"]'));
+    });
+  }
+
+  public async closeFieldPopover() {
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.retry.waitFor('popover is closed', async () => {
+      return !(await this.testSubjects.exists('fieldPopoverHeader_fieldDisplayName'));
     });
   }
 
@@ -205,6 +230,17 @@ export class UnifiedFieldListPageObject extends FtrService {
     // this method requires the field details to be open from clickFieldListItem()
     // this.testSubjects.find doesn't handle spaces in the data-test-subj value
     await this.testSubjects.click(`minus-${field}-${value}`);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async clickFieldListExistsFilter(field: string) {
+    const existsFilterTestSubj = `discoverFieldListPanelAddExistFilter-${field}`;
+    if (!(await this.testSubjects.exists(existsFilterTestSubj))) {
+      // field has to be open
+      await this.clickFieldListItem(field);
+    }
+    // this.testSubjects.find doesn't handle spaces in the data-test-subj value
+    await this.testSubjects.click(existsFilterTestSubj);
     await this.header.waitUntilLoadingHasFinished();
   }
 

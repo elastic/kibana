@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        const warningToast = await toasts.getToastElement(1);
+        const warningToast = await toasts.getElementByIndex(1);
         expect(await warningToast.getVisibleText()).to.contain('Cannot load panels');
 
         await PageObjects.dashboard.waitForRenderComplete();
@@ -96,13 +96,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const query = await queryBar.getQueryString();
         expect(query).to.equal('memory:>220000');
 
-        const warningToast = await toasts.getToastElement(1);
+        const warningToast = await toasts.getElementByIndex(1);
         expect(await warningToast.getVisibleText()).to.contain('Cannot load panels');
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
       it('loads a saved dashboard', async function () {
         await PageObjects.dashboard.saveDashboard('saved with colors', {
+          saveAsNew: true,
           storeTimeWithDashboard: true,
         });
 

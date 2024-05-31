@@ -61,7 +61,6 @@ function checkIsPathExposed<T = unknown>(
     // Traverse the path to see if it is exposed or not
     const exposedConfig = descriptor[key as keyof ExposedToBrowserDescriptor<T>];
     if (exposedConfig && typeof exposedConfig === 'object') {
-      // @ts-expect-error Type 'undefined' is not assignable to type 'ExposedToBrowserDescriptor<T>'
       descriptor = exposedConfig;
       continue;
     }

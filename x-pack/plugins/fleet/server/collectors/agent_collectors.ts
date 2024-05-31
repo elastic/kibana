@@ -69,11 +69,21 @@ export interface AgentData {
     error: number;
     degraded: number;
   };
+  agents_per_privileges: {
+    root: number;
+    unprivileged: number;
+  };
   agents_per_policy: number[];
   agents_per_os: Array<{
     name: string;
     version: string;
     count: number;
+  }>;
+  upgrade_details: Array<{
+    target_version: string;
+    state: string;
+    error_msg: string;
+    agent_count: number;
   }>;
 }
 
@@ -82,6 +92,11 @@ const DEFAULT_AGENT_DATA = {
   agents_per_policy: [],
   agents_per_version: [],
   agents_per_os: [],
+  upgrade_details: [],
+  agents_per_privileges: {
+    root: 0,
+    unprivileged: 0,
+  },
 };
 
 export const getAgentData = async (
@@ -135,6 +150,35 @@ export const getAgentData = async (
               ],
             },
           },
+          upgrade_details: {
+            multi_terms: {
+              size: 1000,
+              terms: [
+                {
+                  field: 'upgrade_details.target_version.keyword',
+                },
+                {
+                  field: 'upgrade_details.state',
+                },
+                {
+                  field: 'upgrade_details.metadata.error_msg.keyword',
+                  missing: '',
+                },
+              ],
+            },
+          },
+          privileges: {
+            filters: {
+              other_bucket_key: 'root',
+              filters: {
+                unprivileged: {
+                  match: {
+                    'local_metadata.elastic.agent.unprivileged': true,
+                  },
+                },
+              },
+            },
+          },
         },
       },
       { signal: abortController.signal }
@@ -151,6 +195,12 @@ export const getAgentData = async (
         offline: 0,
       })
     );
+
+    const agentsPerPrivileges = {
+      root: (response?.aggregations?.privileges as any)?.buckets?.root?.doc_count ?? 0,
+      unprivileged:
+        (response?.aggregations?.privileges as any)?.buckets?.unprivileged?.doc_count ?? 0,
+    };
 
     const getAgentStatusesPerVersion = async (version: string) => {
       return await getAgentStatusForAgentPolicy(
@@ -190,11 +240,22 @@ export const getAgentData = async (
       count: bucket.doc_count,
     }));
 
+    const upgradeDetails = ((response?.aggregations?.upgrade_details as any).buckets ?? []).map(
+      (bucket: any) => ({
+        target_version: bucket.key[0],
+        state: bucket.key[1],
+        error_msg: bucket.key[2],
+        agent_count: bucket.doc_count,
+      })
+    );
+
     return {
       agent_checkin_status: statuses,
       agents_per_policy: agentsPerPolicy,
       agents_per_version: agentsPerVersion,
+      agents_per_privileges: agentsPerPrivileges,
       agents_per_os: agentsPerOS,
+      upgrade_details: upgradeDetails,
     };
   } catch (error) {
     if (error.statusCode === 404) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAdvancedButton } from '../screens/integrations';
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
 import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
@@ -46,6 +47,13 @@ export const fillInQueryTimeout = (timeout: string) => {
   });
 };
 
+export const verifyQueryTimeout = (timeout: string) => {
+  getAdvancedButton().click();
+  cy.getBySel('advanced-accordion-content').within(() => {
+    cy.getBySel('timeout-input').should('have.value', timeout);
+  });
+};
+
 // sometimes the results get stuck in the tests, this is a workaround
 export const checkResults = () => {
   cy.getBySel('osqueryResultsTable').then(($table) => {
@@ -61,11 +69,14 @@ export const checkResults = () => {
 
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
+
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
   cy
     .getBySel('osqueryColumnValueSelect')
     .eq(index)
     .within(() => {
+      cy.getBySel('comboBoxInput').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('comboBoxInput').type(text);
     });
 

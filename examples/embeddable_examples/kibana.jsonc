@@ -5,15 +5,19 @@
   "description": "Example app that shows how to register custom embeddables",
   "plugin": {
     "id": "embeddableExamples",
-    "server": true,
+    "server": false,
     "browser": true,
     "requiredPlugins": [
+      "dataViews",
       "embeddable",
       "uiActions",
       "dashboard",
+      "data",
+      "charts",
+      "fieldFormats",
+      "developerExamples",
+      "dataViewFieldEditor"
     ],
-    "extraPublicDirs": [
-      "public/hello_world"
-    ]
+    "requiredBundles": ["dashboard", "presentationUtil", "kibanaUtils", "kibanaReact"]
   }
 }

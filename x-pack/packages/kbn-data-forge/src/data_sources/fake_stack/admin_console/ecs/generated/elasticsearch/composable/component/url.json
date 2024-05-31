@@ -1,0 +1,78 @@
+{
+  "_meta": {
+    "documentation": "https://www.elastic.co/guide/en/ecs/current/ecs-url.html",
+    "ecs_version": "8.0.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "url": {
+          "properties": {
+            "domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "extension": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "fragment": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "full": {
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              },
+              "type": "wildcard"
+            },
+            "original": {
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              },
+              "type": "wildcard"
+            },
+            "password": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "path": {
+              "type": "wildcard"
+            },
+            "port": {
+              "type": "long"
+            },
+            "query": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "registered_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "scheme": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "subdomain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "top_level_domain": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "username": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

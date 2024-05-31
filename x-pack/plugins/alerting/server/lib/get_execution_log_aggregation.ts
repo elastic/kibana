@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
@@ -14,7 +15,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
-const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
+const DEFAULT_MAX_BUCKETS_LIMIT = 10000; // do not retrieve more than this number of executions. UI limits 1000 to display, but we need to fetch all 10000 to accurately reflect the KPIs
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
@@ -104,9 +105,7 @@ export interface ExecutionUuidKPIAggResult<TBucket = IExecutionUuidKpiAggBucket>
 
 interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
-  executionUuidCardinality: {
-    executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
-  };
+  executionUuidCardinality: estypes.AggregationsCardinalityAggregate; // This is an accurate type even though we're actually using a sum bucket agg
 }
 
 interface ExcludeExecuteStartKpiAggResult extends estypes.AggregationsAggregateBase {
@@ -301,19 +300,35 @@ export function getExecutionLogAggregation({
       },
       aggs: {
         // Get total number of executions
-        executionUuidCardinality: {
-          filter: {
-            bool: {
-              ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
-              must: [getProviderAndActionFilter('alerting', 'execute')],
-            },
+        executionUuidCardinalityBuckets: {
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_BUCKETS_LIMIT,
+            order: formatSortForTermSort([{ timestamp: { order: 'desc' } }]),
           },
           aggs: {
-            executionUuidCardinality: {
-              cardinality: {
-                field: EXECUTION_UUID_FIELD,
+            ruleExecution: {
+              filter: {
+                bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
               },
             },
+          },
+        },
+        // Cardinality aggregation isn't accurate for this use case because we want to limit the cardinality
+        // to DEFAULT_MAX_BUCKETS_LIMIT. Instead, we sum the buckets and call it a cardinality.
+        executionUuidCardinality: {
+          sum_bucket: {
+            buckets_path: 'executionUuidCardinalityBuckets>ruleExecution._count',
           },
         },
         executionUuid: {
@@ -592,8 +607,31 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
   return objToReturn;
 }
 
+function validTotalHitsLimitationOnExecutionLog(esHitsTotal: estypes.SearchTotalHits) {
+  if (
+    esHitsTotal &&
+    esHitsTotal.relation &&
+    esHitsTotal.value &&
+    esHitsTotal.relation === 'gte' &&
+    esHitsTotal.value === 10000
+  ) {
+    throw Boom.entityTooLarge(
+      i18n.translate('xpack.alerting.feature.executionLogAggs.limitationQueryMsg', {
+        defaultMessage:
+          'Results are limited to 10,000 documents, refine your search to see others.',
+      }),
+      EMPTY_EXECUTION_LOG_RESULT
+    );
+  }
+}
+
 export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
-  const { aggregations } = results;
+  const { aggregations, hits } = results;
+
+  if (hits && hits.total) {
+    validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  }
+
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_KPI_RESULT;
   }
@@ -605,7 +643,11 @@ export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectRe
 export function formatExecutionLogResult(
   results: AggregateEventsBySavedObjectResult
 ): IExecutionLogResult {
-  const { aggregations } = results;
+  const { aggregations, hits } = results;
+
+  if (hits && hits.total) {
+    validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  }
 
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_LOG_RESULT;
@@ -613,7 +655,7 @@ export function formatExecutionLogResult(
 
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
 
-  const total = aggs.executionUuidCardinality.executionUuidCardinality.value;
+  const total = aggs.executionUuidCardinality.value;
   const buckets = aggs.executionUuid.buckets;
 
   return {

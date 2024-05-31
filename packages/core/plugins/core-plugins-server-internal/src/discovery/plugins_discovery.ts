@@ -7,7 +7,7 @@
  */
 
 import { from, merge, EMPTY } from 'rxjs';
-import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs';
 import { Logger } from '@kbn/logging';
 import { getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { CoreContext } from '@kbn/core-base-server-internal';

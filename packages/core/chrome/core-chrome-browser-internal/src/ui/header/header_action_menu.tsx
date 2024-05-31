@@ -39,11 +39,6 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
   const unmountRef = useRef<UnmountCallback | null>(null);
 
   useLayoutEffect(() => {
-    if (unmountRef.current) {
-      unmountRef.current();
-      unmountRef.current = null;
-    }
-
     if (mounter.mount && elementRef.current) {
       try {
         unmountRef.current = mounter.mount(elementRef.current);
@@ -53,6 +48,12 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
         console.error(e);
       }
     }
+    return () => {
+      if (unmountRef.current) {
+        unmountRef.current();
+        unmountRef.current = null;
+      }
+    };
   }, [mounter]);
 
   return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;

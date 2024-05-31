@@ -48,7 +48,7 @@ export function useDevToolsRequest({
           newAgentPolicy,
           withSysMonitoring && !packagePolicyIsSystem
         )}\n\n${generateCreatePackagePolicyDevToolsRequest({
-          ...packagePolicy,
+          ...{ ...packagePolicy, policy_id: '' },
         })}`,
         i18n.translate(
           'xpack.fleet.createPackagePolicy.devtoolsRequestWithAgentPolicyDescription',

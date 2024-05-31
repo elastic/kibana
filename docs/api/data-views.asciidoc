@@ -16,6 +16,8 @@ The following data views APIs are available:
     ** <<data-views-api-create, Create data view API>> to create data view
     ** <<data-views-api-update, Update data view API>> to partially updated data view
     ** <<data-views-api-delete, Delete data view API>> to delete a data view
+    ** <<data-views-api-swap-references-preview, Data view swap references preview API>> to preview a data view reference swap
+    ** <<data-views-api-swap-references, Data view swap references API>> to perform a data view reference swap
 * Default data views
     ** <<data-views-api-default-get, Get default data view API>> to retrieve a default data view
     ** <<data-views-api-default-set, Set default data view API>> to set a default data view
@@ -33,6 +35,8 @@ include::data-views/get.asciidoc[]
 include::data-views/create.asciidoc[]
 include::data-views/update.asciidoc[]
 include::data-views/delete.asciidoc[]
+include::data-views/swap_references_preview.asciidoc[]
+include::data-views/swap_references.asciidoc[]
 include::data-views/default-get.asciidoc[]
 include::data-views/default-set.asciidoc[]
 include::data-views/update-fields.asciidoc[]

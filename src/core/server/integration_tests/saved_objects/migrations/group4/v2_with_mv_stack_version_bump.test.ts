@@ -206,7 +206,10 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
       indexTypesMap: {
         '.kibana': ['test_mv', 'test_switch'],
       },
-      migrationMappingPropertyHashes: expect.any(Object),
+      mappingVersions: {
+        test_mv: '10.2.0',
+        test_switch: '10.1.0',
+      },
     });
 
     const { saved_objects: testSwitchDocs } = await savedObjectsRepository.find({

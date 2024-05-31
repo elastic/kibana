@@ -7,7 +7,7 @@
  */
 
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
-import { IKibanaSearchResponse } from '../../types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchError } from './types';
 
 /**

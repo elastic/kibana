@@ -19,6 +19,8 @@ jest.mock('@kbn/repo-info', () => ({
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
+import { GlobalConfigService } from '../services/global_config_service';
+
 import {
   callEnterpriseSearchConfigAPI,
   warnMismatchedVersions,
@@ -37,6 +39,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   };
   const mockDependencies = {
     config: mockConfig,
+    globalConfigService: new GlobalConfigService(),
     request: mockRequest,
     log: loggingSystemMock.create().get(),
   } as any;
@@ -256,7 +259,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
-    callEnterpriseSearchConfigAPI(mockDependencies);
+    void callEnterpriseSearchConfigAPI(mockDependencies);
     jest.advanceTimersByTime(150);
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
       'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.'

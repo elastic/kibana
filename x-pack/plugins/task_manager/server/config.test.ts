@@ -42,10 +42,8 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
-        "requeue_invalid_tasks": Object {
-          "delay": 3000,
-          "enabled": false,
-          "max_attempts": 100,
+        "request_timeouts": Object {
+          "update_by_query": 30000,
         },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
@@ -102,10 +100,8 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
-        "requeue_invalid_tasks": Object {
-          "delay": 3000,
-          "enabled": false,
-          "max_attempts": 100,
+        "request_timeouts": Object {
+          "update_by_query": 30000,
         },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
@@ -165,10 +161,8 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
-        "requeue_invalid_tasks": Object {
-          "delay": 3000,
-          "enabled": false,
-          "max_attempts": 100,
+        "request_timeouts": Object {
+          "update_by_query": 30000,
         },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,

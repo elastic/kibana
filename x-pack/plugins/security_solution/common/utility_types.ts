@@ -37,7 +37,7 @@ type NonAny = number | boolean | string | symbol | null;
 export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
   runtimeTypes.union([type, runtimeTypes.null]);
 
-export const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
+export const stringEnum = <T extends object>(enumObj: T, enumName = 'enum') =>
   new runtimeTypes.Type<T[keyof T], string>(
     enumName,
     (u): u is T[keyof T] => Object.values(enumObj).includes(u),
@@ -71,3 +71,10 @@ export const assertUnreachable = (
 ): never => {
   throw new Error(`${message}: ${x}`);
 };
+
+type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+/**
+ * The XOR (exclusive OR) allows to ensure that a variable conforms to only one of several possible types.
+ * Read more: https://medium.com/@aeron169/building-a-xor-type-in-typescript-5f4f7e709a9d
+ */
+export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;

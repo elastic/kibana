@@ -17,6 +17,21 @@ import {
   UnknownError,
   VisualReportingSoftDisabledError,
 } from '@kbn/reporting-common';
+import { ExecutionError } from '@kbn/reporting-common/types';
+
+export function isExecutionError(error: ExecutionError | unknown): error is ExecutionError {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+  return ['name', 'message', 'stack'].every((k) => k in error);
+}
+
+function getErrorName(error: ExecutionError | unknown): string | undefined {
+  if (isExecutionError(error)) {
+    return error.name;
+  }
+  return undefined;
+}
 
 /**
  * Map an error object from the Screenshotting plugin into an error type of the Reporting domain.
@@ -27,25 +42,32 @@ import {
  * @param {unknown} error - a kind of error object
  * @returns {ReportingError} - the converted error object
  */
-export function mapToReportingError(error: unknown): ReportingError {
+export function mapToReportingError(error: ExecutionError | unknown): ReportingError {
   if (error instanceof ReportingError) {
     return error;
   }
+  const errorName = getErrorName(error);
   switch (true) {
-    case error instanceof errors.InvalidLayoutParametersError:
+    case error instanceof errors.InvalidLayoutParametersError ||
+      errorName === 'InvalidLayoutParametersError':
       return new InvalidLayoutParametersError((error as Error).message);
-    case error instanceof errors.DisallowedOutgoingUrl:
+    case error instanceof errors.DisallowedOutgoingUrl || errorName === 'DisallowedOutgoingUrl':
       return new DisallowedOutgoingUrl((error as Error).message);
-    case error instanceof errors.BrowserClosedUnexpectedly:
+    case error instanceof errors.BrowserClosedUnexpectedly ||
+      errorName === 'BrowserClosedUnexpectedly':
       return new BrowserUnexpectedlyClosedError((error as Error).message);
-    case error instanceof errors.FailedToCaptureScreenshot:
+    case error instanceof errors.FailedToCaptureScreenshot ||
+      errorName === 'FailedToCaptureScreenshot':
       return new BrowserScreenshotError((error as Error).message);
-    case error instanceof errors.FailedToSpawnBrowserError:
+    case error instanceof errors.FailedToSpawnBrowserError ||
+      errorName === 'FailedToSpawnBrowserError':
       return new BrowserCouldNotLaunchError();
-    case error instanceof errors.PdfWorkerOutOfMemoryError:
+    case error instanceof errors.PdfWorkerOutOfMemoryError ||
+      errorName === 'PdfWorkerOutOfMemoryError':
       return new PdfWorkerOutOfMemoryError();
-    case error instanceof errors.InsufficientMemoryAvailableOnCloudError:
+    case error instanceof errors.InsufficientMemoryAvailableOnCloudError ||
+      errorName === 'InsufficientMemoryAvailableOnCloudError':
       return new VisualReportingSoftDisabledError();
   }
-  return new UnknownError();
+  return new UnknownError((error as Error)?.message);
 }

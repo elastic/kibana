@@ -15,8 +15,8 @@ import { login } from '../../../../tasks/login';
 
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer permissions', { tags: ['@ess', '@brokenInServerless'] }, () => {
-  before(() => {
+describe('Sourcerer permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
+  beforeEach(() => {
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
 

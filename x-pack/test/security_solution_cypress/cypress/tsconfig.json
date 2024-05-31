@@ -21,7 +21,6 @@
     "@kbn/datemath",
     "@kbn/guided-onboarding-plugin",
     "@kbn/alerting-plugin",
-    "@kbn/securitysolution-data-table",
     "@kbn/cases-plugin",
     "@kbn/data-plugin",
     "@kbn/core-http-common",
@@ -40,6 +39,8 @@
     "@kbn/management-settings-ids",
     "@kbn/es-query",
     "@kbn/ml-plugin",
-    "@kbn/license-management-plugin"
+    "@kbn/license-management-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/alerts-ui-shared",
   ]
 }

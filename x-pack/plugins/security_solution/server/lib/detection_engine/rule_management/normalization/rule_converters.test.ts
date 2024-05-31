@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { patchTypeSpecificSnakeToCamel } from './rule_converters';
 import {
+  commonParamsCamelToSnake,
+  patchTypeSpecificSnakeToCamel,
+  typeSpecificCamelToSnake,
+} from './rule_converters';
+import {
+  getBaseRuleParams,
   getEqlRuleParams,
+  getEsqlRuleParams,
   getMlRuleParams,
   getNewTermsRuleParams,
   getQueryRuleParams,
@@ -15,37 +21,93 @@ import {
   getThreatRuleParams,
   getThresholdRuleParams,
 } from '../../rule_schema/mocks';
-import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine';
+import type {
+  AlertSuppressionDuration,
+  PatchRuleRequestBody,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../common/api/detection_engine';
 
 describe('rule_converters', () => {
   describe('patchTypeSpecificSnakeToCamel', () => {
-    test('should accept EQL params when existing rule type is EQL', () => {
-      const patchParams = {
-        timestamp_field: 'event.created',
-        event_category_override: 'event.not_category',
-        tiebreaker_field: 'event.created',
-      };
-      const rule = getEqlRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          timestampField: 'event.created',
-          eventCategoryOverride: 'event.not_category',
-          tiebreakerField: 'event.created',
-        })
-      );
-    });
-
-    test('should reject invalid EQL params when existing rule type is EQL', () => {
-      const patchParams = {
-        timestamp_field: 1,
-        event_category_override: 1,
-        tiebreaker_field: 1,
-      } as PatchRuleRequestBody;
-      const rule = getEqlRuleParams();
-      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
-        'event_category_override: Expected string, received number, tiebreaker_field: Expected string, received number, timestamp_field: Expected string, received number'
-      );
+    describe('EQL', () => {
+      test('should accept EQL params when existing rule type is EQL', () => {
+        const patchParams = {
+          timestamp_field: 'event.created',
+          event_category_override: 'event.not_category',
+          tiebreaker_field: 'event.created',
+        };
+        const rule = getEqlRuleParams();
+        const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+        expect(patchedParams).toEqual(
+          expect.objectContaining({
+            timestampField: 'event.created',
+            eventCategoryOverride: 'event.not_category',
+            tiebreakerField: 'event.created',
+          })
+        );
+      });
+      test('should accept EQL params with suppression in snake case and convert to camel case when rule type is EQL', () => {
+        const patchParams = {
+          timestamp_field: 'event.created',
+          event_category_override: 'event.not_category',
+          tiebreaker_field: 'event.created',
+          alert_suppression: {
+            group_by: ['event.type'],
+            duration: {
+              value: 10,
+              unit: 'm',
+            } as AlertSuppressionDuration,
+            missing_fields_strategy: 'suppress',
+          },
+        };
+        const rule = getEqlRuleParams();
+        const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+        expect(patchedParams).toEqual(
+          expect.objectContaining({
+            timestampField: 'event.created',
+            eventCategoryOverride: 'event.not_category',
+            tiebreakerField: 'event.created',
+            alertSuppression: {
+              groupBy: ['event.type'],
+              duration: {
+                value: 10,
+                unit: 'm',
+              },
+              missingFieldsStrategy: 'suppress',
+            },
+          })
+        );
+      });
+      test('should reject invalid EQL params when existing rule type is EQL', () => {
+        const patchParams = {
+          timestamp_field: 1,
+          event_category_override: 1,
+          tiebreaker_field: 1,
+        } as PatchRuleRequestBody;
+        const rule = getEqlRuleParams();
+        expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+          'event_category_override: Expected string, received number, tiebreaker_field: Expected string, received number, timestamp_field: Expected string, received number'
+        );
+      });
+      test('should reject EQL params with invalid suppression group_by field', () => {
+        const patchParams = {
+          timestamp_field: 'event.created',
+          event_category_override: 'event.not_category',
+          tiebreaker_field: 'event.created',
+          alert_suppression: {
+            group_by: 'event.type',
+            duration: {
+              value: 10,
+              unit: 'm',
+            } as AlertSuppressionDuration,
+            missing_fields_strategy: 'suppress',
+          },
+        };
+        const rule = getEqlRuleParams();
+        expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+          'alert_suppression.group_by: Expected array, received string'
+        );
+      });
     });
 
     test('should accept threat match params when existing rule type is threat match', () => {
@@ -158,6 +220,27 @@ describe('rule_converters', () => {
       );
     });
 
+    test('should accept ES|QL alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          duration: { value: 4, unit: 'h' as const },
+          missing_fields_strategy: 'doNotSuppress' as const,
+        },
+      };
+      const rule = getEsqlRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'doNotSuppress',
+            duration: { value: 4, unit: 'h' },
+          },
+        })
+      );
+    });
+
     test('should accept threshold alerts suppression params', () => {
       const patchParams = {
         alert_suppression: {
@@ -169,6 +252,46 @@ describe('rule_converters', () => {
       expect(patchedParams).toEqual(
         expect.objectContaining({
           alertSuppression: {
+            duration: { value: 4, unit: 'h' },
+          },
+        })
+      );
+    });
+
+    test('should accept threat_match alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          missing_fields_strategy: 'suppress' as const,
+        },
+      };
+      const rule = getThreatRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'suppress',
+          },
+        })
+      );
+    });
+
+    test('should accept new_terms alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          duration: { value: 4, unit: 'h' as const },
+          missing_fields_strategy: 'suppress' as const,
+        },
+      };
+      const rule = getNewTermsRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'suppress',
             duration: { value: 4, unit: 'h' },
           },
         })
@@ -218,6 +341,79 @@ describe('rule_converters', () => {
       const rule = getNewTermsRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
         'new_terms_fields: Expected array, received string'
+      );
+    });
+  });
+  describe('typeSpecificCamelToSnake', () => {
+    describe('EQL', () => {
+      test('should accept EQL params when existing rule type is EQL', () => {
+        const params = {
+          timestampField: 'event.created',
+          eventCategoryOverride: 'event.not_category',
+          tiebreakerField: 'event.created',
+        };
+        const eqlRule = { ...getEqlRuleParams(), ...params };
+        const transformedParams = typeSpecificCamelToSnake(eqlRule);
+        expect(transformedParams).toEqual(
+          expect.objectContaining({
+            timestamp_field: 'event.created',
+            event_category_override: 'event.not_category',
+            tiebreaker_field: 'event.created',
+          })
+        );
+      });
+
+      test('should accept EQL params with suppression in camel case and convert to snake case when rule type is EQL', () => {
+        const params = {
+          timestampField: 'event.created',
+          eventCategoryOverride: 'event.not_category',
+          tiebreakerField: 'event.created',
+          alertSuppression: {
+            groupBy: ['event.type'],
+            duration: {
+              value: 10,
+              unit: 'm',
+            } as AlertSuppressionDuration,
+            missingFieldsStrategy: 'suppress' as AlertSuppressionMissingFieldsStrategy,
+          },
+        };
+        const eqlRule = { ...getEqlRuleParams(), ...params };
+        const transformedParams = typeSpecificCamelToSnake(eqlRule);
+        expect(transformedParams).toEqual(
+          expect.objectContaining({
+            timestamp_field: 'event.created',
+            event_category_override: 'event.not_category',
+            tiebreaker_field: 'event.created',
+            alert_suppression: {
+              group_by: ['event.type'],
+              duration: {
+                value: 10,
+                unit: 'm',
+              } as AlertSuppressionDuration,
+              missing_fields_strategy: 'suppress',
+            },
+          })
+        );
+      });
+    });
+  });
+
+  describe('commonParamsCamelToSnake', () => {
+    test('should convert rule_source params to snake case', () => {
+      const transformedParams = commonParamsCamelToSnake({
+        ...getBaseRuleParams(),
+        ruleSource: {
+          type: 'external',
+          isCustomized: false,
+        },
+      });
+      expect(transformedParams).toEqual(
+        expect.objectContaining({
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+          },
+        })
       );
     });
   });

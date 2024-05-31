@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleSo } from '../../../../data/rule/methods/update_rule_so';
 import { muteAlertParamsSchema } from './schemas';
 import type { MuteAlertParams } from './types';
@@ -20,6 +21,7 @@ export async function muteInstance(
   context: RulesClientContext,
   params: MuteAlertParams
 ): Promise<void> {
+  const ruleId = params.alertId;
   try {
     muteAlertParamsSchema.validate(params);
   } catch (error) {
@@ -28,18 +30,18 @@ export async function muteInstance(
 
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.muteInstance('${params.alertId}')`,
+    `rulesClient.muteInstance('${ruleId}')`,
     async () => await muteInstanceWithOCC(context, params)
   );
 }
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: MuteAlertParams
+  { alertId: ruleId, alertInstanceId }: MuteAlertParams
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
-    'alert',
-    alertId
+    RULE_SAVED_OBJECT_TYPE,
+    ruleId
   );
 
   try {
@@ -57,7 +59,7 @@ async function muteInstanceWithOCC(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.MUTE_ALERT,
-        savedObject: { type: 'alert', id: alertId },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
         error,
       })
     );
@@ -68,7 +70,7 @@ async function muteInstanceWithOCC(
     ruleAuditEvent({
       action: RuleAuditAction.MUTE_ALERT,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id: alertId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
     })
   );
 
@@ -80,7 +82,7 @@ async function muteInstanceWithOCC(
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
-      id: alertId,
+      id: ruleId,
       updateRuleAttributes: updateMeta(context, {
         mutedInstanceIds,
         updatedBy: await context.getUserName(),

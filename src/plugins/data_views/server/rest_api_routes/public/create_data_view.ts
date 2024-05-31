@@ -40,11 +40,10 @@ export const createDataView = async ({
   usageCollection,
   spec,
   override,
-  refreshFields,
   counterName,
 }: CreateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.createAndSave(spec, override, !refreshFields);
+  return dataViewsService.createAndSaveDataViewLazy(spec, override);
 };
 
 const registerCreateDataViewRouteFactory =
@@ -72,9 +71,10 @@ const registerCreateDataViewRouteFactory =
           },
           response: {
             200: {
-              body: schema.object({
-                [serviceKey]: dataViewSpecSchema,
-              }),
+              body: () =>
+                schema.object({
+                  [serviceKey]: dataViewSpecSchema,
+                }),
             },
           },
         },
@@ -104,9 +104,12 @@ const registerCreateDataViewRouteFactory =
             counterName: `${req.route.method} ${path}`,
           });
 
+          const toSpecParams =
+            body.refresh_fields === false ? {} : { fieldParams: { fieldName: ['*'] } };
+
           const responseBody: Record<string, DataViewSpecRestResponse> = {
             [serviceKey]: {
-              ...dataView.toSpec(),
+              ...(await dataView.toSpec(toSpecParams)),
               namespaces: dataView.namespaces,
             },
           };

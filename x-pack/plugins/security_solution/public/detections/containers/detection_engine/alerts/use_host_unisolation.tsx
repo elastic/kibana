@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { HOST_ISOLATION_FAILURE } from './translations';
 import { createHostUnIsolation } from './api';
@@ -19,12 +20,14 @@ interface UseHostIsolationProps {
   endpointId: string;
   comment: string;
   caseIds?: string[];
+  agentType: ResponseActionAgentType;
 }
 
 export const useHostUnisolation = ({
   endpointId,
   comment,
   caseIds,
+  agentType,
 }: UseHostIsolationProps): HostUnisolationStatus => {
   const [loading, setLoading] = useState(false);
   const { addError } = useAppToasts();
@@ -36,6 +39,7 @@ export const useHostUnisolation = ({
         endpointId,
         comment,
         caseIds: caseIds && caseIds.length > 0 ? caseIds : undefined,
+        agentType,
       });
       setLoading(false);
       return isolationStatus.action ? true : false;
@@ -44,6 +48,6 @@ export const useHostUnisolation = ({
       addError(error.message, { title: HOST_ISOLATION_FAILURE });
       return false;
     }
-  }, [endpointId, comment, caseIds, addError]);
+  }, [endpointId, comment, caseIds, agentType, addError]);
   return { loading, unIsolateHost };
 };

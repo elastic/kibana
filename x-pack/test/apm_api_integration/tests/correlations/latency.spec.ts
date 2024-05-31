@@ -107,7 +107,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/175855
+  registry.when.skip(
     'correlations latency with data and opbeans-node args',
     { config: 'trial', archives: ['8.0.0'] },
     () => {

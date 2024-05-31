@@ -18,6 +18,7 @@ const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
 enum TaskClaimKeys {
   SUCCESS = 'success',
   TOTAL = 'total',
+  TOTAL_ERRORS = 'total_errors',
 }
 interface TaskClaimCounts extends JsonObject {
   [TaskClaimKeys.SUCCESS]: number;
@@ -26,6 +27,7 @@ interface TaskClaimCounts extends JsonObject {
 
 export type TaskClaimMetric = TaskClaimCounts & {
   duration: SerializedHistogram;
+  duration_values: number[];
 };
 
 export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskClaimMetric> {
@@ -38,12 +40,14 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
     return {
       ...this.counter.initialMetrics(),
       duration: { counts: [], values: [] },
+      duration_values: [],
     };
   }
   public collect(): TaskClaimMetric {
     return {
       ...this.counter.collect(),
       duration: this.durationHistogram.serialize(),
+      duration_values: this.durationHistogram.getAllValues(),
     };
   }
 
@@ -56,6 +60,8 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
     const success = isOk((taskEvent as TaskRun).event);
     if (success) {
       this.counter.increment(TaskClaimKeys.SUCCESS);
+    } else {
+      this.counter.increment(TaskClaimKeys.TOTAL_ERRORS);
     }
     this.counter.increment(TaskClaimKeys.TOTAL);
 

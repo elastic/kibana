@@ -19,6 +19,9 @@ rm -rf "${KIBANA_LOAD_TESTING_DIR}"
 rm -rf "${GCS_ARTIFACTS_DIR}"
 
 download_artifacts() {
+  echo Activating service-account for gsutil to access gs://kibana-performance
+  .buildkite/scripts/common/activate_service_account.sh gs://kibana-performance
+
   mkdir -p "${GCS_ARTIFACTS_DIR}"
 
   gsutil cp "$GCS_BUCKET/latest" "${GCS_ARTIFACTS_DIR}/"

@@ -31,6 +31,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   isEmptyState,
   pageSideBar,
   pageSideBarProps,
+  emptyPageBody,
   ...rest
 }) => {
   let header;
@@ -50,6 +51,11 @@ export const KibanaPageTemplateInner: FC<Props> = ({
     );
   } else if (pageHeader) {
     header = <EuiPageTemplate.Header {...pageHeader} />;
+  }
+
+  // NOTE: with emptyPageBody, page contents are replaced entirely with the provided element
+  if (isEmptyState && emptyPageBody) {
+    children = emptyPageBody;
   }
 
   let sideBar;

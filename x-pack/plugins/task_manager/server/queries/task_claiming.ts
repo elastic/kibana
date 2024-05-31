@@ -9,7 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { groupBy, isPlainObject } from 'lodash';
 
 import { Logger } from '@kbn/core/server';

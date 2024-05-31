@@ -37,8 +37,9 @@ describe('Custom Query Alerts', () => {
   const publicBaseUrl = 'http://somekibanabaseurl.com';
 
   const { dependencies, executor, services } = mocks;
-  const { alerting, lists, logger, ruleDataClient } = dependencies;
+  const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    actions,
     lists,
     logger,
     config: createMockConfig(),
@@ -46,6 +47,7 @@ describe('Custom Query Alerts', () => {
     ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
     version: '8.3',
     publicBaseUrl,
+    alerting,
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
@@ -144,6 +146,6 @@ describe('Custom Query Alerts', () => {
     await executor({ params });
 
     expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
-    expect(eventsTelemetry.queueTelemetryEvents).toHaveBeenCalled();
+    expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
   });
 });

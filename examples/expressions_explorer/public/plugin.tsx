@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Setup as InspectorSetup, Start as InspectorStart } from '@kbn/inspector-plugin/public';
@@ -14,7 +14,7 @@ import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { getExpressionsInspectorViewDescription } from './inspector';
 import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';
 import { ACTION_NAVIGATE, createNavigateAction } from './actions/navigate_action';
-import { buttonRenderer } from './renderers/button';
+import { getButtonRenderer } from './renderers/button';
 import { buttonFn } from './functions/button';
 
 interface StartDeps {
@@ -41,13 +41,13 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
     deps.uiActions.attachAction(NAVIGATE_TRIGGER_ID, ACTION_NAVIGATE);
 
     // register custom functions and renderers
-    deps.expressions.registerRenderer(buttonRenderer);
+    deps.expressions.registerRenderer(getButtonRenderer(core));
     deps.expressions.registerFunction(buttonFn);
 
     core.application.register({
       id: 'expressionsExplorer',
       title: 'Expressions Explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
@@ -59,6 +59,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
             uiSettings: core.uiSettings,
             settings: core.settings,
             theme: coreStart.theme,
+            i18n: coreStart.i18n,
           },
           params
         );

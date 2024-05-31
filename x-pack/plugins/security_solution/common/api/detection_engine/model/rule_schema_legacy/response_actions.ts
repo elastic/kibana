@@ -6,7 +6,6 @@
  */
 import { arrayQueries, ecsMapping } from '@kbn/osquery-io-ts-types';
 import * as t from 'io-ts';
-import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../endpoint/service/response_actions/constants';
 
 // to enable using RESPONSE_ACTION_API_COMMANDS_NAMES as a type
 function keyObject<T extends readonly string[]>(arr: T): { [K in T[number]]: null } {
@@ -15,7 +14,9 @@ function keyObject<T extends readonly string[]>(arr: T): { [K in T[number]]: nul
 
 export type EndpointParams = t.TypeOf<typeof EndpointParams>;
 export const EndpointParams = t.type({
-  command: t.keyof(keyObject(ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)),
+  // TODO: TC- change these when we go GA with automated process actions
+  command: t.keyof(keyObject(['isolate', 'kill-process', 'suspend-process'])),
+  // command: t.keyof(keyObject(ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)),
   comment: t.union([t.string, t.undefined]),
 });
 

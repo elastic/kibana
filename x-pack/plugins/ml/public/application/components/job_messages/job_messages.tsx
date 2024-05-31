@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
-import {
-  EuiBasicTableColumn,
-  EuiSpacer,
-  EuiInMemoryTable,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
-import { JobMessage } from '../../../../common/types/audit_message';
+import type { JobMessage } from '../../../../common/types/audit_message';
 
 import { blurButtonOnClick } from '../../util/component_utils';
 
@@ -48,7 +44,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
 }) => {
   const { showNodeInfo } = useEnabledFeatures();
   const columns: Array<EuiBasicTableColumn<JobMessage>> = useMemo(() => {
-    const cols = [
+    const cols: Array<EuiBasicTableColumn<JobMessage>> = [
       {
         name: refreshMessage ? (
           <EuiToolTip
@@ -100,42 +96,42 @@ export const JobMessages: FC<JobMessagesProps> = ({
       });
     }
 
-    return cols;
-  }, [showNodeInfo, refreshMessage]);
-
-  if (typeof actionHandler === 'function') {
-    columns.push({
-      name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
-        defaultMessage: 'Actions',
-      }),
-      width: '10%',
-      actions: [
-        {
-          render: (message: JobMessage) => {
-            return (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.jobMessages.toggleInChartTooltipText"
-                    defaultMessage="Toggle in chart"
+    if (typeof actionHandler === 'function') {
+      cols.push({
+        name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
+          defaultMessage: 'Actions',
+        }),
+        width: '10%',
+        actions: [
+          {
+            render: (message: JobMessage) => {
+              return (
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.jobMessages.toggleInChartTooltipText"
+                      defaultMessage="Toggle in chart"
+                    />
+                  }
+                >
+                  <EuiButtonIcon
+                    size="xs"
+                    aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
+                      defaultMessage: 'Toggle in chart',
+                    })}
+                    iconType="visAreaStacked"
+                    onClick={() => actionHandler(message)}
                   />
-                }
-              >
-                <EuiButtonIcon
-                  size="xs"
-                  aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
-                    defaultMessage: 'Toggle in chart',
-                  })}
-                  iconType="visAreaStacked"
-                  onClick={() => actionHandler(message)}
-                />
-              </EuiToolTip>
-            );
+                </EuiToolTip>
+              );
+            },
           },
-        },
-      ],
-    });
-  }
+        ],
+      });
+    }
+
+    return cols;
+  }, [showNodeInfo, refreshMessage, actionHandler]);
 
   const defaultSorting = {
     sort: {

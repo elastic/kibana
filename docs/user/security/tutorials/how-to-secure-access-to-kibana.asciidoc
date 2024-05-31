@@ -11,7 +11,7 @@ This guide introduces you to three of {kib}'s security features: spaces, roles, 
 [float]
 === Spaces
 
-Do you have multiple teams or tenants using {kib}? Do you want a “playground” to experiment with new visualizations or rules? If so, then <<xpack-spaces,{kib} Spaces>> can help.
+Do you have multiple teams using {kib}? Do you want a “playground” to experiment with new visualizations or rules? If so, then <<xpack-spaces,{kib} Spaces>> can help.
 
 Think of a space as another instance of {kib}. A space allows you to organize your <<dashboard, dashboards>>, <<alerting-getting-started, rules>>, <<xpack-ml, machine learning jobs>>, and much more into their own categories. For example, you might have a Marketing space for your marketeers to track the results of their campaigns, and an Engineering space for your developers to {apm-guide-ref}/apm-overview.html[monitor application performance].
 

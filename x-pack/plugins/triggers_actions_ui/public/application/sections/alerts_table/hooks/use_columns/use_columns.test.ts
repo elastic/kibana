@@ -14,8 +14,15 @@ import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsTableStorage } from '../../alerts_table_state';
+import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('../../../../../common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('../../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
 jest.mock('../use_fetch_browser_fields_capabilities');
 
 const setItemStorageMock = jest.fn();
@@ -321,6 +328,44 @@ describe('useColumn', () => {
           sort: [],
         })
       );
+    });
+  });
+
+  describe('onResetColumns', () => {
+    test('should restore visible columns defaults', () => {
+      const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
+      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+        useColumns({
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        })
+      );
+
+      expect(result.current.visibleColumns).toEqual([
+        'event.action',
+        '@timestamp',
+        'kibana.alert.duration.us',
+        'kibana.alert.reason',
+      ]);
+
+      act(() => {
+        result.current.onToggleColumn(defaultColumns[0].id);
+      });
+      expect(result.current.visibleColumns).not.toContain(['event.action']);
+
+      act(() => {
+        result.current.onResetColumns();
+      });
+
+      expect(result.current.visibleColumns).toEqual([
+        'event.action',
+        '@timestamp',
+        'kibana.alert.duration.us',
+        'kibana.alert.reason',
+      ]);
     });
   });
 });

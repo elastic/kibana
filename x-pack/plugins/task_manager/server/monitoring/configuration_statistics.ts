@@ -7,7 +7,7 @@
 
 import { combineLatest, of } from 'rxjs';
 import { pick, merge } from 'lodash';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { TaskManagerConfig } from '../config';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';

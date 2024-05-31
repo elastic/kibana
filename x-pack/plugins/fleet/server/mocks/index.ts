@@ -31,6 +31,8 @@ import { packageServiceMock } from '../services/epm/package_service.mock';
 import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
 import type { MessageSigningServiceInterface } from '../services/security';
 
+import { PackagePolicyMocks } from './package_policy.mocks';
+
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
 
@@ -39,6 +41,8 @@ export * from '../services/files/mocks';
 
 // export all mocks from fleet actions client
 export * from '../services/actions/mocks';
+
+export * from './package_policy.mocks';
 
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
@@ -144,6 +148,22 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
+    fetchAllItems: jest.fn((..._) => {
+      return {
+        async *[Symbol.asyncIterator]() {
+          yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '111' })]);
+          yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '222' })]);
+        },
+      };
+    }),
+    fetchAllItemIds: jest.fn((..._) => {
+      return {
+        async *[Symbol.asyncIterator]() {
+          yield Promise.resolve(['111']);
+          yield Promise.resolve(['222']);
+        },
+      };
+    }),
   };
 };
 
@@ -157,6 +177,9 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     list: jest.fn(),
     getFullAgentPolicy: jest.fn(),
     getByIds: jest.fn(),
+    turnOffAgentTamperProtections: jest.fn(),
+    fetchAllAgentPolicies: jest.fn(),
+    fetchAllAgentPolicyIds: jest.fn(),
   };
 };
 

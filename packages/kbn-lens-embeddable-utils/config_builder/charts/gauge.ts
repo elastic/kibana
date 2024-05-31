@@ -18,6 +18,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getFormulaColumn, getValueColumn } from '../columns';
 
@@ -62,18 +63,11 @@ function buildFormulaLayer(
   layer: LensGaugeConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(
-        ACCESSOR,
-        {
-          value: layer.value,
-        },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
     },
   };
 
@@ -83,9 +77,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('goal');
     const formulaColumn = getFormulaColumn(
       columnName,
-      {
-        value: layer.queryGoalValue,
-      },
+      { formula: layer.queryGoalValue },
       dataView,
       formulaAPI
     );
@@ -97,9 +89,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('min');
     const formulaColumn = getFormulaColumn(
       columnName,
-      {
-        value: layer.queryMinValue,
-      },
+      { formula: layer.queryMinValue },
       dataView,
       formulaAPI
     );
@@ -111,9 +101,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
-      {
-        value: layer.queryMaxValue,
-      },
+      { formula: layer.queryMaxValue },
       dataView,
       formulaAPI
     );
@@ -128,11 +116,9 @@ function getValueColumns(layer: LensGaugeConfig) {
   return [
     getValueColumn(ACCESSOR, layer.value),
     ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
-    ...(layer.queryMinValue
-      ? [getValueColumn(getAccessorName('secondary'), layer.queryMinValue)]
-      : []),
+    ...(layer.queryMinValue ? [getValueColumn(getAccessorName('min'), layer.queryMinValue)] : []),
     ...(layer.queryGoalValue
-      ? [getValueColumn(getAccessorName('secondary'), layer.queryGoalValue)]
+      ? [getValueColumn(getAccessorName('goal'), layer.queryGoalValue)]
       : []),
   ];
 }

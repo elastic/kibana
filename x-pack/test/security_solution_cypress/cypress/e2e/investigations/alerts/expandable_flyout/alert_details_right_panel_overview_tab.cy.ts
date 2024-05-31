@@ -6,10 +6,13 @@
  */
 
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { collapseDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import {
+  closeFlyout,
+  collapseDocumentDetailsExpandableFlyoutLeftSection,
+} from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   createNewCaseFromExpandableFlyout,
-  expandFirstAlertExpandableFlyout,
+  expandAlertAtIndexExpandableFlyout,
 } from '../../../../tasks/expandable_flyout/common';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
@@ -39,6 +42,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 import {
   navigateToCorrelationsDetails,
@@ -85,7 +89,7 @@ describe(
       createRule(rule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
     });
 
     describe('about section', () => {
@@ -377,6 +381,43 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB)
           .should('have.text', 'Response')
           .and('have.class', 'euiTab-isSelected');
+      });
+    });
+
+    describe('local storage persistence', () => {
+      before(() => {
+        cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+      });
+
+      after(() => {
+        cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
+      });
+
+      it('should persist which section are collapsed/expanded', () => {
+        cy.log('should show the correct expanded and collapsed section by default');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('be.visible');
+
+        cy.log('should persist the expanded and collapsed sections when opening another alert');
+
+        toggleOverviewTabAboutSection();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('not.be.visible');
+
+        cy.log('should persist the expanded and collapsed sections after closing the flyout');
+
+        closeFlyout();
+        expandAlertAtIndexExpandableFlyout();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('not.be.visible');
+
+        cy.log('should persist the expanded and collapsed sections after page reload');
+
+        closeFlyout();
+        cy.reload();
+        expandAlertAtIndexExpandableFlyout();
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT).should('not.be.visible');
       });
     });
   }

@@ -9,11 +9,8 @@ import { TypeOf } from '@kbn/config-schema';
 import { MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
 import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
-import {
-  EsQueryRuleParamsSchema,
-  EsQueryRuleParams,
-  ES_QUERY_MAX_HITS_PER_EXECUTION,
-} from './rule_type_params';
+import { ES_QUERY_MAX_HITS_PER_EXECUTION } from '../../../common';
+import { EsQueryRuleParamsSchema, EsQueryRuleParams, validateServerless } from './rule_type_params';
 
 const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
   index: ['index-name'],
@@ -354,6 +351,31 @@ describe('ruleType Params validate()', () => {
     expect(onValidate()).not.toThrow();
   });
 
+  it('fails for invalid sourceFields', async () => {
+    // no array that has more than 5 elements
+    const sourceField = { label: 'test', searchPath: 'test' };
+    params.sourceFields = [
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+    ];
+    expect(onValidate()).toThrow(
+      '[sourceFields]: array size is [6], but cannot be greater than [5]'
+    );
+  });
+
+  describe('serverless', () => {
+    it('fails for invalid size', async () => {
+      params.size = 101;
+      expect(onValidateServerless()).toThrowErrorMatchingInlineSnapshot(
+        `"[size]: must be less than or equal to 100"`
+      );
+    });
+  });
+
   describe('esqlQuery search type', () => {
     beforeEach(() => {
       params = { ...DefaultParams, searchType: 'esqlQuery', esqlQuery: { esql: 'from test' } };
@@ -385,5 +407,9 @@ describe('ruleType Params validate()', () => {
 
   function validate(): TypeOf<typeof EsQueryRuleParamsSchema> {
     return EsQueryRuleParamsSchema.validate(params);
+  }
+
+  function onValidateServerless() {
+    return () => validateServerless(params);
   }
 });

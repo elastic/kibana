@@ -53,12 +53,11 @@ describe('get referenced exceptions', () => {
     it('returns found referenced exception lists', async () => {
       const result = await getReferencedExceptionLists({
         rules: [
-          {
-            ...getImportRulesSchemaMock(),
+          getImportRulesSchemaMock({
             exceptions_list: [
               { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          }),
         ],
         savedObjectsClient,
       });
@@ -77,16 +76,14 @@ describe('get referenced exceptions', () => {
     it('returns found referenced exception lists when first exceptions list is empty array and second list has a value', async () => {
       const result = await getReferencedExceptionLists({
         rules: [
-          {
-            ...getImportRulesSchemaMock(),
+          getImportRulesSchemaMock({
             exceptions_list: [],
-          },
-          {
-            ...getImportRulesSchemaMock(),
+          }),
+          getImportRulesSchemaMock({
             exceptions_list: [
               { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          }),
         ],
         savedObjectsClient,
       });
@@ -105,18 +102,16 @@ describe('get referenced exceptions', () => {
     it('returns found referenced exception lists when two rules reference same list', async () => {
       const result = await getReferencedExceptionLists({
         rules: [
-          {
-            ...getImportRulesSchemaMock(),
+          getImportRulesSchemaMock({
             exceptions_list: [
               { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
             ],
-          },
-          {
-            ...getImportRulesSchemaMock(),
+          }),
+          getImportRulesSchemaMock({
             exceptions_list: [
               { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          }),
         ],
         savedObjectsClient,
       });
@@ -157,18 +152,16 @@ describe('get referenced exceptions', () => {
 
       const result = await getReferencedExceptionLists({
         rules: [
-          {
-            ...getImportRulesSchemaMock(),
+          getImportRulesSchemaMock({
             exceptions_list: [
               { id: '456', list_id: 'other-list', namespace_type: 'single', type: 'detection' },
             ],
-          },
-          {
-            ...getImportRulesSchemaMock(),
+          }),
+          getImportRulesSchemaMock({
             exceptions_list: [
               { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
             ],
-          },
+          }),
         ],
         savedObjectsClient,
       });
@@ -207,45 +200,38 @@ describe('get referenced exceptions', () => {
   describe('parseReferencdedExceptionsLists', () => {
     it('should return parsed lists when exception lists are not empty', () => {
       const res = parseReferencedExceptionsLists([
-        {
-          ...getImportRulesSchemaMock(),
+        getImportRulesSchemaMock({
           exceptions_list: [
             { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
           ],
-        },
+        }),
       ]);
       expect(res).toEqual([[], [{ listId: 'my-list', namespaceType: 'single' }]]);
     });
     it('should return parsed lists when one empty exception list and one non-empty list', () => {
       const res = parseReferencedExceptionsLists([
-        {
-          ...getImportRulesSchemaMock(),
-          exceptions_list: [],
-        },
-        {
-          ...getImportRulesSchemaMock(),
+        getImportRulesSchemaMock({ exceptions_list: [] }),
+        getImportRulesSchemaMock({
           exceptions_list: [
             { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
           ],
-        },
+        }),
       ]);
       expect(res).toEqual([[], [{ listId: 'my-list', namespaceType: 'single' }]]);
     });
 
     it('should return parsed lists when two non-empty exception lists reference same list', () => {
       const res = parseReferencedExceptionsLists([
-        {
-          ...getImportRulesSchemaMock(),
+        getImportRulesSchemaMock({
           exceptions_list: [
             { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
           ],
-        },
-        {
-          ...getImportRulesSchemaMock(),
+        }),
+        getImportRulesSchemaMock({
           exceptions_list: [
             { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
           ],
-        },
+        }),
       ]);
       expect(res).toEqual([
         [],
@@ -258,18 +244,16 @@ describe('get referenced exceptions', () => {
 
     it('should return parsed lists when two non-empty exception lists reference differet lists', () => {
       const res = parseReferencedExceptionsLists([
-        {
-          ...getImportRulesSchemaMock(),
+        getImportRulesSchemaMock({
           exceptions_list: [
             { id: '123', list_id: 'my-list', namespace_type: 'single', type: 'detection' },
           ],
-        },
-        {
-          ...getImportRulesSchemaMock(),
+        }),
+        getImportRulesSchemaMock({
           exceptions_list: [
             { id: '456', list_id: 'other-list', namespace_type: 'single', type: 'detection' },
           ],
-        },
+        }),
       ]);
       expect(res).toEqual([
         [],

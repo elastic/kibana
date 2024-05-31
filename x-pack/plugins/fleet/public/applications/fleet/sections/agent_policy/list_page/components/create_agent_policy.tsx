@@ -46,13 +46,14 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults()
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(agentPolicy);
+  const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
 
   const updateAgentPolicy = (updatedFields: Partial<NewAgentPolicy>) => {
     setAgentPolicy({
@@ -95,6 +96,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         withSysMonitoring={withSysMonitoring}
         updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
         validation={validation}
+        updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
       />
     </EuiFlyoutBody>
   );
@@ -120,7 +122,9 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
             {showDevtoolsRequest ? (
               <EuiFlexItem grow={false}>
                 <DevtoolsRequestFlyoutButton
-                  isDisabled={isLoading || Object.keys(validation).length > 0}
+                  isDisabled={
+                    isLoading || Object.keys(validation).length > 0 || hasAdvancedSettingsErrors
+                  }
                   description={i18n.translate(
                     'xpack.fleet.createAgentPolicy.devtoolsRequestDescription',
                     {
@@ -136,7 +140,10 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                 fill
                 isLoading={isLoading}
                 isDisabled={
-                  !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
+                  !hasFleetAllAgentPoliciesPrivileges ||
+                  isLoading ||
+                  Object.keys(validation).length > 0 ||
+                  hasAdvancedSettingsErrors
                 }
                 onClick={async () => {
                   setIsLoading(true);

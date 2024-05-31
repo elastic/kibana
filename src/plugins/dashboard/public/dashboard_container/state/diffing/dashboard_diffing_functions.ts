@@ -6,19 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
-
-import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  isFilterPinned,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
-import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
-
-import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInput } from '../../../../common';
+import { pluginServices } from '../../../services/plugin_services';
+import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInputWithoutId } from '../../types';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
 
@@ -82,8 +74,15 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
     const explicitInputComparePromises = Object.values(currentValue ?? {}).map(
       (panel) =>
         new Promise<boolean>((resolve, reject) => {
+          const {
+            embeddable: { reactEmbeddableRegistryHasKey },
+          } = pluginServices.getServices();
           const embeddableId = panel.explicitInput.id;
-          if (!embeddableId) reject();
+          if (!embeddableId || reactEmbeddableRegistryHasKey(panel.type)) {
+            // if this is a new style embeddable, it will handle its own diffing.
+            reject();
+            return;
+          }
           try {
             container.untilEmbeddableLoaded(embeddableId).then((embeddable) =>
               embeddable
@@ -132,18 +131,5 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
     return fastIsEqual(currentValue, lastValue);
   },
 
-  controlGroupInput: ({ currentValue, lastValue }) =>
-    persistableControlGroupInputIsEqual(currentValue, lastValue),
-
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
-};
-
-export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
-  filters: ({ currentValue, lastValue }) =>
-    onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
-
-  // fire on all time range changes, regardless of timeRestore
-  timeRange: ({ currentValue, lastValue }) =>
-    areTimesEqual(currentValue?.from, lastValue?.from) &&
-    areTimesEqual(currentValue?.to, lastValue?.to),
 };

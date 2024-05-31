@@ -38,201 +38,209 @@ Object {
 
 exports[`stream handler showNotifications show csv formulas warning 1`] = `
 Array [
-  Object {
-    "data-test-subj": "completeReportCsvFormulasWarning",
-    "text": MountPoint {
-      "reactNode": <React.Fragment>
-        <p>
-          <FormattedMessage
-            defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
-            id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
-            values={
+  Array [
+    Object {
+      "data-test-subj": "completeReportCsvFormulasWarning",
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <p>
+            <FormattedMessage
+              defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
+              id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
+              values={
+                Object {
+                  "reportObjectTitle": "Yas",
+                }
+              }
+            />
+          </p>
+          <p>
+            <ReportLink
+              getUrl={[Function]}
+            />
+          </p>
+          <DownloadButton
+            getUrl={[Function]}
+            job={
               Object {
-                "reportObjectTitle": "Yas",
+                "csvContainsFormulas": true,
+                "id": "yas3",
+                "jobtype": "yas",
+                "status": "completed",
+                "title": "Yas",
               }
             }
           />
-        </p>
-        <p>
-          <ReportLink
-            getUrl={[Function]}
-          />
-        </p>
-        <DownloadButton
-          getUrl={[Function]}
-          job={
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <FormattedMessage
+          defaultMessage="{reportType} may contain formulas"
+          id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
+          values={
             Object {
-              "csvContainsFormulas": true,
-              "id": "yas3",
-              "jobtype": "yas",
-              "status": "completed",
-              "title": "Yas",
+              "reportType": "yas",
             }
           }
-        />
-      </React.Fragment>,
+        />,
+      },
     },
-    "title": MountPoint {
-      "reactNode": <FormattedMessage
-        defaultMessage="{reportType} may contain formulas"
-        id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
-        values={
-          Object {
-            "reportType": "yas",
-          }
-        }
-      />,
+    Object {
+      "toastLifeTimeMs": 86400000,
     },
-  },
-  Object {
-    "toastLifeTimeMs": 86400000,
-  },
+  ],
 ]
 `;
 
 exports[`stream handler showNotifications show failed job toast 1`] = `
 Array [
-  Object {
-    "data-test-subj": "completeReportFailure",
-    "iconType": undefined,
-    "text": MountPoint {
-      "reactNode": <React.Fragment>
-        <EuiCallOut
-          color="danger"
-          data-test-errorText="this is the failed report error"
-          size="m"
-        >
-          this is the failed report error
-        </EuiCallOut>
-        <EuiSpacer />
-        <p>
-          <FormattedMessage
-            defaultMessage="Go to {path} for details."
-            id="xpack.reporting.publicNotifier.error.checkManagement"
-            values={
-              Object {
-                "path": <a
-                  href="/#management"
-                >
-                  <FormattedMessage
-                    defaultMessage="Stack Management > Kibana > Reporting"
-                    id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
-                    values={Object {}}
-                  />
-                </a>,
+  Array [
+    Object {
+      "data-test-subj": "completeReportFailure",
+      "iconType": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <EuiCallOut
+            color="danger"
+            data-test-errorText="this is the failed report error"
+            size="m"
+          >
+            this is the failed report error
+          </EuiCallOut>
+          <EuiSpacer />
+          <p>
+            <FormattedMessage
+              defaultMessage="Go to {path} for details."
+              id="xpack.reporting.publicNotifier.error.checkManagement"
+              values={
+                Object {
+                  "path": <a
+                    href="/#management"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Stack Management > Kibana > Reporting"
+                      id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
+                      values={Object {}}
+                    />
+                  </a>,
+                }
               }
+            />
+          </p>
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <FormattedMessage
+          defaultMessage="Cannot create {reportType} report for '{reportObjectTitle}'."
+          id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
+          values={
+            Object {
+              "reportObjectTitle": "Yas 7",
+              "reportType": "yas",
             }
-          />
-        </p>
-      </React.Fragment>,
-    },
-    "title": MountPoint {
-      "reactNode": <FormattedMessage
-        defaultMessage="Cannot create {reportType} report for '{reportObjectTitle}'."
-        id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
-        values={
-          Object {
-            "reportObjectTitle": "Yas 7",
-            "reportType": "yas",
           }
-        }
-      />,
+        />,
+      },
     },
-  },
+  ],
 ]
 `;
 
 exports[`stream handler showNotifications show max length warning 1`] = `
 Array [
-  Object {
-    "data-test-subj": "completeReportMaxSizeWarning",
-    "text": MountPoint {
-      "reactNode": <React.Fragment>
-        <p>
-          <FormattedMessage
-            defaultMessage="The report reached the max size and contains partial data."
-            id="xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription"
-            values={Object {}}
-          />
-        </p>
-        <p>
-          <ReportLink
+  Array [
+    Object {
+      "data-test-subj": "completeReportMaxSizeWarning",
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <p>
+            <FormattedMessage
+              defaultMessage="The report reached the max size and contains partial data."
+              id="xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription"
+              values={Object {}}
+            />
+          </p>
+          <p>
+            <ReportLink
+              getUrl={[Function]}
+            />
+          </p>
+          <DownloadButton
             getUrl={[Function]}
+            job={
+              Object {
+                "id": "yas2",
+                "jobtype": "yas",
+                "maxSizeReached": true,
+                "status": "completed",
+                "title": "Yas",
+              }
+            }
           />
-        </p>
-        <DownloadButton
-          getUrl={[Function]}
-          job={
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <FormattedMessage
+          defaultMessage="Created partial {reportType} for '{reportObjectTitle}'"
+          id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
+          values={
             Object {
-              "id": "yas2",
-              "jobtype": "yas",
-              "maxSizeReached": true,
-              "status": "completed",
-              "title": "Yas",
+              "reportObjectTitle": "Yas",
+              "reportType": "yas",
             }
           }
-        />
-      </React.Fragment>,
+        />,
+      },
     },
-    "title": MountPoint {
-      "reactNode": <FormattedMessage
-        defaultMessage="Created partial {reportType} for '{reportObjectTitle}'"
-        id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
-        values={
-          Object {
-            "reportObjectTitle": "Yas",
-            "reportType": "yas",
-          }
-        }
-      />,
+    Object {
+      "toastLifeTimeMs": 86400000,
     },
-  },
-  Object {
-    "toastLifeTimeMs": 86400000,
-  },
+  ],
 ]
 `;
 
 exports[`stream handler showNotifications show success 1`] = `
 Array [
-  Object {
-    "color": "success",
-    "data-test-subj": "completeReportSuccess",
-    "text": MountPoint {
-      "reactNode": <React.Fragment>
-        <p>
-          <ReportLink
+  Array [
+    Object {
+      "color": "success",
+      "data-test-subj": "completeReportSuccess",
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          <p>
+            <ReportLink
+              getUrl={[Function]}
+            />
+          </p>
+          <DownloadButton
             getUrl={[Function]}
+            job={
+              Object {
+                "id": "yas1",
+                "jobtype": "yas",
+                "status": "completed",
+                "title": "Yas",
+              }
+            }
           />
-        </p>
-        <DownloadButton
-          getUrl={[Function]}
-          job={
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": <FormattedMessage
+          defaultMessage="{reportType} created for '{reportObjectTitle}'"
+          id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
+          values={
             Object {
-              "id": "yas1",
-              "jobtype": "yas",
-              "status": "completed",
-              "title": "Yas",
+              "reportObjectTitle": "Yas",
+              "reportType": "yas",
             }
           }
-        />
-      </React.Fragment>,
+        />,
+      },
     },
-    "title": MountPoint {
-      "reactNode": <FormattedMessage
-        defaultMessage="{reportType} created for '{reportObjectTitle}'"
-        id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
-        values={
-          Object {
-            "reportObjectTitle": "Yas",
-            "reportType": "yas",
-          }
-        }
-      />,
+    Object {
+      "toastLifeTimeMs": 86400000,
     },
-  },
-  Object {
-    "toastLifeTimeMs": 86400000,
-  },
+  ],
 ]
 `;

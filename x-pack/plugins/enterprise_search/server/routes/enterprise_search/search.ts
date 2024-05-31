@@ -43,7 +43,7 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.index_name);
       const searchQuery = request.body.searchQuery;
-      const { client } = (await context.core).elasticsearch;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
       try {

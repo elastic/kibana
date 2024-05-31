@@ -6,7 +6,9 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { SerializedEnrichPolicy } from '@kbn/index-management';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -44,7 +46,8 @@ import {
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import type { SerializedEnrichPolicy, FieldFromIndicesRequest } from '../../../common';
+import type { FieldFromIndicesRequest } from '../../../common';
+import { Fields } from '../components/mappings_editor/types';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -429,5 +432,26 @@ export function createIndex(indexName: string) {
     body: JSON.stringify({
       indexName,
     }),
+  });
+}
+export function updateIndexMappings(indexName: string, newFields: Fields) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
+    method: 'put',
+    body: JSON.stringify({ ...newFields }),
+  });
+}
+
+export function getInferenceModels() {
+  return sendRequest({
+    path: `${API_BASE_PATH}/inference/all`,
+    method: 'get',
+  });
+}
+
+export function useLoadInferenceModels() {
+  return useRequest<InferenceAPIConfigResponse[]>({
+    path: `${API_BASE_PATH}/inference/all`,
+    method: 'get',
   });
 }

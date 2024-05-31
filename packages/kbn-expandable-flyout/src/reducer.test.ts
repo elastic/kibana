@@ -7,9 +7,22 @@
  */
 
 import { FlyoutPanelProps } from './types';
-import { initialState, reducer, State } from './reducer';
-import { Action, ActionType } from './actions';
+import { reducer } from './reducer';
+import { initialState, State } from './state';
+import {
+  closeLeftPanelAction,
+  closePanelsAction,
+  closePreviewPanelAction,
+  closeRightPanelAction,
+  openLeftPanelAction,
+  openPanelsAction,
+  openPreviewPanelAction,
+  openRightPanelAction,
+  previousPreviewPanelAction,
+} from './actions';
 
+const id1 = 'id1';
+const id2 = 'id2';
 const rightPanel1: FlyoutPanelProps = {
   id: 'right1',
   path: { tab: 'tab' },
@@ -39,64 +52,114 @@ describe('reducer', () => {
   describe('should handle openFlyout action', () => {
     it('should add panels to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openFlyout,
-        payload: {
-          right: rightPanel1,
-          left: leftPanel1,
-          preview: previewPanel1,
-        },
-      };
+      const action = openPanelsAction({
+        right: rightPanel1,
+        left: leftPanel1,
+        preview: previewPanel1,
+        id: id1,
+      });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
       });
     });
 
     it('should override all panels in the state', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1, { id: 'preview' }],
-      };
-      const action: Action = {
-        type: ActionType.openFlyout,
-        payload: {
-          right: rightPanel2,
-          left: leftPanel2,
-          preview: previewPanel2,
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1, { id: 'preview' }],
+          },
         },
       };
+      const action = openPanelsAction({
+        right: rightPanel2,
+        left: leftPanel2,
+        preview: previewPanel2,
+        id: id1,
+      });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel2,
-        right: rightPanel2,
-        preview: [previewPanel2],
+        byId: {
+          [id1]: {
+            left: leftPanel2,
+            right: rightPanel2,
+            preview: [previewPanel2],
+          },
+        },
+        needsSync: true,
       });
     });
 
     it('should remove all panels despite only passing a single section ', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
-      };
-      const action: Action = {
-        type: ActionType.openFlyout,
-        payload: {
-          right: rightPanel2,
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
         },
       };
+      const action = openPanelsAction({
+        right: rightPanel2,
+        id: id1,
+      });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: undefined,
+        byId: {
+          [id1]: {
+            left: undefined,
+            right: rightPanel2,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should add panels to a new key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = openPanelsAction({
         right: rightPanel2,
-        preview: [],
+        id: id2,
+      });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+          [id2]: {
+            left: undefined,
+            right: rightPanel2,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -104,35 +167,73 @@ describe('reducer', () => {
   describe('should handle openRightPanel action', () => {
     it('should add right panel to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openRightPanel,
-        payload: rightPanel1,
-      };
+      const action = openRightPanelAction({ right: rightPanel1, id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: undefined,
-        right: rightPanel1,
-        preview: [],
+        byId: {
+          [id1]: {
+            left: undefined,
+            right: rightPanel1,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
       });
     });
 
     it('should replace right panel', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.openRightPanel,
-        payload: rightPanel2,
-      };
+      const action = openRightPanelAction({ right: rightPanel2, id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel1,
-        right: rightPanel2,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel2,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should add right panel to a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = openRightPanelAction({ right: rightPanel2, id: id2 });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+          [id2]: {
+            left: undefined,
+            right: rightPanel2,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -140,35 +241,73 @@ describe('reducer', () => {
   describe('should handle openLeftPanel action', () => {
     it('should add left panel to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openLeftPanel,
-        payload: leftPanel1,
-      };
+      const action = openLeftPanelAction({ left: leftPanel1, id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel1,
-        right: undefined,
-        preview: [],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: undefined,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
       });
     });
 
     it('should replace only left panel', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.openLeftPanel,
-        payload: leftPanel2,
-      };
+      const action = openLeftPanelAction({ left: leftPanel2, id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel2,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel2,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should add left panel to a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = openLeftPanelAction({ left: leftPanel2, id: id2 });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+          [id2]: {
+            left: leftPanel2,
+            right: undefined,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -176,35 +315,73 @@ describe('reducer', () => {
   describe('should handle openPreviewPanel action', () => {
     it('should add preview panel to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openPreviewPanel,
-        payload: previewPanel1,
-      };
+      const action = openPreviewPanelAction({ preview: previewPanel1, id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: undefined,
-        right: undefined,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: undefined,
+            right: undefined,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
       });
     });
 
     it('should add preview panel to the list of preview panels', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.openPreviewPanel,
-        payload: previewPanel2,
-      };
+      const action = openPreviewPanelAction({ preview: previewPanel2, id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1, previewPanel2],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1, previewPanel2],
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should add preview panel to a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = openPreviewPanelAction({ preview: previewPanel2, id: id2 });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+          [id2]: {
+            left: undefined,
+            right: undefined,
+            preview: [previewPanel2],
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -212,43 +389,77 @@ describe('reducer', () => {
   describe('should handle closeRightPanel action', () => {
     it('should return empty state when removing right panel from empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closeRightPanel,
-      };
+      const action = closeRightPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it(`should return unmodified state when removing right panel when no right panel exist`, () => {
       const state: State = {
-        left: leftPanel1,
-        right: undefined,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: undefined,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.closeRightPanel,
-      };
+      const action = closeRightPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it('should remove right panel', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.closeRightPanel,
-      };
+      const action = closeRightPanelAction({ id: id1 });
+
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel1,
-        right: undefined,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: undefined,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should not remove right panel for a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = closeRightPanelAction({ id: id2 });
+
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -256,43 +467,75 @@ describe('reducer', () => {
   describe('should handle closeLeftPanel action', () => {
     it('should return empty state when removing left panel on empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closeLeftPanel,
-      };
+      const action = closeLeftPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it(`should return unmodified state when removing left panel when no left panel exist`, () => {
       const state: State = {
-        left: undefined,
-        right: rightPanel1,
-        preview: [],
+        byId: {
+          [id1]: {
+            left: undefined,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.closeLeftPanel,
-      };
+      const action = closeLeftPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it('should remove left panel', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.closeLeftPanel,
-      };
+      const action = closeLeftPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: undefined,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: undefined,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should not remove left panel for a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = closeLeftPanelAction({ id: id2 });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -300,43 +543,75 @@ describe('reducer', () => {
   describe('should handle closePreviewPanel action', () => {
     it('should return empty state when removing preview panel on empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closePreviewPanel,
-      };
+      const action = closePreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it(`should return unmodified state when removing preview panel when no preview panel exist`, () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: undefined,
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.closePreviewPanel,
-      };
+      const action = closePreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it('should remove all preview panels', () => {
       const state: State = {
-        left: rightPanel1,
-        right: leftPanel1,
-        preview: [previewPanel1, previewPanel2],
+        byId: {
+          [id1]: {
+            left: rightPanel1,
+            right: leftPanel1,
+            preview: [previewPanel1, previewPanel2],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.closePreviewPanel,
-      };
+      const action = closePreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: rightPanel1,
-        right: leftPanel1,
-        preview: [],
+        byId: {
+          [id1]: {
+            left: rightPanel1,
+            right: leftPanel1,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should not remove preview panels for a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = closePreviewPanelAction({ id: id2 });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -344,43 +619,75 @@ describe('reducer', () => {
   describe('should handle previousPreviewPanel action', () => {
     it('should return empty state when previous preview panel on an empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.previousPreviewPanel,
-      };
+      const action = previousPreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...initialState, needsSync: true });
     });
 
     it(`should return unmodified state when previous preview panel when no preview panel exist`, () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: undefined,
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.previousPreviewPanel,
-      };
+      const action = previousPreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it('should remove only last preview panel', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1, previewPanel2],
+        byId: {
+          [id1]: {
+            left: rightPanel1,
+            right: leftPanel1,
+            preview: [previewPanel1, previewPanel2],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.previousPreviewPanel,
-      };
+      const action = previousPreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: rightPanel1,
+            right: leftPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should not remove the last preview panel for a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = previousPreviewPanelAction({ id: id2 });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
       });
     });
   });
@@ -388,29 +695,59 @@ describe('reducer', () => {
   describe('should handle closeFlyout action', () => {
     it('should return empty state when closing flyout on an empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closeFlyout,
-      };
+      const action = closePanelsAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(initialState);
+      expect(newState).toEqual({ ...initialState, needsSync: true });
     });
 
     it('should remove all panels', () => {
       const state: State = {
-        left: leftPanel1,
-        right: rightPanel1,
-        preview: [previewPanel1],
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
       };
-      const action: Action = {
-        type: ActionType.closeFlyout,
-      };
+      const action = closePanelsAction({ id: id1 });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
-        left: undefined,
-        right: undefined,
-        preview: [],
+        byId: {
+          [id1]: {
+            left: undefined,
+            right: undefined,
+            preview: undefined,
+          },
+        },
+        needsSync: true,
+      });
+    });
+
+    it('should not remove panels for a different key', () => {
+      const state: State = {
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+      };
+      const action = closePanelsAction({ id: id2 });
+      const newState: State = reducer(state, action);
+
+      expect(newState).toEqual({
+        byId: {
+          [id1]: {
+            left: leftPanel1,
+            right: rightPanel1,
+            preview: [previewPanel1],
+          },
+        },
+        needsSync: true,
       });
     });
   });

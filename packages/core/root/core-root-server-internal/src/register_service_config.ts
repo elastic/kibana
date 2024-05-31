@@ -26,15 +26,16 @@ import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
 import { config as deprecationConfig } from '@kbn/core-deprecations-server-internal';
 import { statusConfig } from '@kbn/core-status-server-internal';
 import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
-
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
+import { coreConfig } from './core_config';
 
 const rootConfigPath = '';
 
 export function registerServiceConfig(configService: ConfigService) {
   const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
+    coreConfig,
     cspConfig,
     deprecationConfig,
     elasticsearchConfig,

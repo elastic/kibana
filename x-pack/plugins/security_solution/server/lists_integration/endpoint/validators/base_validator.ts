@@ -11,6 +11,7 @@ import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
+import type { FeatureKeys } from '../../../endpoint/services';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -21,7 +22,6 @@ import {
 } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
-import type { FeatureKeys } from '../../../endpoint/services/feature_usage/service';
 
 export const BasicEndpointExceptionDataSchema = schema.object(
   {

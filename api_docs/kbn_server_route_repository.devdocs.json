@@ -352,7 +352,15 @@
         "label": "ClientRequestParamsOf",
         "description": [],
         "signature": [
-          "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT | undefined; handler: ({}: any) => Promise<any>; } & ",
+          "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
           "ServerRouteCreateOptions",
           " ? TRouteParamsRT extends ",
           {
@@ -377,7 +385,15 @@
         "label": "DecodedRequestParamsOf",
         "description": [],
         "signature": [
-          "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT | undefined; handler: ({}: any) => Promise<any>; } & ",
+          "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
           "ServerRouteCreateOptions",
           " ? TRouteParamsRT extends ",
           {
@@ -419,7 +435,25 @@
         "signature": [
           "TServerRouteRepository[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
           "ServerRouteCreateOptions",
-          " ? TReturnType : never"
+          " ? TReturnType extends ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
+          },
+          " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
@@ -610,7 +644,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{} & {}> | null>"
+              "<string | Readonly<{} & {}> | null>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
             "deprecated": false,

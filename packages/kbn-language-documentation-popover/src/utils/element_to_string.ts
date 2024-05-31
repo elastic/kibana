@@ -20,8 +20,8 @@ export function elementToString(element?: JSX.Element): string {
     return '';
   }
   const props = element.props;
-  if (props && 'markdown' in props) {
-    return String(props.markdown);
+  if (props && 'markdownContent' in props) {
+    return String(props.markdownContent);
   } else if (props && 'children' in props && Array.isArray(props.children)) {
     return props.children.reduce((text: string, child: React.ReactNode): string => {
       const validChildren = React.Children.toArray(child).filter(nonNullable);

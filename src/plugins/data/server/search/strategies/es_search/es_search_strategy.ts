@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, from, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';

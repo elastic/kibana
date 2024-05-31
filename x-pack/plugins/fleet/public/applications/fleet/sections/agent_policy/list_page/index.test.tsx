@@ -16,7 +16,7 @@ import { AgentPolicyListPage } from '.';
 
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
-  useGetAgentPolicies: jest.fn().mockReturnValue({
+  useGetAgentPoliciesQuery: jest.fn().mockReturnValue({
     data: {
       items: [
         { id: 'not_managed_policy', is_managed: false, updated_at: '2023-04-06T07:19:29.892Z' },
@@ -25,7 +25,7 @@ jest.mock('../../../hooks', () => ({
       total: 2,
     } as GetAgentPoliciesResponse,
     isLoading: false,
-    resendRequest: jest.fn(),
+    refetch: jest.fn(),
   }),
 }));
 

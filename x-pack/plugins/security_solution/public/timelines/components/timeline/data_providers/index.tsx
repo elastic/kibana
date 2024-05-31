@@ -13,21 +13,21 @@ import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 
 import { Empty } from './empty';
 import { Providers } from './providers';
-import { timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineSelectors } from '../../../store';
+import { timelineDefaults } from '../../../store/defaults';
 
 import * as i18n from './translations';
 import { options } from '../search_or_filter/helpers';
-import type { KqlMode } from '../../../store/timeline/model';
-import { updateKqlMode } from '../../../store/timeline/actions';
+import type { KqlMode } from '../../../store/model';
+import { updateKqlMode } from '../../../store/actions';
 
 interface Props {
   timelineId: string;

@@ -7,13 +7,13 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { DEFAULT_DOCS_PER_PAGE, Paginate } from '../types';
 import { escapeLuceneChars } from '../utils/escape_lucene_charts';
 import { fetchWithPagination } from '../utils/fetch_with_pagination';
 
 export const fetchSearchResults = async (
-  client: IScopedClusterClient,
+  client: ElasticsearchClient,
   indexName: string,
   query?: string,
   from: number = 0,
@@ -21,7 +21,7 @@ export const fetchSearchResults = async (
 ): Promise<Paginate<SearchHit>> => {
   const result = await fetchWithPagination(
     async () =>
-      await client.asCurrentUser.search({
+      await client.search({
         from,
         index: indexName,
         size,

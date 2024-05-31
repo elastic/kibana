@@ -101,7 +101,7 @@
 .tvbVisMetric__label--additional {
   @include euiTextTruncate;
   font-size: .25em; /* 1 */
-  padding: ($euiSizeXS / 2) 0 0;
+  padding: calc($euiSizeXS / 2) 0 0;
   text-align: center;
   color: $tvbValueColor;
   line-height: 1.2; // Ensure the descenders don't get cut off

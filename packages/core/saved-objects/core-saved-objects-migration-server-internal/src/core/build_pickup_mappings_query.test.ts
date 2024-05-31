@@ -9,23 +9,13 @@
 import { buildPickupMappingsQuery } from './build_pickup_mappings_query';
 
 describe('buildPickupMappingsQuery', () => {
-  describe('when no root fields have been updated', () => {
-    it('builds a boolean query to select the updated types', () => {
-      const query = buildPickupMappingsQuery(['type1', 'type2']);
+  it('builds a boolean query to select the updated types', () => {
+    const query = buildPickupMappingsQuery(['type1', 'type2']);
 
-      expect(query).toEqual({
-        bool: {
-          should: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
-        },
-      });
-    });
-  });
-
-  describe('when some root fields have been updated', () => {
-    it('returns undefined', () => {
-      const query = buildPickupMappingsQuery(['type1', 'type2', 'namespaces']);
-
-      expect(query).toBeUndefined();
+    expect(query).toEqual({
+      bool: {
+        should: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
+      },
     });
   });
 });

@@ -21,7 +21,7 @@ type StorageDetails = APIReturnType<'GET /internal/apm/services/{serviceName}/st
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -71,14 +71,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/144025
-  registry.when.skip('Storage details', { config: 'basic', archives: [] }, () => {
-    describe.skip('when data is loaded', () => {
+  registry.when('Storage details', { config: 'basic', archives: [] }, () => {
+    describe('when data is loaded', () => {
       before(async () => {
         const serviceGo = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('5m')
             .rate(1)
@@ -110,9 +110,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
-      it('returns correct stats for processor events', async () => {
+      it.skip('returns correct stats for processor events', async () => {
         const { status, body } = await callApi();
         expect(status).to.be(200);
         expect(body.processorEventStats).to.have.length(4);

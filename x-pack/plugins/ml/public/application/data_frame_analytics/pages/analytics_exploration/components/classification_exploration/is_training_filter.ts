@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isResultsSearchBoolQuery, ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
+import { isResultsSearchBoolQuery } from '../../../../common/analytics';
 
 export type IsTraining = boolean | undefined;
 

@@ -18,7 +18,7 @@ export interface VarSecretReference {
   isSecretRef: true;
 }
 export interface SecretPath {
-  path: string;
+  path: string[];
   value: PackagePolicyConfigRecordEntry;
 }
 export interface OutputSecretPath {

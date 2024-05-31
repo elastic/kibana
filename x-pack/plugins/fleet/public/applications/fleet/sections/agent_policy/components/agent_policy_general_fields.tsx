@@ -20,6 +20,7 @@ interface Props {
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
   nameLabel?: ReactElement<any, any>;
+  disabled?: boolean;
 }
 
 export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
@@ -27,8 +28,10 @@ export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
   updateAgentPolicy,
   validation,
   nameLabel,
+  disabled,
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
+  const isDisabled = disabled || agentPolicy.is_managed === true;
 
   return (
     <EuiFormRow
@@ -39,12 +42,13 @@ export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
           <FormattedMessage id="xpack.fleet.agentPolicyForm.nameFieldLabel" defaultMessage="Name" />
         )
       }
+      isDisabled={isDisabled}
       error={touchedFields.name && validation.name ? validation.name : null}
       isInvalid={Boolean(touchedFields.name && validation.name)}
     >
       <EuiFieldText
         data-test-subj="createAgentPolicyNameField"
-        disabled={agentPolicy.is_managed === true}
+        disabled={isDisabled}
         fullWidth
         value={agentPolicy.name}
         onChange={(e) => updateAgentPolicy({ name: e.target.value })}

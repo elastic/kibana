@@ -42,14 +42,26 @@ export class GlobalNavService extends FtrService {
 
   public async badgeExistsOrFail(expectedLabel: string): Promise<void> {
     await this.testSubjects.existOrFail('headerBadge');
-    const actualLabel = await this.testSubjects.getAttribute(
-      'headerBadge',
-      'data-test-badge-label'
-    );
+    const actualLabel =
+      (await this.testSubjects.getAttribute('headerBadge', 'data-test-badge-label')) ?? '';
     expect(actualLabel.toUpperCase()).to.equal(expectedLabel.toUpperCase());
   }
 
   public async badgeMissingOrFail(): Promise<void> {
     await this.testSubjects.missingOrFail('headerBadge');
+  }
+
+  public async openSolutionNavSwitcher(): Promise<void> {
+    if (await this.testSubjects.exists(`~solutionNavSwitcherPanel`, { timeout: 0 })) return;
+
+    await this.testSubjects.click('~solutionNavSwitcher');
+    await this.testSubjects.existOrFail('~solutionNavSwitcherPanel');
+  }
+
+  public async changeSolutionNavigation(id: 'es' | 'oblt' | 'search'): Promise<void> {
+    if (!(await this.testSubjects.exists(`~solutionNavSwitcherPanel`, { timeout: 0 }))) {
+      await this.openSolutionNavSwitcher();
+    }
+    await this.testSubjects.click(`~solutionNavSwitcherPanel > ${`~solutionNavSwitcher-${id}`}`);
   }
 }

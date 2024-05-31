@@ -14,8 +14,11 @@ export const plugin = (ctx: PluginInitializerContext) => {
   return new IndexMgmtUIPlugin(ctx);
 };
 
-export type { IndexManagementPluginSetup, IndexManagementPluginStart } from './types';
+export type {
+  Index,
+  IndexMappingProps,
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+} from '@kbn/index-management';
 
 export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
-
-export type { Index } from '../common';

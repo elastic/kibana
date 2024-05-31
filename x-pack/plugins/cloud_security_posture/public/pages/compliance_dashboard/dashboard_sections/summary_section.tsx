@@ -32,8 +32,10 @@ import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
+  RULE_PASSED,
 } from '../../../../common/constants';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
+import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
@@ -63,19 +65,29 @@ export const SummarySection = ({
   const { euiTheme } = useEuiTheme();
 
   const handleEvalCounterClick = (evaluation: Evaluation) => {
-    navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) });
+    navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) }, [
+      FINDINGS_GROUPING_OPTIONS.NONE,
+    ]);
   };
 
-  const handleCellClick = (ruleSection: string) => {
-    navToFindings({
-      'rule.section': ruleSection,
-      'result.evaluation': RULE_FAILED,
-      ...getPolicyTemplateQuery(dashboardType),
-    });
+  const handleCellClick = (
+    ruleSection: string,
+    resultEvaluation: 'passed' | 'failed' = RULE_FAILED
+  ) => {
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        'rule.section': ruleSection,
+        'result.evaluation': resultEvaluation,
+      },
+      [FINDINGS_GROUPING_OPTIONS.NONE]
+    );
   };
 
   const handleViewAllClick = () => {
-    navToFindings({ 'result.evaluation': RULE_FAILED, ...getPolicyTemplateQuery(dashboardType) });
+    navToFindings({ 'result.evaluation': RULE_FAILED, ...getPolicyTemplateQuery(dashboardType) }, [
+      FINDINGS_GROUPING_OPTIONS.RULE_SECTION,
+    ]);
   };
 
   const counters: CspCounterCardProps[] = useMemo(
@@ -124,7 +136,9 @@ export const SummarySection = ({
           <EuiButtonEmpty
             iconType="search"
             onClick={() => {
-              navToFindings(getPolicyTemplateQuery(dashboardType));
+              navToFindings(getPolicyTemplateQuery(dashboardType), [
+                FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME,
+              ]);
             }}
           >
             {i18n.translate(
@@ -156,7 +170,7 @@ export const SummarySection = ({
       gutterSize="l"
       css={css`
         // height for compliance by cis section with max rows
-        height: 310px;
+        height: 350px;
       `}
       data-test-subj={DASHBOARD_SUMMARY_CONTAINER}
     >
@@ -192,7 +206,21 @@ export const SummarySection = ({
           <RisksTable
             data={complianceData.groupedFindingsEvaluation}
             maxItems={5}
-            onCellClick={handleCellClick}
+            onCellClick={(cisSection: string) => {
+              const cisSectionEvaluation = complianceData.groupedFindingsEvaluation.find(
+                (groupedFindingsEvaluation) => groupedFindingsEvaluation.name === cisSection
+              );
+
+              // if the CIS Section posture score is 100, we should navigate with result evaluation as passed or result evaluation as failed
+              if (
+                cisSectionEvaluation?.postureScore &&
+                Math.trunc(cisSectionEvaluation?.postureScore) === 100
+              ) {
+                handleCellClick(cisSection, RULE_PASSED);
+              } else {
+                handleCellClick(cisSection);
+              }
+            }}
             onViewAllClick={handleViewAllClick}
             viewAllButtonTitle={i18n.translate(
               'xpack.csp.dashboard.risksTable.viewAllButtonTitle',

@@ -11,6 +11,5 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON } from '../../sc
  * Open the Prevalence tab under the Visualize tab in the document details expandable flyout left section
  */
 export const openPrevalenceTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).click();
 };

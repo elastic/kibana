@@ -42,7 +42,9 @@
 
 .unifiedFieldListItemButton {
   width: 100%;
-
+  @include euiSlightShadow;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
   &.kbnFieldButton {
     &:focus-within,
     &-isActive {
@@ -66,7 +68,47 @@
   }
 }
 
+.unifiedFieldList__fieldPopover__fieldPopoverPanel .unifiedFieldListItemButton {
+  box-shadow: none;
+  background: none;
+}
+
 .unifiedFieldListItemButton--missing {
   background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
   color: $euiColorDarkShade;
+}
+
+.unifiedFieldListItemButton__fieldIconContainer {
+  position: relative;
+}
+
+.unifiedFieldListItemButton__fieldIcon {
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
+}
+
+.unifiedFieldListItemButton__fieldIconDrag {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
+}
+
+// A drag handle will appear only on item hover/focus
+.unifiedFieldListItemButton--withDragIcon {
+  .unifiedFieldListItemButton__fieldIconDrag {
+    visibility: visible;
+    opacity: 0;
+  }
+
+  &:hover,
+  &[class*='-isActive'],
+  .domDraggable__keyboardHandler:focus + & {
+    .unifiedFieldListItemButton__fieldIcon {
+      opacity: 0;
+    }
+    .unifiedFieldListItemButton__fieldIconDrag {
+      opacity: 1;
+    }
+  }
 }

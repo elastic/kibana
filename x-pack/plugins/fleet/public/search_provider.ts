@@ -8,7 +8,7 @@ import type { CoreSetup, CoreStart, ApplicationStart, IBasePath } from '@kbn/cor
 
 import type { Observable } from 'rxjs';
 import { from, of, combineLatest } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, takeUntil } from 'rxjs';
 
 import type {
   GlobalSearchResultProvider,

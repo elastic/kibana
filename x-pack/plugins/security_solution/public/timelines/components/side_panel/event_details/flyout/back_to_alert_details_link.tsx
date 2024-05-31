@@ -5,34 +5,58 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
 } from '../../../../../detections/components/host_isolation/translations';
-import { ALERT_DETAILS } from '../translations';
+import { ALERT_DETAILS, TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_DESCRIPTION } from '../translations';
 
 const BackToAlertDetailsLinkComponent = ({
   showAlertDetails,
+  showExperimentalBadge,
   isolateAction,
 }: {
   showAlertDetails: () => void;
+  showExperimentalBadge?: boolean;
   isolateAction: 'isolateHost' | 'unisolateHost';
-}) => {
-  return (
-    <>
-      <EuiButtonEmpty iconType="arrowLeft" iconSide="left" flush="left" onClick={showAlertDetails}>
-        <EuiText size="xs">
-          <p>{ALERT_DETAILS}</p>
-        </EuiText>
-      </EuiButtonEmpty>
-      <EuiTitle>
-        <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>
-      </EuiTitle>
-    </>
-  );
-};
+}) => (
+  <>
+    <EuiButtonEmpty iconType="arrowLeft" iconSide="left" flush="left" onClick={showAlertDetails}>
+      <EuiText size="xs">
+        <p>{ALERT_DETAILS}</p>
+      </EuiText>
+    </EuiButtonEmpty>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiTitle>
+          <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {showExperimentalBadge && (
+          <EuiBetaBadge
+            css={css`
+              display: inline-flex;
+            `}
+            label={TECHNICAL_PREVIEW}
+            size="s"
+            tooltipContent={TECHNICAL_PREVIEW_DESCRIPTION}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </>
+);
 
 const BackToAlertDetailsLink = React.memo(BackToAlertDetailsLinkComponent);
 

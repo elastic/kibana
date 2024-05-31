@@ -26,9 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Replace Controls';
 
-  const changeFieldType = async (controlId: string, newField: string, expectedType?: string) => {
+  const changeFieldType = async (controlId: string, newField: string, type: string) => {
     await dashboardControls.editExistingControl(controlId);
-    await dashboardControls.controlsEditorSetfield(newField, expectedType);
+    await dashboardControls.controlsEditorSetfield(newField);
+    await dashboardControls.controlsEditorSetControlType(type);
     await dashboardControls.controlEditorSave();
   };
 
@@ -55,7 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
-      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+      await dashboard.saveDashboard(DASHBOARD_NAME, {
+        exitFromEditMode: false,
+        saveAsNew: true,
+      });
     });
 
     after(async () => {

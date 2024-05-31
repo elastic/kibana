@@ -1,0 +1,449 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useComparisonCellValue should render cells with diff mode "Chars" 1`] = `
+<div
+  class="unifiedDataTable__comparisonBaseDocCell"
+  data-test-subj="0_1_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Chars" 2`] = `
+<div
+  data-test-subj="1_2_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      This 
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      one 
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      is a 
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      different 
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      m
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
+    >
+      e
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      s
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
+    >
+      sa
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      g
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
+    >
+      e
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+       val
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      ue
+    </span>
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Chars" 3`] = `
+<div
+  data-test-subj="2_3_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      This is a message val
+    </span>
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Full value" 1`] = `
+<div
+  class="unifiedDataTable__comparisonBaseDocCell"
+  data-test-subj="0_1_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Full value" 2`] = `
+<div
+  class="unifiedDataTable__comparisonDiffCell"
+  data-test-subj="1_2_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This one is a different msg value
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Full value" 3`] = `
+<div
+  class="unifiedDataTable__comparisonMatchCell"
+  data-test-subj="2_3_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Lines" 1`] = `
+<div
+  class="unifiedDataTable__comparisonBaseDocCell"
+  data-test-subj="0_1_1"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    [
+  "gif",
+  "png"
+]
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Lines" 2`] = `
+<div
+  data-test-subj="1_2_1"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    <div
+      class="unifiedDataTable__comparisonSegment"
+    >
+      [
+
+    </div>
+    <div
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
+    >
+        "gif",
+
+    </div>
+    <div
+      class="unifiedDataTable__comparisonSegment"
+    >
+        "png",
+
+    </div>
+    <div
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+        "jpg"
+
+    </div>
+    <div
+      class="unifiedDataTable__comparisonSegment"
+    >
+      ]
+    </div>
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Lines" 3`] = `
+<div
+  data-test-subj="2_3_1"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    <div
+      class="unifiedDataTable__comparisonSegment"
+    >
+      [
+  "gif",
+  "png"
+]
+    </div>
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Words" 1`] = `
+<div
+  class="unifiedDataTable__comparisonBaseDocCell"
+  data-test-subj="0_1_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Words" 2`] = `
+<div
+  data-test-subj="1_2_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      This 
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      one 
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      is a 
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
+    >
+      message
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      different
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+       
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonRemovedSegment"
+    >
+      val
+    </span>
+    <span
+      class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment"
+    >
+      msg value
+    </span>
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with diff mode "Words" 3`] = `
+<div
+  data-test-subj="2_3_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    <span
+      class="unifiedDataTable__comparisonSegment"
+    >
+      This is a message val
+    </span>
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with no diff mode 1`] = `
+<div
+  class="unifiedDataTable__comparisonBaseDocCell"
+  data-test-subj="0_1_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with no diff mode 2`] = `
+<div
+  data-test-subj="1_2_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This one is a different msg value
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with no diff mode 3`] = `
+<div
+  data-test-subj="2_3_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render exmpty cell if doc is not found 1`] = `
+<div
+  data-test-subj="unknown_1_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    -
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render field cells 1`] = `
+<div
+  data-test-subj="fieldColumnId_0_0"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+      >
+        <span
+          data-euiicon-type="tokenString"
+          title="string"
+        >
+          string
+        </span>
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
+      >
+        message
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`useComparisonCellValue should render field cells 2`] = `
+<div
+  data-test-subj="fieldColumnId_0_1"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+      >
+        <span
+          data-euiicon-type="tokenString"
+          title="string"
+        >
+          string
+        </span>
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
+      >
+        extension
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`useComparisonCellValue should render field cells 3`] = `
+<div
+  data-test-subj="fieldColumnId_0_2"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+      >
+        <span
+          data-euiicon-type="tokenNumber"
+          title="number"
+        >
+          number
+        </span>
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
+      >
+        bytes
+      </div>
+    </div>
+  </div>
+</div>
+`;

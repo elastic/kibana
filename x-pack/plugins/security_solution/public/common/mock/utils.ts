@@ -8,7 +8,7 @@
 import { hostsReducer } from '../../explore/hosts/store';
 import { networkReducer } from '../../explore/network/store';
 import { makeUsersReducer } from '../../explore/users/store';
-import { timelineReducer } from '../../timelines/store/timeline/reducer';
+import { timelineReducer } from '../../timelines/store/reducer';
 import { managementReducer } from '../../management/store/reducer';
 import type { ManagementPluginReducer } from '../../management';
 import type { SubPluginsInitReducer } from '../store';

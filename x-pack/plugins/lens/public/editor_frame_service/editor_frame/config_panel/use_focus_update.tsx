@@ -30,7 +30,7 @@ export function useFocusUpdate(ids: string[]) {
     const element = nextFocusedId && refsById.get(nextFocusedId);
     if (element) {
       const focusable = getFirstFocusable(element);
-      focusable?.focus();
+      setTimeout(() => focusable?.focus());
       setNextFocusedId(null);
     }
   }, [ids, refsById, nextFocusedId]);

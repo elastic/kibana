@@ -39,27 +39,27 @@ export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 const getMitre1 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
-    name: getMockThreatData().tactic.name,
-    id: getMockThreatData().tactic.id,
-    reference: getMockThreatData().tactic.reference,
+    name: getMockThreatData()[0].tactic.name,
+    id: getMockThreatData()[0].tactic.id,
+    reference: getMockThreatData()[0].tactic.reference,
   },
   technique: [
     {
-      id: getMockThreatData().technique.id,
-      reference: getMockThreatData().technique.reference,
-      name: getMockThreatData().technique.name,
+      id: getMockThreatData()[0].technique.id,
+      reference: getMockThreatData()[0].technique.reference,
+      name: getMockThreatData()[0].technique.name,
       subtechnique: [
         {
-          id: getMockThreatData().subtechnique.id,
-          name: getMockThreatData().subtechnique.name,
-          reference: getMockThreatData().subtechnique.reference,
+          id: getMockThreatData()[0].subtechnique.id,
+          name: getMockThreatData()[0].subtechnique.name,
+          reference: getMockThreatData()[0].subtechnique.reference,
         },
       ],
     },
     {
-      name: getMockThreatData().technique.name,
-      id: getMockThreatData().technique.id,
-      reference: getMockThreatData().technique.reference,
+      name: getMockThreatData()[0].technique.name,
+      id: getMockThreatData()[0].technique.id,
+      reference: getMockThreatData()[0].technique.reference,
       subtechnique: [],
     },
   ],
@@ -68,20 +68,20 @@ const getMitre1 = (): Threat => ({
 const getMitre2 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
-    name: getMockThreatData().tactic.name,
-    id: getMockThreatData().tactic.id,
-    reference: getMockThreatData().tactic.reference,
+    name: getMockThreatData()[1].tactic.name,
+    id: getMockThreatData()[1].tactic.id,
+    reference: getMockThreatData()[1].tactic.reference,
   },
   technique: [
     {
-      id: getMockThreatData().technique.id,
-      reference: getMockThreatData().technique.reference,
-      name: getMockThreatData().technique.name,
+      id: getMockThreatData()[1].technique.id,
+      reference: getMockThreatData()[1].technique.reference,
+      name: getMockThreatData()[1].technique.name,
       subtechnique: [
         {
-          id: getMockThreatData().subtechnique.id,
-          name: getMockThreatData().subtechnique.name,
-          reference: getMockThreatData().subtechnique.reference,
+          id: getMockThreatData()[1].subtechnique.id,
+          name: getMockThreatData()[1].subtechnique.name,
+          reference: getMockThreatData()[1].subtechnique.reference,
         },
       ],
     },
@@ -406,7 +406,7 @@ export const getEsqlRule = (
 ): EsqlRuleCreateProps => ({
   type: 'esql',
   language: 'esql',
-  query: 'from auditbeat-* [metadata _id, _version, _index] | keep agent.*,_id | eval test_id=_id',
+  query: 'from auditbeat-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
   name: 'ES|QL Rule',
   description: 'The new rule description.',
   severity: 'high',
@@ -477,6 +477,7 @@ export const getNewThreatIndicatorRule = (
   description: 'The threat indicator rule description.',
   query: '*:*',
   threat_query: '*:*',
+  threat_language: 'kuery',
   index: ['suspicious-*'],
   severity: 'critical',
   risk_score: 20,
@@ -550,6 +551,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     version,
     exceptions_list: exceptionsList,
     immutable,
+    rule_source: ruleSource,
     related_integrations: relatedIntegrations,
     setup,
     investigation_fields: investigationFields,
@@ -593,6 +595,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     version,
     exceptions_list: exceptionsList,
     immutable,
+    rule_source: ruleSource,
     related_integrations: relatedIntegrations,
     required_fields: [],
     setup,

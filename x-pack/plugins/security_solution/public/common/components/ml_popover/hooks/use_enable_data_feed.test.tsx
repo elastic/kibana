@@ -7,26 +7,14 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useEnableDataFeed } from './use_enable_data_feed';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../mock';
-import { createStore } from '../../../store';
-import type { State } from '../../../store';
+import { TestProviders } from '../../../mock';
 
 import type { SecurityJob } from '../types';
 import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
 import { ML_JOB_TELEMETRY_STATUS } from '../../../lib/telemetry';
 
-const state: State = mockGlobalState;
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <TestProviders store={store}>{children}</TestProviders>
+  <TestProviders>{children}</TestProviders>
 );
 
 const moduleId = 'test_module_id';

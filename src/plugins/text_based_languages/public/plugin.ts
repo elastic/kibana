@@ -9,7 +9,7 @@
 import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management';
 import { setKibanaServices } from './kibana_services';
 
 interface TextBasedLanguagesPluginStart {

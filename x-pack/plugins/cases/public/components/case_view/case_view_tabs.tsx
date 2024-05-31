@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiNotificationBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiNotificationBadge,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -16,68 +25,80 @@ import { ACTIVITY_TAB, ALERTS_TAB, FILES_TAB } from './translations';
 import type { CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 
-const ExperimentalBadge = styled(EuiBetaBadge)`
-  margin-left: 5px;
-`;
+const TabTitle = ({ title }: { title: string }) => (
+  <EuiTitle size="xxs">
+    <h2 className="eui-displayInline">{title}</h2>
+  </EuiTitle>
+);
 
-const StyledNotificationBadge = styled(EuiNotificationBadge)`
-  margin-left: 5px;
-`;
+TabTitle.displayName = 'TabTitle';
 
-const FilesTab = ({
+const FilesBadge = ({
   activeTab,
   fileStatsData,
   isLoading,
+  euiTheme,
 }: {
   activeTab: string;
   fileStatsData: { total: number } | undefined;
   isLoading: boolean;
+  euiTheme: EuiThemeComputed<{}>;
 }) => (
   <>
-    {FILES_TAB}
     {!isLoading && fileStatsData && (
-      <StyledNotificationBadge
+      <EuiNotificationBadge
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
         data-test-subj="case-view-files-stats-badge"
         color={activeTab === CASE_VIEW_PAGE_TABS.FILES ? 'accent' : 'subdued'}
       >
         {fileStatsData.total > 0 ? fileStatsData.total : 0}
-      </StyledNotificationBadge>
+      </EuiNotificationBadge>
     )}
   </>
 );
 
-const AlertsTab = ({
+FilesBadge.displayName = 'FilesBadge';
+
+const AlertsBadge = ({
   activeTab,
   totalAlerts,
   isExperimental,
+  euiTheme,
 }: {
   activeTab: string;
   totalAlerts: number | undefined;
   isExperimental: boolean;
+  euiTheme: EuiThemeComputed<{}>;
 }) => (
   <>
-    {ALERTS_TAB}
-    <StyledNotificationBadge
+    <EuiNotificationBadge
+      css={css`
+        margin-left: ${euiTheme.size.xs};
+      `}
       data-test-subj="case-view-alerts-stats-badge"
       color={activeTab === CASE_VIEW_PAGE_TABS.ALERTS ? 'accent' : 'subdued'}
     >
       {totalAlerts || 0}
-    </StyledNotificationBadge>
+    </EuiNotificationBadge>
     {isExperimental && (
-      <ExperimentalBadge
+      <EuiBetaBadge
         label={EXPERIMENTAL_LABEL}
         size="s"
         iconType="beaker"
         tooltipContent={EXPERIMENTAL_DESC}
         tooltipPosition="bottom"
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
         data-test-subj="case-view-alerts-table-experimental-badge"
       />
     )}
   </>
 );
 
-FilesTab.displayName = 'FilesTab';
-AlertsTab.displayName = 'AlertsTab';
+AlertsBadge.displayName = 'AlertsBadge';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -87,6 +108,7 @@ export interface CaseViewTabsProps {
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { features } = useCasesContext();
   const { navigateToCaseView } = useCaseViewNavigation();
+  const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading } = useGetCaseFileStats({
     caseId: caseData.id,
   });
@@ -101,11 +123,13 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         ? [
             {
               id: CASE_VIEW_PAGE_TABS.ALERTS,
-              name: (
-                <AlertsTab
+              name: ALERTS_TAB,
+              badge: (
+                <AlertsBadge
                   isExperimental={features.alerts.isExperimental}
                   totalAlerts={caseData.totalAlerts}
                   activeTab={activeTab}
+                  euiTheme={euiTheme}
                 />
               ),
             },
@@ -113,8 +137,14 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         : []),
       {
         id: CASE_VIEW_PAGE_TABS.FILES,
-        name: (
-          <FilesTab isLoading={isLoading} fileStatsData={fileStatsData} activeTab={activeTab} />
+        name: FILES_TAB,
+        badge: (
+          <FilesBadge
+            isLoading={isLoading}
+            fileStatsData={fileStatsData}
+            activeTab={activeTab}
+            euiTheme={euiTheme}
+          />
         ),
       },
     ],
@@ -125,6 +155,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       activeTab,
       isLoading,
       fileStatsData,
+      euiTheme,
     ]
   );
 
@@ -136,14 +167,15 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         onClick={() => navigateToCaseView({ detailName: caseData.id, tabId: tab.id })}
         isSelected={tab.id === activeTab}
       >
-        {tab.name}
+        <TabTitle title={tab.name} />
+        {tab.badge ?? null}
       </EuiTab>
     ));
   }, [activeTab, caseData.id, navigateToCaseView, tabs]);
 
   return (
     <>
-      <EuiTabs>{renderTabs()}</EuiTabs>
+      <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>
       <EuiSpacer size="l" />
     </>
   );

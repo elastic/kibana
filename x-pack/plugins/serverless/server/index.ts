@@ -13,4 +13,7 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new ServerlessPlugin(initializerContext);
 };
 
-export type { ServerlessPluginSetup, ServerlessPluginStart } from './types';
+export type {
+  ServerlessServerSetup as ServerlessPluginSetup,
+  ServerlessServerStart as ServerlessPluginStart,
+} from './types';

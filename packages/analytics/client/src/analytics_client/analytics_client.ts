@@ -23,7 +23,7 @@ import {
   skipWhile,
   takeUntil,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import type { LogMeta } from '@kbn/logging';
 import type { IShipper } from '../shippers';
 import type {
@@ -133,12 +133,9 @@ export class AnalyticsClient implements IAnalyticsClient {
       properties: eventData as unknown as Record<string, unknown>,
     };
 
-    // debug-logging before checking the opt-in status to help during development
-    if (this.initContext.isDev) {
-      this.initContext.logger.debug<EventDebugLogMeta>(`Report event "${eventType}"`, {
-        ebt_event: event,
-      });
-    }
+    this.initContext.logger.debug<EventDebugLogMeta>(`Report event "${eventType}"`, {
+      ebt_event: event,
+    });
 
     const optInConfig = this.optInConfig$.value;
 

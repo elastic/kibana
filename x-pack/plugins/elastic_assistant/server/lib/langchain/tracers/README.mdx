@@ -33,7 +33,7 @@ First, enable the `assistantModelEvaluation` experimental feature flag by adding
 xpack.securitySolution.enableExperimental: [ 'assistantModelEvaluation' ]
 ```
 
-Next, you'll need an APM server to collect the traces. You can either [follow the documentation for installing](https://www.elastic.co/guide/en/apm/guide/current/installing.html) the released artifact, or [run from source](https://github.com/elastic/apm-server#apm-server-development) and set up using the [quickstart guide provided](https://www.elastic.co/guide/en/apm/guide/current/apm-quick-start.html) (be sure to install the APM Server integration to ensure the necessary indices are created!).  Once your APM server is running, add your APM server configuration to your `kibana.dev.yml` as well using the following:
+Next, you'll need an APM server to collect the traces. You can either [follow the documentation for installing](https://www.elastic.co/guide/en/apm/guide/current/installing.html) the released artifact, or [run from source](https://github.com/elastic/apm-server#apm-server-development) and set up using the [quickstart guide provided](https://www.elastic.co/guide/en/apm/guide/current/apm-quick-start.html) (be sure to install the APM Server integration to ensure the necessary indices are created! In dev environments you must click `Display beta integrations` on main Integrations page to ensure the latest package is installed.).  Once your APM server is running, add your APM server configuration to your `kibana.dev.yml` as well using the following:
 
 ```
 # APM
@@ -48,11 +48,13 @@ elastic.apm:
   servicesOverrides.kibana-frontend.active: false
 ```
 
-> [!NOTE]
->  If connecting to a cloud APM server (like our [ai-assistant apm deployment](https://ai-assistant-apm-do-not-delete.kb.us-central1.gcp.cloud.es.io/)), follow [these steps](https://www.elastic.co/guide/en/apm/guide/current/api-key.html#create-an-api-key) to create an API key, and then set it via `apiKey` and also set your `serverUrl` as shown in the APM Integration details within fleet. Note that the `View APM trace` button within the UI will link to your local instance, not the cloud instance.
+If using a remote APM Server/Kibana instance for viewing traces, you can set the `APM URL` as outlined in https://github.com/elastic/kibana/pull/180227 so that the `View APM trace` button within the UI will link to the appropriate instance.
 
 > [!NOTE]
->  If you're an Elastic developer running Kibana from source, you can just enable APM as above, and _not_ include a `serverUrl`, and your traces will be sent to the https://kibana-cloud-apm.elastic.dev cluster. Note that the `View APM trace` button within the UI will link to your local instance, not the cloud instance.
+>  If connecting to a cloud APM server (like our [ai-assistant apm deployment](https://ai-assistant-apm-do-not-delete.kb.us-central1.gcp.cloud.es.io/)), follow [these steps](https://www.elastic.co/guide/en/apm/guide/current/api-key.html#create-an-api-key) to create an API key, and then set it via `apiKey` and also set your `serverUrl` as shown in the APM Integration details within fleet.
+
+> [!NOTE]
+>  If you're an Elastic developer running Kibana from source, you can just enable APM as above, and _not_ include a `serverUrl`, and your traces will be sent to the https://kibana-cloud-apm.elastic.dev cluster. 
 
 ### Configuring LangSmith
 
@@ -65,4 +67,6 @@ export LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"
 export LANGCHAIN_API_KEY=""
 export LANGCHAIN_PROJECT="8.12 ESQL Query Generation"
 ```
+
+If wanting to configure LangSmith in cloud or other environments where you may not have the ability to set env vars, you can set the `LangSmith Project` and `LangSmith API Key` values in session storage as outlined in https://github.com/elastic/kibana/pull/180227.
 

@@ -27,40 +27,10 @@ import type { OnChangePage } from '../events';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
-import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-
-export const isCompactFooter = (width: number): boolean => width < 600;
-
-interface FixedWidthLastUpdatedContainerProps {
-  updatedAt: number;
-}
-
-const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
-  ({ updatedAt }) => {
-    const { timelines } = useKibana().services;
-    const width = useEventDetailsWidthContext();
-    const compact = useMemo(() => isCompactFooter(width), [width]);
-
-    return updatedAt > 0 ? (
-      <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
-        {timelines.getLastUpdated({ updatedAt, compact })}
-      </FixedWidthLastUpdated>
-    ) : null;
-  }
-);
-
-FixedWidthLastUpdatedContainer.displayName = 'FixedWidthLastUpdatedContainer';
-
-const FixedWidthLastUpdated = styled.div<{ compact?: boolean }>`
-  width: ${({ compact }) => (!compact ? 200 : 25)}px;
-  overflow: hidden;
-  text-align: end;
-`;
-
-FixedWidthLastUpdated.displayName = 'FixedWidthLastUpdated';
+import { FixedWidthLastUpdatedContainer } from './last_updated';
 
 interface HeightProp {
   height: number;

@@ -11,8 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
-import { DataDocuments$ } from '../../services/discover_data_state_container';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -20,11 +19,15 @@ import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppState } from '../../services/discover_app_state_container';
+import { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
+import { createCustomizationService } from '../../../../customizations/customization_service';
+import { DiscoverGrid } from '../../../../components/discover_grid';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
-setHeaderActionMenuMounter(jest.fn());
+const customisationService = createCustomizationService();
 
 async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
@@ -37,7 +40,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.appState.update({ index: dataViewMock.id });
+  stateContainer.appState.update({
+    dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+  });
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
@@ -50,9 +55,11 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverMainProvider value={stateContainer}>
-        <DiscoverDocuments {...props} />
-      </DiscoverMainProvider>
+      <DiscoverCustomizationProvider value={customisationService}>
+        <DiscoverMainProvider value={stateContainer}>
+          <DiscoverDocuments {...props} />
+        </DiscoverMainProvider>
+      </DiscoverCustomizationProvider>
     </KibanaContextProvider>
   );
   await act(async () => {
@@ -78,8 +85,8 @@ describe('Discover documents layout', () => {
     const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
-    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscGridToolbarBottom').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbarBottom').exists()).toBe(true);
     expect(findTestSubject(component, 'viewModeToggle').exists()).toBe(true);
   });
 
@@ -99,5 +106,29 @@ describe('Discover documents layout', () => {
     );
 
     expect(container.appState.getState().grid?.columns?.someField.width).toEqual(206);
+  });
+
+  test('should render customisations', async () => {
+    const customControlColumnsConfiguration = () => ({
+      leadingControlColumns: [],
+      trailingControlColumns: [],
+    });
+
+    const customization: DiscoverCustomization = {
+      id: 'data_table',
+      logsEnabled: true,
+      customControlColumnsConfiguration,
+    };
+
+    customisationService.set(customization);
+    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.exists()).toBeTruthy();
+
+    expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
+      customControlColumnsConfiguration
+    );
+    expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
+    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 });

@@ -8,7 +8,6 @@
 import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesGetMappingIndexMappingRecord,
-  IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Direction } from '@elastic/eui';
 
@@ -107,6 +106,7 @@ export interface DataQualityCheckResult {
   markdownComments: string[];
   sameFamily: number | undefined;
   pattern: string;
+  checkedAt: number | undefined;
 }
 
 export interface PatternRollup {
@@ -118,7 +118,7 @@ export interface PatternRollup {
   pattern: string;
   results: Record<string, DataQualityCheckResult> | undefined;
   sizeInBytes: number | undefined;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
 }
 
 export interface CheckIndexRequest {
@@ -142,19 +142,7 @@ export interface IndexToCheck {
   indexName: string;
 }
 
-export type OnCheckCompleted = ({
-  batchId,
-  checkAllStartTime,
-  error,
-  formatBytes,
-  formatNumber,
-  indexName,
-  isLastCheck,
-  partitionedFieldMetadata,
-  pattern,
-  version,
-  requestTime,
-}: {
+export type OnCheckCompleted = (param: {
   batchId: string;
   checkAllStartTime: number;
   error: string | null;
@@ -186,10 +174,32 @@ export interface SelectedIndex {
   pattern: string;
 }
 
+export interface MeteringStatsIndex {
+  uuid?: string;
+  name: string;
+  num_docs: number | null;
+  size_in_bytes: number | null;
+  data_stream?: string;
+}
+
+export interface MeteringIndicesStatsResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    failed: number;
+  };
+  indices: MeteringStatsIndex[];
+  datastreams: Array<{ name: string; num_docs: number; size_in_bytes: number }>;
+  total: {
+    num_docs: number;
+    size_in_bytes: number;
+  };
+}
+
 export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams & {
   errorCount?: number;
   ilmPhase?: string;
-  indexId: string;
+  indexId?: string | null;
   indexName: string;
   sameFamilyFields?: string[];
   unallowedMappingFields?: string[];
@@ -198,8 +208,8 @@ export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams &
 
 export interface DataQualityCheckAllCompletedParams {
   batchId: string;
-  ecsVersion?: string;
-  isCheckAll?: boolean;
+  ecsVersion: string;
+  isCheckAll: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;

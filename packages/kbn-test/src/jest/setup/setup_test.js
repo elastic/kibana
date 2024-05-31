@@ -13,7 +13,10 @@
 
 import 'jest-styled-components';
 import '@testing-library/jest-dom';
-import 'web-streams-polyfill/es6'; // ReadableStream polyfill
+
+// uses subpath exports
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+import 'web-streams-polyfill/polyfill'; // ReadableStream polyfill
 
 /**
  * Removed in Jest 27/jsdom, used in some transitive dependencies

@@ -81,7 +81,7 @@ describe('Jira Fields: Preview', () => {
 
     const getByText = createQueryWithMarkup(screen.getByText);
 
-    expect(getByText('Incident Types: Malware, Denial of Service')).toBeInTheDocument();
+    expect(getByText('Incident types: Malware, Denial of Service')).toBeInTheDocument();
     expect(getByText('Severity: Medium')).toBeInTheDocument();
   });
 });

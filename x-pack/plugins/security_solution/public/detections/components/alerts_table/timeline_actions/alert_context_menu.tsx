@@ -144,11 +144,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
-  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  };
-
   const refetchAll = useCallback(() => {
+    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    };
     if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
     } else {
@@ -427,10 +426,17 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return null;
   }, [maybeRule]);
 
+  const ruleType = enrichedAlert?.['kibana.alert.rule.parameters']?.type;
+  const isAlertWithoutIndex = ruleType === 'esql' || ruleType === 'machine_learning';
+  const isWaitingForIndexOrDataView =
+    !isAlertWithoutIndex && memoRuleIndices == null && memoDataViewId == null;
+
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    (memoRuleIndices == null && memoDataViewId == null);
+    isWaitingForIndexOrDataView;
+
+  if (isLoading || isRuleLoading) return null;
 
   return (
     <AddExceptionFlyout

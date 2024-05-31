@@ -123,6 +123,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-common.ApmConfiguration.isUsersRedactionEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isUsersRedactionEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -354,7 +370,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Record<string, Readonly<{ apiKey?: string | undefined; active?: boolean | undefined; environment?: string | undefined; serverUrl?: string | undefined; secretToken?: string | undefined; globalLabels?: Readonly<{} & {}> | undefined; } & {}>> | undefined>; }>>"
+          "<Record<string, Readonly<{ apiKey?: string | undefined; active?: boolean | undefined; environment?: string | undefined; serverUrl?: string | undefined; secretToken?: string | undefined; globalLabels?: Readonly<{} & {}> | undefined; } & {}>> | undefined>; redactUsers: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }>>"
         ],
         "path": "packages/kbn-apm-config-loader/src/apm_config.ts",
         "deprecated": false,

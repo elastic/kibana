@@ -77,6 +77,20 @@
           },
           {
             "parentPluginId": "@kbn/core-status-common-internal",
+            "id": "def-common.ServerVersion.build_flavor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "build_flavor",
+            "description": [],
+            "signature": [
+              "\"serverless\" | \"traditional\""
+            ],
+            "path": "packages/core/status/core-status-common-internal/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common-internal",
             "id": "def-common.ServerVersion.build_date",
             "type": "string",
             "tags": [],

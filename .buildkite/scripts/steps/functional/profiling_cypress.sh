@@ -13,5 +13,5 @@ echo "--- Profiling Cypress Tests"
 
 cd "$XPACK_DIR"
 
-NODE_OPTIONS=--openssl-legacy-provider node plugins/profiling/scripts/test/e2e.js \
+NODE_OPTIONS=--openssl-legacy-provider node plugins/observability_solution/profiling/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \

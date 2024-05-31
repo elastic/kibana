@@ -8,7 +8,6 @@
 
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { FieldBasedIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { XYPersistedByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/async_services';
 
 export const DATA_LAYER_ID = 'data-layer-id';
 export const DATE_HISTOGRAM_COLUMN_ID = 'date-histogram-column-id';
@@ -64,7 +63,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
             layerType: 'annotations',
             persistanceType: 'byValue',
             ...group,
-          } as XYPersistedByValueAnnotationLayerConfig,
+          },
         ],
       },
       query: {
@@ -146,7 +145,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
 
 export const getCurrentTimeField = (attributes: TypedLensByValueInput['attributes']) => {
   return (
-    attributes.state.datasourceStates.formBased.layers[DATA_LAYER_ID].columns[
+    attributes.state.datasourceStates?.formBased?.layers[DATA_LAYER_ID].columns[
       DATE_HISTOGRAM_COLUMN_ID
     ] as FieldBasedIndexPatternColumn
   ).sourceField;

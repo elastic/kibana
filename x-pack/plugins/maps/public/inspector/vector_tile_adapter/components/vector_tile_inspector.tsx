@@ -19,7 +19,7 @@ import {
   EuiTab,
   EuiText,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { EmptyPrompt } from './empty_prompt';
 import type { TileRequest } from '../types';
 import { TileRequestTab } from './tile_request_tab';
@@ -42,7 +42,7 @@ interface State {
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
 
-class VectorTileInspector extends Component<InspectorViewProps, State> {
+export class VectorTileInspector extends Component<InspectorViewProps, State> {
   private _isMounted = false;
 
   constructor(props: InspectorViewProps) {
@@ -335,7 +335,3 @@ function getTileResponse(tileRequest: TileRequest) {
       }
     : undefined;
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export default VectorTileInspector;

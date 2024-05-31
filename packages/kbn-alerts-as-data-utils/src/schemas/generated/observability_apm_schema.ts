@@ -69,18 +69,21 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilityApmAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilityApmAlertOptional = rt.partial({
   'agent.name': schemaString,
+  'container.id': schemaString,
   'error.grouping_key': schemaString,
   'error.grouping_name': schemaString,
+  'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(
     rt.partial({
-      field: schemaString,
-      value: schemaString,
+      field: schemaStringArray,
+      value: schemaStringArray,
     })
   ),
   labels: schemaUnknown,

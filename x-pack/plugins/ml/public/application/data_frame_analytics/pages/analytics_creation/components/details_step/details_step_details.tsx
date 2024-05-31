@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -14,7 +15,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 
 export interface ListItems {

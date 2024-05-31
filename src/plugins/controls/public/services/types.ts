@@ -15,6 +15,7 @@ import { ControlsHTTPService } from './http/types';
 import { ControlsOptionsListService } from './options_list/types';
 import { ControlsOverlaysService } from './overlays/types';
 import { ControlsSettingsService } from './settings/types';
+import { ControlsStorageService } from './storage/types';
 import { ControlsUnifiedSearchService } from './unified_search/types';
 
 export interface ControlsServices {
@@ -31,4 +32,5 @@ export interface ControlsServices {
   // controls plugin's own services
   controls: ControlsServiceType;
   optionsList: ControlsOptionsListService;
+  storage: ControlsStorageService;
 }

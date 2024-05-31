@@ -18,6 +18,7 @@ export interface ComponentTemplateSerialized {
     lifecycle?: DataStream['lifecycle'];
   };
   version?: number;
+  deprecated?: boolean;
   _meta?: { [key: string]: any };
   lifecycle?: DataRetention;
 }
@@ -42,6 +43,7 @@ export interface ComponentTemplateListItem {
   hasAliases: boolean;
   hasSettings: boolean;
   isManaged: boolean;
+  isDeprecated?: boolean;
 }
 
 export interface ComponentTemplateDatastreams {

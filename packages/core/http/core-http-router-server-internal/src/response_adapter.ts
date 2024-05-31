@@ -33,7 +33,8 @@ function setHeaders(response: HapiResponseObject, headers: Record<string, string
 
 const statusHelpers = {
   isSuccess: (code: number) => code >= 100 && code < 300,
-  isRedirect: (code: number) => code >= 300 && code < 400,
+  isNotModified: (code: number) => code === 304,
+  isRedirect: (code: number) => code >= 300 && code < 400 && code !== 304,
   isError: (code: number) => code >= 400 && code < 600,
 };
 
@@ -76,7 +77,10 @@ export class HapiResponseAdapter {
     if (statusHelpers.isError(kibanaResponse.status)) {
       return this.toError(kibanaResponse);
     }
-    if (statusHelpers.isSuccess(kibanaResponse.status)) {
+    if (
+      statusHelpers.isSuccess(kibanaResponse.status) ||
+      statusHelpers.isNotModified(kibanaResponse.status)
+    ) {
       return this.toSuccess(kibanaResponse);
     }
     if (statusHelpers.isRedirect(kibanaResponse.status)) {

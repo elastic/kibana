@@ -46,10 +46,10 @@ import {
   bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -546,7 +546,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('security_solution', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
@@ -1120,6 +1120,36 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(secondAttachment.alertId).to.eql(['test-id-3']);
         expect(secondAttachment.index).to.eql(['test-index-3']);
+      });
+    });
+
+    describe('partial updates', () => {
+      it('should not result to a version conflict (409) when adding a comment to an updated case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        /**
+         * Updating the status of the case will
+         * change the version of the case
+         */
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
       });
     });
 

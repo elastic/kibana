@@ -7,7 +7,14 @@
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutFooter,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
@@ -50,12 +57,16 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
     });
   }, [defaultValues?.alertIds, queryClient]);
 
+  const osqueryFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'osqueryFlyoutTitle',
+  });
+
   if (osquery?.OsqueryAction) {
     return (
-      <EuiFlyout size="m" onClose={onClose}>
+      <EuiFlyout size="m" onClose={onClose} aria-labelledby={osqueryFlyoutTitleId}>
         <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
           <EuiTitle>
-            <h2>{ACTION_OSQUERY}</h2>
+            <h2 id={osqueryFlyoutTitleId}>{ACTION_OSQUERY}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

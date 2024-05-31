@@ -41,6 +41,7 @@ export default function (ftrContext: FtrProviderContext) {
               name: 'Updated title',
               description: 'I just updated that',
               color: '#009000',
+              managed: false,
             },
           });
         },

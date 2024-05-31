@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const actions = getService('actions');
   const rules = getService('rules');
+  const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
 
   describe('Slack', () => {
@@ -52,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           url: 'https://test.com',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -80,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           token: 'supersecrettoken',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -166,7 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
 
@@ -183,7 +184,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await testSubjects.click('saveRuleButton');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Failed to retrieve Slack channels list');
 
         // We are not saving the rule yet as we currently have no way
@@ -210,7 +211,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         //     tags: '',
         //   },
         // ]);
-        // const toastTitle = await pageObjects.common.closeToast();
+        // const toastTitle = await toasts.getTitleAndDismiss();
         // expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
     });

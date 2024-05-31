@@ -14,7 +14,7 @@ import {
   timer,
   firstValueFrom,
 } from 'rxjs';
-import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo, useRef } from 'react';

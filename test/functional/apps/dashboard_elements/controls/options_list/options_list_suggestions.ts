@@ -7,9 +7,10 @@
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import expect from '@kbn/expect';
 
-import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -143,42 +144,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.optionsListPopoverClearSearch();
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
       });
-    });
 
-    it('wildcard searching causes unsaved changes', async () => {
-      await dashboardControls.editExistingControl(controlId);
-      await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
-      await dashboardControls.controlEditorSave();
-      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-    });
+      it('wildcard searching causes unsaved changes', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
+        await dashboardControls.controlEditorSave();
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      });
 
-    it('wildcard searching works as expected', async () => {
-      await dashboardControls.optionsListOpenPopover(controlId);
-      await dashboardControls.optionsListPopoverSearchForOption('r');
-      const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
-        (result, [key, docCount]) => {
-          if (key.includes('r')) return { ...result, [key]: docCount };
-          return { ...result };
-        },
-        {}
-      );
-      await dashboardControls.ensureAvailableOptionsEqual(
-        controlId,
-        {
-          suggestions: containsR,
-          invalidSelections: [],
-        },
-        true
-      );
-      await dashboardControls.optionsListPopoverClearSearch();
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-    });
+      it('wildcard searching works as expected', async () => {
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSearchForOption('r');
+        const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
+          (result, [key, docCount]) => {
+            if (key.includes('r')) return { ...result, [key]: docCount };
+            return { ...result };
+          },
+          {}
+        );
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          {
+            suggestions: containsR,
+            invalidSelections: [],
+          },
+          true
+        );
+        await dashboardControls.optionsListPopoverClearSearch();
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
 
-    it('returning to default search technqiue should remove unsaved changes', async () => {
-      await dashboardControls.editExistingControl(controlId);
-      await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
-      await dashboardControls.controlEditorSave();
-      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      it('exact match searching works as expected', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'exact' });
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSearchForOption('R');
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
+        await dashboardControls.optionsListPopoverSearchForOption('RuFf');
+        expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
+
+        await dashboardControls.optionsListPopoverClearSearch();
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
+
+      it('returning to default search technique should remove unsaved changes', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+        await dashboardControls.controlEditorSave();
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
     });
   });
 }

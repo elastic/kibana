@@ -6,7 +6,6 @@
  */
 
 import stripAnsi from 'strip-ansi';
-import ansiRegex from 'ansi-regex';
 import { blue } from 'chalk';
 import { DataFormatter } from './data_formatter';
 import { SCREEN_ROW_MAX_WIDTH } from './constants';
@@ -83,4 +82,16 @@ export class ColumnLayoutFormatter extends DataFormatter {
 
     return colData + (fillCount > 0 ? ' '.repeat(fillCount) : '');
   }
+}
+
+// this is a copy of the `ansiRegex` module, which is no longer allowed to be `import`ed at the module
+// because it is not defined as an ESM module (only dynamic import is supported). Due to its usage,
+// which does not allow `async` calls to be `await`ed, it is now being copied here for use locally.
+function ansiRegex({ onlyFirst = false } = {}) {
+  const pattern = [
+    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))',
+  ].join('|');
+
+  return new RegExp(pattern, onlyFirst ? undefined : 'g');
 }

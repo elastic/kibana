@@ -9,6 +9,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
@@ -94,7 +95,7 @@ export class EndpointTestResources extends FtrService {
    * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
    * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
    * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
-   * @param [options.waitTimeout=60000] If waitUntilTransformed=true, number of ms to wait until timeout
+   * @param [options.waitTimeout=120000] If waitUntilTransformed=true, number of ms to wait until timeout
    * @param [options.customIndexFn] If provided, will use this function to generate and index data instead
    */
   async loadEndpointData(
@@ -116,7 +117,7 @@ export class EndpointTestResources extends FtrService {
       enableFleetIntegration = true,
       generatorSeed = 'seed',
       waitUntilTransformed = true,
-      waitTimeout = 60000,
+      waitTimeout = 120000,
       customIndexFn,
     } = options;
 
@@ -197,6 +198,12 @@ export class EndpointTestResources extends FtrService {
 
     await this.retry.waitForWithTimeout(`endpoint hosts in ${index}`, timeout, async () => {
       try {
+        if (index === METADATA_UNITED_INDEX) {
+          // United metadata transform occasionally can't find docs in .fleet-agents.
+          // Running a search on the index first eliminates this issue.
+          // Replacing the search with a refresh does not resolve flakiness.
+          await this.esClient.search({ index: AGENTS_INDEX });
+        }
         const searchResponse = await this.esClient.search({
           index,
           size,

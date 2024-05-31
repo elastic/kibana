@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
-import { Anomaly } from '../../../../common/results_loader';
+import type { Anomaly } from '../../../../common/results_loader';
 
 interface Props {
   anomalyData?: Anomaly[];

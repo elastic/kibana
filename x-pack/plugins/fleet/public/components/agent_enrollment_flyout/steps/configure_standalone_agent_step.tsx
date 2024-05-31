@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiCopy,
   EuiCodeBlock,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import type { K8sMode } from '../types';
+import { useStartServices } from '../../../hooks';
 
 export const ConfigureStandaloneAgentStep = ({
   isK8s,
@@ -38,14 +40,28 @@ export const ConfigureStandaloneAgentStep = ({
   isComplete?: boolean;
   onCopy?: () => void;
 }): EuiContainedStepProps => {
+  const core = useStartServices();
+  const { docLinks } = core;
   const policyMsg =
     isK8s === 'IS_KUBERNETES' ? (
       <FormattedMessage
         id="xpack.fleet.agentEnrollment.stepConfigureAgentDescriptionk8s"
-        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Update {ESUsernameVariable} and {ESPasswordVariable} environment variables in the Daemonset to match your Elasticsearch credentials."
+        defaultMessage="Copy or download the Kubernetes manifest inside the Kubernetes cluster. Update {ESUsernameVariable} and {ESPasswordVariable} environment variables in the Daemonset to match your Elasticsearch credentials. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingGuideLink} before deploying this manifest."
         values={{
           ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
           ESPasswordVariable: <EuiCode>ES_PASSWORD</EuiCode>,
+          scalingGuideLink: (
+            <EuiLink
+              external
+              href={docLinks.links.fleet.scalingKubernetesResourcesAndLimits}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.fleet.fleet.agentEnrollment.k8ScalingGuideLinkText"
+                defaultMessage="Scaling Elastic Agent on Kubernetes"
+              />
+            </EuiLink>
+          ),
         }}
       />
     ) : (

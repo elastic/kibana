@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { once } from 'lodash';
 import type { MlClient } from '../ml_client';
 import { mlLog } from '../log';
-import {
+import type {
   MlCapabilities,
-  adminMlCapabilities,
   MlCapabilitiesResponse,
   ResolveMlCapabilities,
   MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
+import { adminMlCapabilities } from '../../../common/types/capabilities';
 import { upgradeCheckProvider } from './upgrade';
-import { MlLicense } from '../../../common/license';
+import type { MlLicense } from '../../../common/license';
 import {
   InsufficientMLCapabilities,
   UnknownMLCapabilitiesError,

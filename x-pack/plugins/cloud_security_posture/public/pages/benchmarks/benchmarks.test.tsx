@@ -13,7 +13,7 @@ import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
 import { Benchmarks } from './benchmarks';
 import * as TEST_SUBJ from './test_subjects';
-import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
+import { useCspBenchmarkIntegrationsV2 } from './use_csp_benchmark_integrations';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
@@ -65,7 +65,7 @@ describe('<Benchmarks />', () => {
   const renderBenchmarks = (
     queryResponse: Partial<UseQueryResult> = createReactQueryResponse()
   ) => {
-    (useCspBenchmarkIntegrations as jest.Mock).mockImplementation(() => queryResponse);
+    (useCspBenchmarkIntegrationsV2 as jest.Mock).mockImplementation(() => queryResponse);
 
     return render(
       <TestProvider>

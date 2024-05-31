@@ -9,14 +9,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep } from 'lodash';
 import rison from '@kbn/rison';
 import {
-  Query,
   fromKueryExpression,
   toElasticsearchQuery,
   buildEsQuery,
   buildQueryFromFilters,
-  DataViewBase,
 } from '@kbn/es-query';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';

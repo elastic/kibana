@@ -22,13 +22,13 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
 import { getHeaderActions } from './components/header_actions/header_actions';
-import { ConnectorConfiguration } from './connector/connector_configuration';
-import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
+import { ConnectorScheduling } from './connector/connector_scheduling';
 import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
@@ -39,6 +39,7 @@ import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
+import { useIndicesNav } from './indices/indices_nav';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
@@ -75,9 +76,11 @@ export const SearchIndex: React.FC = () => {
   const {
     config,
     guidedOnboarding,
-    productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
+    updateSideNavDefinition,
   } = useValues(KibanaLogic);
+
+  const indicesItems = useIndicesNav();
 
   useEffect(() => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
@@ -111,6 +114,17 @@ export const SearchIndex: React.FC = () => {
       });
     return () => subscription?.unsubscribe();
   }, [guidedOnboarding, index?.count]);
+
+  useEffect(() => {
+    // We update the new side nav definition with the selected indices items
+    updateSideNavDefinition({ indices: indicesItems });
+  }, [indicesItems, updateSideNavDefinition]);
+
+  useEffect(() => {
+    return () => {
+      updateSideNavDefinition({ indices: undefined });
+    };
+  }, [updateSideNavDefinition]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -157,7 +171,7 @@ export const SearchIndex: React.FC = () => {
         ]
       : []),
     {
-      content: <ConnectorSchedulingComponent />,
+      content: <ConnectorScheduling />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
@@ -221,6 +235,7 @@ export const SearchIndex: React.FC = () => {
       )
     );
   };
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
@@ -228,7 +243,10 @@ export const SearchIndex: React.FC = () => {
       isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideGroupProps: {
+          responsive: false,
+        },
+        rightSideItems: getHeaderActions(index),
       }}
     >
       {isCrawlerIndex(index) && !index.connector ? (

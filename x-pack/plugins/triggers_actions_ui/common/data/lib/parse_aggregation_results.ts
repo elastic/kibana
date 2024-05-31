@@ -17,6 +17,7 @@ export interface ParsedAggregationGroup {
   group: string;
   count: number;
   hits: Array<SearchHit<unknown>>;
+  sourceFields: string[];
   value?: number;
 }
 
@@ -30,12 +31,16 @@ interface ParseAggregationResultsOpts {
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
   resultLimit?: number;
+  sourceFieldsParams?: Array<{ label: string; searchPath: string }>;
+  generateSourceFieldsFromHits?: boolean;
 }
 export const parseAggregationResults = ({
   isCountAgg,
   isGroupAgg,
   esResult,
   resultLimit,
+  sourceFieldsParams = [],
+  generateSourceFieldsFromHits = false,
 }: ParseAggregationResultsOpts): ParsedAggregationResults => {
   const aggregations = esResult?.aggregations || {};
 
@@ -51,6 +56,7 @@ export const parseAggregationResults = ({
               hits: esResult.hits.hits ?? [],
             },
           },
+          ...aggregations, // sourceFields
           ...(!isCountAgg
             ? {
                 metricAgg: {
@@ -77,11 +83,32 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName: string = `${groupBucket?.key}`;
+    const sourceFields: { [key: string]: string[] } = {};
+
+    sourceFieldsParams.forEach((field) => {
+      if (generateSourceFieldsFromHits) {
+        const fieldsSet = new Set<string>();
+        groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
+          if (hit._source && hit._source[field.label]) {
+            fieldsSet.add(hit._source[field.label]);
+          }
+        });
+        sourceFields[field.label] = Array.from(fieldsSet);
+      } else {
+        if (groupBucket[field.label]?.buckets && groupBucket[field.label].buckets.length > 0) {
+          sourceFields[field.label] = groupBucket[field.label].buckets.map(
+            (bucket: { doc_count: number; key: string | number }) => bucket.key
+          );
+        }
+      }
+    });
+
     const groupResult: any = {
       group: groupName,
       count: groupBucket?.doc_count,
       hits: groupBucket?.topHitsAgg?.hits?.hits ?? [],
       ...(!isCountAgg ? { value: groupBucket?.metricAgg?.value } : {}),
+      sourceFields,
     };
     results.results.push(groupResult);
   }

@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export * from './src/openapi_linter';
 export * from './src/openapi_generator';
 export * from './src/cli';

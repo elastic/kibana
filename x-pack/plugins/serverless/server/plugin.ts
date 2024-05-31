@@ -14,7 +14,12 @@ import { getConfigDirectory } from '@kbn/utils';
 import { ProjectType } from '@kbn/serverless-types';
 
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
-import { ServerlessPluginSetup, ServerlessPluginStart } from './types';
+import type {
+  ServerlessServerSetup,
+  ServerlessServerStart,
+  ServerlessServerSetupDependencies,
+  ServerlessServerStartDependencies,
+} from './types';
 import { ServerlessConfig } from './config';
 import { API_SWITCH_PROJECT } from '../common';
 
@@ -34,7 +39,15 @@ const typeToIdMap: Record<ProjectType, string> = {
   search: 'es',
 };
 
-export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, ServerlessPluginStart> {
+export class ServerlessPlugin
+  implements
+    Plugin<
+      ServerlessServerSetup,
+      ServerlessServerStart,
+      ServerlessServerSetupDependencies,
+      ServerlessServerStartDependencies
+    >
+{
   private readonly config: ServerlessConfig;
   private projectSettingsAdded: boolean = false;
 

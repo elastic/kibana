@@ -7,10 +7,10 @@
 
 import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { lastValueFrom } from 'rxjs';
 import type { DiagnosticResponse } from '.';
 import type { ReportingCore } from '../../..';
-import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({

@@ -12,7 +12,7 @@
 import stats from 'stats-lite';
 import { isNumber, random } from 'lodash';
 import { merge, of, Observable, combineLatest, ReplaySubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { Option, none, some, isSome, Some } from 'fp-ts/lib/Option';
 import { isOk } from '../lib/result_type';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';

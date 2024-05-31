@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -25,7 +26,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
+import type {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../../common/types/anomaly_detection_jobs';

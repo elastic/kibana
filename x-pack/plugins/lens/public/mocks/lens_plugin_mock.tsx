@@ -9,6 +9,7 @@ import React from 'react';
 import { createFormulaPublicApi } from '../async_services';
 import { LensPublicStart } from '..';
 import { visualizationTypes } from '../visualizations/xy/types';
+import { mockAllSuggestions } from './suggestions_mock';
 
 type Start = jest.Mocked<LensPublicStart>;
 
@@ -32,6 +33,7 @@ export const lensPluginMock = {
 
       stateHelperApi: jest.fn().mockResolvedValue({
         formula: createFormulaPublicApi(),
+        suggestions: jest.fn().mockReturnValue(mockAllSuggestions),
       }),
     };
     return startContract;

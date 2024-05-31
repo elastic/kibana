@@ -22,7 +22,9 @@ export const ElasticBrandPalette: ColorMapping.CategoricalPalette = {
   name: 'Elastic Brand',
   colorCount: ELASTIC_BRAND_PALETTE_COLORS.length,
   type: 'categorical',
-  getColor(valueInRange) {
-    return ELASTIC_BRAND_PALETTE_COLORS[valueInRange];
+  getColor(indexInRange, isDarkMode, loop) {
+    return ELASTIC_BRAND_PALETTE_COLORS[
+      loop ? indexInRange % ELASTIC_BRAND_PALETTE_COLORS.length : indexInRange
+    ];
   },
 };

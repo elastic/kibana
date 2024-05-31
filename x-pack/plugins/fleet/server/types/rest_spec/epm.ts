@@ -261,5 +261,7 @@ export const GetInputsRequestSchema = {
     format: schema.oneOf([schema.literal('json'), schema.literal('yml'), schema.literal('yaml')], {
       defaultValue: 'json',
     }),
+    prerelease: schema.maybe(schema.boolean()),
+    ignoreUnverified: schema.maybe(schema.boolean()),
   }),
 };

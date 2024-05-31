@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiAccordion,
@@ -17,31 +17,93 @@ import {
   EuiButton,
   EuiIcon,
   EuiText,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCode,
 } from '@elastic/eui';
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { RiskScoreEntity, type RiskScore } from '../../../common/risk_engine';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
+import {
+  RiskScoreEntity,
+  RISK_SCORE_INDEX_PATTERN,
+} from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { useKibana } from '../../common/lib/kibana';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../sourcerer/store/model';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-
+import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
+import { userHasRiskEngineReadPermissions } from '../common';
 interface IRiskScorePreviewPanel {
   showMessage: string;
   hideMessage: string;
   isLoading: boolean;
-  items: RiskScore[];
+  items: EntityRiskScoreRecord[];
   type: RiskScoreEntity;
 }
 
-const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
+const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
   scores
     ?.filter((item) => item?.id_field === field)
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
+
+export const RiskScorePreviewSection: React.FC<{
+  privileges: RiskEngineMissingPrivilegesResponse;
+}> = ({ privileges }) => {
+  const sectionBody = useMemo(() => {
+    if (privileges.isLoading) {
+      return (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    if (userHasRiskEngineReadPermissions(privileges)) {
+      return <RiskEnginePreview />;
+    }
+
+    return <MissingPermissionsCallout />;
+  }, [privileges]);
+
+  return (
+    <>
+      <EuiTitle>
+        <h2>{i18n.PREVIEW}</h2>
+      </EuiTitle>
+      <EuiSpacer size={'s'} />
+      {sectionBody}
+    </>
+  );
+};
+
+const MissingPermissionsCallout = () => {
+  return (
+    <EuiCallOut
+      title={i18n.PREVIEW_MISSING_PERMISSIONS_TITLE}
+      color="primary"
+      iconType="iInCircle"
+      data-test-subj="missing-risk-engine-preview-permissions"
+    >
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.securitySolution.riskScore.riskScorePreview.missingPermissionsCallout.description"
+          defaultMessage="Read permission is required for the {index} index pattern in order to preview data. Contact your administrator for further assistance."
+          values={{
+            index: <EuiCode>{RISK_SCORE_INDEX_PATTERN}</EuiCode>,
+          }}
+        />
+      </EuiText>
+    </EuiCallOut>
+  );
+};
 
 const RiskScorePreviewPanel = ({
   items,
@@ -76,7 +138,7 @@ const RiskScorePreviewPanel = ({
   );
 };
 
-export const RiskScorePreviewSection = () => {
+const RiskEnginePreview = () => {
   const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
     from: 'now-24h',
     to: 'now',
@@ -150,10 +212,6 @@ export const RiskScorePreviewSection = () => {
 
   return (
     <>
-      <EuiTitle>
-        <h2>{i18n.PREVIEW}</h2>
-      </EuiTitle>
-      <EuiSpacer size={'s'} />
       <EuiText>{i18n.PREVIEW_DESCRIPTION}</EuiText>
       <EuiSpacer />
       <EuiFormRow fullWidth data-test-subj="risk-score-preview-search-bar">

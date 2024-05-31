@@ -12,13 +12,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
@@ -189,8 +187,3 @@ export const getFieldColumns = ({
     ? getFieldTableColumns({ highlight, onHide })
     : getDefaultFieldTableColumns({ highlight })),
 ];
-
-/** Returns whether the table column has actions attached to it */
-export const isActionsColumn = (column: EuiBasicTableColumn<BrowserFieldItem>): boolean => {
-  return !!(column as EuiTableActionsColumnType<BrowserFieldItem>).actions?.length;
-};

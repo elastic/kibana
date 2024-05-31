@@ -51,14 +51,14 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       const { error } = await createIndex(indexName);
       setIsSaving(false);
       if (!error) {
-        loadIndices();
-        closeModal();
         notificationService.showSuccessToast(
           i18n.translate('xpack.idxMgmt.createIndex.successfullyCreatedIndexMessage', {
             defaultMessage: 'Successfully created index: {indexName}',
             values: { indexName },
           })
         );
+        closeModal();
+        loadIndices();
         return;
       }
       setCreateError(error.message);
@@ -156,7 +156,10 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
           data-test-subj="createIndexSaveButton"
           data-telemetry-id="idxMgmt-indexList-createIndex-saveButton"
         >
-          <FormattedMessage id="xpack.idxMgmt.createIndex.modal.saveButton" defaultMessage="Save" />
+          <FormattedMessage
+            id="xpack.idxMgmt.createIndex.modal.saveButton"
+            defaultMessage="Create"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

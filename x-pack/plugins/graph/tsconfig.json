@@ -49,6 +49,8 @@
     "@kbn/content-management-utils",
     "@kbn/logging",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/visualization-utils",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

@@ -7,8 +7,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { configSchema } from './config';
-import { AlertsConfigType } from './types';
+import { AlertingConfig, configSchema } from './config';
 
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
@@ -34,6 +33,8 @@ export type {
   GetViewInAppRelativeUrlFnOpts,
   DataStreamAdapter,
 } from './types';
+export { DEFAULT_AAD_CONFIG } from './types';
+export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
@@ -68,16 +69,20 @@ export {
   isValidAlertIndexName,
   InstallShutdownError,
 } from './alerts_service';
-export { sanitizeBulkErrorResponse } from './alerts_client';
+export { sanitizeBulkErrorResponse, AlertsClientError } from './alerts_client';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+export type { ConnectorAdapter } from './connector_adapters/types';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { AlertingPlugin } = await import('./plugin');
   return new AlertingPlugin(initContext);
 };
 
-export const config: PluginConfigDescriptor<AlertsConfigType> = {
+export const config: PluginConfigDescriptor<AlertingConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    rules: { run: { alerts: { max: true } } },
+  },
   deprecations: ({ renameFromRoot, deprecate }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(

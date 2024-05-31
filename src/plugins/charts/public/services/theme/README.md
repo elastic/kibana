@@ -8,11 +8,7 @@ The `theme` service offers utilities to interact with the kibana theme. EUI prov
 
 Default `baseTheme` from `@elastic/charts` (i.e. light).
 
-## `chartsDefaultTheme`
-
-Default `theme` from `@elastic/eui` (i.e. light).
-
-## `useChartsTheme` and `useChartsBaseTheme`
+## `useChartsBaseTheme`
 
 A **React hook** for simple fetching of the correct EUI `theme` and `baseTheme`.
 
@@ -23,7 +19,7 @@ import { Chart, Settings } from '@elastic/charts';
 export const YourComponent = () => (
   <Chart>
     <Settings
-      theme={npStart.plugins.charts.theme.useChartsTheme()}
+      theme={[chartThemeOverrides]}
       baseTheme={npStart.plugins.charts.theme.useChartsBaseTheme()}
     />
     {/* ... */}
@@ -31,20 +27,18 @@ export const YourComponent = () => (
 );
 ```
 
-## `chartsTheme$` and `chartsBaseTheme$`
+## `chartsBaseTheme$`
 
 An **`Observable`** of the current charts `theme` and `baseTheme`. Use this implementation for more flexible updates to the chart theme without full page refreshes.
 
 ```tsx
 import { npStart } from 'ui/new_platform';
-import { EuiChartThemeType } from '@elastic/eui/src/themes/charts/themes';
 import { Subscription, combineLatest } from 'rxjs';
 import { Chart, Settings, Theme } from '@elastic/charts';
 
 interface YourComponentProps {};
 
 interface YourComponentState {
-  chartsTheme: EuiChartThemeType['theme'];
   chartsBaseTheme: Theme;
 }
 
@@ -52,16 +46,14 @@ export class YourComponent extends Component<YourComponentProps, YourComponentSt
   private subscriptions: Subscription[] = [];
 
   public state = {
-    chartsTheme: npStart.plugins.charts.theme.chartsDefaultTheme,
     chartsBaseTheme: npStart.plugins.charts.theme.chartsDefaultBaseTheme,
   };
 
   componentDidMount() {
     this.subscription = combineLatest(
-      npStart.plugins.charts.theme.chartsTheme$,
       npStart.plugins.charts.theme.chartsBaseTheme$
-    ).subscribe(([chartsTheme, chartsBaseTheme]) =>
-      this.setState({ chartsTheme, chartsBaseTheme })
+    ).subscribe(([chartsBaseTheme]) =>
+      this.setState({ chartsBaseTheme })
     );
   }
 
@@ -72,21 +64,14 @@ export class YourComponent extends Component<YourComponentProps, YourComponentSt
   }
 
   public render() {
-    const { chartsBaseTheme, chartsTheme } = this.state;
+    const { chartsBaseTheme } = this.state;
 
     return (
       <Chart>
-        <Settings
-          theme={chartsTheme}
-          baseTheme={chartsBaseTheme}
-        />
+        <Settings baseTheme={chartsBaseTheme} />
         {/* ... */}
       </Chart>
     );
   }
 }
 ```
-
-## Why have `theme` and `baseTheme`?
-
-The `theme` prop is a recursive partial `Theme` that overrides properties from the `baseTheme`. This allows changes to the `Theme` TS type in `@elastic/charts` without having to update the `@elastic/eui` themes for every `<Chart />`.

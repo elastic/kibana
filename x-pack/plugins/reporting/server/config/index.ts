@@ -13,7 +13,10 @@ import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-server';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: {
-    csv: { scroll: true },
+    csv: {
+      enablePanelActionDownload: true,
+      scroll: true,
+    },
     poll: true,
     roles: true,
     export_types: true,
@@ -21,6 +24,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
+    unused('queue.indexInterval', { level: 'warning' }), // unused since 8.15
     unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
     unused('capture.browser.type', { level: 'warning' }),
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier', { level: 'warning' }), // unused since 7.10

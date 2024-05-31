@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { type TypeOf } from '@kbn/config-schema';
-import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
@@ -23,7 +22,7 @@ export type AwsCredentialsTypeFieldMap = {
   [key in AwsCredentialsType]: string[];
 };
 
-export type GcpCredentialsType = 'credentials-file' | 'credentials-json';
+export type GcpCredentialsType = 'credentials-file' | 'credentials-json' | 'credentials-none';
 
 export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];
@@ -142,14 +141,6 @@ export interface BaseCspSetupStatus {
 
 export type CspSetupStatus = BaseCspSetupStatus;
 
-export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
-
-export interface Benchmark {
-  package_policy: PackagePolicy;
-  agent_policy: AgentPolicyStatus;
-  rules_count: number;
-}
-
 export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
 export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
@@ -158,13 +149,6 @@ export type RuleSection = CspBenchmarkRuleMetadata['section'];
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
-
-export interface GetBenchmarkResponse {
-  items: Benchmark[];
-  total: number;
-  page: number;
-  perPage: number;
-}
 
 export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;
 
@@ -197,7 +181,7 @@ export interface CnvmStatistics {
   highCount: number | undefined;
   mediumCount: number | undefined;
   resourcesScanned: number | undefined;
-  cloudRegions: number | undefined;
+  cloudAccounts: number | undefined;
 }
 
 export interface CnvmDashboardData {

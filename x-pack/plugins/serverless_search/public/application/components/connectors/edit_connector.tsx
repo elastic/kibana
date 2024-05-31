@@ -66,7 +66,7 @@ export const EditConnector: React.FC = () => {
           title={
             <h1>
               {i18n.translate('xpack.serverlessSearch.connectors.notFound', {
-                defaultMessage: 'Could not find a connector with id {id}',
+                defaultMessage: 'Could not find connector {id}',
                 values: { id },
               })}
             </h1>
@@ -103,7 +103,7 @@ export const EditConnector: React.FC = () => {
               <DeleteConnectorModal
                 closeDeleteModal={() => setDeleteModalIsOpen(false)}
                 connectorId={connector.id}
-                connectorName={connector.name || CONNECTOR_LABEL}
+                connectorName={connector.name}
                 onSuccess={() => navigateToUrl('./')}
               />
             )}

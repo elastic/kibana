@@ -10,11 +10,11 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { CustomFieldsConfigurationFormProps } from './schema';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { customFieldSerializer } from './utils';
 
 export interface CustomFieldFormState {
   isValid: boolean | undefined;
@@ -25,36 +25,6 @@ interface Props {
   onChange: (state: CustomFieldFormState) => void;
   initialValue: CustomFieldConfiguration | null;
 }
-
-// Form -> API
-const formSerializer = ({
-  key,
-  label,
-  type,
-  options,
-}: CustomFieldsConfigurationFormProps): CustomFieldConfiguration => {
-  return {
-    key,
-    label,
-    type,
-    required: options?.required ? options.required : false,
-  };
-};
-
-// API -> Form
-const formDeserializer = ({
-  key,
-  label,
-  type,
-  required,
-}: CustomFieldConfiguration): CustomFieldsConfigurationFormProps => {
-  return {
-    key,
-    options: { required: Boolean(required) },
-    label,
-    type,
-  };
-};
 
 const FormComponent: React.FC<Props> = ({ onChange, initialValue }) => {
   const keyDefaultValue = useMemo(() => uuidv4(), []);
@@ -68,8 +38,7 @@ const FormComponent: React.FC<Props> = ({ onChange, initialValue }) => {
     },
     options: { stripEmptyFields: false },
     schema,
-    serializer: formSerializer,
-    deserializer: formDeserializer,
+    serializer: customFieldSerializer,
   });
 
   const { submit, isValid, isSubmitting } = form;

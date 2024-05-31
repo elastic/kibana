@@ -176,7 +176,7 @@ describe('rule_error_log', () => {
     });
 
     expect(wrapper.find(EuiSuperDatePicker).props().isLoading).toBeFalsy();
-    expect(wrapper.find('.euiTableRow').length).toEqual(10);
+    expect(wrapper.find('tr.euiTableRow').length).toEqual(10);
 
     nowMock.mockRestore();
   });

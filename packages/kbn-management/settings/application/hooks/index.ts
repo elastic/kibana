@@ -8,3 +8,4 @@
 
 export { useFields } from './use_fields';
 export { useSettings } from './use_settings';
+export { useScopeFields } from './use_scope_fields';

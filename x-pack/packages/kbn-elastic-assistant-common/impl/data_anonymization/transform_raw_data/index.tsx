@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { Replacements } from '../../schemas';
+import { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';
 
 export const transformRawData = ({
-  allow,
-  allowReplacement,
+  anonymizationFields,
   currentReplacements,
   getAnonymizedValue,
   onNewReplacements,
   rawData,
 }: {
-  allow: string[];
-  allowReplacement: string[];
-  currentReplacements: Record<string, string> | undefined;
+  anonymizationFields?: AnonymizationFieldResponse[];
+  currentReplacements: Replacements | undefined;
   getAnonymizedValue: ({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
-  onNewReplacements?: (replacements: Record<string, string>) => void;
+  onNewReplacements?: (replacements: Replacements) => void;
   rawData: string | Record<string, unknown[]>;
 }): string => {
   if (typeof rawData === 'string') {
@@ -35,8 +35,7 @@ export const transformRawData = ({
   }
 
   const anonymizedData = getAnonymizedData({
-    allow,
-    allowReplacement,
+    anonymizationFields,
     currentReplacements,
     rawData,
     getAnonymizedValue,

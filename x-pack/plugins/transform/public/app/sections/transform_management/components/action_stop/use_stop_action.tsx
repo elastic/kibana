@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities, useStopTransforms } from '../../../../hooks';
 import { isStopActionDisabled, stopActionNameText, StopActionName } from './stop_action_name';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';

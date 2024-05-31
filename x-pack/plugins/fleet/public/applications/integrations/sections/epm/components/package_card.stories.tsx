@@ -31,6 +31,8 @@ const args: Args = {
   categories: ['foobar'],
   isUnverified: false,
   isUpdateAvailable: false,
+  isQuickstart: false,
+  isCollectionCard: false,
 };
 
 const argTypes = {
@@ -44,6 +46,12 @@ const argTypes = {
     control: 'boolean',
   },
   isUpdateAvailable: {
+    control: 'boolean',
+  },
+  isQuickstart: {
+    control: 'boolean',
+  },
+  isCollectionCard: {
     control: 'boolean',
   },
 };

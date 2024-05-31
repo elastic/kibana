@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
 import { useExecutionResults } from './use_execution_results';
 import { useToasts } from '../../../../common/lib/kibana';
 import { api } from '../../api';
+import { createReactQueryWrapper } from '../../../../common/mock';
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../api');
@@ -26,21 +29,6 @@ describe('useExecutionResults', () => {
   afterEach(async () => {
     cleanup();
   });
-
-  const createReactQueryWrapper = () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          // Turn retries off, otherwise we won't be able to test errors
-          retry: false,
-        },
-      },
-    });
-    const wrapper: React.FC = ({ children }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    return wrapper;
-  };
 
   const render = () =>
     renderHook(

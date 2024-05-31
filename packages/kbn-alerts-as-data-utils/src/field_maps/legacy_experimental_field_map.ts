@@ -37,12 +37,12 @@ export const legacyExperimentalFieldMap = {
   },
   [ALERT_GROUP_FIELD]: {
     type: 'keyword',
-    array: false,
+    array: true,
     required: false,
   },
   [ALERT_GROUP_VALUE]: {
     type: 'keyword',
-    array: false,
+    array: true,
     required: false,
   },
 } as const;

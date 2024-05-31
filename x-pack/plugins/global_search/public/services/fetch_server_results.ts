@@ -6,7 +6,7 @@
  */
 
 import { Observable, from, EMPTY } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs';
 import { HttpStart } from '@kbn/core/public';
 import { GlobalSearchResult, GlobalSearchProviderFindParams } from '../../common/types';
 import { GlobalSearchFindOptions } from './types';

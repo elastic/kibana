@@ -24,19 +24,24 @@ The *{connectors-feature}* feature privilege is required to create, add,
 delete, and modify case connectors and to send updates to external systems.
 
 By default, `All` for the *Cases* feature includes authority to delete cases
-and comments unless you customize the sub-feature privileges.
+and comments and edit case settings unless you customize the sub-feature privileges.
 ====
 
 | Give assignee access to cases
 a| `All` for the *Cases* feature under *Management*.
 
-NOTE: Before a user can be assigned to a case, they must log into {kib} at
+[NOTE]
+====
+Before a user can be assigned to a case, they must log into {kib} at
 least once, which creates a user profile.
 
-| Give view-only access for cases | `Read` for the *Cases* feature under *Management*.
+This privilege is also required to add <<cases-action-type,case actions>> to rules.
+====
 
-| Give access to view and delete cases | `Read` for the *Cases* feature under
-*Management* with the deletion sub-feature enabled.
+| Give view-only access to cases
+a| `Read` for the *Cases* feature under *Management*.
+
+NOTE: By default, `Read` for the *Cases* feature does not include authority to delete cases and comments or edit case settings. You can grant this authority by customizing the sub-feature privileges.
 
 | Revoke all access to cases | `None` for the *Cases* feature under *Management*.
 

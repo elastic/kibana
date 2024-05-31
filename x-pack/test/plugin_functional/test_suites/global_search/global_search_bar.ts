@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
     const browser = getService('browser');
     const kibanaServer = getService('kibanaServer');
+    const retry = getService('retry');
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -51,8 +52,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows a suggestion when searching for a term matching a type', async () => {
         await navigationalSearch.searchFor('dashboard');
 
-        let results = await navigationalSearch.getDisplayedResults();
-        expect(results[0].label).to.eql('type: dashboard');
+        const dashboardTypeSearchResult = await retry.try(async () => {
+          await navigationalSearch.searchFor('dashboard');
+          const results = await navigationalSearch.getDisplayedResults();
+          // will throw if results not found
+          expect(results.length).greaterThan(0);
+          return results;
+        });
+
+        expect(dashboardTypeSearchResult[0].label).to.eql('type: dashboard');
 
         await navigationalSearch.clickOnOption(0);
         await navigationalSearch.waitForResultsLoaded();
@@ -60,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const searchTerm = await navigationalSearch.getFieldValue();
         expect(searchTerm).to.eql('type:dashboard');
 
-        results = await navigationalSearch.getDisplayedResults();
+        const results = await navigationalSearch.getDisplayedResults();
         expect(results.map((result) => result.label)).to.eql([
           'dashboard 1 (tag-2)',
           'dashboard 2 (tag-3)',

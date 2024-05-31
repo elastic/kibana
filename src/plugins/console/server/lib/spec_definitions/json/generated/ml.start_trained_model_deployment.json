@@ -6,6 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "cache_size": [],
+      "deployment_id": "",
       "number_of_allocations": [
         "1"
       ],

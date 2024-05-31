@@ -138,6 +138,10 @@ export type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
   BulkGetAgentPoliciesResponse,
+  RegistryPolicyIntegrationTemplate,
+  EnrollmentSettingsFleetServerPolicy,
+  GetEnrollmentSettingsRequest,
+  GetEnrollmentSettingsResponse,
 } from '../../common/types';
 export {
   entries,

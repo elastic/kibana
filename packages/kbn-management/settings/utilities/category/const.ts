@@ -22,6 +22,7 @@ export const SECURITY_SOLUTION_CATEGORY = 'securitySolution';
 export const TIMELION_CATEGORY = 'timelion';
 export const VISUALIZATION_CATEGORY = 'visualization';
 export const ENTERPRISE_SEARCH_CATEGORY = 'enterpriseSearch';
+export const DEV_TOOLS_CATEGORY = 'devTools';
 
 export const CATEGORY_ORDER = [
   GENERAL_CATEGORY,
@@ -39,4 +40,5 @@ export const CATEGORY_ORDER = [
   SECURITY_SOLUTION_CATEGORY,
   TIMELION_CATEGORY,
   VISUALIZATION_CATEGORY,
+  DEV_TOOLS_CATEGORY,
 ];

@@ -59,6 +59,15 @@ import { EditFilterList } from './edit_filter_list';
 const props = {
   canCreateFilter: true,
   canDeleteFilter: true,
+  kibana: {
+    services: {
+      notifications: {
+        toasts: {
+          addWarning: () => {},
+        },
+      },
+    },
+  },
 };
 
 function prepareEditTest() {

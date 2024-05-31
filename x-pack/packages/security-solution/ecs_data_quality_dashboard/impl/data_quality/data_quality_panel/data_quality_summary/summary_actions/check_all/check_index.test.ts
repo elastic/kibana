@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@kbn/ecs';
+import { EcsFlat, EcsVersion } from '@elastic/ecs';
 
 import { checkIndex, EMPTY_PARTITIONED_FIELD_METADATA } from './check_index';
 import { EMPTY_STAT } from '../../../../helpers';

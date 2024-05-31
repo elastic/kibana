@@ -794,202 +794,184 @@ Kibana and esArchiver to load fixture data into Elasticsearch.
 
 _todo: fully worked out example_
 
-### Saved Objects migrations
+### Saved Objects model versions
 
-_Also see <DocLink id="kibDevTutorialSavedObject" section="migrations" text="How to write a migration"/>._
+_Also see <DocLink id="kibDevTutorialSavedObject" section="model-versions" text="Defining model versions"/>._
 
-It is critical that you have extensive tests to ensure that migrations behave as expected with all possible input
-documents. Given how simple it is to test all the branch conditions in a migration function and the high impact of a
-bug in this code, there’s really no reason not to aim for 100% test code coverage.
+Model versions definitions are more structured than the legacy migration functions, which makes them harder
+to test without the proper tooling. This is why a set of testing tools and utilities are exposed
+from the `@kbn/core-test-helpers-model-versions` package, to help properly test the logic associated
+with model version and their associated transformations.
 
-It's recommend that you primarily leverage unit testing with Jest for testing your migration function. Unit tests will
-be a much more effective approach to testing all the different shapes of input data and edge cases that your migration
-may need to handle. With more complex migrations that interact with several components or may behave different depending
-on registry contents (such as Embeddable migrations), we recommend that you use the Jest Integration suite which allows
-you to create a full instance Kibana and all plugins in memory and leverage the import API to test migrating documents.
+#### Tooling for unit tests
 
-#### Throwing exceptions
-Keep in mind that any exception thrown by your migration function will cause Kibana to fail to upgrade. This should almost
-never happen for our end users and we should be exhaustive in our testing to be sure to catch as many edge cases that we
-could possibly handle. This entails ensuring that the migration is written defensively; we should try to avoid every bug
-possible in our implementation.
+For unit tests, the package exposes utilities to easily test the impact of transforming documents 
+from a model version to another one, either upward or backward.
 
-In general, exceptions should only be thrown when the input data is corrupted and doesn't match the expected schema. In
-such cases, it's important that an informative error message is included in the exception and we do not rely on implicit
-runtime exceptions such as "null pointer exceptions" like `TypeError: Cannot read property 'foo' of undefined`.
+##### Model version test migrator
 
-#### Unit testing
+The `createModelVersionTestMigrator` helper allows to create a test migrator that can be used to 
+test model version changes between versions, by transforming documents the same way the migration
+algorithm would during an upgrade.
 
-Unit testing migration functions is typically pretty straight forward and comparable to other types of Jest testing. In
-general, you should focus this tier of testing on validating output and testing input edge cases. One focus of this tier
-should be trying to find edge cases that throw exceptions the migration shouldn't. As you can see in this simple
-example, the coverage here is very exhaustive and verbose, which is intentional.
+**Example:**
 
 ```ts
-import { migrateCaseFromV7_9_0ToV7_10_0 } from './case_migrations';
+import { 
+  createModelVersionTestMigrator, 
+  type ModelVersionTestMigrator 
+} from '@kbn/core-test-helpers-model-versions';
 
-const validInput_7_9_0 = {
-  id: '1',
-  type: 'case',
-  attributes: {
-    connector_id: '1234';
-  }
-}
+const mySoTypeDefinition = someSoType();
 
-describe('Case migrations v7.7.0 -> v7.8.0', () => {
-  it('transforms the connector field', () => {
-    expect(migrateCaseFromV7_9_0ToV7_10_0(validInput_7_9_0)).toEqual({
-      id: '1',
-      type: 'case',
-      attributes: {
-        connector: {
-          id: '1234',   // verify id was moved into subobject
-          name: 'none', // verify new default field was added
-        }
-      }
-    });
+describe('mySoTypeDefinition model version transformations', () => {
+  let migrator: ModelVersionTestMigrator;
+  
+  beforeEach(() => {
+    migrator = createModelVersionTestMigrator({ type: mySoTypeDefinition });
   });
+  
+  describe('Model version 2', () => {
+    it('properly backfill the expected fields when converting from v1 to v2', () => {
+      const obj = createSomeSavedObject();
 
-  it('handles empty string', () => {
-    expect(migrateCaseFromV7_9_0ToV7_10_0({
-      id: '1',
-      type: 'case',
-      attributes: {
-        connector_id: ''
-      }
-    })).toEqual({
-      id: '1',
-      type: 'case',
-      attributes: {
-        connector: {
-          id: 'none',
-          name: 'none',
-        }
-      }
-    });
-  });
+      const migrated = migrator.migrate({
+        document: obj,
+        fromVersion: 1,
+        toVersion: 2,
+      });
 
-  it('handles null', () => {
-    expect(migrateCaseFromV7_9_0ToV7_10_0({
-      id: '1',
-      type: 'case',
-      attributes: {
-        connector_id: null
-      }
-    })).toEqual({
-      id: '1',
-      type: 'case',
-      attributes: {
-        connector: {
-          id: 'none',
-          name: 'none',
-        }
-      }
-    });
-  });
-
-  it('handles undefined', () => {
-    expect(migrateCaseFromV7_9_0ToV7_10_0({
-      id: '1',
-      type: 'case',
-      attributes: {
-        // Even though undefined isn't a valid JSON or Elasticsearch value, we should test it anyways since there
-        // could be some JavaScript layer that casts the field to `undefined` for some reason.
-        connector_id: undefined 
-      }
-    })).toEqual({
-      id: '1',
-      type: 'case',
-      attributes: {
-        connector: {
-          id: 'none',
-          name: 'none',
-        }
-      }
+      expect(migrated.properties).toEqual(expectedV2Properties);
     });
 
-    expect(migrateCaseFromV7_9_0ToV7_10_0({
-      id: '1',
-      type: 'case',
-      attributes: {
-        // also test without the field present at all
-      }
-    })).toEqual({
-      id: '1',
-      type: 'case',
-      attributes: {
-        connector: {
-          id: 'none',
-          name: 'none',
-        }
-      }
+    it('properly removes the expected fields when converting from v2 to v1', () => {
+      const obj = createSomeSavedObject();
+
+      const migrated = migrator.migrate({
+        document: obj,
+        fromVersion: 2,
+        toVersion: 1,
+      });
+
+      expect(migrated.properties).toEqual(expectedV1Properties);
     });
   });
 });
 ```
 
-You can generate code coverage report for a single plugin.
+#### Tooling for integration tests
 
-```bash
-yarn jest --coverage --config src/plugins/console/jest.config.js
-```
+During integration tests, we can boot a real Elasticsearch cluster, allowing us to manipulate SO
+documents in a way almost similar to how it would be done on production runtime. With integration
+tests, we can even simulate the cohabitation of two Kibana instances with different model versions
+to assert the behavior of their interactions. 
 
-Html report should be available in `target/kibana-coverage/jest/src/plugins/console` path
+##### Model version test bed
 
-We run code coverage daily on CI and ["Kibana Stats cluster"](https://kibana-stats.elastic.dev/s/code-coverage/app/home)
-can be used to view statistics. The report combines code coverage for all jest tests within Kibana repository.
+The package exposes a `createModelVersionTestBed` function that can be used to fully setup a
+test bed for model version integration testing. It can be used to start and stop the ES server,
+and to initiate the migration between the two versions we're testing.
 
-#### Integration testing
-With more complicated migrations, the behavior of the migration may be dependent on values from other plugins which may
-be difficult or even impossible to test with unit tests. You need to actually bootstrap Kibana, load the plugins, and
-then test the full end-to-end migration. This type of set up will also test ingesting your documents into Elasticsearch
-against the mappings defined by your Saved Object type.
-
-This can be achieved using the `jest_integration` suite and the `kbnTestServer` utility for starting an in-memory
-instance of Kibana. You can then leverage the import API to test migrations. This API applies the same migrations to
-imported documents as are applied at Kibana startup and is much easier to work with for testing.
+**Example:**
 
 ```ts
-// You may need to adjust these paths depending on where your test file is located.
-// The absolute path is src/core/test_helpers/so_migrations
-import { createTestHarness, SavedObjectTestHarness } from '../../../../src/core/test_helpers/so_migrations';
+import { 
+  createModelVersionTestBed,
+  type ModelVersionTestKit
+} from '@kbn/core-test-helpers-model-versions';
 
-describe('my plugin migrations', () => {
-  let testHarness: SavedObjectTestHarness;
+describe('myIntegrationTest', () => {
+  const testbed = createModelVersionTestBed();
+  let testkit: ModelVersionTestKit;
 
   beforeAll(async () => {
-    testHarness = createTestHarness();
-    await testHarness.start();
+    await testbed.startES();
   });
 
   afterAll(async () => {
-    await testHarness.stop();
+    await testbed.stopES();
   });
 
-  it('successfully migrates valid case documents', async () => {
-    expect(
-      await testHarness.migrate([
-        { type: 'case', id: '1', attributes: { connector_id: '1234' }, references: [] },
-        { type: 'case', id: '2', attributes: { connector_id: '' }, references: [] },
-        { type: 'case', id: '3', attributes: { connector_id: null }, references: [] },
-      ])
-    ).toEqual([
-      expect.objectContaining(
-        { type: 'case', id: '1', attributes: { connector: { id: '1234', name: 'none' } } }),
-      expect.objectContaining(
-        { type: 'case', id: '2', attributes: { connector: { id: 'none', name: 'none' } } }),
-      expect.objectContaining(
-        { type: 'case', id: '3', attributes: { connector: { id: 'none', name: 'none' } } }),
-    ])
-  })
-})
+  beforeEach(async () => {
+    // prepare the test, preparing the index and performing the SO migration
+    testkit = await testbed.prepareTestKit({
+      savedObjectDefinitions: [{
+        definition: mySoTypeDefinition,
+        // the model version that will be used for the "before" version
+        modelVersionBefore: 1,
+        // the model version that will be used for the "after" version
+        modelVersionAfter: 2,
+      }]
+    })
+  });
+
+  afterEach(async () => {
+    if(testkit) {
+      // delete the indices between each tests to perform a migration again
+      await testkit.tearsDown();
+    }
+  });
+
+  it('can be used to test model version cohabitation', async () => {
+    // last registered version is `1` (modelVersionBefore)
+    const repositoryV1 = testkit.repositoryBefore;
+    // last registered version is `2` (modelVersionAfter)
+    const repositoryV2 = testkit.repositoryAfter;
+
+    // do something with the two repositories, e.g
+    await repositoryV1.create(someAttrs, { id });
+    const v2docReadFromV1 = await repositoryV2.get('my-type', id);
+    expect(v2docReadFromV1.attributes).toEqual(whatIExpect);
+  });
+});
 ```
 
-There are some caveats about using the import/export API for testing migrations:
-- You cannot test the startup behavior of Kibana this way. This should not have any effect on type migrations but does
-  mean that this method cannot be used for testing the migration algorithm itself.
-- While not yet supported, if support is added for migrations that affect multiple types, it's possible that the
-  behavior during import may vary slightly from the upgrade behavior.
+**Limitations:**
+
+Because the test bed is only creating the parts of Core required to instantiate the two SO
+repositories, and because we're not able to properly load all plugins (for proper isolation), the integration
+test bed currently has some limitations:
+
+- no extensions are enabled
+  - no security
+  - no encryption
+  - no spaces
+- all SO types will be using the same SO index
+
+## Limitations and edge cases in serverless environments
+
+The serverless environment, and the fact that upgrade in such environments are performed in a way
+where, at some point, the old and new version of the application are living in cohabitation, leads 
+to some particularities regarding the way the SO APIs works, and to some limitations / edge case
+that we need to document
+
+### Using the `fields` option of the `find` savedObjects API
+
+By default, the `find` API (as any other SO API returning documents) will migrate all documents before
+returning them, to ensure that documents can be used by both versions during a cohabitation (e.g an old
+node searching for documents already migrated, or a new node searching for documents not yet migrated).
+
+However, when using the `fields` option of the `find` API, the documents can't be migrated, as some
+model version changes can't be applied against a partial set of attributes. For this reason, when the
+`fields` option is provided, the documents returned from `find` will **not** be migrated.
+
+Which is why, when using this option, the API consumer needs to make sure that *all* the fields passed
+to the `fields` option **were already present in the prior model version**. Otherwise, it may lead to inconsistencies
+during upgrades, where newly introduced or backfilled fields may not necessarily appear in the documents returned
+from the `search` API when the option is used.
+
+   (*note*: both the previous and next version of Kibana must follow this rule then)
+
+### Using `bulkUpdate` for fields with large `json` blobs
+
+The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents.
+These update operations are done in-memory, and cause memory constraint issues when
+updating many objects with large `json` blobs stored in some fields. As such, we recommend against using
+`bulkUpdate` for savedObjects that:
+- use arrays (as these tend to be large objects)
+- store large `json` blobs in some fields
+
+
 
 ### Elasticsearch
 

@@ -26,10 +26,6 @@
 .dshDashboardGrid__item--expanded,
 .dshDashboardGrid__item--blurred,
 .dshDashboardGrid__item--focused {
-  .embPanel {
-    border-color: transparent;
-  }
-
   .embPanel--dragHandle:hover {
     background-color: unset;
     cursor: default;

@@ -59,17 +59,25 @@ const CaptureSchema = schema.object({
 const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
-  enablePanelActionDownload: schema.boolean({ defaultValue: true }),
+  enablePanelActionDownload: schema.boolean({ defaultValue: false }),
   maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
     defaultValue: ByteSizeValue.parse('250mb'),
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
+    strategy: schema.oneOf(
+      [
+        // point-in-time API or scroll API is supported
+        schema.literal('pit'),
+        schema.literal('scroll'),
+      ],
+      { defaultValue: 'pit' }
+    ),
     duration: schema.string({
-      defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
+      defaultValue: '30s', // values other than "auto" are passed directly to ES, so string only format is preferred
       validate(value) {
-        if (!/^[0-9]+(d|h|m|s|ms|micros|nanos)$/.test(value)) {
-          return 'must be a duration string';
+        if (!/(^[0-9]+(d|h|m|s|ms|micros|nanos)|auto)$/.test(value)) {
+          return 'must be either "auto" or a duration string';
         }
       },
     }),

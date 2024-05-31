@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FileBasedFieldVisConfig } from './types';
+import type { FileBasedFieldVisConfig } from './types';
 
 export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
   const { stats } = config;

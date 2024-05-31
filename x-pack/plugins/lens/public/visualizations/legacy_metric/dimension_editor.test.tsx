@@ -94,9 +94,7 @@ describe('metric dimension editor', () => {
     expect(
       instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]').exists()
     ).toBe(false);
-    expect(
-      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_palette"]').exists()
-    ).toBe(false);
+    expect(instance.find('[data-test-subj="lns_dynamicColoring_edit"]').exists()).toBe(false);
   });
 
   it('should set the dynamic coloring default to "none"', () => {
@@ -109,9 +107,7 @@ describe('metric dimension editor', () => {
         .prop('idSelected')
     ).toEqual(expect.stringContaining(ColorMode.None));
 
-    expect(
-      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_palette"]').exists()
-    ).toBe(false);
+    expect(instance.find('[data-test-subj="lns_dynamicColoring_edit"]').exists()).toBe(false);
   });
 
   it('should show the dynamic palette display ony when colorMode is different from "none"', () => {
@@ -125,9 +121,7 @@ describe('metric dimension editor', () => {
         .prop('idSelected')
     ).toEqual(expect.stringContaining(ColorMode.Labels));
 
-    expect(
-      instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_palette"]').exists()
-    ).toBe(true);
+    expect(instance.find('[data-test-subj="lns_dynamicColoring_edit"]').exists()).toBe(true);
   });
 
   it('should prefill the palette stops with some colors when enabling coloring', () => {
@@ -155,10 +149,7 @@ describe('metric dimension editor', () => {
     const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
 
     act(() => {
-      instance
-        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"]')
-        .first()
-        .simulate('click');
+      instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
     });
     instance.update();
 
@@ -172,10 +163,7 @@ describe('metric dimension editor', () => {
     const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
 
     act(() => {
-      instance
-        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"]')
-        .first()
-        .simulate('click');
+      instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
     });
     instance.update();
 
@@ -189,10 +177,7 @@ describe('metric dimension editor', () => {
     const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
 
     act(() => {
-      instance
-        .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_trigger"]')
-        .first()
-        .simulate('click');
+      instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
     });
     instance.update();
 

@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  ChartTooltipService,
-  getChartTooltipDefaultState,
-  TooltipData,
-} from './chart_tooltip_service';
+import type { TooltipData } from './chart_tooltip_service';
+import { ChartTooltipService, getChartTooltipDefaultState } from './chart_tooltip_service';
 
 describe('ChartTooltipService', () => {
   let service: ChartTooltipService;

@@ -49,6 +49,7 @@ export function useFetchRuleActionConnectors({ ruleActions }: FetchRuleActionCon
       }
       const allActions = await loadAllActions({
         http,
+        includeSystemActions: true,
       });
       setActionConnector((oldState: FetchActionConnectors) => ({
         ...oldState,

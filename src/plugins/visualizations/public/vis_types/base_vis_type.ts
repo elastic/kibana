@@ -21,7 +21,7 @@ const defaultOptions: VisTypeOptions = {
   hierarchicalData: false, // we should get rid of this i guess ?
 };
 
-export class BaseVisType<TVisParams = VisParams> {
+export class BaseVisType<TVisParams extends VisParams = VisParams> {
   public readonly name;
   public readonly title;
   public readonly description;

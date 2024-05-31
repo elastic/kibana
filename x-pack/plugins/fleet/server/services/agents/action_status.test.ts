@@ -5,9 +5,55 @@
  * 2.0.
  */
 
-import { hasRolloutPeriodPassed } from './action_status';
+import type { ActionStatusOptions } from '../../types';
 
-describe('action_status', () => {
+import { getPage, getPerPage, hasRolloutPeriodPassed } from './action_status';
+
+describe('getPage', () => {
+  it('should return the default value when there are no pagination options', () => {
+    const options = {} as ActionStatusOptions;
+    expect(getPage(options)).toBe(0);
+  });
+
+  it('should return the default value when options.page is undefined', () => {
+    const options = { perPage: 5 } as ActionStatusOptions;
+    expect(getPage(options)).toBe(0);
+  });
+
+  it('should return the default value when options.perPage is undefined', () => {
+    const options = { page: 1 } as ActionStatusOptions;
+    expect(getPage(options)).toBe(0);
+  });
+
+  it('should return a value scaled to options.page and options.perPage', () => {
+    const options = { page: 1, perPage: 5 } as ActionStatusOptions;
+    expect(getPage(options)).toBe(5);
+  });
+});
+
+describe('getPerPage', () => {
+  it('should return the default value when there are no pagination options', () => {
+    const options = {} as ActionStatusOptions;
+    expect(getPerPage(options)).toBe(20);
+  });
+
+  it('should return the default value when options.page is undefined', () => {
+    const options = { perPage: 5 } as ActionStatusOptions;
+    expect(getPerPage(options)).toBe(20);
+  });
+
+  it('should return the default value when options.perPage is undefined', () => {
+    const options = { page: 1 } as ActionStatusOptions;
+    expect(getPerPage(options)).toBe(20);
+  });
+
+  it('should return a value scaled to options.page and options.perPage', () => {
+    const options = { page: 1, perPage: 5 } as ActionStatusOptions;
+    expect(getPerPage(options)).toBe(10);
+  });
+});
+
+describe('hasRolloutPeriodPassed', () => {
   it('should return true when rollout period has passed', () => {
     const source = {
       start_time: '2022-12-30T10:52:24.269Z',

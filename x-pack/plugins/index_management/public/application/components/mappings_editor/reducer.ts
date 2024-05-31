@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { Field, NormalizedFields, NormalizedField, State, Action } from './types';
-import {
-  getFieldMeta,
-  getUniqueId,
-  shouldDeleteChildFieldsAfterTypeChange,
-  getAllChildFields,
-  getMaxNestedDepth,
-  normalize,
-  updateFieldsPathAfterFieldNameChange,
-  searchFields,
-} from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
+import {
+  getAllChildFields,
+  getFieldMeta,
+  getFieldsFromState,
+  getFieldsMatchingFilterFromState,
+  getMaxNestedDepth,
+  getUniqueId,
+  normalize,
+  searchFields,
+  shouldDeleteChildFieldsAfterTypeChange,
+  updateFieldsPathAfterFieldNameChange,
+} from './lib';
+import { Action, Field, NormalizedField, NormalizedFields, State } from './types';
 
 export const addFieldToState = (field: Field, state: State): State => {
   const updatedFields = { ...state.fields };
@@ -205,6 +207,11 @@ export const reducer = (state: State, action: Action): State => {
           term: '',
           result: [],
         },
+        filter: {
+          filteredFields: action.value.filter.filteredFields,
+          selectedOptions: action.value.filter.selectedOptions,
+          selectedDataTypes: action.value.filter.selectedDataTypes,
+        },
       };
     }
     case 'configuration.update': {
@@ -315,6 +322,28 @@ export const reducer = (state: State, action: Action): State => {
     }
     case 'field.add': {
       return addFieldToState(action.value, state);
+    }
+    case 'field.addSemanticText': {
+      const addTexFieldWithCopyToActionValue: Field = {
+        name: action.value.referenceField as string,
+        type: 'text',
+        copy_to: [action.value.name],
+      };
+
+      // Add text field to state with copy_to of semantic_text field
+      let updatedState = addFieldToState(addTexFieldWithCopyToActionValue, state);
+
+      const addSemanticTextFieldActionValue: Field = {
+        name: action.value.name,
+        inference_id: action.value.inferenceId,
+        type: 'semantic_text',
+      };
+
+      // Add semantic_text field to state and reset fieldToAddFieldTo
+      updatedState = addFieldToState(addSemanticTextFieldActionValue, updatedState);
+      updatedState.documentFields.fieldToAddFieldTo = undefined;
+
+      return updatedState;
     }
     case 'field.remove': {
       const field = state.fields.byId[action.value];
@@ -582,7 +611,12 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         search: {
           term: action.value,
-          result: searchFields(action.value, state.fields.byId),
+          result: searchFields(
+            action.value,
+            state.filter.selectedDataTypes.length > 0
+              ? getFieldsMatchingFilterFromState(state, state.filter.selectedDataTypes)
+              : state.fields.byId
+          ),
         },
       };
     }
@@ -590,6 +624,28 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         isValid: action.value,
+      };
+    }
+    case 'filter:update': {
+      const selectedDataTypes: string[] = action.value.selectedOptions
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.label);
+      return {
+        ...state,
+        filter: {
+          filteredFields: getFieldsFromState(
+            state.fields,
+            selectedDataTypes.length > 0 ? selectedDataTypes : undefined
+          ),
+          selectedOptions: action.value.selectedOptions,
+          selectedDataTypes,
+        },
+      };
+    }
+    case 'inferenceToModelIdMap.update': {
+      return {
+        ...state,
+        inferenceToModelIdMap: action.value.inferenceToModelIdMap,
       };
     }
   }

@@ -81,49 +81,6 @@ export const FIELD_COLUMN_TITLE = i18n.translate(
   }
 );
 
-export const USER_ID = i18n.translate('xpack.securitySolution.timeline.userDetails.userIdLabel', {
-  defaultMessage: 'User ID',
-});
-
-export const MAX_ANOMALY_SCORE_BY_JOB = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.maxAnomalyScoreByJobLabel',
-  {
-    defaultMessage: 'Max anomaly score by job',
-  }
-);
-
-export const FIRST_SEEN = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.firstSeenLabel',
-  {
-    defaultMessage: 'First seen',
-  }
-);
-
-export const LAST_SEEN = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.lastSeenLabel',
-  {
-    defaultMessage: 'Last seen',
-  }
-);
-
-export const OPERATING_SYSTEM_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hostOsNameLabel',
-  {
-    defaultMessage: 'Operating system',
-  }
-);
-
-export const FAMILY = i18n.translate('xpack.securitySolution.timeline.userDetails.familyLabel', {
-  defaultMessage: 'Family',
-});
-
-export const IP_ADDRESSES = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.ipAddressesLabel',
-  {
-    defaultMessage: 'IP addresses',
-  }
-);
-
 export const NO_ACTIVE_INTEGRATION_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noActiveIntegrationTitle',
   {
@@ -165,13 +122,6 @@ export const CLOSE_BUTTON = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.closeButton',
   {
     defaultMessage: 'close',
-  }
-);
-
-export const OBSERVED_USER_INSPECT_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.observedUserInspectTitle',
-  {
-    defaultMessage: 'Observed user',
   }
 );
 

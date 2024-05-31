@@ -29,9 +29,15 @@ async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientCont
     perPage: 100,
   });
 
-  cspmDataViews.saved_objects.forEach((dataView) => {
-    savedObjectsClient.updateObjectsSpaces([{ id: dataView.id, type: 'index-pattern' }], ['*'], []);
-  });
+  await Promise.all(
+    cspmDataViews.saved_objects.map((dataView) =>
+      savedObjectsClient.updateObjectsSpaces(
+        [{ id: dataView.id, type: 'index-pattern' }],
+        ['*'],
+        []
+      )
+    )
+  );
 }
 
 export const isCspPackagePolicyInstalled = async (

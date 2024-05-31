@@ -31,8 +31,10 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-contexts',
       'skip-docker-ubi',
       'skip-docker-ubuntu',
+      'skip-docker-chainguard',
       'skip-docker-cloud',
       'skip-docker-serverless',
+      'skip-docker-fips',
       'release',
       'skip-node-download',
       'skip-cloud-dependencies-download',
@@ -138,11 +140,14 @@ export function readCliArgs(argv: string[]) {
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
+    createDockerChainguard:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-chainguard']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
     createDockerServerless:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
+    createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     eprRegistry: flags['epr-registry'],
     buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),

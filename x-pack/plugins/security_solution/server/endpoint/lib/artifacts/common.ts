@@ -31,6 +31,7 @@ export const ArtifactConstants = {
 
 export const ManifestConstants = {
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact-manifest',
+  UNIFIED_SAVED_OBJECT_TYPE: 'endpoint:unified-user-artifact-manifest',
 };
 
 export const getArtifactId = (artifact: InternalArtifactSchema) => {

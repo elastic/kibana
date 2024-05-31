@@ -16,6 +16,8 @@ import { pick } from 'lodash';
 import semverMajor from 'semver/functions/major';
 import semverPrerelease from 'semver/functions/prerelease';
 
+import { appContextService } from '../..';
+
 import type {
   ArchivePackage,
   RegistryPolicyTemplate,
@@ -126,6 +128,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'icons',
   'policy_templates',
   'release',
+  'agent',
   'elasticsearch',
 ] as const;
 
@@ -198,7 +201,12 @@ export function parseAndVerifyArchive(
   topLevelDirOverride?: string
 ): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
-  const toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
+  const logger = appContextService.getLogger();
+  let toplevelDir = topLevelDirOverride || '';
+  if (paths.length > 0) {
+    toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
+  }
+
   paths.forEach((filePath) => {
     if (!filePath.startsWith(toplevelDir)) {
       throw new PackageInvalidArchiveError(
@@ -210,15 +218,19 @@ export function parseAndVerifyArchive(
   // The package must contain a manifest file ...
   const manifestFile = path.posix.join(toplevelDir, MANIFEST_NAME);
   const manifestBuffer = assetsMap[manifestFile];
+  logger.debug(`Verifying archive - checking manifest file and manifest buffer`);
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError(
-      `Package at top-level directory ${toplevelDir} must contain a top-level ${MANIFEST_NAME} file.`
+      !paths.includes(manifestFile)
+        ? `Manifest file ${manifestFile} not found in paths.`
+        : `Manifest buffer is not found in assets map for manifest file ${manifestFile}.`
     );
   }
 
   // ... which must be valid YAML
   let manifest: ArchivePackage;
   try {
+    logger.debug(`Verifying archive - loading yaml`);
     manifest = yaml.safeLoad(manifestBuffer.toString());
   } catch (error) {
     throw new PackageInvalidArchiveError(
@@ -227,6 +239,7 @@ export function parseAndVerifyArchive(
   }
 
   // must have mandatory fields
+  logger.debug(`Verifying archive - verifying manifest content`);
   const reqGiven = pick(manifest, requiredArchivePackageProps);
   const requiredKeysMatch =
     Object.keys(reqGiven).toString() === requiredArchivePackageProps.toString();
@@ -246,13 +259,15 @@ export function parseAndVerifyArchive(
   const parsed: ArchivePackage = { ...reqGiven, ...optGiven };
 
   // Package name and version from the manifest must match those from the toplevel directory
+  logger.debug(`Verifying archive - parsing manifest: ${parsed}`);
   const pkgKey = pkgToPkgKey({ name: parsed.name, version: parsed.version });
+
   if (!topLevelDirOverride && toplevelDir !== pkgKey) {
     throw new PackageInvalidArchiveError(
       `Name ${parsed.name} and version ${parsed.version} do not match top-level directory ${toplevelDir}`
     );
   }
-
+  logger.debug(`Parsing archive - parsing and verifying data streams`);
   const parsedDataStreams = parseAndVerifyDataStreams({
     paths,
     pkgName: parsed.name,
@@ -265,9 +280,11 @@ export function parseAndVerifyArchive(
     parsed.data_streams = parsedDataStreams;
   }
 
+  logger.debug(`Parsing archive - parsing and verifying policy templates`);
   parsed.policy_templates = parseAndVerifyPolicyTemplates(manifest);
 
   // add readme if exists
+  logger.debug(`Parsing archive - parsing and verifying Readme`);
   const readme = parseAndVerifyReadme(paths, parsed.name, parsed.version);
   if (readme) {
     parsed.readme = readme;
@@ -283,6 +300,7 @@ export function parseAndVerifyArchive(
 
   // Ensure top-level variables are parsed as well
   if (manifest.vars) {
+    logger.debug(`Parsing archive - parsing and verifying top-level vars`);
     parsed.vars = parseAndVerifyVars(manifest.vars, 'manifest.yml');
   }
 
@@ -294,6 +312,7 @@ export function parseAndVerifyArchive(
     let tags: PackageSpecTags[];
     try {
       tags = yaml.safeLoad(tagsBuffer.toString());
+      logger.debug(`Parsing archive - parsing kibana/tags.yml file`);
       if (tags.length) {
         parsed.asset_tags = tags;
       }

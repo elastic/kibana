@@ -13,7 +13,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { SavedQuery } from '@kbn/data-plugin/public';
 import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
-import { DEFAULT_VALUES } from '../constants';
+import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 
 export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
@@ -43,8 +43,9 @@ export const SearchSourceExpression = ({
     termField,
     termSize,
     excludeHitsFromPreviousRun,
+    sourceFields,
   } = ruleParams;
-  const { data } = useTriggerUiActionServices();
+  const { data, isServerless } = useTriggerUiActionServices();
 
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
@@ -84,7 +85,7 @@ export const SearchSourceExpression = ({
           timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
           threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
           thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-          size: size ?? DEFAULT_VALUES.SIZE,
+          size: size ? size : isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
           aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
           aggField,
           groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
@@ -92,6 +93,7 @@ export const SearchSourceExpression = ({
           termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
           excludeHitsFromPreviousRun:
             excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+          sourceFields,
         });
         setSearchSource(createdSearchSource);
       } catch (error) {

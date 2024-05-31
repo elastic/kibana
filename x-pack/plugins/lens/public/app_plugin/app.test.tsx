@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -107,9 +107,7 @@ describe('Lens App', () => {
     services?: jest.Mocked<LensAppServices>;
     preloadedState?: Partial<LensAppState>;
   }) {
-    const wrappingComponent: React.FC<{
-      children: React.ReactNode;
-    }> = ({ children }) => {
+    const wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       return (
         <I18nProvider>
           <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -188,8 +186,8 @@ describe('Lens App', () => {
         query: { query: '', language: 'lucene' },
         filters: [pinnedFilter],
         resolvedDateRange: {
-          fromDate: '2021-01-10T04:00:00.000Z',
-          toDate: '2021-01-10T08:00:00.000Z',
+          fromDate: 'now-7d',
+          toDate: 'now',
         },
       }),
     });
@@ -332,12 +330,11 @@ describe('Lens App', () => {
         props,
         services,
         preloadedState: {
-          isLinkedToOriginatingApp: true,
+          isLinkedToOriginatingApp: false,
         },
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
         {
           text: 'Visualize Library',
           href: '/testbasepath/app/visualize#/',
@@ -347,7 +344,12 @@ describe('Lens App', () => {
       ]);
 
       await act(async () => {
-        instance.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        instance.setProps({
+          initialInput: { savedObjectId: breadcrumbDocSavedObjectId },
+          preloadedState: {
+            isLinkedToOriginatingApp: true,
+          },
+        });
 
         lensStore.dispatch(
           setState({
@@ -357,7 +359,6 @@ describe('Lens App', () => {
       });
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'The Coolest Container Ever Made', onClick: expect.anything() },
         {
           text: 'Visualize Library',
           href: '/testbasepath/app/visualize#/',
@@ -562,6 +563,10 @@ describe('Lens App', () => {
             : undefined,
         };
 
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+        };
+
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
@@ -589,6 +594,7 @@ describe('Lens App', () => {
           props,
           preloadedState: {
             isSaveable: true,
+            isLinkedToOriginatingApp: true,
             ...preloadedState,
           },
         });
@@ -653,7 +659,6 @@ describe('Lens App', () => {
       it('Shows Save and Return and Save As buttons in create by value mode with originating app', async () => {
         const props = makeDefaultProps();
         const services = makeDefaultServicesForApp();
-        services.dashboardFeatureFlag = { allowByValueEmbeddables: true };
         props.incomingState = {
           originatingApp: 'ultraDashboard',
           valueInput: {
@@ -817,14 +822,22 @@ describe('Lens App', () => {
         const mockedConsoleDir = jest.spyOn(console, 'dir'); // mocked console.dir to avoid messages in the console when running tests
         mockedConsoleDir.mockImplementation(() => {});
 
+        const props = makeDefaultProps();
+
+        props.incomingState = {
+          originatingApp: 'ultraDashboard',
+        };
+
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockRejectedValue({ message: 'failed' });
-        const { instance, props } = await mountWith({
+        const { instance } = await mountWith({
+          props,
           services,
           preloadedState: {
             isSaveable: true,
+            isLinkedToOriginatingApp: true,
           },
         });
 
@@ -892,15 +905,19 @@ describe('Lens App', () => {
       });
 
       it('checks for duplicate title before saving', async () => {
+        const props = makeDefaultProps();
+        props.incomingState = { originatingApp: 'coolContainer' };
         const services = makeDefaultServicesForApp();
         services.attributeService.wrapAttributes = jest
           .fn()
           .mockReturnValue(Promise.resolve({ savedObjectId: '123' }));
         const { instance } = await mountWith({
+          props,
           services,
           preloadedState: {
             isSaveable: true,
             persistedDoc: { savedObjectId: '123' } as unknown as Document,
+            isLinkedToOriginatingApp: true,
           },
         });
         await act(async () => {
@@ -926,7 +943,12 @@ describe('Lens App', () => {
       });
 
       it('does not show the copy button on first save', async () => {
-        const { instance } = await mountWith({ preloadedState: { isSaveable: true } });
+        const props = makeDefaultProps();
+        props.incomingState = { originatingApp: 'coolContainer' };
+        const { instance } = await mountWith({
+          props,
+          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: true },
+        });
         await act(async () => getButton(instance).run(instance.getDOMNode()));
         instance.update();
         expect(instance.find(SavedObjectSaveModal).prop('showCopyOnSave')).toEqual(false);
@@ -1095,8 +1117,8 @@ describe('Lens App', () => {
         lens: expect.objectContaining({
           query: { query: '', language: 'lucene' },
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-7d',
+            toDate: 'now',
           },
         }),
       });
@@ -1132,8 +1154,8 @@ describe('Lens App', () => {
         lens: expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
           resolvedDateRange: {
-            fromDate: '2021-01-09T04:00:00.000Z',
-            toDate: '2021-01-09T08:00:00.000Z',
+            fromDate: 'now-14d',
+            toDate: 'now-7d',
           },
         }),
       });
@@ -1432,8 +1454,8 @@ describe('Lens App', () => {
         type: 'lens/setState',
         payload: {
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-7d',
+            toDate: 'now',
           },
           searchSessionId: 'sessionId-2',
         },

@@ -12,6 +12,11 @@ test('`schema` creates correct schema with defaults.', () => {
   expect(config.schema.validate({})).toMatchInlineSnapshot(`
     Object {
       "appenders": Map {},
+      "browser": Object {
+        "root": Object {
+          "level": "info",
+        },
+      },
       "loggers": Array [],
       "root": Object {
         "appenders": Array [

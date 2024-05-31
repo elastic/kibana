@@ -13,9 +13,11 @@ export const MoreFiltersSelectable = ({
   options,
   activeFilters,
   onChange,
+  isLoading,
 }: {
   options: Array<MultiSelectFilterOption<string>>;
   activeFilters: string[];
+  isLoading: boolean;
   onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
 }) => {
   return (
@@ -27,6 +29,8 @@ export const MoreFiltersSelectable = ({
       onChange={onChange}
       options={options}
       selectedOptionKeys={activeFilters}
+      transparentBackground={true}
+      isLoading={isLoading}
     />
   );
 };

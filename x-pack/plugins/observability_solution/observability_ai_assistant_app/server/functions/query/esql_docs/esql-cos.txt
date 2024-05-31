@@ -1,0 +1,12 @@
+COS
+
+Syntax
+Parameters
+angle
+An angle, in radians. If null, the function returns null.
+DescriptionReturns the cosine of an angle.Supported types
+Example
+```esql
+ROW a=1.8
+| EVAL cos=COS(a)
+```

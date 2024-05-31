@@ -9,6 +9,8 @@ If you are running our hosted Elasticsearch Service on Elastic Cloud, you access
 [float]
 === Install {kib} yourself
 
+TIP: For a step-by-step example of setting up the {stack} on your own premises, try out our tutorial: {stack-ref}/installing-stack-demo-self.html[Installing a self-managed Elastic Stack].
+
 NOTE: Starting with version 6.0.0, Kibana only supports 64 bit operating systems.
 
 Kibana is provided in the following package formats:
@@ -59,4 +61,4 @@ include::install/deb.asciidoc[]
 
 include::install/rpm.asciidoc[]
 
-include::{kib-repo-dir}/setup/docker.asciidoc[]
+include::{kibana-root}/docs/setup/docker.asciidoc[]

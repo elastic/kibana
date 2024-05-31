@@ -40,9 +40,30 @@ export const getEnvAuth = (role: SecurityRoleName): User => {
   return user;
 };
 
+export const getDefaultUserName = (): string => {
+  if (Cypress.env(IS_SERVERLESS)) {
+    return Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
+  }
+  return defaultUser.username;
+};
+
 export const login = (role?: SecurityRoleName): void => {
-  const user = role ? getEnvAuth(role) : defaultUser;
-  loginWithUser(user);
+  let testRole = '';
+
+  if (Cypress.env(IS_SERVERLESS)) {
+    if (!role) {
+      testRole = Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
+    } else {
+      testRole = role;
+    }
+    cy.task('getSessionCookie', testRole).then((cookie) => {
+      cy.setCookie('sid', cookie as string);
+    });
+    cy.visit('/');
+  } else {
+    const user = role ? getEnvAuth(role) : defaultUser;
+    loginWithUser(user);
+  }
 };
 
 export const loginWithUser = (user: User): void => {

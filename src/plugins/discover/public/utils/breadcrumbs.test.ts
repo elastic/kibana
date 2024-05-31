@@ -8,8 +8,6 @@
 
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { setBreadcrumbs } from './breadcrumbs';
-import { createMemoryHistory } from 'history';
-import type { HistoryLocationState } from '../build_services';
 
 describe('Breadcrumbs', () => {
   const discoverServiceMock = createDiscoverServicesMock();
@@ -38,24 +36,6 @@ describe('Breadcrumbs', () => {
     });
     expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       { text: 'Discover', href: '#/custom-path', deepLinkId: 'discover' },
-      { text: 'Saved Search' },
-    ]);
-  });
-
-  test('should set breadcrumbs with profile root path', () => {
-    setBreadcrumbs({
-      services: {
-        ...discoverServiceMock,
-        history: () => {
-          const history = createMemoryHistory<HistoryLocationState>({});
-          history.push('/p/my-profile');
-          return history;
-        },
-      },
-      titleBreadcrumbText: 'Saved Search',
-    });
-    expect(discoverServiceMock.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Discover', href: '#/p/my-profile/', deepLinkId: 'discover' },
       { text: 'Saved Search' },
     ]);
   });

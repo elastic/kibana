@@ -10,8 +10,8 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { policyHasFleetServer } from '../services';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -24,16 +24,23 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
+  from?: 'fleet-policy-list' | undefined;
 }> = ({
   agentPolicy,
   packagePolicy,
   showAddAgent,
   upgradePackagePolicyHref,
   defaultIsOpen = false,
+  from,
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const authz = useAuthz();
+
+  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const isFleetServerPolicy = agentPolicy && policyHasFleetServer(agentPolicy);
+
+  const canAddAgents = isFleetServerPolicy ? authz.fleet.addFleetServers : authz.fleet.addAgents;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
@@ -68,6 +75,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               setIsEnrollmentFlyoutOpen(true);
             }}
             key="addAgent"
+            disabled={!canAddAgents}
           >
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
@@ -80,9 +88,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       data-test-subj="PackagePolicyActionsEditItem"
       disabled={!canWriteIntegrationPolicies || !agentPolicy}
       icon="pencil"
-      href={getHref('integration_policy_edit', {
+      href={`${getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
-      })}
+      })}${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"
     >
       <FormattedMessage
@@ -114,11 +122,14 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   ];
 
   if (!agentPolicy || !agentPolicyIsManaged) {
+    const ContextMenuItem = canWriteIntegrationPolicies
+      ? DangerEuiContextMenuItem
+      : EuiContextMenuItem;
     menuItems.push(
       <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
         {(deletePackagePoliciesPrompt) => {
           return (
-            <DangerEuiContextMenuItem
+            <ContextMenuItem
               data-test-subj="PackagePolicyActionsDeleteItem"
               disabled={!canWriteIntegrationPolicies}
               icon="trash"
@@ -133,7 +144,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
                 id="xpack.fleet.policyDetails.packagePoliciesTable.deleteActionTitle"
                 defaultMessage="Delete integration"
               />
-            </DangerEuiContextMenuItem>
+            </ContextMenuItem>
           );
         }}
       </PackagePolicyDeleteProvider>

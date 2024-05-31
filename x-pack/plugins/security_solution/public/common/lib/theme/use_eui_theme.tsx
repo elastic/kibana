@@ -7,10 +7,9 @@
 
 import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { useUiSetting$ } from '../kibana';
+import { useDarkMode } from '../kibana';
 
 export const useEuiTheme = () => {
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const darkMode = useDarkMode();
   return darkMode ? darkTheme : lightTheme;
 };

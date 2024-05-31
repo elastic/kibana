@@ -6,36 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { useEuiBreakpoint, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const useChartStyles = (chartVisible: boolean) => {
   const { euiTheme } = useEuiTheme();
-  const resultCountCss = css`
+
+  const chartToolbarCss = css`
     padding: ${euiTheme.size.s} ${euiTheme.size.s} ${chartVisible ? 0 : euiTheme.size.s}
       ${euiTheme.size.s};
     min-height: ${euiTheme.base * 2.5}px;
   `;
-  const resultCountInnerCss = css`
-    ${useEuiBreakpoint(['xs', 's'])} {
-      align-items: center;
-    }
-  `;
-  const resultCountTitleCss = css`
-    flex-basis: auto;
 
-    ${useEuiBreakpoint(['xs', 's'])} {
-      margin-bottom: 0 !important;
-    }
-  `;
-  const resultCountToggleCss = css`
-    flex-basis: auto;
-    min-width: 0;
-
-    ${useEuiBreakpoint(['xs', 's'])} {
-      align-items: flex-end;
-    }
-  `;
   const histogramCss = css`
     flex-grow: 1;
     display: flex;
@@ -48,34 +30,9 @@ export const useChartStyles = (chartVisible: boolean) => {
       stroke-width: 1;
     }
   `;
-  const breakdownFieldSelectorGroupCss = css`
-    width: 100%;
-  `;
-  const breakdownFieldSelectorItemCss = css`
-    min-width: 0;
-    align-items: flex-end;
-    padding-left: ${euiTheme.size.s};
-  `;
-  const suggestionsSelectorItemCss = css`
-    min-width: 0;
-    align-items: flex-start;
-    padding-left: ${euiTheme.size.s};
-  `;
-  const chartToolButtonCss = css`
-    display: flex;
-    justify-content: center;
-    padding-left: ${euiTheme.size.s};
-  `;
 
   return {
-    resultCountCss,
-    resultCountInnerCss,
-    resultCountTitleCss,
-    resultCountToggleCss,
+    chartToolbarCss,
     histogramCss,
-    breakdownFieldSelectorGroupCss,
-    breakdownFieldSelectorItemCss,
-    suggestionsSelectorItemCss,
-    chartToolButtonCss,
   };
 };

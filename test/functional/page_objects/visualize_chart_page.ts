@@ -63,7 +63,7 @@ export class VisualizeChartPageObject extends FtrService {
     // check if enabled but not a line, area, histogram or pie chart
     if (await this.find.existsByCssSelector('.visLib__chart', 1)) {
       const chart = await this.find.byCssSelector('.visLib__chart');
-      const chartType = await chart.getAttribute('data-vislib-chart-type');
+      const chartType = (await chart.getAttribute('data-vislib-chart-type')) ?? '';
 
       if (!['line', 'area', 'histogram', 'pie'].includes(chartType)) {
         this.log.debug(`-- isNewLibraryChart = false`);

@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/repo-info",
-    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",

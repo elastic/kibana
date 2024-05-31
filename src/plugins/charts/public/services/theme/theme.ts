@@ -11,19 +11,13 @@ import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
 export class ThemeService {
   /** Returns default charts theme */
-  public readonly chartsDefaultTheme = EUI_CHARTS_THEME_LIGHT.theme;
   public readonly chartsDefaultBaseTheme = LIGHT_THEME;
 
   private theme$?: Observable<CoreTheme>;
-  private _chartsTheme$ = new BehaviorSubject(this.chartsDefaultTheme);
   private _chartsBaseTheme$ = new BehaviorSubject(this.chartsDefaultBaseTheme);
-
-  /** An observable of the current charts theme */
-  public chartsTheme$ = this._chartsTheme$.asObservable();
 
   /** An observable of the current charts base theme */
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
@@ -51,22 +45,35 @@ export class ThemeService {
     return value;
   };
 
-  /** A React hook for consuming the charts theme */
+  /**
+   * @deprecated No longer need to use theme on top of baseTheme, see https://github.com/elastic/kibana/pull/170914#issuecomment-1823014121
+   */
   public useChartsTheme = (): PartialTheme => {
-    const [value, update] = useState(this._chartsTheme$.getValue());
-    const ref = useRef(value);
+    return {};
+  };
 
-    useEffect(() => {
-      const s = this.chartsTheme$.subscribe((val) => {
-        if (val !== ref.current) {
-          ref.current = val;
-          update(val);
-        }
-      });
-      return () => s.unsubscribe();
-    }, []);
-
-    return value;
+  /**
+   * A react hook to return shared sparkline chart overrides
+   *
+   * Replacement for `EUI_SPARKLINE_THEME_PARTIAL`
+   */
+  public useSparklineOverrides = (): PartialTheme => {
+    return {
+      lineSeriesStyle: {
+        point: {
+          visible: false,
+          strokeWidth: 1,
+          radius: 1,
+        },
+      },
+      areaSeriesStyle: {
+        point: {
+          visible: false,
+          strokeWidth: 1,
+          radius: 1,
+        },
+      },
+    };
   };
 
   /** A React hook for consuming the charts theme */
@@ -87,12 +94,14 @@ export class ThemeService {
     return value;
   };
 
-  /** initialize service with uiSettings */
+  /**
+   * Initialize theme service with dark mode
+   *
+   * Meant to be called by charts plugin setup method
+   */
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe(({ darkMode }) => {
-      const selectedTheme = darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
-      this._chartsTheme$.next(selectedTheme);
       this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
     });
   }

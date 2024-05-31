@@ -76,9 +76,10 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Output type used by agent',
         },
       },
-      presets_counts: {
+      preset_counts: {
         _meta: {
           description: 'Count of agents per preset',
+          optional: true,
         },
         properties: {
           balanced: {
@@ -117,6 +118,7 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'keyword',
         _meta: {
           description: 'Output preset used by agent, if applicable',
+          optional: true,
         },
       },
       count_as_data: {
@@ -129,6 +131,58 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'Number of agents enrolled that use this output type as monitoring output',
+        },
+      },
+    },
+  },
+  agents_per_privileges: {
+    _meta: {
+      description: 'Agents per privileges telemetry',
+      optional: true,
+    },
+    properties: {
+      root: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents running with root privilege',
+        },
+      },
+      unprivileged: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents running without root privilege',
+        },
+      },
+    },
+  },
+  upgrade_details: {
+    _meta: {
+      description: 'Agent upgrade details telemetry',
+      optional: true,
+    },
+    properties: {
+      target_version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Target version of the agent upgrade',
+        },
+      },
+      state: {
+        type: 'keyword',
+        _meta: {
+          description: 'State of the agent upgrade',
+        },
+      },
+      error_msg: {
+        type: 'keyword',
+        _meta: {
+          description: 'Error message of the agent upgrade if failed',
+        },
+      },
+      agent_count: {
+        type: 'long',
+        _meta: {
+          description: 'How many agents have this upgrade details',
         },
       },
     },
@@ -226,6 +280,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'The total number of enrolled Fleet Server agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled Fleet Server agents',
         },
       },
       num_host_urls: {
@@ -358,5 +424,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
         },
       },
     },
+  },
+  license_issued_to: {
+    type: 'text',
+    _meta: { description: 'The name of the user the license is issued to' },
+  },
+  deployment_id: {
+    type: 'keyword',
+    _meta: { description: 'id of the deployment', optional: true },
   },
 };

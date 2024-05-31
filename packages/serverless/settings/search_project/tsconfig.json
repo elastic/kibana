@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/management-settings-ids",
+    "@kbn/dev-tools-plugin",
   ]
 }

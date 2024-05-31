@@ -63,12 +63,12 @@ export const InferenceErrors: React.FC = () => {
         hasBorder
         iconType="documents"
         title={
-          <h2>
+          <h3>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.title',
               { defaultMessage: 'Inference errors' }
             )}
-          </h2>
+          </h3>
         }
       >
         {isLoading ? (

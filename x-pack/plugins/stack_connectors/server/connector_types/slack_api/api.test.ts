@@ -18,6 +18,13 @@ const createMock = (): jest.Mocked<SlackApiService> => {
         type: 'message',
       },
     })),
+    postBlockkit: jest.fn().mockImplementation(() => ({
+      ok: true,
+      channel: 'general',
+      message: {
+        text: 'a blockkit message',
+      },
+    })),
     validChannelId: jest.fn().mockImplementation(() => [
       {
         ok: true,
@@ -94,6 +101,21 @@ describe('api', () => {
       message: {
         text: 'a message',
         type: 'message',
+      },
+      ok: true,
+    });
+  });
+
+  test('postBlockkit with channelIds params', async () => {
+    const res = await api.postBlockkit({
+      externalService,
+      params: { channelIds: ['general'], text: 'a blockkit message' },
+    });
+
+    expect(res).toEqual({
+      channel: 'general',
+      message: {
+        text: 'a blockkit message',
       },
       ok: true,
     });

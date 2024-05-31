@@ -8,7 +8,7 @@
 
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';

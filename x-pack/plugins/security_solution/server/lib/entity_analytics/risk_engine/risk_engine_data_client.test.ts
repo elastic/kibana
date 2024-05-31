@@ -78,6 +78,7 @@ describe('RiskEngineDataClient', () => {
           esClient,
           soClient: mockSavedObjectClient,
           namespace: 'default',
+          auditLogger: undefined,
         };
         riskEngineDataClient = new RiskEngineDataClient(options);
       });

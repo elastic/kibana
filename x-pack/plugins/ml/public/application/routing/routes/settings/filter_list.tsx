@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { FilterLists } from '../../../settings/filter_lists';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+
+const FilterLists = dynamic(async () => ({
+  default: (await import('../../../settings/filter_lists')).FilterLists,
+}));
 
 export const filterListRouteFactory = (
   navigateToPath: NavigateToPath,

@@ -61,7 +61,6 @@ const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponent
         items={listAndReferences}
         error={error}
         columns={getSharedListsTableColumns()}
-        isSelectable={false}
         sorting
         data-test-subj="exceptionItemSharedList"
       />

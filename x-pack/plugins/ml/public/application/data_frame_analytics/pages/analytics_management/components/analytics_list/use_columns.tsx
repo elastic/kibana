@@ -25,13 +25,13 @@ import {
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { DataFrameAnalyticsListRow } from './common';
 import {
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStopped,
   DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
 } from './common';
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
@@ -148,7 +148,7 @@ export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
   });
 
   return (
-    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={jobId}>
+    <EuiLink href={href} css={{ overflow: 'hidden', textOverflow: 'ellipsis' }} title={jobId}>
       {jobId}
     </EuiLink>
   );

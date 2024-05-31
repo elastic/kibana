@@ -132,7 +132,7 @@ const CompactPercentageLabels = ({
   </>
 );
 
-const NonCompactPercentageLabels = ({
+const PercentageLabels = ({
   onEvalCounterClick,
   stats,
 }: {
@@ -163,7 +163,8 @@ const NonCompactPercentageLabels = ({
   );
 };
 
-const getPostureScorePercentage = (postureScore: number): string => `${Math.round(postureScore)}%`;
+export const getPostureScorePercentage = (postureScore: number): string =>
+  `${Math.round(postureScore)}%`;
 
 const PercentageInfo = ({
   compact,
@@ -209,7 +210,6 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         )}
       />
       <Settings
-        theme={charts.theme.useChartsTheme()}
         baseTheme={charts.theme.useChartsBaseTheme()}
         showLegend={false}
         legendPosition="right"
@@ -301,7 +301,7 @@ export const ComplianceScoreChart = ({
                   onEvalCounterClick={onEvalCounterClick}
                 />
               ) : (
-                <NonCompactPercentageLabels
+                <PercentageLabels
                   stats={{ totalPassed: data.totalPassed, totalFailed: data.totalFailed }}
                   onEvalCounterClick={onEvalCounterClick}
                 />

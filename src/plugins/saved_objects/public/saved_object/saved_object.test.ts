@@ -15,7 +15,12 @@ import {
 } from '../types';
 import { SavedObjectDecorator } from './decorators';
 
-import { coreMock } from '@kbn/core/public/mocks';
+import {
+  analyticsServiceMock,
+  coreMock,
+  i18nServiceMock,
+  themeServiceMock,
+} from '@kbn/core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { SavedObjectAttributes, SimpleSavedObject } from '@kbn/core/public';
@@ -27,6 +32,11 @@ describe('Saved Object', () => {
   const dataStartMock = dataPluginMock.createStartContract();
   const saveOptionsMock = {} as SavedObjectSaveOpts;
   const savedObjectsClientStub = startMock.savedObjects.client;
+  const startServices = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    i18n: i18nServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
+  };
   let decoratorRegistry: ReturnType<typeof savedObjectsDecoratorRegistryMock.create>;
 
   let SavedObjectClass: new (config: SavedObjectConfig) => SavedObject;
@@ -104,6 +114,7 @@ describe('Saved Object', () => {
           },
         },
       } as unknown as SavedObjectKibanaServices,
+      startServices,
       decoratorRegistry
     );
   };
@@ -415,7 +426,7 @@ describe('Saved Object', () => {
               },
             });
 
-            savedObject.searchSource!.setFields({ index: indexPattern });
+            savedObject.searchSource!.setField('index', indexPattern);
             return savedObject.save(saveOptionsMock).then(() => {
               const args = (savedObjectsClientStub.create as jest.Mock).mock.calls[0];
               expect(args[1]).toEqual({
@@ -660,6 +671,7 @@ describe('Saved Object', () => {
             ...dataStartMock.search,
           },
         } as unknown as SavedObjectKibanaServices,
+        startServices,
         decoratorRegistry
       );
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });

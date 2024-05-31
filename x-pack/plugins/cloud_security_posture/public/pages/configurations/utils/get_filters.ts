@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import {
   type Filter,
   buildFilter,
@@ -14,7 +15,6 @@ import {
   FilterCompareOptions,
 } from '@kbn/es-query';
 import type { Serializable } from '@kbn/utility-types';
-import type { FindingsBaseProps } from '../../../common/types';
 
 const compareOptions: FilterCompareOptions = {
   negate: false,
@@ -34,7 +34,7 @@ export const getFilters = ({
   negate,
 }: {
   filters: Filter[];
-  dataView: FindingsBaseProps['dataView'];
+  dataView: DataView;
   field: string;
   value: Serializable;
   negate: boolean;

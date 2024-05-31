@@ -130,6 +130,10 @@ export const ACTIVITY = i18n.translate('xpack.cases.caseView.activity', {
   defaultMessage: 'Activity',
 });
 
+export const CASE_SETTINGS = i18n.translate('xpack.cases.caseView.caseSettings', {
+  defaultMessage: 'Case settings',
+});
+
 export const EMAIL_SUBJECT = (caseTitle: string) =>
   i18n.translate('xpack.cases.caseView.emailSubject', {
     values: { caseTitle },

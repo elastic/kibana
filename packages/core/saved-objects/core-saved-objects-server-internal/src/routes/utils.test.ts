@@ -381,7 +381,7 @@ describe('logWarnOnExternalRequest', () => {
     logWarnOnExternalRequest({
       method: 'get',
       path: '/resolve/{type}/{id}',
-      req: extRequest,
+      request: extRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -394,7 +394,7 @@ describe('logWarnOnExternalRequest', () => {
     logWarnOnExternalRequest({
       method: 'post',
       path: '/_bulk_resolve',
-      req: extRequest,
+      request: extRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -407,14 +407,14 @@ describe('logWarnOnExternalRequest', () => {
     logWarnOnExternalRequest({
       method: 'get',
       path: '/resolve/{type}/{id}',
-      req: kibRequest,
+      request: kibRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(0);
     logWarnOnExternalRequest({
       method: 'post',
       path: '/_bulk_resolve',
-      req: kibRequest,
+      request: kibRequest,
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(0);

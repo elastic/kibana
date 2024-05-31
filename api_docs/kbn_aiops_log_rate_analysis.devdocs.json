@@ -1,0 +1,823 @@
+{
+  "id": "@kbn/aiops-log-rate-analysis",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getExtendedChangePoint",
+        "type": "Function",
+        "tags": [],
+        "label": "getExtendedChangePoint",
+        "description": [
+          "\nCalculates and returns an extended change point range based on the specified change point timestamp.\n"
+        ],
+        "signature": [
+          "(buckets: Record<string, number>, changePointTs: number) => { startTs: number; endTs: number; }"
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getExtendedChangePoint.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "buckets",
+            "description": [
+              "- An object where keys are bucket timestamps as strings\n  and values are numeric values associated with each bucket."
+            ],
+            "signature": [
+              "Record<string, number>"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getExtendedChangePoint.$2",
+            "type": "number",
+            "tags": [],
+            "label": "changePointTs",
+            "description": [
+              "- The timestamp of the change point as a number. This timestamp must\n  be one of the keys in the `buckets` object."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object containing two properties: `startTs` and `endTs`."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getLogRateAnalysisType",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogRateAnalysisType",
+        "description": [
+          "\nIdentify the log rate analysis type based on the baseline/deviation\ntime ranges on a given log rate histogram.\n"
+        ],
+        "signature": [
+          "(logRateHistogram: ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.LogRateHistogramItem",
+            "text": "LogRateHistogramItem"
+          },
+          "[], windowParameters: ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.LogRateAnalysisType",
+            "text": "LogRateAnalysisType"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getLogRateAnalysisType.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "logRateHistogram",
+            "description": [
+              "The log rate histogram."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.LogRateHistogramItem",
+                "text": "LogRateHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getLogRateAnalysisType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "The window parameters with baseline and deviation time range."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_log_rate_analysis_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The log rate analysis type."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getSnappedTimestamps",
+        "type": "Function",
+        "tags": [],
+        "label": "getSnappedTimestamps",
+        "description": [
+          "\nGenerates an array of timestamps evenly spaced within a given time range.\n"
+        ],
+        "signature": [
+          "(timeRangeEarliest: number, timeRangeLatest: number, interval: number) => number[]"
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getSnappedTimestamps.$1",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeEarliest",
+            "description": [
+              "The earliest timestamp in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getSnappedTimestamps.$2",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeLatest",
+            "description": [
+              "The latest timestamp in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getSnappedTimestamps.$3",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "The interval between timestamps in milliseconds."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Array of timestamps spaced by the specified interval within the given range."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getSnappedWindowParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "getSnappedWindowParameters",
+        "description": [
+          "\n\nConverts window paramaters from the brushes to “snap” the brushes to the chart histogram bar width and ensure timestamps\ncorrespond to bucket timestamps\n"
+        ],
+        "signature": [
+          "(windowParameters: ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ", snapTimestamps: number[]) => ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_window_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getSnappedWindowParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "time range definition for baseline and deviation to be used by log rate analysis"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getSnappedWindowParameters.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "snapTimestamps",
+            "description": [
+              "time range definition that always corresponds to histogram bucket timestamps"
+            ],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "WindowParameters"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getWindowParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "getWindowParameters",
+        "description": [
+          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log deviation and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
+        ],
+        "signature": [
+          "(clickTime: number, minTime: number, maxTime: number, clickTimeUpper?: number | undefined, windowGapOverride?: number | undefined) => ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParameters.$1",
+            "type": "number",
+            "tags": [],
+            "label": "clickTime",
+            "description": [
+              "timestamp of the clicked log rate deviation."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParameters.$2",
+            "type": "number",
+            "tags": [],
+            "label": "minTime",
+            "description": [
+              "minimum timestamp of the time window to be analysed"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParameters.$3",
+            "type": "number",
+            "tags": [],
+            "label": "maxTime",
+            "description": [
+              "maximum timestamp of the time window to be analysed"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParameters.$4",
+            "type": "number",
+            "tags": [],
+            "label": "clickTimeUpper",
+            "description": [
+              "optional timestamp to treat clicktime and clickTimeUpper\nas a time range instead of point in time"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParameters.$5",
+            "type": "number",
+            "tags": [],
+            "label": "windowGapOverride",
+            "description": [
+              "optional override for the baseline/deviation gap"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "WindowParameters"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.getWindowParametersForTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "getWindowParametersForTrigger",
+        "description": [
+          "\nCalculates window parameters, adjusting the window based on a\nchange point and interval. If a change point is specified and falls within\nthe startRange, the window is adjusted around the change point. Otherwise,\nthe window is determined by the startRange and interval.\n"
+        ],
+        "signature": [
+          "(startRange: number | ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ", interval: number, timeRangeEarliest: number, timeRangeLatest: number, changePoint: ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.DocumentCountStatsChangePoint",
+            "text": "DocumentCountStatsChangePoint"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/aiops-log-rate-analysis",
+            "scope": "common",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParametersForTrigger.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "startRange",
+            "description": [
+              "The start timestamp or window parameters. If a number,\nit's the start timestamp; if an object, it's assumed to be\nwindow parameters and is returned directly."
+            ],
+            "signature": [
+              "number | ",
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParametersForTrigger.$2",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "Interval in milliseconds for extending the window or\nadjusting the start range."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParametersForTrigger.$3",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeEarliest",
+            "description": [
+              "Earliest timestamp in milliseconds in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParametersForTrigger.$4",
+            "type": "number",
+            "tags": [],
+            "label": "timeRangeLatest",
+            "description": [
+              "Latest timestamp in milliseconds in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.getWindowParametersForTrigger.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "changePoint",
+            "description": [
+              "Optional change point with `startTs` and `endTs`\nproperties. Adjusts window parameters if within `startRange`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.DocumentCountStatsChangePoint",
+                "text": "DocumentCountStatsChangePoint"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Window parameters"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.DocumentCountStatsChangePoint",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocumentCountStatsChangePoint",
+        "description": [
+          "\nRepresents a change point in document count statistics,\nidentifying a significant change over time."
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStatsChangePoint.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "Key is the timestamp of the change point."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStatsChangePoint.startTs",
+            "type": "number",
+            "tags": [],
+            "label": "startTs",
+            "description": [
+              "The start timestamp of the change point period."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStatsChangePoint.endTs",
+            "type": "number",
+            "tags": [],
+            "label": "endTs",
+            "description": [
+              "The end timestamp of the change point period."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.DocumentCountStatsChangePoint.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of change point."
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.LogRateHistogramItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogRateHistogramItem",
+        "description": [
+          "\nLog rate histogram item"
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.LogRateHistogramItem.time",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "time",
+            "description": [
+              "\nTime of bucket"
+            ],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.LogRateHistogramItem.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "\nNumber of doc count for that time bucket"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.WindowParameters",
+        "type": "Interface",
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
+        "label": "WindowParameters",
+        "description": [
+          "\nTime range definition for baseline and deviation to be used by log rate analysis.\n"
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.WindowParameters.baselineMin",
+            "type": "number",
+            "tags": [],
+            "label": "baselineMin",
+            "description": [
+              "Baseline minimum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.WindowParameters.baselineMax",
+            "type": "number",
+            "tags": [],
+            "label": "baselineMax",
+            "description": [
+              "Baseline maximum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.WindowParameters.deviationMin",
+            "type": "number",
+            "tags": [],
+            "label": "deviationMin",
+            "description": [
+              "Deviation minimum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-log-rate-analysis",
+            "id": "def-common.WindowParameters.deviationMax",
+            "type": "number",
+            "tags": [],
+            "label": "deviationMax",
+            "description": [
+              "Deviation maximum value"
+            ],
+            "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR",
+        "type": "string",
+        "tags": [],
+        "label": "LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR",
+        "description": [
+          "Highlighting color for charts"
+        ],
+        "signature": [
+          "\"orange\""
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.LogRateAnalysisType",
+        "type": "Type",
+        "tags": [],
+        "label": "LogRateAnalysisType",
+        "description": [
+          "\nUnion type of log rate analysis types."
+        ],
+        "signature": [
+          "\"spike\" | \"dip\""
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/aiops-log-rate-analysis",
+        "id": "def-common.LOG_RATE_ANALYSIS_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "LOG_RATE_ANALYSIS_TYPE",
+        "description": [
+          "\nThe type of log rate analysis (spike or dip) will affect how parameters are\npassed to the analysis API endpoint."
+        ],
+        "signature": [
+          "{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"
+        ],
+        "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_analysis_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

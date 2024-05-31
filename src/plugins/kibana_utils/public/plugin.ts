@@ -6,36 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { History } from 'history';
-import { setVersion } from './set_version';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-export interface KibanaUtilsSetup {
-  setVersion: (history: Pick<History, 'location' | 'replace'>) => void;
-}
+export type KibanaUtilsPublicSetup = undefined;
 
-export type KibanaUtilsStart = undefined;
+export type KibanaUtilsPublicStart = undefined;
 
-export class KibanaUtilsPublicPlugin implements Plugin<KibanaUtilsSetup, KibanaUtilsStart> {
-  private readonly version: string;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface KibanaUtilsPublicSetupDependencies {}
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.version = initializerContext.env.packageInfo.version;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface KibanaUtilsPublicStartDependencies {}
+
+export class KibanaUtilsPublicPlugin
+  implements
+    Plugin<
+      KibanaUtilsPublicSetup,
+      KibanaUtilsPublicStart,
+      KibanaUtilsPublicSetupDependencies,
+      KibanaUtilsPublicStartDependencies
+    >
+{
+  public setup(_core: CoreSetup): KibanaUtilsPublicSetup {
+    return undefined;
   }
 
-  public setup(core: CoreSetup): KibanaUtilsSetup {
-    return {
-      setVersion: this.setVersion,
-    };
-  }
-
-  public start(core: CoreStart): KibanaUtilsStart {
+  public start(_core: CoreStart): KibanaUtilsPublicStart {
     return undefined;
   }
 
   public stop() {}
-
-  private setVersion = (history: Pick<History, 'location' | 'replace'>) => {
-    setVersion(history, this.version);
-  };
 }

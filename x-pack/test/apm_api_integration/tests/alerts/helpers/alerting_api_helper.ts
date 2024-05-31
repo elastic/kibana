@@ -8,11 +8,12 @@
 import { Client, errors } from '@elastic/elasticsearch';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { ApmApiClient } from '../../../common/config';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
@@ -25,7 +26,7 @@ export async function createApmRule<T extends ApmRuleType>({
   params,
   actions = [],
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleTypeId: T;
   name: string;
   params: ApmRuleParamsType[T];
@@ -110,7 +111,7 @@ export async function runRuleSoon({
   supertest,
 }: {
   ruleId: string;
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
 }): Promise<Record<string, any>> {
   return pRetry(
     async () => {
@@ -142,13 +143,13 @@ export async function deleteRuleById({
   supertest,
   ruleId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
 }
 
-export async function deleteApmRules(supertest: SuperTest<Test>) {
+export async function deleteApmRules(supertest: SuperTestAgent) {
   const res = await supertest.get(
     `/api/alerting/rules/_find?filter=alert.attributes.consumer:apm&per_page=10000`
   );
@@ -173,19 +174,13 @@ export async function clearKibanaApmEventLog(es: Client) {
   });
 }
 
-export type ApmAlertFields = ParsedTechnicalFields & {
-  'service.name': string;
-  'service.environment': string;
-  'transaction.name': string;
-  'error.grouping_key': string;
-  'error.grouping_name': string;
-};
+export type ApmAlertFields = ParsedTechnicalFields & ObservabilityApmAlert;
 
 export async function createIndexConnector({
   supertest,
   name,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   name: string;
 }) {
   const { body } = await supertest
@@ -233,7 +228,7 @@ export async function deleteAllActionConnectors({
   supertest,
   es,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   es: Client;
 }): Promise<any> {
   const res = await supertest.get(`/api/actions/connectors`);
@@ -250,7 +245,7 @@ async function deleteActionConnector({
   supertest,
   actionId,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   actionId: string;
 }) {
   return supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');

@@ -32,6 +32,7 @@ export interface BottomBarProps {
   hasInvalidChanges: boolean;
   isLoading: boolean;
   unsavedChangesCount: number;
+  hiddenChangesCount: number;
 }
 
 /**
@@ -43,6 +44,7 @@ export const BottomBar = ({
   hasInvalidChanges,
   isLoading,
   unsavedChangesCount,
+  hiddenChangesCount,
 }: BottomBarProps) => {
   const { cssFormButton, cssFormUnsavedCount } = useFormStyles();
 
@@ -55,7 +57,7 @@ export const BottomBar = ({
         gutterSize="s"
       >
         <EuiFlexItem grow={false} css={cssFormUnsavedCount}>
-          <UnsavedCount unsavedCount={unsavedChangesCount} />
+          <UnsavedCount unsavedCount={unsavedChangesCount} hiddenCount={hiddenChangesCount} />
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>

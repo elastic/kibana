@@ -20,6 +20,7 @@ export interface ExportTimeline {
 export const EditTimelineActionsComponent: React.FC<{
   deleteTimelines: DeleteTimelines | undefined;
   ids: string[];
+  savedSearchIds?: string[];
   isEnableDownloader: boolean;
   isDeleteTimelineModalOpen: boolean;
   onComplete: () => void;
@@ -27,6 +28,7 @@ export const EditTimelineActionsComponent: React.FC<{
 }> = ({
   deleteTimelines,
   ids,
+  savedSearchIds,
   isEnableDownloader,
   isDeleteTimelineModalOpen,
   onComplete,
@@ -46,6 +48,7 @@ export const EditTimelineActionsComponent: React.FC<{
         isModalOpen={isDeleteTimelineModalOpen}
         onComplete={onComplete}
         savedObjectIds={ids}
+        savedSearchIds={savedSearchIds}
         title={title}
       />
     )}

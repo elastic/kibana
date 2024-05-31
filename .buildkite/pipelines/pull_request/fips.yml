@@ -1,0 +1,18 @@
+steps:
+  - command: .buildkite/scripts/steps/fips/build.sh
+    label: 'Build FIPS Image'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+    timeout_in_minutes: 60
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

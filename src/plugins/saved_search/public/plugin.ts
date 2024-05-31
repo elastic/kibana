@@ -17,13 +17,14 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   getSavedSearch,
   saveSavedSearch,
   SaveSavedSearchOptions,
   getNewSavedSearch,
   SavedSearchUnwrapResult,
+  SearchByValueInput,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
@@ -35,6 +36,7 @@ import {
   getSavedSearchAttributeService,
   toSavedSearch,
 } from './services/saved_searches';
+import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
 
 /**
  * Saved search plugin public Setup contract
@@ -66,6 +68,7 @@ export interface SavedSearchPublicPluginStart {
  * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicSetupDependencies {
+  embeddable: EmbeddableSetup;
   contentManagement: ContentManagementPublicSetup;
   expressions: ExpressionsSetup;
 }
@@ -92,7 +95,7 @@ export class SavedSearchPublicPlugin
 {
   public setup(
     { getStartServices }: CoreSetup,
-    { contentManagement, expressions }: SavedSearchPublicSetupDependencies
+    { contentManagement, expressions, embeddable }: SavedSearchPublicSetupDependencies
   ) {
     contentManagement.registry.register({
       id: SavedSearchType,
@@ -114,6 +117,19 @@ export class SavedSearchPublicPlugin
     );
 
     expressions.registerType(kibanaContext);
+
+    embeddable.registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
+      SavedSearchType,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        return {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+      }
+    );
 
     return {};
   }

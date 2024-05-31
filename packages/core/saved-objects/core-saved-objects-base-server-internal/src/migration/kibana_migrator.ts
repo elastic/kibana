@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '../mappings';
+import type { IDocumentMigrator } from './document_migrator';
 
 /** @internal */
 export interface IKibanaMigrator {
@@ -53,6 +54,11 @@ export interface IKibanaMigrator {
     doc: SavedObjectUnsanitizedDoc,
     options?: MigrateDocumentOptions
   ): SavedObjectUnsanitizedDoc;
+
+  /**
+   * Returns the document migrator bound to this kibana migrator.
+   */
+  getDocumentMigrator(): IDocumentMigrator;
 }
 
 /**

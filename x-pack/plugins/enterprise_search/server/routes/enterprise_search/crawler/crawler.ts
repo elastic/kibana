@@ -47,6 +47,7 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         indexName: request.body.index_name,
         isNative: true,
         language: request.body.language,
+        name: null,
         serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
       };
       const { client } = (await context.core).elasticsearch;

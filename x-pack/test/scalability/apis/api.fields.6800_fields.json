@@ -1,0 +1,50 @@
+{
+  "journeyName": "GET /internal/data_views/fields - 6800 fields",
+  "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 5000,
+      "threshold2": 10000,
+      "threshold3": 20000
+    },
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 1,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "rampUsersPerSec",
+        "minUsersCount": 1,
+        "maxUsersCount": 7,
+        "duration": "140s"
+      }
+    ],
+    "maxDuration": "5m"
+  },
+  "testData": {
+    "esArchives": ["test/functional/fixtures/es_archiver/many_fields"]
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "http": {
+            "method": "GET",
+            "path": "/internal/data_views/fields",
+            "query": "?pattern=indices*&apiVersion=1",
+            "headers": {
+              "Cookie": "",
+              "Kbn-Version": "",
+              "Accept-Encoding": "gzip, deflate, br",
+              "Content-Type": "application/json",
+              "x-elastic-internal-origin": "kibana"
+            },
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}

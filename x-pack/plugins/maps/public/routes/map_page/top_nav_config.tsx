@@ -21,7 +21,6 @@ import { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
-  getIsAllowByValueEmbeddables,
   getInspector,
   getCoreOverlays,
   getSavedObjectsTagging,
@@ -215,7 +214,7 @@ export function getTopNavConfig({
 
         let saveModal;
 
-        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
@@ -240,6 +239,13 @@ export function getTopNavConfig({
             <SavedObjectSaveModalDashboard
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
+              mustCopyOnSaveMessage={
+                savedMap.isManaged()
+                  ? i18n.translate('xpack.maps.topNav.mustCopyOnSaveMessage', {
+                      defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
+                    })
+                  : undefined
+              }
               tagOptions={tagSelector}
             />
           );

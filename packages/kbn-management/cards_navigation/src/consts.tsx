@@ -107,7 +107,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.REPORTING]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
-      defaultMessage: 'Manage generated PDF, PNG and CSV reports.',
+      defaultMessage: 'Manage generated CSV reports.',
     }),
     icon: 'visPie',
   },
@@ -119,19 +119,28 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'tag',
   },
 
-  [AppIds.API_KEYS]: {
-    category: appCategories.OTHER,
-    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
-      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
-    }),
-    icon: 'lockOpen',
-  },
-
   [AppIds.SERVERLESS_SETTINGS]: {
     category: appCategories.OTHER,
     description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
       defaultMessage: 'Control project behavior, such as date display and default sorting.',
     }),
     icon: 'gear',
+  },
+
+  // Access section
+  [AppIds.API_KEYS]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
+    }),
+    icon: 'lockOpen',
+  },
+  [AppIds.ROLES]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate('management.landing.withCardNavigation.rolesDescription', {
+      defaultMessage:
+        'Create roles unique to this project and combine the exact set of privileges that your users need.',
+    }),
+    icon: 'usersRolesApp',
   },
 };

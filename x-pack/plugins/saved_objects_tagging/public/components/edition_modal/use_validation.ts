@@ -11,7 +11,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { type TagValidation, validateTagName } from '../../../common';
 import type { ITagsClient, TagAttributes } from '../../../common/types';
-import { duplicateTagNameErrorMessage, validateTag } from './utils';
+import { duplicateTagNameErrorMessage, managedTagConflictMessage, validateTag } from './utils';
 
 const initialValidation: TagValidation = {
   valid: true,
@@ -70,7 +70,7 @@ export const useValidation = ({
           valid: false,
           errors: {
             ...prev.errors,
-            name: duplicateTagNameErrorMessage,
+            name: existingTag.managed ? managedTagConflictMessage : duplicateTagNameErrorMessage,
           },
         }));
       }
@@ -129,7 +129,9 @@ export const useValidation = ({
   useEffect(() => {
     validation$.next({
       ...validation$.value,
-      hasDuplicateNameError: nameError === duplicateTagNameErrorMessage,
+      hasDuplicateNameError: [duplicateTagNameErrorMessage, managedTagConflictMessage].includes(
+        nameError!
+      ),
     });
   }, [nameError, validation$]);
 

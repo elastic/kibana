@@ -12,6 +12,7 @@ import { DataRequest } from '../../../util/data_request';
 import { DataRequestContext } from '../../../../actions';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { IMvtVectorSource } from '../../../sources/vector_source';
+import { isESVectorTileSource } from '../../../sources/es_source';
 
 // shape of sourceDataRequest.getData()
 export interface MvtSourceData {
@@ -83,7 +84,7 @@ export async function syncMvtSourceData({
         : prevData.refreshToken;
 
     const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels, buffer);
-    if (source.isESSource()) {
+    if (isESVectorTileSource(source)) {
       syncContext.inspectorAdapters.vectorTiles.addLayer(layerId, layerName, tileUrl);
     }
     const sourceData = {

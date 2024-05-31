@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 
 import { schema } from '@kbn/config-schema';
 

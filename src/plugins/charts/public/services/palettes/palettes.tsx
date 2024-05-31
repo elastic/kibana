@@ -12,8 +12,8 @@ import {
   euiPaletteColorBlind,
   euiPaletteCool,
   euiPaletteGray,
-  euiPaletteNegative,
-  euiPalettePositive,
+  euiPaletteRed,
+  euiPaletteGreen,
   euiPaletteWarm,
   euiPaletteForStatus,
   euiPaletteForTemperature,
@@ -273,19 +273,19 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.temperatureLabel', { defaultMessage: 'Temperature' }),
       ...buildGradient('temperature', euiPaletteForTemperature),
     },
-    complimentary: {
-      title: i18n.translate('charts.palettes.complimentaryLabel', {
-        defaultMessage: 'Complimentary',
+    complementary: {
+      title: i18n.translate('charts.palettes.complementaryLabel', {
+        defaultMessage: 'Complementary',
       }),
-      ...buildGradient('complimentary', euiPaletteComplementary),
+      ...buildGradient('complementary', euiPaletteComplementary),
     },
     negative: {
       title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),
-      ...buildGradient('negative', euiPaletteNegative),
+      ...buildGradient('negative', euiPaletteRed),
     },
     positive: {
       title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'Positive' }),
-      ...buildGradient('positive', euiPalettePositive),
+      ...buildGradient('positive', euiPaletteGreen),
     },
     cool: {
       title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'Cool' }),

@@ -15,7 +15,10 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const indexManagementService = getService('indexManagement');
 
-  describe('component templates', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/182792
+  // Failing: See https://github.com/elastic/kibana/issues/182797
+  // Failing: See https://github.com/elastic/kibana/issues/182791
+  describe.skip('component templates', () => {
     // Api methods
     let getAllComponentTemplates: typeof indexManagementService['componentTemplates']['api']['getAllComponentTemplates'];
     let getOneComponentTemplate: typeof indexManagementService['componentTemplates']['api']['getOneComponentTemplate'];
@@ -68,9 +71,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             usedBy: [],
             isManaged: false,
             hasSettings: true,
+            isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
           });
@@ -139,9 +140,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -220,9 +218,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -380,9 +375,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',

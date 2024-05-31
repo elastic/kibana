@@ -8,11 +8,10 @@
 
 import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
 import { TrendlineArguments } from '../types';
 import { metricTrendlineFunction } from './metric_trendline_function';
 
-const fakeContext = {} as ExecutionContext<Adapters, SerializableRecord>;
+const fakeContext = {} as ExecutionContext<Adapters>;
 const fakeInput = {} as Datatable;
 const metricTrendline = (args: TrendlineArguments) =>
   metricTrendlineFunction().fn(fakeInput, args, fakeContext);

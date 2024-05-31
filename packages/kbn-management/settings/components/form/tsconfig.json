@@ -33,5 +33,6 @@
     "@kbn/management-settings-components-field-category",
     "@kbn/management-settings-utilities",
     "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-ui-settings-common",
   ]
 }

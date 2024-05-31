@@ -46,8 +46,20 @@ function getRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<InfraDocument>, encoding, callback) {
-      if ('host.hostname' in document) {
+      const metricset = document['metricset.name'];
+
+      if (metricset === 'cpu') {
         document._index = 'metrics-system.cpu-default';
+      } else if (metricset === 'memory') {
+        document._index = 'metrics-system.memory-default';
+      } else if (metricset === 'network') {
+        document._index = 'metrics-system.network-default';
+      } else if (metricset === 'load') {
+        document._index = 'metrics-system.load-default';
+      } else if (metricset === 'filesystem') {
+        document._index = 'metrics-system.filesystem-default';
+      } else if (metricset === 'diskio') {
+        document._index = 'metrics-system.diskio-default';
       } else if ('container.id' in document) {
         document._index = 'metrics-kubernetes.container-default';
       } else if ('kubernetes.pod.uid' in document) {

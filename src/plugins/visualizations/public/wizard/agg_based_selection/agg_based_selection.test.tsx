@@ -10,6 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
+import { VisParams } from '../../../common';
 
 describe('AggBasedSelection', () => {
   const defaultVisTypeParams = {
@@ -47,7 +48,7 @@ describe('AggBasedSelection', () => {
   ] as BaseVisType[];
 
   const visTypes: TypesStart = {
-    get<T>(id: string): BaseVisType<T> {
+    get<T extends VisParams>(id: string): BaseVisType<T> {
       return _visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
     },
     all: () => _visTypes,

@@ -12,6 +12,8 @@ import type {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
+  HttpResponsePayload,
+  ResponseError,
 } from '@kbn/core/server';
 
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
@@ -160,7 +162,11 @@ const statusToErrorMessage = (statusCode: number) => {
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
-  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+  error<T extends HttpResponsePayload | ResponseError>({
+    statusCode,
+    body,
+    headers,
+  }: CustomHttpResponseOptions<T>) {
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
     };

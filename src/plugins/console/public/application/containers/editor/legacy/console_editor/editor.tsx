@@ -34,6 +34,7 @@ import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 import type { SenseEditor } from '../../../../models/sense_editor';
 import { StorageKeys } from '../../../../../services';
+import { DEFAULT_INPUT_VALUE } from '../../../../../../common/constants';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -53,14 +54,6 @@ const abs: CSSProperties = {
   bottom: '0',
   right: '0',
 };
-
-const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
-GET \${exampleVariable1} // _search
-{
-  "query": {
-    "\${exampleVariable2}": {} // match_all
-  }
-}`;
 
 const inputId = 'ConAppInputTextarea';
 
@@ -108,7 +101,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     }
 
     const readQueryParams = () => {
-      const [, queryString] = (window.location.hash || '').split('?');
+      const [, queryString] = (window.location.hash || window.location.search || '').split('?');
 
       return parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };
@@ -229,7 +222,12 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
-    setupAutosave();
+    if (!initialQueryParams.load_from) {
+      // Don't setup autosaving editor content when we pre-load content
+      // This prevents losing the user's current console content when
+      // `loadFrom` query param is used for a console session
+      setupAutosave();
+    }
 
     return () => {
       unsubscribeResizer();
@@ -295,14 +293,14 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
               })}
             >
               <EuiLink
-                color="success"
+                color="primary"
                 onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',
                 })}
               >
-                <EuiIcon type="playFilled" />
+                <EuiIcon type="play" />
               </EuiLink>
             </EuiToolTip>
           </EuiFlexItem>

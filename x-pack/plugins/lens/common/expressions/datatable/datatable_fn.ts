@@ -8,20 +8,11 @@
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import type {
-  Datatable,
-  DatatableColumnMeta,
-  ExecutionContext,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '../../types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
-import { getSortingCriteria } from './sorting';
 import type { DatatableExpressionFunction } from './types';
-
-function isRange(meta: { params?: { id?: string } } | undefined) {
-  return meta?.params?.id === 'range';
-}
 
 export const datatableFn =
   (
@@ -49,8 +40,6 @@ export const datatableFn =
     }
 
     let untransposedData: Datatable | undefined;
-    // do the sorting at this level to propagate it also at CSV download
-    const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
 
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
@@ -67,15 +56,6 @@ export const datatableFn =
       transposeTable(args, table, formatters);
     }
 
-    const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
-
-    const columnsReverseLookup = table.columns.reduce<
-      Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-    >((memo, { id, name, meta }, i) => {
-      memo[id] = { name, index: i, meta };
-      return memo;
-    }, {});
-
     const columnsWithSummary = args.columns.filter((c) => c.summaryRow);
     for (const column of columnsWithSummary) {
       column.summaryRowValue = computeSummaryRowForColumn(
@@ -84,29 +64,6 @@ export const datatableFn =
         formatters,
         formatFactory({ id: 'number' })
       );
-    }
-
-    if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
-      const sortingHint = args.columns.find((col) => col.columnId === sortBy)?.sortingHint;
-      // Sort on raw values for these types, while use the formatted value for the rest
-      const sortingCriteria = getSortingCriteria(
-        sortingHint ??
-          (isRange(columnsReverseLookup[sortBy]?.meta)
-            ? 'range'
-            : columnsReverseLookup[sortBy]?.meta?.type),
-        sortBy,
-        formatters[sortBy],
-        sortDirection
-      );
-      // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = (table.rows || [])
-        .slice()
-        .sort(sortingCriteria);
-      // replace also the local copy
-      table.rows = context.inspectorAdapters.tables[layerId].rows;
-    } else {
-      args.sortingColumnId = undefined;
-      args.sortingDirection = 'none';
     }
 
     return {

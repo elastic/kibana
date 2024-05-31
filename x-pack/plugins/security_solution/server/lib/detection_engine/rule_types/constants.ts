@@ -6,3 +6,8 @@
  */
 
 export const TIMESTAMP_RUNTIME_FIELD = 'kibana.combined_timestamp' as const;
+
+/**
+ * When suppression is enabled, allow to to suppress more than max signals alerts
+ */
+export const MAX_SIGNALS_SUPPRESSION_MULTIPLIER = 5;

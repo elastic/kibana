@@ -72,7 +72,7 @@ export const FetchAgentVersionsList: Task = {
     const versionsList = await getAvailableVersions(log);
     const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
 
-    if (versionsList !== []) {
+    if (versionsList.length !== 0) {
       log.info(`Writing versions list to ${AGENT_VERSION_BUILD_FILE}`);
       await write(
         build.resolvePath(AGENT_VERSION_BUILD_FILE),

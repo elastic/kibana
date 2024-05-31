@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/lens-formula-docs",
+  "owner": ["@elastic/kibana-visualizations"]
+}

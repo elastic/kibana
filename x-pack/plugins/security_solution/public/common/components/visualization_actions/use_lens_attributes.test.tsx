@@ -18,12 +18,12 @@ import {
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
 
-jest.mock('../../containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));
@@ -150,6 +150,31 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
       ...getIndexFilters(['auditbeat-*']),
+    ]);
+  });
+
+  it('should not apply tabs and pages when applyPageAndTabsFilters = false', () => {
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: 'elastic',
+        pageName: 'user',
+        tabName: 'events',
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          applyPageAndTabsFilters: false,
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes().state.filters,
+      ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 

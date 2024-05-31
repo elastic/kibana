@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ThemeServiceSetup } from '@kbn/core/public';
+import { AnalyticsServiceStart, I18nStart, ThemeServiceSetup } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
+export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceSetup>('Theme');

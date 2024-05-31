@@ -13,6 +13,9 @@ export const fetchMachineLearningModules = () => {
   return rootRequest<Module[]>({
     method: 'GET',
     url: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
+    headers: {
+      'elastic-api-version': '1',
+    },
     failOnStatusCode: false,
   });
 };

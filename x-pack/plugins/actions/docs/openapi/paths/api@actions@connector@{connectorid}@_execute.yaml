@@ -17,6 +17,8 @@ post:
         schema:
           $ref: '../components/schemas/run_connector_request.yaml'
         examples:
+          runCasesWebhookConnectorRequest:
+            $ref: '../components/examples/run_cases_webhook_connector_request.yaml'
           runEmailConnectorRequest:
             $ref: '../components/examples/run_email_connector_request.yaml'
           runIndexConnectorRequest:
@@ -29,6 +31,8 @@ post:
             $ref: '../components/examples/run_server_log_connector_request.yaml'
           runServiceNowITOMConnectorRequest:
             $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
+          runSlackConnectorRequest:
+            $ref: '../components/examples/run_slack_api_connector_request.yaml'
           runSwimlaneConnectorRequest:
             $ref: '../components/examples/run_swimlane_connector_request.yaml'
   responses:
@@ -61,6 +65,8 @@ post:
                   - error
                   - ok
           examples:
+            runCasesWebhookConnectorResponse:
+              $ref: '../components/examples/run_cases_webhook_connector_response.yaml'
             runEmailConnectorResponse:
               $ref: '../components/examples/run_email_connector_response.yaml'
             runIndexConnectorResponse:
@@ -73,6 +79,8 @@ post:
               $ref: '../components/examples/run_server_log_connector_response.yaml'
             runServiceNowITOMConnectorResponse:
               $ref: '../components/examples/run_servicenow_itom_connector_response.yaml'
+            runSlackConnectorResponse:
+              $ref: '../components/examples/run_slack_api_connector_response.yaml'
             runSwimlaneConnectorResponse:
               $ref: '../components/examples/run_swimlane_connector_response.yaml'
     '401':

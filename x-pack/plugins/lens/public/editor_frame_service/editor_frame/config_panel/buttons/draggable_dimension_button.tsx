@@ -7,11 +7,12 @@
 
 import React, { useMemo, useCallback, ReactElement } from 'react';
 import {
-  DragDrop,
   DragDropIdentifier,
   useDragDropContext,
   DropType,
   DropTargetSwapDuplicateCombine,
+  Draggable,
+  Droppable,
 } from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
 import {
@@ -50,8 +51,8 @@ export function DraggableDimensionButton({
   };
   order: [2, number, number, number];
   onDrop: (source: DragDropIdentifier, dropTarget: DragDropIdentifier, dropType?: DropType) => void;
-  onDragStart: () => void;
-  onDragEnd: () => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
   activeVisualization: Visualization<unknown, unknown>;
   group: VisualizationDimensionGroupConfig;
   children: ReactElement;
@@ -138,24 +139,29 @@ export function DraggableDimensionButton({
       className="lnsLayerPanel__dimensionContainer"
       data-test-subj={group.dataTestSubj}
     >
-      <DragDrop
-        draggable
-        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
-        getAdditionalClassesOnEnter={DropTargetSwapDuplicateCombine.getAdditionalClassesOnEnter}
-        getAdditionalClassesOnDroppable={
-          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
-        }
-        order={order}
+      <Draggable
         dragType={isOperation(dragging) ? 'move' : 'copy'}
-        dropTypes={dropTypes}
+        order={order}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
-        onDrop={handleOnDrop}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
       >
-        {children}
-      </DragDrop>
+        <Droppable
+          dropTypes={dropTypes}
+          getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+          getAdditionalClassesOnEnter={DropTargetSwapDuplicateCombine.getAdditionalClassesOnEnter}
+          getAdditionalClassesOnDroppable={
+            DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+          }
+          order={order}
+          reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
+          value={value}
+          onDrop={handleOnDrop}
+        >
+          {children}
+        </Droppable>
+      </Draggable>
     </div>
   );
 }

@@ -62,6 +62,14 @@ export function syncStatusToColor(status: SyncStatus): string {
   }
 }
 
+export const isSyncCancellable = (syncStatus: SyncStatus): boolean => {
+  return (
+    syncStatus === SyncStatus.IN_PROGRESS ||
+    syncStatus === SyncStatus.PENDING ||
+    syncStatus === SyncStatus.SUSPENDED
+  );
+};
+
 export const syncJobTypeToText = (syncType: SyncJobType): string => {
   switch (syncType) {
     case SyncJobType.FULL:

@@ -28,6 +28,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
   selectedField,
   acceptsCustomOptions = false,
   showMappingConflicts = false,
+  'aria-label': ariaLabel,
 }): JSX.Element => {
   const {
     isInvalid,
@@ -71,6 +72,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
         })}
         fullWidth
         renderOption={renderFields}
+        aria-label={ariaLabel}
       />
     );
   }
@@ -91,6 +93,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
       style={fieldWidth}
       fullWidth
       renderOption={renderFields}
+      aria-label={ariaLabel}
     />
   );
 };

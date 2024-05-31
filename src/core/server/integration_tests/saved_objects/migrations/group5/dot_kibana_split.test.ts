@@ -134,7 +134,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -149,7 +149,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -164,7 +164,7 @@ describe('split .kibana index into multiple system indices', () => {
           mappings: {
             dynamic: 'strict',
             _meta: {
-              migrationMappingPropertyHashes: expect.any(Object),
+              mappingVersions: expect.any(Object),
               indexTypesMap: expect.any(Object),
             },
             properties: expect.any(Object),
@@ -179,6 +179,7 @@ describe('split .kibana index into multiple system indices', () => {
           ".kibana": Array [
             "action",
             "action_task_params",
+            "ad_hoc_run_params",
             "alert",
             "api_key_pending_invalidation",
             "apm-custom-dashboards",
@@ -195,13 +196,16 @@ describe('split .kibana index into multiple system indices', () => {
             "cases-comments",
             "cases-configure",
             "cases-connector-mappings",
+            "cases-rules",
             "cases-telemetry",
             "cases-user-actions",
+            "cloud-security-posture-settings",
             "config",
             "config-global",
             "connector_token",
             "core-usage-stats",
             "csp-rule-template",
+            "endpoint:unified-user-artifact-manifest",
             "endpoint:user-artifact-manifest",
             "enterprise_search_telemetry",
             "epm-packages",
@@ -222,6 +226,7 @@ describe('split .kibana index into multiple system indices', () => {
             "guided-onboarding-guide-state",
             "guided-onboarding-plugin-state",
             "index-pattern",
+            "infra-custom-dashboards",
             "infrastructure-monitoring-log-view",
             "infrastructure-ui-source",
             "ingest-agent-policies",
@@ -262,8 +267,10 @@ describe('split .kibana index into multiple system indices', () => {
             "siem-ui-timeline-note",
             "siem-ui-timeline-pinned-event",
             "slo",
+            "slo-settings",
             "space",
             "spaces-usage-stats",
+            "synthetics-dynamic-settings",
             "synthetics-monitor",
             "synthetics-param",
             "synthetics-privates-locations",

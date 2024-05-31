@@ -10,7 +10,7 @@ The Machine learning integration initiates a new job predefined to calculate ano
 With this integration, you can quickly pinpoint anomalous transactions and see the health of
 any upstream and downstream services.
 
-Machine learning jobs are created per environment, and are based on a service's average response time.
+Machine learning jobs are created per environment and are based on a service's average response time.
 Because jobs are created at the environment level,
 you can add new services to your existing environments without the need for additional machine learning jobs.
 
@@ -40,7 +40,7 @@ To enable machine learning anomaly detection:
 . From the Services overview, Traces overview, or Service Map tab,
 select **Anomaly detection**.
 
-. Click **Create ML Job**.
+. Click **Create Job**.
 
 . Machine learning jobs are created at the environment level.
 Select all of the service environments that you want to enable anomaly detection in.
@@ -50,7 +50,7 @@ Anomalies will surface for all services and transaction types within the selecte
 
 That's it! After a few minutes, the job will begin calculating results;
 it might take additional time for results to appear on your service maps.
-Existing jobs can be managed in *Machine Learning jobs management*.
+To manage existing jobs, click **Manage jobs**.
 
 [float]
 [[warning-ml-integration]]
@@ -66,7 +66,7 @@ image::apm/images/apm-anomaly-alert.png[Example view of anomaly alert in the APM
 [[unkown-ml-integration]]
 === Unknown service health
 
-After enabling anomaly detection, service health may display as "Unknown". There are three reasons why this can occur:
+After enabling anomaly detection, service health may display as "Unknown". Here are some reasons why this can occur:
 
 1. No machine learning job exists. See <<create-ml-integration>> to enable anomaly detection and create a machine learning job.
 2. There is no machine learning data for the job. If you just created the machine learning job you'll need to wait a few minutes for data to be available. Alternatively, if the service or its enviroment are new, you'll need to wait for more trace data.

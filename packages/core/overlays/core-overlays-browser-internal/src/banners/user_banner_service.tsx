@@ -8,19 +8,27 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { Subscription } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-interface StartDeps {
-  banners: OverlayBannersStart;
+interface StartServices {
+  analytics: AnalyticsServiceStart;
   i18n: I18nStart;
+  theme: ThemeServiceStart;
+}
+
+interface StartDeps extends StartServices {
+  banners: OverlayBannersStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -33,7 +41,7 @@ const ReactMarkdownLazy = React.lazy(() => import('react-markdown'));
 export class UserBannerService {
   private settingsSubscription?: Subscription;
 
-  public start({ banners, i18n, uiSettings }: StartDeps) {
+  public start({ banners, uiSettings, ...startServices }: StartDeps) {
     let id: string | undefined;
     let timeout: any;
 
@@ -55,7 +63,7 @@ export class UserBannerService {
         id,
         (el) => {
           ReactDOM.render(
-            <i18n.Context>
+            <KibanaRenderContextProvider {...startServices}>
               <EuiCallOut
                 title={
                   <FormattedMessage
@@ -75,14 +83,14 @@ export class UserBannerService {
                   <ReactMarkdownLazy>{content.trim()}</ReactMarkdownLazy>
                 </React.Suspense>
 
-                <EuiButton type="primary" size="s" onClick={() => banners.remove(id!)}>
+                <EuiButton color="primary" size="s" onClick={() => banners.remove(id!)}>
                   <FormattedMessage
                     id="core.ui.overlays.banner.closeButtonLabel"
                     defaultMessage="Close"
                   />
                 </EuiButton>
               </EuiCallOut>
-            </i18n.Context>,
+            </KibanaRenderContextProvider>,
             el
           );
 

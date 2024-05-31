@@ -11,19 +11,23 @@ import { useCallback, useMemo } from 'react';
 import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
-import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
+import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
+import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 
 export const getUseCellActionsHook = (tableId: TableId) => {
   const useCellActions: AlertsTableConfigurationRegistry['useCellActions'] = ({
     columns,
     data,
     dataGridRef,
+    pageSize,
+    pageIndex,
   }) => {
     const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
+    const dataViewId = useDataViewId(SourcererScopeName.detections);
     /**
      * There is difference between how `triggers actions` fetched data v/s
      * how security solution fetches data via timelineSearchStrategy
@@ -58,7 +62,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       useShallowEqualSelector((state) => (getTable(state, tableId) ?? tableDefaults).viewMode) ??
       tableDefaults.viewMode;
 
-    const cellActionsMetadata = useMemo(() => ({ scopeId: tableId }), []);
+    const cellActionsMetadata = useMemo(() => ({ scopeId: tableId, dataViewId }), [dataViewId]);
 
     const cellActionsFields = useMemo<UseDataGridColumnsSecurityCellActionsProps['fields']>(() => {
       if (viewMode === VIEW_SELECTION.eventRenderedView) {
@@ -77,10 +81,10 @@ export const getUseCellActionsHook = (tableId: TableId) => {
 
     const getCellValue = useCallback<UseDataGridColumnsSecurityCellActionsProps['getCellValue']>(
       (fieldName, rowIndex) => {
-        const pageRowIndex = rowIndex % finalData.length;
-        return finalData[pageRowIndex].find((rowData) => rowData.field === fieldName)?.value ?? [];
+        const pageRowIndex = rowIndex - pageSize * pageIndex;
+        return finalData[pageRowIndex]?.find((rowData) => rowData.field === fieldName)?.value ?? [];
       },
-      [finalData]
+      [finalData, pageIndex, pageSize]
     );
 
     const disabledActionTypes =
@@ -103,10 +107,12 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       [cellActions]
     );
 
-    return {
-      getCellActions,
-      visibleCellActions: 3,
-    };
+    return useMemo(() => {
+      return {
+        getCellActions,
+        visibleCellActions: 3,
+      };
+    }, [getCellActions]);
   };
 
   return useCellActions;

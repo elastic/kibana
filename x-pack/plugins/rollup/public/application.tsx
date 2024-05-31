@@ -11,7 +11,11 @@ import { Provider } from 'react-redux';
 
 import { CoreSetup, ExecutionContextStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider, useExecutionContext } from './shared_imports';
+import {
+  KibanaContextProvider,
+  KibanaRenderContextProvider,
+  useExecutionContext,
+} from './shared_imports';
 // @ts-ignore
 import { rollupJobsStore } from './crud_app/store';
 // @ts-ignore
@@ -39,10 +43,9 @@ const AppWithExecutionContext = ({
  */
 export const renderApp = async (
   core: CoreSetup,
-  { history, element, setBreadcrumbs, theme$ }: ManagementAppMountParams
+  { history, element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const [coreStart] = await core.getStartServices();
-  const I18nContext = coreStart.i18n.Context;
 
   const services = {
     history,
@@ -50,15 +53,13 @@ export const renderApp = async (
   };
 
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaContextProvider services={services}>
-          <Provider store={rollupJobsStore}>
-            <AppWithExecutionContext executionContext={core.executionContext} history={history} />
-          </Provider>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider services={services}>
+        <Provider store={rollupJobsStore}>
+          <AppWithExecutionContext executionContext={core.executionContext} history={history} />
+        </Provider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
   return () => {

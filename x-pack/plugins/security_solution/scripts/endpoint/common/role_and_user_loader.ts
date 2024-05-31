@@ -14,7 +14,7 @@ import { inspect } from 'util';
 import type { AxiosError } from 'axios';
 import type { EndpointSecurityRoleDefinitions } from './roles_users';
 import { getAllEndpointSecurityRoles } from './roles_users';
-import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { COMMON_API_HEADERS } from './constants';
 
 const ignoreHttp409Error = (error: AxiosError) => {

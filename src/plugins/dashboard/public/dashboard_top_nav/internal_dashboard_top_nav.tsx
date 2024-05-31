@@ -14,11 +14,12 @@ import {
   LazyLabsFlyout,
   getContextProvider as getPresentationUtilContextProvider,
 } from '@kbn/presentation-util-plugin/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
-import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
+import type { EuiBreadcrumb } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
 import {
   getDashboardTitle,
@@ -39,7 +40,7 @@ import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
 
 export interface InternalDashboardTopNavProps {
-  customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
+  customLeadingBreadCrumbs?: EuiBreadcrumb[];
   embedSettings?: DashboardEmbedSettings;
   forceHideUnifiedSearch?: boolean;
   redirectTo: DashboardRedirect;
@@ -305,17 +306,7 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
-      allBadges.push({
-        'data-test-subj': 'dashboardSaveRecommendedBadge',
-        badgeText: dashboardManagedBadge.getText(),
-        title: '',
-        color: 'primary',
-        iconType: 'glasses',
-        toolTipProps: {
-          content: dashboardManagedBadge.getTooltip(),
-          position: 'bottom',
-        } as EuiToolTipProps,
-      });
+      allBadges.push(getManagedContentBadge(dashboardManagedBadge.getTooltip()));
     }
     return allBadges;
   }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);

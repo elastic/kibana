@@ -12,15 +12,15 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
 import { EuiPanel } from '@elastic/eui';
 import { TimelineId } from '../../../../../common/types';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineKPIs } from './kpis';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useKibana } from '../../../../common/lib/kibana';
-import { timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineSelectors } from '../../../store';
+import { timelineDefaults } from '../../../store/defaults';
 import { combineQueries } from '../../../../common/lib/kuery';
 import {
   endSelector,

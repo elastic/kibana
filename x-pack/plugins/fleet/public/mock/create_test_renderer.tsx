@@ -10,12 +10,10 @@ import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import { themeServiceMock } from '@kbn/core/public/mocks';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
@@ -55,7 +53,8 @@ export interface TestRenderer {
   HookWrapper: React.FC<any>;
   render: UiRender;
   renderHook: <TProps, TResult>(
-    callback: (props: TProps) => TResult
+    callback: (props: TProps) => TResult,
+    wrapper?: WrapperComponent<any>
   ) => RenderHookResult<TProps, TResult>;
   setHeaderActionMenu: Function;
 }
@@ -71,7 +70,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
 
   ExperimentalFeaturesService.init(allowedExperimentalValues);
 
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
       <startServices.i18n.Context>
         <Router history={mountHistory}>
@@ -93,7 +92,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),
-    AppWrapper: memo(({ children }) => {
+    AppWrapper: memo(({ children }: { children?: React.ReactNode }) => {
       return (
         <FleetAppContext
           startServices={testRendererMocks.startServices}
@@ -102,7 +101,6 @@ export const createFleetTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
-          theme$={themeServiceMock.createTheme$()}
           fleetStatus={{
             enabled: true,
             isLoading: false,
@@ -138,7 +136,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
       <startServices.i18n.Context>
         <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
@@ -156,7 +154,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),
-    AppWrapper: memo(({ children }) => {
+    AppWrapper: memo(({ children }: { children?: React.ReactNode }) => {
       return (
         <IntegrationsAppContext
           basepath={basePath}
@@ -166,7 +164,6 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
-          theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
           fleetStatus={{
             enabled: true,
@@ -189,9 +186,17 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
       });
       return renderResponse!;
     },
-    renderHook: (callback) => {
+    renderHook: (
+      callback,
+      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+    ) => {
+      const wrapper: WrapperComponent<any> = ({ children }) => (
+        <testRendererMocks.HookWrapper>
+          <ExtraWrapper>{children}</ExtraWrapper>
+        </testRendererMocks.HookWrapper>
+      );
       return renderHook(callback, {
-        wrapper: testRendererMocks.HookWrapper,
+        wrapper,
       });
     },
   };

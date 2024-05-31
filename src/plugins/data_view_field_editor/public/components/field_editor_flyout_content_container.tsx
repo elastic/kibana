@@ -85,7 +85,9 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
-  const [controller] = useState(() => new PreviewController({ dataView, search, fieldFormats }));
+  const [controller] = useState(
+    () => new PreviewController({ dataView, search, fieldFormats, fieldTypeToProcess })
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   const { fields } = dataView;
@@ -178,6 +180,7 @@ export const FieldEditorFlyoutContentContainer = ({
 
       // Update custom label, popularity and format
       dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+      dataView.setFieldCustomDescription(updatedField.name, updatedField.customDescription);
 
       editedField.count = updatedField.popularity || 0;
       if (updatedField.format) {

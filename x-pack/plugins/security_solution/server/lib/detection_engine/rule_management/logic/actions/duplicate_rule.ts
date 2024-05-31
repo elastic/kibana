@@ -12,6 +12,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
+import { convertImmutableToRuleSource } from '../../normalization/rule_converters';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -33,8 +34,10 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
   const isPrebuilt = rule.params.immutable;
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
-  const setup = isPrebuilt ? '' : rule.params.setup;
   const actions = transformToActionFrequency(rule.actions, rule.throttle);
+
+  // Duplicated rules are always considered custom rules
+  const immutable = false;
 
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
@@ -43,11 +46,11 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
     consumer: SERVER_APP_ID,
     params: {
       ...rule.params,
-      immutable: false,
+      immutable,
+      ruleSource: convertImmutableToRuleSource(immutable),
       ruleId,
       relatedIntegrations,
       requiredFields,
-      setup,
       exceptionsList: [],
     },
     schedule: rule.schedule,

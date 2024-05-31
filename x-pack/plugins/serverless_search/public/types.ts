@@ -6,11 +6,14 @@
  */
 
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSearchPluginSetup {}
@@ -22,10 +25,13 @@ export interface ServerlessSearchPluginSetupDependencies {
   cloud: CloudSetup;
   management: ManagementSetup;
   serverless: ServerlessPluginSetup;
+  discover: DiscoverSetup;
 }
 
 export interface ServerlessSearchPluginStartDependencies {
   cloud: CloudStart;
+  console: ConsolePluginStart;
+  searchPlayground: SearchPlaygroundPluginStart;
   management: ManagementStart;
   security: SecurityPluginStart;
   serverless: ServerlessPluginStart;

@@ -529,7 +529,7 @@ describe('bulkExecute()', () => {
           },
           {
             id: '456',
-            actionTypeId: 'not-in-allowlist',
+            actionTypeId: '.index',
             config: {},
             isPreconfigured: true,
             isDeprecated: false,
@@ -554,7 +554,7 @@ describe('bulkExecute()', () => {
           },
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"not-in-allowlist actions cannot be scheduled for unsecured actions execution"`
+        `".index actions cannot be scheduled for unsecured actions execution"`
       );
     }
   );

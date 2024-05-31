@@ -24,8 +24,8 @@ import { useParams } from 'react-router-dom';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
-import { RulePreview } from '../../../../detections/components/rules/rule_preview';
-import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
+import { RulePreview } from '../../components/rule_preview';
+import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -41,11 +41,11 @@ import {
 import { displaySuccessToast, useStateToaster } from '../../../../common/components/toasters';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepPanel } from '../../../../detections/components/rules/step_panel';
-import { StepAboutRule } from '../../../../detections/components/rules/step_about_rule';
-import { StepDefineRule } from '../../../../detections/components/rules/step_define_rule';
-import { StepScheduleRule } from '../../../../detections/components/rules/step_schedule_rule';
-import { StepRuleActions } from '../../../../detections/components/rules/step_rule_actions';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
+import { StepAboutRule } from '../../components/step_about_rule';
+import { StepDefineRule } from '../../components/step_define_rule';
+import { StepScheduleRule } from '../../components/step_schedule_rule';
+import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
 import { formatRule } from '../rule_creation/helpers';
 import {
   getStepsData,
@@ -150,13 +150,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
-  const esqlIndex = useEsqlIndex(
-    defineStepData.queryBar.query.query,
-    defineStepData.ruleType,
-    // allow to compute index from query only when query is valid or user switched to another tab
-    // to prevent multiple data view initiations with partly typed index names
-    defineStepForm.isValid || activeStep !== RuleStep.defineRule
-  );
+
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
+
   const memoizedIndex = useMemo(
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
     [defineStepData.index, esqlIndex, defineStepData.ruleType]
@@ -287,7 +283,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                 <StepAboutRule
                   isLoading={isLoading}
                   isUpdateView
-                  isActive={activeStep === RuleStep.aboutRule}
                   ruleType={defineStepData.ruleType}
                   machineLearningJobId={defineStepData.machineLearningJobId}
                   index={memoizedIndex}
@@ -398,6 +393,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     const aboutStepFormValid = await aboutStepForm.validate();
     const scheduleStepFormValid = await scheduleStepForm.validate();
     const actionsStepFormValid = await actionsStepForm.validate();
+
     if (
       defineStepFormValid &&
       aboutStepFormValid &&
@@ -414,7 +410,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           rule?.exceptions_list
         ),
         ...(ruleId ? { id: ruleId } : {}),
-        ...(rule != null ? { max_signals: rule.max_signals } : {}),
       });
 
       displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);

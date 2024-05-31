@@ -1,0 +1,35 @@
+{
+  "inference.inference": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "url_components": {
+      "task_type": [
+        "sparse_embedding",
+        "text_embedding",
+        "rerank",
+        "completion"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_inference/{inference_id}",
+      "_inference/{task_type}/{inference_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/post-inference-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

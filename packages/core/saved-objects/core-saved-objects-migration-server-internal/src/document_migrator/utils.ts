@@ -56,7 +56,7 @@ export function convertMigrationFunction(
 
       return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
-      log.error(error);
+      log.error(`Error trying to transform document: ${error.message}`);
       throw new TransformSavedObjectDocumentError(error, version);
     }
   };

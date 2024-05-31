@@ -23,7 +23,13 @@
     "@kbn/shared-ux-utility",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
+    "@kbn/custom-icons",
+    "@kbn/react-field",
+    "@kbn/ui-theme",
+    "@kbn/discover-shared-plugin"
   ],
   "exclude": [
     "target/**/*",

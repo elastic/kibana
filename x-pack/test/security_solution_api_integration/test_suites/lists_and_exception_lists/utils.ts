@@ -33,7 +33,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { countDownTest } from '../detections_response/utils';
+import { countDownTest } from '../../../common/utils/security_solution';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -41,7 +41,7 @@ import { countDownTest } from '../detections_response/utils';
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -61,7 +61,7 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -82,7 +82,7 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -205,7 +205,7 @@ export const binaryToString = (res: any, callback: any): void => {
  * @param supertest The supertest handle
  */
 export const deleteAllExceptions = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   await deleteAllExceptionsByType(supertest, log, 'single');
@@ -218,7 +218,7 @@ export const deleteAllExceptions = async (
  * @param supertest The supertest handle
  */
 export const deleteAllExceptionsByType = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: NamespaceType
 ): Promise<void> => {
@@ -260,7 +260,7 @@ export const deleteAllExceptionsByType = async (
  * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: Type,
   contents: string[],
@@ -297,7 +297,7 @@ export const importFile = async (
  * @param fileName filename to import as
  */
 export const importTextFile = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: Type,
   contents: string[],
@@ -330,7 +330,7 @@ export const importTextFile = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItem = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValue: string,
   fileName: string
@@ -362,7 +362,7 @@ export const waitForListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItems = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValues: string[],
   fileName: string
@@ -378,7 +378,7 @@ export const waitForListItems = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItem = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValue: string,
   fileName: string
@@ -417,7 +417,7 @@ export const waitForTextListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItems = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValues: string[],
   fileName: string

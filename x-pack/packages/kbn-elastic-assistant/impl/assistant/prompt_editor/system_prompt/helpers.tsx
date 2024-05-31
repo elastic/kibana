@@ -25,9 +25,12 @@ export const getOptionFromPrompt = ({
   id,
   name,
   showTitles = false,
+  isFlyoutMode,
 }: Prompt & { showTitles?: boolean }): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: (
+  inputDisplay: isFlyoutMode ? (
+    name
+  ) : (
     <EuiText
       color="subdued"
       data-test-subj="systemPromptText"
@@ -59,9 +62,11 @@ export const getOptionFromPrompt = ({
 interface GetOptionsProps {
   prompts: Prompt[] | undefined;
   showTitles?: boolean;
+  isFlyoutMode: boolean;
 }
 export const getOptions = ({
   prompts,
   showTitles = false,
+  isFlyoutMode = false,
 }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles })) ?? [];
+  prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles, isFlyoutMode })) ?? [];

@@ -23,12 +23,13 @@ export interface Consumer {
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export interface CellComponentProps {
-  alert: Alert;
+  alert?: Alert;
   cases: AlertsTableProps['cases']['data'];
   maintenanceWindows: AlertsTableProps['maintenanceWindows']['data'];
   columnId: SystemCellId;
   isLoading: boolean;
   showAlertStatusWithFlapping: boolean;
+  caseAppId?: string;
 }
 
 export type CellComponent = React.FC<CellComponentProps>;

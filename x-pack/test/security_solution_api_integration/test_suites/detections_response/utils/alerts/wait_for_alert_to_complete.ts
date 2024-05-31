@@ -8,10 +8,10 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { waitFor } from '../wait_for';
+import { waitFor } from '../../../../../common/utils/security_solution';
 
 export const waitForAlertToComplete = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   id: string
 ): Promise<void> => {

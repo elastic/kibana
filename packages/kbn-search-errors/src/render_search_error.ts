@@ -9,23 +9,18 @@
 import { i18n } from '@kbn/i18n';
 import { ReactNode } from 'react';
 import { BfetchRequestError } from '@kbn/bfetch-error';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import { EsError } from './es_error';
 
-export function renderSearchError({
-  error,
-  application,
-}: {
-  error: Error;
-  application: ApplicationStart;
-}): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
+export function renderSearchError(
+  error: Error
+): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
   if (error instanceof EsError) {
     return {
       title: i18n.translate('searchErrors.search.esErrorTitle', {
         defaultMessage: 'Cannot retrieve search results',
       }),
       body: error.getErrorMessage(),
-      actions: error.getActions(application),
+      actions: error.getActions(),
     };
   }
 

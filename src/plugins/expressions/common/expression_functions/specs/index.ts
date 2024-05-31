@@ -17,6 +17,7 @@ export * from './overall_metric';
 export * from './derivative';
 export * from './moving_average';
 export * from './ui_setting';
+export * from './math_column';
 export type { MapColumnArguments } from './map_column';
 export { mapColumn } from './map_column';
 export type { MathArguments, MathInput } from './math';

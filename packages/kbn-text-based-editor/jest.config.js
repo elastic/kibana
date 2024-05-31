@@ -10,4 +10,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-text-based-editor'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-text-based-editor/setup_tests.ts'],
 };

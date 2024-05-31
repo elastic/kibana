@@ -36,9 +36,9 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 import { SearchBarProps } from './types';
 
-const NoMatchesMessage = (props: { basePathUrl: string; darkMode: boolean }) => (
-  <PopoverPlaceholder darkMode={props.darkMode} basePath={props.basePathUrl} />
-);
+const NoMatchesMessage = (props: { basePathUrl: string }) => {
+  return <PopoverPlaceholder basePath={props.basePathUrl} />;
+};
 
 const EmptyMessage = () => (
   <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
@@ -108,7 +108,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           resultToOption(
             option,
             searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
-            taggingApi?.ui.getTag
+            taggingApi?.ui.getTagList
           )
         ),
       ]);
@@ -125,20 +125,22 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current = null;
         }
 
-        const suggestions = loadSuggestions(searchValue);
+        const suggestions = loadSuggestions(searchValue.toLowerCase());
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
           reportEvent.searchRequest();
         }
 
-        const rawParams = parseSearchParams(searchValue);
-        const tagIds =
-          taggingApi && rawParams.filters.tags
-            ? rawParams.filters.tags.map(
-                (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
-              )
-            : undefined;
+        const rawParams = parseSearchParams(searchValue.toLowerCase());
+        let tagIds: string[] | undefined;
+        if (taggingApi && rawParams.filters.tags) {
+          tagIds = rawParams.filters.tags.map(
+            (tagName) => taggingApi.ui.getTagIdFromName(tagName.toLowerCase()) ?? UNKNOWN_TAG_ID
+          );
+        } else {
+          tagIds = undefined;
+        }
         const searchParams: GlobalSearchFindParams = {
           term: rawParams.term,
           types: rawParams.filters.types,
@@ -351,7 +353,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
-        buttonRef: setButtonRef,
+        popoverRef: setButtonRef,
         panelStyle: { marginTop: '6px' },
       }}
       popoverButton={

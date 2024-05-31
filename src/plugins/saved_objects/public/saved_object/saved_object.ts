@@ -16,12 +16,13 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../types';
+import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices, StartServices } from '../types';
 import { ISavedObjectDecoratorRegistry } from './decorators';
 import { buildSavedObject } from './helpers/build_saved_object';
 
 export function createSavedObjectClass(
   services: SavedObjectKibanaServices,
+  startServices: StartServices,
   decoratorRegistry: ISavedObjectDecoratorRegistry
 ) {
   /**
@@ -35,7 +36,13 @@ export function createSavedObjectClass(
     constructor(config: SavedObjectConfig = {}) {
       // @ts-ignore
       const self: SavedObject = this;
-      buildSavedObject(self, config, services, decoratorRegistry.getOrderedDecorators(services));
+      buildSavedObject(
+        self,
+        config,
+        services,
+        startServices,
+        decoratorRegistry.getOrderedDecorators(services)
+      );
     }
   }
 

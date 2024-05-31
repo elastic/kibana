@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CommonlyUsed } from '../../page_objects/time_picker';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export function DashboardCustomizePanelProvider({ getService, getPageObject }: FtrProviderContext) {
   const log = getService('log');
@@ -63,6 +63,10 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
             async () => (await toggle.getAttribute('aria-checked')) === 'true'
           );
         }
+      });
+
+      await retry.waitFor('superDatePickerToggleQuickMenuButton to be present', async () => {
+        return Boolean(await this.findDatePickerQuickMenuButton());
       });
     }
 
@@ -120,6 +124,11 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       await testSubjects.click('customEmbeddablePanelHideTitleSwitch');
     }
 
+    public async getCustomPanelTitle() {
+      log.debug('getCustomPanelTitle');
+      return (await testSubjects.find('customEmbeddablePanelTitleInput')).getAttribute('value');
+    }
+
     public async setCustomPanelTitle(customTitle: string) {
       log.debug('setCustomPanelTitle');
       await testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle, {
@@ -130,6 +139,13 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async resetCustomPanelTitle() {
       log.debug('resetCustomPanelTitle');
       await testSubjects.click('resetCustomEmbeddablePanelTitleButton');
+    }
+
+    public async getCustomPanelDescription() {
+      log.debug('getCustomPanelDescription');
+      return (await testSubjects.find('customEmbeddablePanelDescriptionInput')).getAttribute(
+        'value'
+      );
     }
 
     public async setCustomPanelDescription(customDescription: string) {
@@ -147,7 +163,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async clickSaveButton() {
       log.debug('clickSaveButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('saveCustomizePanelButton');
         await testSubjects.waitForDeleted('saveCustomizePanelButton');
       });

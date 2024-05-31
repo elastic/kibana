@@ -76,7 +76,7 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
     cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
     cy.get(CONNECTOR_CARD_DETAILS).should(
       'have.text',
-      `Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
+      `Incident types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
         getIbmResilientConnectorOptions().severity
       }`
     );

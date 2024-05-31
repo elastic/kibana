@@ -12,7 +12,7 @@ import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { getIndexMappingsRoute } from './get_index_mappings';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   fetchMappings: jest.fn(),

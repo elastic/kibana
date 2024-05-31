@@ -2,8 +2,11 @@ title: Update case comment request
 description: >-
   The update case comment API request body varies depending on whether you are
   updating an alert or a comment.
-discriminator:
-  propertyName: type
 oneOf:
   - $ref: 'update_alert_comment_request_properties.yaml'
   - $ref: 'update_user_comment_request_properties.yaml'
+discriminator:
+  propertyName: type
+  mapping:
+    alert: 'update_alert_comment_request_properties.yaml'
+    user: 'update_user_comment_request_properties.yaml'

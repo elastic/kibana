@@ -8,9 +8,7 @@
 import { Pager, EuiSearchBar } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
-import * as qs from 'query-string';
 import { indexStatusLabels } from '../../lib/index_status_labels';
-import { isHiddenIndex } from '../../lib/indices';
 import { sortTable } from '../../services';
 import { extensionsService } from './extension_service';
 
@@ -50,16 +48,15 @@ const filterByToggles = (indices, toggleNameToVisibleMap) => {
   if (!toggleNames.length) {
     return indices;
   }
-  // An index is visible if ANY applicable toggle is visible.
   return indices.filter((index) => {
-    return toggleNames.some((toggleName) => {
-      if (!togglesByName[toggleName].matchIndex(index)) {
-        return true;
+    return toggleNames.every((toggleName) => {
+      // if an index matches a toggle, it's only shown if the toggle is set to "enabled"
+      // for example, a hidden index is only shown when the "include hidden" toggle is "enabled"
+      if (togglesByName[toggleName].matchIndex(index)) {
+        return toggleNameToVisibleMap[toggleName] === true;
       }
-
-      const isVisible = toggleNameToVisibleMap[toggleName] === true;
-
-      return isVisible;
+      // otherwise the index is shown by default
+      return true;
     });
   });
 };
@@ -68,17 +65,11 @@ export const getFilteredIndices = createSelector(
   getIndices,
   getAllIds,
   getTableState,
-  getTableLocationProp,
-  (indices, allIds, tableState, tableLocation) => {
+  (indices, allIds, tableState) => {
     let indexArray = allIds.map((indexName) => indices[indexName]);
     indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
-    const { includeHiddenIndices: includeHiddenParam } = qs.parse(tableLocation.search);
-    const includeHidden = includeHiddenParam === 'true';
-    const filteredIndices = includeHidden
-      ? indexArray
-      : indexArray.filter((index) => !isHiddenIndex(index));
     const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
-    return EuiSearchBar.Query.execute(filter, filteredIndices, {
+    return EuiSearchBar.Query.execute(filter, indexArray, {
       defaultFields: defaultFilterFields,
     });
   }
@@ -103,7 +94,8 @@ export const getPageOfIndices = createSelector(
     const sortedIndexes = sortTable(
       filteredIndices,
       tableState.sortField,
-      tableState.isSortAscending
+      tableState.isSortAscending,
+      extensionsService
     );
     const { firstItemIndex, lastItemIndex } = pager;
     const pagedIndexes = sortedIndexes.slice(firstItemIndex, lastItemIndex + 1);

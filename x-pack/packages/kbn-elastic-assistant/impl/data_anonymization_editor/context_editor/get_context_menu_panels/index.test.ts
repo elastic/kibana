@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getContextMenuPanels, PRIMARY_PANEL_ID, SECONDARY_PANEL_ID } from '.';
+import { getContextMenuPanels, PRIMARY_PANEL_ID } from '.';
 import * as i18n from '../translations';
 import { ContextEditorRow } from '../types';
 
@@ -23,9 +23,7 @@ describe('getContextMenuPanels', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('the first panel has a `primary-panel-id` when onlyDefaults is true', () => {
-    const onlyDefaults = true;
-
+  it('the first panel has a `primary-panel-id`', () => {
     const panels = getContextMenuPanels({
       disableAllow: false,
       disableAnonymize: false,
@@ -34,285 +32,9 @@ describe('getContextMenuPanels', () => {
       closePopover,
       onListUpdated,
       selected,
-      onlyDefaults,
     });
 
     expect(panels[0].id).toEqual(PRIMARY_PANEL_ID);
-  });
-
-  it('the first panel also has a `primary-panel-id` when onlyDefaults is false', () => {
-    const onlyDefaults = false;
-
-    const panels = getContextMenuPanels({
-      disableAllow: false,
-      disableAnonymize: false,
-      disableDeny: false,
-      disableUnanonymize: false,
-      closePopover,
-      onListUpdated,
-      selected,
-      onlyDefaults,
-    });
-
-    expect(panels[0].id).toEqual(PRIMARY_PANEL_ID); // first panel is always the primary panel
-  });
-
-  it('the second panel has a `secondary-panel-id` when onlyDefaults is false', () => {
-    const onlyDefaults = false;
-
-    const panels = getContextMenuPanels({
-      disableAllow: false,
-      disableAnonymize: false,
-      disableDeny: false,
-      disableUnanonymize: false,
-      closePopover,
-      onListUpdated,
-      selected,
-      onlyDefaults,
-    });
-
-    expect(panels[1].id).toEqual(SECONDARY_PANEL_ID);
-  });
-
-  it('the second panel is not rendered when onlyDefaults is true', () => {
-    const onlyDefaults = true;
-
-    const panels = getContextMenuPanels({
-      disableAllow: false,
-      disableAnonymize: false,
-      disableDeny: false,
-      disableUnanonymize: false,
-      closePopover,
-      onListUpdated,
-      selected,
-      onlyDefaults,
-    });
-
-    expect(panels.length).toEqual(1);
-  });
-
-  describe('allow by default', () => {
-    it('calls closePopover when allow by default is clicked', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const allowByDefaultItem = panels[1].items?.find(
-        (item) => item.name === i18n.ALLOW_BY_DEFAULT
-      );
-
-      allowByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(closePopover).toHaveBeenCalled();
-    });
-
-    it('calls onListUpdated to add the field to both the `allow` and `defaultAllow` lists', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const allowByDefaultItem = panels[1].items?.find(
-        (item) => item.name === i18n.ALLOW_BY_DEFAULT
-      );
-
-      allowByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(onListUpdated).toHaveBeenCalledWith([
-        { field: 'user.name', operation: 'add', update: 'allow' },
-        { field: 'user.name', operation: 'add', update: 'defaultAllow' },
-      ]);
-    });
-  });
-
-  describe('deny by default', () => {
-    it('calls closePopover when deny by default is clicked', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const denyByDefaultItem = panels[1].items?.find((item) => item.name === i18n.DENY_BY_DEFAULT);
-
-      denyByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(closePopover).toHaveBeenCalled();
-    });
-
-    it('calls onListUpdated to remove the field from both the `allow` and `defaultAllow` lists', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const denyByDefaultItem = panels[1].items?.find((item) => item.name === i18n.DENY_BY_DEFAULT);
-
-      denyByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(onListUpdated).toHaveBeenCalledWith([
-        { field: 'user.name', operation: 'remove', update: 'allow' },
-        { field: 'user.name', operation: 'remove', update: 'defaultAllow' },
-      ]);
-    });
-  });
-
-  describe('anonymize by default', () => {
-    it('calls closePopover when anonymize by default is clicked', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const anonymizeByDefaultItem = panels[1].items?.find(
-        (item) => item.name === i18n.ANONYMIZE_BY_DEFAULT
-      );
-
-      anonymizeByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(closePopover).toHaveBeenCalled();
-    });
-
-    it('calls onListUpdated to add the field to both the `allowReplacement` and `defaultAllowReplacement` lists', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const anonymizeByDefaultItem = panels[1].items?.find(
-        (item) => item.name === i18n.ANONYMIZE_BY_DEFAULT
-      );
-
-      anonymizeByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(onListUpdated).toHaveBeenCalledWith([
-        { field: 'user.name', operation: 'add', update: 'allowReplacement' },
-        { field: 'user.name', operation: 'add', update: 'defaultAllowReplacement' },
-      ]);
-    });
-  });
-
-  describe('unanonymize by default', () => {
-    it('calls closePopover when unanonymize by default is clicked', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const unAnonymizeByDefaultItem = panels[1].items?.find(
-        (item) => item.name === i18n.UNANONYMIZE_BY_DEFAULT
-      );
-
-      unAnonymizeByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(closePopover).toHaveBeenCalled();
-    });
-
-    it('calls onListUpdated to remove the field from both the `allowReplacement` and `defaultAllowReplacement` lists', () => {
-      const panels = getContextMenuPanels({
-        disableAllow: false,
-        disableAnonymize: false,
-        disableDeny: false,
-        disableUnanonymize: false,
-        closePopover,
-        onListUpdated,
-        selected,
-        onlyDefaults: false,
-      });
-
-      const unAnonymizeByDefaultItem = panels[1].items?.find(
-        (item) => item.name === i18n.UNANONYMIZE_BY_DEFAULT
-      );
-
-      unAnonymizeByDefaultItem?.onClick!(
-        new MouseEvent('click', { bubbles: true }) as unknown as React.MouseEvent<
-          HTMLHRElement,
-          MouseEvent
-        >
-      );
-
-      expect(onListUpdated).toHaveBeenCalledWith([
-        { field: 'user.name', operation: 'remove', update: 'allowReplacement' },
-        { field: 'user.name', operation: 'remove', update: 'defaultAllowReplacement' },
-      ]);
-    });
   });
 
   describe('allow', () => {
@@ -327,7 +49,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
@@ -346,7 +67,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
@@ -363,7 +83,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
@@ -387,7 +106,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const allowItem = panels[0].items?.find((item) => item.name === i18n.ALLOW);
@@ -417,7 +135,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const denyItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -436,7 +153,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const denyItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -453,7 +169,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const denyByDefaultItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -477,7 +192,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const denyItem = panels[0].items?.find((item) => item.name === i18n.DENY);
@@ -507,7 +221,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -526,7 +239,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -543,7 +255,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -567,7 +278,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const anonymizeItem = panels[0].items?.find((item) => item.name === i18n.ANONYMIZE);
@@ -597,7 +307,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const unanonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);
@@ -616,7 +325,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const unanonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);
@@ -633,7 +341,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const unAnonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);
@@ -657,7 +364,6 @@ describe('getContextMenuPanels', () => {
         closePopover,
         onListUpdated,
         selected,
-        onlyDefaults: false,
       });
 
       const unAnonymizeItem = panels[0].items?.find((item) => item.name === i18n.UNANONYMIZE);

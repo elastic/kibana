@@ -97,6 +97,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
       {/* Repository settings fields */}
       <TypeSettings
         repository={repository}
+        isManagedRepository={isManagedRepository}
         updateRepository={updateRepository}
         settingErrors={
           hasValidationErrors && validation.errors.settings ? validation.errors.settings : {}

@@ -7,4 +7,3 @@
  */
 
 export { ProjectHeader } from './header';
-export { SideNavigation } from './side_navigation';

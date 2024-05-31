@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { allowAutoCreateRadioIds } from '../../../../common/constants';
 import { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
 import {
@@ -116,12 +117,14 @@ export const TemplateForm = ({
   const indexTemplate = defaultValue ?? {
     name: '',
     indexPatterns: [],
+    dataStream: {},
     template: {},
     _kbnMeta: {
       type: 'default',
       hasDatastream: false,
       isLegacy,
     },
+    allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
   };
 
   const {
@@ -205,6 +208,7 @@ export const TemplateForm = ({
         const outputTemplate = {
           ...wizardData.logistics,
           _kbnMeta: initialTemplate._kbnMeta,
+          deprecated: initialTemplate.deprecated,
           composedOf: wizardData.components,
           template: {
             settings: wizardData.settings,

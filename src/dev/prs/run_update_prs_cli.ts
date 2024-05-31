@@ -11,7 +11,7 @@ import { resolve } from 'path';
 import * as Rx from 'rxjs';
 import execa from 'execa';
 import chalk from 'chalk';
-import { first, tap } from 'rxjs/operators';
+import { first, tap } from 'rxjs';
 import dedent from 'dedent';
 
 import { run } from '@kbn/dev-cli-runner';

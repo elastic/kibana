@@ -12,6 +12,8 @@ value:
       params:
         level: info
         message: "Rule {{rule.name}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+  alert_delay:
+    active: 3
   api_key_created_by_user: false
   api_key_owner: elastic
   consumer: alerts

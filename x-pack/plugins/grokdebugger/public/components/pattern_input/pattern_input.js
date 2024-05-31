@@ -9,7 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor, GrokLang } from '@kbn/kibana-react-plugin/public';
+
+import { CodeEditor, GrokLang } from '@kbn/code-editor';
 
 export function PatternInput({ value, onChange }) {
   return (

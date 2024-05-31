@@ -1,0 +1,25 @@
+SHOW
+
+Syntax
+```esql
+SHOW item
+```
+
+Parameters
+item
+Can only be INFO.
+DescriptionThe
+```esql
+SHOW source command returns information about the deployment and
+```
+
+its capabilities:
+Use
+```esql
+SHOW INFO to return the deployment’s version, build date and hash.
+```
+
+Examples
+```esql
+SHOW INFO
+```

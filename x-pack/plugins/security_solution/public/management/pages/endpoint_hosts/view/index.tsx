@@ -11,10 +11,12 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   type EuiBasicTableColumn,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
+  EuiLoadingLogo,
   type EuiSelectableProps,
   EuiSpacer,
   EuiSuperDatePicker,
@@ -30,10 +32,14 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
-import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
+import {
+  AgentStatus,
+  EndpointAgentStatus,
+} from '../../../../common/components/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { getEndpointPendingActionsCallback } from '../store/selectors';
@@ -76,6 +82,7 @@ const StyledDatePicker = styled.div`
 `;
 
 interface GetEndpointListColumnsProps {
+  agentStatusClientEnabled: boolean;
   canReadPolicyManagement: boolean;
   backToEndpointList: PolicyDetailsRouteState['backLink'];
   getHostPendingActions: ReturnType<typeof getEndpointPendingActionsCallback>;
@@ -100,6 +107,7 @@ const columnWidths: Record<
 };
 
 const getEndpointListColumns = ({
+  agentStatusClientEnabled,
   canReadPolicyManagement,
   backToEndpointList,
   getHostPendingActions,
@@ -150,7 +158,10 @@ const getEndpointListColumns = ({
       }),
       sortable: true,
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
-        return (
+        // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
+        return agentStatusClientEnabled ? (
+          <AgentStatus agentId={endpointInfo.metadata.agent.id} agentType="endpoint" />
+        ) : (
           <EndpointAgentStatus
             endpointHostInfo={endpointInfo}
             pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
@@ -339,6 +350,8 @@ const stateHandleDeployEndpointsClick: AgentPolicyDetailsDeployAgentAction = {
 };
 
 export const EndpointList = () => {
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
+
   const history = useHistory();
   const {
     listData,
@@ -360,6 +373,7 @@ export const EndpointList = () => {
     isAutoRefreshEnabled,
     patternsError,
     metadataTransformStats,
+    isInitialized,
   } = useEndpointSelector(selector);
   const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
@@ -525,6 +539,7 @@ export const EndpointList = () => {
   const columns = useMemo(
     () =>
       getEndpointListColumns({
+        agentStatusClientEnabled,
         canReadPolicyManagement,
         backToEndpointList,
         getAppUrl,
@@ -533,6 +548,7 @@ export const EndpointList = () => {
         search,
       }),
     [
+      agentStatusClientEnabled,
       backToEndpointList,
       canReadPolicyManagement,
       getAppUrl,
@@ -550,15 +566,39 @@ export const EndpointList = () => {
   );
 
   const mutableListData = useMemo(() => [...listData], [listData]);
-
   const renderTableOrEmptyState = useMemo(() => {
-    if (endpointsExist) {
+    if (!isInitialized) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+            title={
+              <h2>
+                {i18n.translate('xpack.securitySolution.endpoint.list.loadingEndpointManagement', {
+                  defaultMessage: 'Loading Endpoint Management',
+                })}
+              </h2>
+            }
+          />
+        </ManagementEmptyStateWrapper>
+      );
+    } else if (listError) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="error"
+            title={<h2>{listError.error}</h2>}
+            body={<p>{listError.message}</p>}
+          />
+        </ManagementEmptyStateWrapper>
+      );
+    } else if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
           items={mutableListData}
           columns={columns}
-          error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
@@ -597,31 +637,34 @@ export const EndpointList = () => {
       );
     }
   }, [
-    canAccessFleet,
-    canReadEndpointList,
-    columns,
+    isInitialized,
+    listError,
     endpointsExist,
-    endpointPrivilegesLoading,
-    handleCreatePolicyClick,
-    handleDeployEndpointsClick,
-    handleSelectableOnChange,
-    hasPolicyData,
-    listError?.message,
-    loading,
-    mutableListData,
-    onTableChange,
-    paginationSetup,
+    canReadEndpointList,
+    canAccessFleet,
     policyItemsLoading,
-    policyItems,
-    selectedPolicyId,
+    hasPolicyData,
+    mutableListData,
+    columns,
+    paginationSetup,
+    onTableChange,
+    loading,
     setTableRowProps,
     sorting,
+    endpointPrivilegesLoading,
+    policyItems,
+    handleDeployEndpointsClick,
+    selectedPolicyId,
+    handleSelectableOnChange,
+    handleCreatePolicyClick,
   ]);
+
+  const hideHeader = !(endpointsExist && isInitialized && !listError);
 
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={!endpointsExist}
+      hideHeader={hideHeader}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -637,34 +680,36 @@ export const EndpointList = () => {
       headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      <>
-        <TransformFailedCallout
-          metadataTransformStats={metadataTransformStats}
-          hasNoPolicyData={!hasPolicyData}
-        />
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {shouldShowKQLBar && (
-            <EuiFlexItem>
-              <AdminSearchBar />
+      {isInitialized && !listError && (
+        <>
+          <TransformFailedCallout
+            metadataTransformStats={metadataTransformStats}
+            hasNoPolicyData={!hasPolicyData}
+          />
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {shouldShowKQLBar && (
+              <EuiFlexItem>
+                <AdminSearchBar />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} style={refreshStyle}>
+              <StyledDatePicker>
+                <EuiSuperDatePicker
+                  className="endpointListDatePicker"
+                  onTimeChange={onTimeChange}
+                  isDisabled={hasSelectedEndpoint}
+                  onRefresh={onRefresh}
+                  isPaused={refreshIsPaused}
+                  refreshInterval={refreshInterval}
+                  onRefreshChange={onRefreshChange}
+                  isAutoRefreshOnly={true}
+                />
+              </StyledDatePicker>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false} style={refreshStyle}>
-            <StyledDatePicker>
-              <EuiSuperDatePicker
-                className="endpointListDatePicker"
-                onTimeChange={onTimeChange}
-                isDisabled={hasSelectedEndpoint}
-                onRefresh={onRefresh}
-                isPaused={refreshIsPaused}
-                refreshInterval={refreshInterval}
-                onRefreshChange={onRefreshChange}
-                isAutoRefreshOnly={true}
-              />
-            </StyledDatePicker>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">

@@ -11,7 +11,10 @@ import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IngestPipelinePanel } from './ingest_pipelines/ingest_pipeline_panel';
 import { CodeBox } from './code_box';
 import { LanguageDefinition } from '../types';
 import { OverviewPanel } from './overview_panel';
@@ -26,23 +29,33 @@ interface IngestDataProps {
   };
   assetBasePath: string;
   application?: ApplicationStart;
+  consolePlugin?: ConsolePluginStart;
   sharePlugin: SharePluginStart;
   languages: LanguageDefinition[];
   consoleRequest?: string;
   additionalIngestionPanel?: React.ReactNode;
+  ingestPipelineData?: IngestGetPipelineResponse;
+  selectedPipeline: string;
+  setSelectedPipeline: (pipelineId: string) => void;
+  defaultIngestPipeline: string;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
   codeSnippet,
   selectedLanguage,
+  selectedPipeline,
   setSelectedLanguage,
   docLinks,
   assetBasePath,
   application,
+  consolePlugin,
   sharePlugin,
   languages,
   consoleRequest,
   additionalIngestionPanel,
+  ingestPipelineData,
+  setSelectedPipeline,
+  defaultIngestPipeline,
 }) => {
   return (
     <OverviewPanel
@@ -58,6 +71,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           setSelectedLanguage={setSelectedLanguage}
           assetBasePath={assetBasePath}
           application={application}
+          consolePlugin={consolePlugin}
           sharePlugin={sharePlugin}
         />
       }
@@ -67,6 +81,12 @@ export const IngestData: React.FC<IngestDataProps> = ({
       })}
     >
       <EuiSpacer size="l" />
+      <IngestPipelinePanel
+        selectedPipeline={selectedPipeline}
+        setSelectedPipeline={setSelectedPipeline}
+        ingestPipelinesData={ingestPipelineData}
+        defaultIngestPipeline={defaultIngestPipeline}
+      />
       <EuiTitle size="xs">
         <h4>
           {i18n.translate('searchApiPanels.welcomeBanner.ingestData.alternativeOptions', {

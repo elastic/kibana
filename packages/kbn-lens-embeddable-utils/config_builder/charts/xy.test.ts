@@ -50,7 +50,7 @@ function mockDataViewsService() {
   } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
 }
 
-test('generates metric chart config', async () => {
+test('generates xy chart config', async () => {
   const result = await buildXY(
     {
       chartType: 'xy',
@@ -62,9 +62,13 @@ test('generates metric chart config', async () => {
         {
           type: 'series',
           seriesType: 'bar',
-          label: 'test',
-          value: 'count',
           xAxis: '@timestamp',
+          yAxis: [
+            {
+              label: 'test',
+              value: 'count',
+            },
+          ],
         },
       ],
     },
@@ -73,6 +77,7 @@ test('generates metric chart config', async () => {
       formulaAPI: {} as any,
     }
   );
+
   expect(result).toMatchInlineSnapshot(`
     Object {
       "references": Array [
@@ -87,19 +92,16 @@ test('generates metric chart config', async () => {
           "test": Object {},
         },
         "datasourceStates": Object {
-          "formBased": Object {
-            "layers": Object {},
-          },
           "textBased": Object {
             "layers": Object {
               "layer_0": Object {
                 "allColumns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor0_x",
+                    "columnId": "x_metric_formula_accessor0",
                     "fieldName": "@timestamp",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor0",
+                    "columnId": "metric_formula_accessor0_0",
                     "fieldName": "count",
                     "meta": Object {
                       "type": "number",
@@ -108,11 +110,11 @@ test('generates metric chart config', async () => {
                 ],
                 "columns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor0_x",
+                    "columnId": "x_metric_formula_accessor0",
                     "fieldName": "@timestamp",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor0",
+                    "columnId": "metric_formula_accessor0_0",
                     "fieldName": "count",
                     "meta": Object {
                       "type": "number",
@@ -139,12 +141,14 @@ test('generates metric chart config', async () => {
             "yLeft": true,
             "yRight": true,
           },
+          "emphasizeFitting": false,
           "fittingFunction": "None",
           "gridlinesVisibilitySettings": Object {
             "x": true,
             "yLeft": true,
             "yRight": true,
           },
+          "hideEndzones": true,
           "labelsOrientation": Object {
             "x": 0,
             "yLeft": 0,
@@ -153,12 +157,12 @@ test('generates metric chart config', async () => {
           "layers": Array [
             Object {
               "accessors": Array [
-                "metric_formula_accessor0",
+                "metric_formula_accessor0_0",
               ],
               "layerId": "layer_0",
               "layerType": "data",
               "seriesType": "bar",
-              "xAccessor": "metric_formula_accessor0_x",
+              "xAccessor": "x_metric_formula_accessor0",
             },
           ],
           "legend": Object {
@@ -172,6 +176,11 @@ test('generates metric chart config', async () => {
             "yRight": true,
           },
           "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "lowerBound": undefined,
+            "mode": "full",
+            "upperBound": undefined,
+          },
         },
       },
       "title": "test",

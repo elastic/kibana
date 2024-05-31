@@ -67,7 +67,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     const dispatch = useDispatch();
 
     const [showClearSelection, setShowClearSelection] = useState(false);
-    const getGlobalQuerySelector = inputsSelectors.globalQuery();
+    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
     const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
     const refetchQuery = useCallback(() => {
       globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());

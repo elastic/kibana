@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { OpsgenieSubActions } from '../../../common';
 import { renderParameterTemplates } from './render_template_variables';
 
 const ruleTagsTemplate = '{{rule.tags}}';
+const logger = loggingSystemMock.createLogger();
 
 describe('renderParameterTemplates', () => {
   const variables = {
@@ -20,6 +22,7 @@ describe('renderParameterTemplates', () => {
   it('renders the rule.tags as a single string if subAction is not set to CreateAlert', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: '',
           subActionParams: {
@@ -43,6 +46,7 @@ describe('renderParameterTemplates', () => {
   it('does not transform the tags if the rule.tags string is not found', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {
@@ -66,6 +70,7 @@ describe('renderParameterTemplates', () => {
   it('transforms the rule.tags to an empty array when the field does not exist in the variable', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {
@@ -87,6 +92,7 @@ describe('renderParameterTemplates', () => {
   it('does not transform the tags when the field does not exist in the params', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {},
@@ -104,6 +110,7 @@ describe('renderParameterTemplates', () => {
   it('replaces the rule.tags template with an array of strings', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {
@@ -132,6 +139,7 @@ describe('renderParameterTemplates', () => {
   it('replaces the rule.tags template with only a single instance of the rule.tags even when the mustache template exists multiple times', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {
@@ -161,6 +169,7 @@ describe('renderParameterTemplates', () => {
   it('replaces the rule.tags template with empty array and preserves the other values already in the array', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {
@@ -186,6 +195,7 @@ describe('renderParameterTemplates', () => {
   it('replaces the rule.tags template with variable value when the path is a full string', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {
@@ -212,6 +222,7 @@ describe('renderParameterTemplates', () => {
   it('replaces the rule.tags template and other templates', () => {
     expect(
       renderParameterTemplates(
+        logger,
         {
           subAction: OpsgenieSubActions.CreateAlert,
           subActionParams: {

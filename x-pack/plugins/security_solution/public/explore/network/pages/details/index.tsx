@@ -40,9 +40,9 @@ import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../../app/types';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { getNetworkDetailsPageFilter } from '../../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
@@ -123,6 +123,11 @@ const NetworkDetailsComponent: React.FC = () => {
       return [undefined, e];
     }
   }, [globalFilters, indexPattern, networkDetailsFilter, query, uiSettings]);
+
+  const additionalFilters = useMemo(
+    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
+    [rawFilteredQuery]
+  );
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -226,14 +231,14 @@ const NetworkDetailsComponent: React.FC = () => {
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -260,7 +265,7 @@ const NetworkDetailsComponent: React.FC = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.network} />

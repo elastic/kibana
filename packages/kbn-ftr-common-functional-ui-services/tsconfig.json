@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "cheerio", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/test-subj-selector",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/std",
+    "@kbn/expect"
+  ]
+}

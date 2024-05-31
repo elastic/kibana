@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { isValidFeatureId, ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
@@ -41,24 +41,29 @@ export const useFetchBrowserFieldCapabilities = ({
   );
   const [fields, setFields] = useState<FieldDescriptor[]>([]);
 
-  const getBrowserFieldInfo = useCallback(async (): Promise<{
-    browserFields: BrowserFields;
-    fields: FieldDescriptor[];
-  }> => {
-    if (!http) return Promise.resolve({ browserFields: {}, fields: [] });
+  const getBrowserFieldInfo = useCallback(
+    async (
+      validFeatureId: ValidFeatureId[]
+    ): Promise<{
+      browserFields: BrowserFields;
+      fields: FieldDescriptor[];
+    }> => {
+      if (!http) return Promise.resolve({ browserFields: {}, fields: [] });
 
-    try {
-      return await http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
-        `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
-        {
-          query: { featureIds },
-        }
-      );
-    } catch (e) {
-      toasts.addDanger(ERROR_FETCH_BROWSER_FIELDS);
-      return Promise.resolve({ browserFields: {}, fields: [] });
-    }
-  }, [featureIds, http, toasts]);
+      try {
+        return await http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
+          `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+          {
+            query: { featureIds: validFeatureId },
+          }
+        );
+      } catch (e) {
+        toasts.addDanger(ERROR_FETCH_BROWSER_FIELDS);
+        return Promise.resolve({ browserFields: {}, fields: [] });
+      }
+    },
+    [http, toasts]
+  );
 
   useEffect(() => {
     if (initialBrowserFields) {
@@ -67,21 +72,26 @@ export const useFetchBrowserFieldCapabilities = ({
       setBrowserFields(initialBrowserFields);
       return;
     }
-
-    if (isLoading !== undefined || featureIds.includes(INVALID_FEATURE_ID)) {
+    const validFeatureIdTmp = featureIds.filter((fid) => isValidFeatureId(fid));
+    if (
+      isLoading !== undefined ||
+      featureIds.includes(INVALID_FEATURE_ID) ||
+      validFeatureIdTmp.length === 0
+    ) {
       return;
     }
 
     setIsLoading(true);
 
-    const callApi = async () => {
-      const { browserFields: browserFieldsInfo, fields: newFields } = await getBrowserFieldInfo();
+    const callApi = async (validFeatureId: ValidFeatureId[]) => {
+      const { browserFields: browserFieldsInfo, fields: newFields } = await getBrowserFieldInfo(
+        validFeatureId
+      );
       setFields(newFields);
       setBrowserFields(browserFieldsInfo);
       setIsLoading(false);
     };
-
-    callApi();
+    callApi(validFeatureIdTmp);
   }, [getBrowserFieldInfo, isLoading, featureIds, initialBrowserFields]);
 
   return [isLoading, browserFields, fields];

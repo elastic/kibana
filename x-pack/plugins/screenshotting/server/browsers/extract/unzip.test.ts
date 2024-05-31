@@ -6,7 +6,7 @@
  */
 
 import mockFs from 'mock-fs';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { ExtractError } from './extract_error';
 import { unzip } from './unzip';
 
@@ -28,7 +28,7 @@ describe('unzip', () => {
   it('should extract zipped contents', async () => {
     await unzip('/test.zip', '/output');
 
-    expect(readFileSync('/output/test.txt').toString()).toEqual('test');
+    await expect(readFile('/output/test.txt', 'utf8')).resolves.toBe('test');
   });
 
   it('should reject on invalid archive', async () => {

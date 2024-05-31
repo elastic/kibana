@@ -126,6 +126,12 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
 
+  const setUpdateIndexMappingsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
+
   const setLoadIndexStatsResponse = (
     indexName: string,
     response?: HttpResponse,
@@ -216,6 +222,7 @@ const registerHttpRequestMockHelpers = (
     setCreateTemplateResponse,
     setLoadIndexSettingsResponse,
     setLoadIndexMappingResponse,
+    setUpdateIndexMappingsResponse,
     setLoadIndexStatsResponse,
     setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,

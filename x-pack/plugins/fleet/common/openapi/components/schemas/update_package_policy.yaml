@@ -59,6 +59,5 @@ properties:
     type: boolean
 required:
   - name
-  - namespace
   - policy_id
   - enabled

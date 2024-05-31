@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { CreateChatCompletionResponse } from 'openai';
+import type OpenAI from 'openai';
 import { Readable } from 'stream';
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
@@ -112,7 +112,7 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
         }
 
         return response.ok({
-          body: executeResult.data as CreateChatCompletionResponse | Readable,
+          body: executeResult.data as OpenAI.ChatCompletion | Readable,
         });
       }
     );

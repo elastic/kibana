@@ -6,7 +6,7 @@
  */
 
 import { AlertStatus } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
@@ -49,11 +49,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Table
 
     async getHostsTable() {
-      return testSubjects.find('hostsView-table');
+      return testSubjects.find('hostsView-table-loaded');
     },
 
-    async isHostTableLoading() {
-      return !(await testSubjects.exists('tbody[class*=euiBasicTableBodyLoading]'));
+    async isHostTableLoaded() {
+      return !(await testSubjects.exists('hostsView-table-loading'));
     },
 
     async getHostsTableData() {
@@ -66,10 +66,29 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const cells = await row.findAllByCssSelector('[data-test-subj*="hostsView-tableRow-"]');
 
       // Retrieve content for each cell
-      const [title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx] =
-        await Promise.all(cells.map((cell) => this.getHostsCellContent(cell)));
+      const [
+        alertsCount,
+        title,
+        cpuUsage,
+        normalizedLoad,
+        memoryUsage,
+        memoryFree,
+        diskSpaceUsage,
+        rx,
+        tx,
+      ] = await Promise.all(cells.map((cell) => this.getHostsCellContent(cell)));
 
-      return { title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx };
+      return {
+        alertsCount,
+        title,
+        cpuUsage,
+        normalizedLoad,
+        memoryUsage,
+        memoryFree,
+        diskSpaceUsage,
+        rx,
+        tx,
+      };
     },
 
     async getHostsCellContent(cell: WebElementWrapper) {
@@ -108,7 +127,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
     },
 
-    async clickAndValidateMetriChartActionOptions() {
+    async clickAndValidateMetricChartActionOptions() {
       const element = await testSubjects.find('hostsView-metricChart-tx');
       await element.moveMouseTo();
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
@@ -235,11 +254,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // Sorting
     getCpuUsageHeader() {
-      return testSubjects.find('tableHeaderCell_cpu_2');
+      return testSubjects.find('tableHeaderCell_cpu_3');
     },
 
     getTitleHeader() {
-      return testSubjects.find('tableHeaderCell_title_1');
+      return testSubjects.find('tableHeaderCell_title_2');
     },
 
     async sortByCpuUsage() {

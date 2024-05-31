@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type {
@@ -24,6 +25,7 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { nullableType } from '../lib/nullable';
@@ -103,7 +105,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-const ParamsSchema = schema.object({
+export const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 
@@ -139,12 +141,13 @@ export function getConnectorType(): WebhookConnectorType {
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   if (!params.body) return params;
   return {
-    body: renderMustacheString(params.body, variables, 'json'),
+    body: renderMustacheString(logger, params.body, variables, 'json'),
   };
 }
 
@@ -208,6 +211,7 @@ export async function executor(
     isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
+
   const sslCertificate =
     authType === WebhookAuthType.SSL &&
     ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
@@ -231,14 +235,19 @@ export async function executor(
     ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
   };
 
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: basicAuth.auth?.username,
+    password: basicAuth.auth?.password,
+    headers,
+  });
+
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({
       axios: axiosInstance,
       method,
       url,
       logger,
-      ...basicAuth,
-      headers: headers ? headers : {},
+      headers: headersWithBasicAuth,
       data,
       configurationUtilities,
       sslOverrides,

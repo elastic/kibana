@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -13,16 +14,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('List connectors', () => {
+    before(async () => {
+      await deleteAllActionConnectors(supertest);
+    });
+
+    after(async () => {
+      await deleteAllActionConnectors(supertest);
+    });
+
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
-        .readUser({
+        .editorUser({
           endpoint: 'GET /internal/observability_ai_assistant/connectors',
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
-      const res = await observabilityAIAssistantAPIClient.readUser({
+      const res = await observabilityAIAssistantAPIClient.editorUser({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
@@ -46,7 +55,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const res = await observabilityAIAssistantAPIClient.readUser({
+      const res = await observabilityAIAssistantAPIClient.editorUser({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
@@ -60,4 +69,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(204);
     });
   });
+}
+
+export async function deleteAllActionConnectors(supertest: SuperTestAgent): Promise<any> {
+  const res = await supertest.get(`/api/actions/connectors`);
+
+  const body = res.body as Array<{ id: string; connector_type_id: string; name: string }>;
+  return Promise.all(
+    body.map(({ id }) => {
+      return supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
+    })
+  );
 }

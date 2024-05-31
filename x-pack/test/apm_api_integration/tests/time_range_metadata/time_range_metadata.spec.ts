@@ -11,14 +11,15 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { deleteSummaryFieldTransform } from '@kbn/apm-synthtrace';
-import { Readable, pipeline } from 'stream';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { Readable } from 'stream';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const es = getService('es');
   const log = getService('log');
 
@@ -74,7 +75,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when(
-    'Time range metadata when generating summary data',
+    'Time range metadata when generating data with multiple APM server versions',
     { config: 'basic', archives: [] },
     () => {
       describe('data loaded with and without summary field', () => {
@@ -82,65 +83,179 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const withoutSummaryFieldEnd = moment(withoutSummaryFieldStart).add(2, 'hours');
 
         const withSummaryFieldStart = moment(withoutSummaryFieldEnd);
-        const withSummaryFieldEnd = moment(withoutSummaryFieldEnd).add(2, 'hours');
+        const withSummaryFieldEnd = moment(withSummaryFieldStart).add(2, 'hours');
 
         before(async () => {
-          const previousTxEvents = getTransactionEvents(
-            withoutSummaryFieldStart,
-            withoutSummaryFieldEnd
-          );
+          await getTransactionEvents({
+            start: withoutSummaryFieldStart,
+            end: withoutSummaryFieldEnd,
+            isLegacy: true,
+            synthtrace: apmSynthtraceEsClient,
+            logger: log,
+          });
 
-          const apmPipeline = (base: Readable) => {
-            // @ts-expect-error
-            const defaultPipeline: NodeJS.ReadableStream =
-              synthtraceEsClient.getDefaultPipeline()(base);
-
-            return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
-              if (err) {
-                log.error(err);
-              }
-            });
-          };
-
-          await synthtraceEsClient.index(previousTxEvents, apmPipeline);
-
-          const txEvents = getTransactionEvents(withSummaryFieldStart, withSummaryFieldEnd);
-          await synthtraceEsClient.index(txEvents);
+          await getTransactionEvents({
+            start: withSummaryFieldStart,
+            end: withSummaryFieldEnd,
+            isLegacy: false,
+            synthtrace: apmSynthtraceEsClient,
+            logger: log,
+          });
         });
 
         after(() => {
-          return synthtraceEsClient.clean();
+          return apmSynthtraceEsClient.clean();
         });
 
-        describe('Values for hasDurationSummaryField for transaction metrics', () => {
-          it('returns true when summary field is available both inside and outside the range', async () => {
+        describe('aggregators and summary field support', () => {
+          it('returns support only for legacy transactionMetrics 1m without duration summary field', async () => {
             const response = await getTimeRangeMedata({
-              start: moment(withSummaryFieldStart).add(1, 'hour'),
-              end: moment(withSummaryFieldEnd),
+              start: withoutSummaryFieldStart,
+              end: withoutSummaryFieldEnd,
             });
 
             expect(
               response.sources.filter(
-                (source) =>
-                  source.documentType === ApmDocumentType.TransactionMetric &&
-                  source.hasDurationSummaryField === true
-              ).length
-            ).to.eql(3);
+                (source) => source.documentType !== ApmDocumentType.TransactionEvent
+              )
+            ).to.eql([
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.TenMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.SixtyMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.TenMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                hasDocs: true,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.SixtyMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+            ]);
           });
 
-          it('returns false when summary field is available inside but not outside the range', async () => {
+          it('returns support for all document types with duration summary field', async () => {
             const response = await getTimeRangeMedata({
-              start: moment(withSummaryFieldStart).subtract(30, 'minutes'),
-              end: moment(withSummaryFieldEnd),
+              start: withSummaryFieldStart,
+              end: withSummaryFieldEnd,
             });
 
             expect(
               response.sources.filter(
-                (source) =>
-                  source.documentType === ApmDocumentType.TransactionMetric &&
-                  source.hasDurationSummaryField === false
-              ).length
-            ).to.eql(3);
+                (source) => source.documentType !== ApmDocumentType.TransactionEvent
+              )
+            ).to.eql([
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.TenMinutes,
+                hasDocs: true,
+                hasDurationSummaryField: true,
+              },
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                hasDocs: true,
+                hasDurationSummaryField: true,
+              },
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.SixtyMinutes,
+                hasDocs: true,
+                hasDurationSummaryField: true,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.TenMinutes,
+                hasDocs: true,
+                hasDurationSummaryField: true,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                hasDocs: true,
+                hasDurationSummaryField: true,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.SixtyMinutes,
+                hasDocs: true,
+                hasDurationSummaryField: true,
+              },
+            ]);
+          });
+
+          it('returns support only for transaction 1m when timerange includes both new and legacy documents', async () => {
+            const response = await getTimeRangeMedata({
+              start: withoutSummaryFieldStart,
+              end: withSummaryFieldEnd,
+            });
+
+            expect(
+              response.sources.filter(
+                (source) => source.documentType !== ApmDocumentType.TransactionEvent
+              )
+            ).to.eql([
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.TenMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.ServiceTransactionMetric,
+                rollupInterval: RollupInterval.SixtyMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.TenMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                hasDocs: true,
+                hasDurationSummaryField: false,
+              },
+              {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.SixtyMinutes,
+                hasDocs: false,
+                hasDurationSummaryField: false,
+              },
+            ]);
           });
         });
       });
@@ -154,7 +269,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(() => {
         const instance = apm.service('my-service', 'production', 'java').instance('instance');
 
-        return synthtraceEsClient.index(
+        return apmSynthtraceEsClient.index(
           timerange(moment(start).subtract(1, 'day'), end)
             .interval('1m')
             .rate(1)
@@ -165,7 +280,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(() => {
-        return synthtraceEsClient.clean();
+        return apmSynthtraceEsClient.clean();
       });
 
       describe('with default settings', () => {
@@ -399,8 +514,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('when service metrics are only available in the current time range', () => {
-        before(async () => {
-          await es.deleteByQuery({
+        before(async () =>
+          es.deleteByQuery({
             index: 'metrics-apm*',
             query: {
               bool: {
@@ -413,7 +528,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   {
                     range: {
                       '@timestamp': {
-                        lte: start.toISOString(),
+                        gte: start.toISOString(),
                       },
                     },
                   },
@@ -422,8 +537,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             refresh: true,
             expand_wildcards: ['open', 'hidden'],
-          });
-        });
+          })
+        );
 
         it('marks service transaction metrics as unavailable', async () => {
           const response = await getTimeRangeMedata({
@@ -507,13 +622,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(() => {
-        return synthtraceEsClient.clean();
+        return apmSynthtraceEsClient.clean();
       });
     }
   );
 }
 
-function getTransactionEvents(start: Moment, end: Moment) {
+function getTransactionEvents({
+  start,
+  end,
+  synthtrace,
+  logger,
+  isLegacy = false,
+}: {
+  start: Moment;
+  end: Moment;
+  synthtrace: ApmSynthtraceEsClient;
+  logger: ToolingLog;
+  isLegacy?: boolean;
+}) {
   const serviceName = 'synth-go';
   const transactionName = 'GET /api/product/list';
   const GO_PROD_RATE = 15;
@@ -523,7 +650,7 @@ function getTransactionEvents(start: Moment, end: Moment) {
     .service({ name: serviceName, environment: 'production', agentName: 'go' })
     .instance('instance-a');
 
-  return [
+  const events = [
     timerange(start, end)
       .interval('1m')
       .rate(GO_PROD_RATE)
@@ -546,4 +673,10 @@ function getTransactionEvents(start: Moment, end: Moment) {
           .failure()
       ),
   ];
+
+  const apmPipeline = (base: Readable) => {
+    return synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(base);
+  };
+
+  return synthtrace.index(events, isLegacy ? apmPipeline : undefined);
 }

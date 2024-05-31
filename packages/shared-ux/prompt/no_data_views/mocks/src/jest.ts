@@ -16,12 +16,14 @@ const defaultParams = {};
 export const getNoDataViewsPromptServicesMock = (
   params: Partial<NoDataViewsPromptServices> = defaultParams
 ) => {
-  const { canCreateNewDataView, dataViewsDocLink } = params || {};
+  const { canCreateNewDataView, dataViewsDocLink, esqlDocLink } = params || {};
 
   const services: NoDataViewsPromptServices = {
     canCreateNewDataView: canCreateNewDataView || true,
     dataViewsDocLink: dataViewsDocLink || 'some/link',
+    esqlDocLink: esqlDocLink || 'some/link',
     openDataViewEditor: jest.fn(),
+    onTryESQL: jest.fn(),
   };
 
   return services;

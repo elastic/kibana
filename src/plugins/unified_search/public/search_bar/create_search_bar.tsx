@@ -234,6 +234,8 @@ export function createSearchBar({
             dateRangeTo={timeRange.to}
             refreshInterval={refreshInterval.value}
             isRefreshPaused={refreshInterval.pause}
+            isLoading={props.isLoading}
+            onCancel={props.onCancel}
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
@@ -254,6 +256,7 @@ export function createSearchBar({
             dataViewPickerOverride={props.dataViewPickerOverride}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
+            additionalQueryBarMenuItems={props.additionalQueryBarMenuItems}
             {...overrideDefaultBehaviors(props)}
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}

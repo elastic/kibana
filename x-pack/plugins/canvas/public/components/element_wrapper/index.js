@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import { connectAdvanced } from 'react-redux';
-import { compose, withPropsOnChange, mapProps } from 'recompose';
+import { compose, withPropsOnChange, mapProps } from 'react-recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';

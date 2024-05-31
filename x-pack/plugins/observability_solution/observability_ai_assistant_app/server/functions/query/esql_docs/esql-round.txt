@@ -1,0 +1,15 @@
+ROUND
+
+Syntax
+Parameters
+number
+The numeric value to round. If null, the function returns null.
+decimals
+The number of decimal places to round to. Defaults to 0. If null, the function returns null.
+DescriptionRounds a number to the specified number of decimal places. Defaults to 0, which returns the nearest integer. If the precision is a negative number, rounds to the number of digits left of the decimal point.Supported types
+Example
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL height_ft = ROUND(height * 3.281, 1)
+```

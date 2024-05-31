@@ -43,7 +43,6 @@ exports[`PipelinePanel renders 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
 </FlyoutPanel>

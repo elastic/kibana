@@ -24,6 +24,7 @@ const input = {
   timeRange: { from: 'now-15m', to: 'now' },
   columns: ['message', 'extension'],
   rowHeight: 30,
+  headerRowHeight: 5,
   rowsPerPage: 50,
 };
 

@@ -38,6 +38,17 @@ jest.mock('../../../components', () => {
   };
 });
 
+function cardProps(overrides: Partial<PackageCardProps> = {}): PackageCardProps {
+  return {
+    id: 'card-1',
+    url: 'https://google.com',
+    fromIntegrations: 'installed',
+    title: 'System',
+    description: 'System',
+    ...overrides,
+  } as PackageCardProps;
+}
+
 function renderPackageCard(props: PackageCardProps) {
   const renderer = createFleetTestRendererMock();
 
@@ -56,13 +67,11 @@ describe('package card', () => {
   });
 
   it('should navigate with state when integrations card', async () => {
-    const { utils } = renderPackageCard({
-      id: 'card-1',
-      url: '/app/integrations/detail/apache-1.0/overview',
-      fromIntegrations: 'installed',
-      title: 'System',
-      description: 'System',
-    } as PackageCardProps);
+    const { utils } = renderPackageCard(
+      cardProps({
+        url: '/app/integrations/detail/apache-1.0/overview',
+      })
+    );
 
     await act(async () => {
       const el = utils.getByRole('button');
@@ -75,13 +84,11 @@ describe('package card', () => {
   });
 
   it('should navigate with url when enterprise search card', async () => {
-    const { utils } = renderPackageCard({
-      id: 'card-1',
-      url: '/app/enterprise_search/workplace_search/setup_guide',
-      fromIntegrations: 'installed',
-      title: 'System',
-      description: 'System',
-    } as PackageCardProps);
+    const { utils } = renderPackageCard(
+      cardProps({
+        url: '/app/enterprise_search/workplace_search/setup_guide',
+      })
+    );
 
     await act(async () => {
       const el = utils.getByRole('button');
@@ -95,13 +102,7 @@ describe('package card', () => {
   it('should navigate with window open when external url', async () => {
     window.open = jest.fn();
 
-    const { utils } = renderPackageCard({
-      id: 'card-1',
-      url: 'https://google.com',
-      fromIntegrations: 'installed',
-      title: 'System',
-      description: 'System',
-    } as PackageCardProps);
+    const { utils } = renderPackageCard(cardProps());
 
     await act(async () => {
       const el = utils.getByRole('button');
@@ -109,4 +110,30 @@ describe('package card', () => {
     });
     expect(window.open).toHaveBeenCalledWith('https://google.com', '_blank');
   });
+
+  it.each([true, false])(
+    'determines whether to render card with badge when quickstart flag is %s',
+    async (isQuickstart) => {
+      const {
+        utils: { queryByTitle },
+      } = renderPackageCard(
+        cardProps({
+          isQuickstart,
+        })
+      );
+      const badgeElement = await queryByTitle('Quickstart');
+      expect(!!badgeElement).toEqual(isQuickstart);
+    }
+  );
+
+  it.each([true, false])(
+    'determines whether to render card with collection button when `isCollectionCard` is %s`',
+    async (isCollectionCard) => {
+      const {
+        utils: { queryByText },
+      } = renderPackageCard(cardProps({ isCollectionCard }));
+      const collectionButton = queryByText('View collection');
+      expect(!!collectionButton).toEqual(isCollectionCard);
+    }
+  );
 });

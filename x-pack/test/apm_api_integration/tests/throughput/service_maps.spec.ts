@@ -15,7 +15,7 @@ import { roundNumber } from '../../utils';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -95,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -117,8 +117,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
+      // FLAKY: https://github.com/elastic/kibana/issues/176984
       describe('compare throughput value between service inventory and service maps', () => {
         before(async () => {
           [throughputTransactionValues, throughputMetricValues] = await Promise.all([
@@ -135,6 +136,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
+      // FLAKY: https://github.com/elastic/kibana/issues/176987
       describe('when calling service maps transactions stats api', () => {
         let serviceMapsNodeThroughput: number | null | undefined;
         before(async () => {

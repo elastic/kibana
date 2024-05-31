@@ -434,7 +434,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "name": "Download CSV reports from Saved Search panels",
+                "name": "Generate CSV reports from Saved Search panels",
                 "savedObject": Object {
                   "all": Array [],
                   "read": Array [],
@@ -546,6 +546,7 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
         "store_search_session",
       ],
       "app": Array [
@@ -582,6 +583,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "tag",
         ],
@@ -599,6 +601,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -614,6 +619,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "dashboard",
           "query",
@@ -1160,6 +1166,7 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
         "store_search_session",
       ],
       "app": Array [
@@ -1196,6 +1203,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "tag",
         ],
@@ -1213,6 +1221,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -1228,6 +1239,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "dashboard",
           "query",

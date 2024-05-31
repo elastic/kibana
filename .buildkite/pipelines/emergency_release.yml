@@ -1,0 +1,20 @@
+env:
+  SKIP_NODE_SETUP: true
+  VERSION: ${BUILDKITE_COMMIT:0:12}
+  EMERGENCY_RELEASE_REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/emergency.yaml
+
+steps:
+  - label: ':label: Create tag'
+    command: .buildkite/scripts/serverless/create_deploy_tag/create_fix_tag.sh
+    if: build.branch =~ /^deploy-fix@.*\$/
+
+  - wait
+
+  - label: ':argo: Emergency Release'
+    if: build.branch =~ /^deploy-fix@.*\$/
+    trigger: gpctl-promote
+    build:
+      env:
+        REMOTE_SERVICE_CONFIG: "${EMERGENCY_RELEASE_REMOTE_SERVICE_CONFIG}"
+        SERVICE_COMMIT_HASH: "${VERSION}"
+        DRY_RUN: "${DRY_RUN:-false}"

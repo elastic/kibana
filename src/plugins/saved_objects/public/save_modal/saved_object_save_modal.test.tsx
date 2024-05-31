@@ -10,7 +10,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('SavedObjectSaveModal', () => {
   it('should render matching snapshot', () => {
@@ -72,7 +73,9 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('allows specifying custom save button label', () => {
-    const wrapper = mountWithIntl(
+    const confirmButtonLabel = 'Save and done';
+
+    render(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -80,11 +83,36 @@ describe('SavedObjectSaveModal', () => {
         showCopyOnSave={false}
         objectType="visualization"
         showDescription={true}
-        confirmButtonLabel="Save and done"
+        confirmButtonLabel={confirmButtonLabel}
       />
     );
-    expect(wrapper.find('button[data-test-subj="confirmSaveSavedObjectButton"]').text()).toBe(
-      'Save and done'
+
+    expect(screen.queryByText(confirmButtonLabel)).toBeInTheDocument();
+  });
+
+  it('enforces copy on save', async () => {
+    const onSave = jest.fn();
+
+    render(
+      <SavedObjectSaveModal
+        onSave={onSave}
+        onClose={() => void 0}
+        title={'Saved Object title'}
+        objectType="visualization"
+        showDescription={true}
+        showCopyOnSave={true}
+        mustCopyOnSaveMessage="You must save a copy of the object."
+      />
     );
+
+    expect(onSave).not.toHaveBeenCalled();
+
+    expect(screen.getByTestId('saveAsNewCheckbox')).toBeDisabled();
+    userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled();
+      expect(onSave.mock.calls[0][0].newCopyOnSave).toBe(true);
+    });
   });
 });

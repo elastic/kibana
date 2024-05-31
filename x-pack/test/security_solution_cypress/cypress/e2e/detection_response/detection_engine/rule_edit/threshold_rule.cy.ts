@@ -41,15 +41,6 @@ describe(
   'Detection threshold rules, edit',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForThresholdRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     describe('without suppression', () => {

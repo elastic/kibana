@@ -42,7 +42,7 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
         external_in_bytes: memoryUsage.external,
       },
       pid: process.pid,
-      event_loop_delay: eventLoopDelayHistogram.mean,
+      event_loop_delay: eventLoopDelayHistogram.max,
       event_loop_delay_histogram: eventLoopDelayHistogram,
       event_loop_utilization: eventLoopUtilization,
       uptime_in_millis: process.uptime() * 1000,

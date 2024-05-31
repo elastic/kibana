@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
-import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
+import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
-import type { OptionsListSortingType } from './suggestions_sorting';
 import type { DataControlInput } from '../types';
+import { OptionsListSearchTechnique } from './suggestions_searching';
+import type { OptionsListSortingType } from './suggestions_sorting';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
-
-export type OptionsListSearchTechnique = 'prefix' | 'wildcard';
-export const OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
   searchTechnique?: OptionsListSearchTechnique;

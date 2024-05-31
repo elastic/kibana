@@ -13,20 +13,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'timePicker',
     'header',
-    'unifiedSearch',
-    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
+  const dataViews = getService('dataViews');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'bfetch:disable': true,
+        // 'bfetch:disable': true, // bfetch is already disabled in serverless
         // TODO: Removed ES|QL setting since ES|QL isn't supported in Serverless
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -216,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should send 2 requests (documents + chart) when changing the data view', async () => {
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+          await dataViews.switchToAndValidate('long-window-logstash-*');
         });
       });
     });

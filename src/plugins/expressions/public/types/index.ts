@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Adapters } from '@kbn/inspector-plugin/public';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
@@ -35,12 +35,11 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: SerializableRecord;
+  searchContext?: ExecutionContextSearch;
   context?: ExpressionValue;
   variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
   debug?: boolean;
-  disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
   uiState?: unknown;
@@ -55,7 +54,7 @@ export interface IExpressionLoaderParams {
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   getCompatibleCellValueActions?: ExpressionRenderHandlerParams['getCompatibleCellValueActions'];
   executionContext?: KibanaExecutionContext;
-
+  abortController?: AbortController;
   /**
    * The flag to toggle on emitting partial results.
    * By default, the partial results are disabled.
@@ -67,6 +66,8 @@ export interface IExpressionLoaderParams {
    * By default, it equals 1000.
    */
   throttle?: number;
+
+  allowCache?: boolean;
 }
 
 export interface ExpressionRenderError extends Error {

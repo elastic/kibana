@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const indexManagementService = getService('indexManagement');
 
-  // Failing: See https://github.com/elastic/kibana/issues/172697
-  describe.skip('Enrich policies', function () {
+  describe('Enrich policies', function () {
     const INDEX_NAME = `index-${Math.random()}`;
     const POLICY_NAME = `policy-${Math.random()}`;
 
@@ -54,15 +53,13 @@ export default function ({ getService }: FtrProviderContext) {
     it('should list all policies', async () => {
       const { body } = await getAllEnrichPolicies().expect(200);
 
-      expect(body).toEqual([
-        {
-          enrichFields: ['firstName'],
-          matchField: 'email',
-          name: POLICY_NAME,
-          sourceIndices: [INDEX_NAME],
-          type: 'match',
-        },
-      ]);
+      expect(body).toContainEqual({
+        enrichFields: ['firstName'],
+        matchField: 'email',
+        name: POLICY_NAME,
+        sourceIndices: [INDEX_NAME],
+        type: 'match',
+      });
     });
 
     it('should be able to execute a policy', async () => {
@@ -74,9 +71,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should be able to delete a policy', async () => {
-      const { body } = await removeEnrichPolicy(POLICY_NAME).expect(200);
+      const { status } = await removeEnrichPolicy(POLICY_NAME);
 
-      expect(body).toEqual({ acknowledged: true });
+      // In the odd case that the policy is somehow still being executed, the delete
+      // method might return a 429 so we need to account for that.
+      expect([200, 429]).toContain(status);
     });
   });
 }

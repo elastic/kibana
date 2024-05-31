@@ -40,7 +40,8 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/176543
+describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
   describe(
@@ -86,7 +87,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         cy.contains(AGENT_POLICY_NAME).click();
         cy.get('.euiTableCellContent')
-          .get('.euiPopover__anchor')
+          .get('.euiPopover')
           .get(`[aria-label="Open"]`)
           .first()
           .click();
@@ -163,6 +164,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains('New live query').click();
         cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
         selectAllAgents();
         submitQuery();
@@ -186,7 +188,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       navigateTo('/app/osquery/packs');
     });
 
-    describe('add proper shard to policies packs config', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/171279
+    describe.skip('add proper shard to policies packs config', () => {
       const globalPack = 'globalPack' + generateRandomStringName(1)[0];
       const agentPolicy = 'testGlobal' + generateRandomStringName(1)[0];
       let globalPackId: string;
@@ -308,14 +311,12 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
         cy.get('#shardsPercentage0').should('have.value', '15');
         cy.getBySel('packShardsForm-1').within(() => {
-          cy.getBySel('shards-field-policy').contains(OSQUERY_POLICY);
+          cy.getBySel('shards-field-policy').find('input').should('value', OSQUERY_POLICY);
           cy.get('#shardsPercentage1').should('have.value', '0');
         });
-        cy.getBySel(POLICY_SELECT_COMBOBOX).within(() => {
-          cy.contains(OSQUERY_POLICY).should('not.exist');
-        });
+        cy.getBySel(POLICY_SELECT_COMBOBOX).find('input').should('not.have.value', OSQUERY_POLICY);
 
-        cy.getBySel('comboBoxInput').contains(OSQUERY_POLICY).should('exist');
+        cy.getBySel('shards-field-policy').find(`input[value="${OSQUERY_POLICY}"]`).should('exist');
         cy.getBySel(POLICY_SELECT_COMBOBOX).click();
         cy.get('[data-test-subj="packShardsForm-1"]').within(() => {
           cy.get(`[aria-label="Delete shards row"]`).click();

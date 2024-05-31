@@ -18,6 +18,7 @@ import {
 } from '../common/constants';
 import { RulesClientContext } from '../types';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const checkAuthorizationAndGetTotal = async (
   context: RulesClientContext,
@@ -54,7 +55,7 @@ export const checkAuthorizationAndGetTotal = async (
         filter,
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         aggs: {
           alertTypeId: {
             multi_terms: {

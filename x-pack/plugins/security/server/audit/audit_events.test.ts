@@ -30,7 +30,7 @@ describe('#savedObjectEvent', () => {
       savedObjectEvent({
         action: AuditAction.CREATE,
         outcome: 'unknown',
-        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID', name: 'test_dashboard' },
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -50,6 +50,7 @@ describe('#savedObjectEvent', () => {
           "delete_from_spaces": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
+            "name": "test_dashboard",
             "type": "dashboard",
           },
           "unauthorized_spaces": undefined,
@@ -64,7 +65,7 @@ describe('#savedObjectEvent', () => {
     expect(
       savedObjectEvent({
         action: AuditAction.CREATE,
-        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID', name: 'test_dashboard' },
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -84,6 +85,7 @@ describe('#savedObjectEvent', () => {
           "delete_from_spaces": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
+            "name": "test_dashboard",
             "type": "dashboard",
           },
           "unauthorized_spaces": undefined,
@@ -98,7 +100,7 @@ describe('#savedObjectEvent', () => {
     expect(
       savedObjectEvent({
         action: AuditAction.CREATE,
-        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID', name: 'test_dashboard' },
         error: new Error('ERROR_MESSAGE'),
       })
     ).toMatchInlineSnapshot(`
@@ -122,6 +124,7 @@ describe('#savedObjectEvent', () => {
           "delete_from_spaces": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
+            "name": "test_dashboard",
             "type": "dashboard",
           },
           "unauthorized_spaces": undefined,
@@ -163,13 +166,13 @@ describe('#savedObjectEvent', () => {
     expect(
       savedObjectEvent({
         action: AuditAction.GET,
-        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
+        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID', name: 'telemetry_name' },
       })
     ).toBeUndefined();
     expect(
       savedObjectEvent({
         action: AuditAction.RESOLVE,
-        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID' },
+        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID', name: 'config_name' },
       })
     ).toBeUndefined();
     expect(
@@ -196,13 +199,13 @@ describe('#savedObjectEvent', () => {
     expect(
       savedObjectEvent({
         action: AuditAction.UPDATE,
-        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID' },
+        savedObject: { type: 'config', id: 'SAVED_OBJECT_ID', name: 'config_name' },
       })
     ).not.toBeUndefined();
     expect(
       savedObjectEvent({
         action: AuditAction.UPDATE,
-        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID' },
+        savedObject: { type: 'telemetry', id: 'SAVED_OBJECT_ID', name: 'telemetry_name' },
       })
     ).not.toBeUndefined();
   });

@@ -318,6 +318,7 @@ const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
   ...customQueryFieldsDiffAlgorithms,
   ...savedQueryFieldsDiffAlgorithms,
   ...eqlFieldsDiffAlgorithms,
+  ...esqlFieldsDiffAlgorithms,
   ...threatMatchFieldsDiffAlgorithms,
   ...thresholdFieldsDiffAlgorithms,
   ...machineLearningFieldsDiffAlgorithms,

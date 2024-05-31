@@ -38,6 +38,7 @@ import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../comm
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
+import { deleteSearchByTimelineId } from '../saved_search';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
@@ -179,8 +180,8 @@ const combineFilters = (filters: Array<string | null>) =>
 
 const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
   const username = request.user?.username ?? UNAUTHENTICATED_USER;
-  const updatedBy = `siem-ui-timeline.attributes.updatedBy: ${username}`;
-  const createdBy = `siem-ui-timeline.attributes.createdBy: ${username}`;
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: "${username}"`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: "${username}"`;
   return combineFilters([updatedBy, createdBy]);
 };
 
@@ -547,43 +548,39 @@ export const updatePartialSavedTimeline = async (
 
 export const resetTimeline = async (
   request: FrameworkRequest,
-  timelineIds: string[],
+  timelineId: string,
   timelineType: TimelineType
 ) => {
-  if (!timelineIds.length) {
-    return Promise.reject(new Error('timelineIds is empty'));
-  }
+  await Promise.all([
+    note.deleteNotesByTimelineId(request, timelineId),
+    pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+  ]);
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
-      Promise.all([
-        note.deleteNoteByTimelineId(request, timelineId),
-        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
-      ])
-    )
-  );
-
-  const response = await Promise.all(
-    timelineIds.map((timelineId) =>
-      updatePartialSavedTimeline(request, timelineId, { ...draftTimelineDefaults, timelineType })
-    )
-  );
+  const response = await updatePartialSavedTimeline(request, timelineId, {
+    ...draftTimelineDefaults,
+    timelineType,
+  });
 
   return response;
 };
 
-export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+export const deleteTimeline = async (
+  request: FrameworkRequest,
+  timelineIds: string[],
+  searchIds?: string[]
+) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
+  await Promise.all([
+    ...timelineIds.map((timelineId) =>
       Promise.all([
         savedObjectsClient.delete(timelineSavedObjectType, timelineId),
-        note.deleteNoteByTimelineId(request, timelineId),
+        note.deleteNotesByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
-    )
-  );
+    ),
+    deleteSearchByTimelineId(request, searchIds),
+  ]);
 };
 
 export const copyTimeline = async (

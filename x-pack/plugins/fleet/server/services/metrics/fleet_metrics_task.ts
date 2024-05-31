@@ -20,7 +20,7 @@ import { appContextService } from '../app_context';
 import type { AgentMetrics } from './fetch_agent_metrics';
 
 export const TYPE = 'Fleet-Metrics-Task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.1';
 const TITLE = 'Fleet Metrics Task';
 const TIMEOUT = '1m';
 const SCOPE = ['fleet'];
@@ -115,6 +115,7 @@ export class FleetMetricsTask {
             unhealthy: agents.unhealthy,
             inactive: agents.inactive,
             upgrading_step: agentMetrics.upgrading_step,
+            unhealthy_reason: agentMetrics.unhealthy_reason,
           },
         },
       };
@@ -185,7 +186,7 @@ export class FleetMetricsTask {
     this.wasStarted = true;
 
     try {
-      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
+      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval ${INTERVAL}`);
 
       await this.taskManager.ensureScheduled({
         id: this.taskId,

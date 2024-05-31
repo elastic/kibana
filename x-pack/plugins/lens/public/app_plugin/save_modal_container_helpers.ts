@@ -11,7 +11,6 @@ import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export const redirectToDashboard = ({
   embeddableInput,
-  dashboardFeatureFlag,
   dashboardId,
   originatingApp,
   getOriginatingPath,
@@ -19,15 +18,10 @@ export const redirectToDashboard = ({
 }: {
   embeddableInput: LensEmbeddableInput;
   dashboardId: string;
-  dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
   originatingApp?: string;
   getOriginatingPath?: (dashboardId: string) => string | undefined;
   stateTransfer: LensAppServices['stateTransfer'];
 }) => {
-  if (!dashboardFeatureFlag.allowByValueEmbeddables) {
-    throw new Error('redirectToDashboard called with by-value embeddables disabled');
-  }
-
   const state = {
     input: embeddableInput,
     type: LENS_EMBEDDABLE_TYPE,

@@ -18,7 +18,7 @@ import {
   createContainerWithEntries,
   createContainerWithEndpointEntries,
 } from '../exception_list_and_item';
-import { createRule } from './create_rule';
+import { createRule } from '../../../../../common/utils/security_solution';
 
 /**
  * Convenience testing function where you can pass in just the entries and you will
@@ -31,7 +31,7 @@ import { createRule } from './create_rule';
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createRuleWithExceptionEntries = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   rule: RuleCreateProps,
   entries: NonEmptyEntriesArray[],

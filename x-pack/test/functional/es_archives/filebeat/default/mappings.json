@@ -5419,10 +5419,6 @@
     "settings": {
       "index": {
         "auto_expand_replicas": "0-1",
-        "lifecycle": {
-          "name": "filebeat-7.0.0",
-          "rollover_alias": "filebeat-7.0.0"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"

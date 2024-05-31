@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -18,26 +19,26 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
-  onClose: () => void;
+  onCancel: () => void;
 }
 
-export const LoadingCategorization: FC<Props> = ({ onClose }) => (
+export const LoadingCategorization: FC<Props> = ({ onCancel }) => (
   <>
     <EuiSpacer size="l" />
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
         <EuiFlexGrid columns={1}>
           <EuiFlexItem>
-            <EuiLoadingElastic size="xxl" />
+            <EuiLoadingElastic size="xl" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
-              <h2>
+              <h4>
                 <FormattedMessage
                   id="xpack.aiops.categorizeFlyout.loading.title"
                   defaultMessage="Loading pattern analysis"
                 />
-              </h2>
+              </h4>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -45,7 +46,7 @@ export const LoadingCategorization: FC<Props> = ({ onClose }) => (
               <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
                 <EuiButton
                   data-test-subj="aiopsLoadingCategorizationCancelButton"
-                  onClick={() => onClose()}
+                  onClick={() => onCancel()}
                 >
                   Cancel
                 </EuiButton>

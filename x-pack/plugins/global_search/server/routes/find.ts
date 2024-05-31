@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { reduce, map } from 'rxjs/operators';
+import { reduce, map } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { GlobalSearchRouter } from '../types';
 import { GlobalSearchFindError } from '../../common/errors';
@@ -33,8 +33,9 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
       const { params, options } = req.body;
       try {
         const globalSearch = await ctx.globalSearch;
+        const { client } = (await ctx.core).elasticsearch;
         const allResults = await globalSearch
-          .find(params, { ...options, aborted$: req.events.aborted$ })
+          .find(params, { ...options, aborted$: req.events.aborted$, client })
           .pipe(
             map((batch) => batch.results),
             reduce((acc, results) => [...acc, ...results])

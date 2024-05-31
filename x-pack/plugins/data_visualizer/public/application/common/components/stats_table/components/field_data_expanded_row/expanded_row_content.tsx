@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 
 interface Props {
-  children: ReactNode;
   dataTestSubj: string;
 }
-export const ExpandedRowContent: FC<Props> = ({ children, dataTestSubj }) => {
+export const ExpandedRowContent: FC<PropsWithChildren<Props>> = ({ children, dataTestSubj }) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSubj} gutterSize={'s'} wrap={true}>
       {children}

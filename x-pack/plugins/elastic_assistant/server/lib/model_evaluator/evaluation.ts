@@ -6,17 +6,19 @@
  */
 
 import { loadEvaluator } from 'langchain/evaluation';
-import { LLM } from 'langchain/llms/base';
-import { ChainValues, HumanMessage } from 'langchain/schema';
+import { LLM } from '@langchain/core/language_models/llms';
+import { ChainValues } from '@langchain/core/utils/types';
+import { HumanMessage } from '@langchain/core/messages';
 import { chunk as createChunks } from 'lodash/fp';
 import { Logger } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
-import { LangChainTracer, RunCollectorCallbackHandler } from 'langchain/callbacks';
+import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector';
+import { Dataset } from '@kbn/elastic-assistant-common';
 import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
-import { Dataset } from '../../schemas/evaluate/post_evaluate';
 import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
-import { ResponseBody } from '../langchain/types';
 import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
+import { ResponseBody } from '../langchain/types';
 
 export interface PerformEvaluationParams {
   agentExecutorEvaluators: AgentExecutorEvaluatorWithMetadata[];
@@ -102,7 +104,6 @@ export const performEvaluation = async ({
     const chunk = requestChunks.shift() ?? [];
     const chunkNumber = totalChunks - requestChunks.length;
     logger.info(`Prediction request chunk: ${chunkNumber} of ${totalChunks}`);
-    logger.debug(chunk);
 
     // Note, order is kept between chunk and dataset, and is preserved w/ Promise.allSettled
     const chunkResults = await Promise.allSettled(chunk.map((r) => r.request()));

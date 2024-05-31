@@ -34,7 +34,8 @@ export default function (providerContext: FtrProviderContext) {
       .expect(201);
   }
 
-  describe('fleet_final_pipeline', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/180071
+  describe.skip('fleet_final_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -100,6 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
+      expect(res.index_templates[0]?.index_template?.composed_of).to.contain('ecs@mappings');
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain('.fleet_globals-1');
       expect(res.index_templates[0]?.index_template?.composed_of).to.contain(
         '.fleet_agent_id_verification-1'

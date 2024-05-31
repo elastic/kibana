@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 
-function createCoreContext({ production = false }: { production?: boolean } = {}): CoreContext {
+function createCoreContext({ production = false }: { production?: boolean } = {}): CoreContext & {
+  logger: MockedLogger;
+} {
   return {
     coreId: Symbol('core context mock'),
     logger: loggerMock.create(),
@@ -24,6 +26,7 @@ function createCoreContext({ production = false }: { production?: boolean } = {}
         branch: 'branch',
         buildNum: 100,
         buildSha: 'buildSha',
+        buildShaShort: 'buildShaShort',
         dist: false,
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
         buildFlavor: 'traditional',

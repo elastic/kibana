@@ -348,13 +348,10 @@ describe('execute()', () => {
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "auth": Object {
-          "password": "123",
-          "username": "abc",
-        },
         "axios": undefined,
         "data": "some data",
         "headers": Object {
+          "Authorization": "Basic YWJjOjEyMw==",
           "aheader": "a value",
         },
         "logger": Object {
@@ -676,7 +673,11 @@ describe('execute()', () => {
     const variables = {
       rogue,
     };
-    const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let paramsObject: any;

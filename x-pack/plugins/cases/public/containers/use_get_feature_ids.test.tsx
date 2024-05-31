@@ -32,7 +32,7 @@ describe('useGetFeaturesIds', () => {
   it('returns the features ids correctly', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
 
-    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
+    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -40,10 +40,24 @@ describe('useGetFeaturesIds', () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
-        query: { registrationContext: ['context1'] },
+        query: {
+          ids: {
+            values: ['alert-id-1'],
+          },
+        },
         signal: expect.any(AbortSignal),
       });
     });
+  });
+
+  it('never call API if disable', async () => {
+    const spyMock = jest.spyOn(api, 'getFeatureIds');
+
+    renderHook(() => useGetFeatureIds(['alert-id-1'], false), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    expect(spyMock).toHaveBeenCalledTimes(0);
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -53,7 +67,7 @@ describe('useGetFeaturesIds', () => {
       .spyOn(api, 'getFeatureIds')
       .mockRejectedValue(new Error('Something went wrong'));
 
-    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
+    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -61,7 +75,11 @@ describe('useGetFeaturesIds', () => {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
-        query: { registrationContext: ['context1'] },
+        query: {
+          ids: {
+            values: ['alert-id-1'],
+          },
+        },
         signal: expect.any(AbortSignal),
       });
       expect(addError).toHaveBeenCalled();

@@ -8,6 +8,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFormRow,
   EuiColorPicker,
@@ -17,7 +18,6 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
-import { TooltipWrapper } from './tooltip_wrapper';
 
 const tooltipContent = {
   auto: i18n.translate('visualizationUiComponents.colorPicker.tooltip.auto', {

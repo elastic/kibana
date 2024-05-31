@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, act } from '@testing-library/react';
-import { MenuItem } from './menu_item';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
-import { EnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
+import { act, render } from '@testing-library/react';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { FlyoutEditDrilldownActionApi } from './flyout_edit_drilldown';
+import { MenuItem } from './menu_item';
 
 test('<MenuItem/>', () => {
-  const state = createStateContainer<{ events: object[] }>({ events: [] });
+  const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
+    dynamicActions: { events: [] },
+  });
+
+  const state = createStateContainer<{ events: SerializedEvent[] }>({ events: [] });
   const context = {
     embeddable: {
       enhancements: {
         dynamicActions: { state } as unknown as DynamicActionManager,
       },
-    } as unknown as EnhancedEmbeddable,
+      dynamicActionsState$,
+    } as unknown as FlyoutEditDrilldownActionApi,
     trigger: {},
   };
   const { getByText, queryByText } = render(<MenuItem context={context} />);
@@ -28,7 +36,9 @@ test('<MenuItem/>', () => {
   expect(queryByText('0')).not.toBeInTheDocument();
 
   act(() => {
-    state.set({ events: [{}] });
+    dynamicActionsState$.next({
+      dynamicActions: { events: [{} as SerializedEvent] },
+    });
   });
 
   expect(queryByText('1')).toBeInTheDocument();

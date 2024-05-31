@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 import { SplitByTermsUI } from './terms';
 
 jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
   htmlIdGenerator: jest.fn(() => () => '42'),
   EuiFlexGroup: jest.requireActual('@elastic/eui').EuiFlexGroup,
   EuiFlexItem: jest.requireActual('@elastic/eui').EuiFlexItem,

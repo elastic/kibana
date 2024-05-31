@@ -5,20 +5,63 @@
  * 2.0.
  */
 
+import { type DataView } from '@kbn/data-views-plugin/common';
+import { type DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
 import {
   Embeddable,
   type EmbeddableInput,
   type EmbeddableOutput,
-  type IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/common';
-import { type DataViewsContract } from '@kbn/data-views-plugin/public';
-import { firstValueFrom } from 'rxjs';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, forkJoin, from, map, switchMap } from 'rxjs';
 import { type AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { AnomalySwimLaneEmbeddableApi } from '../anomaly_swimlane/types';
 
 export type CommonInput = { jobIds: string[] } & EmbeddableInput;
 
 export type CommonOutput = { indexPatterns?: DataView[] } & EmbeddableOutput;
+
+export const buildDataViewPublishingApi = (
+  services: { anomalyDetectorService: AnomalyDetectorService; dataViewsService: DataViewsContract },
+  api: Pick<AnomalySwimLaneEmbeddableApi, 'jobIds'>,
+  subscription: Subscription
+): PublishingSubject<DataView[] | undefined> => {
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+
+  subscription.add(
+    api.jobIds
+      .pipe(
+        // Get job definitions
+        switchMap((jobIds) => services.anomalyDetectorService.getJobs$(jobIds)),
+        // Get unique indices from the datafeed configs
+        map((jobs) => [...new Set(jobs.map((j) => j.datafeed_config!.indices).flat())]),
+        switchMap((indices) =>
+          forkJoin(
+            indices.map((indexName) =>
+              from(
+                services.dataViewsService.find(`"${indexName}"`).then((r) => {
+                  const dView = r.find((obj) =>
+                    obj.getIndexPattern().toLowerCase().includes(indexName.toLowerCase())
+                  );
+
+                  return dView;
+                })
+              )
+            )
+          )
+        ),
+        map((results) => {
+          return results.flat().filter((dView) => dView !== undefined) as DataView[];
+        })
+      )
+      .subscribe(dataViews$)
+  );
+
+  return dataViews$;
+};
 
 export abstract class AnomalyDetectionEmbeddable<
   Input extends CommonInput,
@@ -26,6 +69,9 @@ export abstract class AnomalyDetectionEmbeddable<
 > extends Embeddable<Input, Output> {
   // Need to defer embeddable load in order to resolve data views
   deferEmbeddableLoad = true;
+
+  // API
+  public abstract jobIds: BehaviorSubject<JobId[] | undefined>;
 
   protected constructor(
     initialInput: Input,

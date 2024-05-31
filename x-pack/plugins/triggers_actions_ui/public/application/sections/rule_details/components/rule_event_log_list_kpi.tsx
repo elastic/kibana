@@ -109,6 +109,9 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
       });
       setKpi(newKpi);
     } catch (e) {
+      if (e.body.statusCode === 413) {
+        return;
+      }
       toasts.addDanger({
         title: API_FAILED_MESSAGE,
         text: e.body?.message ?? e,

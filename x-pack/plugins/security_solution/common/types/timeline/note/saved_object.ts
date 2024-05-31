@@ -16,7 +16,7 @@ import { unionWithNullType } from '../../../utility_types';
  */
 const SavedNoteRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
-    timelineId: unionWithNullType(runtimeTypes.string),
+    timelineId: runtimeTypes.string,
   }),
   runtimeTypes.partial({
     eventId: unionWithNullType(runtimeTypes.string),
@@ -39,11 +39,6 @@ export const SavedObjectNoteRuntimeType = runtimeTypes.intersection([
   }),
   runtimeTypes.partial({
     noteId: runtimeTypes.string,
-    timelineVersion: runtimeTypes.union([
-      runtimeTypes.string,
-      runtimeTypes.null,
-      runtimeTypes.undefined,
-    ]),
   }),
 ]);
 

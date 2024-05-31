@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { ImageEmbeddable } from '../image_embeddable';
 
 export const IMAGE_CLICK_TRIGGER = 'IMAGE_CLICK_TRIGGER';
 
@@ -21,7 +20,3 @@ export const imageClickTrigger: Trigger = {
     defaultMessage: 'Clicking the image will trigger the action',
   }),
 };
-
-export interface ImageClickContext {
-  embeddable: ImageEmbeddable;
-}

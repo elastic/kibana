@@ -23,8 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
     const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
     const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
 
-    before(() => esArchiver.load(ARCHIVE_NAME));
-    after(() => esArchiver.unload(ARCHIVE_NAME));
+    before(async () => esArchiver.load(ARCHIVE_NAME));
+    after(async () => esArchiver.unload(ARCHIVE_NAME));
 
     it('works', async () => {
       const response = await supertest

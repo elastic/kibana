@@ -6,13 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { AiAssistantManagementPlugin } from './plugin';
+import type { PluginInitializer } from '@kbn/core/public';
+import { AIAssistantManagementPlugin } from './plugin';
 
-export type {
-  AiAssistantManagementSelectionPluginSetup,
-  AiAssistantManagementSelectionPluginStart,
+import type {
+  AIAssistantManagementSelectionPluginPublicSetup,
+  AIAssistantManagementSelectionPluginPublicStart,
 } from './plugin';
 
-export function plugin() {
-  return new AiAssistantManagementPlugin();
-}
+export { AIAssistantType } from '../common/ai_assistant_type';
+
+export type {
+  AIAssistantManagementSelectionPluginPublicSetup,
+  AIAssistantManagementSelectionPluginPublicStart,
+};
+
+export const plugin: PluginInitializer<
+  AIAssistantManagementSelectionPluginPublicSetup,
+  AIAssistantManagementSelectionPluginPublicStart
+> = () => new AIAssistantManagementPlugin();

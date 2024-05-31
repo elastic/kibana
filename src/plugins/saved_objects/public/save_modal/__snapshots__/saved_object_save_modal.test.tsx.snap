@@ -43,9 +43,13 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          autoFocus={true}
           data-test-subj="savedObjectTitle"
           fullWidth={true}
+          inputRef={
+            Object {
+              "current": null,
+            }
+          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
@@ -79,7 +83,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         labelType="label"
       >
         <EuiTextArea
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           fullWidth={true}
           onChange={[Function]}
           value=""
@@ -167,9 +171,13 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         labelType="label"
       >
         <EuiFieldText
-          autoFocus={true}
           data-test-subj="savedObjectTitle"
           fullWidth={true}
+          inputRef={
+            Object {
+              "current": null,
+            }
+          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
@@ -203,7 +211,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         labelType="label"
       >
         <EuiTextArea
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           fullWidth={true}
           onChange={[Function]}
           value=""
@@ -291,9 +299,13 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         labelType="label"
       >
         <EuiFieldText
-          autoFocus={true}
           data-test-subj="savedObjectTitle"
           fullWidth={true}
+          inputRef={
+            Object {
+              "current": null,
+            }
+          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
@@ -327,7 +339,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         labelType="label"
       >
         <EuiTextArea
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           fullWidth={true}
           onChange={[Function]}
           value=""
@@ -419,9 +431,13 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
             labelType="label"
           >
             <EuiFieldText
-              autoFocus={true}
               data-test-subj="savedObjectTitle"
               fullWidth={true}
+              inputRef={
+                Object {
+                  "current": null,
+                }
+              }
               isInvalid={false}
               onChange={[Function]}
               value="Saved Object title"
@@ -455,7 +471,7 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
             labelType="label"
           >
             <EuiTextArea
-              data-test-subj="viewDescription"
+              data-test-subj="savedObjectDescription"
               fullWidth={true}
               onChange={[Function]}
               value=""

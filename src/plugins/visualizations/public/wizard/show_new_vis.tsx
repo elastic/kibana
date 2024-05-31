@@ -9,14 +9,15 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   getHttp,
   getTypes,
   getApplication,
   getEmbeddable,
   getDocLinks,
+  getAnalytics,
+  getI18n,
   getTheme,
   getContentManagement,
   getUISettings,
@@ -38,7 +39,7 @@ export interface ShowNewVisModalParams {
 /**
  * shows modal dialog that allows you to create new visualization
  * @param {string[]} editorParams
- * @param {function} onClose - function that will be called when dialog is closed
+ * @param {Function} onClose - function that will be called when dialog is closed
  */
 export function showNewVisModal({
   editorParams = [],
@@ -62,34 +63,32 @@ export function showNewVisModal({
 
   document.body.appendChild(container);
   const element = (
-    <KibanaThemeProvider theme$={getTheme().theme$}>
-      <I18nProvider>
-        <Suspense
-          fallback={
-            <EuiPortal>
-              <EuiProgress size="xs" position="fixed" />
-            </EuiPortal>
-          }
-        >
-          <NewVisModal
-            isOpen={true}
-            onClose={handleClose}
-            originatingApp={originatingApp}
-            stateTransfer={getEmbeddable().getStateTransfer()}
-            outsideVisualizeApp={outsideVisualizeApp}
-            editorParams={editorParams}
-            visTypesRegistry={getTypes()}
-            contentClient={getContentManagement().client}
-            uiSettings={getUISettings()}
-            addBasePath={getHttp().basePath.prepend}
-            application={getApplication()}
-            docLinks={getDocLinks()}
-            showAggsSelection={showAggsSelection}
-            selectedVisType={selectedVisType}
-          />
-        </Suspense>
-      </I18nProvider>
-    </KibanaThemeProvider>
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
+      <Suspense
+        fallback={
+          <EuiPortal>
+            <EuiProgress size="xs" position="fixed" />
+          </EuiPortal>
+        }
+      >
+        <NewVisModal
+          isOpen={true}
+          onClose={handleClose}
+          originatingApp={originatingApp}
+          stateTransfer={getEmbeddable().getStateTransfer()}
+          outsideVisualizeApp={outsideVisualizeApp}
+          editorParams={editorParams}
+          visTypesRegistry={getTypes()}
+          contentClient={getContentManagement().client}
+          uiSettings={getUISettings()}
+          addBasePath={getHttp().basePath.prepend}
+          application={getApplication()}
+          docLinks={getDocLinks()}
+          showAggsSelection={showAggsSelection}
+          selectedVisType={selectedVisType}
+        />
+      </Suspense>
+    </KibanaRenderContextProvider>
   );
   ReactDOM.render(element, container);
 

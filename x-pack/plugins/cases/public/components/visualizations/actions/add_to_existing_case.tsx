@@ -10,7 +10,7 @@ import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { CaseUI } from '../../../../common';
 import { isLensEmbeddable, hasInput, getLensCaseAttachment } from './utils';
@@ -59,7 +59,7 @@ export const createAddToExistingCaseLensAction = ({
   history,
   caseContextProps,
 }: CasesUIActionProps) => {
-  const { application: applicationService, theme } = core;
+  const { application: applicationService, i18n, theme } = core;
 
   let currentAppId: string | undefined;
 
@@ -124,7 +124,7 @@ export const createAddToExistingCaseLensAction = ({
             onSuccess={onSuccess}
           />
         </ActionWrapper>,
-        { theme$: theme.theme$ }
+        { i18n, theme }
       );
 
       mount(targetDomElement);

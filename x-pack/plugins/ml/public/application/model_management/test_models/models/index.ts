@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { NerInference } from './ner';
-import { TextExpansionInference } from './text_expansion';
-import { QuestionAnsweringInference } from './question_answering';
-import {
+import type { NerInference } from './ner';
+import type { TextExpansionInference } from './text_expansion';
+import type { QuestionAnsweringInference } from './question_answering';
+import type {
   TextClassificationInference,
   ZeroShotClassificationInference,
   FillMaskInference,
   LangIdentInference,
 } from './text_classification';
-import { TextEmbeddingInference } from './text_embedding';
+import type { TextEmbeddingInference } from './text_embedding';
 
 export type InferrerType =
   | NerInference

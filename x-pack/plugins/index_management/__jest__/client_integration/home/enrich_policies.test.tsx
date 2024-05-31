@@ -14,8 +14,8 @@ import { createTestEnrichPolicy } from '../helpers/fixtures';
 import { EnrichPoliciesTestBed, setup } from './enrich_policies.helpers';
 import { notificationService } from '../../../public/application/services/notification';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

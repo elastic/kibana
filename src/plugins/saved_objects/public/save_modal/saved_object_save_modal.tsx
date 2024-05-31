@@ -25,11 +25,13 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTextArea,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -44,6 +46,7 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  mustCopyOnSaveMessage?: string;
   onCopyOnSaveChange?: (copyOnChange: boolean) => void;
   initialCopyOnSave?: boolean;
   objectType: string;
@@ -75,6 +78,7 @@ const generateId = htmlIdGenerator();
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
+  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -85,6 +89,13 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     visualizationDescription: this.props.description ? this.props.description : '',
     hasAttemptedSubmit: false,
   };
+
+  public componentDidMount() {
+    setTimeout(() => {
+      // defer so input focus ref value has been populated
+      this.savedObjectTitleInputRef.current?.focus();
+    }, 0);
+  }
 
   public render() {
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
@@ -108,7 +119,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         >
           <EuiFieldText
             fullWidth
-            autoFocus
+            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -173,7 +184,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            {this.props.showCopyOnSave && <EuiFlexItem grow>{this.renderCopyOnSave()}</EuiFlexItem>}
+            {this.props.showCopyOnSave && this.renderCopyOnSave()}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
                 <FormattedMessage
@@ -211,7 +222,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       >
         <EuiTextArea
           fullWidth
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}
         />
@@ -249,7 +260,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     await this.props.onSave({
       newTitle: this.state.title,
-      newCopyOnSave: this.state.copyOnSave,
+      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
       isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
       onTitleDuplicate: this.onTitleDuplicate,
       newDescription: this.state.visualizationDescription,
@@ -334,7 +345,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               />
             }
             color="warning"
-            data-test-subj="titleDupicateWarnMsg"
+            data-test-subj="titleDuplicateWarnMsg"
             id={duplicateWarningId}
           >
             <p>
@@ -355,18 +366,29 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
   private renderCopyOnSave = () => {
     return (
-      <EuiSwitch
-        data-test-subj="saveAsNewCheckbox"
-        checked={this.state.copyOnSave}
-        onChange={this.onCopyOnSaveChange}
-        label={
-          <FormattedMessage
-            id="savedObjects.saveModal.saveAsNewLabel"
-            defaultMessage="Save as new {objectType}"
-            values={{ objectType: this.props.objectType }}
+      <>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            data-test-subj="saveAsNewCheckbox"
+            checked={Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave}
+            disabled={Boolean(this.props.mustCopyOnSaveMessage)}
+            onChange={this.onCopyOnSaveChange}
+            label={
+              <FormattedMessage
+                id="savedObjects.saveModal.saveAsNewLabel"
+                defaultMessage="Save as new {objectType}"
+                values={{ objectType: this.props.objectType }}
+              />
+            }
           />
-        }
-      />
+        </EuiFlexItem>
+        {this.props.mustCopyOnSaveMessage && (
+          <EuiFlexItem css={{ marginLeft: `-${euiThemeVars.euiSize}` }} grow={false}>
+            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={true} />
+      </>
     );
   };
 }

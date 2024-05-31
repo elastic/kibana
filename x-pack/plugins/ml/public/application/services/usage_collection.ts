@@ -8,7 +8,7 @@
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PLUGIN_ID } from '../../../common/constants/app';
-import { MlUsageEvent } from '../../../common/constants/usage_collection';
+import type { MlUsageEvent } from '../../../common/constants/usage_collection';
 
 export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup) {
   if (usageCollection === undefined) {

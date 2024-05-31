@@ -169,7 +169,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                     )}
                     <EuiFlexItem>
                       <EuiTitle size={titleSize}>
-                        <h4 data-test-subj="header-section-title">
+                        <h2 data-test-subj="header-section-title">
                           <span className="eui-textBreakNormal">{title}</span>
                           {tooltip && (
                             <>
@@ -182,7 +182,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                               />
                             </>
                           )}
-                        </h4>
+                        </h2>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>

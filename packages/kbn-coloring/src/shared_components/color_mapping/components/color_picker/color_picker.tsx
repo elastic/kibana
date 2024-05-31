@@ -107,7 +107,7 @@ export function ColorPicker({
             style={{ paddingBottom: 8 }}
           >
             {i18n.translate('coloring.colorMapping.colorPicker.removeGradientColorButtonLabel', {
-              defaultMessage: 'Remove color step',
+              defaultMessage: 'Remove color stop',
             })}
           </EuiButtonEmpty>
         </>

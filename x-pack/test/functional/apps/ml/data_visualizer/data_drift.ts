@@ -13,6 +13,7 @@ export const farequoteKQLFiltersSearchTestData = {
   dateTimeField: '@timestamp',
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
   chartClickCoordinates: [0, 0] as [number, number],
+  comparisonChartClickCoordinates: [2, 1] as [number, number],
   dataViewName: 'ft_farequote',
   totalDocCount: '5,674',
 };
@@ -22,6 +23,7 @@ const dataViewCreationTestData = {
   isSavedSearch: true,
   dateTimeField: '@timestamp',
   chartClickCoordinates: [0, 0] as [number, number],
+  comparisonChartClickCoordinates: [2, 2] as [number, number],
   totalDocCount: '86,274',
 };
 
@@ -30,7 +32,6 @@ const nonTimeSeriesTestData = {
   isSavedSearch: false,
   dateTimeField: '@timestamp',
   sourceIndexOrSavedSearch: 'ft_ihp_outlier',
-  chartClickCoordinates: [0, 0] as [number, number],
   dataViewName: 'ft_ihp_outlier',
 };
 
@@ -71,13 +72,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
     await ml.dataDrift.assertNoWindowParametersEmptyPromptExists();
 
-    if (testData.chartClickCoordinates) {
+    if ('chartClickCoordinates' in testData) {
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
+      await ml.dataDrift.clickDocumentCountChart('Reference', testData.chartClickCoordinates);
+      await ml.dataDrift.assertRunAnalysisButtonState(true);
       await ml.dataDrift.clickDocumentCountChart(
-        'dataDriftDocCountChart-Reference',
-        testData.chartClickCoordinates
+        'Comparison',
+        testData.comparisonChartClickCoordinates
       );
     }
+    await ml.dataDrift.assertRunAnalysisButtonState(false);
     await ml.dataDrift.runAnalysis();
   }
 

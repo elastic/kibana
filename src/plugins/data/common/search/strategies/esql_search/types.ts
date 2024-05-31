@@ -7,3 +7,5 @@
  */
 
 export const ESQL_SEARCH_STRATEGY = 'esql';
+export const ESQL_ASYNC_SEARCH_STRATEGY = 'esql_async';
+export const ESQL_TABLE_TYPE = 'es_ql';

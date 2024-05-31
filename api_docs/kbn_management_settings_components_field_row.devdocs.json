@@ -80,7 +80,7 @@
           "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}."
         ],
         "signature": [
-          "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<",
+          "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
             "scope": "common",
@@ -88,7 +88,7 @@
             "section": "def-common.FieldRowKibanaDependencies",
             "text": "FieldRowKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-management/settings/components/field_row/services.tsx",
         "deprecated": false,
@@ -102,7 +102,7 @@
             "label": "{\n  children,\n  docLinks,\n  notifications,\n  settings,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
                 "scope": "common",
@@ -110,7 +110,7 @@
                 "section": "def-common.FieldRowKibanaDependencies",
                 "text": "FieldRowKibanaDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-management/settings/components/field_row/services.tsx",
             "deprecated": false,
@@ -195,7 +195,7 @@
               "The {@link FieldDefinition} corresponding the setting."
             ],
             "signature": [
-              "{ type: ",
+              "{ id: string; type: ",
               {
                 "pluginId": "@kbn/core-ui-settings-common",
                 "scope": "common",
@@ -203,7 +203,7 @@
                 "section": "def-common.UiSettingsType",
                 "text": "UiSettingsType"
               },
-              "; id: string; defaultValue?: string | number | boolean | (string | number)[] | null | undefined; name: string; groupId: string; displayName: string; isCustom: boolean; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: string | number | boolean | (string | number)[] | null | undefined; defaultValueDisplay: string; isDefaultValue: boolean; unsavedFieldId: string; }"
+              "; defaultValue?: string | number | boolean | (string | number)[] | null | undefined; name: string; groupId: string; displayName: string; isCustom: boolean; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: string | number | boolean | (string | number)[] | null | undefined; defaultValueDisplay: string; isDefaultValue: boolean; unsavedFieldId: string; }"
             ],
             "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,

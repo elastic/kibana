@@ -7,7 +7,7 @@
  */
 
 import { Observable, Subscriber } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';

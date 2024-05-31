@@ -17,12 +17,18 @@ import JSON5 from 'json5';
 
 export const getDocVersion = () => {
   const env = Env.createDefault(REPO_ROOT, getEnvOptions());
-  return getDocLinksMeta({ kibanaBranch: env.packageInfo.branch }).version;
+  return getDocLinksMeta({
+    kibanaBranch: env.packageInfo.branch,
+    buildFlavor: env.packageInfo.buildFlavor,
+  }).version;
 };
 
 export const getMigrationDocLink = () => {
   const env = Env.createDefault(REPO_ROOT, getEnvOptions());
-  const docLinks = getDocLinks({ kibanaBranch: env.packageInfo.branch });
+  const docLinks = getDocLinks({
+    kibanaBranch: env.packageInfo.branch,
+    buildFlavor: env.packageInfo.buildFlavor,
+  });
   return docLinks.kibanaUpgradeSavedObjects;
 };
 

@@ -22,7 +22,7 @@
     margin: $euiSizeS;
     border: 1px solid $euiColorMediumShade;
     border-radius: $euiSizeXS;
-    padding: $euiSizeXS / 2 0;
+    padding: calc($euiSizeXS / 2) 0;
 
     &.monChild--index {
       border-left: $euiSizeXS solid $euiColorSuccess;

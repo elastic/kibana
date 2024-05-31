@@ -14,6 +14,6 @@ export function plugin() {
 }
 
 export type {
-  ServerlessObservabilityPluginSetup,
-  ServerlessObservabilityPluginStart,
+  ServerlessObservabilityPublicSetup as ServerlessObservabilityPluginSetup,
+  ServerlessObservabilityPublicStart as ServerlessObservabilityPluginStart,
 } from './types';

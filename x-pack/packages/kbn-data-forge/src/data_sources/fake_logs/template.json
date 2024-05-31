@@ -1,0 +1,92 @@
+{
+  "order": 1,
+  "index_patterns": [
+    "kbn-data-forge-fake_logs.fake_logs-*"
+  ],
+  "settings": {
+    "index": {
+      "mapping": {
+        "total_fields": {
+          "limit": "10000"
+        }
+      },
+      "number_of_shards": "1",
+      "number_of_replicas": "0",
+      "query": {
+        "default_field": [
+          "message",
+          "labels.*",
+          "event.*"
+        ]
+      }
+    }
+  },
+  "mappings": {
+    "dynamic_templates": [
+      {
+        "labels": {
+          "path_match": "labels.*",
+          "mapping": {
+            "type": "keyword"
+          },
+          "match_mapping_type": "string"
+        }
+      },
+      {
+        "strings_as_keyword": {
+          "mapping": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "match_mapping_type": "string"
+        }
+      }
+    ],
+    "date_detection": false,
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "metricset": {
+        "properties": {
+          "period": {
+            "type": "long"
+          }
+        }
+      },
+      "host": {
+        "properties": {
+          "name": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "event": {
+        "properties": {
+          "dataset": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "module": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "message": {
+        "type": "keyword",
+        "ignore_above": 256
+      },
+      "latency": {
+        "type": "long"
+      },
+      "status_code": {
+        "type": "long"
+      }
+    }
+  },
+  "aliases": {
+    "logs-fake_logs": {}
+  }
+}

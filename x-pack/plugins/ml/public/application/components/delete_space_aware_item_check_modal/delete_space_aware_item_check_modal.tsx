@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -21,6 +22,7 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import type {
   CanDeleteMLSpaceAwareItemsResponse,
   MlSavedObjectType,
@@ -246,11 +248,15 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
   const [itemCheckRespSummary, setItemCheckRespSummary] = useState<
     CanDeleteMLSpaceAwareItemsSummary | undefined
   >();
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const {
     savedObjects: { canDeleteMLSpaceAwareItems, removeItemFromCurrentSpace },
   } = useMlApiContext();
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
+
+  // delay showing the modal to avoid flickering
+  useDebounce(() => setShowModal(true), 1000);
 
   useEffect(() => {
     setIsLoading(true);
@@ -321,6 +327,10 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
     }
   };
 
+  if (showModal === false) {
+    return null;
+  }
+
   return (
     <EuiModal onClose={onCloseCallback} data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlay">
       <>
@@ -358,6 +368,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlayCloseButton"
                     size="s"
                     onClick={
                       itemCheckRespSummary?.canTakeAnyAction &&

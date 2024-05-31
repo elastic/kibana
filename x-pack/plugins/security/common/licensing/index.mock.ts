@@ -17,6 +17,7 @@ export const licenseMock = {
     licenseType: LicenseType = 'basic' // default to basic if this is not specified
   ): jest.Mocked<SecurityLicense> => ({
     isLicenseAvailable: jest.fn().mockReturnValue(true),
+    getUnavailableReason: jest.fn(),
     isEnabled: jest.fn().mockReturnValue(true),
     getFeatures: jest.fn().mockReturnValue(features),
     hasAtLeast: jest

@@ -81,19 +81,16 @@ test('generates metric chart config', async () => {
           "test": Object {},
         },
         "datasourceStates": Object {
-          "formBased": Object {
-            "layers": Object {},
-          },
           "textBased": Object {
             "layers": Object {
               "layer_0": Object {
                 "allColumns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor_y",
+                    "columnId": "y_metric_formula_accessor",
                     "fieldName": "category",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor_x",
+                    "columnId": "x_metric_formula_accessor",
                     "fieldName": "@timestamp",
                   },
                   Object {
@@ -103,11 +100,11 @@ test('generates metric chart config', async () => {
                 ],
                 "columns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor_y",
+                    "columnId": "y_metric_formula_accessor",
                     "fieldName": "category",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor_x",
+                    "columnId": "x_metric_formula_accessor",
                     "fieldName": "@timestamp",
                   },
                   Object {
@@ -147,8 +144,8 @@ test('generates metric chart config', async () => {
           },
           "shape": "heatmap",
           "valueAccessor": "metric_formula_accessor",
-          "xAccessor": "metric_formula_accessor_x",
-          "yAccessor": "metric_formula_accessor_y",
+          "xAccessor": "x_metric_formula_accessor",
+          "yAccessor": "y_metric_formula_accessor",
         },
       },
       "title": "test",

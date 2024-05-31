@@ -13,3 +13,7 @@ export const OVERVIEW_TAB_VULNERABILITY_FLYOUT = 'vulnerability_overview_tab_fly
 export const SEVERITY_STATUS_VULNERABILITY_FLYOUT = 'vulnerability_severity_status_flyout';
 export const TAB_ID_VULNERABILITY_FLYOUT = (tabId: string) =>
   `vulnerability-finding-flyout-tab-${tabId}`;
+
+export const LATEST_VULNERABILITIES_TABLE = 'latest_vulnerabilities_table';
+
+export const VULNERABILITIES_GROUPING_COUNTER = 'vulnerabilities_grouping_counter';

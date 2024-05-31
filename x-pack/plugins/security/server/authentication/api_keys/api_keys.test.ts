@@ -259,7 +259,7 @@ describe('API Keys', () => {
       });
     });
 
-    it('creates Cross-Cluster API key when type is `cross_cluster`', async () => {
+    it('creates cross-cluster API key when type is `cross_cluster`', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
@@ -388,7 +388,7 @@ describe('API Keys', () => {
       });
     });
 
-    it('updates Cross-Cluster API key when type is `cross_cluster`', async () => {
+    it('updates cross-cluster API key when type is `cross_cluster`', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({

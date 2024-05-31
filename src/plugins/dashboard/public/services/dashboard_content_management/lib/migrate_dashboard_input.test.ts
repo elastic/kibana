@@ -9,10 +9,10 @@
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 
-import { DashboardContainerInput } from '../../../../common';
-import { migrateDashboardInput } from './migrate_dashboard_input';
-import { DashboardEmbeddableService } from '../../embeddable/types';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../../mocks';
+import { DashboardEmbeddableService } from '../../embeddable/types';
+import { SavedDashboardInput } from '../types';
+import { migrateDashboardInput } from './migrate_dashboard_input';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
@@ -25,7 +25,7 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 
 describe('Migrate dashboard input', () => {
   it('should run factory migrations on all Dashboard content', () => {
-    const dashboardInput: DashboardContainerInput = getSampleDashboardInput();
+    const dashboardInput: SavedDashboardInput = getSampleDashboardInput();
     dashboardInput.panels = {
       panel1: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel1' } }),
       panel2: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel2' } }),

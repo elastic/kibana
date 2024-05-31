@@ -9,7 +9,7 @@
 import { convertItemsMock } from './driver.test.mocks';
 // @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { NewsfeedApiDriver } from './driver';
 import { storageMock } from './storage.mock';
 

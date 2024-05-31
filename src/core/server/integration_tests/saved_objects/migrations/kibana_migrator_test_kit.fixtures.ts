@@ -18,6 +18,12 @@ const defaultType: SavedObjectsType<any> = {
       name: { type: 'keyword' },
     },
   },
+  modelVersions: {
+    1: {
+      changes: [],
+    },
+  },
+  switchToModelVersionAt: '8.10.0',
   migrations: {},
 };
 

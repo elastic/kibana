@@ -1,0 +1,13 @@
+TRIM
+
+Syntax
+Parameters
+string
+String expression. If null, the function returns null.
+DescriptionRemoves leading and trailing whitespaces from a string.Supported types
+Example
+```esql
+ROW message = "   some text  ",  color = " red "
+| EVAL message = TRIM(message)
+| EVAL color = TRIM(color)
+```

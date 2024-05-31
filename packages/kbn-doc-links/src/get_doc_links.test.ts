@@ -10,7 +10,7 @@ import { getDocLinks } from './get_doc_links';
 
 describe('getDocLinks', () => {
   it('returns an immutable object', () => {
-    const links = getDocLinks({ kibanaBranch: 'test.branch' });
+    const links = getDocLinks({ kibanaBranch: 'test.branch', buildFlavor: 'traditional' });
 
     expect(() => {
       (links as unknown as Record<string, unknown>).settings = 'override';

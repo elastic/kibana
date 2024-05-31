@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, withState } from 'recompose';
+import { compose, withState } from 'react-recompose';
 import { AdvancedFilter as Component, Props as ComponentProps } from './advanced_filter';
 
 export interface Props {

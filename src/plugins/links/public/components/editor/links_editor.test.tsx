@@ -39,6 +39,7 @@ describe('LinksEditor', () => {
     onAddToDashboard: jest.fn(),
     onClose: jest.fn(),
     isByReference: false,
+    flyoutId: 'test-id',
   };
 
   const someLinks: Link[] = [

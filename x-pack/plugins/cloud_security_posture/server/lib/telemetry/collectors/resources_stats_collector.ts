@@ -134,7 +134,6 @@ const getCspmResourcesStats = (
       });
     });
   });
-  logger.info('CSPM telemetry: resources stats was sent');
 
   return resourcesStats.flat(2);
 };

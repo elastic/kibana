@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
+import { of } from 'rxjs';
+
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { AuthenticatedUser } from '@kbn/security-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientData } from '../plugin';
+import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
+import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
@@ -43,13 +46,15 @@ export const renderApp = (
     core,
     plugins,
     isSidebarEnabled = true,
+    updateSideNavDefinition,
   }: {
     core: CoreStart;
     isSidebarEnabled: boolean;
     params: AppMountParameters;
     plugins: PluginsStart;
+    updateSideNavDefinition: UpdateSideNavDefinitionFn;
   },
-  { config, data }: { config: ClientConfigType; data: ClientData }
+  { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
   const {
     access,
@@ -65,9 +70,18 @@ export const renderApp = (
     workplaceSearch,
   } = data;
   const { history } = params;
-  const { application, chrome, http, uiSettings } = core;
+  const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
-  const { charts, cloud, guidedOnboarding, lens, security, share, ml } = plugins;
+  const {
+    charts,
+    cloud,
+    guidedOnboarding,
+    indexManagement: indexManagementPlugin,
+    lens,
+    security,
+    share,
+    ml,
+  } = plugins;
 
   const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
   externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
@@ -80,14 +94,14 @@ export const renderApp = (
   const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
   let user: AuthenticatedUser | null = null;
   try {
-    security.authc
+    security?.authc
       .getCurrentUser()
       .then((newUser) => {
         user = newUser;
@@ -98,6 +112,9 @@ export const renderApp = (
   } catch {
     user = null;
   }
+  const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
+
+  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -105,9 +122,14 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    connectorTypes,
+    console: plugins.console,
     data: plugins.data,
+    esConfig,
+    getChromeStyle$: chrome.getChromeStyle$,
     guidedOnboarding,
     history,
+    indexMappingComponent,
     isSidebarEnabled,
     lens,
     ml,
@@ -116,30 +138,32 @@ export const renderApp = (
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
-        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store) : undefined
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchPlayground: plugins.searchPlayground,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
     uiSettings,
+    updateSideNavDefinition,
     user,
   });
   const unmountLicensingLogic = mountLicensingLogic({
     canManageLicense: core.application.capabilities.management?.stack?.license_management,
-    license$: plugins.licensing.license$,
+    license$: plugins.licensing?.license$ || of(undefined),
   });
   const unmountHttpLogic = mountHttpLogic({
     errorConnectingMessage,
     http,
     readOnlyMode,
   });
-  const unmountFlashMessagesLogic = mountFlashMessagesLogic();
+  const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
 
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme$={params.theme$}>
+      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
           <CloudContext>
             <Provider store={store}>
@@ -155,7 +179,6 @@ export const renderApp = (
                   searchOAuth={searchOAuth}
                   workplaceSearch={workplaceSearch}
                 />
-                <Toasts />
               </Router>
             </Provider>
           </CloudContext>
@@ -170,7 +193,7 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
-    plugins.data.search.session.clear();
+    plugins.data?.search.session.clear();
   };
 };
 
@@ -184,13 +207,18 @@ export const renderApp = (
 export const renderHeaderActions = (
   HeaderActions: React.FC,
   store: Store,
+  params: AppMountParameters,
   kibanaHeaderEl: HTMLElement
 ) => {
   ReactDOM.render(
-    <Provider store={store}>
-      <HeaderActions />
-    </Provider>,
+    <I18nProvider>
+      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+        <Provider store={store}>
+          <HeaderActions />
+        </Provider>
+      </KibanaThemeProvider>
+    </I18nProvider>,
     kibanaHeaderEl
   );
-  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
+  return () => ReactDOM.render(<></>, kibanaHeaderEl);
 };

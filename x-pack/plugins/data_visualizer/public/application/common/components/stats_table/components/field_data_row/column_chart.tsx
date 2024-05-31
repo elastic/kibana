@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiDataGridColumn } from '@elastic/eui';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  LEGACY_LIGHT_THEME,
+  Position,
+  ScaleType,
+  Settings,
+} from '@elastic/charts';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
 
@@ -45,6 +54,8 @@ export const ColumnChart: FC<Props> = ({
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <Chart size={size}>
           <Settings
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
             xDomain={Array.from({ length: maxChartColumns }, (_, i) => i)}
             theme={{
               chartMargins: zeroSize,

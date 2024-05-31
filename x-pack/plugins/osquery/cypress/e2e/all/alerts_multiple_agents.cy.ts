@@ -14,6 +14,7 @@ import {
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
+import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
 describe(
   'Alert Event Details - dynamic params',
@@ -42,6 +43,7 @@ describe(
 
     it('should substitute parameters in investigation guide', () => {
       cy.getBySel('expand-event').first().click();
+      closeAlertsStepTourIfVisible();
       cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       // Flakes at times if the button is only clicked once
       cy.contains('Get processes').should('be.visible').dblclick({ force: true });
@@ -49,7 +51,7 @@ describe(
       // This is probably due to the tokenization of the fields when it's inactive
       cy.get(OSQUERY_FLYOUT_BODY_EDITOR).click();
       cy.getBySel('flyout-body-osquery').contains("SELECT * FROM os_version where name='Ubuntu';");
-      cy.getBySel('flyout-body-osquery').contains('host.os.platform');
+      cy.getBySel('flyout-body-osquery').find('input[value="host.os.platform"]').should('exist');
       cy.getBySel('flyout-body-osquery').contains('platform');
     });
 

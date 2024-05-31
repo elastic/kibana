@@ -13,6 +13,7 @@ export interface InferencePipelineConfiguration {
   existingPipeline?: boolean;
   inferenceConfig?: InferencePipelineInferenceConfig;
   isPipelineNameUserSupplied?: boolean;
+  isModelPlaceholderSelected?: boolean;
   modelID: string;
   pipelineName: string;
   fieldMappings?: FieldMapping[];
@@ -21,6 +22,7 @@ export interface InferencePipelineConfiguration {
 
 export interface AddInferencePipelineFormErrors {
   modelID?: string;
+  modelStatus?: string;
   fieldMappings?: string;
   pipelineName?: string;
 }

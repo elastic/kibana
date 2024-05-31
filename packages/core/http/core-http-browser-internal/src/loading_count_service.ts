@@ -7,15 +7,7 @@
  */
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {
-  distinctUntilChanged,
-  endWith,
-  map,
-  pairwise,
-  startWith,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
+import { distinctUntilChanged, endWith, map, pairwise, startWith, takeUntil, tap } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 

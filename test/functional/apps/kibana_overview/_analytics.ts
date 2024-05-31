@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const verifyImageUrl = async (el: WebElementWrapper, imgName: string) => {
         const image = await el.findByCssSelector('img');
-        const imageUrl = await image.getAttribute('src');
+        const imageUrl = (await image.getAttribute('src')) ?? '';
         expect(imageUrl.includes(imgName)).to.be(true);
       };
 

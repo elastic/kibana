@@ -42,10 +42,15 @@ const savedSearchAttributesSchema = schema.object(
       searchSourceJSON: schema.string(),
     }),
     viewMode: schema.maybe(
-      schema.oneOf([schema.literal('documents'), schema.literal('aggregated')])
+      schema.oneOf([
+        schema.literal('documents'),
+        schema.literal('patterns'),
+        schema.literal('aggregated'),
+      ])
     ),
     hideAggregatedPreview: schema.maybe(schema.boolean()),
     rowHeight: schema.maybe(schema.number()),
+    headerRowHeight: schema.maybe(schema.number()),
     hits: schema.maybe(schema.number()),
     timeRestore: schema.maybe(schema.boolean()),
     timeRange: schema.maybe(
@@ -68,6 +73,25 @@ const savedSearchAttributesSchema = schema.object(
       })
     ),
     breakdownField: schema.maybe(schema.string()),
+    visContext: schema.maybe(
+      schema.oneOf([
+        // existing value
+        schema.object({
+          // unified histogram state
+          suggestionType: schema.string(),
+          requestData: schema.object({
+            dataViewId: schema.maybe(schema.string()),
+            timeField: schema.maybe(schema.string()),
+            timeInterval: schema.maybe(schema.string()),
+            breakdownField: schema.maybe(schema.string()),
+          }),
+          // lens attributes
+          attributes: schema.recordOf(schema.string(), schema.any()),
+        }),
+        // cleared previous value
+        schema.object({}),
+      ])
+    ),
     version: schema.maybe(schema.number()),
   },
   { unknowns: 'forbid' }

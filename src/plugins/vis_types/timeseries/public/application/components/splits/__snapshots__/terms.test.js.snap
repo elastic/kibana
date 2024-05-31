@@ -214,6 +214,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           fullWidth={false}
           isClearable={false}
           onChange={[Function]}
+          optionMatcher={[Function]}
           options={
             Array [
               Object {

@@ -193,17 +193,17 @@ export const createKbnUrlControls = (
 
   // runs scheduled url updates
   function flush(replace = shouldReplace) {
+    if (updateQueue.length === 0) {
+      return;
+    }
+
     const nextUrl = getPendingUrl();
-
-    if (!nextUrl) return;
-
     cleanUp();
     const newUrl = updateUrl(nextUrl, replace);
     return newUrl;
   }
 
   function getPendingUrl() {
-    if (updateQueue.length === 0) return undefined;
     const resultUrl = updateQueue.reduce(
       (url, nextUpdate) => nextUpdate(url) ?? url,
       getCurrentUrl(history)

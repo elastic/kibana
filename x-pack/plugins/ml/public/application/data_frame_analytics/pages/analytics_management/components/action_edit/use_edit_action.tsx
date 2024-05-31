@@ -7,7 +7,10 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 
 import { editActionNameText, EditActionName } from './edit_action_name';
 

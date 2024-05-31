@@ -1777,6 +1777,7 @@ describe('Exception helpers', () => {
             },
             {
               id: 'observer.serial_number',
+              overrideField: 'agent.status',
               label: 'Agent status',
             },
             {
@@ -1801,6 +1802,12 @@ describe('Exception helpers', () => {
         },
         {
           id: 'observer.serial_number',
+          overrideField: 'agent.status',
+          label: 'Agent status',
+        },
+        {
+          id: 'crowdstrike.event.DeviceId',
+          overrideField: 'agent.status',
           label: 'Agent status',
         },
         {

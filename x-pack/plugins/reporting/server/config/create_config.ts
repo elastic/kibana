@@ -45,10 +45,7 @@ export function createConfig(
     ipaddr.isValid(kibanaServerHostname) &&
     !sum(ipaddr.parse(kibanaServerHostname).toByteArray())
   ) {
-    logger.info(
-      `Overriding server host address "0.0.0.0" in Reporting runtime config,` +
-        ` using "xpack.reporting.kibanaServer.hostname: localhost".`
-    );
+    // A silent override to use "localhost" instead of "0.0.0.0" for connection of the headless browser
     kibanaServerHostname = 'localhost';
   }
   // kibanaServer.port, default to server.port

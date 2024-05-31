@@ -64,11 +64,13 @@ export const convertToSavedSearch = async (
     attributes,
     references,
     sharingSavedObjectProps,
+    managed,
   }: {
     savedSearchId: string | undefined;
     attributes: SavedSearchAttributes;
     references: Reference[];
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
+    managed: boolean | undefined;
   },
   { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies
 ) => {
@@ -92,7 +94,8 @@ export const convertToSavedSearch = async (
     tags,
     references,
     await searchSourceCreate(searchSourceValues),
-    sharingSavedObjectProps
+    sharingSavedObjectProps,
+    Boolean(managed)
   );
 
   return returnVal;
@@ -106,6 +109,7 @@ export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearch
       attributes: so.item.attributes,
       references: so.item.references,
       sharingSavedObjectProps: so.meta,
+      managed: so.item.managed,
     },
     deps
   );
@@ -124,4 +128,5 @@ export const getNewSavedSearch = ({
   searchSource: ISearchStartSearchSource;
 }): SavedSearch => ({
   searchSource: searchSource.createEmpty(),
+  managed: false,
 });

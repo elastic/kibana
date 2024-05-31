@@ -12,11 +12,13 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { cleanEmptyKeys, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { isFilterPinned, Filter } from '@kbn/es-query';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
   isDataFrameAnalyticsConfigs,
@@ -25,7 +27,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { isDefined } from '@kbn/ml-is-defined';
-import { DashboardItems } from '../../../services/dashboard_service';
+import type { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -43,12 +45,9 @@ import {
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
-import {
-  CombinedJob,
-  Job,
-  isAnomalyDetectionJob,
-} from '../../../../../common/types/anomaly_detection_jobs';
-import { TimeRangeType } from './constants';
+import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { TimeRangeType } from './constants';
 
 export interface TimeRange {
   type: TimeRangeType;

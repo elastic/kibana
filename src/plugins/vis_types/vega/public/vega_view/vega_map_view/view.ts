@@ -15,7 +15,7 @@ import { maplibregl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
-import { getUISettings } from '../../services';
+import { getThemeService } from '../../services';
 
 import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
@@ -98,7 +98,7 @@ export class VegaMapView extends VegaBaseView {
     const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
     //
     if (mapStyle) {
-      const isDarkMode: boolean = getUISettings().get('theme:darkMode');
+      const isDarkMode: boolean = getThemeService().getTheme().darkMode;
       return emsTileServiceId
         ? emsTileServiceId
         : await this._serviceSettings.getDefaultTmsLayer(isDarkMode);
@@ -136,14 +136,14 @@ export class VegaMapView extends VegaBaseView {
     }
 
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
-    if (!this._$container) return;
+    if (!this._container) return;
 
     // For the correct geration of the PDF/PNG report, we must wait until the map is fully rendered.
     return new Promise((resolve) => {
       const mapBoxInstance = new maplibregl.Map({
         style,
         customAttribution,
-        container: this._$container.get(0),
+        container: this._container,
         ...this.getMapParams({ ...zoomSettings }),
       });
 
@@ -206,7 +206,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
-        vegaControls: this._$controls?.get(0),
+        vegaControls: this._controls,
         updateVegaView,
       },
     });

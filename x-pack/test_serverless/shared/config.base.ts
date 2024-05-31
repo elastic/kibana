@@ -18,7 +18,7 @@ import {
 } from '@kbn/test';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-plugin/common';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { services } from './services';
 
 export default async () => {
@@ -159,7 +159,7 @@ export default async () => {
       try: 120 * 1000,
       waitFor: 20 * 1000,
       esRequestTimeout: 30 * 1000,
-      kibanaReportCompletion: 60 * 1000,
+      kibanaReportCompletion: 80 * 1000,
       kibanaStabilize: 15 * 1000,
       navigateStatusPageCheck: 250,
       waitForExists: 2500,

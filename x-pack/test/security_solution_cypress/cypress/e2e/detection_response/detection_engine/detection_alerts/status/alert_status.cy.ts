@@ -44,7 +44,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   context('Opening alerts', { tags: ['@ess', '@serverless'] }, () => {
@@ -240,7 +240,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
   // This test is unable to be run in serverless as `reader` is not available and viewer is currently reserved
   // https://github.com/elastic/kibana/pull/169723#issuecomment-1793191007
   // https://github.com/elastic/kibana/issues/170583
-  context('User is readonly', { tags: ['@ess', '@brokenInServerless'] }, () => {
+  context('User is readonly', { tags: ['@ess', '@skipInServerless'] }, () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);

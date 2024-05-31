@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import minimatch from 'minimatch';
 import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
+import { isAPMDataView } from '@kbn/apm-data-view';
 import {
   LayerDescriptor,
   SizeDynamicOptions,
@@ -28,25 +28,16 @@ import { VectorStyle } from '../../../../styles/vector/vector_style';
 import { ESSearchSource } from '../../../../sources/es_search_source';
 import { ESPewPewSource } from '../../../../sources/es_pew_pew_source';
 import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
-import { APM_INDEX_PATTERN_TITLE } from '../observability';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 const euiVisColorPalette = euiPaletteColorBlind();
 
-function isApmIndex(indexPatternTitle: string) {
-  return APM_INDEX_PATTERN_TITLE.split(',')
-    .map((pattern) => {
-      return minimatch(indexPatternTitle, pattern);
-    })
-    .some(Boolean);
+function getSourceField(indexPatternId: string) {
+  return isAPMDataView(indexPatternId) ? 'client.geo.location' : 'source.geo.location';
 }
 
-function getSourceField(indexPatternTitle: string) {
-  return isApmIndex(indexPatternTitle) ? 'client.geo.location' : 'source.geo.location';
-}
-
-function getDestinationField(indexPatternTitle: string) {
-  return isApmIndex(indexPatternTitle) ? 'server.geo.location' : 'destination.geo.location';
+function getDestinationField(indexPatternId: string) {
+  return isAPMDataView(indexPatternId) ? 'server.geo.location' : 'destination.geo.location';
 }
 
 function createSourceLayerDescriptor(
@@ -56,10 +47,10 @@ function createSourceLayerDescriptor(
 ) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
-    geoField: getSourceField(indexPatternTitle),
+    geoField: getSourceField(indexPatternId),
     scalingType: SCALING_TYPES.TOP_HITS,
-    topHitsSplitField: isApmIndex(indexPatternTitle) ? 'client.ip' : 'source.ip',
-    tooltipProperties: isApmIndex(indexPatternTitle)
+    topHitsSplitField: isAPMDataView(indexPatternId) ? 'client.ip' : 'source.ip',
+    tooltipProperties: isAPMDataView(indexPatternId)
       ? [
           'host.name',
           'client.ip',
@@ -114,10 +105,10 @@ function createDestinationLayerDescriptor(
 ) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
-    geoField: getDestinationField(indexPatternTitle),
+    geoField: getDestinationField(indexPatternId),
     scalingType: SCALING_TYPES.TOP_HITS,
-    topHitsSplitField: isApmIndex(indexPatternTitle) ? 'server.ip' : 'destination.ip',
-    tooltipProperties: isApmIndex(indexPatternTitle)
+    topHitsSplitField: isAPMDataView(indexPatternId) ? 'server.ip' : 'destination.ip',
+    tooltipProperties: isAPMDataView(indexPatternId)
       ? [
           'host.name',
           'server.ip',
@@ -172,16 +163,16 @@ function createLineLayerDescriptor(
 ) {
   const sourceDescriptor = ESPewPewSource.createDescriptor({
     indexPatternId,
-    sourceGeoField: getSourceField(indexPatternTitle),
-    destGeoField: getDestinationField(indexPatternTitle),
+    sourceGeoField: getSourceField(indexPatternId),
+    destGeoField: getDestinationField(indexPatternId),
     metrics: [
       {
         type: AGG_TYPE.SUM,
-        field: isApmIndex(indexPatternTitle) ? 'client.bytes' : 'source.bytes',
+        field: isAPMDataView(indexPatternId) ? 'client.bytes' : 'source.bytes',
       },
       {
         type: AGG_TYPE.SUM,
-        field: isApmIndex(indexPatternTitle) ? 'server.bytes' : 'destination.bytes',
+        field: isAPMDataView(indexPatternId) ? 'server.bytes' : 'destination.bytes',
       },
     ],
   });

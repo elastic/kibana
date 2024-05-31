@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T00:15:00.000Z').getTime() - 1;
@@ -41,6 +41,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Service Map', { config: 'trial', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176982
     describe('optional kuery param', () => {
       before(async () => {
         const events = timerange(start, end)
@@ -67,10 +68,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             })
           );
-        await synthtraceEsClient.index(events);
+        await apmSynthtraceEsClient.index(events);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns full service map when no kuery is defined', async () => {
         const { status, body } = await callApi();

@@ -50,7 +50,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
 }) => {
   const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
   return (
-    <Bar>
+    <Bar position="sticky">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>

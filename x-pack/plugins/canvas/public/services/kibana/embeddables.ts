@@ -15,6 +15,8 @@ export type EmbeddablesServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const embeddablesServiceFactory: EmbeddablesServiceFactory = ({ startPlugins }) => ({
+  reactEmbeddableRegistryHasKey: startPlugins.embeddable.reactEmbeddableRegistryHasKey,
+  getReactEmbeddableSavedObjects: startPlugins.embeddable.getReactEmbeddableSavedObjects,
   getEmbeddableFactories: startPlugins.embeddable.getEmbeddableFactories,
   getStateTransfer: startPlugins.embeddable.getStateTransfer,
 });

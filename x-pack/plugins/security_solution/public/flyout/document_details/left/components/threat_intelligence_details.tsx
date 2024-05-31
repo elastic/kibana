@@ -14,7 +14,7 @@ import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_d
 import { THREAT_INTELLIGENCE_DETAILS_LOADING_TEST_ID } from './test_ids';
 import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 
-export const THREAT_INTELLIGENCE_TAB_ID = 'threat-intelligence-details';
+export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
 
 /**
  * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab

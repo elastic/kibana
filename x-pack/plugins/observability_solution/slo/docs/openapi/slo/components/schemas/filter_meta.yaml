@@ -1,0 +1,29 @@
+title: FilterMeta
+description: Defines properties for a filter
+type: object
+properties:
+  alias:
+    type: string
+    nullable: true
+  disabled:
+    type: boolean
+  negate:
+    type: boolean
+  controlledBy:
+    type: string
+  group:
+    type: string
+  index:
+    type: string
+  isMultiIndex:
+    type: boolean
+  type:
+    type: string
+  key:
+    type: string
+  params:
+    type: object
+  value:
+    type: string
+  field:
+    type: string

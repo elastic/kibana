@@ -13,7 +13,7 @@ import type { ListArray, NonEmptyEntriesArray } from '@kbn/securitysolution-io-t
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { createExceptionList } from './create_exception_list';
 import { createExceptionListItem } from '../item/create_exception_list_item';
-import { waitFor } from '../../wait_for';
+import { waitFor } from '../../../../../../common/utils/security_solution';
 
 /**
  * Convenience testing function where you can pass in just the endpoint entries and you will
@@ -23,7 +23,7 @@ import { waitFor } from '../../wait_for';
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createContainerWithEntries = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   entries: NonEmptyEntriesArray[]
 ): Promise<ListArray> => {

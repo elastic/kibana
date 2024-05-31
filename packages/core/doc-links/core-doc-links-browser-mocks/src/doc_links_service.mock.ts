@@ -7,6 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
@@ -15,7 +16,7 @@ const createStartContractMock = (): DocLinksStart => {
   // This service is so simple that we actually use the real implementation
   const injectedMetadata = injectedMetadataServiceMock.createStartContract();
   injectedMetadata.getKibanaBranch.mockReturnValue('mocked-test-branch');
-  return new DocLinksService().start({ injectedMetadata });
+  return new DocLinksService(coreContextMock.create()).start({ injectedMetadata });
 };
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;

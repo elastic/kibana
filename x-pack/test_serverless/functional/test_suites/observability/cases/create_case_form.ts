@@ -80,14 +80,14 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
           {
             key: 'valid_key_1',
             label: 'Summary',
-            type: CustomFieldTypes.TEXT,
-            required: true,
+            type: CustomFieldTypes.TEXT as const,
+            required: false,
           },
           {
             key: 'valid_key_2',
             label: 'Sync',
-            type: CustomFieldTypes.TOGGLE,
-            required: true,
+            type: CustomFieldTypes.TOGGLE as const,
+            required: false,
           },
         ];
 

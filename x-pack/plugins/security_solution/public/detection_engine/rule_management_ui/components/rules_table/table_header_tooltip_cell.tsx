@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   title: string;
@@ -28,15 +28,15 @@ const TableHeaderTooltipCellComponent = ({ title, tooltipContent, customTooltip 
       <span className="eui-textTruncate">{title}</span>
     </EuiFlexItem>
     {customTooltip ?? (
-      <EuiToolTip content={tooltipContent}>
-        <EuiIcon
-          data-test-subj="tableHeaderIcon"
-          size="m"
-          color="subdued"
-          type="questionInCircle"
-          style={{ marginLeft: 4 }}
-        />
-      </EuiToolTip>
+      <EuiIconTip
+        content={tooltipContent}
+        type="questionInCircle"
+        color="subdued"
+        anchorProps={{
+          css: { marginLeft: 4 },
+          'data-test-subj': 'tableHeaderIcon',
+        }}
+      />
     )}
   </EuiFlexGroup>
 );

@@ -13,6 +13,7 @@
   "kbn_references": [
     { "path": "../../tsconfig.json" },
     "@kbn/babel-register",
+    "@kbn/security-hardening",
   ],
   "exclude": [
     "target/**/*",

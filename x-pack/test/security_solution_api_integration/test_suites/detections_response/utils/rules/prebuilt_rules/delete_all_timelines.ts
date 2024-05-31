@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { retryIfDeleteByQueryConflicts } from '../../retry_delete_by_query_conflicts';
 
 /**
  * Remove all timelines from the security solution savedObjects index
  * @param es The ElasticSearch handle
  */
-export const deleteAllTimelines = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
-    q: 'type:siem-ui-timeline',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
+export const deleteAllTimelines = async (es: Client, logger: ToolingLog): Promise<void> => {
+  await retryIfDeleteByQueryConflicts(logger, deleteAllTimelines.name, async () => {
+    return await es.deleteByQuery({
+      index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+      q: 'type:siem-ui-timeline',
+      wait_for_completion: true,
+      refresh: true,
+      body: {},
+    });
   });
 };

@@ -7,27 +7,17 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({
-  getService,
-  getPageObjects,
-  loadTestFile,
-  getPageObject,
-}: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common']);
   const kibanaServer = getService('kibanaServer');
-  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('context app', function () {
     before(async () => {
       await browser.setWindowSize(1200, 800);
-      // TODO: Serverless tests require login first
-      await svlCommonPage.login();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await PageObjects.common.navigateToApp('discover');
     });
 
     after(async () => {

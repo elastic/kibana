@@ -29,8 +29,7 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
 import { ParamEditorProps } from '../..';
@@ -110,6 +109,7 @@ export function FormulaEditor({
   hasData,
   dateRange,
   uiSettings,
+  data,
 }: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
   hasData: boolean;
@@ -453,7 +453,7 @@ export function FormulaEditor({
             unifiedSearch,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
-            dateRange,
+            timefilter: data.query.timefilter.timefilter,
           });
         }
       } else {
@@ -466,7 +466,7 @@ export function FormulaEditor({
           unifiedSearch,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
-          dateRange,
+          timefilter: data.query.timefilter.timefilter,
         });
       }
 
@@ -482,7 +482,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef, dateRange]
+    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, data.query.timefilter.timefilter]
   );
 
   const provideSignatureHelp = useCallback(

@@ -29,6 +29,7 @@ import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
+import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -173,18 +174,15 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
                       {agent.local_metadata.elastic.agent.version}
                     </EuiFlexItem>
-                    {latestAgentVersion && isAgentUpgradeable(agent, latestAgentVersion) ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          position="right"
-                          content={i18n.translate('xpack.fleet.agentList.agentUpgradeLabel', {
-                            defaultMessage: 'Upgrade available',
-                          })}
-                        >
-                          <EuiIcon type="warning" color="warning" />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <AgentUpgradeStatus
+                        isAgentUpgradable={
+                          !!(agentPolicy?.is_managed !== true && isAgentUpgradeable(agent))
+                        }
+                        agent={agent}
+                        latestAgentVersion={latestAgentVersion}
+                      />
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
                   '-'
@@ -207,6 +205,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
                   ? agent.local_metadata.elastic.agent.log_level
                   : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.privilegeModeLabel', {
+                defaultMessage: 'Privilege mode',
+              }),
+              description:
+                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
+                    defaultMessage="Running as non-root"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Running as root"
+                  />
+                ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {

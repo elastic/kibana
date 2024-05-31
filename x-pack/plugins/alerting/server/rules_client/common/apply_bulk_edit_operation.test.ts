@@ -6,7 +6,7 @@
  */
 
 import { applyBulkEditOperation } from './apply_bulk_edit_operation';
-import type { Rule } from '../../types';
+import { Rule } from '../../types';
 
 describe('applyBulkEditOperation', () => {
   describe('tags operations', () => {
@@ -182,41 +182,75 @@ describe('applyBulkEditOperation', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
+
       const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
         {
           field: 'actions',
           value: [
-            { id: 'mock-add-action-id-1', group: 'default', params: {} },
-            { id: 'mock-add-action-id-2', group: 'default', params: {} },
+            {
+              id: 'mock-add-action-id-1',
+              group: 'default',
+              params: {},
+            },
+            {
+              id: 'mock-add-action-id-2',
+              group: 'default',
+              params: {},
+            },
           ],
           operation: 'add',
         },
         ruleMock
       );
+
       expect(modifiedAttributes).toHaveProperty('actions', [
         { id: 'mock-action-id', group: 'default', params: {} },
         { id: 'mock-add-action-id-1', group: 'default', params: {} },
         { id: 'mock-add-action-id-2', group: 'default', params: {} },
       ]);
+
       expect(isAttributeModified).toBe(true);
     });
 
     test('should add action with different params and same id', () => {
       const ruleMock = {
-        actions: [{ id: 'mock-action-id', group: 'default', params: { test: 1 } }],
+        actions: [
+          {
+            id: 'mock-action-id',
+            group: 'default',
+            params: { test: 1 },
+          },
+        ],
       };
+
       const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
         {
           field: 'actions',
-          value: [{ id: 'mock-action-id', group: 'default', params: { test: 2 } }],
+          value: [
+            {
+              id: 'mock-action-id',
+              group: 'default',
+              params: { test: 2 },
+            },
+          ],
           operation: 'add',
         },
         ruleMock
       );
+
       expect(modifiedAttributes).toHaveProperty('actions', [
-        { id: 'mock-action-id', group: 'default', params: { test: 1 } },
-        { id: 'mock-action-id', group: 'default', params: { test: 2 } },
+        {
+          id: 'mock-action-id',
+          group: 'default',
+          params: { test: 1 },
+        },
+        {
+          id: 'mock-action-id',
+          group: 'default',
+          params: { test: 2 },
+        },
       ]);
+
       expect(isAttributeModified).toBe(true);
     });
 
@@ -224,17 +258,30 @@ describe('applyBulkEditOperation', () => {
       const ruleMock = {
         actions: [{ id: 'mock-action-id', group: 'default', params: {} }],
       };
+
       const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
         {
           field: 'actions',
-          value: [{ id: 'mock-rewrite-action-id-1', group: 'default', params: {} }],
+          value: [
+            {
+              id: 'mock-rewrite-action-id-1',
+              group: 'default',
+              params: {},
+            },
+          ],
           operation: 'set',
         },
         ruleMock
       );
+
       expect(modifiedAttributes).toHaveProperty('actions', [
-        { id: 'mock-rewrite-action-id-1', group: 'default', params: {} },
+        {
+          id: 'mock-rewrite-action-id-1',
+          group: 'default',
+          params: {},
+        },
       ]);
+
       expect(isAttributeModified).toBe(true);
     });
   });

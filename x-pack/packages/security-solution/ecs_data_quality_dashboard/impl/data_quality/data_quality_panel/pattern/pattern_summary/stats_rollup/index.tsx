@@ -13,10 +13,6 @@ import { EMPTY_STAT, getIncompatibleStatColor } from '../../../../helpers';
 import { StatLabel } from '../../../stat_label';
 import * as i18n from '../../../stat_label/translations';
 
-const StatsFlexGroup = styled(EuiFlexGroup)`
-  gap: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
 const IndicesStatContainer = styled.div`
   min-width: 100px;
 `;
@@ -61,10 +57,10 @@ const StatsRollupComponent: React.FC<Props> = ({
   const indicesDescription = useMemo(() => <StatLabel line2={i18n.INDICES} />, []);
 
   return (
-    <StatsFlexGroup
+    <EuiFlexGroup
       alignItems="flexEnd"
       data-test-subj="statsRollup"
-      gutterSize="none"
+      gutterSize="s"
       justifyContent="flexEnd"
     >
       <EuiFlexItem grow={false}>
@@ -120,23 +116,25 @@ const StatsRollupComponent: React.FC<Props> = ({
         </IndicesStatContainer>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <IndicesStatContainer>
-          <EuiToolTip
-            content={
-              pattern != null
-                ? i18n.INDICES_SIZE_PATTERN_TOOL_TIP(pattern)
-                : i18n.TOTAL_SIZE_TOOL_TIP
-            }
-          >
-            <EuiStat
-              description={sizeDescription}
-              title={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
-              titleSize={STAT_TITLE_SIZE}
-            />
-          </EuiToolTip>
-        </IndicesStatContainer>
-      </EuiFlexItem>
+      {sizeInBytes != null && (
+        <EuiFlexItem grow={false}>
+          <IndicesStatContainer>
+            <EuiToolTip
+              content={
+                pattern != null
+                  ? i18n.INDICES_SIZE_PATTERN_TOOL_TIP(pattern)
+                  : i18n.TOTAL_SIZE_TOOL_TIP
+              }
+            >
+              <EuiStat
+                description={sizeDescription}
+                title={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
+                titleSize={STAT_TITLE_SIZE}
+              />
+            </EuiToolTip>
+          </IndicesStatContainer>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <DocsContainer>
@@ -153,7 +151,7 @@ const StatsRollupComponent: React.FC<Props> = ({
           </EuiToolTip>
         </DocsContainer>
       </EuiFlexItem>
-    </StatsFlexGroup>
+    </EuiFlexGroup>
   );
 };
 

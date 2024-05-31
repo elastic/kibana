@@ -7,19 +7,42 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { Filter } from '@kbn/es-query';
+import { Filter, RangeFilter, ScriptedRangeFilter, isRangeFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FILTER_OPERATORS, Operator } from './filter_operators';
+import { FILTER_OPERATORS, OPERATORS, Operator } from './filter_operators';
 
 export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
   return indexPattern?.fields.find((field) => field.name === filter.meta.key);
 }
 
+function getRangeOperatorFromFilter({
+  meta: { params: { gte, gt, lte, lt } = {}, negate },
+}: RangeFilter | ScriptedRangeFilter) {
+  if (negate) {
+    // if filter is negated, always use 'is not between' operator
+    return OPERATORS.NOT_BETWEEN;
+  }
+  const left = gte ?? gt;
+  const right = lte ?? lt;
+
+  if (left !== undefined && right === undefined) {
+    return OPERATORS.GREATER_OR_EQUAL;
+  }
+
+  if (left === undefined && right !== undefined) {
+    return OPERATORS.LESS;
+  }
+  return OPERATORS.BETWEEN;
+}
+
 export function getOperatorFromFilter(filter: Filter) {
   return FILTER_OPERATORS.find((operator) => {
+    if (isRangeFilter(filter)) {
+      return getRangeOperatorFromFilter(filter) === operator.id;
+    }
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
 }

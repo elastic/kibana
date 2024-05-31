@@ -8,7 +8,7 @@ Array [
     Success! Wait a moment please.
   </h2>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -47,7 +47,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -121,7 +121,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"

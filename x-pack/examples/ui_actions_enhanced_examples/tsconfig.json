@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/share-plugin",
     "@kbn/discover-plugin",
     "@kbn/dashboard-plugin",
@@ -29,5 +28,7 @@
     "@kbn/i18n",
     "@kbn/unified-search-plugin",
     "@kbn/utility-types",
+    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-mount",
   ]
 }

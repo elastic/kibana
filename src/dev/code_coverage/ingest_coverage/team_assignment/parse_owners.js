@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromEvent } from 'rxjs';
-import { map, filter, takeUntil } from 'rxjs/operators';
+import { fromEvent, map, filter, takeUntil } from 'rxjs';
 import { lineRead, pathAndTeams, dropCCDelim } from './parse_owners_helpers';
 import { pipe } from '../utils';
 

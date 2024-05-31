@@ -1,0 +1,22 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: false
+
+indexing:
+  dataset: "fake_stack"
+  interval: 3600000
+
+schedule:
+  # Start with good events
+  - template: "good"
+    start: "now-7d"
+    end: "now-45m"
+  - template: "bad"
+    start: "now-2h"
+    end: "now+25m"
+    randomness: 0.2
+    interval: 60000
+    

@@ -12,6 +12,13 @@ import { useSearchStrategy } from '../../use_search_strategy';
 jest.mock('../../use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
+
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_engine_status', () => ({
+  useIsNewRiskScoreModuleInstalled: jest
+    .fn()
+    .mockReturnValue({ isLoading: false, installed: true }),
+}));
+
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 
@@ -30,7 +37,7 @@ const mockResult = {
   loading: false,
 };
 
-describe('useUsersRelatedHosts', () => {
+describe('useHostRelatedUsers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSearchStrategy.mockReturnValue({

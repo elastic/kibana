@@ -8,6 +8,14 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, isEmpty } from 'lodash/fp';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import {
+  CROWDSTRIKE_AGENT_ID_FIELD,
+  isAlertFromCrowdstrikeEvent,
+} from '../../../../common/utils/crowdstrike_alert_check';
+import {
+  SENTINEL_ONE_AGENT_ID_FIELD,
+  isAlertFromSentinelOneEvent,
+} from '../../../../common/utils/sentinelone_alert_check';
 import { isAlertFromEndpointEvent } from '../../../../common/utils/endpoint_alert_check';
 import {
   getEventCategoriesFromData,
@@ -30,7 +38,7 @@ export interface UseHighlightedFieldsResult {
     /**
      * If the field has a custom override
      */
-    overrideField?: string;
+    overrideField?: { field: string; values: string[] };
     /**
      * Values for the field
      */
@@ -99,10 +107,32 @@ export const useHighlightedFields = ({
       return acc;
     }
 
+    // if the field is observer.serial_number and the event is not a sentinel one event we skip it
+    if (
+      field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
+      !isAlertFromSentinelOneEvent({ data: dataFormattedForFieldBrowser })
+    ) {
+      return acc;
+    }
+
+    // if the field is crowdstrike.event.DeviceId and the event is not a crowdstrike event we skip it
+    if (
+      field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
+      !isAlertFromCrowdstrikeEvent({ data: dataFormattedForFieldBrowser })
+    ) {
+      return acc;
+    }
+
     return {
       ...acc,
       [field.id]: {
-        ...(field.overrideField && { overrideField: field.overrideField }),
+        ...(field.overrideField && {
+          overrideField: {
+            field: field.overrideField,
+            values:
+              find({ field: field.overrideField }, dataFormattedForFieldBrowser)?.values ?? [],
+          },
+        }),
         values: fieldValues,
       },
     };

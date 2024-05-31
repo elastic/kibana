@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
+  const config = getService('config');
 
   describe('security/authentication', function () {
     describe('route access', () => {
@@ -144,8 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: {},
             operator: true,
             roles: ['superuser'],
-            // We use `elastic` for MKI, and `elastic_serverless` for any other testing environment.
-            username: expect.stringContaining('elastic'),
+            username: config.get('servers.kibana.username'),
           });
           expect(status).toBe(200);
         });

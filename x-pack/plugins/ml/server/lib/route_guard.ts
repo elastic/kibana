@@ -22,10 +22,12 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 
 import { PLUGIN_ID } from '../../common/constants/app';
-import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
+import type { MLSavedObjectService } from '../saved_objects';
+import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 
-import { MlClient, getMlClient } from './ml_client';
+import type { MlClient } from './ml_client';
+import { getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
 
 type MLRequestHandlerContext = CustomRequestHandlerContext<{

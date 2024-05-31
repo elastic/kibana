@@ -8,13 +8,15 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+import { getChangePointDetectionComponent } from './shared_components';
 import type {
   AiopsPluginSetup,
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
-import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -27,21 +29,21 @@ export class AiopsPlugin
   ) {
     Promise.all([
       firstValueFrom(licensing.license$),
-      import('./embeddable/register_embeddable'),
+      import('./embeddables'),
       import('./ui_actions'),
       import('./cases/register_change_point_charts_attachment'),
       core.getStartServices(),
     ]).then(
       ([
         license,
-        { registerEmbeddable },
+        { registerEmbeddables },
         { registerAiopsUiActions },
         { registerChangePointChartsAttachment },
         [coreStart, pluginStart],
       ]) => {
         if (license.hasAtLeast('platinum')) {
           if (embeddable) {
-            registerEmbeddable(core, embeddable);
+            registerEmbeddables(embeddable, core);
           }
 
           if (uiActions) {
@@ -58,7 +60,19 @@ export class AiopsPlugin
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     return {
-      EmbeddableChangePointChart: getEmbeddableChangePointChart(core, plugins),
+      ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
+      getPatternAnalysisAvailable: async () => {
+        const { getPatternAnalysisAvailable } = await import(
+          './components/log_categorization/log_categorization_enabled'
+        );
+        return getPatternAnalysisAvailable(plugins.licensing);
+      },
+      PatternAnalysisComponent: dynamic(
+        async () =>
+          import(
+            './components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper'
+          )
+      ),
     };
   }
 

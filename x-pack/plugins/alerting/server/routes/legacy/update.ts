@@ -68,7 +68,7 @@ export const updateAlertRoute = (
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
         try {
-          const alertRes = await rulesClient.update({
+          const { systemActions, ...alertRes } = await rulesClient.update({
             id,
             data: {
               name,

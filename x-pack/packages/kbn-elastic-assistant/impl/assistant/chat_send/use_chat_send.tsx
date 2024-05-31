@@ -7,17 +7,20 @@
 
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import { Replacements } from '@kbn/elastic-assistant-common';
+import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
-import { useSendMessages } from '../use_send_messages';
+import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, Message, Prompt } from '../../..';
+import { Conversation, Prompt, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
   allSystemPrompts: Prompt[];
-  currentConversation: Conversation;
+  currentConversation?: Conversation;
   editingSystemPromptId: string | undefined;
   http: HttpSetup;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
@@ -27,10 +30,11 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
 
 export interface UseChatSend {
-  handleButtonSendMessage: (m: string) => void;
+  abortStream: () => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
@@ -53,10 +57,16 @@ export const useChatSend = ({
   setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
+  setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
-  const { isLoading, sendMessages } = useSendMessages();
-  const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
-    useConversation();
+  const {
+    assistantTelemetry,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
+    toasts,
+  } = useAssistantContext();
+
+  const { isLoading, sendMessage, abortStream } = useSendMessage();
+  const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
     setPromptTextPreview(prompt);
@@ -66,98 +76,139 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      const onNewReplacements = (newReplacements: Record<string, string>) =>
-        appendReplacements({
-          conversationId: currentConversation.id,
-          replacements: newReplacements,
-        });
-
+      if (!currentConversation?.apiConfig) {
+        toasts?.addError(
+          new Error('The conversation needs a connector configured in order to send a message.'),
+          {
+            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+              defaultMessage: 'Error setting up Knowledge Base',
+            }),
+          }
+        );
+        return;
+      }
       const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
 
-      const message = await getCombinedMessage({
+      const userMessage = getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
         currentReplacements: currentConversation.replacements,
-        onNewReplacements,
         promptText,
         selectedPromptContexts,
         selectedSystemPrompt: systemPrompt,
       });
 
-      const updatedMessages = appendMessage({
-        conversationId: currentConversation.id,
-        message,
+      const baseReplacements: Replacements =
+        userMessage.replacements ?? currentConversation.replacements;
+
+      const selectedPromptContextsReplacements = Object.values(
+        selectedPromptContexts
+      ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
+
+      const replacements: Replacements = {
+        ...baseReplacements,
+        ...selectedPromptContextsReplacements,
+      };
+      const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
+        ...m,
+        content: m.content ?? '',
+      }));
+      setCurrentConversation({
+        ...currentConversation,
+        replacements,
+        messages: updatedMessages,
       });
 
       // Reset prompt context selection and preview before sending:
       setSelectedPromptContexts({});
       setPromptTextPreview('');
 
-      const rawResponse = await sendMessages({
+      const rawResponse = await sendMessage({
         apiConfig: currentConversation.apiConfig,
         http,
-        messages: updatedMessages,
-        onNewReplacements,
-        replacements: currentConversation.replacements ?? {},
+        message: userMessage.content ?? '',
+        conversationId: currentConversation.id,
+        replacements,
       });
 
-      const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-      appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId: currentConversation.title,
+        role: userMessage.role,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
+      });
+
+      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
+
+      setCurrentConversation({
+        ...currentConversation,
+        replacements,
+        messages: [...updatedMessages, responseMessage],
+      });
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId: currentConversation.title,
+        role: responseMessage.role,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+      });
     },
     [
       allSystemPrompts,
-      appendMessage,
-      appendReplacements,
-      currentConversation.apiConfig,
-      currentConversation.id,
-      currentConversation.messages.length,
-      currentConversation.replacements,
+      assistantTelemetry,
+      currentConversation,
       editingSystemPromptId,
       http,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       selectedPromptContexts,
-      sendMessages,
+      sendMessage,
+      setCurrentConversation,
       setPromptTextPreview,
       setSelectedPromptContexts,
+      toasts,
     ]
   );
 
   const handleRegenerateResponse = useCallback(async () => {
-    const onNewReplacements = (newReplacements: Record<string, string>) =>
-      appendReplacements({
-        conversationId: currentConversation.id,
-        replacements: newReplacements,
-      });
+    if (!currentConversation?.apiConfig) {
+      toasts?.addError(
+        new Error('The conversation needs a connector configured in order to send a message.'),
+        {
+          title: i18n.translate('xpack.elasticAssistant.knowledgeBase.setupError', {
+            defaultMessage: 'Error setting up Knowledge Base',
+          }),
+        }
+      );
+      return;
+    }
+    // remove last message from the local state immediately
+    setCurrentConversation({
+      ...currentConversation,
+      messages: currentConversation.messages.slice(0, -1),
+    });
+    const updatedMessages = (await removeLastMessage(currentConversation.id)) ?? [];
 
-    const updatedMessages = removeLastMessage(currentConversation.id);
-
-    const rawResponse = await sendMessages({
+    const rawResponse = await sendMessage({
       apiConfig: currentConversation.apiConfig,
       http,
-      messages: updatedMessages,
-      onNewReplacements,
-      replacements: currentConversation.replacements ?? {},
+      // do not send any new messages, the previous conversation is already stored
+      conversationId: currentConversation.id,
+      replacements: {},
     });
-    const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-    appendMessage({ conversationId: currentConversation.id, message: responseMessage });
-  }, [
-    appendMessage,
-    appendReplacements,
-    currentConversation.apiConfig,
-    currentConversation.id,
-    currentConversation.replacements,
-    http,
-    removeLastMessage,
-    sendMessages,
-  ]);
 
-  const handleButtonSendMessage = useCallback(
-    (message: string) => {
-      handleSendMessage(message);
-      setUserPrompt('');
-    },
-    [handleSendMessage, setUserPrompt]
-  );
+    const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
+    setCurrentConversation({
+      ...currentConversation,
+      messages: [...updatedMessages, responseMessage],
+    });
+  }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
-  const handleOnChatCleared = useCallback(() => {
+  const handleOnChatCleared = useCallback(async () => {
     const defaultSystemPromptId = getDefaultSystemPrompt({
       allSystemPrompts,
       conversation: currentConversation,
@@ -166,12 +217,18 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    clearConversation(currentConversation.id);
+    if (currentConversation) {
+      const updatedConversation = await clearConversation(currentConversation);
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
+    }
     setEditingSystemPromptId(defaultSystemPromptId);
   }, [
     allSystemPrompts,
     clearConversation,
     currentConversation,
+    setCurrentConversation,
     setEditingSystemPromptId,
     setPromptTextPreview,
     setSelectedPromptContexts,
@@ -179,7 +236,7 @@ export const useChatSend = ({
   ]);
 
   return {
-    handleButtonSendMessage,
+    abortStream,
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -179,7 +180,7 @@ export const legacyGetSiemNotificationRuleNoActionsSOResult = (
     ruleThrottle: 'no_actions',
     alertThrottle: null,
   },
-  references: [{ id: ruleId, type: 'alert', name: 'alert_0' }],
+  references: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE, name: 'alert_0' }],
   migrationVersion: {
     'siem-detection-engine-rule-actions': '7.11.2',
   },
@@ -214,7 +215,7 @@ export const legacyGetSiemNotificationRuleEveryRunSOResult = (
     ruleThrottle: 'rule',
     alertThrottle: null,
   },
-  references: [{ id: ruleId, type: 'alert', name: 'alert_0' }],
+  references: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE, name: 'alert_0' }],
   migrationVersion: {
     'siem-detection-engine-rule-actions': '7.11.2',
   },
@@ -251,7 +252,7 @@ export const legacyGetSiemNotificationRuleHourlyActionsSOResult = (
     alertThrottle: '1h',
   },
   references: [
-    { id: ruleId, type: 'alert', name: 'alert_0' },
+    { id: ruleId, type: RULE_SAVED_OBJECT_TYPE, name: 'alert_0' },
     { id: connectorId, type: 'action', name: 'action_0' },
   ],
   migrationVersion: {
@@ -290,7 +291,7 @@ export const legacyGetSiemNotificationRuleDailyActionsSOResult = (
     alertThrottle: '1d',
   },
   references: [
-    { id: ruleId, type: 'alert', name: 'alert_0' },
+    { id: ruleId, type: RULE_SAVED_OBJECT_TYPE, name: 'alert_0' },
     { id: connectorId, type: 'action', name: 'action_0' },
   ],
   migrationVersion: {
@@ -329,7 +330,7 @@ export const legacyGetSiemNotificationRuleWeeklyActionsSOResult = (
     alertThrottle: '7d',
   },
   references: [
-    { id: ruleId, type: 'alert', name: 'alert_0' },
+    { id: ruleId, type: RULE_SAVED_OBJECT_TYPE, name: 'alert_0' },
     { id: connectorId, type: 'action', name: 'action_0' },
   ],
   migrationVersion: {

@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { buildTopNFlowQuery } from './query.top_n_flow_network.dsl';
-import { mockOptions, expectedDsl } from './__mocks__';
+import { buildTopNFlowCountQuery, buildTopNFlowQuery } from './query.top_n_flow_network.dsl';
+import { mockOptions, mockCountOptions, expectedDsl, expectedCountDsl } from './__mocks__';
 
 describe('buildTopNFlowQuery', () => {
   test('build query from options correctly', () => {
     expect(buildTopNFlowQuery(mockOptions)).toEqual(expectedDsl);
+  });
+});
+
+describe('buildTopNFlowCountQuery', () => {
+  test('build query from options correctly', () => {
+    expect(buildTopNFlowCountQuery(mockCountOptions)).toEqual(expectedCountDsl);
   });
 });

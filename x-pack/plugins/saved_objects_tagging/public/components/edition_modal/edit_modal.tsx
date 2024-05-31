@@ -24,7 +24,7 @@ interface EditTagModalProps {
 }
 
 const getAttributes = (tag: Tag): TagAttributes => {
-  const { id, ...attributes } = tag;
+  const { id, managed, ...attributes } = tag;
   return attributes;
 };
 

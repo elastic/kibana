@@ -11,7 +11,7 @@ import { createMockMlSystemProvider } from './shared_services/providers/__mocks_
 import { createModulesProviderMock } from './shared_services/providers/__mocks__/modules';
 import { createResultsServiceProviderMock } from './shared_services/providers/__mocks__/results_service';
 import { createAlertingServiceProviderMock } from './shared_services/providers/__mocks__/alerting_service';
-import { MlPluginSetup } from './plugin';
+import type { MlPluginSetup } from './plugin';
 
 const createSetupContract = () =>
   ({

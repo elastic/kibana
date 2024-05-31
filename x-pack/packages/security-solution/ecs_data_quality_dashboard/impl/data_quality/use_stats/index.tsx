@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 import { HttpFetchQuery } from '@kbn/core/public';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import * as i18n from '../translations';
 import { INTERNAL_API_VERSION } from '../helpers';
+import { MeteringStatsIndex } from '../types';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
 export interface UseStats {
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
   error: string | null;
   loading: boolean;
 }
@@ -31,7 +31,7 @@ export const useStats = ({
   startDate?: string | null;
 }): UseStats => {
   const { httpFetch, isILMAvailable } = useDataQualityContext();
-  const [stats, setStats] = useState<Record<string, IndicesStatsIndicesStats> | null>(null);
+  const [stats, setStats] = useState<Record<string, MeteringStatsIndex> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -51,7 +51,7 @@ export const useStats = ({
           }
         }
 
-        const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
+        const response = await httpFetch<Record<string, MeteringStatsIndex>>(
           `${STATS_ENDPOINT}/${encodedIndexName}`,
           {
             version: INTERNAL_API_VERSION,

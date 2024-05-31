@@ -35,7 +35,7 @@ export class LicenseManagementServerPlugin
       ],
     });
 
-    getStartServices().then(([, { licensing }]) => {
+    void getStartServices().then(([, { licensing }]) => {
       this.apiRoutes.setup({
         router,
         plugins: {

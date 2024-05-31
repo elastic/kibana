@@ -371,6 +371,7 @@ describe('execute()', () => {
       who: 'world',
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       'action-type-id'
@@ -397,6 +398,7 @@ describe('execute()', () => {
       who: 'world',
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       'action-type-id'
@@ -446,6 +448,7 @@ describe('execute()', () => {
       },
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       AlertHistoryEsIndexConnectorId
@@ -526,6 +529,7 @@ describe('execute()', () => {
       },
     };
     const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
       paramsWithTemplates,
       variables,
       AlertHistoryEsIndexConnectorId
@@ -583,6 +587,7 @@ describe('execute()', () => {
 
     expect(() =>
       connectorType.renderParameterTemplates!(
+        mockedLogger,
         paramsWithTemplates,
         variables,
         AlertHistoryEsIndexConnectorId

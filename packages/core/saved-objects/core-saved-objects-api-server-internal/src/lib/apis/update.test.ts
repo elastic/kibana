@@ -43,9 +43,10 @@ import {
   createConflictErrorPayload,
   createGenericNotFoundErrorPayload,
   updateSuccess,
+  mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
 
-describe('SavedObjectsRepository', () => {
+describe('#update', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -95,7 +96,7 @@ describe('SavedObjectsRepository', () => {
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
   });
 
-  describe('#update', () => {
+  describe('performUpdate', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
     const attributes = { title: 'Testing' };
@@ -178,6 +179,55 @@ describe('SavedObjectsRepository', () => {
         expect(client.index).toHaveBeenCalledTimes(1);
       });
 
+      it(`should use the ES index action with the merged attributes when mergeAttributes is not false`, async () => {
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, {
+          foo: 'bar',
+        });
+
+        expect(client.index).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              globalType: {
+                foo: 'bar',
+                title: 'Testing',
+              },
+            }),
+          }),
+          expect.any(Object)
+        );
+      });
+
+      it(`should use the ES index action only with the provided attributes when mergeAttributes is false`, async () => {
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          NAMESPACE_AGNOSTIC_TYPE,
+          id,
+          {
+            foo: 'bar',
+          },
+          { mergeAttributes: false }
+        );
+
+        expect(client.index).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              globalType: {
+                foo: 'bar',
+              },
+            }),
+          }),
+          expect.any(Object)
+        );
+      });
+
       it(`should check for alias conflicts if a new multi-namespace object before create action would be created then create action to create the object`, async () => {
         migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
         await updateSuccess(
@@ -218,6 +268,7 @@ describe('SavedObjectsRepository', () => {
         };
         await test(references);
       });
+
       it(`accepts custom references array 2`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
@@ -232,6 +283,7 @@ describe('SavedObjectsRepository', () => {
         };
         await test([{ type: 'foo', id: '42', name: 'some ref' }]);
       });
+
       it(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
           migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
@@ -268,7 +320,7 @@ describe('SavedObjectsRepository', () => {
         const expected = {
           'index-pattern': { description: 'bar', title: 'foo' },
           type: 'index-pattern',
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expect(
           (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
@@ -301,7 +353,7 @@ describe('SavedObjectsRepository', () => {
           multiNamespaceIsolatedType: { description: 'bar', title: 'foo' },
           namespaces: ['default'],
           type: 'multiNamespaceIsolatedType',
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expect(
           (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!

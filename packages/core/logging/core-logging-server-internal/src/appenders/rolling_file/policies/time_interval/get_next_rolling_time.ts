@@ -23,8 +23,10 @@ export const getNextRollingTime = (
     const increment =
       interval.get(incrementedUnit) -
       (currentMoment.get(incrementedUnit) % interval.get(incrementedUnit));
-    const incrementInMs = moment.duration(increment, incrementedUnit).asMilliseconds();
-    return currentMoment.startOf(incrementedUnit).toDate().getTime() + incrementInMs;
+    const nextRollingMoment = currentMoment
+      .startOf(incrementedUnit)
+      .add(increment, incrementedUnit);
+    return nextRollingMoment.toDate().getTime();
   } else {
     return currentTime + interval.asMilliseconds();
   }

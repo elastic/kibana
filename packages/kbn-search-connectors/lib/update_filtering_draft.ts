@@ -6,16 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { CONNECTORS_INDEX } from '..';
 import { fetchConnectorById } from './fetch_connectors';
-import {
-  Connector,
-  FilteringRule,
-  FilteringRules,
-  FilteringValidationState,
-} from '../types/connectors';
+import { FilteringRule, FilteringRules } from '../types/connectors';
 
 export const updateFilteringDraft = async (
   client: ElasticsearchClient,
@@ -37,31 +32,25 @@ export const updateFilteringDraft = async (
     created_at: filteringRule.created_at ? filteringRule.created_at : now,
     updated_at: now,
   }));
-  const draft: FilteringRules = {
+
+  const draft = {
     advanced_snippet: {
       created_at: now,
       updated_at: now,
       value: parsedAdvancedSnippet,
     },
     rules: parsedFilteringRules,
-    validation: {
-      errors: [],
-      state: FilteringValidationState.EDITED,
-    },
   };
-  const connectorResult = await fetchConnectorById(client, connectorId);
-  if (!connectorResult) {
-    throw new Error(`Could not find connector with id ${connectorId}`);
-  }
-  const { value: connector, seqNo, primaryTerm } = connectorResult;
 
-  const result = await client.update<Connector>({
-    doc: { ...connector, filtering: [{ ...connector.filtering[0], draft }] },
-    id: connectorId,
-    if_primary_term: primaryTerm,
-    if_seq_no: seqNo,
-    index: CONNECTORS_INDEX,
+  const updateDraftFilteringResult = await client.transport.request<{ result: Result }>({
+    method: 'PUT',
+    path: `/_connector/${connectorId}/_filtering`,
+    body: draft,
   });
 
-  return result.result === 'updated' ? draft : undefined;
+  if (updateDraftFilteringResult.result === 'updated') {
+    const connector = await fetchConnectorById(client, connectorId);
+    return connector?.filtering?.[0]?.draft;
+  }
+  return undefined;
 };

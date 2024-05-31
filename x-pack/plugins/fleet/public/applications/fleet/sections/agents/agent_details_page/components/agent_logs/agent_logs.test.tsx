@@ -6,14 +6,17 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { render } from '@testing-library/react';
 
-import { useStartServices } from '../../../../../hooks';
+import { useAuthz, useStartServices } from '../../../../../hooks';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { AgentLogsUI } from './agent_logs';
 
+jest.mock('../../../../../../../hooks/use_authz');
+
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   return {
+    ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
     createStateContainerReactHelpers: jest.fn().mockReturnValue({
       useTransitions: jest.fn().mockReturnValue({ update: jest.fn() }),
     }),
@@ -55,10 +58,22 @@ jest.mock('../../../../../hooks', () => {
 const mockUseStartServices = useStartServices as jest.Mock;
 
 describe('AgentLogsUI', () => {
-  const renderComponent = () => {
+  beforeEach(() => {
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        allAgents: true,
+      },
+    } as any);
+  });
+  const renderComponent = (
+    opts = {
+      agentVersion: '8.11.0',
+    }
+  ) => {
+    const renderer = createFleetTestRendererMock();
     const agent = {
       id: 'agent1',
-      local_metadata: { elastic: { agent: { version: '8.11' } } },
+      local_metadata: { elastic: { agent: { version: opts.agentVersion, log_level: 'debug' } } },
     } as any;
     const state = {
       datasets: ['elastic_agent'],
@@ -67,7 +82,7 @@ describe('AgentLogsUI', () => {
       end: '2023-20-04T14:20:00.340Z',
       query: '',
     } as any;
-    return render(<AgentLogsUI agent={agent} state={state} />);
+    return renderer.render(<AgentLogsUI agent={agent} state={state} />);
   };
 
   const mockStartServices = (isServerlessEnabled?: boolean) => {
@@ -113,5 +128,36 @@ describe('AgentLogsUI', () => {
       'href',
       `http://localhost:5620/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2023-20-04T14:00:00.340Z',to:'2023-20-04T14:20:00.340Z'))&_a=(columns:!(event.dataset,message),index:'logs-*',query:(language:kuery,query:'elastic_agent.id:agent1 and (data_stream.dataset:elastic_agent) and (log.level:info or log.level:error)'))`
     );
+  });
+
+  it('should show log level dropdown with correct value', () => {
+    mockStartServices();
+    const result = renderComponent();
+    const logLevelDropdown = result.getByTestId('selectAgentLogLevel');
+    expect(logLevelDropdown.getElementsByTagName('option').length).toBe(4);
+    expect(logLevelDropdown).toHaveDisplayValue('debug');
+  });
+
+  it('should always show apply log level changes button', () => {
+    mockStartServices();
+    const result = renderComponent();
+    const applyLogLevelBtn = result.getByTestId('applyLogLevelBtn');
+    expect(applyLogLevelBtn).toBeInTheDocument();
+    expect(applyLogLevelBtn).not.toHaveAttribute('disabled');
+  });
+
+  it('should hide reset log level button for agents version < 8.15.0', () => {
+    mockStartServices();
+    const result = renderComponent();
+    const resetLogLevelBtn = result.queryByTestId('resetLogLevelBtn');
+    expect(resetLogLevelBtn).not.toBeInTheDocument();
+  });
+
+  it('should show reset log level button for agents version >= 8.15.0', () => {
+    mockStartServices();
+    const result = renderComponent({ agentVersion: '8.15.0' });
+    const resetLogLevelBtn = result.getByTestId('resetLogLevelBtn');
+    expect(resetLogLevelBtn).toBeInTheDocument();
+    expect(resetLogLevelBtn).not.toHaveAttribute('disabled');
   });
 });

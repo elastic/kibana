@@ -8,7 +8,7 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { useMemo } from 'react';
 import {

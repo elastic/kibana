@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState, type FC } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useState, type FC } from 'react';
 
-import {
-  formatDate,
-  EuiPanel,
-  EuiBasicTable,
-  EuiBasicTableProps,
-  EuiToolTip,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import type { EuiBasicTableProps } from '@elastic/eui';
+import { formatDate, EuiPanel, EuiBasicTable, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
-import { TransformMessage } from '../../../../../../common/types/messages';
+import type { TransformMessage } from '../../../../../../common/types/messages';
 
 import { JobIcon } from '../../../../components/job_icon';
 import { useGetTransformAuditMessages, useRefreshTransformList } from '../../../../hooks';

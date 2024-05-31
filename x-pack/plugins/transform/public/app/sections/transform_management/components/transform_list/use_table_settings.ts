@@ -6,14 +6,14 @@
  */
 
 import { useState } from 'react';
-import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import type { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 // Copying from EUI EuiBasicTable types as type is not correctly picked up for table's onChange
 // Can be removed when https://github.com/elastic/eui/issues/4011 is addressed in EUI
-export interface Criteria<T> {
+export interface Criteria<T extends object> {
   page?: {
     index: number;
     size: number;
@@ -23,14 +23,14 @@ export interface Criteria<T> {
     direction: Direction;
   };
 }
-export interface CriteriaWithPagination<T> extends Criteria<T> {
+export interface CriteriaWithPagination<T extends object> extends Criteria<T> {
   page: {
     index: number;
     size: number;
   };
 }
 
-interface AnalyticsBasicTableSettings<T> {
+interface AnalyticsBasicTableSettings<T extends object> {
   pageIndex: number;
   pageSize: number;
   totalItemCount: number;
@@ -39,13 +39,13 @@ interface AnalyticsBasicTableSettings<T> {
   sortDirection: Direction;
 }
 
-interface UseTableSettingsReturnValue<T> {
+interface UseTableSettingsReturnValue<T extends object> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
   sorting: { sort: PropertySort };
 }
 
-export function useTableSettings<TypeOfItem>(
+export function useTableSettings<TypeOfItem extends object>(
   sortByField: keyof TypeOfItem,
   items: TypeOfItem[]
 ): UseTableSettingsReturnValue<TypeOfItem> {

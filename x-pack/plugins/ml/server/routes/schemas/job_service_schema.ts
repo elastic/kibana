@@ -70,15 +70,12 @@ export const deleteJobsSchema = schema.object({
   /** List of job IDs. */
   jobIds: schema.arrayOf(schema.string()),
   deleteUserAnnotations: schema.maybe(schema.boolean()),
+  deleteAlertingRules: schema.maybe(schema.boolean()),
 });
 
 export const optionalJobIdsSchema = schema.object({
   /** Optional list of job IDs. */
   jobIds: schema.maybe(schema.arrayOf(schema.string())),
-});
-
-export const jobsWithTimerangeSchema = schema.object({
-  dateFormatTz: schema.maybe(schema.string()),
 });
 
 export const lookBackProgressSchema = {

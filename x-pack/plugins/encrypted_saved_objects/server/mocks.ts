@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+
 import type { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
 import type {
   EncryptedSavedObjectsClient,
@@ -19,6 +21,7 @@ function createEncryptedSavedObjectsSetupMock(
     __legacyCompat: { registerLegacyAPI: jest.fn() },
     canEncrypt,
     createMigration: jest.fn(),
+    createModelVersion: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsPluginSetup>;
 }
 
@@ -32,8 +35,10 @@ function createEncryptedSavedObjectsStartMock() {
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
     getDecryptedAsInternalUser: jest.fn(),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
-  } as jest.Mocked<EncryptedSavedObjectsClient>;
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn((findOptions, deps) =>
+      savedObjectsClientMock.create().createPointInTimeFinder(findOptions, deps)
+    ),
+  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
 }
 
 export const encryptedSavedObjectsMock = {

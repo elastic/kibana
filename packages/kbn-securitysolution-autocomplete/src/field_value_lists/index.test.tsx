@@ -26,7 +26,11 @@ import {
 // const mockKibanaHttpService = coreMock.createStart().http;
 // import { coreMock } from '../../../../../../../src/core/public/mocks';
 const mockKibanaHttpService = jest.fn();
-
+const mockShowValueListModal = jest.fn();
+const MockedShowValueListModal = (props: unknown) => {
+  mockShowValueListModal(props);
+  return <></>;
+};
 const mockStart = jest.fn();
 const mockKeywordList: ListSchema = {
   ...getListResponseMock(),
@@ -63,6 +67,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue="some-list-id"
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -84,6 +89,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('@tags')}
         selectedValue=""
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -111,6 +117,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
+        showValueListModal={MockedShowValueListModal}
       />
     );
     expect(
@@ -131,6 +138,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('@tags')}
         selectedValue=""
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -154,6 +162,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -177,14 +186,15 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue="some-list-id"
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
     expect(
       wrapper
-        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] EuiComboBoxPill`)
+        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
         .at(0)
-        .text()
+        .props().value
     ).toEqual('some name');
   });
 
@@ -200,6 +210,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -229,5 +240,30 @@ describe('AutocompleteFieldListsComponent', () => {
         version: VERSION,
       });
     });
+  });
+
+  test('it render the value list modal', async () => {
+    mockShowValueListModal.mockReset();
+    mount(
+      <AutocompleteFieldListsComponent
+        httpService={mockKibanaHttpService}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('ip')}
+        selectedValue="some-list-id"
+        showValueListModal={MockedShowValueListModal}
+      />
+    );
+
+    expect(mockShowValueListModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        children: 'Show value list',
+        listId: 'some-list-id',
+        shouldShowContentIfModalNotAvailable: false,
+      })
+    );
   });
 });

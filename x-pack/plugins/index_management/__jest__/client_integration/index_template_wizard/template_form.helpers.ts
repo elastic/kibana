@@ -145,10 +145,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     order,
     priority,
     version,
-    dataStream,
+    enableDataStream,
     lifecycle,
     allowAutoCreate,
-  }: Partial<TemplateDeserialized> = {}) => {
+  }: Partial<TemplateDeserialized> & { enableDataStream?: boolean } = {}) => {
     const { component, form, find } = testBed;
 
     if (name) {
@@ -174,7 +174,12 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         form.setInputValue('orderField.input', JSON.stringify(order));
       }
 
-      if (dataStream) {
+      // Deal with toggling the data stream switch
+      const isDataStreamEnabled = find('dataStreamField.input').props().checked;
+
+      if (enableDataStream && !isDataStreamEnabled) {
+        form.toggleEuiSwitch('dataStreamField.input');
+      } else if (!enableDataStream && isDataStreamEnabled) {
         form.toggleEuiSwitch('dataStreamField.input');
       }
 
@@ -185,27 +190,34 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       if (version) {
         form.setInputValue('versionField.input', JSON.stringify(version));
       }
+
+      if (allowAutoCreate) {
+        let optionIndex = 0;
+        if (allowAutoCreate === 'TRUE') {
+          optionIndex = 1;
+        }
+        if (allowAutoCreate === 'FALSE') {
+          optionIndex = 2;
+        }
+        const radioGroup = find('allowAutoCreateField.input');
+        const radioOption = radioGroup.childAt(optionIndex).find('input');
+        radioOption.simulate('change', { target: { checked: true } });
+        component.update();
+      }
     });
     component.update();
 
     if (lifecycle && lifecycle.enabled) {
-      act(() => {
+      await act(async () => {
         form.toggleEuiSwitch('dataRetentionToggle.input');
       });
       component.update();
 
-      act(() => {
-        form.setInputValue('valueDataRetentionField', String(lifecycle.value));
-      });
+      form.setInputValue('valueDataRetentionField', String(lifecycle.value));
     }
 
     await act(async () => {
-      if (allowAutoCreate) {
-        form.toggleEuiSwitch('allowAutoCreateField.input');
-      }
-
       clickNextButton();
-      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -378,6 +390,8 @@ export type TestSubjects =
   | 'settingsEditor'
   | 'versionField.input'
   | 'valueDataRetentionField'
+  | 'formWizardStep-5'
+  | 'lifecycleValue'
   | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
   | 'previewIndexTemplate';

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import type { TestData } from '../../types';
 
 export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote with spike',
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+  autoRun: false,
   dataGenerator: 'farequote_with_spike',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',
@@ -24,5 +25,24 @@ export const farequoteDataViewTestData: TestData = {
     totalDocCountFormatted: '86,374',
     sampleProbabilityFormatted: '0.5',
     fieldSelectorPopover: ['airline', 'custom_field.keyword'],
+    globalState: {
+      refreshInterval: { pause: true, value: 60000 },
+      time: { from: '2016-02-07T00:00:00.000Z', to: '2016-02-11T23:59:54.000Z' },
+    },
+    appState: {
+      logRateAnalysis: {
+        filters: [],
+        searchQuery: { match_all: {} },
+        searchQueryLanguage: 'kuery',
+        searchString: '',
+        wp: {
+          bMax: 1454940000000,
+          bMin: 1454817600000,
+          dMax: 1455040800000,
+          dMin: 1455033600000,
+        },
+      },
+    },
+    prompt: 'empty',
   },
 };

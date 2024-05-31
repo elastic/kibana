@@ -1,0 +1,126 @@
+{
+  "id": "@kbn/security-hardening",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/security-hardening",
+        "id": "def-common.unsafeConsole",
+        "type": "Object",
+        "tags": [],
+        "label": "unsafeConsole",
+        "description": [],
+        "path": "packages/kbn-security-hardening/console.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-hardening",
+            "id": "def-common.unsafeConsole.debug",
+            "type": "Function",
+            "tags": [],
+            "label": "debug",
+            "description": [],
+            "signature": [
+              "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
+            ],
+            "path": "packages/kbn-security-hardening/console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-hardening",
+            "id": "def-common.unsafeConsole.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
+            ],
+            "path": "packages/kbn-security-hardening/console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-hardening",
+            "id": "def-common.unsafeConsole.info",
+            "type": "Function",
+            "tags": [],
+            "label": "info",
+            "description": [],
+            "signature": [
+              "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
+            ],
+            "path": "packages/kbn-security-hardening/console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-hardening",
+            "id": "def-common.unsafeConsole.log",
+            "type": "Function",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
+            ],
+            "path": "packages/kbn-security-hardening/console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-hardening",
+            "id": "def-common.unsafeConsole.trace",
+            "type": "Function",
+            "tags": [],
+            "label": "trace",
+            "description": [],
+            "signature": [
+              "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
+            ],
+            "path": "packages/kbn-security-hardening/console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-hardening",
+            "id": "def-common.unsafeConsole.warn",
+            "type": "Function",
+            "tags": [],
+            "label": "warn",
+            "description": [],
+            "signature": [
+              "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
+            ],
+            "path": "packages/kbn-security-hardening/console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

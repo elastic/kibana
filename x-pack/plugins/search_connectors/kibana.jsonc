@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-connectors-plugin",
+  "owner": "@elastic/enterprise-search-frontend",
+  "description": "Plugin hosting shared features for connectors",
+  "plugin": {
+    "id": "searchConnectors",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "search",
+      "connectors"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

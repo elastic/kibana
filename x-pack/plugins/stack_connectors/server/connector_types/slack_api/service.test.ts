@@ -37,6 +37,18 @@ const channel = {
   is_private: true,
 };
 
+const testBlock = {
+  blocks: [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
+      },
+    },
+  ],
+};
+
 const getValidChannelIdResponse = createAxiosResponse({
   data: {
     ok: true,
@@ -63,6 +75,42 @@ const postMessageResponse = createAxiosResponse({
       },
     },
   ],
+});
+
+const postBlockkitResponse = createAxiosResponse({
+  data: {
+    bot_id: 'B06AMU52C9E',
+    type: 'message',
+    text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
+    user: 'U069W74U6A1',
+    ts: '1704383852.003159',
+    app_id: 'A069Z4WDFEW',
+    blocks: [
+      {
+        type: 'section',
+        block_id: 'sDltQ',
+        text: {
+          type: 'mrkdwn',
+          text: "Hello, Assistant to the Regional Manager Dwight! *Michael Scott* wants to know where you'd like to take the Paper Company investors to dinner tonight.\n",
+          verbatim: false,
+        },
+      },
+    ],
+    team: 'TC0AARLHE',
+    bot_profile: {
+      id: 'B06AMU52C9E',
+      app_id: 'A069Z4WDFEW',
+      name: 'test slack web api',
+      icons: {
+        image_36: 'https://a.slack-edge.com/80588/img/plugins/app/bot_36.png',
+        image_48: 'https://a.slack-edge.com/80588/img/plugins/app/bot_48.png',
+        image_72: 'https://a.slack-edge.com/80588/img/plugins/app/service_72.png',
+      },
+      deleted: false,
+      updated: 1702475971,
+      team_id: 'TC0AARLHE',
+    },
+  },
 });
 
 describe('Slack API service', () => {
@@ -213,6 +261,110 @@ describe('Slack API service', () => {
 
       expect(
         await service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
+      ).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        message: 'error posting slack message',
+        serviceMessage: 'request fail',
+        status: 'error',
+      });
+    });
+  });
+
+  describe('postBlockkit', () => {
+    test('should call request with only channels argument', async () => {
+      requestMock.mockImplementation(() => postBlockkitResponse);
+
+      await service.postBlockkit({
+        channels: ['general', 'private'],
+        text: JSON.stringify(testBlock),
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: 'general', blocks: testBlock.blocks },
+      });
+    });
+
+    test('should call request with channels && channelIds  argument', async () => {
+      requestMock.mockImplementation(() => postBlockkitResponse);
+
+      await service.postBlockkit({
+        channels: ['general', 'private'],
+        channelIds: ['QWEERTYU987', 'POIUYT123'],
+        text: JSON.stringify(testBlock),
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
+      });
+    });
+
+    test('should call request with only channelIds argument', async () => {
+      requestMock.mockImplementation(() => postBlockkitResponse);
+
+      await service.postBlockkit({
+        channelIds: ['QWEERTYU987', 'POIUYT123'],
+        text: JSON.stringify(testBlock),
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        logger,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
+      });
+    });
+
+    test('should throw an error if text is invalid JSON', async () => {
+      expect(
+        await service.postBlockkit({
+          channelIds: ['QWEERTYU987', 'POIUYT123'],
+          text: 'abc',
+        })
+      ).toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        message: 'error posting slack message',
+        serviceMessage: 'Unexpected token \'a\', "abc" is not valid JSON',
+        status: 'error',
+      });
+    });
+
+    test('should throw an error if request to slack fails', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('request fail');
+      });
+
+      expect(
+        await service.postBlockkit({
+          channelIds: ['QWEERTYU987', 'POIUYT123'],
+          text: JSON.stringify(testBlock),
+        })
       ).toEqual({
         actionId: SLACK_API_CONNECTOR_ID,
         message: 'error posting slack message',

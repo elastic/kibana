@@ -8,12 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore, useRiskScoreKpi } from '../../../containers/risk_score';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HostRiskScoreQueryTabBody } from './host_risk_score_tab_body';
 import { HostsType } from '../../store/model';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
 
-jest.mock('../../../containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score_kpi');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
 

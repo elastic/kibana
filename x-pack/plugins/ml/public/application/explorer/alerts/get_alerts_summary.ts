@@ -14,7 +14,7 @@ import {
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 import { groupBy } from 'lodash';
-import { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
+import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 
 export type RulesSummary = Array<[string, RuleSummary]>;
 

@@ -9,9 +9,14 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { monaco } from '../monaco_imports';
-import type { SyntaxErrors, LangValidation, EditorError, BaseWorkerDefinition } from '../types';
+import type {
+  SyntaxErrors,
+  LangValidation,
+  MonacoEditorError,
+  BaseWorkerDefinition,
+} from '../types';
 
-const toDiagnostics = (error: EditorError): monaco.editor.IMarkerData => {
+const toDiagnostics = (error: MonacoEditorError): monaco.editor.IMarkerData => {
   return {
     ...error,
     severity: monaco.MarkerSeverity.Error,
@@ -36,10 +41,10 @@ export class DiagnosticsAdapter {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
 
-      if (model.getModeId() === this.langId) {
+      if (model.getLanguageId() === this.langId) {
         model.onDidChangeContent(() => {
           // Do not validate if the language ID has changed
-          if (model.getModeId() !== this.langId) {
+          if (model.getLanguageId() !== this.langId) {
             return;
           }
 

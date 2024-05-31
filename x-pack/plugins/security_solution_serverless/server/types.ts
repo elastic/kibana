@@ -78,10 +78,6 @@ export interface UsageSourceMetadata {
 
 export type Tier = ProductTier | 'none';
 
-export interface SecurityUsageReportingTaskSetupContractOptions {
-  lookBackLimitMinutes?: number;
-}
-
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
@@ -92,7 +88,6 @@ export interface SecurityUsageReportingTaskSetupContract {
   taskTitle: string;
   version: string;
   meteringCallback: MeteringCallback;
-  options?: SecurityUsageReportingTaskSetupContractOptions;
 }
 
 export interface SecurityUsageReportingTaskStartContract {
@@ -100,9 +95,15 @@ export interface SecurityUsageReportingTaskStartContract {
   interval: string;
 }
 
+export interface MeteringCallBackResponse {
+  records: UsageRecord[];
+  latestTimestamp?: Date; // timestamp of the latest record
+  shouldRunAgain?: boolean; // if task should run again immediately
+}
+
 export type MeteringCallback = (
   metringCallbackInput: MeteringCallbackInput
-) => Promise<UsageRecord[]>;
+) => Promise<MeteringCallBackResponse>;
 
 export interface MeteringCallbackInput {
   esClient: ElasticsearchClient;

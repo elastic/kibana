@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
@@ -30,45 +30,21 @@ export interface CreateCaseFlyoutProps {
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
-const StyledFlyout = styled(EuiFlyout)`
-  ${({ theme }) => `
-      z-index: ${theme.eui.euiZModal};
-    `}
-`;
-
-// Adding bottom padding because timeline's
-// bottom bar gonna hide the submit button.
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  ${({ theme }) => `
-      && .euiFlyoutBody__overflow {
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
-
-      && .euiFlyoutBody__overflowContent {
-        display: block;
-        padding: ${theme.eui.euiSizeL} ${theme.eui.euiSizeL} 70px;
-        height: auto;
-      }
-    `}
-`;
-
-const FormWrapper = styled.div`
-  width: 100%;
-`;
-
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
   ({ afterCaseCreated, attachments, headerContent, initialValue, onClose, onSuccess }) => {
     const handleCancel = onClose || noop;
     const handleOnSuccess = onSuccess || noop;
+    const { euiTheme } = useEuiTheme();
 
     return (
       <>
         <ReactQueryDevtools initialIsOpen={false} />
-        <StyledFlyout
-          onClose={onClose}
+        <EuiFlyout
+          onClose={handleCancel}
           tour-step="create-case-flyout"
           data-test-subj="create-case-flyout"
+          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+          maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
         >
           <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">
@@ -76,8 +52,25 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
             </EuiTitle>
             {headerContent && headerContent}
           </EuiFlyoutHeader>
-          <StyledEuiFlyoutBody>
-            <FormWrapper>
+          <EuiFlyoutBody
+            css={css`
+              && .euiFlyoutBody__overflow {
+                overflow-y: auto;
+                overflow-x: hidden;
+              }
+
+              && .euiFlyoutBody__overflowContent {
+                display: block;
+                padding: ${euiTheme.size.l} ${euiTheme.size.l} ${euiTheme.size.xxxxl};
+                height: auto;
+              }
+            `}
+          >
+            <div
+              css={css`
+                width: 100%;
+              `}
+            >
               <CreateCaseForm
                 afterCaseCreated={afterCaseCreated}
                 attachments={attachments}
@@ -86,9 +79,9 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
                 withSteps={false}
                 initialValue={initialValue}
               />
-            </FormWrapper>
-          </StyledEuiFlyoutBody>
-        </StyledFlyout>
+            </div>
+          </EuiFlyoutBody>
+        </EuiFlyout>
       </>
     );
   }

@@ -15,11 +15,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TransformListRow } from '../../../../common';
+import type { TransformListRow } from '../../../../common';
 
 import { useDocumentationLinks, useRefreshTransformList } from '../../../../hooks';
 
-import { StatsBar, TransformStatsBarStats } from '../stats_bar';
+import type { TransformStatsBarStats } from '../stats_bar';
+import { StatsBar } from '../stats_bar';
 
 function createTransformStats(
   transformNodes: number,

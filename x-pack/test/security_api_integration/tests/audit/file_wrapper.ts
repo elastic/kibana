@@ -9,6 +9,8 @@ import Fs from 'fs';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 
 export class FileWrapper {
+  delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   constructor(private readonly path: string, private readonly retry: RetryService) {}
   async reset() {
     // "touch" each file to ensure it exists and is empty before each test
@@ -32,9 +34,15 @@ export class FileWrapper {
     });
   }
   // writing in a file is an async operation. we use this method to make sure logs have been written.
-  async isNotEmpty() {
-    const content = await this.read();
-    const line = content[0];
-    return line.length > 0;
+  async isWritten() {
+    // attempt at determinism - wait for the size of the file to stop changing.
+    await this.retry.waitForWithTimeout(`file '${this.path}' to be written`, 5000, async () => {
+      const sizeBefore = Fs.statSync(this.path).size;
+      await this.delay(500);
+      const sizeAfter = Fs.statSync(this.path).size;
+      return sizeAfter === sizeBefore;
+    });
+
+    return Fs.statSync(this.path).size > 0;
   }
 }

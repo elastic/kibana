@@ -8,5 +8,5 @@
 
 export { showSettings } from './show_settings';
 export { addFromLibrary } from './add_panel_from_library';
-export { runSaveAs, runQuickSave, runClone } from './run_save_functions';
-export { addOrUpdateEmbeddable, replacePanel } from './panel_management';
+export { addOrUpdateEmbeddable } from './panel_management';
+export { runQuickSave, runInteractiveSave } from './run_save_functions';

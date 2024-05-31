@@ -7,7 +7,7 @@
 
 import path from 'path';
 import mockFs from 'mock-fs';
-import { existsSync, readdirSync } from 'fs';
+import { access, readdir } from 'fs/promises';
 import { ChromiumArchivePaths, PackageInfo } from '../chromium';
 import { fetch } from './fetch';
 import { sha256 } from './checksum';
@@ -55,8 +55,8 @@ describe('ensureDownloaded', () => {
 
     await download(paths, pkg);
 
-    expect(existsSync(unexpectedPath1)).toBe(false);
-    expect(existsSync(unexpectedPath2)).toBe(false);
+    await expect(access(unexpectedPath1)).rejects.toThrow();
+    await expect(access(unexpectedPath2)).rejects.toThrow();
   });
 
   it('should reject when download fails', async () => {
@@ -84,14 +84,14 @@ describe('ensureDownloaded', () => {
       await download(paths, pkg);
 
       expect(fetch).not.toHaveBeenCalled();
-      expect(readdirSync(path.resolve(`${paths.archivesPath}/x64`))).toEqual(
+      await expect(readdir(path.resolve(`${paths.archivesPath}/x64`))).resolves.toEqual(
         expect.arrayContaining([
           'chrome-mac.zip',
           'chrome-win.zip',
           expect.stringMatching(/^chromium-[0-9a-f]{7}-locales-linux_x64\.zip$/),
         ])
       );
-      expect(readdirSync(path.resolve(`${paths.archivesPath}/arm64`))).toEqual(
+      await expect(readdir(path.resolve(`${paths.archivesPath}/arm64`))).resolves.toEqual(
         expect.arrayContaining([
           'chrome-mac.zip',
           expect.stringMatching(/^chromium-[0-9a-f]{7}-locales-linux_arm64\.zip$/),

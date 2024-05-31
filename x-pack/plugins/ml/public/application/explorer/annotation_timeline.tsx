@@ -10,6 +10,7 @@ import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
 import { type ChartTooltipService, type TooltipData } from '../components/chart_tooltip';
 import { useCurrentThemeVars } from '../contexts/kibana';
+import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
 
 export interface AnnotationTimelineProps<T extends { timestamp: number; end_timestamp?: number }> {
   label: string;
@@ -23,8 +24,6 @@ export interface AnnotationTimelineProps<T extends { timestamp: number; end_time
   chartWidth: number;
 }
 
-export const Y_AXIS_LABEL_WIDTH = 170;
-export const Y_AXIS_LABEL_PADDING = 8;
 const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
 

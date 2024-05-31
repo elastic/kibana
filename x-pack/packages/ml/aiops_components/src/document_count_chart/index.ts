@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { DocumentCountChart } from './document_count_chart';
+export {
+  DocumentCountChart,
+  DocumentCountChartWithAutoAnalysisStart,
+} from './document_count_chart';
 export type {
   BrushSelectionUpdateHandler,
   BrushSettings,

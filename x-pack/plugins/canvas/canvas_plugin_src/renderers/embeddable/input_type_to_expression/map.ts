@@ -36,5 +36,5 @@ export function toExpression(input: MapEmbeddableInput & { savedObjectId: string
     }
   }
 
-  return expressionParts.join(' ');
+  return `${expressionParts.join(' ')} | render`;
 }

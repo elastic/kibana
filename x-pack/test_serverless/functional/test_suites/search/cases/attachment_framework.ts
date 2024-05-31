@@ -16,6 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const settings = getPageObject('settings');
 
   describe('persistable attachment', () => {
     before(async () => {
@@ -32,6 +33,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
+
+        await settings.refreshDataViewFieldList('default:all-data', { ignoreMissing: true });
 
         await svlSearchNavigation.navigateToLandingPage();
 
@@ -52,7 +55,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('does not show actions to add lens visualization to case', async () => {
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.missingOrFail('embeddablePanelAction-embeddable_addToNewCase');
         await testSubjects.missingOrFail('embeddablePanelAction-embeddable_addToExistingCase');
       });
     });

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 
 interface Props {
@@ -38,22 +38,22 @@ export function SaveQueryForm({
   showTimeFilterOption = true,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
-  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
-    Boolean(savedQuery?.attributes.filters ?? true)
+    Boolean(savedQuery ? savedQuery.attributes.filters : true)
   );
   // Defaults to false because saved queries are meant to be as portable as possible and loading
   // a saved query with a time filter will override whatever the current value of the global timepicker
   // is. We expect this option to be used rarely and only when the user knows they want this behavior.
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
-    Boolean(savedQuery?.attributes.timefilter ?? false)
+    Boolean(savedQuery ? savedQuery.attributes.timefilter : false)
   );
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [saveIsDisabled, setSaveIsDisabled] = useState<boolean>(false);
 
   const titleConflictErrorText = i18n.translate(
     'unifiedSearch.search.searchBar.savedQueryForm.titleConflictText',
     {
-      defaultMessage: 'Name conflicts with an existing query',
+      defaultMessage: 'Name conflicts with an existing query.',
     }
   );
 
@@ -64,27 +64,15 @@ export function SaveQueryForm({
     }
   );
 
-  useEffect(() => {
-    const fetchQueries = async () => {
-      const allSavedQueries = await savedQueryService.getAllSavedQueries();
-      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
-      setSavedQueries(sortedAllSavedQueries);
-    };
-    fetchQueries();
-  }, [savedQueryService]);
-
-  const validate = useCallback(() => {
+  const validate = useCallback(async () => {
     const errors = [];
-    if (
-      !!savedQueries.find(
-        (existingSavedQuery) => !savedQuery && existingSavedQuery.attributes.title === title
-      )
-    ) {
-      errors.push(titleConflictErrorText);
-    }
 
     if (!title) {
       errors.push(titleExistsErrorText);
+    }
+
+    if (await savedQueryService.isDuplicateTitle(title, savedQuery?.id)) {
+      errors.push(titleConflictErrorText);
     }
 
     if (!isEqual(errors, formErrors)) {
@@ -93,18 +81,31 @@ export function SaveQueryForm({
     }
 
     return !formErrors.length;
-  }, [savedQueries, formErrors, title, savedQuery, titleConflictErrorText, titleExistsErrorText]);
+  }, [
+    formErrors,
+    savedQuery,
+    savedQueryService,
+    title,
+    titleConflictErrorText,
+    titleExistsErrorText,
+  ]);
 
-  const onClickSave = useCallback(() => {
-    if (validate()) {
-      onSave({
-        id: savedQuery?.id,
-        title,
-        description: '',
-        shouldIncludeFilters,
-        shouldIncludeTimefilter,
-      });
-      onClose();
+  const onClickSave = useCallback(async () => {
+    try {
+      setSaveIsDisabled(true);
+
+      if (await validate()) {
+        onSave({
+          id: savedQuery?.id,
+          title,
+          description: '',
+          shouldIncludeFilters,
+          shouldIncludeTimefilter,
+        });
+        onClose();
+      }
+    } finally {
+      setSaveIsDisabled(false);
     }
   }, [
     validate,
@@ -135,10 +136,6 @@ export function SaveQueryForm({
       <EuiFormRow
         label={i18n.translate('unifiedSearch.search.searchBar.savedQueryNameLabelText', {
           defaultMessage: 'Name',
-        })}
-        helpText={i18n.translate('unifiedSearch.search.searchBar.savedQueryNameHelpText', {
-          defaultMessage:
-            'Name cannot contain a leading or trailing whitespace and must be unique.',
         })}
         isInvalid={hasErrors}
         display="rowCompressed"
@@ -200,7 +197,7 @@ export function SaveQueryForm({
           onClick={onClickSave}
           fill
           data-test-subj="savedQueryFormSaveButton"
-          disabled={hasErrors}
+          disabled={hasErrors || saveIsDisabled}
         >
           {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormSaveButtonText', {
             defaultMessage: 'Save query',

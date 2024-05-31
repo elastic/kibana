@@ -9,7 +9,10 @@
 import { DependencyManager } from './dependency_manager';
 import { PluginServiceProviders, PluginServiceRequiredServices } from './provider';
 
-export class PluginServiceProvidersMediator<Services, StartParameters> {
+export class PluginServiceProvidersMediator<
+  Services extends Record<keyof Services, {}>,
+  StartParameters
+> {
   constructor(private readonly providers: PluginServiceProviders<Services, StartParameters>) {}
 
   start(params: StartParameters) {

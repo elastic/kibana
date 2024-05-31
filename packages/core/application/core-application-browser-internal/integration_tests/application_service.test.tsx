@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, type Observable, take } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, MemoryHistory } from 'history';
 

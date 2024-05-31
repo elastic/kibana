@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { FieldsForHistograms } from '@kbn/ml-agg-utils';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { FieldsForHistograms } from '@kbn/ml-agg-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
@@ -15,7 +15,7 @@ import {
   dataVisualizerFieldHistogramsSchema,
   indexPatternSchema,
 } from './schemas/data_visualizer_schema';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 
 function getHistogramsForFields(
   client: IScopedClusterClient,

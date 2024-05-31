@@ -16,16 +16,15 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 describe('useSavedSearchAliasMatchRedirect', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
-  let history: () => History;
+  let history: History;
 
   beforeEach(() => {
     spaces = spacesPluginMock.createStartContract();
-    history = () =>
-      ({
-        location: {
-          search: '?_g=foo',
-        },
-      } as History);
+    history = {
+      location: {
+        search: '?_g=foo',
+      },
+    } as History;
   });
 
   test('should redirect in case of aliasMatch', () => {

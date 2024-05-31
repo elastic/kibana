@@ -69,7 +69,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
               encode: false,
             });
 
-            return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+            return <Redirect to={`${NETWORK_PATH}/flows?${reEncoded}`} />;
           } else if (multipleEntities(ip)) {
             const ips: string[] = getMultipleEntities(ip);
             queryStringDecoded.query = addEntitiesToKql(
@@ -81,7 +81,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
               sort: false,
               encode: false,
             });
-            return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+            return <Redirect to={`${NETWORK_PATH}/flows?${reEncoded}`} />;
           } else {
             const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,

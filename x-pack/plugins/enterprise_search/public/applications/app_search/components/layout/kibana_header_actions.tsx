@@ -9,8 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
+import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_action';
 import { EngineLogic } from '../engine';
 import { QueryTesterButton } from '../query_tester';
 
@@ -18,12 +17,6 @@ export const KibanaHeaderActions: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      {engineName && (
-        <EuiFlexItem>
-          <QueryTesterButton />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <EndpointsHeaderAction>{Boolean(engineName) && <QueryTesterButton />}</EndpointsHeaderAction>
   );
 };

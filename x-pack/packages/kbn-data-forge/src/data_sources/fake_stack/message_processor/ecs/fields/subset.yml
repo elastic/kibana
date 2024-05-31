@@ -1,0 +1,16 @@
+---
+name: message_processor
+fields:
+  base:
+    fields: "*"
+  log:
+    fields:
+      level: {}
+      logger: {}
+  host:
+    fields:
+      name: {}
+  processor:
+    fields: "*"
+
+

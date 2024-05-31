@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 
-import { CombinedField } from './types';
+import type { CombinedField } from './types';
 import { CombinedFieldLabel } from './combined_field_label';
 
 export function CombinedFieldsReadOnlyForm({

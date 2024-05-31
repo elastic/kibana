@@ -83,9 +83,15 @@ export interface UiSettingsParams<T = unknown> {
    * @remark settings without order defined will be displayed last and ordered by name
    */
   order?: number;
-  /*
-   * Value validation schema
+  /**
+   * Value validation schema.
    * Used to validate value on write and read.
+   *
+   * This schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.
+   * Use schema options to specify limits on the value. For example:
+   * `schema.number({ min: 0, max: 100 })`
+   *
+   * More information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md
    */
   schema: Type<T>;
   /**

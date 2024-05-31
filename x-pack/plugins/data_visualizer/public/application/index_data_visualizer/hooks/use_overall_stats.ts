@@ -6,66 +6,66 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { from, Subscription, Observable } from 'rxjs';
-import { mergeMap, last, map, toArray } from 'rxjs/operators';
+import type { Subscription } from 'rxjs';
+import { map } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/common';
+} from '@kbn/search-types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import {
+import type {
   AggregatableFieldOverallStats,
+  NonAggregatableFieldOverallStats,
+} from '../search_strategy/requests/overall_stats';
+import {
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
   getSampleOfDocumentsForNonAggregatableFields,
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
   isNonAggregatableSampledDocs,
-  NonAggregatableFieldOverallStats,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
-import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
-import {
+import type {
   DataStatsFetchProgress,
-  isRandomSamplingOption,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
+import { isRandomSamplingOption } from '../../../../common/types/field_stats';
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
-import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import {
+  getDefaultPageState,
+  MAX_CONCURRENT_REQUESTS,
+} from '../constants/index_data_visualizer_viewer';
 import { displayError } from '../../common/util/display_error';
+import {
+  fetchDataWithTimeout,
+  rateLimitingForkJoin,
+} from '../search_strategy/requests/fetch_utils';
 
-/**
- * Helper function to run forkJoin
- * with restrictions on how many input observables can be subscribed to concurrently
- */
-export function rateLimitingForkJoin<T>(
-  observables: Array<Observable<T>>,
-  maxConcurrentRequests = MAX_CONCURRENT_REQUESTS
-): Observable<T[]> {
-  return from(observables).pipe(
-    mergeMap(
-      (observable, index) =>
-        observable.pipe(
-          last(),
-          map((value) => ({ index, value }))
-        ),
-      maxConcurrentRequests
-    ),
-    toArray(),
-    map((indexedObservables) =>
-      indexedObservables.sort((l, r) => l.index - r.index).map((obs) => obs.value)
-    )
-  );
-}
+const getPopulatedFieldsInIndex = (
+  populatedFieldsInIndexWithoutRuntimeFields: Set<string> | undefined | null,
+  runtimeFieldMap: MappingRuntimeFields | undefined
+): Set<string> | undefined | null => {
+  if (!populatedFieldsInIndexWithoutRuntimeFields) return undefined;
+  const runtimeFields = runtimeFieldMap ? Object.keys(runtimeFieldMap) : undefined;
+  return runtimeFields && runtimeFields?.length > 0
+    ? new Set([...Array.from(populatedFieldsInIndexWithoutRuntimeFields), ...runtimeFields])
+    : populatedFieldsInIndexWithoutRuntimeFields;
+};
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
+  esql = false,
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
   probability?: number | null
@@ -81,13 +81,91 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
+  const [populatedFieldsInIndexWithoutRuntimeFields, setPopulatedFieldsInIndex] = useState<
+    | Set<string>
+    // request to fields caps has not been made yet
+    | undefined
+    // null is set when field caps api is too slow, and we should not retry anymore
+    | null
+  >();
+
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
   );
 
   const abortCtrl = useRef(new AbortController());
+  const populatedFieldsAbortCtrl = useRef(new AbortController());
+
   const searchSubscription$ = useRef<Subscription>();
+
+  useEffect(
+    function updatePopulatedFields() {
+      let unmounted = false;
+
+      // If null, that means we tried to fetch populated fields already but it timed out
+      // so don't try again
+      if (!searchStrategyParams || populatedFieldsInIndexWithoutRuntimeFields === null) return;
+
+      const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
+
+      const fetchPopulatedFields = async () => {
+        populatedFieldsAbortCtrl.current.abort();
+        populatedFieldsAbortCtrl.current = new AbortController();
+
+        // Trick to avoid duplicate getFieldsForWildcard requests
+        // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
+        if (timeFieldName !== undefined && (earliest === undefined || latest === undefined)) {
+          return;
+        }
+
+        const filterCriteria = buildBaseFilterCriteria(
+          timeFieldName,
+          earliest,
+          latest,
+          searchQuery
+        );
+
+        // Getting non-empty fields for the index pattern
+        // because then we can absolutely exclude these from subsequent requests
+        const nonEmptyFields = await fetchDataWithTimeout<Promise<FieldSpec[]>>(
+          data.dataViews.getFieldsForWildcard({
+            pattern: index,
+            indexFilter: {
+              bool: {
+                filter: filterCriteria,
+              },
+            },
+            includeEmptyFields: false,
+          }),
+          populatedFieldsAbortCtrl.current
+        );
+
+        if (!unmounted) {
+          if (Array.isArray(nonEmptyFields)) {
+            setPopulatedFieldsInIndex(new Set([...nonEmptyFields.map((field) => field.name)]));
+          } else {
+            setPopulatedFieldsInIndex(null);
+          }
+        }
+      };
+
+      fetchPopulatedFields();
+
+      return () => {
+        unmounted = true;
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      searchStrategyParams?.timeFieldName,
+      searchStrategyParams?.earliest,
+      searchStrategyParams?.latest,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({ query: searchStrategyParams?.searchQuery }),
+      searchStrategyParams?.index,
+    ]
+  );
 
   const startFetch = useCallback(async () => {
     try {
@@ -95,7 +173,18 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       abortCtrl.current.abort();
       abortCtrl.current = new AbortController();
 
-      if (!searchStrategyParams || lastRefresh === 0) return;
+      if (
+        !searchStrategyParams ||
+        lastRefresh === 0 ||
+        populatedFieldsInIndexWithoutRuntimeFields === undefined
+      ) {
+        return;
+      }
+
+      const populatedFieldsInIndex = getPopulatedFieldsInIndex(
+        populatedFieldsInIndexWithoutRuntimeFields,
+        searchStrategyParams.runtimeFieldMap
+      );
 
       setFetchState({
         ...getInitialProgress(),
@@ -104,8 +193,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       });
 
       const {
-        aggregatableFields,
-        nonAggregatableFields,
+        aggregatableFields: originalAggregatableFields,
+        nonAggregatableFields: originalNonAggregatableFields,
         index,
         searchQuery,
         timeFieldName,
@@ -122,6 +211,14 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         sessionId,
         ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
+
+      const hasPopulatedFieldsInfo = isDefined(populatedFieldsInIndex);
+      const aggregatableFields = hasPopulatedFieldsInfo
+        ? originalAggregatableFields.filter((field) => populatedFieldsInIndex.has(field.name))
+        : originalAggregatableFields;
+      const nonAggregatableFields = hasPopulatedFieldsInfo
+        ? originalNonAggregatableFields.filter((fieldName) => populatedFieldsInIndex.has(fieldName))
+        : originalNonAggregatableFields;
 
       const documentCountStats = await getDocumentCountStats(
         data.search,
@@ -151,6 +248,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             return resp as IKibanaSearchResponse;
           })
         );
+
       const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
         data.search
           .search<IKibanaSearchRequest, IKibanaSearchResponse>(
@@ -233,7 +331,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               const docs = resp.rawResponse.hits.hits.map((d) =>
                 d.fields ? getProcessedFields(d.fields) : {}
               );
-
               sampledNonAggregatableFieldsExamples = docs;
             }
             if (isAggregatableFieldOverallStats(resp)) {
@@ -249,7 +346,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
           const aggregatableOverallStats = processAggregatableFieldsExistResponse(
             aggregatableOverallStatsResp,
-            aggregatableFields
+            originalAggregatableFields,
+            populatedFieldsInIndex
           );
 
           const nonAggregatableFieldsCount: number[] = new Array(nonAggregatableFields.length).fill(
@@ -270,9 +368,10 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           }
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
             nonAggregatableOverallStatsResp,
-            nonAggregatableFields,
+            originalNonAggregatableFields,
             nonAggregatableFieldsCount,
-            nonAggregatableFieldsUniqueCount
+            nonAggregatableFieldsUniqueCount,
+            nonAggregatableFields
           );
 
           setOverallStats({
@@ -283,7 +382,10 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           });
         },
         error: (error) => {
-          displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
+          if (error.name !== 'AbortError') {
+            displayError(toasts, searchStrategyParams.index, extractErrorProperties(error));
+          }
+
           setFetchState({
             isRunning: false,
             error,
@@ -302,12 +404,20 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         displayError(toasts, searchStrategyParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data.search, searchStrategyParams, toasts, lastRefresh, probability]);
+  }, [
+    data,
+    searchStrategyParams,
+    toasts,
+    lastRefresh,
+    probability,
+    populatedFieldsInIndexWithoutRuntimeFields,
+  ]);
 
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
-    abortCtrl.current.abort();
+    abortCtrl.current?.abort();
+    populatedFieldsAbortCtrl.current?.abort();
   }, []);
 
   // auto-update

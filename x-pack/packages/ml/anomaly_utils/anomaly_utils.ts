@@ -59,6 +59,10 @@ export interface MlEntityField {
    * Optional entity field operation
    */
   operation?: MlEntityFieldOperation;
+  /**
+   * Optional cardinality of field
+   */
+  cardinality?: number;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.

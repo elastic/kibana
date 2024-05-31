@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import '../../common/mock/match_media';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import type { EditableTitleProps } from './editable_title';

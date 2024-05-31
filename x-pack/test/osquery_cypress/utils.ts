@@ -111,6 +111,12 @@ export const addIntegrationToAgentPolicy = async (
 };
 
 /**
+ * Check if the given version string is a valid artifact version
+ * @param version Version string
+ */
+const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
+
+/**
  * Returns the Agent version that is available for install (will check `artifacts-api.elastic.co/v1/versions`)
  * that is equal to or less than `maxVersion`.
  * @param maxVersion
@@ -120,7 +126,12 @@ export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Prom
   const kbnStatus = await kbnClient.status.get();
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+    .then((response) =>
+      map(
+        response.data.versions.filter(isValidArtifactVersion),
+        (version) => version.split('-SNAPSHOT')[0]
+      )
+    );
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??

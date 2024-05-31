@@ -13,7 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import type { KqlMode } from '../../../store/timeline/model';
+import type { KqlMode } from '../../../store/model';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import type { KueryFilterQuery } from '../../../../../common/types/timeline';
@@ -21,8 +21,8 @@ import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { Sourcerer } from '../../../../common/components/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { Sourcerer } from '../../../../sourcerer/components';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,
@@ -41,7 +41,6 @@ interface Props {
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   refreshInterval: number;
-  setFilters: (filters: Filter[]) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   filters: Filter[];
   savedQueryId: string | null;
@@ -79,7 +78,6 @@ export const SearchOrFilter = React.memo<Props>(
     timelineId,
     refreshInterval,
     savedQueryId,
-    setFilters,
     setSavedQueryId,
     to,
     toStr,
@@ -129,7 +127,6 @@ export const SearchOrFilter = React.memo<Props>(
                 isRefreshPaused={isRefreshPaused}
                 refreshInterval={refreshInterval}
                 savedQueryId={savedQueryId}
-                setFilters={setFilters}
                 setSavedQueryId={setSavedQueryId}
                 timelineId={timelineId}
                 to={to}

@@ -3,19 +3,18 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["public/**/*", "server/**/*"],
+  "include": ["common/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/url-forwarding-plugin",
     "@kbn/management-plugin",
-    "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/ui-theme",
-    "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-router",
     "@kbn/deeplinks-devtools",
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

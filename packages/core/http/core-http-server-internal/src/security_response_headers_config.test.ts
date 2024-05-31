@@ -20,7 +20,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       Object {
         "Cross-Origin-Opener-Policy": "same-origin",
         "Permissions-Policy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
-        "Referrer-Policy": "no-referrer-when-downgrade",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
         "X-Content-Type-Options": "nosniff",
       }
     `);

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useState, useEffect, useMemo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { Field, Aggregation, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';

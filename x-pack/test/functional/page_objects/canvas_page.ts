@@ -143,8 +143,8 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.missingOrFail('add-element-button');
     },
 
-    async getTimeFiltersFromDebug() {
-      log.debug('CanvasPage.getTimeFiltersFromDebug');
+    async getFiltersFromDebug(type: 'range' | 'term') {
+      log.debug(`CanvasPage.getFiltersFromDebug: ${type}`);
       await testSubjects.existOrFail('canvasDebug__content');
 
       const contentElem = await testSubjects.find('canvasDebug__content');
@@ -152,19 +152,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       const filters = JSON.parse(content);
 
-      return filters.filters.filter((f: any) => f.query?.range);
-    },
-
-    async getMatchFiltersFromDebug() {
-      log.debug('CanvasPage.getMatchFiltersFromDebug');
-      await testSubjects.existOrFail('canvasDebug__content');
-
-      const contentElem = await testSubjects.find('canvasDebug__content');
-      const content = await contentElem.getVisibleText();
-
-      const filters = JSON.parse(content);
-
-      return filters.filters.filter((f: any) => f.query?.term);
+      return filters.filters.filter((f: any) => f.query[type]);
     },
 
     async clickAddFromLibrary() {

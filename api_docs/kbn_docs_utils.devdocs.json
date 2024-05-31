@@ -21,6 +21,76 @@
     "functions": [
       {
         "parentPluginId": "@kbn/docs-utils",
+        "id": "def-common.findPlugins",
+        "type": "Function",
+        "tags": [],
+        "label": "findPlugins",
+        "description": [],
+        "signature": [
+          "(pluginOrPackageFilter: string[] | undefined) => ",
+          "PluginOrPackage",
+          "[]"
+        ],
+        "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/docs-utils",
+            "id": "def-common.findPlugins.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "pluginOrPackageFilter",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/docs-utils",
+        "id": "def-common.findTeamPlugins",
+        "type": "Function",
+        "tags": [],
+        "label": "findTeamPlugins",
+        "description": [],
+        "signature": [
+          "(team: string) => ",
+          "PluginOrPackage",
+          "[]"
+        ],
+        "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/docs-utils",
+            "id": "def-common.findTeamPlugins.$1",
+            "type": "string",
+            "tags": [],
+            "label": "team",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/docs-utils",
         "id": "def-common.runBuildApiDocsCli",
         "type": "Function",
         "tags": [],

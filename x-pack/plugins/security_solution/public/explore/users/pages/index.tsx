@@ -55,7 +55,7 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <Redirect
             to={{
-              pathname: `${USERS_PATH}/name/${detailName}/${UsersTableType.authentications}`,
+              pathname: `${USERS_PATH}/name/${detailName}/${UsersTableType.events}`,
               search,
             }}
           />
@@ -66,7 +66,7 @@ export const UsersContainer = React.memo(() => {
         path={`${USERS_PATH}/:detailName/:tabName?`}
         render={({
           match: {
-            params: { detailName, tabName = UsersTableType.authentications },
+            params: { detailName, tabName = UsersTableType.events },
           },
           location: { search = '' },
         }) => (
@@ -81,7 +81,7 @@ export const UsersContainer = React.memo(() => {
       <Route // Redirect to the first tab when tabName is not present.
         path={USERS_PATH}
         render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
+          <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.events}`, search }} />
         )}
       />
     </Routes>

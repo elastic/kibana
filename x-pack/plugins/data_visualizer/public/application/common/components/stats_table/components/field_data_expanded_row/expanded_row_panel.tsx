@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
+import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 
 interface Props {
-  children: ReactNode;
   dataTestSubj?: string;
   grow?: EuiFlexItemProps['grow'];
   className?: string;
 }
-export const ExpandedRowPanel: FC<Props> = ({ children, dataTestSubj, grow, className }) => {
+export const ExpandedRowPanel: FC<PropsWithChildren<Props>> = ({
+  children,
+  dataTestSubj,
+  grow,
+  className,
+}) => {
   return (
     <EuiPanel
       data-test-subj={dataTestSubj}

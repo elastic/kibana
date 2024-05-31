@@ -22,18 +22,18 @@ const defaultProps: Props = {
   },
   selectedPromptContexts: {},
   setSelectedPromptContexts: jest.fn(),
+  currentReplacements: {},
+  isFlyoutMode: false,
 };
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
-  allow: [],
-  allowReplacement: [],
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockAlertPromptContext.id,
   rawData: 'test-raw-data',
 };
 
 const mockSelectedEventPromptContext: SelectedPromptContext = {
-  allow: [],
-  allowReplacement: [],
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockEventPromptContext.id,
   rawData: 'test-raw-data',
 };

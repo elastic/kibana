@@ -23,7 +23,7 @@ export const IMPORT_RULE = i18n.translate(
 export const IMPORT_VALUE_LISTS = i18n.translate(
   'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Import value lists',
+    defaultMessage: 'Manage value lists',
   }
 );
 
@@ -32,6 +32,14 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   {
     defaultMessage:
       'Use value lists to create an exception when a field value matches a value found in a list',
+  }
+);
+
+export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
+  {
+    defaultMessage:
+      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
   }
 );
 
@@ -148,6 +156,27 @@ export const BULK_ACTION_DELETE_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteTagsTitle',
   {
     defaultMessage: 'Delete tags',
+  }
+);
+
+export const BULK_ACTION_INVESTIGATION_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.investigationFieldsTitle',
+  {
+    defaultMessage: 'Custom highlighted fields',
+  }
+);
+
+export const BULK_ACTION_ADD_INVESTIGATION_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Add custom highlighted fields',
+  }
+);
+
+export const BULK_ACTION_DELETE_INVESTIGATION_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Delete custom highlighted fields',
   }
 );
 
@@ -400,6 +429,64 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_TAGS_TITLE = i18n.translate(
   }
 );
 
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.investigationFieldsRequiredErrorMessage',
+  {
+    defaultMessage: 'A minimum of one custom highlighted field is required.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsOverwriteCheckboxLabel',
+  {
+    defaultMessage: "Overwrite all selected rules' custom highlighted fields",
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsComboboxLabel',
+  {
+    defaultMessage: 'Add custom highlighted fields for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsComboboxHelpText',
+  {
+    defaultMessage:
+      'Enter fields that you would like to add. By default, the dropdown includes fields of the index patterns defined in Security Solution advanced settings.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Add custom highlighted fields',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxLabel',
+  {
+    defaultMessage: 'Delete custom highlighted fields for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxHelpText',
+  {
+    defaultMessage:
+      'Enter fields that you would like to delete. By default, the dropdown includes fields of the index patterns defined in Security Solution advanced settings.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsTitle',
+  {
+    defaultMessage: 'Delete custom highlighted fields',
+  }
+);
+
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.exportFilenameTitle',
   {
@@ -536,6 +623,13 @@ export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.integrationsTitle',
+  {
+    defaultMessage: 'Integrations',
   }
 );
 
@@ -1196,6 +1290,14 @@ export const INSTALL_RULE_BUTTON = i18n.translate(
     defaultMessage: 'Install rule',
   }
 );
+
+export const INSTALL_RULE_BUTTON_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.addRules.installRuleButton.ariaLabel', {
+    defaultMessage: 'Install "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
 
 export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',

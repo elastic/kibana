@@ -95,20 +95,24 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   }
 
   try {
-    const { preboot } = await root.preboot();
+    const prebootContract = await root.preboot();
+    let isSetupOnHold = false;
 
-    // If setup is on hold then preboot server is supposed to serve user requests and we can let
-    // dev parent process know that we are ready for dev mode.
-    const isSetupOnHold = preboot.isSetupOnHold();
-    if (process.send && isSetupOnHold) {
-      process.send(['SERVER_LISTENING']);
-    }
+    if (prebootContract) {
+      const { preboot } = prebootContract;
+      // If setup is on hold then preboot server is supposed to serve user requests and we can let
+      // dev parent process know that we are ready for dev mode.
+      isSetupOnHold = preboot.isSetupOnHold();
+      if (process.send && isSetupOnHold) {
+        process.send(['SERVER_LISTENING']);
+      }
 
-    if (isSetupOnHold) {
-      rootLogger.info('Holding setup until preboot stage is completed.');
-      const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
-      if (shouldReloadConfig) {
-        await reloadConfiguration('configuration might have changed during preboot stage');
+      if (isSetupOnHold) {
+        rootLogger.info('Holding setup until preboot stage is completed.');
+        const { shouldReloadConfig } = await preboot.waitUntilCanSetup();
+        if (shouldReloadConfig) {
+          await reloadConfiguration('configuration might have changed during preboot stage');
+        }
       }
     }
 

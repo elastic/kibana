@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiLinkButtonProps,
-  EuiPopover,
-  EuiPopoverProps,
-  EuiPopoverTitle,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import './help_popover.scss';
 
 export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {
@@ -36,7 +31,11 @@ interface HelpPopoverProps {
   title?: string;
 }
 
-export const HelpPopover: FC<HelpPopoverProps> = ({ anchorPosition, children, title }) => {
+export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
+  anchorPosition,
+  children,
+  title,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -52,7 +51,7 @@ export const HelpPopover: FC<HelpPopoverProps> = ({ anchorPosition, children, ti
     >
       {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
 
-      <EuiText className="mlHelpPopover__content" size="s">
+      <EuiText className="mlHelpPopover__content eui-scrollBar" size="s" tabIndex={0}>
         {children}
       </EuiText>
     </EuiPopover>

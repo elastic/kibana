@@ -6,6 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "force": "__flag__",
+      "delete_dest_index": "__flag__",
       "timeout": [
         "30s",
         "-1",

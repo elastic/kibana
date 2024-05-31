@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExecutionContext, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { ExpressionValueSearchContext, ExecutionContextSearch } from './kibana_context_type';
+import { ExpressionValueSearchContext } from './kibana_context_type';
 
 const toArray = <T>(query: undefined | T | T[]): T[] =>
   !query ? [] : Array.isArray(query) ? query : [query];
@@ -20,7 +20,7 @@ export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
   ExpressionValueSearchContext | null,
   object,
   ExpressionValueSearchContext,
-  ExecutionContext<Adapters, ExecutionContextSearch>
+  ExecutionContext<Adapters>
 >;
 
 export const kibana: ExpressionFunctionKibana = {
@@ -41,6 +41,7 @@ export const kibana: ExpressionFunctionKibana = {
       // TODO: But it shouldn't be need.
       ...input,
       type: 'kibana_context',
+      now: getSearchContext().now ?? Date.now(),
       query: [...toArray(getSearchContext().query), ...toArray((input || {}).query)],
       filters: [...(getSearchContext().filters || []), ...((input || {}).filters || [])],
       timeRange: getSearchContext().timeRange || (input ? input.timeRange : undefined),

@@ -10,12 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getDataStreamDetailsLink } from '../../../../../services/routing';
-import { getTemplateDetailsLink } from '../../../../../..';
+import { getDataStreamDetailsLink, getTemplateDetailsLink } from '../../../../../services/routing';
 import { useLoadDataStream } from '../../../../../services/api';
 import { useAppContext } from '../../../../../app_context';
 import { humanizeTimeStamp } from '../../../data_stream_list/humanize_time_stamp';
@@ -25,7 +23,9 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
   dataStreamName,
 }) => {
   const { error, data: dataStream, isLoading, resendRequest } = useLoadDataStream(dataStreamName);
-  const { history } = useAppContext();
+  const {
+    core: { getUrlForApp },
+  } = useAppContext();
   const hasError = !isLoading && (error || !dataStream);
   let contentLeft: ReactNode = (
     <EuiFlexGroup gutterSize="xs" alignItems="baseline">
@@ -53,7 +53,10 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
       <EuiFlexItem>
         <EuiButton
           size="s"
-          {...reactRouterNavigate(history, getDataStreamDetailsLink(dataStream?.name ?? ''))}
+          target="_blank"
+          href={getUrlForApp('management', {
+            path: `data/index_management${getDataStreamDetailsLink(dataStream?.name ?? '')}`,
+          })}
         >
           {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.dataStreamLinkLabel', {
             defaultMessage: 'See details',
@@ -63,10 +66,12 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
       <EuiFlexItem>
         <EuiButton
           size="s"
-          {...reactRouterNavigate(
-            history,
-            getTemplateDetailsLink(dataStream?.indexTemplateName ?? '')
-          )}
+          target="_blank"
+          href={getUrlForApp('management', {
+            path: `data/index_management${getTemplateDetailsLink(
+              dataStream?.indexTemplateName ?? ''
+            )}`,
+          })}
         >
           {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.templateLinkLabel', {
             defaultMessage: 'Related template',

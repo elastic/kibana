@@ -55,8 +55,7 @@
       "lens",
       "maps",
       "savedObjectsFinder",
-      "usageCollection",
-      "unifiedSearch"
+      "usageCollection"
     ],
     "extraPublicDirs": ["common"]
   }

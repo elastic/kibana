@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Replacements } from '@kbn/elastic-assistant-common';
 import { invert } from 'lodash/fp';
 import { v4 } from 'uuid';
 
@@ -12,7 +13,7 @@ export const getAnonymizedValue = ({
   currentReplacements,
   rawValue,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacements | undefined;
   rawValue: string;
 }): string => {
   if (currentReplacements != null) {

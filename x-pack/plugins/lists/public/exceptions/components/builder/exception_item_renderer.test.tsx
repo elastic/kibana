@@ -15,6 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
+import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 
@@ -54,6 +55,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
             setWarningsExist={jest.fn()}
+            showValueListModal={MockedShowValueListModal}
           />
         </EuiThemeProvider>
       );
@@ -86,6 +88,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
             setWarningsExist={jest.fn()}
+            showValueListModal={MockedShowValueListModal}
           />
         </EuiThemeProvider>
       );
@@ -116,6 +119,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
             setWarningsExist={jest.fn()}
+            showValueListModal={MockedShowValueListModal}
           />
         </EuiThemeProvider>
       );
@@ -148,6 +152,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
             setWarningsExist={jest.fn()}
+            showValueListModal={MockedShowValueListModal}
           />
         </EuiThemeProvider>
       );
@@ -187,6 +192,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
           setWarningsExist={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       );
 
@@ -218,6 +224,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
           setWarningsExist={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       );
 
@@ -250,6 +257,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
           setWarningsExist={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       );
 
@@ -280,6 +288,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
           setWarningsExist={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       );
 
@@ -312,6 +321,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           setErrorsExist={jest.fn()}
           setWarningsExist={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       );
 

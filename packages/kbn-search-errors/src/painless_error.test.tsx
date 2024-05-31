@@ -6,91 +6,86 @@
  * Side Public License, v 1.
  */
 
+import type { ReactElement } from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createEsError } from './create_es_error';
+import { renderSearchError } from './render_search_error';
+import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
-const startMock = coreMock.createStart();
 
-import { mount } from 'enzyme';
-import { PainlessError } from './painless_error';
-import { findTestSubject } from '@elastic/eui/lib/test';
-
-const searchPhaseException = {
-  error: {
-    root_cause: [
-      {
-        type: 'script_exception',
-        reason: 'compile error',
-        script_stack: ['invalid', '^---- HERE'],
-        script: 'invalid',
-        lang: 'painless',
-        position: {
-          offset: 0,
-          start: 0,
-          end: 7,
-        },
+const servicesMock = {
+  application: coreMock.createStart().application,
+  docLinks: {
+    links: {
+      fleet: {
+        datastreamsTSDSMetrics: '',
       },
-    ],
-    type: 'search_phase_execution_exception',
-    reason: 'all shards failed',
-    phase: 'query',
-    grouped: true,
-    failed_shards: [
-      {
-        shard: 0,
-        index: '.kibana_11',
-        node: 'b3HX8C96Q7q1zgfVLxEsPA',
-        reason: {
-          type: 'script_exception',
-          reason: 'compile error',
-          script_stack: ['invalid', '^---- HERE'],
-          script: 'invalid',
-          lang: 'painless',
-          position: {
-            offset: 0,
-            start: 0,
-            end: 7,
-          },
-          caused_by: {
-            type: 'illegal_argument_exception',
-            reason: 'cannot resolve symbol [invalid]',
-          },
-        },
-      },
-    ],
-  },
-  status: 400,
+    },
+  } as CoreStart['docLinks'],
 };
 
-describe('PainlessError', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+const dataViewMock = {
+  title: 'logs',
+  id: '1234',
+} as unknown as DataView;
 
-  it('Should show reason and code', () => {
-    const e = new PainlessError(
-      {
-        statusCode: 400,
-        message: 'search_phase_execution_exception',
-        attributes: {
-          error: searchPhaseException.error,
+describe('Painless error', () => {
+  const painlessError = createEsError(
+    {
+      statusCode: 400,
+      message: 'search_phase_execution_exception',
+      attributes: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'all shards failed',
+          failed_shards: [
+            {
+              shard: 0,
+              index: '.kibana_11',
+              node: 'b3HX8C96Q7q1zgfVLxEsPA',
+              reason: {
+                type: 'script_exception',
+                reason: 'compile error',
+                script_stack: ['invalid', '^---- HERE'],
+                script: 'invalid',
+                lang: 'painless',
+                position: {
+                  offset: 0,
+                  start: 0,
+                  end: 7,
+                },
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason: 'cannot resolve symbol [invalid]',
+                },
+              },
+            },
+          ],
         },
       },
-      () => {}
+    },
+    () => {},
+    servicesMock,
+    dataViewMock
+  );
+
+  test('should set error.message to painless reason', () => {
+    expect(painlessError.message).toEqual(
+      'Error executing runtime field or scripted field on data view logs'
     );
-    const component = mount(e.getErrorMessage());
+  });
 
-    const failedShards = searchPhaseException.error.failed_shards![0];
+  test('should render error message', () => {
+    const searchErrorDisplay = renderSearchError(painlessError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    const wrapper = shallow(searchErrorDisplay?.body as ReactElement);
+    expect(wrapper).toMatchSnapshot();
+  });
 
-    const stackTraceElem = findTestSubject(component, 'painlessStackTrace').getDOMNode();
-    const stackTrace = failedShards!.reason.script_stack!.splice(-2).join('\n');
-    expect(stackTraceElem.textContent).toBe(stackTrace);
-
-    const humanReadableError = findTestSubject(
-      component,
-      'painlessHumanReadableError'
-    ).getDOMNode();
-    expect(humanReadableError.textContent).toBe(failedShards?.reason.caused_by?.reason);
-
-    const actions = e.getActions(startMock.application);
-    expect(actions.length).toBe(2);
+  test('should return 2 actions', () => {
+    const searchErrorDisplay = renderSearchError(painlessError);
+    expect(searchErrorDisplay).not.toBeUndefined();
+    expect(searchErrorDisplay?.actions?.length).toBe(2);
   });
 });

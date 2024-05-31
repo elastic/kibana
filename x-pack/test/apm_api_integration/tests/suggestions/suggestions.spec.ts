@@ -23,18 +23,19 @@ const end = new Date(endNumber).toISOString();
 export default function suggestionsTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177538
   registry.when('suggestions when data is loaded', { config: 'basic', archives: [] }, async () => {
     before(async () => {
       await generateData({
-        synthtraceEsClient,
+        apmSynthtraceEsClient,
         start: startNumber,
         end: endNumber,
       });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe(`field: ${SERVICE_ENVIRONMENT}`, () => {
       describe('when fieldValue is empty', () => {

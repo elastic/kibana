@@ -17,7 +17,7 @@
     "patterns": [
       "_index_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/index-templates.html",
     "availability": {
       "stack": true,
       "serverless": true

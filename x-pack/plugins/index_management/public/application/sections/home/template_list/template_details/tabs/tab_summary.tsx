@@ -25,6 +25,7 @@ import { getLifecycleValue } from '../../../../../lib/data_streams';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../../constants';
 import { useIlmLocator } from '../../../../../services/use_ilm_locator';
+import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -216,19 +217,22 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             )}
 
             {/* Allow auto create */}
-            {isLegacy !== true && (
-              <>
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.templateDetails.summaryTab.allowAutoCreateDescriptionListTitle"
-                    defaultMessage="Allow auto create"
-                  />
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  {allowAutoCreate ? i18nTexts.yes : i18nTexts.no}
-                </EuiDescriptionListDescription>
-              </>
-            )}
+            {isLegacy !== true &&
+              allowAutoCreate !== allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION && (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateDetails.summaryTab.allowAutoCreateDescriptionListTitle"
+                      defaultMessage="Allow auto create"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {allowAutoCreate === allowAutoCreateRadioIds.TRUE_RADIO_OPTION
+                      ? i18nTexts.yes
+                      : i18nTexts.no}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
           </EuiDescriptionList>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -66,8 +66,8 @@ export const buildTopCountriesQuery = ({
               filter,
             },
       },
+      size: 0,
     },
-    size: 0,
     track_total_hits: false,
   };
   return dslQuery;

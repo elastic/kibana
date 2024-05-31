@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { Bucket } from '../../../../../common/types/field_stats';
+import type { Bucket } from '../../../../../common/types/field_stats';
 
 /** Utility to calculate the correct sample size, whether or not _doc_count is set
  * and calculate the percentage (in fraction) for each bucket

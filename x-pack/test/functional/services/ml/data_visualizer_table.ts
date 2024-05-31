@@ -388,8 +388,8 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertNumberFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number,
-      viewableInLens: boolean,
+      topValuesCount?: number,
+      viewableInLens?: boolean,
       hasActionMenu = false,
       checkDistributionPreviewExist = true
     ) {
@@ -402,10 +402,12 @@ export function MachineLearningDataVisualizerTableProvider(
         this.detailsSelector(fieldName, 'dataVisualizerNumberSummaryTable')
       );
 
-      await testSubjects.existOrFail(
-        this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
-      );
-      await this.assertTopValuesCount(fieldName, topValuesCount);
+      if (topValuesCount !== undefined) {
+        await testSubjects.existOrFail(
+          this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
+        );
+        await this.assertTopValuesCount(fieldName, topValuesCount);
+      }
 
       if (checkDistributionPreviewExist) {
         await this.assertDistributionPreviewExist(fieldName);
@@ -495,9 +497,7 @@ export function MachineLearningDataVisualizerTableProvider(
 
       await this.assertExamplesList(fieldName, expectedExamplesCount);
 
-      await testSubjects.existOrFail(
-        this.detailsSelector(fieldName, 'dataVisualizerEmbeddedMapContent')
-      );
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mapContainer'));
 
       await this.ensureDetailsClosed(fieldName);
     }

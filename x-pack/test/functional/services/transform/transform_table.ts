@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -426,19 +427,23 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
       });
     }
 
-    public async assertTransformRowActionsButtonEnabled(
-      transformId: string,
-      expectedValue: boolean
-    ) {
-      const isEnabled = await testSubjects.isEnabled(
-        this.rowSelector(transformId, 'euiCollapsedItemActionsButton')
+    public async assertTransformRowActionsEnabled(transformId: string, expectedValue: boolean) {
+      await this.ensureTransformActionsMenuOpen(transformId);
+
+      // Check whether all menu actions are disabled
+      let allDisabled = true;
+      const actions = await find.allByCssSelector('.euiBasicTable__collapsedAction');
+      await asyncForEach(actions, async (action) => {
+        if (await action.isEnabled()) {
+          allDisabled = false;
+        }
+      });
+      expect(allDisabled).to.eql(
+        !expectedValue,
+        `Expected all transform row actions to '${expectedValue ? 'not' : ''}' be disabled.`
       );
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected transform row actions button to be '${
-          expectedValue ? 'enabled' : 'disabled'
-        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
-      );
+
+      await this.ensureTransformActionsMenuClosed();
     }
 
     public async assertTransformRowActions(transformId: string, isTransformRunning = false) {

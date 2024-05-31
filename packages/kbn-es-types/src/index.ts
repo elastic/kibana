@@ -11,7 +11,11 @@ import {
   AggregateOf as AggregationResultOf,
   AggregateOfMap as AggregationResultOfMap,
   SearchHit,
-  ClusterDetails,
+  ESQLColumn,
+  ESQLRow,
+  ESQLSearchReponse,
+  ESQLSearchParams,
+  ChangePointType,
 } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
@@ -40,5 +44,9 @@ export type {
   AggregationResultOf,
   AggregationResultOfMap,
   SearchHit,
-  ClusterDetails,
+  ESQLColumn,
+  ESQLRow,
+  ESQLSearchReponse,
+  ESQLSearchParams,
+  ChangePointType,
 };

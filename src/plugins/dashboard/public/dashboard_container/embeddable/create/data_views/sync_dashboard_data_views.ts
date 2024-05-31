@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { Observable, pipe, combineLatest } from 'rxjs';
-import { distinctUntilChanged, switchMap, filter, map } from 'rxjs/operators';
-
 import { DataView } from '@kbn/data-views-plugin/common';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-
+import { apiPublishesDataViews, PublishesDataViews } from '@kbn/presentation-publishing';
+import { uniqBy } from 'lodash';
+import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainer } from '../../dashboard_container';
 
@@ -21,89 +18,49 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
     data: { dataViews },
   } = pluginServices.getServices();
 
-  const onUpdateDataViews = async (newDataViewIds: string[]) => {
-    if (this.controlGroup) this.controlGroup.setRelevantDataViewId(newDataViewIds[0]);
-
-    // fetch all data views. These should be cached locally at this time so we will not need to query ES.
-    const responses = await Promise.allSettled(newDataViewIds.map((id) => dataViews.get(id)));
-    // Keep only fullfilled ones as each panel will handle the rejected ones already on their own
-    const allDataViews = responses
-      .filter(
-        (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
+  const controlGroupDataViewsPipe: Observable<DataView[]> = this.controlGroup
+    ? this.controlGroup.getOutput$().pipe(
+        map((output) => output.dataViewIds ?? []),
+        switchMap(
+          (dataViewIds) =>
+            new Promise<DataView[]>((resolve) =>
+              Promise.all(dataViewIds.map((id) => dataViews.get(id))).then((nextDataViews) =>
+                resolve(nextDataViews)
+              )
+            )
+        )
       )
-      .map(({ value }) => value);
-    this.setAllDataViews(allDataViews);
-  };
+    : of([]);
 
-  const updateDataViewsOperator = pipe(
-    filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-    map((container: DashboardContainer): string[] | undefined => {
-      const panelDataViewIds: Set<string> = new Set<string>();
-
-      Object.values(container.getChildIds()).forEach((id) => {
-        const embeddableInstance = container.getChild(id);
-        if (isErrorEmbeddable(embeddableInstance)) return;
-
-        /**
-         * TODO - this assumes that all embeddables which communicate data views do so via an `indexPatterns` key on their output.
-         * This should be replaced with a more generic, interface based method where an embeddable can communicate a data view ID.
-         */
-        const childPanelDataViews = (
-          embeddableInstance.getOutput() as { indexPatterns: DataView[] }
-        ).indexPatterns;
-        if (!childPanelDataViews) return;
-        childPanelDataViews.forEach((dataView) => {
-          if (dataView.id) panelDataViewIds.add(dataView.id);
-        });
-      });
-      if (container.controlGroup) {
-        const controlGroupDataViewIds = container.controlGroup.getOutput().dataViewIds;
-        controlGroupDataViewIds?.forEach((dataViewId) => panelDataViewIds.add(dataViewId));
+  const childDataViewsPipe: Observable<DataView[]> = this.children$.pipe(
+    switchMap((children) => {
+      const childrenThatPublishDataViews: PublishesDataViews[] = [];
+      for (const child of Object.values(children)) {
+        if (apiPublishesDataViews(child)) childrenThatPublishDataViews.push(child);
       }
-
-      /**
-       * If no index patterns have been returned yet, and there is at least one embeddable which
-       * hasn't yet loaded, defer the loading of the default index pattern by returning undefined.
-       */
-      if (
-        panelDataViewIds.size === 0 &&
-        Object.keys(container.getOutput().embeddableLoaded).length > 0 &&
-        Object.values(container.getOutput().embeddableLoaded).some((value) => value === false)
-      ) {
-        return;
-      }
-      return Array.from(panelDataViewIds);
+      if (childrenThatPublishDataViews.length === 0) return of([]);
+      return combineLatest(childrenThatPublishDataViews.map((child) => child.dataViews));
     }),
-    distinctUntilChanged((a, b) => deepEqual(a, b)),
-
-    // using switchMap for previous task cancellation
-    switchMap((allDataViewIds?: string[]) => {
-      return new Observable((observer) => {
-        if (!allDataViewIds) return;
-        if (allDataViewIds.length > 0) {
-          if (observer.closed) return;
-          onUpdateDataViews(allDataViewIds);
-          observer.complete();
-        } else {
-          dataViews.getDefaultId().then((defaultDataViewId) => {
-            if (observer.closed) return;
-            if (defaultDataViewId) {
-              onUpdateDataViews([defaultDataViewId]);
-            }
-            observer.complete();
-          });
-        }
-      });
-    })
+    map(
+      (nextDataViews) => nextDataViews.flat().filter((dataView) => Boolean(dataView)) as DataView[]
+    )
   );
 
-  const dataViewSources = [this.getOutput$()];
-  if (this.controlGroup) dataViewSources.push(this.controlGroup.getOutput$());
-
-  return combineLatest(dataViewSources)
+  return combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
     .pipe(
-      map(() => this),
-      updateDataViewsOperator
+      switchMap(([controlGroupDataViews, childDataViews]) => {
+        const allDataViews = controlGroupDataViews.concat(childDataViews);
+        if (allDataViews.length === 0) {
+          return (async () => {
+            const defaultDataViewId = await dataViews.getDefaultId();
+            return [await dataViews.get(defaultDataViewId!)];
+          })();
+        }
+        return of(uniqBy(allDataViews, 'id'));
+      })
     )
-    .subscribe();
+    .subscribe((newDataViews) => {
+      if (newDataViews[0].id) this.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
+      this.setAllDataViews(newDataViews);
+    });
 }

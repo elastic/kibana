@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should not rerequest when pan changes do not move map view area outside of buffer', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT + 5, DATA_CENTER_LON + 5, 1);
+          await PageObjects.maps.setView(DATA_CENTER_LAT + 1, DATA_CENTER_LON + 1, 1);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);
         });

@@ -24,16 +24,14 @@ paths:
                 filters: {}
                 fieldMeta: {}
       parameters:
-        - name: query
+        - name: suggestion_type
           in: path
           required: true
           schema:
-            type: object
-            properties:
-              suggestion_type:
-                type: string
-                enum:
-                  - eventFilters
+            type: string
+            enum:
+              - eventFilters
+
       responses:
         '200':
           description: OK

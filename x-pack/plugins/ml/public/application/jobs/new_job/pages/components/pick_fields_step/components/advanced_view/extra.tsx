@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SummaryCountField } from '../summary_count_field';

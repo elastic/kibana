@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { HttpError } from '../../../../../../../common/types/api';
-import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import {
   CreateModelApiLogic,
@@ -22,31 +22,15 @@ const CREATE_MODEL_API_RESPONSE: CreateModelResponse = {
   modelId: 'model_1',
   deploymentState: MlModelDeploymentState.NotDeployed,
 };
-const FETCH_MODELS_API_DATA_RESPONSE: MlModel[] = [
-  {
-    modelId: 'model_1',
-    title: 'Model 1',
-    type: 'ner',
-    deploymentState: MlModelDeploymentState.NotDeployed,
-    startTime: 0,
-    targetAllocationCount: 0,
-    nodeAllocationCount: 0,
-    threadsPerAllocation: 0,
-    isPlaceholder: false,
-    hasStats: false,
-  },
-];
 
 describe('ModelSelectLogic', () => {
   const { mount } = new LogicMounter(ModelSelectLogic);
   const { mount: mountCreateModelApiLogic } = new LogicMounter(CreateModelApiLogic);
-  const { mount: mountCachedFetchModelsApiLogic } = new LogicMounter(CachedFetchModelsApiLogic);
   const { mount: mountStartModelApiLogic } = new LogicMounter(StartModelApiLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
     mountCreateModelApiLogic();
-    mountCachedFetchModelsApiLogic();
     mountStartModelApiLogic();
     mount();
   });
@@ -71,15 +55,14 @@ describe('ModelSelectLogic', () => {
 
         expect(ModelSelectLogic.actions.startPollingModels).toHaveBeenCalled();
       });
-    });
+      it('sets selected model as non-placeholder', () => {
+        jest.spyOn(ModelSelectLogic.actions, 'clearModelPlaceholderFlag');
 
-    describe('fetchModels', () => {
-      it('makes fetch models request', () => {
-        jest.spyOn(ModelSelectLogic.actions, 'fetchModelsMakeRequest');
+        ModelSelectLogic.actions.createModelSuccess(CREATE_MODEL_API_RESPONSE);
 
-        ModelSelectLogic.actions.fetchModels();
-
-        expect(ModelSelectLogic.actions.fetchModelsMakeRequest).toHaveBeenCalled();
+        expect(ModelSelectLogic.actions.clearModelPlaceholderFlag).toHaveBeenCalledWith(
+          CREATE_MODEL_API_RESPONSE.modelId
+        );
       });
     });
 
@@ -138,14 +121,6 @@ describe('ModelSelectLogic', () => {
         StartModelApiLogic.actions.apiError(error);
 
         expect(ModelSelectLogic.values.modelStateChangeError).toEqual('some-error-message');
-      });
-    });
-
-    describe('selectableModels', () => {
-      it('gets models data from API response', () => {
-        CachedFetchModelsApiLogic.actions.apiSuccess(FETCH_MODELS_API_DATA_RESPONSE);
-
-        expect(ModelSelectLogic.values.selectableModels).toEqual(FETCH_MODELS_API_DATA_RESPONSE);
       });
     });
 

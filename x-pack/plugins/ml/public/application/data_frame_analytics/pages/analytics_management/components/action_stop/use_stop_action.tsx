@@ -7,12 +7,11 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  isDataFrameAnalyticsFailed,
-  isDataFrameAnalyticsRunning,
+import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
+import { isDataFrameAnalyticsFailed, isDataFrameAnalyticsRunning } from '../analytics_list/common';
 import { stopAnalytics } from '../../services/analytics_service';
 
 import { stopActionNameText, StopActionName } from './stop_action_name';

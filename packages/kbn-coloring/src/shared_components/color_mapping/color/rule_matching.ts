@@ -23,7 +23,7 @@ export function ruleMatch(
       }
       return rule.values.includes(`${value}`);
     case 'matchExactlyCI':
-      return rule.values.some((d) => d.toLowerCase() === `${value}`);
+      return rule.values.some((d) => d.toLowerCase() === `${value}`.toLowerCase());
     case 'range':
       // TODO: color by value not yet possible in all charts in elastic-charts
       return typeof value === 'number' ? rangeMatch(rule, value) : false;

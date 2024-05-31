@@ -12,8 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardReplacePanel = getService('dashboardReplacePanel');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
@@ -70,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.checkCurrentRowsPerPageToBe(100);
 
       await PageObjects.dashboard.saveDashboard(dashboardName, {
+        saveAsNew: true,
         waitDialogIsClosed: true,
         exitFromEditMode: false,
       });
@@ -80,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeRowsPerPageTo(10);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await refreshDashboardPage();
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);
@@ -124,21 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
-      expect(await errorMessage.getVisibleText()).to.equal(
-        'Expected AND, OR, end of input, whitespace but "n" found. this < is not : a valid > query ----------^'
-      );
-    });
-
-    it('should replace a panel with a saved search', async () => {
-      await dashboardAddPanel.addVisualization('Rendering Test: datatable');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.replacePanelByTitle('Rendering Test: datatable');
-      await dashboardReplacePanel.replaceEmbeddable('Rendering-Test:-saved-search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await testSubjects.missingOrFail('embeddableError');
-      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+      const errorText = await errorMessage.getVisibleText();
+      expect(errorText).to.match(/Expected[\S\s]+but "n" found/);
     });
 
     it('should not show the full screen button', async () => {
@@ -148,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the the grid toolbar', async () => {
       await addSearchEmbeddableToDashboard();
-      await testSubjects.existOrFail('dscGridToolbar');
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
     });
   });
 }

@@ -7,7 +7,7 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { merge, type Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 import { useMemo } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';

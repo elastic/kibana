@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 

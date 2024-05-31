@@ -8,7 +8,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 
 import { OptimizerUpdate } from './run_optimizer';
 

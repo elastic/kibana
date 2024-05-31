@@ -20,6 +20,7 @@ import {
   EuiFlyout,
   EuiFlyoutFooter,
   EuiSkeletonText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type {
@@ -362,16 +363,27 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     ]
   );
 
+  const exceptionFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'exceptionFlyoutTitle',
+  });
+
   return (
-    <EuiFlyout size="l" onClose={handleCloseFlyout} data-test-subj="editExceptionFlyout">
+    <EuiFlyout
+      size="l"
+      onClose={handleCloseFlyout}
+      data-test-subj="editExceptionFlyout"
+      aria-labelledby={exceptionFlyoutTitleId}
+    >
       <FlyoutHeader>
         <EuiTitle>
-          <h2 data-test-subj="exceptionFlyoutTitle">{editExceptionMessage}</h2>
+          <h2 id={exceptionFlyoutTitleId} data-test-subj="exceptionFlyoutTitle">
+            {editExceptionMessage}
+          </h2>
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>
-      {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
       <FlyoutBodySection className="builder-section">
+        {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
           onChange={setExceptionItemMeta}

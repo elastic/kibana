@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor, cleanup, screen } from '@testing-library/react';
@@ -24,7 +24,7 @@ jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
 
-const TestProviders: React.FC<{}> = ({ children }) => {
+const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const queryClient = new QueryClient();
   return (
     <I18nProvider>
@@ -231,7 +231,7 @@ describe('MaintenanceWindowCallout', () => {
           warn: console.warn,
         },
       });
-      const wrapper: React.FC = ({ children }) => (
+      const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       );
       return wrapper;

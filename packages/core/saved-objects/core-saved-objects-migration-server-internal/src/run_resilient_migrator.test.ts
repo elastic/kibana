@@ -18,7 +18,11 @@ import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { next } from './next';
 import { runResilientMigrator, type RunResilientMigratorParams } from './run_resilient_migrator';
-import { indexTypesMapMock, savedObjectTypeRegistryMock } from './run_resilient_migrator.fixtures';
+import {
+  hashToVersionMapMock,
+  indexTypesMapMock,
+  savedObjectTypeRegistryMock,
+} from './run_resilient_migrator.fixtures';
 import type { InitState, State } from './state';
 import type { Next } from './state_action_machine';
 
@@ -70,8 +74,10 @@ describe('runResilientMigrator', () => {
       kibanaVersion: options.kibanaVersion,
       waitForMigrationCompletion: options.waitForMigrationCompletion,
       mustRelocateDocuments: options.mustRelocateDocuments,
+      indexTypes: options.indexTypes,
       indexTypesMap: options.indexTypesMap,
-      targetMappings: options.targetMappings,
+      hashToVersionMap: options.hashToVersionMap,
+      targetIndexMappings: options.targetIndexMappings,
       preMigrationScript: options.preMigrationScript,
       migrationVersionPerType: options.migrationVersionPerType,
       coreMigrationVersionPerType: options.coreMigrationVersionPerType,
@@ -117,8 +123,10 @@ const mockOptions = (): RunResilientMigratorParams => {
     kibanaVersion: '8.8.0',
     waitForMigrationCompletion: false,
     mustRelocateDocuments: true,
+    indexTypes: ['a', 'c'],
     indexTypesMap: indexTypesMapMock,
-    targetMappings: {
+    hashToVersionMap: hashToVersionMapMock,
+    targetIndexMappings: {
       properties: {
         a: { type: 'keyword' },
         c: { type: 'long' },

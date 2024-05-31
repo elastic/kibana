@@ -15,6 +15,7 @@ import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
 import { RulesClientContext } from '../types';
 import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const untrackRuleAlerts = async (
   context: RulesClientContext,
@@ -23,11 +24,13 @@ export const untrackRuleAlerts = async (
 ) => {
   return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
+
     try {
       const taskInstance = taskInstanceToAlertTaskInstance(
         await context.taskManager.get(attributes.scheduledTaskId),
         attributes as unknown as SanitizedRule
       );
+
       const { state } = taskInstance;
 
       const untrackedAlerts = mapValues<Record<string, RawAlert>, Alert>(
@@ -67,7 +70,7 @@ export const untrackRuleAlerts = async (
           savedObjects: [
             {
               id,
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
               typeId: attributes.alertTypeId,
               relation: SAVED_OBJECT_REL_PRIMARY,
             },

@@ -52,6 +52,7 @@ describe('disableRuleRoute', () => {
       Array [
         Object {
           "id": "1",
+          "untrack": false,
         },
       ]
     `);

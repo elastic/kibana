@@ -23,7 +23,8 @@ import {
   EuiTablePagination,
   EuiSelectableMessage,
   EuiI18n,
-  useIsWithinBreakpoints,
+  useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,7 +39,11 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import {
+  fieldNameWildcardMatcher,
+  getFieldSearchMatchingHighlight,
+  getTextBasedColumnIconType,
+} from '@kbn/field-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -106,7 +111,7 @@ const updateSearchText = debounce(
 
 export const DocViewerTable = ({
   columns,
-  columnTypes,
+  columnsMeta,
   hit,
   dataView,
   hideActionsColumn,
@@ -114,7 +119,12 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
+  const { euiTheme } = useEuiTheme();
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const dimensions = useResizeObserver(ref);
+  const showActionsInsideTableCell = dimensions?.width
+    ? dimensions.width > euiTheme.breakpoint.m
+    : false;
 
   const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -164,11 +174,13 @@ export const DocViewerTable = ({
   );
 
   const fieldToItem = useCallback(
-    (field: string) => {
+    (field: string, isPinned: boolean) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = columnTypes
-        ? columnTypes[field] // for text-based results types come separately
+      const columnMeta = columnsMeta?.[field];
+      const columnIconType = getTextBasedColumnIconType(columnMeta);
+      const fieldType = columnIconType
+        ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
@@ -190,7 +202,7 @@ export const DocViewerTable = ({
           fieldMapping,
           fieldType,
           scripted: Boolean(fieldMapping?.scripted),
-          pinned: pinnedFields.includes(displayName),
+          pinned: isPinned,
           onTogglePinned,
         },
         value: {
@@ -212,9 +224,8 @@ export const DocViewerTable = ({
       onToggleColumn,
       filter,
       columns,
-      columnTypes,
+      columnsMeta,
       flattened,
-      pinnedFields,
       onTogglePinned,
       fieldFormats,
     ]
@@ -244,7 +255,7 @@ export const DocViewerTable = ({
         }
 
         if (pinnedFields.includes(curFieldName)) {
-          acc.pinnedItems.push(fieldToItem(curFieldName));
+          acc.pinnedItems.push(fieldToItem(curFieldName, true));
         } else {
           const fieldMapping = mapping(curFieldName);
           if (
@@ -255,7 +266,7 @@ export const DocViewerTable = ({
             )
           ) {
             // filter only unpinned fields
-            acc.restItems.push(fieldToItem(curFieldName));
+            acc.restItems.push(fieldToItem(curFieldName, false));
           }
         }
 
@@ -287,7 +298,7 @@ export const DocViewerTable = ({
       <EuiTableHeaderCell
         key="header-cell-actions"
         align="left"
-        width={showActionsInsideTableCell ? 150 : 62}
+        width={showActionsInsideTableCell && filter ? 150 : 62}
         isSorted={false}
       >
         <EuiText size="xs">
@@ -401,7 +412,7 @@ export const DocViewerTable = ({
   ];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false} ref={setRef}>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>
@@ -428,7 +439,7 @@ export const DocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiTable responsive={false}>
+          <EuiTable responsiveBreakpoint={false}>
             <EuiTableHeader>{headers}</EuiTableHeader>
             <EuiTableBody>{rowElements}</EuiTableBody>
           </EuiTable>

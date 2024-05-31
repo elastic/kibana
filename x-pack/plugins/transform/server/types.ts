@@ -12,7 +12,7 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { License } from './services';
 
 export interface PluginSetupDependencies {
@@ -32,8 +32,8 @@ export interface PluginStartDependencies {
 
 export interface RouteDependencies {
   router: IRouter;
-  license: License;
-  coreStart: CoreStart;
-  dataViews: DataViewsServerPluginStart;
-  security?: SecurityPluginStart;
+  getLicense: () => Promise<License>;
+  getCoreStart: () => Promise<CoreStart>;
+  getDataViewsStart: () => Promise<DataViewsServerPluginStart>;
+  getSecurity: () => Promise<SecurityPluginStart | undefined>;
 }

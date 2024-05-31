@@ -79,13 +79,18 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render null if error', () => {
+  it('should render 0 same source alert if error', () => {
     (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
+      dataCount: 0,
     });
 
-    const { container } = renderRelatedAlertsBySameSourceEvent();
-    expect(container).toBeEmptyDOMElement();
+    const { getByTestId } = renderRelatedAlertsBySameSourceEvent();
+    expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
+    const value = getByTestId(VALUE_TEST_ID);
+    expect(value).toBeInTheDocument();
+    expect(value).toHaveTextContent('0 alerts related by source event');
+    expect(getByTestId(VALUE_TEST_ID)).toBeInTheDocument();
   });
 });
