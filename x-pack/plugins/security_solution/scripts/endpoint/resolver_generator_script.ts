@@ -170,12 +170,6 @@ async function main() {
       type: 'number',
       default: ANCESTRY_LIMIT,
     },
-    // apiKey: {
-    //   alias: 'key',
-    //   describe: 'API key for kibana, required for serverless',
-    //   type: 'string',
-    //   default: '',
-    // },
     generations: {
       alias: 'gen',
       describe: 'number of child generations to create',
@@ -306,12 +300,6 @@ async function main() {
   } else {
     clientOptions = { node: argv.node };
   }
-  // if (argv.apiKey !== '') {
-  //   kbnClientOptions = {
-  //     ...kbnClientOptions,
-  //     apiKey: argv.apiKey,
-  //   };
-  // }
   let client = new Client(clientOptions);
   let kbnClient = new KbnClient({ ...kbnClientOptions });
   let user: UserInfo | undefined;
