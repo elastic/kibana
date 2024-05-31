@@ -12,30 +12,25 @@ import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
 import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
 import { useSloAlertsQuery } from './slo_alerts_table';
 
-import { SloEmbeddableDeps } from '../types';
 import { SloItem } from '../types';
+import { useKibana } from '../../../../utils/kibana_react';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
 interface Props {
-  deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
   onLoaded?: () => void;
   showAllGroupByInstances?: boolean;
 }
 
-export function SloAlertsSummary({
-  slos,
-  deps,
-  timeRange,
-  onLoaded,
-  showAllGroupByInstances,
-}: Props) {
+export function SloAlertsSummary({ slos, timeRange, onLoaded, showAllGroupByInstances }: Props) {
   const {
-    triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
-  } = deps;
+    services: {
+      triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
+    },
+  } = useKibana();
 
   const esQuery = useSloAlertsQuery(slos, timeRange, showAllGroupByInstances);
   const timeBuckets = useTimeBuckets();

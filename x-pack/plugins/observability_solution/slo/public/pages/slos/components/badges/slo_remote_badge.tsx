@@ -12,24 +12,41 @@ import React, { MouseEvent } from 'react';
 import { useSpace } from '../../../../hooks/use_space';
 import { createRemoteSloDetailsUrl } from '../../../../utils/slo/remote_slo_urls';
 
-export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
-  const spaceId = useSpace();
-  if (!slo.remote) {
-    return null;
-  }
+export function SloRemoteBadgeWithoutRouterContext({
+  remote,
+  ...rest
+}: {
+  remote: Required<SLOWithSummaryResponse>['remote'];
+  href: string;
+} & (
+  | {}
+  | {
+      onClick: (e: React.MouseEvent<HTMLElement>) => void;
+    }
+)) {
+  const interactivityProps =
+    'onClick' in rest
+      ? {
+          onClick: rest.onClick,
+          iconOnClick: rest.onClick,
+          iconOnClickAriaLabel: '',
+          onClickAriaLabel: '',
+          // make sure EuiBadge's types don't complain about passing
+          // both href and onClick
+          href: rest.href as unknown as undefined,
+        }
+      : {
+          href: rest.href,
+          target: '_blank',
+          onMouseDown: (e: MouseEvent) => {
+            e.stopPropagation();
+          },
+        };
 
-  const sloDetailsUrl = createRemoteSloDetailsUrl(slo, spaceId);
   return (
     <EuiFlexItem grow={false}>
-      <EuiToolTip content={slo.remote.kibanaUrl} title={slo.remote.remoteName}>
-        <EuiBadge
-          color="default"
-          href={sloDetailsUrl!}
-          target="_blank"
-          onMouseDown={(e: MouseEvent) => {
-            e.stopPropagation();
-          }}
-        >
+      <EuiToolTip content={remote.kibanaUrl} title={remote.remoteName}>
+        <EuiBadge color="default" {...interactivityProps}>
           {i18n.translate('xpack.slo.sloCardItemBadges.remoteBadgeLabel', {
             defaultMessage: 'Remote',
           })}
@@ -37,4 +54,15 @@ export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
       </EuiToolTip>
     </EuiFlexItem>
   );
+}
+
+export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
+  const spaceId = useSpace();
+
+  if (!slo.remote) {
+    return null;
+  }
+
+  const sloDetailsUrl = createRemoteSloDetailsUrl(slo, spaceId);
+  return <SloRemoteBadgeWithoutRouterContext href={sloDetailsUrl!} remote={slo.remote} />;
 }

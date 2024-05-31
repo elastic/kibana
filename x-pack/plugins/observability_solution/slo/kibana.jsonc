@@ -36,21 +36,23 @@
       "presentationUtil",
       "features",
       "licensing",
-      "usageCollection",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
       "spaces",
       "serverless",
       "discover",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "investigate"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",
       "embeddable",
-      "ingestPipelines"
+      "ingestPipelines",
+      "investigate"
     ]
   }
 }

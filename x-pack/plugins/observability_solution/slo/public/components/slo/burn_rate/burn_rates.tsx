@@ -34,7 +34,9 @@ export interface BurnRateOption {
   duration: number;
 }
 
-function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; duration: string }> {
+export function getWindowsFromOptions(
+  opts: BurnRateOption[]
+): Array<{ name: string; duration: string }> {
   return opts.map((opt) => ({ name: opt.windowName, duration: `${opt.duration}h` }));
 }
 

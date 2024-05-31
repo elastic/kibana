@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { WorkflowBlock } from '@kbn/investigate-plugin/common';
+import type { OnWidgetAdd } from '@kbn/investigate-plugin/public';
+import { createInvestigateSloInventoryWidget } from '@kbn/slo-plugin/public';
 import { useKibana } from '../use_kibana';
 
 export function useSloWorkflowBlock({
   setFlyout,
+  onWidgetAdd,
 }: {
   setFlyout: React.Dispatch<React.SetStateAction<React.ReactNode>>;
+  onWidgetAdd: OnWidgetAdd;
 }) {
   const {
     dependencies: {
       start: { slo },
     },
   } = useKibana();
+
+  const onWidgetAddRef = useRef(onWidgetAdd);
+
+  onWidgetAddRef.current = onWidgetAdd;
 
   const sloResult = useAbortableAsync(
     ({ signal }) => {
@@ -103,6 +111,16 @@ export function useSloWorkflowBlock({
           numUnhealthy: unhealthySlos.length,
         },
       }),
+      onClick: () => {
+        onWidgetAddRef.current(
+          createInvestigateSloInventoryWidget({
+            title: i18n.translate('xpack.investigateApp.workflowBlocks.slo.inventoryWidgetTitle', {
+              defaultMessage: 'Violating SLOs',
+            }),
+            parameters: {},
+          })
+        );
+      },
     };
   }, [sloResult, slo, setFlyout]);
 

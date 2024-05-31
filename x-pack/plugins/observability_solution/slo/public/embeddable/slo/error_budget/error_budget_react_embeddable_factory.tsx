@@ -18,8 +18,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SLO_ERROR_BUDGET_ID } from './constants';
-import { SloErrorBudgetEmbeddableState, SloEmbeddableDeps, ErrorBudgetApi } from './types';
+import { SloErrorBudgetEmbeddableState, ErrorBudgetApi } from './types';
 import { SloErrorBudget } from './error_budget_burn_down';
+import { SloEmbeddableContextProps } from '../common/slo_embeddable_context';
 
 export const getErrorBudgetPanelTitle = () =>
   i18n.translate('xpack.slo.errorBudgetEmbeddable.title', {
@@ -27,7 +28,7 @@ export const getErrorBudgetPanelTitle = () =>
   });
 const queryClient = new QueryClient();
 
-export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
+export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableContextProps) => {
   const factory: ReactEmbeddableFactory<SloErrorBudgetEmbeddableState, ErrorBudgetApi> = {
     type: SLO_ERROR_BUDGET_ID,
     deserializeState: (state) => {
@@ -72,7 +73,7 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
         Component: () => {
           const [sloId, sloInstanceId] = useBatchedPublishingSubjects(sloId$, sloInstanceId$);
 
-          const I18nContext = deps.i18n.Context;
+          const I18nContext = deps.coreStart.i18n.Context;
 
           useEffect(() => {
             return () => {

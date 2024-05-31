@@ -31,6 +31,8 @@ import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 
 import { callSloApi, createSloApiClient } from './rest';
+import { registerSloInvestigateWidgets } from './investigate/register_slo_investigate_widgets';
+import { SloEmbeddableContextProps } from './embeddable/slo/common/slo_embeddable_context';
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
@@ -90,6 +92,12 @@ export class SloPlugin
 
     registerBurnRateRuleType(pluginsSetup.observability.observabilityRuleTypeRegistry);
 
+    registerSloInvestigateWidgets({
+      coreSetup,
+      pluginsSetup,
+      kibanaVersion,
+    });
+
     const assertPlatinumLicense = async () => {
       const licensing = pluginsSetup.licensing;
       const license = await firstValueFrom(licensing.license$);
@@ -97,6 +105,13 @@ export class SloPlugin
       const hasPlatinumLicense = license.hasAtLeast('platinum');
       if (hasPlatinumLicense) {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+        const embeddableContextProps: SloEmbeddableContextProps = {
+          coreStart,
+          pluginsStart,
+          kibanaVersion,
+        };
+
         pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState: SloOverviewEmbeddableState | undefined) => {
@@ -109,34 +124,29 @@ export class SloPlugin
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           async () => {
-            const deps = { ...coreStart, ...pluginsStart };
             const { getOverviewEmbeddableFactory } = await import(
               './embeddable/slo/overview/slo_embeddable_factory'
             );
-            return getOverviewEmbeddableFactory(deps);
+            return getOverviewEmbeddableFactory(embeddableContextProps);
           }
         );
 
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_ALERTS_EMBEDDABLE_ID,
           async () => {
-            const deps = { ...coreStart, ...pluginsStart };
-
             const { getAlertsEmbeddableFactory } = await import(
               './embeddable/slo/alerts/slo_alerts_embeddable_factory'
             );
 
-            return getAlertsEmbeddableFactory(deps, kibanaVersion);
+            return getAlertsEmbeddableFactory(embeddableContextProps);
           }
         );
 
         pluginsSetup.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
-          const deps = { ...coreStart, ...pluginsStart };
-
           const { getErrorBudgetEmbeddableFactory } = await import(
             './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
           );
-          return getErrorBudgetEmbeddableFactory(deps);
+          return getErrorBudgetEmbeddableFactory(embeddableContextProps);
         });
 
         const registerAsyncSloUiActions = async () => {

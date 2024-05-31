@@ -9,15 +9,14 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import { SloEmbeddableDeps } from '../types';
 import type { SloItem } from '../types';
 import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
+import { useKibana } from '../../../../utils/kibana_react';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
 
 interface Props {
-  deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
   onLoaded?: () => void;
@@ -90,15 +89,20 @@ export const useSloAlertsQuery = (
 
 export function SloAlertsTable({
   slos,
-  deps,
   timeRange,
   onLoaded,
   lastReloadRequestTime,
   showAllGroupByInstances,
 }: Props) {
   const {
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
-  } = deps;
+    services: {
+      triggersActionsUi: {
+        alertsTableConfigurationRegistry,
+        getAlertsStateTable: AlertsStateTable,
+      },
+    },
+  } = useKibana();
+
   return (
     <AlertsStateTable
       query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}

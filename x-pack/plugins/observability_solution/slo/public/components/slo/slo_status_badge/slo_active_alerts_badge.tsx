@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface Props {
@@ -18,25 +19,13 @@ export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
-export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-  } = useKibana().services;
-
-  const handleActiveAlertsClick = () => {
-    if (activeAlerts) {
-      const kuery = encodeURIComponent(
-        `'slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"'`
-      );
-      navigateToUrl(
-        `${basePath.prepend(
-          observabilityPaths.alerts
-        )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
-      );
-    }
-  };
-
+export function SloActiveAlertsBadgeWithoutRouting({
+  activeAlerts,
+  viewMode,
+  handleActiveAlertsClick,
+}: Omit<Props, 'slo'> & {
+  handleActiveAlertsClick?: () => void;
+}) {
   if (!activeAlerts) {
     return null;
   }
@@ -55,7 +44,9 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         <EuiBadge
           iconType="warning"
           color="danger"
-          onClick={handleActiveAlertsClick}
+          onClick={() => {
+            handleActiveAlertsClick?.();
+          }}
           onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
             defaultMessage: 'active alerts badge',
           })}
@@ -74,5 +65,50 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         </EuiBadge>
       </EuiToolTip>
     </EuiFlexItem>
+  );
+}
+
+export const navigateToAlertsForSlo = ({
+  basePath,
+  navigateToUrl,
+  activeAlerts,
+  slo,
+}: {
+  basePath: CoreStart['http']['basePath'];
+  navigateToUrl: CoreStart['application']['navigateToUrl'];
+  activeAlerts?: number;
+  slo: SLOWithSummaryResponse;
+}) => {
+  if (activeAlerts) {
+    const kuery = encodeURIComponent(`'slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}"'`);
+    navigateToUrl(
+      `${basePath.prepend(
+        observabilityPaths.alerts
+      )}?_a=(kuery:${kuery},rangeFrom:now-15m,rangeTo:now,status:active)`
+    );
+  }
+};
+
+export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
+  const {
+    application: { navigateToUrl },
+    http: { basePath },
+  } = useKibana().services;
+
+  const handleActiveAlertsClick = () => {
+    navigateToAlertsForSlo({
+      basePath,
+      navigateToUrl,
+      activeAlerts,
+      slo,
+    });
+  };
+
+  return (
+    <SloActiveAlertsBadgeWithoutRouting
+      activeAlerts={activeAlerts}
+      viewMode={viewMode}
+      handleActiveAlertsClick={handleActiveAlertsClick}
+    />
   );
 }

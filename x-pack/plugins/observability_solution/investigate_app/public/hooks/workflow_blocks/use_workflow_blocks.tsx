@@ -28,6 +28,7 @@ export function useWorkflowBlocks({
   const [flyout, setFlyout] = useState<React.ReactNode | null>(null);
   const sloWorkflowBlock = useSloWorkflowBlock({
     setFlyout,
+    onWidgetAdd,
   });
 
   const alertsWorkflowBlock = useAlertsWorkflowBlock();

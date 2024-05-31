@@ -11,9 +11,11 @@ import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugi
 import type { InvestigateWidget, WorkflowBlock } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
 
+export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
+
 export interface WidgetRenderAPI {
   onDelete: () => void;
-  onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
+  onWidgetAdd: OnWidgetAdd;
   blocks: {
     publish: (blocks: WorkflowBlock[]) => void;
   };

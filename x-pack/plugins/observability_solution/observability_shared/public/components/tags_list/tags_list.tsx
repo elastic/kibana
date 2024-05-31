@@ -16,6 +16,7 @@ export interface TagsListProps {
   numberOfTagsToDisplay?: number;
   color?: EuiBadgeProps['color'];
   ignoreEmpty?: boolean;
+  textSize?: 'xs' | 's';
 }
 
 const getFilterLabel = (tag: string) => {
@@ -33,6 +34,7 @@ const TagsList = ({
   numberOfTagsToDisplay = 3,
   onClick,
   color = 'hollow',
+  textSize = 's',
 }: TagsListProps) => {
   const [toDisplay, setToDisplay] = useState(numberOfTagsToDisplay);
 
@@ -41,7 +43,7 @@ const TagsList = ({
       return null;
     }
     return (
-      <EuiText>
+      <EuiText size={textSize}>
         {i18n.translate('xpack.observabilityShared.tagsList.TextLabel', { defaultMessage: '--' })}
       </EuiText>
     );
@@ -89,7 +91,7 @@ const TagsList = ({
             content={
               <>
                 {tags.slice(toDisplay, tags.length).map((tag) => (
-                  <EuiText key={tag} size="s">
+                  <EuiText key={tag} size={textSize}>
                     {tag}
                   </EuiText>
                 ))}

@@ -52,8 +52,8 @@ export interface Props {
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props) {
-  const { charts, uiSettings, discover } = useKibana().services;
+export function EventsChartPanelWithoutFrame({ slo, range, selectedTabId, onBrushed }: Props) {
+  const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
@@ -72,24 +72,6 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
 
   const dateFormat = uiSettings.get('dateFormat');
 
-  const title =
-    slo.indicator.type !== 'sli.metric.timeslice' ? (
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.title', {
-            defaultMessage: 'Good vs bad events',
-          })}
-        </h2>
-      </EuiTitle>
-    ) : (
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.timesliceTitle', {
-            defaultMessage: 'Timeslice metric',
-          })}
-        </h2>
-      </EuiTitle>
-    );
   const threshold =
     slo.indicator.type === 'sli.metric.timeslice'
       ? slo.indicator.params.metric.threshold
@@ -148,10 +130,103 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
       </>
     ) : null;
 
+  return slo.indicator.type !== 'sli.metric.timeslice' ? (
+    <GoodBadEventsChart
+      isLoading={isLoading}
+      data={data || []}
+      annotation={annotation}
+      slo={slo}
+      onBrushed={onBrushed}
+    />
+  ) : (
+    <>
+      {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
+
+      {!isLoading && (
+        <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+          <Tooltip type={TooltipType.VerticalCursor} />
+          <Settings
+            baseTheme={baseTheme}
+            showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
+            legendPosition={Position.Left}
+            noResults={
+              <EuiIcon
+                type="visualizeApp"
+                size="l"
+                color="subdued"
+                title={i18n.translate('xpack.slo.eventsChartPanel.euiIcon.noResultsLabel', {
+                  defaultMessage: 'no results',
+                })}
+              />
+            }
+            onPointerUpdate={handleCursorUpdate}
+            externalPointerEvents={{
+              tooltip: { visible: true },
+            }}
+            pointerUpdateDebounce={0}
+            pointerUpdateTrigger={'x'}
+            locale={i18n.getLocale()}
+            onBrushEnd={(brushArea) => {
+              onBrushed?.(getBrushTimeBounds(brushArea));
+            }}
+          />
+          {annotation}
+
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            showOverlappingTicks
+            tickFormat={(d) => moment(d).format(dateFormat)}
+          />
+          <Axis
+            id="left"
+            position={Position.Left}
+            tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+            domain={domain}
+          />
+          <AreaSeries
+            id="Metric"
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="date"
+            yAccessors={['value']}
+            data={(data ?? []).map((datum) => ({
+              date: new Date(datum.date).getTime(),
+              value: datum.sliValue,
+            }))}
+          />
+        </Chart>
+      )}
+    </>
+  );
+}
+
+export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props) {
+  const { discover } = useKibana().services;
+
   const showViewEventsLink = ![
     'sli.apm.transactionErrorRate',
     'sli.apm.transactionDuration',
   ].includes(slo.indicator.type);
+
+  const title =
+    slo.indicator.type !== 'sli.metric.timeslice' ? (
+      <EuiTitle size="xs">
+        <h2>
+          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.title', {
+            defaultMessage: 'Good vs bad events',
+          })}
+        </h2>
+      </EuiTitle>
+    ) : (
+      <EuiTitle size="xs">
+        <h2>
+          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.timesliceTitle', {
+            defaultMessage: 'Timeslice metric',
+          })}
+        </h2>
+      </EuiTitle>
+    );
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">
@@ -191,77 +266,12 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
         </EuiFlexGroup>
 
         <EuiFlexItem>
-          {slo.indicator.type !== 'sli.metric.timeslice' ? (
-            <GoodBadEventsChart
-              isLoading={isLoading}
-              data={data || []}
-              annotation={annotation}
-              slo={slo}
-              onBrushed={onBrushed}
-            />
-          ) : (
-            <>
-              {isLoading && (
-                <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />
-              )}
-
-              {!isLoading && (
-                <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-                  <Tooltip type={TooltipType.VerticalCursor} />
-                  <Settings
-                    baseTheme={baseTheme}
-                    showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
-                    legendPosition={Position.Left}
-                    noResults={
-                      <EuiIcon
-                        type="visualizeApp"
-                        size="l"
-                        color="subdued"
-                        title={i18n.translate('xpack.slo.eventsChartPanel.euiIcon.noResultsLabel', {
-                          defaultMessage: 'no results',
-                        })}
-                      />
-                    }
-                    onPointerUpdate={handleCursorUpdate}
-                    externalPointerEvents={{
-                      tooltip: { visible: true },
-                    }}
-                    pointerUpdateDebounce={0}
-                    pointerUpdateTrigger={'x'}
-                    locale={i18n.getLocale()}
-                    onBrushEnd={(brushArea) => {
-                      onBrushed?.(getBrushTimeBounds(brushArea));
-                    }}
-                  />
-                  {annotation}
-
-                  <Axis
-                    id="bottom"
-                    position={Position.Bottom}
-                    showOverlappingTicks
-                    tickFormat={(d) => moment(d).format(dateFormat)}
-                  />
-                  <Axis
-                    id="left"
-                    position={Position.Left}
-                    tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
-                    domain={domain}
-                  />
-                  <AreaSeries
-                    id="Metric"
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="date"
-                    yAccessors={['value']}
-                    data={(data ?? []).map((datum) => ({
-                      date: new Date(datum.date).getTime(),
-                      value: datum.sliValue,
-                    }))}
-                  />
-                </Chart>
-              )}
-            </>
-          )}
+          <EventsChartPanelWithoutFrame
+            slo={slo}
+            range={range}
+            onBrushed={onBrushed}
+            selectedTabId={selectedTabId}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

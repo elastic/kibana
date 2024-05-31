@@ -49,6 +49,7 @@ const defaultStory: Story = {
         from: moment().subtract(15, 'minutes').toISOString(),
         to: moment().toISOString(),
       },
+      workflowBlocks: [],
     },
   },
   render: function Render(args) {

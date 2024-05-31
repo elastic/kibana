@@ -53,6 +53,10 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type {
+  InvestigatePublicStart,
+  InvestigatePublicSetup,
+} from '@kbn/investigate-plugin/public';
 
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SloPlugin } from './plugin';
@@ -70,6 +74,7 @@ export interface SloPublicPluginsSetup {
   presentationUtil?: PresentationUtilPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   usageCollection: UsageCollectionSetup;
+  investigate?: InvestigatePublicSetup;
 }
 
 export interface SloPublicPluginsStart {
@@ -104,6 +109,7 @@ export interface SloPublicPluginsStart {
   discover: DiscoverStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
+  investigate?: InvestigatePublicStart;
 }
 
 export type SloPublicSetup = ReturnType<SloPlugin['setup']>;

@@ -22,12 +22,12 @@ export type WidgetFactory<
 > = <T extends MakePartial<InvestigateWidgetCreate<TParameters>, PredefinedKeys>>(
   widgetCreate: T
 ) => Pick<InvestigateWidgetCreate<TParameters>, PredefinedKeys> &
-  TDefaults &
+  (TDefaults extends Record<string, any> ? TDefaults : {}) &
   Omit<T, 'parameters'> & { parameters: T['parameters'] & DeepPartial<GlobalWidgetParameters> };
 
 export function createWidgetFactory<
   TParameters extends Record<string, any>,
-  TDefaults extends Defaults | undefined
+  TDefaults extends Defaults | undefined = undefined
 >(type: string, defaults?: TDefaults): WidgetFactory<TParameters, TDefaults> {
   const createWidget: WidgetFactory<any, any> = (widgetCreate) => {
     return {

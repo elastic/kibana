@@ -14,7 +14,7 @@ import { BurnRateRuleParams } from '../../../../typings';
 export interface Props {
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
   isRemote?: boolean;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent | React.KeyboardEvent) => void;
 }
 
 export function SloRulesBadge({ rules, onClick, isRemote }: Props) {
