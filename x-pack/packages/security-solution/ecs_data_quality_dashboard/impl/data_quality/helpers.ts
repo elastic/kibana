@@ -456,9 +456,9 @@ export const getErrorSummaries = (
   );
 };
 
-export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
-export const RESULTS_INDICES_LATEST_ROUTE =
-  '/internal/ecs_data_quality_dashboard/results/indices_latest/{pattern}';
+export const POST_INDEX_RESULTS = '/internal/ecs_data_quality_dashboard/results';
+export const GET_INDEX_RESULTS_LATEST =
+  '/internal/ecs_data_quality_dashboard/results_latest/{pattern}';
 
 export interface StorageResult {
   batchId: string;
@@ -544,7 +544,7 @@ export async function postStorageResult({
   abortController?: AbortController;
 }): Promise<void> {
   try {
-    await httpFetch<void>(RESULTS_API_ROUTE, {
+    await httpFetch<void>(POST_INDEX_RESULTS, {
       method: 'POST',
       signal: abortController.signal,
       version: INTERNAL_API_VERSION,
@@ -567,7 +567,7 @@ export async function getStorageResults({
   abortController: AbortController;
 }): Promise<StorageResult[]> {
   try {
-    const route = RESULTS_INDICES_LATEST_ROUTE.replace('{pattern}', pattern);
+    const route = GET_INDEX_RESULTS_LATEST.replace('{pattern}', pattern);
     const results = await httpFetch<StorageResult[]>(route, {
       method: 'GET',
       signal: abortController.signal,

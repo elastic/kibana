@@ -14,6 +14,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { some } from 'lodash';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { IAlertsClient } from '../alerts_client/types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithReason } from '../lib';
@@ -287,10 +288,11 @@ export class RuleTypeRunner<
               `rule execution failure: ${context.ruleLogPrefix}`,
               err.message
             );
+
             return {
               error: createTaskRunError(
                 new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err),
-                TaskErrorSource.FRAMEWORK
+                getErrorSource(err) || TaskErrorSource.FRAMEWORK
               ),
               stackTrace: { message: err, stackTrace: err.stack },
             };
