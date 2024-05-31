@@ -294,6 +294,7 @@ export function getDiscoverStateContainer({
     getInternalState: internalStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
+    updateAppState: appStateContainer.update,
   });
 
   const loadDataViewList = async () => {

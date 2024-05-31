@@ -67,7 +67,12 @@ export const fetchDocuments = (
     .pipe(
       filter((res) => !isRunningResponse(res)),
       map((res) => {
-        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView);
+        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView, {
+          processRecord: (record) => {
+            services.profilesManager.resolveDocumentProfile({ record });
+            return record;
+          },
+        });
       })
     );
 

@@ -615,7 +615,7 @@ x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
-x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
@@ -1551,6 +1551,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/detection_engine/rule_gaps @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detections/pages/alerts @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-detection-engine

@@ -106,6 +106,7 @@ export function fetchAll(
           data,
           services.expressions,
           inspectorAdapters,
+          services.profilesManager,
           abortController.signal
         )
       : fetchDocuments(searchSource, fetchDeps);
