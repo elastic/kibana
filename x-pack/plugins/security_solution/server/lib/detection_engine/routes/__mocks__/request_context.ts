@@ -58,7 +58,7 @@ export const createMockClients = () => {
       exceptionListClient: listMock.getExceptionListClient(core.savedObjects.client),
     },
     rulesClient: rulesClientMock.create(),
-    rulesManagementClient: rulesManagementClientMock.create(),
+    detectionRulesClient: rulesManagementClientMock.create(),
     actionsClient: actionsClientMock.create(),
     ruleDataService: ruleRegistryMocks.createRuleDataService(),
 
@@ -142,7 +142,7 @@ const createSecuritySolutionRequestContextMock = (
     }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
-    getDetectionRulesClient: jest.fn(() => clients.rulesManagementClient),
+    getDetectionRulesClient: jest.fn(() => clients.detectionRulesClient),
     getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),

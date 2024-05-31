@@ -21,7 +21,7 @@ describe('importRules', () => {
   beforeEach(() => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
     clients.rulesClient.update.mockResolvedValue(importedRule);
-    clients.rulesManagementClient.importRule.mockResolvedValue(importedRule);
+    clients.detectionRulesClient.importRule.mockResolvedValue(importedRule);
     clients.actionsClient.getAll.mockResolvedValue([]);
 
     jest.clearAllMocks();
@@ -60,7 +60,7 @@ describe('importRules', () => {
   });
 
   it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
-    clients.rulesManagementClient.importRule.mockImplementationOnce(async () => {
+    clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
       throw createBulkErrorObject({
         ruleId: importedRule.params.ruleId,
         statusCode: 409,
