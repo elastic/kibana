@@ -21,10 +21,11 @@ import * as i18n from './translations';
 interface IntegrationAssistantHeaderProps {
   currentStep: number;
   setStep: (step: number) => void;
+  isGenerating: boolean;
 }
 
 export const IntegrationAssistantHeader = React.memo<IntegrationAssistantHeaderProps>(
-  ({ currentStep, setStep }) => {
+  ({ currentStep, setStep, isGenerating }) => {
     const { euiTheme } = useEuiTheme();
     return (
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="l">
@@ -51,7 +52,11 @@ export const IntegrationAssistantHeader = React.memo<IntegrationAssistantHeaderP
             width: 100%;
           `}
         >
-          <IntegrationsAssistantSteps currentStep={currentStep} setStep={setStep} />
+          <IntegrationsAssistantSteps
+            currentStep={currentStep}
+            setStep={setStep}
+            isGenerating={isGenerating}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

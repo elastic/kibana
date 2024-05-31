@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 interface IntegrationsAssistantStepsProps {
   currentStep: number;
   setStep: (step: number) => void;
+  isGenerating: boolean;
 }
 
 const SETUP_CONNECTOR = i18n.translate('xpack.integrationAssistant.step.install', {
@@ -20,7 +21,7 @@ const SETUP_CONNECTOR = i18n.translate('xpack.integrationAssistant.step.install'
 
 const CONFIGURE_INTEGRATION = i18n.translate(
   'xpack.integrationAssistant.step.configureIntegration',
-  { defaultMessage: 'Configure integration' }
+  { defaultMessage: 'Integration details' }
 );
 
 const LOGS_ANALYSIS = i18n.translate('xpack.integrationAssistant.step.logsAnalysis', {
@@ -32,12 +33,12 @@ const GENERATION = i18n.translate('xpack.integrationAssistant.step.generation', 
 });
 
 const INSTALL = i18n.translate('xpack.integrationAssistant.step.install', {
-  defaultMessage: 'Install',
+  defaultMessage: 'Deploy',
 });
 
-const getStepStatus = (step: number, currentStep: number): EuiStepStatus => {
+const getStepStatus = (step: number, currentStep: number, loading?: boolean): EuiStepStatus => {
   if (step === currentStep) {
-    return 'current';
+    return loading ? 'loading' : 'current';
   } else if (step < currentStep) {
     return 'complete';
   } else {
@@ -53,7 +54,7 @@ const getStepOnClick = (step: number, currentStep: number, setStep: (step: numbe
 };
 
 export const IntegrationsAssistantSteps = React.memo<IntegrationsAssistantStepsProps>(
-  ({ currentStep, setStep }) => {
+  ({ currentStep, setStep, isGenerating }) => {
     const steps = useMemo<EuiStepsHorizontalProps['steps']>(() => {
       return [
         {
@@ -68,7 +69,7 @@ export const IntegrationsAssistantSteps = React.memo<IntegrationsAssistantStepsP
         },
         {
           title: LOGS_ANALYSIS,
-          status: getStepStatus(3, currentStep),
+          status: getStepStatus(3, currentStep, isGenerating),
           onClick: getStepOnClick(3, currentStep, setStep),
         },
         {
@@ -82,7 +83,7 @@ export const IntegrationsAssistantSteps = React.memo<IntegrationsAssistantStepsP
           onClick: getStepOnClick(5, currentStep, setStep),
         },
       ];
-    }, [currentStep, setStep]);
+    }, [currentStep, setStep, isGenerating]);
 
     return <EuiStepsHorizontal steps={steps} size="s" />;
   }

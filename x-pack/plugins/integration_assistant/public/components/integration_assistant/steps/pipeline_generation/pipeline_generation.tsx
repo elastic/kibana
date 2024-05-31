@@ -21,6 +21,7 @@ interface PipelineGenerationProps {
   integrationSettings: IntegrationSettings | undefined;
   setIntegrationSettings: (param: IntegrationSettings) => void;
   setIsGenerating: (param: boolean) => void;
+  setResult: (param: object | undefined) => void;
 }
 
 const progressText: Record<ProgressItem, string> = {
@@ -31,12 +32,16 @@ const progressText: Record<ProgressItem, string> = {
 };
 
 export const PipelineGeneration = React.memo<PipelineGenerationProps>(
-  ({ integrationSettings, setIsGenerating }) => {
+  ({ integrationSettings, setIsGenerating, setResult }) => {
     const { isLoading, progress, error, result } = usePipelineGeneration({ integrationSettings });
 
     useEffect(() => {
       setIsGenerating(isLoading);
     }, [setIsGenerating, isLoading]);
+
+    useEffect(() => {
+      setResult(result);
+    }, [setResult, result]);
 
     //   return <JsonEditor value={result} onUpdate={() => {}} />;
 

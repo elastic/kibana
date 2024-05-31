@@ -13,6 +13,7 @@ interface AssistantState {
   connectorId?: string;
   integrationSettings?: IntegrationSettings;
   isGenerating: boolean;
+  result?: object; // TODO: type result properly
 }
 
 const initialState: AssistantState = {
@@ -20,13 +21,15 @@ const initialState: AssistantState = {
   connectorId: undefined,
   integrationSettings: undefined,
   isGenerating: false,
+  result: undefined,
 };
 
 type Action =
-  | { type: 'SET_STEP'; payload: number }
-  | { type: 'SET_CONNECTOR_ID'; payload: string }
-  | { type: 'SET_INTEGRATION_SETTINGS'; payload: IntegrationSettings }
-  | { type: 'SET_IS_GENERATING'; payload: boolean };
+  | { type: 'SET_STEP'; payload: AssistantState['step'] }
+  | { type: 'SET_CONNECTOR_ID'; payload: AssistantState['connectorId'] }
+  | { type: 'SET_INTEGRATION_SETTINGS'; payload: AssistantState['integrationSettings'] }
+  | { type: 'SET_IS_GENERATING'; payload: AssistantState['isGenerating'] }
+  | { type: 'SET_GENERATED_RESULT'; payload: AssistantState['result'] };
 
 const reducer = (state: AssistantState, action: Action): AssistantState => {
   switch (action.type) {
@@ -38,6 +41,8 @@ const reducer = (state: AssistantState, action: Action): AssistantState => {
       return { ...state, integrationSettings: action.payload };
     case 'SET_IS_GENERATING':
       return { ...state, isGenerating: action.payload };
+    case 'SET_GENERATED_RESULT':
+      return { ...state, result: action.payload };
     default:
       return state;
   }
@@ -48,17 +53,20 @@ export const useAssistantState = () => {
 
   const actions = useMemo(
     () => ({
-      setStep: (payload: number) => {
+      setStep: (payload: AssistantState['step']) => {
         dispatch({ type: 'SET_STEP', payload });
       },
-      setConnectorId: (payload: string) => {
+      setConnectorId: (payload: AssistantState['connectorId']) => {
         dispatch({ type: 'SET_CONNECTOR_ID', payload });
       },
-      setIntegrationSettings: (payload: IntegrationSettings) => {
+      setIntegrationSettings: (payload: AssistantState['integrationSettings']) => {
         dispatch({ type: 'SET_INTEGRATION_SETTINGS', payload });
       },
-      setIsGenerating: (payload: boolean) => {
+      setIsGenerating: (payload: AssistantState['isGenerating']) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
+      },
+      setResult: (payload: AssistantState['result']) => {
+        dispatch({ type: 'SET_GENERATED_RESULT', payload });
       },
     }),
     []

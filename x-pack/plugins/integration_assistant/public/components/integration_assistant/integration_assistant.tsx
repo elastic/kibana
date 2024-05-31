@@ -54,7 +54,7 @@ export const IntegrationAssistant = React.memo(() => {
     } else if (state.step === 3) {
       return isLogsAnalysisReady({ integrationSettings: state.integrationSettings });
     } else if (state.step === 4) {
-      return isPipelineGenerationReady({ isGenerating: state.isGenerating });
+      return isPipelineGenerationReady({ result: state.result, isGenerating: state.isGenerating });
     }
     return false;
   }, [state]);
@@ -73,7 +73,11 @@ export const IntegrationAssistant = React.memo(() => {
       <KibanaPageTemplate.Header>
         <EuiFlexGroup direction="column" alignItems="center">
           <EuiFlexItem css={contendCss}>
-            <IntegrationAssistantHeader currentStep={state.step} setStep={actions.setStep} />
+            <IntegrationAssistantHeader
+              currentStep={state.step}
+              setStep={actions.setStep}
+              isGenerating={state.isGenerating}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </KibanaPageTemplate.Header>
@@ -104,6 +108,7 @@ export const IntegrationAssistant = React.memo(() => {
                 integrationSettings={state.integrationSettings}
                 setIntegrationSettings={actions.setIntegrationSettings}
                 setIsGenerating={actions.setIsGenerating}
+                setResult={actions.setResult}
               />
             )}
           </EuiFlexItem>

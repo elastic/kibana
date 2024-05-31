@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const isPipelineGenerationReady = ({ isGenerating }: { isGenerating: boolean }) =>
-  isGenerating === false;
+export const isPipelineGenerationReady = ({
+  isGenerating,
+  result,
+}: {
+  isGenerating: boolean;
+  result?: object;
+}) => isGenerating === false && result != null;

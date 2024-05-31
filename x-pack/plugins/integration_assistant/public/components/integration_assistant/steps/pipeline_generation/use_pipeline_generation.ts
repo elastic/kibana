@@ -28,7 +28,7 @@ interface ParametersWithPipeline extends Parameters {
 
 export const usePipelineGeneration = ({ integrationSettings }: PipelineGenerationProps) => {
   const { http, notifications } = useKibana().services;
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<object | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [error, setError] = useState<null | string>(null);

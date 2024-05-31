@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -28,7 +27,7 @@ interface LogsAnalysisProps {
   setIntegrationSettings: (param: IntegrationSettings) => void;
 }
 
-// TODO: unit test this
+// TODO: unit test this, add suport for ndjson
 const parseLogsContent = (
   fileContent: string | undefined
 ): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[] } => {
@@ -87,7 +86,7 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
           setIsParsing(false);
 
           if (error) {
-            notifications?.toasts.addDanger('The logs sample file contains non-object entries');
+            notifications?.toasts.addDanger(error);
             return;
           }
 
