@@ -17,7 +17,7 @@ export const inject = (
   if (hasAttributes(state)) {
     // Filter out references that are not in the state
     // https://github.com/elastic/kibana/pull/119079
-    const references = state.attributes?.references
+    const references = (state.attributes?.references ?? [])
       .map((stateRef) =>
         injectedReferences.find((injectedRef) => injectedRef.name === stateRef.name)
       )

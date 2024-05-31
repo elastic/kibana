@@ -94,7 +94,8 @@ export function initializeFetch({
               this.input.query
             );
           }
-          // const parentContext = api.parentApi?.executionContext;
+          const parentContext = api.parentApi?.executionContext;
+          console.log('parent context', parentContext);
           // const child: KibanaExecutionContext = {
           //   type: SEARCH_EMBEDDABLE_TYPE,
           //   name: 'discover',

@@ -27,7 +27,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
-import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
+import {
+  SavedSearchByValueAttributes,
+  SavedSearchUnwrapResult,
+} from '@kbn/saved-search-plugin/public';
 import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { DiscoverServices } from '../build_services';
@@ -73,13 +76,14 @@ export const getSearchEmbeddableFactory = ({
               serializedState.references ?? []
             ) as SavedSearchUnwrapResult)
       );
+      console.log('savedSearch', savedSearch);
 
       // const { searchSourceJSON, references: originalReferences } =
       //   savedSearch.searchSource.serialize();
       // console.log(searchSourceJSON, originalReferences);
       /** TODO: Remove unused state? kibanaSavedObjectMeta for example */
 
-      return savedSearch;
+      return { ...savedSearch, savedObjectId };
       // return {
       //   ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
       //   searchSource: savedSearch.searchSource,
@@ -112,13 +116,12 @@ export const getSearchEmbeddableFactory = ({
         );
 
         // const references = savedObjectsTagging
-        // ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
-        // : originalReferences;
+        //   ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
+        //   : originalReferences;
 
         const { rawState, references } = extract({
-          attributes: savedSearchAttributes,
+          attributes: { ...savedSearchAttributes, references: originalReferences },
         });
-        console.log({ rawState, references, originalReferences });
         return {
           rawState: rawState as unknown as SearchEmbeddableSerializedState,
           references,
@@ -152,26 +155,23 @@ export const getSearchEmbeddableFactory = ({
             i18n.translate('discover.embeddable.search.displayName', {
               defaultMessage: 'search',
             }),
-          getSavedSearch: () => {
-            return undefined;
-          },
           canLinkToLibrary: async () => {
             return (
               discoverServices.capabilities.discover.save && !Boolean(savedObjectId$.getValue())
             );
           },
           canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
+          libraryId$: savedObjectId$,
           saveToLibrary: async (title: string) => {
-            const savedObjectId = await attributeService.saveMethod({
-              // ...searchEmbeddableApi.attributes$.getValue(),
-              title,
-            });
+            const savedObjectId = await attributeService.saveMethod(
+              {
+                ...serializeState().rawState.attributes,
+                title,
+              } as SavedSearchByValueAttributes,
+              savedObjectId$.getValue()
+            );
+            savedObjectId$.next(savedObjectId);
             return savedObjectId;
-          },
-          getByReferenceState: (savedObjectId: string) => {
-            return {
-              savedObjectId,
-            };
           },
           checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
             attributeService.checkForDuplicateTitle({
@@ -179,12 +179,8 @@ export const getSearchEmbeddableFactory = ({
               isTitleDuplicateConfirmed,
               onTitleDuplicate,
             }),
-          getByValueState: () => {
-            const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
-            return {
-              ...byValueState,
-              // attributes: searchEmbeddableApi.attributes$.getValue(),
-            };
+          unlinkFromLibrary: () => {
+            savedObjectId$.next(undefined);
           },
           serializeState,
         },
@@ -231,7 +227,6 @@ export const getSearchEmbeddableFactory = ({
           blockingError: blockingError$,
           fetchContext$,
           rows$: searchEmbeddableApi.rows$,
-          // savedSearch$: searchEmbeddableApi.savedSearch$,
         },
         discoverServices,
       });
@@ -251,7 +246,6 @@ export const getSearchEmbeddableFactory = ({
 
           useEffect(() => {
             return () => {
-              onUnmount();
               unsubscribeFromFetch();
             };
           }, []);
@@ -315,13 +309,7 @@ export const getSearchEmbeddableFactory = ({
                     discoverServices.uiActions.getTriggerCompatibleActions
                   }
                 >
-                  <SearchEmbeddableGridComponent
-                    api={{
-                      ...api,
-                      ...searchEmbeddableApi,
-                    }}
-                    onAddFilter={onAddFilter}
-                  />
+                  <SearchEmbeddableGridComponent api={api} onAddFilter={onAddFilter} />
                 </CellActionsProvider>
               )}
             </KibanaContextProvider>

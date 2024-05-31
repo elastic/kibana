@@ -73,12 +73,7 @@ export const initializeSearchEmbeddableApi = async (
     searchSource: searchSource$,
   };
 
-  const getSearchEmbeddableComparators = (): StateComparators<
-    Omit<
-      SearchEmbeddableRuntimeState,
-      'title' | 'description' | 'hidePanelTitles' | 'savedObjectId'
-    >
-  > => {
+  const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableAttributes> => {
     return {
       searchSource: [searchSource$, (value) => searchSource$.next(value)],
       rowHeight: [rowHeight$, (value) => rowHeight$.next(value)],

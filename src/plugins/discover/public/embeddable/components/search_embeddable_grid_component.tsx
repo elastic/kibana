@@ -7,38 +7,26 @@
  */
 
 import React, { useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  isLegacyTableEnabled,
-  SEARCH_FIELDS_FROM_SOURCE,
-} from '@kbn/discover-utils';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
-import { DiscoverGridEmbeddable } from './saved_search_grid';
 import type { EmbeddableComponentSearchProps, SearchEmbeddableApi } from '../types';
-import { isEsqlMode } from '../initialize_fetch';
+import { DiscoverGridEmbeddable } from './saved_search_grid';
 
 interface SavedSearchEmbeddableComponentProps {
-  api: SearchEmbeddableApi & {
-    savedSearch$: BehaviorSubject<SavedSearch>;
-    rows$: BehaviorSubject<DataTableRecord[]>;
-  };
+  api: SearchEmbeddableApi;
   query?: AggregateQuery | Query;
   onAddFilter: DocViewFilterFn;
 }
@@ -141,7 +129,7 @@ export function SearchEmbeddableGridComponent({
   //   [discoverServices, isEsql]
   // );
 
-  const useLegacyTable = false;
+  // const useLegacyTable = false;
 
   const searchProps: EmbeddableComponentSearchProps | undefined = useMemo(() => {
     const { dataView } = savedSearchProps;
@@ -168,15 +156,15 @@ export function SearchEmbeddableGridComponent({
     return <></>;
   }
 
-  if (useLegacyTable) {
-    return (
-      <DiscoverDocTableEmbeddableMemoized
-        {...searchProps}
-        sampleSizeState={fetchedSampleSize}
-        isPlainRecord={isTextBasedQueryMode}
-      />
-    );
-  }
+  // if (useLegacyTable) {
+  //   return (
+  //     <DiscoverDocTableEmbeddableMemoized
+  //       {...searchProps}
+  //       sampleSizeState={fetchedSampleSize}
+  //       isPlainRecord={isTextBasedQueryMode}
+  //     />
+  //   );
+  // }
 
   return (
     <DiscoverGridEmbeddableMemoized

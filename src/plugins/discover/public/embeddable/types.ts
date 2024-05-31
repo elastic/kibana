@@ -12,7 +12,10 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
+  HasExecutionContext,
+  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
+  HasParentApi,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
@@ -65,16 +68,17 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   // HasSavedSearch &
-  HasSearchSource &
+  // HasSearchSource &
   PublishesDataViews &
   PublishesSavedObjectId &
-  HasLibraryTransforms &
   PublishesDataLoading &
   PublishesBlockingError &
   PublishesSavedSearchAttributes &
+  HasInPlaceLibraryTransforms &
   // PublishesSearchSession
   // PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
+// HasParentApi<HasExecutionContext>;
 
 export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
   rows$: BehaviorSubject<DataTableRecord[]>;
@@ -96,10 +100,6 @@ export const apiHasSavedSearch = (
   const embeddable = api as HasSavedSearch;
   return Boolean(embeddable.getSavedSearch) && typeof embeddable.getSavedSearch === 'function';
 };
-
-export interface HasSearchSource {
-  getSavedSearch: () => SearchSource | undefined;
-}
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;
