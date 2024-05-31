@@ -20,6 +20,7 @@ import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
+import { findingsTableFieldLabels } from './findings_table_field_labels';
 
 interface LatestFindingsTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -136,6 +137,7 @@ export const LatestFindingsTable = ({
             customCellRenderer={customCellRenderer}
             groupSelectorComponent={groupSelectorComponent}
             height={height}
+            columnHeaders={findingsTableFieldLabels}
           />
         </>
       )}
