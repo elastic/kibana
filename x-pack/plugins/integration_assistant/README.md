@@ -14,6 +14,7 @@ Exposes 4 API's that can be consumed by any frontend plugin, which are:
 - Categorization API
 - Related Fields API
 - Build Integration API
+- Optional Test Pipeline API (Used to update pipeline results if the ingest pipeline changes by a user in the UI).
 
 ## Development
 
@@ -30,6 +31,7 @@ Each node links to a specific function, usually a `handler` specified in its own
 #### Structure
 
 **Graphs**
+
 The graph components are split into logical parts and are placed in separate folders for each graph under the `./server/graphs` directory.
 
 Each graph folder needs to contains at least one `graph.ts`, which exports a function that returns the compiled graph object.
@@ -37,12 +39,23 @@ Each graph folder needs to contains at least one `graph.ts`, which exports a fun
 Each exported graph function is then linked up to one or more API routes.
 
 **Routes**
+
 All routes are defined under `./server/routes` in its own file, and then included in the `./server/routes/register_routes.ts` file.
 
 **Integration Builder**
-The integration builder is the last step in the
 
-### Tests
+The integration builder is the last step in the expected API flow (ECS Mapping -> Categorization -> Related Fields -> Integration Builder).
+With the provided package and data stream details, a optional logo and a list of sample logs, the API will build out the entire folder structure and files required for the integration package, archive it and return it as a `Buffer`.
+
+**Templates**
+
+Currently the templates are stored as nunjucks files as they were converted from jinja2 templates, which uses the exact same format. Longer term this will most likely be switched to the Kibana forked Handlebars templating engine.
+
+The templates are stored in the `./server/templates` directory and are used to generate the integration package files while running the Integration Builder API.
+
+One template (pipeline.yml.njk) is used by the ECS Mapping API to generate provide the boilerplate ingest pipeline structure we want to use for all generated integrations.
+
+## Tests
 
 All mocks/fixtures are placed in the top `./__jest__` directory of the plugin. If many mocks/fixtures are required, try to split them up into separate file(s).
 
