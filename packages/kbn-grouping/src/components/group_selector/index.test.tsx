@@ -73,6 +73,14 @@ describe('group selector', () => {
     const { getByTestId } = render(<GroupSelector {...testProps} />);
     expect(getByTestId('group-selector-dropdown').textContent).toBe('Group alerts by: Rule name');
   });
+  it('Sets the Group by title from the title prop', () => {
+    const { getByTestId } = render(
+      <GroupSelector {...testProps} title="Group custom property by" />
+    );
+    expect(getByTestId('group-selector-dropdown').textContent).toBe(
+      'Group custom property by: Rule name'
+    );
+  });
   it('Presents correct option when group selector dropdown is clicked', () => {
     const { getByTestId } = render(<GroupSelector {...testProps} />);
     fireEvent.click(getByTestId('group-selector-dropdown'));

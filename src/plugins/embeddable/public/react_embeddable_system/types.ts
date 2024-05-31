@@ -11,7 +11,12 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
+import {
+  HasType,
+  PublishesPhaseEvents,
+  PublishesUnsavedChanges,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
 import React from 'react';
 
@@ -25,6 +30,7 @@ export interface DefaultEmbeddableApi<
   RuntimeState extends object = SerializedState
 > extends DefaultPresentationPanelApi,
     HasType,
+    PublishesPhaseEvents,
     PublishesUnsavedChanges,
     HasSerializableState<SerializedState>,
     HasSnapshottableState<RuntimeState> {}
@@ -38,7 +44,13 @@ export type ReactEmbeddableApiRegistration<
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 > = Omit<
   Api,
-  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
+  | 'uuid'
+  | 'parent'
+  | 'type'
+  | 'unsavedChanges'
+  | 'resetUnsavedChanges'
+  | 'snapshotRuntimeState'
+  | 'phase$'
 >;
 
 /**
