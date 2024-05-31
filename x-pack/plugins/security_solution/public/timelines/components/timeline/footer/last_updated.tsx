@@ -13,8 +13,6 @@ interface FixedWidthLastUpdatedContainerProps {
   updatedAt: number;
 }
 
-export const isCompactFooter = (width: number): boolean => width < 600;
-
 export const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
   ({ updatedAt }) => {
     const { timelines } = useKibana().services;
