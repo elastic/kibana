@@ -20,70 +20,19 @@ import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
-
-const fields = [
-  ...supportedFieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-  { name: 'any#Char$Field', type: 'number' },
-  { name: 'kubernetes.something.something', type: 'number' },
-  { name: '@timestamp', type: 'date' },
-];
-const enrichFields = [
-  { name: 'otherField', type: 'string' },
-  { name: 'yetAnotherField', type: 'number' },
-];
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const unsupported_field = [{ name: 'unsupported_field', type: 'unsupported' }];
-const indexes = [
-  'a_index',
-  'index',
-  'other_index',
-  '.secret_index',
-  'my-index',
-  'unsupported_index',
-];
-const policies = [
-  {
-    name: 'policy',
-    sourceIndices: ['enrich_index'],
-    matchField: 'otherStringField',
-    enrichFields: ['otherField', 'yetAnotherField'],
-  },
-  {
-    name: 'policy$',
-    sourceIndices: ['enrich_index'],
-    matchField: 'otherStringField',
-    enrichFields: ['otherField', 'yetAnotherField'],
-  },
-];
+import {
+  fields,
+  enrichFields,
+  getCallbackMocks,
+  indexes,
+  policies,
+  unsupported_field,
+} from './__tests__/helpers';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
   .fill(0)
   .map((_, i) => i + 1);
-
-function getCallbackMocks() {
-  return {
-    getFieldsFor: jest.fn(async ({ query }) => {
-      if (/enrich/.test(query)) {
-        return enrichFields;
-      }
-      if (/unsupported_index/.test(query)) {
-        return unsupported_field;
-      }
-      if (/dissect|grok/.test(query)) {
-        return [{ name: 'firstWord', type: 'string' }];
-      }
-      return fields;
-    }),
-    getSources: jest.fn(async () =>
-      indexes.map((name) => ({
-        name,
-        hidden: name.startsWith('.'),
-      }))
-    ),
-    getPolicies: jest.fn(async () => policies),
-  };
-}
 
 const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
 const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
