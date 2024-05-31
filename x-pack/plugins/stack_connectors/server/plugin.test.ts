@@ -181,7 +181,6 @@ describe('Stack Connectors Plugin', () => {
           name: 'IBM Resilient',
         })
       );
-      
     });
   });
 });

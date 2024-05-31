@@ -63,7 +63,7 @@ describe('GeminiConnectorFields renders', () => {
       dashboardUrl: `https://dashboardurl.com/${connectorId}`,
     }));
   });
-  
+
   test('Gemini connector fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={geminiConnector}>
@@ -130,11 +130,11 @@ describe('GeminiConnectorFields renders', () => {
 
   describe('Validation', () => {
     const onSubmit = jest.fn();
-    
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    
+
     it('validates correctly if the apiUrl is empty', async () => {
       const connector = {
         ...geminiConnector,

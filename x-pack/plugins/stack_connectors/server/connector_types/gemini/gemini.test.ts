@@ -26,18 +26,17 @@ jest.mock('@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token', () => ({
 let mockRequest: jest.Mock;
 
 describe('GeminiConnector', () => {
-
   const defaultResponse = {
     data: {
       candidates: [{ content: { parts: [{ text: 'Paris' }] } }],
-      usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 }
-    }
-  }
+      usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 },
+    },
+  };
 
   const connectorResponse = {
     completion: 'Paris',
-    usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 }
-  }
+    usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,29 +47,29 @@ describe('GeminiConnector', () => {
 
   const connector = new GeminiConnector({
     connector: { id: '1', type: '.gemini' },
-      configurationUtilities: actionsConfigMock.create(),
-      config: {
-        apiUrl: 'https://api.gemini.com',
-        defaultModel: 'gemini-1.5-pro-preview-0409',
-        gcpRegion: 'us-central1',
-        gcpProjectID: 'my-project-12345',
-      },
-      secrets: {
-        credentialsJson: JSON.stringify({
-          type: 'service_account',
-          project_id: '',
-          private_key_id: '',
-          private_key: '-----BEGIN PRIVATE KEY----------END PRIVATE KEY-----\n',
-          client_email: '',
-          client_id: '',
-          auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-          token_uri: 'https://oauth2.googleapis.com/token',
-          auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-          client_x509_cert_url: '',
-        }),
-      },
-      logger: loggingSystemMock.createLogger(),
-      services: actionsMock.createServices(),
+    configurationUtilities: actionsConfigMock.create(),
+    config: {
+      apiUrl: 'https://api.gemini.com',
+      defaultModel: 'gemini-1.5-pro-preview-0409',
+      gcpRegion: 'us-central1',
+      gcpProjectID: 'my-project-12345',
+    },
+    secrets: {
+      credentialsJson: JSON.stringify({
+        type: 'service_account',
+        project_id: '',
+        private_key_id: '',
+        private_key: '-----BEGIN PRIVATE KEY----------END PRIVATE KEY-----\n',
+        client_email: '',
+        client_id: '',
+        auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+        token_uri: 'https://oauth2.googleapis.com/token',
+        auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+        client_x509_cert_url: '',
+      }),
+    },
+    logger: loggingSystemMock.createLogger(),
+    services: actionsMock.createServices(),
   });
 
   describe('runApi', () => {
@@ -98,19 +97,18 @@ describe('GeminiConnector', () => {
       expect(mockRequest).toHaveBeenCalledWith({
         url: 'https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/test-model:generateContent',
         method: 'post',
-        data: JSON.stringify(
-          {
-            messages: [
-              {
+        data: JSON.stringify({
+          messages: [
+            {
               contents: [
                 {
                   role: 'user',
                   parts: [{ text: 'What is the capital of France?' }],
                 },
-              ]}
-            ],
-          },
-        ),
+              ],
+            },
+          ],
+        }),
         headers: {
           Authorization: 'Bearer mock_access_token',
           'Content-Type': 'application/json',

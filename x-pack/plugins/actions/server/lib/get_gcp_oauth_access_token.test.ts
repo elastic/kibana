@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { GoogleAuth } from 'google-auth-library';
 import { Logger } from '@kbn/core/server';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('getGoogleOAuthJwtAccessToken', () => {
-
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const credentialsJson = {
     type: 'service_account',
@@ -62,7 +60,8 @@ describe('getGoogleOAuthJwtAccessToken', () => {
         newToken: 'mocked_access_token',
         deleteExisting: false,
         expiresInSec: 3500,
-      }));
+      })
+    );
   });
 
   it('uses stored access token if it exists', async () => {
@@ -117,7 +116,8 @@ describe('getGoogleOAuthJwtAccessToken', () => {
         newToken: 'mocked_access_token',
         deleteExisting: false,
         expiresInSec: 3500,
-      }));
+      })
+    );
   });
 
   it('logs warning when getting connector token fails', async () => {
@@ -133,7 +133,7 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
     const accessToken = await getGoogleOAuthJwtAccessToken({
       connectorId: 'failing_connector',
-      logger: logger,
+      logger,
       credentials: credentialsJson,
       connectorTokenClient,
     });
@@ -156,12 +156,14 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     // Dynamically import the function after mocking
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
 
-    await expect(getGoogleOAuthJwtAccessToken({
-      connectorId: 'test_connector',
-      logger,
-      credentials: {},
-      connectorTokenClient,
-    })).rejects.toThrowError(
+    await expect(
+      getGoogleOAuthJwtAccessToken({
+        connectorId: 'test_connector',
+        logger,
+        credentials: {},
+        connectorTokenClient,
+      })
+    ).rejects.toThrowError(
       'Unable to retrieve access token. Ensure the service account has the right permissions and the Vertex AI endpoint is enabled in the GCP project. Error: Google Auth Error'
     );
 
