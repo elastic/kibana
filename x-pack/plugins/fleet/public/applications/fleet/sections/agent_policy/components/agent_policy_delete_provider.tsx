@@ -176,7 +176,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
           >
             <FormattedMessage
               id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
-              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy."
+              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy. This might include inactive agents."
               values={{
                 agentsCount,
               }}

@@ -9,8 +9,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
 import { events as genAiEvents } from '@kbn/elastic-assistant-plugin/server/lib/telemetry/event_based_telemetry';
 
-import { events as securityEvents } from '../../../../../server/lib/telemetry/event_based/events';
-import { telemetryEvents } from '../events/telemetry_events';
+import { events as securityEvents } from '../../server/lib/telemetry/event_based/events';
+import { telemetryEvents } from '../../public/common/lib/telemetry/events/telemetry_events';
 // uncomment and add to run script, but do not commit as creates cirular dependency
 // import { telemetryEvents as serverlessEvents } from '@kbn/security-solution-serverless/server/telemetry/event_based_telemetry';
 
@@ -55,18 +55,17 @@ async function cli(): Promise<void> {
     'kbn-xsrf': 'xxx',
     'Content-Type': 'application/json',
   };
-  const dataViewApiUrl = `${removeTrailingSlash(kibanaUrl)}/s/${spaceId}/api/data_views`;
+  const dataViewApiUrl = `${removeTrailingSlash(
+    kibanaUrl
+  )}/s/${spaceId}/api/data_views/data_view/${dataViewName}`;
 
   try {
     logger.info(`Fetching data view "${dataViewName}"...`);
     const {
-      data: { data_view: dataViews },
+      data: { data_view: ourDataView },
     } = await axios.get(dataViewApiUrl, {
       headers: requestHeaders,
     });
-    const ourDataView = dataViews.find(
-      (dataView: { id: string; name: string }) => dataView.name === dataViewName
-    );
 
     if (!ourDataView) {
       throw new Error(
@@ -111,7 +110,7 @@ async function cli(): Promise<void> {
       });
     });
 
-    const runtimeFieldUrl = `${dataViewApiUrl}/data_view/${ourDataView.id}/runtime_field`;
+    const runtimeFieldUrl = `${dataViewApiUrl}/runtime_field`;
     await upsertRuntimeFields(runtimeFields, runtimeFieldUrl, requestHeaders);
     const manualFieldLength = Object.keys(manualRuntimeFields).length;
     const runtimeFieldLength = Object.keys(runtimeFields).length;
@@ -200,10 +199,7 @@ async function upsertRuntimeFields(
           headers: requestHeaders,
         });
       } catch (error) {
-        throw new Error(
-          `Error upserting field ${fieldName}:`,
-          error.response ? error.response.data : error.message
-        );
+        throw new Error(`Error upserting field '${fieldName}: ${fieldType}' - ${error.message}`);
       }
     }
   }
