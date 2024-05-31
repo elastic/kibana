@@ -138,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.url',
         'kibana.version',
         'kibana.alert.consecutive_matches',
+        'kibana.alert.is_improving',
         'kibana.alert.previous_action_group',
       ];
 
@@ -156,7 +157,6 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
-        [ALERT_IS_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
