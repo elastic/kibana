@@ -294,7 +294,14 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             packagePolicy.name === installablePackagePolicy.packagePolicy.name
         );
       });
-      logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
+      logger.debug(
+        `Adding preconfigured package policies ${JSON.stringify(
+          packagePoliciesToAdd.map((pol) => ({
+            name: pol.packagePolicy.name,
+            package: pol.installedPackage.name,
+          }))
+        )}`
+      );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
         esClient,
