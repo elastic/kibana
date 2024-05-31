@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Create Conversation API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/elastic_assistant/conversations:
+  /internal/elastic_assistant/conversations:
     post:
       operationId: CreateConversation
       x-codegen-enabled: true
@@ -37,8 +37,8 @@ paths:
                     type: string
                   message:
                     type: string
-  
-  /api/elastic_assistant/conversations/{id}:
+
+  /internal/elastic_assistant/conversations/{id}:
     get:
       operationId: ReadConversation
       x-codegen-enabled: true
@@ -52,7 +52,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates a successful call.
@@ -86,7 +86,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -126,7 +126,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates a successful call.
@@ -147,8 +147,8 @@ paths:
                     type: string
                   message:
                     type: string
-  
-  /api/elastic_assistant/conversations/{id}/messages:
+
+  /internal/elastic_assistant/conversations/{id}/messages:
     post:
       operationId: AppendConversationMessage
       x-codegen-enabled: true
@@ -162,7 +162,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:

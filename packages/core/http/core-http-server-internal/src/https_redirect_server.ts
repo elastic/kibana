@@ -8,7 +8,7 @@
 
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import { createServer, getServerOptions } from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/logging';
 
 import { HttpConfig } from './http_config';
@@ -31,13 +31,10 @@ export class HttpsRedirectServer {
     // Redirect server is configured in the same way as any other HTTP server
     // within the platform with the only exception that it should always be a
     // plain HTTP server, so we just ignore `tls` part of options.
-    this.server = createServer(
-      {
-        ...getServerOptions(config, { configureTLS: false }),
-        port: config.ssl.redirectHttpFromPort,
-      },
-      getListenerOptions(config)
-    );
+    this.server = createServer({
+      ...getServerOptions(config, { configureTLS: false }),
+      port: config.ssl.redirectHttpFromPort,
+    });
 
     this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
       return responseToolkit

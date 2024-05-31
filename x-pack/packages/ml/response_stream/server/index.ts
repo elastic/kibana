@@ -8,5 +8,6 @@
 export {
   streamFactory,
   type StreamFactoryReturnType,
+  type StreamResponseWithHeaders,
   type UncompressedResponseStream,
 } from './stream_factory';

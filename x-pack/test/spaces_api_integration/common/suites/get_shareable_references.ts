@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { deepFreeze } from '@kbn/std';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
@@ -192,7 +192,7 @@ const getRedactedSpaces = (authorizedSpace: string | undefined, spaces: string[]
   return redactedSpaces.sort((a, b) => (a === '?' ? 1 : b === '?' ? -1 : 0)); // unknown spaces are always at the end of the array
 };
 
-export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectForbidden = expectResponses.forbiddenTypes('share_to_space');
   const expectResponseBody =
     (
@@ -274,7 +274,7 @@ export function getShareableReferencesTestSuiteFactory(esArchiver: any, supertes
             const requestBody = test.request;
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_get_shareable_references`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

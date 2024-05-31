@@ -13,6 +13,10 @@ import { RuleAlertDelay } from './rule_alert_delay';
 const mockOnChange = jest.fn();
 
 describe('RuleAlertDelay', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('Renders correctly', () => {
     render(
       <RuleAlertDelay
@@ -43,6 +47,37 @@ describe('RuleAlertDelay', () => {
     });
 
     expect(mockOnChange).toHaveBeenCalledWith('alertDelay', { active: 3 });
+  });
+
+  test('Should only allow integers as inputs', async () => {
+    render(<RuleAlertDelay onChange={mockOnChange} />);
+
+    ['-', '+', 'e', 'E', '.', 'a', '01'].forEach((char) => {
+      fireEvent.change(screen.getByTestId('alertDelayInput'), {
+        target: {
+          value: char,
+        },
+      });
+    });
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
+
+  test('Should call onChange with null if empty string is typed', () => {
+    render(
+      <RuleAlertDelay
+        alertDelay={{
+          active: 5,
+        }}
+        onChange={mockOnChange}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('alertDelayInput'), {
+      target: {
+        value: '',
+      },
+    });
+    expect(mockOnChange).toHaveBeenCalledWith('alertDelay', null);
   });
 
   test('Should display error when input is invalid', () => {

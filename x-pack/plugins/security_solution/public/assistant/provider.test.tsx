@@ -165,7 +165,7 @@ describe('createConversations', () => {
       );
       await waitForNextUpdate();
       expect(http.fetch.mock.calls[0][0]).toBe(
-        '/api/elastic_assistant/current_user/conversations/_bulk_action'
+        '/internal/elastic_assistant/current_user/conversations/_bulk_action'
       );
       expect(
         http.fetch.mock.calls[0].length > 1
@@ -187,7 +187,7 @@ describe('createConversations', () => {
       );
       await waitForNextUpdate();
       expect(http.fetch.mock.calls[0][0]).toBe(
-        '/api/elastic_assistant/current_user/conversations/_bulk_action'
+        '/internal/elastic_assistant/current_user/conversations/_bulk_action'
       );
       const createdConversations =
         http.fetch.mock.calls[0].length > 1

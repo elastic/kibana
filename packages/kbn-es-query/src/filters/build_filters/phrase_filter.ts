@@ -9,7 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
-import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 import { hasRangeKeys } from './range_filter';
 
@@ -101,7 +101,7 @@ export const getPhraseFilterValue = (
 export const buildPhraseFilter = (
   field: DataViewFieldBase,
   value: PhraseFilterValue,
-  indexPattern: DataViewBase
+  indexPattern: DataViewBaseNoFields
 ): PhraseFilter | ScriptedPhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 

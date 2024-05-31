@@ -33,5 +33,6 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
+    "@kbn/react-kibana-context-render",
   ]
 }

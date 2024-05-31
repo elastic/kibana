@@ -18,6 +18,8 @@ import {
 } from '../mocks/metric_threshold_rule';
 import { AlertDetailsAppSection } from './alert_details_app_section';
 import { ExpressionChart } from './expression_chart';
+import { Groups } from './groups';
+import { Tags } from './tags';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
@@ -43,14 +45,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
       ...mockCoreMock.createStart(),
       charts: mockedChartStartContract,
     },
-  }),
-}));
-
-jest.mock('../../../containers/metrics_source/source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),
 }));
 
@@ -84,15 +78,32 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('threshold-2000-2500')).toBeTruthy();
   });
 
-  it('should render rule link', async () => {
+  it('should render alert summary fields', async () => {
     renderComponent();
 
     expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
       {
+        label: 'Source',
+        value: (
+          <Groups
+            groups={[
+              {
+                field: 'host.name',
+                value: 'host-1',
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        label: 'Tags',
+        value: <Tags tags={['tag 1', 'tag 2']} />,
+      },
+      {
         label: 'Rule',
         value: (
-          <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
+          <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
             Monitoring hosts
           </EuiLink>
         ),

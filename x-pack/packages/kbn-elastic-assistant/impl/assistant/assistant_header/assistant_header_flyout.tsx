@@ -45,6 +45,7 @@ interface OwnProps {
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
+  isAssistantEnabled: boolean;
 }
 
 type Props = OwnProps;
@@ -70,6 +71,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   conversations,
   refetchConversationsState,
   onConversationCreate,
+  isAssistantEnabled,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -140,6 +142,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
         isExpanded={!!chatHistoryVisible}
         setIsExpanded={setChatHistoryVisible}
         onConversationCreate={onConversationCreate}
+        isAssistantEnabled={isAssistantEnabled}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
