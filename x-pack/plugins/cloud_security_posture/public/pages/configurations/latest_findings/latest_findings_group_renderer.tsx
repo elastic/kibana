@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/securitysolution-grouping/src';
+import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
