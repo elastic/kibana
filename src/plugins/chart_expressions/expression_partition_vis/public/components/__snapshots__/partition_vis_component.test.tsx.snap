@@ -788,7 +788,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -1716,7 +1715,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -2708,7 +2706,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -3700,7 +3697,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -4628,7 +4624,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={false}
           theme={
             Array [
               Object {
@@ -5505,6 +5500,11 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendPosition="right"
           legendSize={130}
           legendSort={[Function]}
+          legendValues={
+            Array [
+              "value",
+            ]
+          }
           locale="en"
           noResults={
             <VisualizationNoResults
@@ -5515,7 +5515,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
-          showLegendExtra={true}
           theme={
             Array [
               Object {

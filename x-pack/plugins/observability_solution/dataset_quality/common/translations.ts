@@ -46,6 +46,13 @@ export const flyoutOpenInLogsExplorerText = i18n.translate(
   }
 );
 
+export const flyoutOpenInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',
   {
@@ -137,6 +144,33 @@ export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShow
   defaultMessage: 'Show all',
 });
 
+export const flyoutImprovementText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Degraded Fields',
+  }
+);
+
+export const flyoutImprovementTooltip = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of degraded fields found in your dataset.',
+  }
+);
+
+export const flyoutDegradedFieldsTableLoadingText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableLoadingText',
+  {
+    defaultMessage: 'Loading degraded fields',
+  }
+);
+
+export const flyoutDegradedFieldsTableNoData = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableNoData',
+  {
+    defaultMessage: 'No degraded fields found',
+  }
+);
 /*
 Summary Panel
 */
