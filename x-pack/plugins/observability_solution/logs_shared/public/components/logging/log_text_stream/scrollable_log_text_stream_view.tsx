@@ -157,7 +157,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     const hasContextAction = !!setContextEntry;
 
     return (
-      <ScrollableLogTextStreamViewWrapper>
+      <ScrollableLogTextStreamViewWrapper role="table">
         {isReloading && (!isStreaming || !hasItems) ? (
           <LogsSharedLoadingPanel
             width="100%"
