@@ -28,7 +28,7 @@ export function registerVisualizeESQLFunction({
   resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(visualizeESQLFunction, async ({ arguments: { query, intention } }) => {
-    const { columns, errorMessages } = await validateEsqlQuery({
+    const { columns, errorMessages, rows } = await validateEsqlQuery({
       query,
       client: (await resources.context.core).elasticsearch.client.asCurrentUser,
     });
@@ -38,6 +38,7 @@ export function registerVisualizeESQLFunction({
     return {
       data: {
         columns,
+        rows,
       },
       content: {
         message,

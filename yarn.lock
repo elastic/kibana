@@ -4667,6 +4667,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-datagrid@link:src/plugins/esql_datagrid":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:packages/kbn-esql-utils":
   version "0.0.0"
   uid ""

@@ -1,0 +1,33 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/data-plugin",
+    "@kbn/es-types",
+    "@kbn/es-query",
+    "@kbn/discover-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/cell-actions",
+    "@kbn/unified-data-table",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core",
+    "@kbn/ui-actions-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/i18n",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/shared-ux-utility"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}
