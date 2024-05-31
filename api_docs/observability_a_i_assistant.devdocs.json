@@ -993,6 +993,20 @@
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.KnowledgeBaseEntry.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5185,6 +5199,31 @@
     "objects": [
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantCapabilities",
+        "type": "Object",
+        "tags": [],
+        "label": "aiAssistantCapabilities",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.aiAssistantCapabilities.show",
+            "type": "string",
+            "tags": [],
+            "label": "show",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.DEFAULT_LANGUAGE_OPTION",
         "type": "Object",
         "tags": [],
@@ -7215,6 +7254,20 @@
                 "section": "def-common.KnowledgeBaseEntryRole",
                 "text": "KnowledgeBaseEntryRole"
               }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.KnowledgeBaseEntry.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              "{ name: string; } | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,

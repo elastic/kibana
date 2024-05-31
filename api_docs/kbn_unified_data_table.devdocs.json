@@ -2427,6 +2427,22 @@
             "path": "packages/kbn-unified-data-table/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.UnifiedDataTableSettingsColumn.display",
+            "type": "string",
+            "tags": [],
+            "label": "display",
+            "description": [
+              "\n  Optional props passed to Columns to display provided labels as column names instead of field names.\n  This object maps column field names to their corresponding display labels.\n  These labels will take precedence over the data view field names."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

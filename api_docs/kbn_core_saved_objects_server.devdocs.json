@@ -6166,44 +6166,52 @@
             "path": "x-pack/plugins/actions/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "alerting",
