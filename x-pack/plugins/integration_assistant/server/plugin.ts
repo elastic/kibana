@@ -44,7 +44,7 @@ export class IntegrationAssistantPlugin
     >('integrationAssistant', () => ({
       getStartServices: core.getStartServices,
     }));
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
     this.logger.debug('integrationAssistant api: Setup');
 
     registerRoutes(router);
