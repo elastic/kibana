@@ -33,7 +33,11 @@ import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { map, distinctUntilChanged, startWith } from 'rxjs';
 import { v4 } from 'uuid';
 import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
-import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
+import {
+  DashboardContainerInput,
+  DashboardPanelState,
+  prefixReferencesFromPanel,
+} from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
   DEFAULT_PANEL_HEIGHT,
@@ -377,6 +381,11 @@ export const initializeDashboard = async ({
               i: embeddableId,
             },
           };
+          if (incomingEmbeddable.references) {
+            container.savedObjectReferences.push(
+              ...prefixReferencesFromPanel(embeddableId, incomingEmbeddable.references)
+            );
+          }
           container.updateInput({
             panels: {
               ...container.getInput().panels,

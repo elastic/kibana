@@ -52,7 +52,7 @@ import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
-import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
@@ -587,13 +587,14 @@ export class DashboardContainer
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
-      const runtimeState = apiHasSnapshottableState(child)
-        ? await child.snapshotRuntimeState()
+      const serialized = apiHasSerializableState(child)
+        ? await child.serializeState()
         : { rawState: {} };
       return {
         type: panel.type,
-        explicitInput: { ...panel.explicitInput, ...runtimeState },
+        explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
+        references: serialized.references,
       };
     }
     return panel;
