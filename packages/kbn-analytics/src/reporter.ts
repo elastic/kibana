@@ -72,7 +72,9 @@ export class Reporter {
     const metrics = wrapArray(eventNames).map((eventName) => {
       this.logger.debug(`${type} Metric -> (${appName}:${eventName}):`);
       const report = createUiCounterMetric({ type, appName, eventName, count });
-      this.logger.debug(JSON.stringify(report));
+      if (this.logger.isLevelEnabled('debug')) {
+        this.logger.debug(JSON.stringify(report));
+      }
       return report;
     });
     this.saveToReport(metrics);
