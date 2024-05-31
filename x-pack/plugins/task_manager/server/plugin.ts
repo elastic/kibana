@@ -38,7 +38,6 @@ import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
-import { start } from './append_only/task_claimer';
 
 export interface TaskManagerSetupContract {
   /**
@@ -282,35 +281,29 @@ export class TaskManagerPlugin
         savedObjects.createInternalRepository(['all_pods']),
         this.config.manually_provide_pod_names
       );
-      // this.taskPollingLifecycle = new TaskPollingLifecycle({
-      //   config: this.config!,
-      //   definitions: this.definitions,
-      //   unusedTypes: REMOVED_TYPES,
-      //   logger: this.logger,
-      //   executionContext,
-      //   taskStore,
-      //   usageCounter: this.usageCounter,
-      //   middleware: this.middleware,
-      //   elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-      //   taskPartitioner,
-      //   ...managedConfiguration,
-      // });
-
-      // this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
-      //   config: this.config!,
-      //   definitions: this.definitions,
-      //   logger: this.logger,
-      //   executionContext,
-      //   middleware: this.middleware,
-      //   elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
-      //   pool: this.taskPollingLifecycle.pool,
-      //   lifecycleEvent: this.taskPollingLifecycle.events,
-      // });
-
-      start({
+      this.taskPollingLifecycle = new TaskPollingLifecycle({
+        config: this.config!,
+        definitions: this.definitions,
+        unusedTypes: REMOVED_TYPES,
+        logger: this.logger,
+        executionContext,
+        taskStore,
+        usageCounter: this.usageCounter,
+        middleware: this.middleware,
+        elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         taskPartitioner,
-        esClient: elasticsearch.client.asInternalUser,
-        kibanaUuid: this.podName!,
+        ...managedConfiguration,
+      });
+
+      this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
+        config: this.config!,
+        definitions: this.definitions,
+        logger: this.logger,
+        executionContext,
+        middleware: this.middleware,
+        elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        pool: this.taskPollingLifecycle.pool,
+        lifecycleEvent: this.taskPollingLifecycle.events,
       });
     }
 
