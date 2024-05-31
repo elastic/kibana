@@ -259,10 +259,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let skipExecution: boolean = false;
           try {
             if (!isMachineLearningParams(params)) {
-              const indexPatterns = new IndexPatternsFetcher(
-                scopedClusterClient.asInternalUser,
-                true
-              );
+              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
 
               if (existingIndices.length > 0) {
