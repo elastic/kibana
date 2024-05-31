@@ -16,8 +16,9 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiComboBox,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { XYLegendValue, LegendLayout } from '@kbn/visualizations-plugin/common/constants';
@@ -28,7 +29,7 @@ import { LegendSizeSettings } from './size/legend_size_settings';
 import { nonNullable } from '../../utils';
 import { ToolbarTitleSettings } from '../axis/title/toolbar_title_settings';
 
-export interface LegendSettingsPopoverProps<LegendStats extends string = XYLegendValue> {
+export interface LegendSettingsPopoverProps<LegendStats extends LegendValue = XYLegendValue> {
   /**
    * Determines the legend display options
    */
@@ -216,25 +217,23 @@ const PANEL_STYLE = {
 
 const legendTitleStrings = {
   header: i18n.translate('xpack.lens.label.shared.legendHeader', {
-    defaultMessage: 'Title',
+    defaultMessage: 'Series header',
   }),
-  label: i18n.translate('xpack.lens.shared.legendNameLabel', {
-    defaultMessage: 'Title',
+  label: i18n.translate('xpack.lens.shared.Lagend ', {
+    defaultMessage: 'Series header',
   }),
   placeholder: i18n.translate('xpack.lens.shared.overwriteLegendTitle', {
-    defaultMessage: 'Overwrite title',
+    defaultMessage: 'Overwrite series header',
   }),
-  getDataTestSubj: () => `lnsLegendTitle`,
+  getDataTestSubj: () => `lnsLegendTableSeriesHeader`,
 };
 
-export function shouldDisplayTable<LegendStats extends string = XYLegendValue>(
-  stats?: LegendStats[]
-) {
-  return !!(stats && stats.filter((v) => v !== XYLegendValue.CurrentAndLastValue).length);
+export function shouldDisplayTable(legendValues: LegendValue[]) {
+  return legendValues.some((v) => v !== LegendValue.CurrentAndLastValue);
 }
 
-export function LegendSettingsPopover<LegendStats extends string = XYLegendValue>({
-  allowedLegendStats,
+export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegendValue>({
+  allowedLegendStats = [],
   legendOptions,
   mode,
   legendLayout,
@@ -255,7 +254,7 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
   renderNestedLegendSwitch,
   nestedLegend,
   onNestedLegendChange = noop,
-  legendStats,
+  legendStats = [],
   onLegendStatsChange = noop,
   groupPosition = 'right',
   maxLines,
@@ -267,6 +266,25 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
   showAutoLegendSizeOption,
   titlePlaceholder,
 }: LegendSettingsPopoverProps<LegendStats>) {
+  const isLegendNotHidden = mode !== 'hide';
+
+  const canShowStatisticsConfigs = isLegendNotHidden && allowedLegendStats.length > 1;
+
+  const canShowShowValueConfig =
+    isLegendNotHidden &&
+    allowedLegendStats.length === 1 &&
+    (allowedLegendStats[0].value === LegendValue.CurrentAndLastValue ||
+      allowedLegendStats[0].value === LegendValue.Value);
+
+  const isCurrentAndLastValueOnlySelected =
+    legendStats.length === 1 && legendStats[0] === LegendValue.CurrentAndLastValue;
+
+  const canShowLegendTitleChangeConfig =
+    canShowStatisticsConfigs &&
+    !isCurrentAndLastValueOnlySelected &&
+    legendStats.length > 0 &&
+    !!onLegendTitleChange;
+
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.legendLabel', {
@@ -280,14 +298,14 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
-          defaultMessage: 'Display',
+          defaultMessage: 'Visibility',
         })}
         fullWidth
       >
         <EuiButtonGroup
           isFullWidth
           legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
-            defaultMessage: 'Display',
+            defaultMessage: 'Visibility',
           })}
           data-test-subj="lens-legend-display-btn"
           buttonSize="compressed"
@@ -296,40 +314,72 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
           onChange={onDisplayChange}
         />
       </EuiFormRow>
-      {allowedLegendStats && allowedLegendStats.length > 1 && (
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.shared.legendValues', {
-            defaultMessage: 'Values',
-          })}
-          fullWidth
-        >
-          <EuiComboBox
-            aria-label={i18n.translate('xpack.lens.shared.legendValues', {
-              defaultMessage: 'Values',
-            })}
-            placeholder={i18n.translate('xpack.lens.shared.legendValuesPlaceholder', {
-              defaultMessage: 'Select one or more values to display',
-            })}
-            options={allowedLegendStats}
-            selectedOptions={allowedLegendStats.filter(({ value }) => legendStats?.includes(value))}
-            onChange={(options) => {
-              const newLegendStats = options.map(({ value }) => value).filter(nonNullable);
-              const hasConvertedToTable =
-                !shouldDisplayTable(legendStats) && shouldDisplayTable(newLegendStats);
-              onLegendStatsChange(newLegendStats, hasConvertedToTable);
-            }}
-            isClearable={true}
-            compressed
+
+      {isLegendNotHidden && (
+        <>
+          <LegendLocationSettings
+            location={location}
+            onLocationChange={onLocationChange}
+            verticalAlignment={verticalAlignment}
+            horizontalAlignment={horizontalAlignment}
+            onAlignmentChange={onAlignmentChange}
+            position={position}
+            onPositionChange={onPositionChange}
           />
-        </EuiFormRow>
+          {location !== 'inside' && (
+            <LegendSizeSettings
+              legendSize={legendSize}
+              onLegendSizeChange={onLegendSizeChange}
+              isVerticalLegend={
+                !position || position === Position.Left || position === Position.Right
+              }
+              showAutoOption={showAutoLegendSizeOption}
+            />
+          )}
+          {location && (
+            <ColumnsNumberSetting
+              floatingColumns={floatingColumns}
+              onFloatingColumnsChange={onFloatingColumnsChange}
+              isHidden={location === 'outside' || shouldDisplayTable(legendStats)}
+            />
+          )}
+        </>
       )}
-      {!!(
-        allowedLegendStats?.length &&
-        allowedLegendStats?.length > 1 &&
-        legendStats?.length &&
-        onLegendTitleChange
-      ) && (
+
+      {canShowStatisticsConfigs && (
+        <>
+          <EuiHorizontalRule margin="s" />
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.shared.legendStatistics', {
+              defaultMessage: 'Statistics',
+            })}
+            fullWidth
+          >
+            <EuiComboBox
+              aria-label={i18n.translate('xpack.lens.shared.legendStatistics', {
+                defaultMessage: 'Statistics',
+              })}
+              placeholder={i18n.translate('xpack.lens.shared.legendStatisticsPlaceholder', {
+                defaultMessage: 'Select one or more statistics to show',
+              })}
+              options={allowedLegendStats}
+              selectedOptions={allowedLegendStats.filter(({ value }) =>
+                legendStats?.includes(value)
+              )}
+              onChange={(options) => {
+                const newLegendStats = options.map(({ value }) => value).filter(nonNullable);
+                const hasConvertedToTable =
+                  !shouldDisplayTable(legendStats) && shouldDisplayTable(newLegendStats);
+                onLegendStatsChange(newLegendStats, hasConvertedToTable);
+              }}
+              isClearable={true}
+              compressed
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {canShowLegendTitleChangeConfig && (
         <ToolbarTitleSettings
           settingId="legend"
           title={legendTitle}
@@ -339,7 +389,7 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
           placeholder={titlePlaceholder}
         />
       )}
-      {allowedLegendStats && allowedLegendStats.length === 1 && (
+      {canShowShowValueConfig && (
         <EuiFormRow
           display="columnCompressedSwitch"
           label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
@@ -390,87 +440,57 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
         </EuiFormRow>
       )} */}
 
-      {mode !== 'hide' && (
-        <>
-          <LegendLocationSettings
-            location={location}
-            onLocationChange={onLocationChange}
-            verticalAlignment={verticalAlignment}
-            horizontalAlignment={horizontalAlignment}
-            onAlignmentChange={onAlignmentChange}
-            position={position}
-            onPositionChange={onPositionChange}
-          />
-          {location !== 'inside' && (
-            <LegendSizeSettings
-              legendSize={legendSize}
-              onLegendSizeChange={onLegendSizeChange}
-              isVerticalLegend={
-                !position || position === Position.Left || position === Position.Right
-              }
-              showAutoOption={showAutoLegendSizeOption}
-            />
-          )}
-          {location && (
-            <ColumnsNumberSetting
-              floatingColumns={floatingColumns}
-              onFloatingColumnsChange={onFloatingColumnsChange}
-              isHidden={location === 'outside' || shouldDisplayTable(legendStats)}
-            />
-          )}
-          {legendLayout !== LegendLayout.List && (
-            <EuiFormRow
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.shared.labelTruncation', {
-                defaultMessage: 'Label truncation',
-              })}
-              fullWidth
-            >
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    compressed
-                    label={i18n.translate('xpack.lens.shared.labelTruncation', {
-                      defaultMessage: 'Label truncation',
-                    })}
-                    data-test-subj="lens-legend-truncate-switch"
-                    showLabel={false}
-                    checked={shouldTruncate ?? true}
-                    onChange={onTruncateLegendChange}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow>
-                  <MaxLinesInput
-                    disabled={!shouldTruncate}
-                    value={maxLines ?? DEFAULT_TRUNCATE_LINES}
-                    setValue={onMaxLinesChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          )}
-
-          {renderNestedLegendSwitch && (
-            <EuiFormRow
-              display="columnCompressedSwitch"
-              label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
-                defaultMessage: 'Nested',
-              })}
-              fullWidth
-            >
+      {isLegendNotHidden && legendLayout !== LegendLayout.List && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.labelTruncation', {
+            defaultMessage: 'Label truncation',
+          })}
+          fullWidth
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
               <EuiSwitch
                 compressed
-                label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-                  defaultMessage: 'Nested',
+                label={i18n.translate('xpack.lens.shared.labelTruncation', {
+                  defaultMessage: 'Label truncation',
                 })}
-                data-test-subj="lens-legend-nested-switch"
+                data-test-subj="lens-legend-truncate-switch"
                 showLabel={false}
-                checked={Boolean(nestedLegend)}
-                onChange={onNestedLegendChange}
+                checked={shouldTruncate ?? true}
+                onChange={onTruncateLegendChange}
               />
-            </EuiFormRow>
-          )}
-        </>
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <MaxLinesInput
+                disabled={!shouldTruncate}
+                value={maxLines ?? DEFAULT_TRUNCATE_LINES}
+                setValue={onMaxLinesChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      )}
+
+      {isLegendNotHidden && renderNestedLegendSwitch && (
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
+            defaultMessage: 'Nested',
+          })}
+          fullWidth
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+              defaultMessage: 'Nested',
+            })}
+            data-test-subj="lens-legend-nested-switch"
+            showLabel={false}
+            checked={Boolean(nestedLegend)}
+            onChange={onNestedLegendChange}
+          />
+        </EuiFormRow>
       )}
     </ToolbarPopover>
   );

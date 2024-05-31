@@ -1091,7 +1091,7 @@ export const getXyVisualization = ({
   },
 
   getRenderEventCounters(state) {
-    if (shouldDisplayTable(state.legend.legendStats)) {
+    if (shouldDisplayTable(state.legend.legendStats ?? [])) {
       return [`legend_stats`];
     }
     return [];

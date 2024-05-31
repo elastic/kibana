@@ -830,7 +830,7 @@ export function XYChart({
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
             // TODO: use legendLayout when list is implemented
             // legendLayout={legend.layout}
-            legendValues={legend.legendStats}
+            legendValues={isHistogramViz ? legend.legendStats : []}
             legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
             theme={[
               {
@@ -881,7 +881,6 @@ export function XYChart({
                   )
                 : undefined
             }
-            legendValues={isHistogramViz ? legend.legendStats : []}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={

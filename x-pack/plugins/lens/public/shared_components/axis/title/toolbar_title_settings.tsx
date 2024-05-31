@@ -97,7 +97,8 @@ export const ToolbarTitleSettings: React.FunctionComponent<TitleSettingsProps> =
           placeholder={placeholder}
           hasAutoOption={true}
           handleChange={({ mode, label }) => {
-            onLocalTitleChange({ title: label, visibility: mode });
+            // if the label is empty, turn back to auto mode as at the initialization phase of this component
+            onLocalTitleChange({ title: label, visibility: label?.length === 0 ? 'auto' : mode });
           }}
         />
       </EuiFormRow>

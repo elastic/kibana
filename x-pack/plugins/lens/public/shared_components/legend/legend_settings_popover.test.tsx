@@ -10,7 +10,8 @@ import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_sett
 import userEvent from '@testing-library/user-event';
 import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { LegendLayout, XYLegendValue } from '@kbn/visualizations-plugin/common';
+import { LegendLayout } from '@kbn/visualizations-plugin/common';
+import { LegendValue } from '@elastic/charts';
 
 describe('Legend Settings', () => {
   let defaultProps: LegendSettingsPopoverProps;
@@ -132,12 +133,12 @@ describe('Legend Settings', () => {
       allowedLegendStats: [
         {
           label: 'Current and last value',
-          value: XYLegendValue.CurrentAndLastValue,
+          value: LegendValue.CurrentAndLastValue,
           toolTipContent: 'Shows the current and last value',
         },
         {
           label: 'Average',
-          value: XYLegendValue.Average,
+          value: LegendValue.Average,
           toolTipContent: 'Shows the average value',
         },
       ],
@@ -147,7 +148,7 @@ describe('Legend Settings', () => {
     fireEvent.click(screen.getByRole('combobox', { name: 'Values' }));
     fireEvent.click(screen.getByRole('option', { name: 'Current and last value' }));
     // expect(screen.getByRole('group', { name: 'Layout' })).toBeInTheDocument();
-    expect(onLegendStatsChange).toBeCalledWith([XYLegendValue.CurrentAndLastValue], false);
+    expect(onLegendStatsChange).toBeCalledWith([LegendValue.CurrentAndLastValue], false);
   });
 
   it('should not show truncation options when layout is list', () => {

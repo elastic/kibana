@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
   EuiButtonGroup,
 } from '@elastic/eui';
-import type { Position } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { LegendLayout, PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
@@ -31,7 +31,7 @@ import { getLegendStats } from './render_helpers';
 
 const partitionLegendValues = [
   {
-    value: PartitionLegendValue.Value,
+    value: LegendValue.Value,
     label: i18n.translate('xpack.lens.shared.legendValues.value', {
       defaultMessage: 'Value',
     }),
@@ -268,7 +268,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onDisplayChange={onLegendDisplayChange}
         legendStats={getLegendStats(layer, state.shape)}
         allowedLegendStats={
-          !!PartitionChartsMeta[state.shape]?.legend.defaultLegendStats
+          PartitionChartsMeta[state.shape]?.legend.defaultLegendStats
             ? partitionLegendValues
             : undefined
         }

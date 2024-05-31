@@ -6,7 +6,7 @@
  */
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
-import { Position } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
 import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 import {
   Operation,
@@ -54,7 +54,6 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   XYPersistedByReferenceAnnotationLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
@@ -612,7 +611,7 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: [XYLegendValue.CurrentAndLastValue],
+            legendStats: [LegendValue.CurrentAndLastValue],
           },
         };
 

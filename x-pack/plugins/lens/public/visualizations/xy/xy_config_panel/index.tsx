@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position, ScaleType } from '@elastic/charts';
+import { LegendValue, Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
@@ -122,86 +122,165 @@ const axisKeyToTitleMapping: Record<keyof AxesSettingsConfig, 'xTitle' | 'yTitle
     yRight: 'yRightTitle',
   };
 
-const xyLegendValues = [
+const xyLegendValues: Array<{
+  value: XYLegendValue;
+  label: string;
+  toolTipContent: string;
+}> = [
   {
-    value: XYLegendValue.Average,
+    value: LegendValue.Average,
     label: i18n.translate('xpack.lens.shared.legendValues.average', {
       defaultMessage: 'Average',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.averageDesc', {
-      defaultMessage: 'Mean of all returned values.',
+      defaultMessage: 'Average of all values in the series.',
     }),
   },
   {
-    value: XYLegendValue.CurrentAndLastValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
-      defaultMessage: 'Current value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.currentValueDesc', {
-      defaultMessage: 'Value of the bucket being hovered or last bucket value when not hovering.',
-    }),
-  },
-  {
-    value: XYLegendValue.Count,
-    label: i18n.translate('xpack.lens.shared.legendValues.count', {
-      defaultMessage: 'Count',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.countDesc', {
-      defaultMessage: 'Incremental count of returned values.',
-    }),
-  },
-  {
-    value: XYLegendValue.FirstValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.firstValue', {
-      defaultMessage: 'First value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstValueDesc', {
-      defaultMessage: 'First value in the returned data set.',
-    }),
-  },
-  {
-    value: XYLegendValue.LastValue,
-    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
-      defaultMessage: 'Last value',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
-      defaultMessage: 'Last value in the returned data set.',
-    }),
-  },
-  {
-    value: XYLegendValue.Median,
+    value: LegendValue.Median,
     label: i18n.translate('xpack.lens.shared.legendValues.median', {
       defaultMessage: 'Median',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.medianDesc', {
-      defaultMessage: 'Middle value in the returned data set.',
+      defaultMessage: 'Median value in the series.',
     }),
   },
   {
-    value: XYLegendValue.Max,
-    label: i18n.translate('xpack.lens.shared.legendValues.max', {
-      defaultMessage: 'Maximum',
-    }),
-    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.maxDesc', {
-      defaultMessage: 'Maximum value in the returned data set.',
-    }),
-  },
-  {
-    value: XYLegendValue.Min,
+    value: LegendValue.Min,
     label: i18n.translate('xpack.lens.shared.legendValues.min', {
       defaultMessage: 'Minimum',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.minDesc', {
-      defaultMessage: 'Minimum value in the returned data set.',
+      defaultMessage: 'Minimum value in the series.',
     }),
   },
   {
-    value: XYLegendValue.Total,
+    value: LegendValue.Max,
+    label: i18n.translate('xpack.lens.shared.legendValues.max', {
+      defaultMessage: 'Maximum',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.maxDesc', {
+      defaultMessage: 'Maximum value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Range,
+    label: i18n.translate('xpack.lens.shared.legendValues.range', {
+      defaultMessage: 'Range',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.rangeDesc', {
+      defaultMessage: 'Difference between the min and the max in the series.',
+    }),
+  },
+  {
+    value: LegendValue.LastValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
+      defaultMessage: 'Last value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
+      defaultMessage: 'Last value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.LastNonNullValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
+      defaultMessage: 'Last non-null value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
+      defaultMessage: 'Last non-null value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.FirstValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.firstValue', {
+      defaultMessage: 'First value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstValueDesc', {
+      defaultMessage: 'First value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.FirstNonNullValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.firstNonNullValue', {
+      defaultMessage: 'First non-null value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstNonNullValueDesc', {
+      defaultMessage: 'First non-null value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Difference,
+    label: i18n.translate('xpack.lens.shared.legendValues.diff', {
+      defaultMessage: 'Difference',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.diffDesc', {
+      defaultMessage: 'Difference between first and last value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.DifferencePercent,
+    label: i18n.translate('xpack.lens.shared.legendValues.diffPercent', {
+      defaultMessage: 'Difference %',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.diffPercentDesc', {
+      defaultMessage: 'Difference in pecent between first and last value in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Total,
     label: i18n.translate('xpack.lens.shared.legendValues.total', {
       defaultMessage: 'Sum',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.totalDesc', {
-      defaultMessage: 'Total of all returned values.',
+      defaultMessage: 'The sum of all values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Count,
+    label: i18n.translate('xpack.lens.shared.legendValues.count', {
+      defaultMessage: 'Count',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.countDesc', {
+      defaultMessage: 'Count of all the values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.DistinctCount,
+    label: i18n.translate('xpack.lens.shared.legendValues.distinctCount', {
+      defaultMessage: 'Distinct Count',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.distinctCountDesc', {
+      defaultMessage: 'Count of distinct values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.Variance,
+    label: i18n.translate('xpack.lens.shared.legendValues.variance', {
+      defaultMessage: 'Variance',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.varianceDesc', {
+      defaultMessage: 'Variance of all the values in the series.',
+    }),
+  },
+  {
+    value: LegendValue.StdDeviation,
+    label: i18n.translate('xpack.lens.shared.legendValues.stdDev', {
+      defaultMessage: 'Std Deviation',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.stdDevDesc', {
+      defaultMessage: 'Standard deviation of all the values in the series.',
+    }),
+  },
+  // Moved to the bottom to limit its usage. It could cause some UX issues due to the dynamic nature
+  // of the data displayed
+  {
+    value: LegendValue.CurrentAndLastValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
+      defaultMessage: 'Current or last value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.currentValueDesc', {
+      defaultMessage:
+        'Value of the bucket being hovered or the last bucket value when not hovering.',
     }),
   },
 ];

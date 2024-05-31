@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { LegendValue } from '@elastic/charts';
 import { METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
@@ -57,19 +58,25 @@ export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(BUCKET_TYPES),
 ] as const;
 
-// todo: get the type from elastic-charts library
-export enum XYLegendValue {
-  Average = 'average',
-  CurrentAndLastValue = 'currentAndLastValue',
-  Count = 'count',
-  FirstValue = 'firstValue',
-  LastValue = 'lastValue',
-  Median = 'median',
-  Max = 'max',
-  Min = 'min',
-  Total = 'total',
-}
+export type XYLegendValue = Extract<
+  LegendValue,
+  | 'currentAndLastValue'
+  | 'lastValue'
+  | 'lastNonNullValue'
+  | 'average'
+  | 'median'
+  | 'max'
+  | 'min'
+  | 'firstValue'
+  | 'firstNonNullValue'
+  | 'total'
+  | 'count'
+  | 'distinctCount'
+  | 'variance'
+  | 'stdDeviation'
+  | 'range'
+  | 'difference'
+  | 'differencePercent'
+>;
 
-export enum PartitionLegendValue {
-  Value = 'value',
-}
+export type PartitionLegendValue = Extract<LegendValue, 'value' | 'percent'>;
