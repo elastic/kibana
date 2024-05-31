@@ -72,25 +72,12 @@ export async function setupFleet(
   } = { useLock: false }
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
-  const logger = appContextService.getLogger();
-  let created;
+  let created = false;
   try {
     if (options.useLock) {
-      try {
-        created = await soClient.create<FleetSetupLock>(
-          FLEET_SETUP_LOCK_TYPE,
-          {
-            status: 'in_progress',
-            uuid: uuidv4(),
-            started_at: new Date().toISOString(),
-          },
-          { id: FLEET_SETUP_LOCK_TYPE }
-        );
-        logger.info(`Fleet setup lock created: ${JSON.stringify(created)}`);
-      } catch (error) {
-        logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
-        return { isInitialized: false, nonFatalErrors: [] };
-      }
+      const { created: isCreated, toReturn } = await createLock(soClient);
+      created = isCreated;
+      if (toReturn) return toReturn;
     }
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
@@ -101,15 +88,69 @@ export async function setupFleet(
     t.end();
     // only delete lock if it was created by this instance
     if (options.useLock && created) {
-      try {
-        await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
-        logger.info(`Fleet setup lock deleted`);
-      } catch (error) {
-        // ignore 404 errors
-        if (error.statusCode !== 404) {
-          logger.error('Could not delete fleet setup lock', error);
-        }
-      }
+      await deleteLock(soClient);
+    }
+  }
+}
+
+async function createLock(
+  soClient: SavedObjectsClientContract
+): Promise<{ created: boolean; toReturn?: SetupStatus }> {
+  const logger = appContextService.getLogger();
+  let created;
+  try {
+    // check if fleet setup is already started
+    const fleetSetupLock = await soClient.get<FleetSetupLock>(
+      FLEET_SETUP_LOCK_TYPE,
+      FLEET_SETUP_LOCK_TYPE
+    );
+
+    // started more than 1 hour ago
+    if (
+      fleetSetupLock.attributes.started_at &&
+      new Date(fleetSetupLock.attributes.started_at).getTime() < Date.now() - 60 * 60 * 1000
+    ) {
+      created = fleetSetupLock;
+    } else {
+      logger.info('Fleet setup already in progress, abort setup');
+      return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
+    }
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      logger.debug('Fleet setup lock does not exist, continue setup');
+    }
+  }
+
+  // if lock is already created more than 1 hour ago, retry setup
+  if (!created) {
+    try {
+      created = await soClient.create<FleetSetupLock>(
+        FLEET_SETUP_LOCK_TYPE,
+        {
+          status: 'in_progress',
+          uuid: uuidv4(),
+          started_at: new Date().toISOString(),
+        },
+        { id: FLEET_SETUP_LOCK_TYPE }
+      );
+      logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
+    } catch (error) {
+      logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
+      return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
+    }
+  }
+  return { created: !!created };
+}
+
+async function deleteLock(soClient: SavedObjectsClientContract) {
+  const logger = appContextService.getLogger();
+  try {
+    await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
+    logger.debug(`Fleet setup lock deleted`);
+  } catch (error) {
+    // ignore 404 errors
+    if (error.statusCode !== 404) {
+      logger.error('Could not delete fleet setup lock', error);
     }
   }
 }
