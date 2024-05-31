@@ -112,7 +112,7 @@ export interface IRulesManagementClient {
   importRule: (importRulePayload: ImportRuleProps) => Promise<RuleAlertType>;
 }
 
-export const createRulesManagementClient = (
+export const createDetectionRulesClient = (
   rulesClient: RulesClient,
   request: KibanaRequest,
   savedObjectsClient: SavedObjectsClientContract,
