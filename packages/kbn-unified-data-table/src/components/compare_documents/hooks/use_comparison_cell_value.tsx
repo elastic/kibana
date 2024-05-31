@@ -13,11 +13,11 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconProps } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
-import { dynamic } from '@kbn/shared-ux-utility';
 import {
   AdditionalFieldGroups,
   getAllFallbackFields,
   getAssociatedSmartFieldsAsString,
+  SmartFieldFallbackTooltip,
 } from '@kbn/unified-field-list';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
@@ -34,10 +34,6 @@ import {
   REMOVED_SEGMENT_CLASS,
   SEGMENT_CLASS,
 } from './use_comparison_css';
-
-const SmartFieldFallbackTooltip = dynamic(
-  () => import('@kbn/unified-field-list/src/components/fallback_fields/smart_fields_tooltip')
-);
 
 export interface UseComparisonCellValueProps {
   dataView: DataView;

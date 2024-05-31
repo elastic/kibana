@@ -17,17 +17,13 @@ import {
   convertFieldsToFallbackFields,
   getAllFallbackFields,
   getAssociatedSmartFieldsAsString,
+  SmartFieldFallbackTooltip,
 } from '@kbn/unified-field-list';
 import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/data_visualizer_stats_table';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
 export type { FieldStatisticsTableProps };
-
-const SmartFieldFallbackTooltip = dynamic(
-  () => import('@kbn/unified-field-list/src/components/fallback_fields/smart_fields_tooltip')
-);
 
 const statsTableCss = css({
   width: '100%',
