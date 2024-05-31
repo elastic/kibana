@@ -29,8 +29,8 @@ import {
   SecurityPageName,
 } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../sourcerer/containers';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';

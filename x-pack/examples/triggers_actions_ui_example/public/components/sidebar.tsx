@@ -76,6 +76,17 @@ export const Sidebar = () => {
               },
             ],
           },
+          {
+            name: 'Rule Form Components',
+            id: 'rule-form-components',
+            items: [
+              {
+                id: 'rule-definition',
+                name: 'Rule Definition',
+                onClick: () => history.push('/rule_definition'),
+              },
+            ],
+          },
         ]}
       />
     </EuiPageSidebar>
