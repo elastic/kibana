@@ -15,13 +15,6 @@ export const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT = i18n.translate(
   }
 );
 
-export const USE_THE_FOLLOWING_CONTEXT_TO_ANSWER = i18n.translate(
-  'xpack.securitySolution.assistant.content.prompts.system.useTheFollowingContextToAnswer',
-  {
-    defaultMessage: 'Use the following context to answer questions:',
-  }
-);
-
 export const IF_YOU_DONT_KNOW_THE_ANSWER = i18n.translate(
   'xpack.securitySolution.assistant.content.prompts.system.ifYouDontKnowTheAnswer',
   {
@@ -46,8 +39,7 @@ export const FORMAT_OUTPUT_CORRECTLY = i18n.translate(
 );
 
 export const DEFAULT_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
-${FORMAT_OUTPUT_CORRECTLY}
-${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
+${FORMAT_OUTPUT_CORRECTLY}`;
 
 export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.securitySolution.assistant.content.prompts.system.defaultSystemPromptName',
@@ -58,8 +50,7 @@ export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
 
 export const SUPERHERO_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
 ${SUPERHERO_PERSONALITY}
-${FORMAT_OUTPUT_CORRECTLY}
-${USE_THE_FOLLOWING_CONTEXT_TO_ANSWER}`;
+${FORMAT_OUTPUT_CORRECTLY}`;
 
 export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.securitySolution.assistant.content.prompts.system.superheroSystemPromptName',
@@ -67,7 +58,3 @@ export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
     defaultMessage: 'Enhanced system prompt',
   }
 );
-
-export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
-  return `CONTEXT:\n"""\n${context}\n"""`;
-};

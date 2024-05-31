@@ -21,9 +21,11 @@ import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
+import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
+import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 
@@ -73,6 +75,14 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getDataTableFactory(coreStart, deps);
     });
 
+    embeddable.registerReactEmbeddableFactory(SAVED_BOOK_ID, async () => {
+      const { getSavedBookEmbeddableFactory } = await import(
+        './react_embeddables/saved_book/saved_book_react_embeddable'
+      );
+      const [coreStart] = await startServicesPromise;
+      return getSavedBookEmbeddableFactory(coreStart);
+    });
+
     registerSearchEmbeddable(
       embeddable,
       new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
@@ -88,6 +98,8 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     registerAddSearchPanelAction(deps.uiActions);
 
     registerCreateDataTableAction(deps.uiActions);
+
+    registerCreateSavedBookAction(deps.uiActions, core);
   }
 
   public stop() {}

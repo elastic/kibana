@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect } from 'react';
 
 import { useValues } from 'kea';
+
+import useObservable from 'react-use/lib/useObservable';
+
+import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -40,12 +44,33 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   docLink = 'search_application',
   ...pageTemplateProps
 }) => {
+  const alwaysReturnNavItems = true;
   const navItems = useEnterpriseSearchApplicationNav(
     searchApplicationName,
     pageTemplateProps.isEmptyState,
-    hasSchemaConflicts
+    hasSchemaConflicts,
+    alwaysReturnNavItems
   );
-  const { renderHeaderActions } = useValues(KibanaLogic);
+
+  const { renderHeaderActions, updateSideNavDefinition, getChromeStyle$ } = useValues(KibanaLogic);
+  const chromeStyle = useObservable(getChromeStyle$(), 'classic');
+
+  const getSelectedAppItems = useCallback(
+    (
+      items?: Array<EuiSideNavItemTypeEnhanced<unknown>>
+    ): Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined => {
+      if (!items) return undefined;
+
+      const buildGroup = items.find((item) => item.id === 'build');
+      if (!buildGroup || !buildGroup.items) return undefined;
+
+      const searchAppsGroup = buildGroup.items.find((item) => item.id === 'searchApplications');
+
+      return searchAppsGroup?.items;
+    },
+    []
+  );
+
   useLayoutEffect(() => {
     const docAction = {
       playground: PlaygroundHeaderDocsAction,
@@ -57,11 +82,23 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
       renderHeaderActions();
     };
   }, []);
+
+  useEffect(() => {
+    // We update the new side nav definition with the selected app items
+    updateSideNavDefinition({ searchApps: getSelectedAppItems(navItems) });
+  }, [navItems, getSelectedAppItems, updateSideNavDefinition]);
+
+  useEffect(() => {
+    return () => {
+      updateSideNavDefinition({ searchApps: undefined });
+    };
+  }, [updateSideNavDefinition]);
+
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        items: navItems,
+        items: chromeStyle === 'classic' ? navItems : undefined,
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       restrictWidth={restrictWidth}

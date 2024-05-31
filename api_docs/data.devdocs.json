@@ -7117,7 +7117,9 @@
             "label": "createFiltersFromRangeSelectAction",
             "description": [],
             "signature": [
-              "(event: RangeSelectDataContext) => Promise<",
+              "(event: ",
+              "RangeSelectDataContext",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7838,6 +7840,22 @@
             "label": "updated_at",
             "description": [
               "Timestamp of the last time this document had been updated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
             ],
             "signature": [
               "string | undefined"
@@ -12089,7 +12107,13 @@
             "text": "DataView"
           },
           " extends ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           " implements ",
           {
             "pluginId": "@kbn/es-query",
@@ -14586,7 +14610,13 @@
             ],
             "signature": [
               "(dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -14603,7 +14633,13 @@
                   "data view instance"
                 ],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -14639,7 +14675,13 @@
             ],
             "signature": [
               "(indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -14654,7 +14696,13 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -18475,7 +18523,13 @@
             "text": "DataView"
           },
           " extends ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           " implements ",
           {
             "pluginId": "@kbn/es-query",
@@ -21902,7 +21956,13 @@
             ],
             "signature": [
               "(dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -21919,7 +21979,13 @@
                   "data view instance"
                 ],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -21955,7 +22021,13 @@
             ],
             "signature": [
               "(indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -21970,7 +22042,13 @@
                 "label": "indexPattern",
                 "description": [],
                 "signature": [
-                  "AbstractDataView"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
+                  }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -24101,6 +24179,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.SavedObject.error",
             "type": "Object",
             "tags": [],
@@ -24988,9 +25082,21 @@
             "text": "DataView"
           },
           ">; createSavedObject: (dataView: ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
           {
             "pluginId": "dataViews",
