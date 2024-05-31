@@ -211,7 +211,7 @@ function useRole(
       : Promise.resolve({
           name: '',
           description: '',
-          elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [] },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [],
           _unrecognized_applications: [],
         } as Role);
@@ -700,7 +700,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.security.management.editRole.customRoleSuccessfullySavedNotificationTitle',
-            { defaultMessage: 'Custom role created' }
+            { defaultMessage: 'Custom role saved' }
           ),
           text: toMountPoint(
             <>

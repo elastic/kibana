@@ -26,8 +26,8 @@ import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -82,7 +82,7 @@ jest.mock('react-redux', () => {
 });
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 const mockDataView = {
   dataViewId: mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId,
   browserFields: mockBrowserFields,
