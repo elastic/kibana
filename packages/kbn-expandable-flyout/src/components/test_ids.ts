@@ -17,3 +17,13 @@ export const PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID = 'previewSectionCloseButton';
 export const PREVIEW_SECTION_BACK_BUTTON_TEST_ID = 'previewSectionBackButton';
 
 export const PREVIEW_SECTION_HEADER_TEST_ID = 'previewSectionHeader';
+
+export const RENDER_MENU_BUTTON_TEST_ID = 'renderMenuButton';
+
+export const RENDER_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID = 'renderMenuFlyoutTypeButtonGroup';
+
+export const RENDER_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID =
+  'renderMenuFlyoutTypeButtonGroupOverlayOption';
+
+export const RENDER_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID =
+  'renderMenuFlyoutTypeButtonGroupPushOption';
