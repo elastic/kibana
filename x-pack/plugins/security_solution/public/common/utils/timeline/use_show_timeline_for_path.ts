@@ -9,8 +9,8 @@ import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
 import { getLinksWithHiddenTimeline } from '../../links';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../lib/kibana';
 
 const isTimelinePathVisible = (currentPath: string): boolean => {

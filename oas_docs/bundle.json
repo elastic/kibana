@@ -1,0 +1,538 @@
+{
+  "components": {
+    "schemas": {
+      "core_status_redactedResponse": {
+        "additionalProperties": false,
+        "description": "A minimal representation of Kibana's operational status.",
+        "properties": {
+          "status": {
+            "additionalProperties": false,
+            "properties": {
+              "overall": {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "available"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "enum": [
+                          "degraded"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "enum": [
+                          "unavailable"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "enum": [
+                          "critical"
+                        ],
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Service status levels as human and machine readable values."
+                  }
+                },
+                "required": [
+                  "level"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "overall"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "core_status_response": {
+        "additionalProperties": false,
+        "description": "Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.",
+        "properties": {
+          "metrics": {
+            "additionalProperties": false,
+            "description": "Metric groups collected by Kibana.",
+            "properties": {
+              "collection_interval_in_millis": {
+                "description": "The interval at which metrics should be collected.",
+                "type": "number"
+              },
+              "elasticsearch_client": {
+                "additionalProperties": false,
+                "description": "Current network metrics of Kibana's Elasticsearch client.",
+                "properties": {
+                  "totalActiveSockets": {
+                    "description": "Count of network sockets currently in use.",
+                    "type": "number"
+                  },
+                  "totalIdleSockets": {
+                    "description": "Count of network sockets currently idle.",
+                    "type": "number"
+                  },
+                  "totalQueuedRequests": {
+                    "description": "Count of requests not yet assigned to sockets.",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalActiveSockets",
+                  "totalIdleSockets",
+                  "totalQueuedRequests"
+                ],
+                "type": "object"
+              },
+              "last_updated": {
+                "description": "The time metrics were collected.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "elasticsearch_client",
+              "last_updated",
+              "collection_interval_in_millis"
+            ],
+            "type": "object"
+          },
+          "name": {
+            "description": "Kibana instance name.",
+            "type": "string"
+          },
+          "status": {
+            "additionalProperties": false,
+            "properties": {
+              "core": {
+                "additionalProperties": false,
+                "description": "Statuses of core Kibana services.",
+                "properties": {
+                  "elasticsearch": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "detail": {
+                        "description": "Human readable detail of the service status.",
+                        "type": "string"
+                      },
+                      "documentationUrl": {
+                        "description": "A URL to further documentation regarding this service.",
+                        "type": "string"
+                      },
+                      "level": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "available"
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "enum": [
+                              "degraded"
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "enum": [
+                              "unavailable"
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "enum": [
+                              "critical"
+                            ],
+                            "type": "string"
+                          }
+                        ],
+                        "description": "Service status levels as human and machine readable values."
+                      },
+                      "meta": {
+                        "additionalProperties": {},
+                        "description": "An unstructured set of extra metadata about this service.",
+                        "type": "object"
+                      },
+                      "summary": {
+                        "description": "A human readable summary of the service status.",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "summary",
+                      "meta"
+                    ],
+                    "type": "object"
+                  },
+                  "savedObjects": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "detail": {
+                        "description": "Human readable detail of the service status.",
+                        "type": "string"
+                      },
+                      "documentationUrl": {
+                        "description": "A URL to further documentation regarding this service.",
+                        "type": "string"
+                      },
+                      "level": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              "available"
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "enum": [
+                              "degraded"
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "enum": [
+                              "unavailable"
+                            ],
+                            "type": "string"
+                          },
+                          {
+                            "enum": [
+                              "critical"
+                            ],
+                            "type": "string"
+                          }
+                        ],
+                        "description": "Service status levels as human and machine readable values."
+                      },
+                      "meta": {
+                        "additionalProperties": {},
+                        "description": "An unstructured set of extra metadata about this service.",
+                        "type": "object"
+                      },
+                      "summary": {
+                        "description": "A human readable summary of the service status.",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "summary",
+                      "meta"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "elasticsearch",
+                  "savedObjects"
+                ],
+                "type": "object"
+              },
+              "overall": {
+                "additionalProperties": false,
+                "properties": {
+                  "detail": {
+                    "description": "Human readable detail of the service status.",
+                    "type": "string"
+                  },
+                  "documentationUrl": {
+                    "description": "A URL to further documentation regarding this service.",
+                    "type": "string"
+                  },
+                  "level": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "available"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "enum": [
+                          "degraded"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "enum": [
+                          "unavailable"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "enum": [
+                          "critical"
+                        ],
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Service status levels as human and machine readable values."
+                  },
+                  "meta": {
+                    "additionalProperties": {},
+                    "description": "An unstructured set of extra metadata about this service.",
+                    "type": "object"
+                  },
+                  "summary": {
+                    "description": "A human readable summary of the service status.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "level",
+                  "summary",
+                  "meta"
+                ],
+                "type": "object"
+              },
+              "plugins": {
+                "additionalProperties": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "detail": {
+                      "description": "Human readable detail of the service status.",
+                      "type": "string"
+                    },
+                    "documentationUrl": {
+                      "description": "A URL to further documentation regarding this service.",
+                      "type": "string"
+                    },
+                    "level": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "available"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "enum": [
+                            "degraded"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "enum": [
+                            "unavailable"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "enum": [
+                            "critical"
+                          ],
+                          "type": "string"
+                        }
+                      ],
+                      "description": "Service status levels as human and machine readable values."
+                    },
+                    "meta": {
+                      "additionalProperties": {},
+                      "description": "An unstructured set of extra metadata about this service.",
+                      "type": "object"
+                    },
+                    "summary": {
+                      "description": "A human readable summary of the service status.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "level",
+                    "summary",
+                    "meta"
+                  ],
+                  "type": "object"
+                },
+                "description": "A dynamic mapping of plugin ID to plugin status.",
+                "type": "object"
+              }
+            },
+            "required": [
+              "overall",
+              "core",
+              "plugins"
+            ],
+            "type": "object"
+          },
+          "uuid": {
+            "description": "Unique, generated Kibana instance UUID. This UUID should persist even if the Kibana process restarts.",
+            "type": "string"
+          },
+          "version": {
+            "additionalProperties": false,
+            "properties": {
+              "build_date": {
+                "description": "The date and time of this build.",
+                "type": "string"
+              },
+              "build_flavor": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "serverless"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "enum": [
+                      "traditional"
+                    ],
+                    "type": "string"
+                  }
+                ],
+                "description": "The build flavour determines configuration and behavior of Kibana. On premise users will almost always run the \"traditional\" flavour, while other flavours are reserved for Elastic-specific use cases."
+              },
+              "build_hash": {
+                "description": "A unique hash value representing the git commit of this Kibana build.",
+                "type": "string"
+              },
+              "build_number": {
+                "description": "A monotonically increasing number, each subsequent build will have a higher number.",
+                "type": "number"
+              },
+              "build_snapshot": {
+                "description": "Whether this build is a snapshot build.",
+                "type": "boolean"
+              },
+              "number": {
+                "description": "A semantic version number.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "number",
+              "build_hash",
+              "build_number",
+              "build_snapshot",
+              "build_flavor",
+              "build_date"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "uuid",
+          "version",
+          "status",
+          "metrics"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Kibana HTTP APIs",
+    "version": "0.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/status": {
+      "get": {
+        "operationId": "/api/status#0",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Set to \"true\" to get the response in v7 format.",
+            "in": "query",
+            "name": "v7format",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Set to \"true\" to get the response in v8 format.",
+            "in": "query",
+            "name": "v8format",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/core_status_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/core_status_redactedResponse"
+                    }
+                  ],
+                  "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
+                }
+              }
+            },
+            "description": "Get Kibana's current status."
+          },
+          "503": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/core_status_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/core_status_redactedResponse"
+                    }
+                  ],
+                  "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
+                }
+              }
+            },
+            "description": "Get Kibana's current status."
+          }
+        },
+        "summary": "Get Kibana's current status."
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:5622"
+    }
+  ]
+}

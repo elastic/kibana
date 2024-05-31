@@ -660,6 +660,7 @@ export async function getInstalledPackageWithAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   logger?: Logger;
+  ignoreUnverified?: boolean;
 }) {
   const installation = await getInstallation(options);
   if (!installation) {
@@ -709,10 +710,12 @@ export async function getPackageAssetsMap({
   savedObjectsClient,
   packageInfo,
   logger,
+  ignoreUnverified,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: PackageInfo;
   logger: Logger;
+  ignoreUnverified?: boolean;
 }) {
   const installedPackageWithAssets = await getInstalledPackageWithAssets({
     savedObjectsClient,
@@ -723,7 +726,9 @@ export async function getPackageAssetsMap({
   let assetsMap: AssetsMap | undefined;
   if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
     // Try to get from registry
-    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version);
+    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
+      ignoreUnverified,
+    });
     assetsMap = pkg.assetsMap;
   } else {
     assetsMap = installedPackageWithAssets.assetsMap;
