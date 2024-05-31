@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+import { Subject } from 'rxjs';
 
-export const decorators = [EuiThemeProviderDecorator];
-
-window.jest = jest;
+export function useConversation() {
+  return {
+    conversation: {},
+    state: 'idle',
+    next: new Subject(),
+    stop: () => {},
+    messages: [],
+    saveTitle: () => {},
+  };
+}

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
-
-export const decorators = [EuiThemeProviderDecorator];
-
-window.jest = jest;
+export function useObservabilityAIAssistantRouter() {
+  return {
+    push: () => {},
+    replace: () => {},
+    link: () => {},
+  };
+}
