@@ -296,6 +296,8 @@ describe('validation logic', () => {
       },
     });
 
+    // The following block tests a case that is allowed in Kibana
+    // by suppressing the parser error in packages/kbn-esql-ast/src/ast_parser.ts
     describe('ESQL query can be empty', () => {
       testErrorsAndWarnings('', []);
       testErrorsAndWarnings(' ', []);
