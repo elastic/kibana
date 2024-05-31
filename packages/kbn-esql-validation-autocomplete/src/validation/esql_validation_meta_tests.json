@@ -431,6 +431,11 @@
       "warning": []
     },
     {
+      "query": "from *,-.*",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from indexes*",
       "error": [
         "Unknown index [indexes*]"
