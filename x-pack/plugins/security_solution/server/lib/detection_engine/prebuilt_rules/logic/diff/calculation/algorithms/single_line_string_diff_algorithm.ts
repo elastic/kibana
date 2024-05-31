@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 
-export const decorators = [EuiThemeProviderDecorator];
-
-window.jest = jest;
+export const singleLineStringDiffAlgorithm = simpleDiffAlgorithm<string>;

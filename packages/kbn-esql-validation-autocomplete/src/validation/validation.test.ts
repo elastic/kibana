@@ -352,6 +352,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from *ex*`, []);
       testErrorsAndWarnings(`from in*ex`, []);
       testErrorsAndWarnings(`from ind*ex`, []);
+      testErrorsAndWarnings(`from *,-.*`, []);
       testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
 
       testErrorsAndWarnings(`from remote-*:indexes*`, []);

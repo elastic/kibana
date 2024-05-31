@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
+import useObservable from 'react-use/lib/useObservable';
+import { Subject } from 'rxjs';
 
-export const decorators = [EuiThemeProviderDecorator];
+export function useLicense() {
+  const license = useObservable(new Subject());
 
-window.jest = jest;
+  return {
+    getLicense: () => license ?? null,
+    hasAtLeast: () => true,
+  };
+}
