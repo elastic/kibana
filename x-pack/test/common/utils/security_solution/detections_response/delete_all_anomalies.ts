@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 
 import { countDownTest } from './count_down_test';
 
 export const deleteAllAnomalies = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   es: Client,
   index: string[] = ['.ml-anomalies-*']

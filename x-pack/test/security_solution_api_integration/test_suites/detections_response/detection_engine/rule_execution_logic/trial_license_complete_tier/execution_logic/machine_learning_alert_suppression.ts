@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
         await executeSetupModuleRequest({ module: mlModuleName, rspCode: 200, supertest });
         await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
-        await deleteAllAnomalies(supertest, log, es);
+        await deleteAllAnomalies(log, es);
       });
 
       after(async () => {
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
-        await deleteAllAnomalies(supertest, log, es);
+        await deleteAllAnomalies(log, es);
       });
 
       describe('with per-execution suppression duration', () => {
