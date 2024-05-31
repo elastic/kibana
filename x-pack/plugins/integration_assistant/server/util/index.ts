@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-export {
-  asyncCreate,
-  asyncEnsureDir,
-  asyncCopy,
-  asyncRead,
-  asyncExists,
-  asyncListDir,
-} from './async_file';
+export { existsSync, ensureDirSync, createSync, copySync, listDirSync, readSync } from './files';
 
 export { generateFields, mergeSamples } from './samples';
 export { deepCopy, generateUniqueId } from './util';

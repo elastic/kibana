@@ -48,7 +48,6 @@ export function registerIntegrationBuilderRoutes(
                 docs: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
               })
             ),
-            initialVersion: schema.maybe(schema.string()),
           }),
         }),
       },

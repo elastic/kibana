@@ -15,7 +15,7 @@ import { createDatastream } from './data_stream';
 import { createAgentInput } from './agent';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
-import { generateUniqueId, asyncEnsureDir, asyncCopy, asyncCreate } from '../util';
+import { generateUniqueId, ensureDirSync, copySync, createSync } from '../util';
 
 export async function buildPackage(integration: Integration): Promise<Buffer> {
   const templateDir = joinPath(__dirname, '../templates');
@@ -27,22 +27,17 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   });
 
   const tmpDir = joinPath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
-  const packageDir = await createDirectories(tmpDir, integration);
+  const packageDir = createDirectories(tmpDir, integration);
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
 
   for (const dataStream of integration.dataStreams) {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
-    await createDatastream(integration.name, specificDataStreamDir, dataStream);
-    await createAgentInput(specificDataStreamDir, dataStream.inputTypes);
-    await createPipeline(specificDataStreamDir, dataStream.pipeline);
-    await createFieldMapping(
-      integration.name,
-      dataStreamName,
-      specificDataStreamDir,
-      dataStream.docs
-    );
+    createDatastream(integration.name, specificDataStreamDir, dataStream);
+    createAgentInput(specificDataStreamDir, dataStream.inputTypes);
+    createPipeline(specificDataStreamDir, dataStream.pipeline);
+    createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);
   }
 
   const tmpPackageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
@@ -51,70 +46,71 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   return zipBuffer;
 }
 
-async function createDirectories(tmpDir: string, integration: Integration): Promise<string> {
+function createDirectories(tmpDir: string, integration: Integration): string {
   const packageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
-  await asyncEnsureDir(tmpDir);
-  await asyncEnsureDir(packageDir);
-  await createPackage(packageDir, integration);
+  ensureDirSync(tmpDir);
+  ensureDirSync(packageDir);
+  createPackage(packageDir, integration);
   return packageDir;
 }
 
-async function createPackage(packageDir: string, integration: Integration): Promise<void> {
-  await createReadme(packageDir, integration);
-  await createChangelog(packageDir, integration);
-  await createBuildFile(packageDir);
-  await createPackageManifest(packageDir, integration);
-  await createPackageSystemTests(packageDir, integration);
-  await createLogo(packageDir, integration);
+function createPackage(packageDir: string, integration: Integration): void {
+  createReadme(packageDir, integration);
+  createChangelog(packageDir);
+  createBuildFile(packageDir);
+  createPackageManifest(packageDir, integration);
+  createPackageSystemTests(packageDir, integration);
+  createLogo(packageDir, integration);
 }
 
-async function createLogo(packageDir: string, integration: Integration): Promise<void> {
+function createLogo(packageDir: string, integration: Integration): void {
   const logoDir = joinPath(packageDir, 'img');
-  await asyncEnsureDir(logoDir);
+  ensureDirSync(logoDir);
 
   if (integration?.logo !== undefined) {
     const buffer = Buffer.from(integration.logo, 'base64');
-    await asyncCreate(joinPath(logoDir, 'logo.svg'), buffer);
+    createSync(joinPath(logoDir, 'logo.svg'), buffer);
   } else {
     const imgTemplateDir = joinPath(__dirname, '../templates/img');
-    await asyncCopy(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
+    copySync(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
   }
 }
 
-async function createBuildFile(packageDir: string): Promise<void> {
+function createBuildFile(packageDir: string): void {
   const buildFile = nunjucks.render('build.yml.njk', { ecs_version: '8.11.0' });
   const buildDir = joinPath(packageDir, '_dev/build');
 
-  await asyncEnsureDir(buildDir);
-  await asyncCreate(joinPath(buildDir, 'build.yml'), buildFile);
+  ensureDirSync(buildDir);
+  createSync(joinPath(buildDir, 'build.yml'), buildFile);
 }
 
-async function createChangelog(packageDir: string, integration: Integration): Promise<void> {
+function createChangelog(packageDir: string): void {
   const changelogTemplate = nunjucks.render('changelog.yml.njk', {
     initial_version: '0.1.0',
   });
 
-  await asyncCreate(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
+  createSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
 }
 
-async function createReadme(packageDir: string, integration: Integration) {
+function createReadme(packageDir: string, integration: Integration) {
   const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
-  await asyncEnsureDir(readmeDirPath);
+  ensureDirSync(readmeDirPath);
   const readmeTemplate = nunjucks.render('README.md.njk', {
     package_name: integration.name,
     data_streams: integration.dataStreams,
   });
 
-  await asyncCreate(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
+  createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
 }
 
 async function createZipArchive(tmpPackageDir: string): Promise<Buffer> {
   const zip = new AdmZip();
   zip.addLocalFolder(tmpPackageDir);
-  return zip.toBuffer();
+  const buffer = zip.toBuffer();
+  return buffer;
 }
 
-async function createPackageManifest(packageDir: string, integration: Integration): Promise<void> {
+function createPackageManifest(packageDir: string, integration: Integration): void {
   const uniqueInputs: { [key: string]: { type: string; title: string; description: string } } = {};
 
   integration.dataStreams.forEach((dataStream: DataStream) => {
@@ -137,10 +133,10 @@ async function createPackageManifest(packageDir: string, integration: Integratio
     package_name: integration.name,
     package_version: '0.1.0',
     package_description: integration.description,
-    package_owner: integration.owner,
-    min_version: integration.minKibanaVersion,
+    package_owner: '@elastic/custom-integrations',
+    min_version: '^8.13.0',
     inputs: uniqueInputsList,
   });
 
-  await asyncCreate(joinPath(packageDir, 'manifest.yml'), packageManifest);
+  createSync(joinPath(packageDir, 'manifest.yml'), packageManifest);
 }

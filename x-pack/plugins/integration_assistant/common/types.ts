@@ -57,8 +57,6 @@ export interface Integration {
   title: string;
   description: string;
   dataStreams: DataStream[];
-  owner: string;
-  minKibanaVersion: string;
   logo?: string;
 }
 
