@@ -17,7 +17,7 @@ import { SecurityLicenseService } from '../../common/licensing';
 import { UserProfileAPIClient } from '../account_management';
 import { authenticationMock } from '../authentication/index.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
-import { UserAPIClient } from '../management';
+import { RolesAPIClient, UserAPIClient } from '../management';
 
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
@@ -48,6 +48,7 @@ const authc = authenticationMock.createStart();
 const mockApiClients = (http: ReturnType<typeof httpServiceMock.createStartContract>) => ({
   userProfiles: new UserProfileAPIClient(http),
   users: new UserAPIClient(http),
+  roles: new RolesAPIClient(http),
 });
 
 describe('SecurityNavControlService', () => {
