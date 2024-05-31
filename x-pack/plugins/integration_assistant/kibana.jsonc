@@ -6,7 +6,7 @@
   "plugin": {
     "id": "integrationAssistant",
     "server": true,
-    "browser": true,
+    "browser": false,
     "configPath": [
       "xpack",
       "integration_assistant"
