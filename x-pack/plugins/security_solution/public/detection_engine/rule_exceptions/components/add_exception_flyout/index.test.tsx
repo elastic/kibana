@@ -247,6 +247,32 @@ describe('When the add exception modal is opened', () => {
       it('should NOT display the eql sequence callout', () => {
         expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
       });
+
+      it.only('should show a warning if wildcard is used', () => {
+        console.log(wrapper.debug());
+        const { getByLabelText, queryByText, getByTestId } = render(
+          <TestProviders>
+            <AddExceptionFlyout
+              rules={null}
+              isBulkAction={false}
+              alertData={undefined}
+              isAlertDataLoading={undefined}
+              alertStatus={undefined}
+              isEndpointItem
+              showAlertCloseOptions
+              onCancel={jest.fn()}
+              onConfirm={jest.fn()}
+            />
+          </TestProviders>
+        );
+
+        const fieldInput = wrapper.find('[data-test-subj="fieldAutocompleteComboBox"]');
+        // const fieldInput = getByLabelText('"Field" in group 1, position 1')
+        console.log(fieldInput);
+        // expect(fieldInput).toBeDisabled();
+
+        expect(wrapper.find('wildcardWithWrongOperatorCallout').exists()).toBeTruthy();
+      });
     });
 
     describe('alert data is passed in', () => {
