@@ -105,10 +105,12 @@ async function createLock(
       FLEET_SETUP_LOCK_TYPE
     );
 
+    const LOCK_TIMEOUT = 60 * 60 * 1000; // 1 hour
+
     // started more than 1 hour ago, delete previous lock
     if (
       fleetSetupLock.attributes.started_at &&
-      new Date(fleetSetupLock.attributes.started_at).getTime() < Date.now() - 60 * 60 * 1000
+      new Date(fleetSetupLock.attributes.started_at).getTime() < Date.now() - LOCK_TIMEOUT
     ) {
       await deleteLock(soClient);
     } else {
