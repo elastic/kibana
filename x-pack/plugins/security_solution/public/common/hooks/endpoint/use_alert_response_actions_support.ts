@@ -9,7 +9,8 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
-import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
+
+// FIXME:PT Move these constants below
 import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../utils/crowdstrike_alert_check';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../utils/sentinelone_alert_check';
 import { getFieldValue } from '../../../detections/components/host_isolation/helpers';
@@ -107,7 +108,7 @@ export const useAlertResponseActionsSupport = (
         acc[responseActionName] = false;
 
         if (agentType && isFeatureEnabled) {
-          acc[responseActionName] = isActionSupportedByAgentType(
+          acc[responseActionName] = isAgentTypeAndActionSupported(
             agentType,
             responseActionName,
             'manual'

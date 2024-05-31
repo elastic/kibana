@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
@@ -517,10 +517,6 @@ const adjustCommandsForSentinelOne = ({
 }: {
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
-  const featureFlags = ExperimentalFeaturesService.get();
-  const isHostIsolationEnabled = featureFlags.responseActionsSentinelOneV1Enabled;
-  const isGetFileFeatureEnabled = featureFlags.responseActionsSentinelOneGetFileEnabled;
-
   const disableCommand = (command: CommandDefinition) => {
     command.helpDisabled = true;
     command.helpHidden = true;
@@ -529,23 +525,13 @@ const adjustCommandsForSentinelOne = ({
   };
 
   return commandList.map((command) => {
-    const agentSupportsResponseAction =
-      command.name === 'status'
-        ? false
-        : isActionSupportedByAgentType(
-            'sentinel_one',
-            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
-              command.name as ConsoleResponseActionCommands
-            ],
-            'manual'
-          );
-
-    // If command is not supported by SentinelOne - disable it
     if (
-      !agentSupportsResponseAction ||
-      (command.name === 'get-file' && !isGetFileFeatureEnabled) ||
-      (command.name === 'isolate' && !isHostIsolationEnabled) ||
-      (command.name === 'release' && !isHostIsolationEnabled)
+      command.name === 'status' ||
+      !isAgentTypeAndActionSupported(
+        'sentinel_one',
+        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+        'manual'
+      )
     ) {
       disableCommand(command);
     }
