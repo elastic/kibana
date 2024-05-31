@@ -35,6 +35,7 @@ import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   logger,
+  spaces,
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
@@ -49,6 +50,7 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
       try {
         const soClient = (await context.core).savedObjects.client;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
 
         const definition = await readEntityDefinition(soClient, req.params.id, logger);
 
@@ -60,8 +62,8 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
         await deleteIndices(esClient, definition, logger);
 
         // Recreate everything
-        await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
-        await createAndInstallLatestIngestPipeline(esClient, definition, logger);
+        await createAndInstallHistoryIngestPipeline(esClient, definition, logger, spaceId);
+        await createAndInstallLatestIngestPipeline(esClient, definition, logger, spaceId);
         await createAndInstallHistoryTransform(esClient, definition, logger);
         await createAndInstallLatestTransform(esClient, definition, logger);
         await startTransform(esClient, definition, logger);

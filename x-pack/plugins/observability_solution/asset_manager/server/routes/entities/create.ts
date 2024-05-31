@@ -36,6 +36,7 @@ import {
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   logger,
+  spaces,
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, EntityDefinition>(
     {
@@ -62,17 +63,21 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
         },
         definition: false,
       };
-      const soClient = (await context.core).savedObjects.client;
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const core = await context.core;
+      const soClient = core.savedObjects.client;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
       try {
         const definition = await saveEntityDefinition(soClient, req.body);
         installState.definition = true;
 
-        await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
+        // install ingest pipelines
+        await createAndInstallHistoryIngestPipeline(esClient, definition, logger, spaceId);
         installState.ingestPipelines.history = true;
-        await createAndInstallLatestIngestPipeline(esClient, definition, logger);
+        await createAndInstallLatestIngestPipeline(esClient, definition, logger, spaceId);
         installState.ingestPipelines.latest = true;
 
+        // install transfroms
         await createAndInstallHistoryTransform(esClient, definition, logger);
         installState.transforms.history = true;
         await createAndInstallLatestTransform(esClient, definition, logger);
