@@ -9,6 +9,8 @@
 export type {
   ESQLAst,
   ESQLAstItem,
+  ESQLAstCommand,
+  ESQLAstMetricsCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLCommandMode,

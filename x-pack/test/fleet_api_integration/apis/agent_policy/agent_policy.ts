@@ -1308,6 +1308,28 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should allow hosted policy delete with force flag', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Hosted policy',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+        hostedPolicy = createdPolicy;
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxx')
+          .send({ agentPolicyId: hostedPolicy.id, force: true })
+          .expect(200);
+
+        await supertest.get(`/api/fleet/agent_policies/${hostedPolicy.id}`).expect(404);
+      });
+
       describe('Errors when trying to delete', () => {
         it('should prevent policies having agents from being deleted', async () => {
           const {
@@ -1353,6 +1375,16 @@ export default function (providerContext: FtrProviderContext) {
             'agent-inactive-1',
             policyWithInactiveAgents.id
           );
+
+          // inactive agents are included in agent policy agents count
+          const {
+            body: {
+              item: { agents: agentsCount },
+            },
+          } = await supertest
+            .get(`/api/fleet/agent_policies/${policyWithInactiveAgents.id}`)
+            .expect(200);
+          expect(agentsCount).to.equal(1);
 
           const { body } = await supertest
             .post('/api/fleet/agent_policies/delete')

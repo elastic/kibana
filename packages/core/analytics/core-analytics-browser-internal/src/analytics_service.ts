@@ -17,7 +17,6 @@ import { trackPerformanceMeasureEntries } from './track_performance_measure_entr
 import { trackClicks } from './track_clicks';
 
 import { getSessionId } from './get_session_id';
-import { createLogger } from './logger';
 import { trackViewportSize } from './track_viewport_size';
 
 /** @internal */
@@ -32,7 +31,7 @@ export class AnalyticsService {
   constructor(core: CoreContext) {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
-      logger: createLogger(core.env.mode.dev),
+      logger: core.logger.get('analytics'),
       // TODO: We need to be able to edit sendTo once we resolve the telemetry config.
       //  For now, we are relying on whether it's a distributable or running from source.
       sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
