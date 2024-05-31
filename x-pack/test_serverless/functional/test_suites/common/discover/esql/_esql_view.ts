@@ -174,7 +174,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('errors', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183479
+    describe.skip('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         const brokenQueries = [
