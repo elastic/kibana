@@ -7,3 +7,5 @@
  */
 
 export * from './src/constants';
+
+export { createRegExpPatternFrom } from './src/utils/create_regexp_pattern_from';
