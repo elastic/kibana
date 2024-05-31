@@ -75,4 +75,3 @@ export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
 export const KbnCodeEditor = require('@kbn/code-editor');
 export const KbnEsqlAst = require('@kbn/esql-ast');
 export const KbnPresentationPublishing = require('@kbn/presentation-publishing');
-export const KbnPresentationContainers = require('@kbn/presentation-containers');

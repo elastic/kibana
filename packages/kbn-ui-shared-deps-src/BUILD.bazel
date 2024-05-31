@@ -30,6 +30,7 @@ webpack_cli(
     "//packages/kbn-analytics",
     "//packages/kbn-es-query",
     "//packages/kbn-search-errors",
+    "//packages/presentation/presentation_publishing",
     "//packages/kbn-std",
     "//packages/kbn-safer-lodash-set",
     "//packages/kbn-peggy",
