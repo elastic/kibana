@@ -62,7 +62,7 @@ export class ProfilesManager {
   }
 
   public async resolveRootProfile(params: RootProfileProviderParams) {
-    const serializedParams = this.serializeRootProfileParams(params);
+    const serializedParams = serializeRootProfileParams(params);
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
       return;
@@ -89,7 +89,7 @@ export class ProfilesManager {
   }
 
   public async resolveDataSourceProfile(params: DataSourceProfileProviderParams) {
-    const serializedParams = this.serializeDataSourceProfileParams(params);
+    const serializedParams = serializeDataSourceProfileParams(params);
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
       return;
@@ -158,30 +158,30 @@ export class ProfilesManager {
 
     return combineLatest(observables).pipe(map(() => this.getProfiles(options)));
   }
-
-  private serializeRootProfileParams(
-    params: RootProfileProviderParams
-  ): SerializedRootProfileParams {
-    return {
-      solutionNavId: params.solutionNavId,
-    };
-  }
-
-  private serializeDataSourceProfileParams(
-    params: DataSourceProfileProviderParams
-  ): SerializedDataSourceProfileParams {
-    return {
-      dataViewId: isDataSourceType(params.dataSource, DataSourceType.DataView)
-        ? params.dataSource.dataViewId
-        : undefined,
-      esqlQuery:
-        isDataSourceType(params.dataSource, DataSourceType.Esql) &&
-        isOfAggregateQueryType(params.query)
-          ? params.query.esql
-          : undefined,
-    };
-  }
 }
+
+const serializeRootProfileParams = (
+  params: RootProfileProviderParams
+): SerializedRootProfileParams => {
+  return {
+    solutionNavId: params.solutionNavId,
+  };
+};
+
+const serializeDataSourceProfileParams = (
+  params: DataSourceProfileProviderParams
+): SerializedDataSourceProfileParams => {
+  return {
+    dataViewId: isDataSourceType(params.dataSource, DataSourceType.DataView)
+      ? params.dataSource.dataViewId
+      : undefined,
+    esqlQuery:
+      isDataSourceType(params.dataSource, DataSourceType.Esql) &&
+      isOfAggregateQueryType(params.query)
+        ? params.query.esql
+        : undefined,
+  };
+};
 
 const recordHasContext = (
   record: DataTableRecord | undefined
