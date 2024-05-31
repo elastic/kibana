@@ -104,7 +104,7 @@ describe('useEsqlMode', () => {
     stateContainer.dataState.data$.documents$.next(msgComplete);
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
-  test('should change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {
+  test('should not change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {
     const { replaceUrlState } = renderHookWithContext(false, {
       viewMode: VIEW_MODE.AGGREGATED_LEVEL,
     });

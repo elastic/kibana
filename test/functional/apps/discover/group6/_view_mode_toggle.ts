@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscViewModeToggle');
         });
 
-        it('should still show view mode toggle for text-based searches', async () => {
+        it('should still show view mode toggle for ES|QL searches', async () => {
           await testSubjects.click('dscViewModeDocumentButton');
 
           await retry.try(async () => {

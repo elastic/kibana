@@ -67,12 +67,7 @@ export const DiscoverMainContent = ({
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
-      stateContainer.appState.update(
-        // Resetting to default viewMode: undefined if document level
-        // else change for viewMode from undefined to DOCUMENT_LEVEL will triger unsaved changes badge
-        { viewMode: mode },
-        true
-      );
+      stateContainer.appState.update({ viewMode: mode }, true);
 
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {

@@ -74,7 +74,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
   const lastReloadRequestTime$ = useMemo(() => {
     return stateContainer?.dataState?.refetch$
       ? stateContainer?.dataState?.refetch$.pipe(
-          map((d) => {
+          map(() => {
             return Date.now();
           })
         )
