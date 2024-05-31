@@ -664,6 +664,7 @@ class AgentPolicyService {
           'download_source_id',
           'fleet_server_host_id',
           'supports_agentless',
+          'global_data_tags',
         ]),
         ...newAgentPolicyProps,
       },
