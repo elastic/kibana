@@ -25,7 +25,7 @@ Contains a Discover-like table specifically for ES|QL queries:
 ### How to use it
 ```tsx
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview, formatESQLColumns } from '@kbn/esql-utils';
-import { ESQLTable } from '@kbn/esql-datagrid/public';
+import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 
 /**
   Run the _query api to get the datatable with the ES|QL query you want. 
@@ -36,7 +36,7 @@ const indexPattern = getIndexPatternFromESQLQuery(query);
 const adHocDataView = getESQLAdHocDataview(indexPattern, dataViewService);
 const formattedColumns = formatESQLColumns(columns);
 
-<ESQLTable
+<ESQLDataGrid
   rows={values}
   columns={formattedColumns}
   dataView={adHocDataView}
