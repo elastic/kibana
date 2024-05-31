@@ -63,10 +63,14 @@ export function createAddSwimlanePanelAction(
           '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
         );
 
-        const initialState = await resolveAnomalySwimlaneUserInput({
-          ...coreStart,
-          ...pluginStart,
-        });
+        const initialState = await resolveAnomalySwimlaneUserInput(
+          {
+            ...coreStart,
+            ...pluginStart,
+          },
+          context.embeddable,
+          context.embeddable.uuid
+        );
 
         presentationContainerParent.addNewPanel({
           panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,

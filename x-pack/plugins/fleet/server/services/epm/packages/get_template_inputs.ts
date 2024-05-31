@@ -62,7 +62,8 @@ export async function getTemplateInputs(
   pkgName: string,
   pkgVersion: string,
   format: Format,
-  prerelease?: boolean
+  prerelease?: boolean,
+  ignoreUnverified?: boolean
 ) {
   const packageInfoMap = new Map<string, PackageInfo>();
   let packageInfo: PackageInfo;
@@ -75,6 +76,7 @@ export async function getTemplateInputs(
       pkgName,
       pkgVersion,
       prerelease,
+      ignoreUnverified,
     });
   }
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
@@ -83,6 +85,7 @@ export async function getTemplateInputs(
     logger: appContextService.getLogger(),
     packageInfo,
     savedObjectsClient: soClient,
+    ignoreUnverified,
   });
 
   const compiledInputs = await _compilePackagePolicyInputs(

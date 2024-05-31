@@ -7,75 +7,31 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { asyncForEach } from '@kbn/std';
 
-import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '..';
+import { fetchSyncJobs, cancelSync } from '..';
 import { SyncStatus } from '../types/connectors';
-import { isIndexNotFoundException } from '../utils/identify_exceptions';
 
 export const cancelSyncs = async (
   client: ElasticsearchClient,
   connectorId: string
 ): Promise<void> => {
-  try {
-    await client.updateByQuery({
-      index: CONNECTORS_JOBS_INDEX,
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'connector.id': connectorId,
-              },
-            },
-            {
-              terms: {
-                status: [SyncStatus.PENDING, SyncStatus.SUSPENDED],
-              },
-            },
-          ],
-        },
-      },
-      script: {
-        lang: 'painless',
-        source: `ctx._source['status'] = '${SyncStatus.CANCELED}';
-ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
-ctx._source['canceled_at'] = '${new Date(Date.now()).toISOString()}';
-ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';`,
-      },
-    });
-    await client.updateByQuery({
-      index: CONNECTORS_JOBS_INDEX,
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'connector.id': connectorId,
-              },
-            },
-            {
-              terms: {
-                status: [SyncStatus.IN_PROGRESS],
-              },
-            },
-          ],
-        },
-      },
-      script: {
-        lang: 'painless',
-        source: `ctx._source['status'] = '${SyncStatus.CANCELING}';
-ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';`,
-      },
-    });
-    await client.update({
-      doc: { last_sync_status: SyncStatus.CANCELED, sync_now: false },
-      id: connectorId,
-      index: CONNECTORS_INDEX,
-    });
-  } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      return;
+  await asyncForEach(
+    [SyncStatus.PENDING, SyncStatus.IN_PROGRESS, SyncStatus.SUSPENDED],
+    async (status) => {
+      const syncJobsToCancel = await fetchSyncJobs(client, connectorId, 0, 1000, 'all', status);
+      await asyncForEach(syncJobsToCancel.data, async (syncJob) => {
+        await cancelSync(client, syncJob.id);
+      });
     }
-    throw error;
-  }
+  );
+
+  return await client.transport.request({
+    method: 'PUT',
+    path: `/_connector/${connectorId}/_last_sync`,
+    body: {
+      last_access_control_sync_status: SyncStatus.CANCELED,
+      last_sync_status: SyncStatus.CANCELED,
+    },
+  });
 };

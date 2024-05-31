@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
-import {
-  getLatencyAggregationType,
-  LatencyAggregationType,
-} from '../../../../../common/latency_aggregation_types';
+import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
@@ -29,17 +26,11 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getLatencyChartScreenContext } from './get_latency_chart_screen_context';
-
+import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select';
 interface Props {
   height?: number;
   kuery: string;
 }
-
-const options: Array<{ value: LatencyAggregationType; text: string }> = [
-  { value: LatencyAggregationType.avg, text: 'Average' },
-  { value: LatencyAggregationType.p95, text: '95th percentile' },
-  { value: LatencyAggregationType.p99, text: '99th percentile' },
-];
 
 export function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
@@ -131,18 +122,12 @@ export function LatencyChart({ height, kuery }: Props) {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSelect
-                  data-test-subj="apmLatencyChartSelect"
-                  compressed
-                  prepend={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
-                    defaultMessage: 'Metric',
-                  })}
-                  options={options}
-                  value={latencyAggregationType}
-                  onChange={(nextOption) => {
+                <LatencyAggregationTypeSelect
+                  latencyAggregationType={latencyAggregationType}
+                  onChange={(type) => {
                     urlHelpers.push(history, {
                       query: {
-                        latencyAggregationType: nextOption.target.value,
+                        latencyAggregationType: type,
                       },
                     });
                   }}

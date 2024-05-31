@@ -44,7 +44,7 @@ const riskScore = {
       rule_risks: [],
       calculated_score_norm: 100,
       multipliers: [],
-      calculated_level: RiskSeverity.critical,
+      calculated_level: RiskSeverity.Critical,
     },
   },
 };

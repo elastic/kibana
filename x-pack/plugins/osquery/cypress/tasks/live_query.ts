@@ -69,11 +69,14 @@ export const checkResults = () => {
 
 export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
+
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
   cy
     .getBySel('osqueryColumnValueSelect')
     .eq(index)
     .within(() => {
+      cy.getBySel('comboBoxInput').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('comboBoxInput').type(text);
     });
 

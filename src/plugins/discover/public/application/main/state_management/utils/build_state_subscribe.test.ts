@@ -11,6 +11,7 @@ import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;
@@ -35,7 +36,9 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should set the data view if the index has changed, and refetch should be triggered', async () => {
-    await getSubscribeFn()({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
 
     expect(stateContainer.actions.setDataView).toHaveBeenCalledWith(dataViewComplexMock);
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
@@ -75,18 +78,26 @@ describe('buildStateSubscribe', () => {
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
     stateContainer.dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
-    await stateSubscribeFn({ index: dataViewComplexMock.id });
+    await stateSubscribeFn({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
   });
   it('should not execute setState twice if the identical data view change is propagated twice', async () => {
-    await getSubscribeFn()({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
 
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
 
-    stateContainer.appState.getPrevious = jest.fn(() => ({ index: dataViewComplexMock.id }));
+    stateContainer.appState.getPrevious = jest.fn(() => ({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    }));
 
-    await getSubscribeFn()({ index: dataViewComplexMock.id });
+    await getSubscribeFn()({
+      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+    });
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
   });
 });

@@ -21,6 +21,8 @@ export const enableInfrastructureProfilingIntegration =
   'observability:enableInfrastructureProfilingIntegration';
 export const enableInfrastructureAssetCustomDashboards =
   'observability:enableInfrastructureAssetCustomDashboards';
+export const enableInfrastructureContainerAssetView =
+  'observability:enableInfrastructureContainerAssetView';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';

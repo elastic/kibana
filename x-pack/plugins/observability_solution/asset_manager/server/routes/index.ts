@@ -14,16 +14,19 @@ import { hostsRoutes } from './assets/hosts';
 import { servicesRoutes } from './assets/services';
 import { containersRoutes } from './assets/containers';
 import { podsRoutes } from './assets/pods';
+import { createEntityDefinitionRoute } from './entities/create';
+import { deleteEntityDefinitionRoute } from './entities/delete';
+import { resetEntityDefinitionRoute } from './entities/reset';
 
-export function setupRoutes<T extends RequestHandlerContext>({
-  router,
-  assetClient,
-}: SetupRouteOptions<T>) {
-  pingRoute<T>({ router, assetClient });
-  sampleAssetsRoutes<T>({ router, assetClient });
-  assetsRoutes<T>({ router, assetClient });
-  hostsRoutes<T>({ router, assetClient });
-  servicesRoutes<T>({ router, assetClient });
-  containersRoutes<T>({ router, assetClient });
-  podsRoutes<T>({ router, assetClient });
+export function setupRoutes<T extends RequestHandlerContext>(dependencies: SetupRouteOptions<T>) {
+  pingRoute<T>(dependencies);
+  sampleAssetsRoutes<T>(dependencies);
+  assetsRoutes<T>(dependencies);
+  hostsRoutes<T>(dependencies);
+  servicesRoutes<T>(dependencies);
+  containersRoutes<T>(dependencies);
+  podsRoutes<T>(dependencies);
+  createEntityDefinitionRoute<T>(dependencies);
+  deleteEntityDefinitionRoute<T>(dependencies);
+  resetEntityDefinitionRoute<T>(dependencies);
 }

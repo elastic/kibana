@@ -7,13 +7,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -72,7 +72,6 @@ export const renderApp = ({
   experimentalFeatures: ExperimentalFeatures;
 }) => {
   const { element, history, theme$ } = appMountParameters;
-  const i18nCore = core.i18n;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   // ensure all divs are .kbnAppWrappers
@@ -110,8 +109,8 @@ export const renderApp = ({
   });
 
   ReactDOM.render(
-    <PresentationContextProvider>
-      <EuiErrorBoundary>
+    <KibanaRenderContextProvider {...core}>
+      <PresentationContextProvider>
         <ApplicationUsageTrackingProvider>
           <KibanaThemeProvider {...{ theme: { theme$ } }}>
             <CloudProvider>
@@ -137,16 +136,14 @@ export const renderApp = ({
                 >
                   <Router history={history}>
                     <EuiThemeProvider darkMode={isDarkMode}>
-                      <i18nCore.Context>
-                        <RedirectAppLinks
-                          coreStart={core}
-                          data-test-subj="observabilityMainContainer"
-                        >
-                          <QueryClientProvider client={queryClient}>
-                            <App />
-                          </QueryClientProvider>
-                        </RedirectAppLinks>
-                      </i18nCore.Context>
+                      <RedirectAppLinks
+                        coreStart={core}
+                        data-test-subj="observabilityMainContainer"
+                      >
+                        <QueryClientProvider client={queryClient}>
+                          <App />
+                        </QueryClientProvider>
+                      </RedirectAppLinks>
                     </EuiThemeProvider>
                   </Router>
                 </PluginContext.Provider>
@@ -154,8 +151,8 @@ export const renderApp = ({
             </CloudProvider>
           </KibanaThemeProvider>
         </ApplicationUsageTrackingProvider>
-      </EuiErrorBoundary>
-    </PresentationContextProvider>,
+      </PresentationContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

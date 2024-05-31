@@ -9,14 +9,14 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
-import { RiskEngineStatus } from '../../../../common/entity_analytics/risk_engine';
 import { waitFor } from '@testing-library/react';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 
 const enabledRiskEngineStatus = {
-  risk_engine_status: RiskEngineStatus.ENABLED,
+  risk_engine_status: RiskEngineStatusEnum.ENABLED,
 };
 const disabledRiskEngineStatus = {
-  risk_engine_status: RiskEngineStatus.DISABLED,
+  risk_engine_status: RiskEngineStatusEnum.DISABLED,
 };
 
 const mockUseRiskEngineStatus = jest.fn();
