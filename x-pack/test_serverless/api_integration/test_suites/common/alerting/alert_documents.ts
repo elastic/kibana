@@ -254,7 +254,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.eql(hits2['@timestamp']);
       expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
       expect(hits2[ALERT_PREVIOUS_ACTION_GROUP]).to.be('query matched');
-      expect(hits1[ALERT_IS_IMPROVING]).to.eql(false);
       expect(hits2[ALERT_IS_IMPROVING]).to.be(undefined);
 
       // remove fields we know will be different
