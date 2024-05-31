@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
+import { useKibana } from '../common/lib/kibana';
+import { FLYOUT_STORAGE_KEYS } from './document_details/shared/constants/local_storage';
 import {
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
@@ -97,16 +100,37 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
 /**
  * Flyout used for the Security Solution application
  * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ * This flyout support push/overlay mode. The value is saved in local storage.
  */
-export const SecuritySolutionFlyout = memo(() => (
-  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
-));
+export const SecuritySolutionFlyout = memo(() => {
+  const { storage } = useKibana().services;
+
+  const flyoutTypeChange = useCallback(
+    (flyoutType: EuiFlyoutProps['type']) =>
+      storage.set(FLYOUT_STORAGE_KEYS.FLYOUT_PUSH_OR_OVERLAY_MODE, flyoutType),
+    [storage]
+  );
+
+  const flyoutType = storage.get(FLYOUT_STORAGE_KEYS.FLYOUT_PUSH_OR_OVERLAY_MODE);
+
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      flyoutTypeProps={{
+        type: flyoutType,
+        callback: flyoutTypeChange,
+      }}
+    />
+  );
+});
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
 /**
  * Flyout used in Timeline
  * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ * This flyout does not support push mode, because timeline being rendered in a modal (EUiPortal), it's very difficult to dynamically change its width.
  */
 export const TimelineFlyout = memo(() => {
   const { euiTheme } = useEuiTheme();
@@ -116,6 +140,9 @@ export const TimelineFlyout = memo(() => {
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
       customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+      flyoutTypeProps={{
+        disabled: true,
+      }}
     />
   );
 });
