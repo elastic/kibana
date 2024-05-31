@@ -32,12 +32,12 @@ const defaultProps: Props = {
   chartProps: { baseTheme: LIGHT_THEME },
   comparator: COMPARATORS.GREATER_THAN,
   id: 'componentId',
-  threshold: [90],
+  thresholds: [90],
   title: 'Threshold breached',
   value: 93,
   valueFormatter: (d) => `${d}%`,
   warning: {
-    threshold: [75],
+    thresholds: [75],
     comparator: COMPARATORS.GREATER_THAN,
   },
 };

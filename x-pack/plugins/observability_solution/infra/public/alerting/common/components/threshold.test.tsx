@@ -25,7 +25,7 @@ describe('Threshold', () => {
       chartProps: { baseTheme: LIGHT_THEME },
       comparator: COMPARATORS.GREATER_THAN,
       id: 'componentId',
-      threshold: [90],
+      thresholds: [90],
       title: 'Threshold breached',
       value: 93,
       valueFormatter: (d) => `${d}%`,
@@ -54,10 +54,10 @@ describe('Threshold', () => {
 
   it('shows warning message', () => {
     renderComponent({
-      threshold: [7],
+      thresholds: [7],
       comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
       warning: {
-        threshold: [3, 7],
+        thresholds: [3, 7],
         comparator: COMPARATORS.BETWEEN,
       },
     });

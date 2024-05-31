@@ -19,14 +19,14 @@ export interface ChartProps {
 
 export interface Props {
   chartProps: ChartProps;
-  comparator: COMPARATORS;
+  comparator: COMPARATORS | string;
   id: string;
-  threshold: number[];
+  thresholds: number[];
   title: string;
   value: number;
   valueFormatter: (d: number) => string;
   warning?: {
-    threshold: number[];
+    thresholds: number[];
     comparator: COMPARATORS;
   };
 }
@@ -35,7 +35,7 @@ export const Threshold = ({
   chartProps: { theme, baseTheme },
   comparator,
   id,
-  threshold,
+  thresholds,
   title,
   value,
   valueFormatter,
@@ -53,7 +53,7 @@ export const Threshold = ({
         minWidth: '100%',
       }}
       hasShadow={false}
-      data-test-subj={`threshold-${threshold.join('-')}-${value}`}
+      data-test-subj={`threshold-${thresholds.join('-')}-${value}`}
     >
       <Chart>
         <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
@@ -68,7 +68,7 @@ export const Threshold = ({
                     {i18n.translate('xpack.infra.alerting.thresholdExtraTitle', {
                       values: {
                         comparator,
-                        threshold: threshold.map((t) => valueFormatter(t)).join(' - '),
+                        threshold: thresholds.map((t) => valueFormatter(t)).join(' - '),
                       },
                       defaultMessage: `Alert when {comparator} {threshold}`,
                     })}
@@ -77,7 +77,7 @@ export const Threshold = ({
                       i18n.translate('xpack.infra.alerting.warningExtraTitle', {
                         values: {
                           comparator: warning.comparator,
-                          threshold: warning.threshold.map((t) => valueFormatter(t)).join(' - '),
+                          threshold: warning.thresholds.map((t) => valueFormatter(t)).join(' - '),
                         },
                         defaultMessage: `Warn when {comparator} {threshold}`,
                       })}
