@@ -1376,6 +1376,16 @@ export default function (providerContext: FtrProviderContext) {
             policyWithInactiveAgents.id
           );
 
+          // inactive agents are included in agent policy agents count
+          const {
+            body: {
+              item: { agents: agentsCount },
+            },
+          } = await supertest
+            .get(`/api/fleet/agent_policies/${policyWithInactiveAgents.id}`)
+            .expect(200);
+          expect(agentsCount).to.equal(1);
+
           const { body } = await supertest
             .post('/api/fleet/agent_policies/delete')
             .set('kbn-xsrf', 'xxx')
