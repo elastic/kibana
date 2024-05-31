@@ -21,7 +21,7 @@ import {
 import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import React, { FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -362,7 +362,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         panelStyle: { marginTop: '6px' },
       }}
       popoverButton={
-        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton} currentTarget="_blank">
+        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
           <EuiIcon type="search" size="m" />
         </EuiHeaderSectionItemButton>
       }
