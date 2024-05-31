@@ -35,7 +35,7 @@
     "@kbn/core-user-profile-server",
     "@kbn/core-feature-flags-server",
     "@kbn/core-pricing-server",
-    "@kbn/core-di-server",
+    "@kbn/core-di-common",
   ],
   "exclude": [
     "target/**/*",

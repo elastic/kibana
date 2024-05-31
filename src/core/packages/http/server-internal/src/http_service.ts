@@ -32,7 +32,7 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
-import type { InternalCoreDiServiceStart } from '@kbn/core-di-server-internal';
+import type { InternalCoreDiServiceStart } from '@kbn/core-di-common-internal';
 import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';

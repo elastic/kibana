@@ -11,10 +11,10 @@ import type { interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreId } from '@kbn/core-base-common-internal';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { InternalCoreDiServiceStart } from '@kbn/core-di-common-internal';
 import type { InjectionRequestHandlerContext } from '@kbn/core-di-server';
 import { RequestToken, ResponseToken } from '@kbn/core-http-server';
 import { Global } from '@kbn/core-di-common';
-import type { InternalCoreDiServiceStart } from './internal_contracts';
 
 /**
  * The {@link InjectionRequestHandlerContext} implementation.

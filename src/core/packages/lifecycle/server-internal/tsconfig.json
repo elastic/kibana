@@ -39,7 +39,7 @@
     "@kbn/core-feature-flags-server",
     "@kbn/core-feature-flags-server-internal",
     "@kbn/core-pricing-server",
-    "@kbn/core-di-server-internal",
+    "@kbn/core-di-common-internal",
   ],
   "exclude": [
     "target/**/*",
