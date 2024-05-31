@@ -43,7 +43,7 @@ import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import type { IRulesManagementClient } from '../../../rule_management/logic/rule_management/rules_management_client';
+import type { IRulesManagementClient } from '../../../rule_management/logic/rule_management/detection_rules_client';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

@@ -10,7 +10,7 @@ import type {
   CreateRuleOptions,
   _UpdateRuleProps,
   _PatchRuleProps,
-} from '../rules_management_client';
+} from '../detection_rules_client';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleCreateProps,

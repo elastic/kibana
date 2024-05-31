@@ -13,7 +13,7 @@ import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { updateRule } from './rules_management_client';
+import { updateRule } from './detection_rules_client';
 import { readRules } from './read_rules';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';

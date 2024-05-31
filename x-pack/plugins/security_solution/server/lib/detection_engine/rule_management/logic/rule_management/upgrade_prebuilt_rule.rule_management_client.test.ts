@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { upgradePrebuiltRule } from './rules_management_client';
+import { upgradePrebuiltRule } from './detection_rules_client';
 
 import {
   getCreateEqlRuleSchemaMock,
