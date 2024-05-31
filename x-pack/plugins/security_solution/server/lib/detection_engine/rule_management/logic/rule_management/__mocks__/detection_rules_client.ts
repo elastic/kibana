@@ -6,7 +6,7 @@
  */
 
 import type {
-  IRulesManagementClient,
+  IDetectionRulesClient,
   CreateRuleOptions,
   _UpdateRuleProps,
   _PatchRuleProps,
@@ -19,7 +19,7 @@ import type {
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { RuleAlertType } from '../../../../rule_schema';
 
-export type RulesManagementClientMock = jest.Mocked<IRulesManagementClient>;
+export type RulesManagementClientMock = jest.Mocked<IDetectionRulesClient>;
 
 const createRulesManagementClientMock = () => {
   const mocked: RulesManagementClientMock = {

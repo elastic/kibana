@@ -43,7 +43,7 @@ import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import type { IRulesManagementClient } from '../../../rule_management/logic/rule_management/detection_rules_client';
+import type { IDetectionRulesClient } from '../../../rule_management/logic/rule_management/detection_rules_client';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -134,7 +134,7 @@ export const createRuleExceptions = async ({
 }: {
   items: CreateRuleExceptionListItemSchemaDecoded[];
   listsClient: ExceptionListClient | null;
-  rulesManagementClient: IRulesManagementClient;
+  rulesManagementClient: IDetectionRulesClient;
   rule: SanitizedRule<RuleParams>;
 }) => {
   const ruleDefaultLists = rule.params.exceptionsList.filter(
@@ -277,7 +277,7 @@ export const createAndAssociateDefaultExceptionList = async ({
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  rulesManagementClient: IRulesManagementClient;
+  rulesManagementClient: IDetectionRulesClient;
   removeOldAssociation: boolean;
 }): Promise<ExceptionListSchema> => {
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });

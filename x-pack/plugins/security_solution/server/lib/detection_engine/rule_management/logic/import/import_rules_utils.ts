@@ -16,7 +16,7 @@ import type { RuleToImport } from '../../../../../../common/api/detection_engine
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
-import type { IRulesManagementClient } from '../rule_management/detection_rules_client';
+import type { IDetectionRulesClient } from '../rule_management/detection_rules_client';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -50,7 +50,7 @@ export const importRules = async ({
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
-  rulesManagementClient: IRulesManagementClient;
+  rulesManagementClient: IDetectionRulesClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {

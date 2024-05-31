@@ -98,7 +98,7 @@ interface ImportRuleProps {
   options: ImportRuleOptions;
 }
 
-export interface IRulesManagementClient {
+export interface IDetectionRulesClient {
   createCustomRule: (createCustomRulePayload: CreateCustomRuleProps) => Promise<RuleAlertType>;
   createPrebuiltRule: (
     createPrebuiltRulePayload: CreatePrebuiltRuleProps
@@ -118,7 +118,7 @@ export const createDetectionRulesClient = (
   savedObjectsClient: SavedObjectsClientContract,
   licensing: LicensingApiRequestHandlerContext,
   ml?: SharedServices
-): IRulesManagementClient => {
+): IDetectionRulesClient => {
   const mlAuthz = buildMlAuthz({
     license: licensing.license,
     ml,
