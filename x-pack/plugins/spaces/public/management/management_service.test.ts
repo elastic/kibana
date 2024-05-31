@@ -36,6 +36,7 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        getRolesAPIClient: jest.fn(),
       });
 
       expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
@@ -55,6 +56,7 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        getRolesAPIClient: jest.fn(),
       });
     });
   });
@@ -75,6 +77,7 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        getRolesAPIClient: jest.fn(),
       });
 
       service.stop();
