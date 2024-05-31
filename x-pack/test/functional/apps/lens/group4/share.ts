@@ -66,7 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
       await PageObjects.lens.save('new');
-      await PageObjects.lens.waitForVisualization();
       const url = await PageObjects.lens.getUrl();
       await PageObjects.lens.closeShareModal();
       await browser.openNewTab();
