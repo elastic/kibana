@@ -118,7 +118,8 @@ export async function getFullAgentPolicy(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
-    agentPolicy.namespace
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags
   );
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;

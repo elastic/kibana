@@ -64,6 +64,7 @@ export interface AgentPolicySOAttributes {
   package_policies?: PackagePolicy[];
   agents?: number;
   overrides?: any | null;
+  global_data_tags?: Array<{ name: string; value: string | number }>;
 }
 
 export interface AgentSOAttributes {
