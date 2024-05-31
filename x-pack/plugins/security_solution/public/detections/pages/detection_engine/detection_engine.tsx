@@ -73,10 +73,10 @@ import {
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
 import { ChartPanels } from './chart_panels';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
