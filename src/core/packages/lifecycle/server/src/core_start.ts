@@ -17,7 +17,7 @@ import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { MetricsServiceStart } from '@kbn/core-metrics-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { CoreDiServiceStart } from '@kbn/core-di-server';
+import type { CoreDiServiceStart } from '@kbn/core-di-common';
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-server';

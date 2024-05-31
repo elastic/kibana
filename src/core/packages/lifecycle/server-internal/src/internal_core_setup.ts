@@ -31,7 +31,7 @@ import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-int
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-server-internal';
 import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
 import type { PricingServiceSetup } from '@kbn/core-pricing-server';
-import type { InternalCoreDiServiceSetup } from '@kbn/core-di-server-internal';
+import type { InternalCoreDiServiceSetup } from '@kbn/core-di-common-internal';
 
 /** @internal */
 export interface InternalCoreSetup {
