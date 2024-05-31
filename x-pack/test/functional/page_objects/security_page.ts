@@ -306,44 +306,50 @@ export class SecurityPageObject extends FtrService {
       return;
     }
 
-    this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
-    const url = this.deployment.getHostPort() + '/logout';
-    await this.browser.get(url);
+    const performForceLogout = async () => {
+      this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
+      const url = this.deployment.getHostPort() + '/logout';
+      await this.browser.get(url);
 
-    // After logging out, the user can be redirected to various locations depending on the context. By default, we
-    // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
-    // we should simply wait until the user is redirected *elsewhere*.
-    if (waitForLoginPage) {
-      this.log.debug('Waiting on the login form to appear');
-      await this.waitForLoginPage();
-    } else {
-      this.log.debug('Waiting for logout to complete');
-      await this.retry.waitFor('logout to complete', async () => {
-        // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
-        // current page and lose the state (e.g. unsaved changes) via native alert dialog.
-        const alert = await this.browser.getAlert();
-        if (alert?.accept) {
-          await alert.accept();
-        }
+      // After logging out, the user can be redirected to various locations depending on the context. By default, we
+      // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+      // we should simply wait until the user is redirected *elsewhere*.
+      if (waitForLoginPage) {
+        this.log.debug('Waiting on the login form to appear');
+        await this.waitForLoginPage();
+      } else {
+        this.log.debug('Waiting for logout to complete');
+        await this.retry.waitFor('logout to complete', async () => {
+          // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
+          // current page and lose the state (e.g. unsaved changes) via native alert dialog.
+          const alert = await this.browser.getAlert();
+          if (alert?.accept) {
+            await alert.accept();
+          }
 
-        // Timeout has been doubled here in attempt to quiet the flakiness
-        await this.retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
-          const urlBefore = await this.browser.getCurrentUrl();
-          await this.delay(1000);
-          const urlAfter = await this.browser.getCurrentUrl();
-          this.log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
-          return urlAfter === urlBefore;
+          // Timeout has been doubled to 40s here in attempt to quiet the flakiness
+          await this.retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
+            const urlBefore = await this.browser.getCurrentUrl();
+            await this.delay(1000);
+            const urlAfter = await this.browser.getCurrentUrl();
+            this.log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
+            return urlAfter === urlBefore;
+          });
+
+          const currentUrl = await this.browser.getCurrentUrl();
+          if (this.config.get('serverless')) {
+            // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+            return currentUrl.includes('/login') || currentUrl.includes('/projects');
+          } else {
+            return !currentUrl.includes('/logout');
+          }
         });
+      }
+    };
 
-        const currentUrl = await this.browser.getCurrentUrl();
-        if (this.config.get('serverless')) {
-          // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
-          return currentUrl.includes('/login') || currentUrl.includes('/projects');
-        } else {
-          return !currentUrl.includes('/logout');
-        }
-      });
-    }
+    await this.retry.tryWithRetries('force logout with retries', performForceLogout, {
+      retryCount: 2,
+    });
   }
 
   async clickRolesSection() {
