@@ -32,8 +32,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "triggersActionsUi",
-      "dataQuality"
+      "triggersActionsUi"
     ],
     "extraPublicDirs": [
       "common",
