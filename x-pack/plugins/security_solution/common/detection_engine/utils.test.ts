@@ -272,13 +272,6 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithDuration('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('eql')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(true);
-
-      // Rule types that don't support alert suppression:
-<<<<<<< HEAD
-      expect(isSuppressionRuleConfiguredWithDuration('esql')).toBe(false);
-=======
-      expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(false);
->>>>>>> main
     });
 
     test('should return false for an unknown rule type', () => {
@@ -298,13 +291,6 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithGroupBy('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('eql')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(true);
-
-      // Rule types that don't support alert suppression:
-<<<<<<< HEAD
-      expect(isSuppressionRuleConfiguredWithGroupBy('esql')).toBe(false);
-=======
-      expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(false);
->>>>>>> main
     });
 
     test('should return false for a threshold rule type', () => {
@@ -329,13 +315,6 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithMissingFields('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('eql')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(true);
-
-      // Rule types that don't support alert suppression:
-<<<<<<< HEAD
-      expect(isSuppressionRuleConfiguredWithMissingFields('esql')).toBe(false);
-=======
-      expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(false);
->>>>>>> main
     });
 
     test('should return false for a threshold rule type', () => {
