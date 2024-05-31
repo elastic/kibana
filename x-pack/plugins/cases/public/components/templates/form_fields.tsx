@@ -96,7 +96,6 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
             connectors={connectors}
             isLoading={isSubmitting}
             configurationConnectorId={configurationConnectorId}
-            path="connectorId"
           />
         </div>
       ),
