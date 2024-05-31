@@ -830,10 +830,9 @@ TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version
 And the current version of <field> is unchanged from the base version
 And there is no update for <field> in this upgrade
-Then the merged output should be the current verison of <field>
+Then the merged output should be the current version of <field>
 And there should be no conflict
 
 Examples:
@@ -849,10 +848,9 @@ Examples:
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version
 And the current version of <field> has changed from the base version
 And there is no update for <field> in this upgrade
-Then the merged output should be the current verison of <field>
+Then the merged output should be the current version of <field>
 And there should be no conflict
 
 Examples:
@@ -868,10 +866,9 @@ Examples:
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version
 And the current version of <field> is unchanged from the base version
 And there is a update for <field> in this upgrade
-Then the merged output should be the target verison of <field>
+Then the merged output should be the target version of <field>
 And there should be no conflict
 
 Examples:
@@ -887,14 +884,13 @@ Examples:
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version
 And the current version of <field> has changed from the base version
 And there is a update for <field> in this upgrade
 And the current version and the update have the same value
-Then the merged output should be the current verison of <field>
+Then the merged output should be the current version of <field>
 And there should be no conflict
 
-CASE: should work the same if rule does not have an existing base version
+CASE: should work the same if rule's base version exists or not
 
 Examples:
 | field      | base_version | current_version | target_version |
@@ -909,19 +905,36 @@ Examples:
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version
 And the current version of <field> has changed from the base version
 And there is a update for <field> in this upgrade
 And the current version and the update do not have the same value
-Then the merged output should be the current verison of <field>
+Then the merged output should be the current version of <field>
 And there should be a conflict
-
-CASE: should return target version if rule does not have an existing base version
 
 Examples:
 | field      | base_version | current_version | target_version |
 | name       | "A"          | "B"             | "C"            |
 | risk_score | 1            | 2               | 3              |
+```
+
+#### **Scenario: Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist**
+
+**Automation** 1 integration test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And the base version of the rule cannot be determined
+And the current version of <field> has changed from the base version
+And there is a update for <field> in this upgrade
+And the current version and the update do not have the same value
+Then the merged output should be the target version of <field>
+And there should be a conflict
+
+Examples:
+| field      | base_version | current_version | target_version |
+| name       | N/A          | "B"             | "C"            |
+| risk_score | N/A          | 2               | 3              |
 ```
 
 ### Rule upgrade workflow: viewing rule changes in JSON diff view
