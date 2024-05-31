@@ -25,45 +25,9 @@ export const RootContext = z.literal('security');
  * Message role.
  */
 export type ChatMessageRole = z.infer<typeof ChatMessageRole>;
-export const ChatMessageRole = z.enum(['system', 'user', 'assistant', 'function', 'elastic']);
+export const ChatMessageRole = z.enum(['system', 'user', 'assistant']);
 export type ChatMessageRoleEnum = typeof ChatMessageRole.enum;
 export const ChatMessageRoleEnum = ChatMessageRole.enum;
-
-/**
- * Message role.
- */
-export type TriggerType = z.infer<typeof TriggerType>;
-export const TriggerType = z.enum(['user', 'assistant', 'elastic']);
-export type TriggerTypeEnum = typeof TriggerType.enum;
-export const TriggerTypeEnum = TriggerType.enum;
-
-export type TriggerArguments = z.infer<typeof TriggerArguments>;
-export const TriggerArguments = z.object({}).catchall(z.unknown());
-
-export type TriggerData = z.infer<typeof TriggerData>;
-export const TriggerData = z.object({}).catchall(z.unknown());
-
-/**
- * AI assistant message.
- */
-export type InstructionsObject = z.infer<typeof InstructionsObject>;
-export const InstructionsObject = z.object({
-  doc_id: z.string().optional(),
-  text: z.string().optional(),
-});
-
-/**
- * AI assistant message.
- */
-export type FunctionCall = z.infer<typeof FunctionCall>;
-export const FunctionCall = z.object({
-  /**
-   * Trigger type.
-   */
-  trigger: TriggerType,
-  arguments: TriggerArguments.optional(),
-  data: TriggerData.optional(),
-});
 
 export type MessageData = z.infer<typeof MessageData>;
 export const MessageData = z.object({}).catchall(z.unknown());
@@ -77,14 +41,6 @@ export const ChatMessage = z.object({
    * Message content.
    */
   content: z.string().optional(),
-  /**
-   * Message name.
-   */
-  name: z.string().optional(),
-  /**
-   * Function definition.
-   */
-  function_call: FunctionCall.optional(),
   /**
    * Message role.
    */
@@ -102,21 +58,15 @@ export const ChatMessage = z.object({
 
 export type ChatCompleteProps = z.infer<typeof ChatCompleteProps>;
 export const ChatCompleteProps = z.object({
-  /**
-   * Solution context.
-   */
-  context: RootContext.optional(),
   conversationId: z.string().optional(),
+  promptId: z.string().optional(),
   responseLanguage: z.string().optional(),
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),
-  disableFunctions: z.boolean().optional(),
   connectorId: z.string(),
   model: z.string().optional(),
-  title: z.string().optional(),
   persist: z.boolean(),
   messages: z.array(ChatMessage),
-  instructions: z.array(z.union([InstructionsObject, z.string()])).optional(),
 });
 
 export type ChatCompleteRequestBody = z.infer<typeof ChatCompleteRequestBody>;

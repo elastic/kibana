@@ -21,9 +21,9 @@ import { buildResponse } from '../utils';
 import {
   UPGRADE_LICENSE_MESSAGE,
   appendAssistantMessageToConversation,
+  createOrUpdateConversationWithUserInput,
   hasAIAssistantLicense,
   langChainExecute,
-  updateConversationWithUserInput,
 } from '../helpers';
 
 export const chatCompleteRoute = (
@@ -97,14 +97,15 @@ export const chatCompleteRoute = (
 
           // replacements
 
-          if (request.body.persist && conversationId && conversationsDataClient) {
-            const updatedConversation = await updateConversationWithUserInput({
+          if (request.body.persist && conversationsDataClient) {
+            const updatedConversation = await createOrUpdateConversationWithUserInput({
               actionsClient,
               actionTypeId,
               authenticatedUser,
               connectorId,
               conversationId,
               conversationsDataClient,
+              promptId: request.body.promptId,
               logger,
               replacements: latestReplacements,
               newMessages: request.body.messages

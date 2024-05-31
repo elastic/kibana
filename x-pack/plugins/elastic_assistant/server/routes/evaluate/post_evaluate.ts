@@ -192,7 +192,7 @@ export const postEvaluateRoute = (
               agents.push({
                 agentEvaluator: async (langChainMessages, exampleId) => {
                   const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
-                    actions,
+                    actionsClient,
                     isEnabledKnowledgeBase: true,
                     assistantTools,
                     connectorId,
@@ -237,9 +237,8 @@ export const postEvaluateRoute = (
             evalModel == null || evalModel === ''
               ? undefined
               : new ActionsClientLlm({
-                  actions,
+                  actionsClient,
                   connectorId: evalModel,
-                  request: skeletonRequest,
                   logger,
                   model: skeletonRequest.body.model,
                 });

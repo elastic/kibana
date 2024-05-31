@@ -53,47 +53,6 @@ components:
         - system
         - user
         - assistant
-        - function
-        - elastic
-
-    TriggerType:
-      type: string
-      description: Message role.
-      enum:
-        - user
-        - assistant
-        - elastic
-
-    TriggerArguments:
-      type: object
-      additionalProperties: true
-
-    TriggerData:
-      type: object
-      additionalProperties: true
-
-    InstructionsObject:
-      type: object
-      description: AI assistant message.
-      properties:
-        doc_id:
-          type: string
-        text: 
-          type: string
-
-    FunctionCall: 
-      type: object
-      description: AI assistant message.
-      required:
-        - 'trigger'
-      properties:
-        trigger:
-          $ref: '#/components/schemas/TriggerType'
-          description: Trigger type.
-        arguments:
-          $ref: '#/components/schemas/TriggerArguments'
-        data: 
-          $ref: '#/components/schemas/TriggerData'
 
     MessageData:
       type: object
@@ -109,12 +68,6 @@ components:
         content:
           type: string
           description: Message content.
-        name:
-          type: string
-          description: Message name.
-        function_call:
-          $ref: '#/components/schemas/FunctionCall'
-          description: Function definition.
         role:
           $ref: '#/components/schemas/ChatMessageRole'
           description: Message role.
@@ -134,10 +87,9 @@ components:
     ChatCompleteProps:
       type: object
       properties:
-        context:
-          $ref: '#/components/schemas/RootContext'
-          description: Solution context.
         conversationId:
+          type: string
+        promptId:
           type: string
         responseLanguage:
           type: string
@@ -145,13 +97,9 @@ components:
           type: string
         langSmithApiKey:
           type: string
-        disableFunctions:
-          type: boolean
         connectorId:
           type: string
         model:
-          type: string
-        title:
           type: string
         persist:
           type: boolean
@@ -159,12 +107,6 @@ components:
           type: array
           items:
               $ref: '#/components/schemas/ChatMessage'
-        instructions:
-          type: array
-          items:
-              oneOf:
-                - $ref: '#/components/schemas/InstructionsObject'
-                - type: string
       required:
         - messages
         - persist

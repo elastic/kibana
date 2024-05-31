@@ -54,6 +54,10 @@ interface GetPluginNameFromRequestParams {
 
 export const DEFAULT_PLUGIN_NAME = 'securitySolutionUI';
 
+export const NEW_CHAT = i18n.translate('xpack.elasticAssistantPlugin.server.newChat', {
+  defaultMessage: 'New chat',
+});
+
 /**
  * Attempts to extract the plugin name the request originated from using the request headers.
  *
@@ -124,24 +128,22 @@ export const UPGRADE_LICENSE_MESSAGE =
   'Your license does not support AI Assistant. Please upgrade your license.';
 
 export interface GenerateTitleForNewChatConversationParams {
-  conversationsDataClient: AIAssistantConversationsDataClient;
-  conversationId: string;
-  message: Pick<Message, 'content' | 'role' | 'timestamp'>;
+  message: Pick<Message, 'content' | 'role'>;
   model?: string;
   actionTypeId: string;
   connectorId: string;
   logger: Logger;
   actionsClient: PublicMethodsOf<ActionsClient>;
+  responseLanguage?: string;
 }
 export const generateTitleForNewChatConversation = async ({
-  conversationsDataClient,
-  conversationId,
   message,
   model,
   actionTypeId,
   connectorId,
   logger,
   actionsClient,
+  responseLanguage = 'English',
 }: GenerateTitleForNewChatConversationParams) => {
   try {
     const autoTitle = (await executeAction({
@@ -155,13 +157,7 @@ export const generateTitleForNewChatConversation = async ({
           messages: [
             {
               role: 'assistant',
-              content: i18n.translate(
-                'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
-                {
-                  defaultMessage:
-                    'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
-                }
-              ),
+              content: `You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Please create the title in ${responseLanguage}.`,
             },
             message,
           ],
@@ -173,25 +169,15 @@ export const generateTitleForNewChatConversation = async ({
       logger,
     })) as unknown as StaticResponse; // TODO: Use function overloads in executeAction to avoid this cast when sending subAction: 'invokeAI',
     if (autoTitle.status === 'ok') {
-      try {
-        // This regular expression captures a string enclosed in single or double quotes.
-        // It extracts the string content without the quotes.
-        // Example matches:
-        // - "Hello, World!" => Captures: Hello, World!
-        // - 'Another Example' => Captures: Another Example
-        // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-        const match = autoTitle.data.match(/^["']?([^"']+)["']?$/);
-        const title = match ? match[1] : autoTitle.data;
-
-        return await conversationsDataClient.updateConversation({
-          conversationUpdateProps: {
-            id: conversationId,
-            title,
-          },
-        });
-      } catch (e) {
-        logger.warn(`Failed to update conversation with generated title: ${e.message}`);
-      }
+      // This regular expression captures a string enclosed in single or double quotes.
+      // It extracts the string content without the quotes.
+      // Example matches:
+      // - "Hello, World!" => Captures: Hello, World!
+      // - 'Another Example' => Captures: Another Example
+      // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+      const match = autoTitle.data.match(/^["']?([^"']+)["']?$/);
+      const title = match ? match[1] : autoTitle.data;
+      return title;
     }
   } catch (e) {
     /* empty */
@@ -459,6 +445,78 @@ export const langChainExecute = async ({
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
 
+export interface CreateOrUpdateConversationWithParams {
+  logger: Logger;
+  conversationsDataClient: AIAssistantConversationsDataClient;
+  replacements: Replacements;
+  conversationId?: string;
+  promptId?: string;
+  actionTypeId: string;
+  connectorId: string;
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  newMessages?: Array<Pick<Message, 'content' | 'role' | 'timestamp'>>;
+  model?: string;
+  authenticatedUser: AuthenticatedUser;
+  responseLanguage?: string;
+}
+export const createOrUpdateConversationWithUserInput = async ({
+  logger,
+  conversationsDataClient,
+  replacements,
+  conversationId,
+  actionTypeId,
+  promptId,
+  connectorId,
+  actionsClient,
+  newMessages,
+  model,
+  authenticatedUser,
+  responseLanguage,
+}: CreateOrUpdateConversationWithParams) => {
+  if (!conversationId) {
+    if (newMessages && newMessages.length > 0) {
+      const title = await generateTitleForNewChatConversation({
+        message: newMessages[0],
+        actionsClient,
+        actionTypeId,
+        connectorId,
+        logger,
+        model,
+        responseLanguage,
+      });
+      if (title) {
+        return conversationsDataClient.createConversation({
+          conversation: {
+            title,
+            messages: newMessages,
+            replacements,
+            apiConfig: {
+              connectorId,
+              actionTypeId,
+              model,
+              defaultSystemPromptId: promptId,
+            },
+          },
+          authenticatedUser,
+        });
+      }
+    }
+    return;
+  }
+  return updateConversationWithUserInput({
+    actionsClient,
+    actionTypeId,
+    authenticatedUser,
+    connectorId,
+    conversationId,
+    conversationsDataClient,
+    logger,
+    replacements,
+    newMessages,
+    model,
+  });
+};
+
 export interface UpdateConversationWithParams {
   logger: Logger;
   conversationsDataClient: AIAssistantConversationsDataClient;
@@ -470,6 +528,7 @@ export interface UpdateConversationWithParams {
   newMessages?: Array<Pick<Message, 'content' | 'role' | 'timestamp'>>;
   model?: string;
   authenticatedUser: AuthenticatedUser;
+  responseLanguage?: string;
 }
 export const updateConversationWithUserInput = async ({
   logger,
@@ -482,7 +541,32 @@ export const updateConversationWithUserInput = async ({
   newMessages,
   model,
   authenticatedUser,
+  responseLanguage,
 }: UpdateConversationWithParams) => {
+  if (!conversationId) {
+    if (newMessages && newMessages.length > 0) {
+      const title = await generateTitleForNewChatConversation({
+        message: newMessages[0],
+        actionsClient,
+        actionTypeId,
+        connectorId,
+        logger,
+        responseLanguage,
+        model,
+      });
+      if (title) {
+        return conversationsDataClient.createConversation({
+          conversation: {
+            title,
+            messages: newMessages,
+            replacements,
+          },
+          authenticatedUser,
+        });
+      }
+    }
+    return;
+  }
   const conversation = await conversationsDataClient?.getConversation({
     id: conversationId,
     authenticatedUser,
@@ -491,10 +575,6 @@ export const updateConversationWithUserInput = async ({
     throw new Error(`conversation id: "${conversationId}" not found`);
   }
   let updatedConversation = conversation;
-
-  const NEW_CHAT = i18n.translate('xpack.elasticAssistantPlugin.server.newChat', {
-    defaultMessage: 'New chat',
-  });
 
   const messages = updatedConversation?.messages?.map((c) => ({
     role: c.role,
@@ -505,15 +585,19 @@ export const updateConversationWithUserInput = async ({
   const lastMessage = newMessages?.[0] ?? messages?.[0];
 
   if (conversation?.title === NEW_CHAT && lastMessage) {
-    const res = await generateTitleForNewChatConversation({
+    const title = await generateTitleForNewChatConversation({
       message: lastMessage,
       actionsClient,
       actionTypeId,
       connectorId,
-      conversationId,
-      conversationsDataClient,
       logger,
       model,
+    });
+    const res = await conversationsDataClient.updateConversation({
+      conversationUpdateProps: {
+        id: conversationId,
+        title,
+      },
     });
     if (res) {
       updatedConversation = res;
