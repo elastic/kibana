@@ -449,6 +449,7 @@ export default function ({
 
     let valueToInsert = termAsString;
     let templateInserted = false;
+    console.log('addtemplate ' + context.addTemplate)
     if (context.addTemplate && !_.isUndefined(term.template) && !_.isNull(term.template)) {
       let indentedTemplateLines;
       // In order to allow triple quoted strings in template completion we check the `__raw_`
@@ -510,6 +511,7 @@ export default function ({
 
     valueToInsert = prefix + valueToInsert + context.suffixToAdd;
 
+    console.log({valueToInsert})
     if (context.rangeToReplace!.start.column !== context.rangeToReplace!.end.column) {
       editor.replace(context.rangeToReplace!, valueToInsert);
     } else {
@@ -1198,6 +1200,7 @@ export default function ({
         if (context.autoCompleteType === 'body') {
           defaults.completer = {
             insertMatch() {
+              console.log('inserting match')
               return applyTerm(term);
             },
           };

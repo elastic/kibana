@@ -22,7 +22,15 @@ import {
 import { populateContext } from '../../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
-import { END_OF_URL_TOKEN, i18nTexts, newLineRegex } from './constants';
+import {
+  END_OF_URL_TOKEN,
+  i18nTexts,
+  newLineRegex,
+  shouldAutocompletePropertyNameRegex,
+  shouldAutocompletePropertyValueRegex,
+  shouldAutocompleteUrlPartRegex,
+  shouldAutocompleteUrlRegex,
+} from './constants';
 
 /*
  * This function initializes the autocomplete context for the request
@@ -299,6 +307,7 @@ const getSuggestions = (
         const suggestion = {
           // convert name to a string
           label: item.name + '',
+          // TODO need to add more logic for when to insert template and when not to (context.addTemplate)
           insertText: getInsertText(item, bodyContent, context),
           detail: i18nTexts.api,
           // the kind is only used to configure the icon
@@ -387,4 +396,17 @@ const getConditionalTemplate = (
   if (matchedRule && matchedRule.__template) {
     return matchedRule.__template;
   }
+};
+
+/*
+ * This function checks the content of the line before the cursor and decides if the autocomplete
+ * suggestions should be triggered
+ */
+export const shouldTriggerSuggestions = (lineContent: string): boolean => {
+  return (
+    shouldAutocompleteUrlRegex.test(lineContent) ||
+    shouldAutocompleteUrlPartRegex.test(lineContent) ||
+    shouldAutocompletePropertyNameRegex.test(lineContent) ||
+    shouldAutocompletePropertyValueRegex.test(lineContent)
+  );
 };
