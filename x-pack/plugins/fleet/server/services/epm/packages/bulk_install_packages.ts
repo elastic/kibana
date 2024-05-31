@@ -29,6 +29,7 @@ interface BulkInstallPackagesParams {
   preferredSource?: 'registry' | 'bundled';
   prerelease?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  skipIfInstalled?: boolean;
 }
 
 export async function bulkInstallPackages({
@@ -39,6 +40,7 @@ export async function bulkInstallPackages({
   force,
   prerelease,
   authorizationHeader,
+  skipIfInstalled,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
@@ -91,7 +93,7 @@ export async function bulkInstallPackages({
       }
 
       const pkgKeyProps = result.value;
-      if (!force) {
+      if (!force || skipIfInstalled) {
         const installedPackageResult = await isPackageVersionOrLaterInstalled({
           savedObjectsClient,
           pkgName: pkgKeyProps.name,
