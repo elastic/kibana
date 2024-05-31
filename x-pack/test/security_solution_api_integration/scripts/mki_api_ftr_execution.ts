@@ -9,6 +9,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { exec } from 'child_process';
 import crypto from 'crypto';
+import fs from 'fs';
 import type {
   ProductType,
   ProjectHandler,
@@ -71,7 +72,6 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
     return process.exit(1);
   }
 
-  const fs = require('fs');
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 
   const scriptName: string = process.env.TARGET_SCRIPT;
