@@ -25,7 +25,7 @@ import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-p
 import { ESQLSearchReponse } from '@kbn/es-types';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
-import { validateEsqlQuery } from './validate_esql_query';
+import { runAndValidateEsqlQuery } from './validate_esql_query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -107,8 +107,10 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
     },
     async ({ arguments: { query } }) => {
       const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
-      const { error, errorMessages } = await validateEsqlQuery({
-        query,
+      // With limit 0 I get only the columns, it is much more performant
+      const performantQuery = `${query} | limit 0`;
+      const { error, errorMessages } = await runAndValidateEsqlQuery({
+        query: performantQuery,
         client,
       });
 

@@ -12,7 +12,7 @@ import { ESQLSearchReponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType, type KBN_FIELD_TYPES } from '@kbn/field-types';
 import { splitIntoCommands } from './correct_common_esql_mistakes';
 
-export async function validateEsqlQuery({
+export async function runAndValidateEsqlQuery({
   query,
   client,
 }: {
