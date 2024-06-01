@@ -352,11 +352,21 @@ describe('ReportingStore', () => {
   });
 
   describe('start', () => {
+    class TestReportingStore extends ReportingStore {
+      constructor(...args: ConstructorParameters<typeof ReportingStore>) {
+        super(...args);
+      }
+      public createIlmPolicy() {
+        return super.createIlmPolicy();
+      }
+    }
+
     it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
       mockEsClient.ilm.getLifecycle.mockRejectedValue({ statusCode: 404 });
       mockEsClient.ilm.putLifecycle.mockResponse({} as any);
 
-      const store = new ReportingStore(mockCore, mockLogger);
+      const store = new TestReportingStore(mockCore, mockLogger);
+      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
       await store.start();
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
@@ -372,16 +382,32 @@ describe('ReportingStore', () => {
           },
         }
       `);
+      expect(createIlmPolicySpy).toBeCalled();
     });
 
     it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
       mockEsClient.ilm.getLifecycle.mockResponse({});
 
-      const store = new ReportingStore(mockCore, mockLogger);
+      const store = new TestReportingStore(mockCore, mockLogger);
+      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
       await store.start();
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
+      expect(createIlmPolicySpy).toBeCalled();
+    });
+
+    it('does not call ILM APIs in serverless', async () => {
+      const reportingConfig = {
+        statefulSettings: { enabled: false },
+      };
+      mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
+
+      const store = new TestReportingStore(mockCore, mockLogger);
+      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
+      await store.start();
+
+      expect(createIlmPolicySpy).not.toBeCalled();
     });
   });
 });
