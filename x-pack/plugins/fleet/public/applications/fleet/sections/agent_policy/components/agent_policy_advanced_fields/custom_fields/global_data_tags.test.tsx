@@ -21,7 +21,7 @@ describe('GlobalDataTagsTable', () => {
     { name: 'tag2', value: 'value2' },
   ];
 
-  const renderComponent = async (tags: GlobalDataTag[] = initialTags) => {
+  const renderComponent = async (tags: GlobalDataTag[]) => {
     mockUpdateAgentPolicy = jest.fn();
     await act(async () => {
       renderResult = render(
@@ -35,7 +35,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should render initial tags', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
     initialTags.forEach((tag) => {
       expect(renderResult.getByText(tag.name)).toBeInTheDocument();
       expect(renderResult.getByText(tag.value)).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should edit an existing tag', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Edit')[0]);
@@ -95,7 +95,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should show validation errors for empty name and value', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getByText('Add another field'));
@@ -110,7 +110,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should delete a tag', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Delete')[0]);
@@ -126,7 +126,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should show validation errors for duplicate tag names', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getByText('Add another field'));
@@ -145,7 +145,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should cancel adding a new tag', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getByText('Add another field'));
@@ -160,7 +160,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should cancel editing a tag', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Edit')[0]);
@@ -175,7 +175,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should allow multiple tags to be in "edit" state concurrently', async () => {
-    await renderComponent();
+    await renderComponent(initialTags);
 
     // Enter edit mode for the first tag
     await act(async () => {
