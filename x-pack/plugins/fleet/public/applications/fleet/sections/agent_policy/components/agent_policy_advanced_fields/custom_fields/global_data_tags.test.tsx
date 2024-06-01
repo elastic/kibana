@@ -134,7 +134,7 @@ describe('GlobalDataTagsTable', () => {
 
     const nameInput = renderResult.getByPlaceholderText('Enter name');
     await act(async () => {
-      fireEvent.change(nameInput, { target: { value: 'tag1' } });
+      fireEvent.change(nameInput, { target: { value: initialTags[0].name } });
     });
 
     await act(async () => {
@@ -182,8 +182,8 @@ describe('GlobalDataTagsTable', () => {
       fireEvent.click(renderResult.getAllByLabelText('Edit')[0]);
     });
 
-    const nameInput1 = renderResult.getByDisplayValue('tag1');
-    const valueInput1 = renderResult.getByDisplayValue('value1');
+    const nameInput1 = renderResult.getByDisplayValue(initialTags[0].name);
+    const valueInput1 = renderResult.getByDisplayValue(initialTags[0].value);
 
     await act(async () => {
       fireEvent.change(nameInput1, { target: { value: 'updatedTag1' } });
@@ -197,8 +197,8 @@ describe('GlobalDataTagsTable', () => {
       fireEvent.click(renderResult.getByLabelText('Edit'));
     });
 
-    const nameInput2 = renderResult.getByDisplayValue('tag2');
-    const valueInput2 = renderResult.getByDisplayValue('value2');
+    const nameInput2 = renderResult.getByDisplayValue(initialTags[1].name);
+    const valueInput2 = renderResult.getByDisplayValue(initialTags[1].value);
 
     await act(async () => {
       fireEvent.change(nameInput2, { target: { value: 'updatedTag2' } });
