@@ -170,6 +170,7 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   const llmTypeDictionary: Record<string, string> = {
     [`.gen-ai`]: `openai`,
     [`.bedrock`]: `bedrock`,
+    [`.gemini`]: `gemini`,
   };
   return llmTypeDictionary[actionTypeId];
 };

@@ -20,6 +20,12 @@ export interface InvokeBody {
   signal?: AbortSignal;
 }
 
+interface UsageMetadata {
+  promptTokenCount: number;
+  candidatesTokenCount: number;
+  totalTokenCount: number;
+}
+
 /**
  * Takes the OpenAI and Bedrock `invokeStream` sub action response stream and the request messages array as inputs.
  * Uses gpt-tokenizer encoding to calculate the number of tokens in the prompt and completion parts of the response stream
@@ -128,6 +134,74 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
       logger.error('An error occurred while calculating streaming response tokens');
   }
   return parseOpenAIResponse(responseBody);
+};
+
+export const parseGeminiStreamForUsageMetadata = async ({
+  responseStream,
+  logger,
+  body,
+}): Promise<UsageMetadata> => {
+  let responseBody = '';
+  // const { signal, ...chatCompletionRequest } = body;
+
+  const onData = (chunk: Buffer) => {
+    // no special encoding, can safely use `${chunk}` and append to responseBody
+    responseBody += chunk.toString();
+  };
+
+  const destroyStream = () => {
+    // Pause the stream to prevent further data events
+    responseStream.pause();
+    // Remove the 'data' event listener once the stream is paused
+    responseStream.removeListener('data', onData);
+    // Manually destroy the stream
+    responseStream.emit('close');
+    responseStream.destroy();
+  };
+
+  responseStream.on('data', onData);
+
+  return new Promise((resolve, reject) => {
+    responseStream.on('end', () => {
+      resolve(parseGeminiUsageMetadata(responseBody));
+    });
+    responseStream.on('error', (err) => {
+      reject(err);
+    });
+    // signal?.addEventListener('abort', destroyStream);
+  });
+};
+
+/** Parse Gemini stream response body */
+const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata => {
+  const parsedLines = responseBody
+    .split('\n')
+    .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
+    .map((line) => JSON.parse(line.replace('data: ', '')));
+
+  const text = parsedLines
+    .filter(
+      (
+        line
+      ): line is {
+        candidates: Array<{
+          content: { role: string; parts: Array<{ text: string }> };
+          finishReason: string;
+          safetyRatings: Array<{ category: string; probability: string }>;
+        }>;
+      } => 'candidates' in line
+    )
+    .reduce((prev, line) => {
+      const parts = line.candidates[0].content.parts;
+      const chunkText = parts.map((part) => part.text).join('');
+      return prev + chunkText;
+    }, '');
+
+  // Extract usage metadata from the last chunk
+  const lastChunk = parsedLines[parsedLines.length - 1];
+  const usageMetadata = 'usageMetadata' in lastChunk ? lastChunk.usageMetadata : null;
+
+  return usageMetadata;
 };
 
 /**
