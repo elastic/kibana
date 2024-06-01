@@ -39,7 +39,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
 }) => {
   const [globalDataTags, setGlobalDataTags] = useState<GlobalDataTag[]>(initialTags);
   const [editIndexList, setEditIndexList] = useState<Set<number>>(new Set([]));
-  // Indicates whether a new row is currently being added to the table.
+  // isAdding indicates whether a new row is currently being added to the table.
   // When true, the table will display "Confirm" and "Cancel" actions for the new row
   // to allow the user to either confirm the addition or cancel it.
   const [isAdding, setIsAdding] = useState<boolean>(false);
@@ -263,11 +263,11 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
         return isEditing || isAddingRow ? (
           <EuiFormRow isInvalid={!!error.value} error={error.value}>
             <EuiFieldText
-              placeholder="Enter name"
+              placeholder="Enter value"
               value={isEditing ? globalDataTags[index].value : newTag.value}
               name="value"
               onChange={(e) => (isEditing ? handleEditChange(e, index) : handleNewTagChange(e))}
-              isInvalid={!!error.name}
+              isInvalid={!!error.value}
               compressed={true}
             />
           </EuiFormRow>
