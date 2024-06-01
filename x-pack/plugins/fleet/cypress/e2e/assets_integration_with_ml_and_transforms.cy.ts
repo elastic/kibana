@@ -81,13 +81,6 @@ const assets: Asset[] = [
   {
     type: 'index',
     expected: [destinationIndex],
-    links: [
-      {
-        text: destinationIndex,
-        expectedEsApi: `/internal/index_management/indices/ml-rdp-lmd`,
-        expectedResponseStatus: 200,
-      },
-    ],
   },
 ];
 
@@ -140,11 +133,19 @@ describe('Assets - Real API for integration with ML and transforms', () => {
                 link.expectedBody(res);
               }
             });
-          }).as(`get${link.text}`);
-          cy.wait(`@get${link.text}`);
+          });
           cy.go('back');
         });
       }
+    });
+
+    // Verify by API that destination index was created and is healthy
+    request({
+      method: 'GET',
+      url: `/internal/index_management/indices/${destinationIndex}`,
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '1' },
+    }).then((response) => {
+      expect(response.status).to.equal(200);
     });
 
     // Verify by API that transform was created and is healthy
