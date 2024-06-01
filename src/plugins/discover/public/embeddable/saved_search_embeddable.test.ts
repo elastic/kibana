@@ -9,6 +9,7 @@
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createDataViewDataSource } from '../../common/data_sources';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -17,7 +18,7 @@ import { ReactWrapper } from 'enzyme';
 import { ReactElement } from 'react';
 import { render } from 'react-dom';
 import { act } from 'react-dom/test-utils';
-import { Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { SearchInput } from '..';
 import { VIEW_MODE } from '../../common/constants';
 import { DiscoverServices } from '../build_services';
@@ -140,6 +141,7 @@ describe('saved search embeddable', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mountpoint = document.createElement('div');
 
     showFieldStatisticsMockValue = false;
@@ -152,6 +154,8 @@ describe('saved search embeddable', () => {
         if (key === SHOW_FIELD_STATISTICS) return showFieldStatisticsMockValue;
       }
     );
+
+    servicesMock.core.chrome.getActiveSolutionNavId$ = () => new BehaviorSubject('test');
   });
 
   afterEach(() => {
@@ -473,6 +477,47 @@ describe('saved search embeddable', () => {
       expect(editApp).toBe('r');
       expect(editPath).toBe('/mock-url');
       expect(editUrl).toBe('/base/mock-url');
+    });
+  });
+
+  describe('context awareness', () => {
+    it('should resolve root profile on init', async () => {
+      const resolveRootProfileSpy = jest.spyOn(
+        discoverServiceMock.profilesManager,
+        'resolveRootProfile'
+      );
+      const { embeddable } = createEmbeddable();
+      expect(resolveRootProfileSpy).not.toHaveBeenCalled();
+      await waitOneTick();
+      expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
+      resolveRootProfileSpy.mockReset();
+      expect(resolveRootProfileSpy).not.toHaveBeenCalled();
+      embeddable.reload();
+      await waitOneTick();
+      expect(resolveRootProfileSpy).not.toHaveBeenCalled();
+    });
+
+    it('should resolve data source profile when fetching', async () => {
+      const resolveDataSourceProfileSpy = jest.spyOn(
+        discoverServiceMock.profilesManager,
+        'resolveDataSourceProfile'
+      );
+      const { embeddable } = createEmbeddable();
+      expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
+      await waitOneTick();
+      expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
+        dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+        dataView: dataViewMock,
+        query: embeddable.getInput().query,
+      });
+      resolveDataSourceProfileSpy.mockReset();
+      expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
+      embeddable.reload();
+      expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
+        dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+        dataView: dataViewMock,
+        query: embeddable.getInput().query,
+      });
     });
   });
 });
