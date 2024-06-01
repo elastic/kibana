@@ -248,6 +248,10 @@ export function VisualizeESQL({
   // if the Lens suggestions api suggests a table then we want to render a Discover table instead
   const isLensInputTable = lensInput?.attributes?.visualizationType === 'lnsDatatable';
 
+  const visualizationComponentDataTestSubj = isTableVisible
+    ? 'observabilityAiAssistantESQLDataGrid'
+    : 'observabilityAiAssistantESQLLensChart';
+
   return (
     <>
       {!isLensInputTable && (
@@ -278,56 +282,44 @@ export function VisualizeESQL({
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-              {!isTableVisible && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.observabilityAiAssistant.lensESQLFunction.table',
-                      {
-                        defaultMessage: 'Table of results',
-                      }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      size="xs"
-                      iconType="tableDensityExpanded"
-                      onClick={() => setIsTableVisible(true)}
-                      data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
-                      aria-label={i18n.translate(
-                        'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
-                        {
-                          defaultMessage: 'Display results',
-                        }
-                      )}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-              {isTableVisible && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
-                      {
-                        defaultMessage: 'Visualization',
-                      }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      size="xs"
-                      iconType="visBarVerticalStacked"
-                      onClick={() => setIsTableVisible(false)}
-                      data-test-subj="observabilityAiAssistantLensESQLDisplayChartButton"
-                      aria-label={i18n.translate(
-                        'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
-                        {
-                          defaultMessage: 'Display chart',
-                        }
-                      )}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    isTableVisible
+                      ? i18n.translate(
+                          'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
+                          {
+                            defaultMessage: 'Visualization',
+                          }
+                        )
+                      : i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.table', {
+                          defaultMessage: 'Table of results',
+                        })
+                  }
+                >
+                  <EuiButtonIcon
+                    size="xs"
+                    iconType={isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'}
+                    onClick={() => setIsTableVisible(!isTableVisible)}
+                    data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
+                    aria-label={
+                      isTableVisible
+                        ? i18n.translate(
+                            'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
+                            {
+                              defaultMessage: 'Display chart',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
+                            {
+                              defaultMessage: 'Display results',
+                            }
+                          )
+                    }
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
               <EuiToolTip
                 content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
                   defaultMessage: 'Edit visualization',
@@ -373,8 +365,8 @@ export function VisualizeESQL({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isTableVisible && (
-            <EuiFlexItem data-test-subj="observabilityAiAssistantESQLDataGrid">
+          <EuiFlexItem data-test-subj={visualizationComponentDataTestSubj}>
+            {isTableVisible ? (
               <ESQLDataGrid
                 rows={rows}
                 columns={columns}
@@ -383,10 +375,7 @@ export function VisualizeESQL({
                 flyoutType="overlay"
                 isTableView
               />
-            </EuiFlexItem>
-          )}
-          {!isTableVisible && (
-            <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
+            ) : (
               <lens.EmbeddableComponent
                 {...lensInput}
                 style={{
@@ -394,8 +383,8 @@ export function VisualizeESQL({
                 }}
                 onLoad={onLoad}
               />
-            </EuiFlexItem>
-          )}
+            )}
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
       {isLensInputTable && (
