@@ -41,7 +41,9 @@ exports[`basePath throws if not specified, but rewriteBasePath is set 1`] = `"ca
 exports[`has defaults for config 1`] = `
 Object {
   "autoListen": true,
-  "cdn": Object {},
+  "cdn": Object {
+    "url": null,
+  },
   "compression": Object {
     "brotli": Object {
       "enabled": false,

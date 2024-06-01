@@ -20,6 +20,7 @@ import type {
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
+  ESQLAstBaseItem,
   ESQLCommand,
   ESQLLiteral,
   ESQLList,
@@ -35,6 +36,18 @@ import type {
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
+}
+
+export function createAstBaseItem<Name = string>(
+  name: Name,
+  ctx: ParserRuleContext
+): ESQLAstBaseItem<Name> {
+  return {
+    name,
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
 }
 
 export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand {
