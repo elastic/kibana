@@ -80,7 +80,9 @@ const configSchema = schema.object(
       },
     }),
     cdn: schema.object({
-      url: schema.maybe(schema.uri({ scheme: ['http', 'https'], validate: validateCdnURL })),
+      url: schema.nullable(
+        schema.maybe(schema.uri({ scheme: ['http', 'https'], validate: validateCdnURL }))
+      ),
     }),
     oas: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
