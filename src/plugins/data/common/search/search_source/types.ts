@@ -8,12 +8,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Query, AggregateQuery } from '@kbn/es-query';
-import { SerializableRecord } from '@kbn/utility-types';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import { ISearchOptions } from '@kbn/search-types';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { SearchField } from '@kbn/es-types';
 import type { AggConfigSerialized, IAggConfigs } from '../../../public';
 import type { SearchSource } from './search_source';
 
@@ -62,12 +62,7 @@ export type EsQuerySortValue = Record<
   SortDirection | SortDirectionNumeric | SortDirectionFormat
 >;
 
-interface SearchField {
-  [key: string]: SearchFieldValue;
-}
-
-// @internal
-export type SearchFieldValue = string | SearchField;
+export type SearchFieldValue = SearchField & Serializable;
 
 /**
  * search source fields
