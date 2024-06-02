@@ -20,6 +20,6 @@ export type {
   MaybeReadonlyArray,
   ESQLColumn,
   ESQLRow,
-  ESQLSearchReponse,
+  ESQLSearchResponse,
   ESQLSearchParams,
 } from './src';

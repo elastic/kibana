@@ -34,6 +34,7 @@ interface ESQLDataGridProps {
   query: AggregateQuery;
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
+  initialColumns?: DatatableColumn[];
 }
 type DataTableColumnsMeta = Record<
   string,
@@ -47,7 +48,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const storage = new Storage(localStorage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
-    props.isTableView ? props.columns.map((c) => c.name) : []
+    (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
   );
   const [rowHeight, setRowHeight] = useState<number>(5);
 

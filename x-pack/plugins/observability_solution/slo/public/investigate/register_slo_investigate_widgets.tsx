@@ -9,6 +9,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import useAsync from 'react-use/lib/useAsync';
 import { lazy } from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { ChromeOption } from '@kbn/investigate-plugin/public';
 import type { SloPublicPluginsSetup, SloPublicPluginsStart } from '..';
 import { SLO_DETAIL_WIDGET_NAME, SLO_INVENTORY_WIDGET_NAME } from './constants';
 import { SloEmbeddableContext } from '../embeddable/slo/common/slo_embeddable_context';
@@ -62,6 +63,7 @@ export function registerSloInvestigateWidgets(options: RegisterInvestigateWidget
     {
       type: SLO_INVENTORY_WIDGET_NAME,
       description: 'Show a grid of SLOs, which displays their state, and the history of the SLI',
+      chrome: ChromeOption.static,
       schema: {
         type: 'object',
         properties: {},
@@ -90,6 +92,7 @@ export function registerSloInvestigateWidgets(options: RegisterInvestigateWidget
       type: SLO_DETAIL_WIDGET_NAME,
       description:
         'Show an overview of a single SLO, including its metadata, the historical SLI, the budget burn down, and the good vs bad events',
+      chrome: ChromeOption.static,
       schema: {
         type: 'object',
         properties: {

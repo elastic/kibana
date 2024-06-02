@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { type BoolQuery, buildEsQuery, type Query, type Filter } from '@kbn/es-query';
+import { type BoolQuery, buildEsQuery } from '@kbn/es-query';
+import type { GlobalWidgetParameters } from '../../common/types';
 
-export function getEsFilterFromOverrides({
+export function getEsFilterFromGlobalParameters({
   query,
   filters,
   timeRange,
-}: {
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: {
-    from: string;
-    to: string;
-  };
-}): { bool: BoolQuery } {
+}: Partial<GlobalWidgetParameters>): { bool: BoolQuery } {
   const esFilter = buildEsQuery(undefined, query ?? [], filters ?? []);
 
   if (timeRange) {

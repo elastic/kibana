@@ -239,6 +239,9 @@ export function InvestigateView({}: {}) {
         blocks: {
           publish: (blocksForItem) => {
             setBlocks((prevBlocks) => ({ ...prevBlocks, [item.id]: blocksForItem }));
+            return () => {
+              setBlocks((prevBlocks) => ({ ...prevBlocks, [item.id]: [] }));
+            };
           },
         },
       });

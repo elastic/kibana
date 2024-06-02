@@ -7,7 +7,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import React, { lazy } from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
+import { ChromeOption, GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,7 +20,7 @@ import type { Environment } from '../../../../common/environment_rt';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ApmThemeProvider } from '../../routing/app_root';
 import { StartServices } from '../../../context/kibana_context/use_kibana';
-import { createInvestigateServiceDetailWidget } from './investigate_service_detail/create_investigate_service_inventory_widget';
+import { createInvestigateServiceDetailWidget } from './investigate_service_detail/create_investigate_service_detail_widget';
 
 interface RegisterInvestigateWidgetOptions {
   core: CoreSetup<ApmPluginStartDeps, unknown>;
@@ -95,6 +95,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
       type: APM_SERVICE_INVENTORY_WIDGET_NAME,
       description:
         'An overview of APM services. Each service shows latency, throughput and failure rate metrics, and a health status. Users can click through and investigate an individual service',
+      chrome: ChromeOption.static,
       schema: {
         type: 'object',
         properties: {
@@ -146,6 +147,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
       type: APM_SERVICE_DETAIL_WIDGET_NAME,
       description: `Details for a specific service. Shows throughput, latency and failure rate metrics,
         and open alerts, anomalies, and SLOs. It also shows the top transaction groups.`,
+      chrome: ChromeOption.static,
       schema: {
         type: 'object',
         properties: {

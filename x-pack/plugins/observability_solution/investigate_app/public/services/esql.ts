@@ -6,14 +6,10 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import {
-  ESQL_LATEST_VERSION,
-  getESQLAdHocDataview,
-  getIndexPatternFromESQLQuery,
-} from '@kbn/esql-utils';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { type DataView, ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { ESFilter, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESFilter, ESQLSearchResponse } from '@kbn/es-types';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { v4 } from 'uuid';
@@ -39,7 +35,7 @@ export interface EsqlQueryMeta {
 }
 
 export interface EsqlService {
-  query: (params: DefaultQueryParams) => Promise<ESQLSearchReponse>;
+  query: (params: DefaultQueryParams) => Promise<ESQLSearchResponse>;
   meta: (params: DefaultQueryParams) => Promise<EsqlQueryMeta>;
 }
 
@@ -64,7 +60,6 @@ export function createEsqlService({
         {
           params: {
             query,
-            version: ESQL_LATEST_VERSION,
             dropNullColumns,
             filter,
           },
@@ -72,7 +67,7 @@ export function createEsqlService({
         { strategy: ESQL_SEARCH_STRATEGY, abortSignal: signal }
       )
     ).then((searchResponse) => {
-      return searchResponse.rawResponse as unknown as ESQLSearchReponse;
+      return searchResponse.rawResponse as unknown as ESQLSearchResponse;
     });
 
     return response;

@@ -8,7 +8,7 @@ import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { appendToESQLQuery } from '@kbn/esql-utils';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -124,7 +124,7 @@ const getESQLOverallStatsInChunk = async ({
       if (!esqlResults) {
         return;
       }
-      const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
+      const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchResponse;
 
       const sampleCount = !isDefined(limitSize) ? totalCount : limitSize;
       fieldsToFetch.forEach((field, idx) => {

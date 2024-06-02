@@ -55,6 +55,8 @@
     "@kbn/dashboard-plugin",
     "@kbn/security-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/apm-plugin"
+    "@kbn/apm-plugin",
+    "@kbn/esql-datagrid",
+    "@kbn/observability-plugin"
   ],
 }

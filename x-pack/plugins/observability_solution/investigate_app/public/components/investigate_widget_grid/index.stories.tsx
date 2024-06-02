@@ -8,6 +8,7 @@
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React, { useState } from 'react';
 import { v4 } from 'uuid';
+import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { InvestigateWidgetGrid as Component, InvestigateWidgetGridItem } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
 import { MiniMapContextProvider } from '../../hooks/use_mini_map';
@@ -87,7 +88,7 @@ export const InvestigateWidgetGridStory: ComponentStoryObj<typeof Component> = {
         ),
         columns: 4,
         rows: 2,
-        chrome: 'disabled',
+        chrome: ChromeOption.disabled,
       }),
       createItem({
         title: '1',
@@ -110,7 +111,7 @@ export const InvestigateWidgetGridStory: ComponentStoryObj<typeof Component> = {
         ),
         columns: 4,
         rows: 2,
-        chrome: 'disabled',
+        chrome: ChromeOption.disabled,
       }),
       createItem({
         title: '2',

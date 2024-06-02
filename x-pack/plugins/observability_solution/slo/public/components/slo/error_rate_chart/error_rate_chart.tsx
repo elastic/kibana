@@ -24,6 +24,7 @@ interface Props {
   annotations?: AlertAnnotation[];
   selectedTabId?: SloTabId;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  height?: number;
 }
 
 export function ErrorRateChart({
@@ -35,6 +36,7 @@ export function ErrorRateChart({
   annotations,
   onBrushed,
   selectedTabId,
+  height = 190,
 }: Props) {
   const {
     lens: { EmbeddableComponent },
@@ -56,7 +58,7 @@ export function ErrorRateChart({
   return (
     <EmbeddableComponent
       id="sloErrorRateChart"
-      style={{ height: 190 }}
+      style={{ height }}
       timeRange={{
         from,
         to,

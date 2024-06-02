@@ -29,7 +29,14 @@ export {
   type WorkflowBlock,
 } from '../common/types';
 
+export { ChromeOption } from './types';
+
 export { createWidgetFactory } from './create_widget';
+export { getEsFilterFromGlobalParameters } from './util/get_es_filters_from_global_parameters';
+
+export { ESQL_WIDGET_NAME } from './esql_widget/constants';
+export { createEsqlWidget } from './esql_widget/create_esql_widget';
+export type { EsqlWidgetParameters } from './esql_widget/types';
 
 export const plugin: PluginInitializer<
   InvestigatePublicSetup,

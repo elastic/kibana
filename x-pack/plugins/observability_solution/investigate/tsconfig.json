@@ -17,6 +17,7 @@
     "@kbn/config-schema",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/es-query",
+    "@kbn/interpreter",
   ],
   "exclude": ["target/**/*"]
 }

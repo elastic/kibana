@@ -5,25 +5,20 @@
  * 2.0.
  */
 
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes/routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
+import { SharedProviders } from './shared_providers';
 
 function App() {
   return (
@@ -52,7 +47,6 @@ export const renderApp = ({
   usageCollection,
   isDev,
   kibanaVersion,
-  isServerless,
 }: {
   core: CoreStart;
   config: ConfigSchema;
@@ -63,10 +57,8 @@ export const renderApp = ({
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;
-  isServerless?: boolean;
 }) => {
-  const { element, history, theme$ } = appMountParameters;
-  const isDarkMode = core.theme.getTheme().darkMode;
+  const { element, history } = appMountParameters;
 
   core.chrome.setHelpExtension({
     appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
@@ -78,57 +70,30 @@ export const renderApp = ({
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
 
-  const queryClient = new QueryClient();
-
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
-  const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
-  const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <PresentationContextProvider>
+      <SharedProviders
+        isDev={Boolean(isDev)}
+        kibanaVersion={kibanaVersion}
+        pluginsStart={plugins}
+        coreStart={core}
+        config={config}
+        ObservabilityPageTemplate={ObservabilityPageTemplate}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+        appMountParameters={appMountParameters}
+      >
         <ApplicationUsageTrackingProvider>
-          <KibanaThemeProvider {...{ theme: { theme$ } }}>
-            <CloudProvider>
-              <KibanaContextProvider
-                services={{
-                  ...core,
-                  ...plugins,
-                  storage: new Storage(localStorage),
-                  isDev,
-                  kibanaVersion,
-                  isServerless,
-                }}
-              >
-                <PluginContext.Provider
-                  value={{
-                    isDev,
-                    config,
-                    appMountParameters,
-                    observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <RedirectAppLinks
-                        coreStart={core}
-                        data-test-subj="observabilityMainContainer"
-                      >
-                        <QueryClientProvider client={queryClient}>
-                          <App />
-                          <HideableReactQueryDevTools />
-                        </QueryClientProvider>
-                      </RedirectAppLinks>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </CloudProvider>
-          </KibanaThemeProvider>
+          <Router history={history}>
+            <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+              <App />
+              <HideableReactQueryDevTools />
+            </RedirectAppLinks>
+          </Router>
         </ApplicationUsageTrackingProvider>
-      </PresentationContextProvider>
+      </SharedProviders>
     </KibanaRenderContextProvider>,
     element
   );

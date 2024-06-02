@@ -12,6 +12,8 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
+// @ts-expect-error
+import { getTextColor } from '@elastic/eui/lib/components/badge/color_utils';
 import { css } from '@emotion/css';
 import { WorkflowBlock } from '@kbn/investigate-plugin/common';
 import classNames from 'classnames';
@@ -34,16 +36,6 @@ const descriptionClassName = css`
   white-space: nowrap;
 `;
 
-const contentClassName = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  white-space: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-`;
-
 const itemClassName = css`
   max-width: 320px;
 `;
@@ -57,16 +49,28 @@ function WorkflowBlockControl({
   description,
   loading,
   onClick,
-  color = 'lightestShade',
+  color = 'primary',
   children,
   compressed,
 }: Omit<WorkflowBlock, 'id'> & { compressed: boolean }) {
   const theme = useTheme();
 
+  const actualColor = theme.colors[loading ? 'lightestShade' : color];
+
   const panelClassName = css`
-    background-color: ${rgba(theme.colors[color], 0.75)};
-    height: ${compressed ? 64 : 128}px;
+    background-color: ${rgba(actualColor, 0.75)};
+    height: ${compressed ? 32 : 128}px;
     transition: all ${theme.animation.fast} ${theme.animation.resistance} !important;
+  `;
+
+  const contentClassName = css`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: ${compressed ? 1 : 2};
+    -webkit-box-orient: vertical;
   `;
 
   const panelClickableClassName = onClick
@@ -77,13 +81,15 @@ function WorkflowBlockControl({
           &:hover,
           &:focus {
             box-shadow: none;
-            background-color: ${rgba(theme.colors[color], 1)};
+            background-color: ${rgba(actualColor, 1)};
             transform: none;
             border: 1px solid ${theme.colors.darkestShade};
           }
         `
       )
     : panelClassName;
+
+  const textColor = getTextColor({ euiTheme: theme }, actualColor);
 
   if (loading) {
     return (
@@ -116,13 +122,13 @@ function WorkflowBlockControl({
         >
           {description && !compressed && (
             <EuiFlexItem grow={false} className={textItemClassName}>
-              <EuiText size="xs" color={theme.colors.text} className={descriptionClassName}>
+              <EuiText size="xs" color={textColor} className={descriptionClassName}>
                 {description}
               </EuiText>
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false} className={textItemClassName}>
-            <EuiText size="m" color={theme.colors.text} className={contentClassName}>
+            <EuiText size={compressed ? 's' : 'm'} color={textColor} className={contentClassName}>
               {content}
             </EuiText>
           </EuiFlexItem>

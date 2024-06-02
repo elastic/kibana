@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { Observable, of } from 'rxjs';
-import type { ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -39,7 +39,7 @@ export function getMockInvestigateAppContext(): DeeplyMockedKeys<InvestigateAppK
           dataView: {} as DataView,
         });
       }),
-      query: jest.fn().mockImplementation((): Promise<ESQLSearchReponse> => {
+      query: jest.fn().mockImplementation((): Promise<ESQLSearchResponse> => {
         return Promise.resolve({
           values: [],
           columns: [],

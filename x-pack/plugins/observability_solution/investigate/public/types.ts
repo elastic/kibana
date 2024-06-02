@@ -11,13 +11,21 @@ import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugi
 import type { InvestigateWidget, WorkflowBlock } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
 
+export enum ChromeOption {
+  disabled = 'disabled',
+  static = 'static',
+  dynamic = 'dynamic',
+}
+
 export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
+
+type UnregisterFunction = () => void;
 
 export interface WidgetRenderAPI {
   onDelete: () => void;
   onWidgetAdd: OnWidgetAdd;
   blocks: {
-    publish: (blocks: WorkflowBlock[]) => void;
+    publish: (blocks: WorkflowBlock[]) => UnregisterFunction;
   };
 }
 
@@ -34,7 +42,7 @@ export interface WidgetDefinition {
     signal: AbortSignal;
   }) => Promise<Record<string, any>>;
   render: (options: WidgetRenderOptions<InvestigateWidget>) => React.ReactNode;
-  chrome?: 'disabled';
+  chrome?: ChromeOption;
 }
 
 type RegisterWidgetOptions = Omit<WidgetDefinition, 'generate' | 'render'>;

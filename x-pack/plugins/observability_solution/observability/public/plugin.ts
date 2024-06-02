@@ -69,6 +69,10 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type {
+  InvestigatePublicStart,
+  InvestigatePublicSetup,
+} from '@kbn/investigate-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -86,6 +90,7 @@ import {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { registerInvestigateWidgets } from './investigate/register_investigate_widgets';
 
 export interface ConfigSchema {
   unsafe: {
@@ -126,6 +131,7 @@ export interface ObservabilityPublicPluginsSetup {
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
+  investigate?: InvestigatePublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -162,6 +168,7 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
+  investigate?: InvestigatePublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -269,7 +276,6 @@ export class Plugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         usageCollection: pluginsSetup.usageCollection,
-        isServerless: !!pluginsStart.serverless,
       });
     };
 
@@ -313,6 +319,15 @@ export class Plugin
       coreSetup.uiSettings,
       logsExplorerLocator
     );
+
+    registerInvestigateWidgets({
+      coreSetup,
+      pluginsSetup,
+      kibanaVersion,
+      isDev: this.initContext.env.mode.dev,
+      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+      config,
+    });
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({

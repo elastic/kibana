@@ -6,14 +6,20 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/alerts-ui-shared/src/common/constants';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { WorkflowBlock } from '@kbn/investigate-plugin/common';
+import type { WorkflowBlock } from '@kbn/investigate-plugin/common';
+import type { OnWidgetAdd } from '@kbn/investigate-plugin/public';
+import { createInvestigateAlertsInventoryWidget } from '@kbn/observability-plugin/public';
 import { useKibana } from '../use_kibana';
 
-export function useAlertsWorkflowBlock() {
+export function useAlertsWorkflowBlock({ onWidgetAdd }: { onWidgetAdd: OnWidgetAdd }) {
   const { core } = useKibana();
+
+  const onWidgetAddRef = useRef(onWidgetAdd);
+
+  onWidgetAddRef.current = onWidgetAdd;
 
   const alertsResult = useAbortableAsync(
     ({ signal }) => {
@@ -94,7 +100,17 @@ export function useAlertsWorkflowBlock() {
           defaultMessage: 'Investigate alerts',
         }
       ),
-      onClick: () => {},
+      onClick: () => {
+        onWidgetAddRef.current(
+          createInvestigateAlertsInventoryWidget({
+            title: i18n.translate(
+              'xpack.investigateApp.workflowBlocks.alerts.activeAlertsWidgetTitle',
+              { defaultMessage: 'Active alerts' }
+            ),
+            parameters: {},
+          })
+        );
+      },
       description: i18n.translate(
         'xpack.investigateApp.workflowBlocks.alerts.investigateOpenAlertsDescription',
         {

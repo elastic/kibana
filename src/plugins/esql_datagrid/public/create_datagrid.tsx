@@ -24,6 +24,7 @@ interface ESQLDataGridProps {
   query: AggregateQuery;
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
+  initialColumns?: DatatableColumn[];
 }
 
 export const ESQLDataGrid = (props: ESQLDataGridProps) => {

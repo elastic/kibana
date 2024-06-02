@@ -6,16 +6,16 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { InvestigateWidgetColumnSpan } from '@kbn/investigate-plugin/public';
+import { ChromeOption, InvestigateWidgetColumnSpan } from '@kbn/investigate-plugin/public';
 import { keyBy, mapValues, orderBy } from 'lodash';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { Layout, Responsive, WidthProvider, ItemCallback } from 'react-grid-layout';
+import { ItemCallback, Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import './styles.scss';
 import { EuiBreakpoint, EUI_BREAKPOINTS, useBreakpoints } from '../../hooks/use_breakpoints';
 import { useTheme } from '../../hooks/use_theme';
 import { GridItem, GRID_ITEM_HEADER_HEIGHT } from '../grid_item';
+import './styles.scss';
 
 const gridContainerClassName = css`
   position: relative;
@@ -49,7 +49,7 @@ export interface InvestigateWidgetGridItem {
   columns: number;
   rows: number;
   locked: boolean;
-  chrome?: 'disabled';
+  chrome?: ChromeOption;
   loading: boolean;
   overrides: InvestigateWidgetGridItemOverride[];
 }
@@ -254,7 +254,7 @@ function GridSectionRenderer({
       compactType="vertical"
       isBounded
       containerPadding={CONTAINER_PADDING}
-      isDraggable
+      isDraggable={false}
       isDroppable={false}
     >
       {gridElements}
@@ -277,7 +277,7 @@ export function InvestigateWidgetGrid({
     const allSections: Section[] = [currentGrid];
 
     for (const item of items) {
-      if (item.chrome === 'disabled') {
+      if (item.chrome === ChromeOption.disabled || item.chrome === ChromeOption.static) {
         const elementSection: SingleComponentSection = {
           item,
         };
@@ -339,7 +339,36 @@ export function InvestigateWidgetGrid({
         }
         return (
           <EuiFlexItem grow={false} key={index}>
-            {section.item.element}
+            {section.item.chrome === ChromeOption.disabled ? (
+              section.item.element
+            ) : (
+              <GridItem
+                id={section.item.id}
+                title={section.item.title}
+                description={section.item.description}
+                faded={section.item.locked && fadeLockedItems}
+                loading={section.item.loading}
+                locked={section.item.locked}
+                overrides={section.item.overrides}
+                onCopy={() => {
+                  onItemCopy(section.item);
+                }}
+                onDelete={() => {
+                  onItemDelete(section.item);
+                }}
+                onOverrideRemove={(override) => {
+                  onItemOverrideRemove(section.item, override);
+                }}
+                onTitleChange={(nextTitle) => {
+                  onItemTitleChange(section.item, nextTitle);
+                }}
+                onLockToggle={() => {
+                  onItemLockToggle(section.item);
+                }}
+              >
+                {section.item.element}
+              </GridItem>
+            )}
           </EuiFlexItem>
         );
       })}

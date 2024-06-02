@@ -9,6 +9,7 @@ import {
   AreaSeries,
   Axis,
   Chart,
+  LegendPositionConfig,
   LineAnnotation,
   Position,
   RectAnnotation,
@@ -50,9 +51,16 @@ export interface Props {
   range: { from: Date; to: Date };
   selectedTabId: SloTabId;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  legendPosition?: Position | LegendPositionConfig;
 }
 
-export function EventsChartPanelWithoutFrame({ slo, range, selectedTabId, onBrushed }: Props) {
+export function EventsChartPanelWithoutFrame({
+  slo,
+  range,
+  selectedTabId,
+  onBrushed,
+  legendPosition = Position.Left,
+}: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -137,6 +145,7 @@ export function EventsChartPanelWithoutFrame({ slo, range, selectedTabId, onBrus
       annotation={annotation}
       slo={slo}
       onBrushed={onBrushed}
+      legendPosition={legendPosition}
     />
   ) : (
     <>
@@ -148,7 +157,7 @@ export function EventsChartPanelWithoutFrame({ slo, range, selectedTabId, onBrus
           <Settings
             baseTheme={baseTheme}
             showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
-            legendPosition={Position.Left}
+            legendPosition={legendPosition}
             noResults={
               <EuiIcon
                 type="visualizeApp"

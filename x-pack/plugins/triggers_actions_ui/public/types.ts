@@ -763,6 +763,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  disableBulkActions?: boolean;
   ruleTypeIds?: string[];
   useFetchPageContext?: PreFetchPageContext;
   actions?: {

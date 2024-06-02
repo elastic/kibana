@@ -6,7 +6,8 @@
  */
 
 import { createWidgetFactory } from '@kbn/investigate-plugin/public';
-import { ESQL_WIDGET_NAME } from '../../constants';
-import type { EsqlWidgetParameters } from './types';
+import { ALERTS_DETAIL_WIDGET_NAME } from './constants';
 
-export const createEsqlWidget = createWidgetFactory<EsqlWidgetParameters>(ESQL_WIDGET_NAME);
+export const createInvestigateAlertsDetailWidget = createWidgetFactory<{ alertUuid: string }>(
+  ALERTS_DETAIL_WIDGET_NAME
+);

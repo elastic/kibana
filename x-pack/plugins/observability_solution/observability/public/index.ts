@@ -99,3 +99,4 @@ export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_valu
 export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
 export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';
 export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';
+export { createInvestigateAlertsInventoryWidget } from './investigate/investigate_alerts_inventory/create_investigate_alerts_inventory_widget';

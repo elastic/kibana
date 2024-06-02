@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { RegisterWidgetOptions } from '../register_widgets';
 import { NOTE_WIDGET_NAME } from '../../constants';
 import { NoteWidget } from '../../components/note_widget';
@@ -14,7 +15,7 @@ export function registerNoteWidget(options: RegisterWidgetOptions) {
     {
       type: NOTE_WIDGET_NAME,
       description: '',
-      chrome: 'disabled',
+      chrome: ChromeOption.disabled,
       schema: {
         type: 'object',
         properties: {

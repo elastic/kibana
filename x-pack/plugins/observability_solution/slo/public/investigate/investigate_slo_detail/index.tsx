@@ -13,12 +13,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { GlobalWidgetParameters, WidgetRenderAPI } from '@kbn/investigate-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import {
+  createEsqlWidget,
+  GlobalWidgetParameters,
+  WidgetRenderAPI,
+} from '@kbn/investigate-plugin/public';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { Position } from '@elastic/charts';
 import { ErrorRateChart } from '../../components/slo/error_rate_chart';
 import { useBurnRateOptions } from '../../pages/slo_details/hooks/use_burn_rate_options';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
@@ -49,6 +54,7 @@ function InvestigateSloDetailBurnRateChart({
       threshold={threshold}
       onBrushed={() => {}}
       selectedTabId="overview"
+      height={150}
     />
   );
 }
@@ -242,6 +248,7 @@ export function InvestigateSloDetailLoaded({
                 range={range}
                 selectedTabId="overview"
                 onBrushed={() => {}}
+                legendPosition={Position.Top}
               />
             </ChartWithTitle>
           </EuiFlexItem>
@@ -249,6 +256,27 @@ export function InvestigateSloDetailLoaded({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function getQueryAndFiltersFromSlo(slo: SLOWithSummaryResponse) {
+  const { filter } = slo.indicator.params;
+
+  if (!filter) {
+    return {};
+  }
+
+  if (typeof filter === 'string') {
+    return {
+      query: { query: filter, language: 'kuery' as const },
+    };
+  }
+
+  const kuery = filter.kqlQuery;
+
+  return {
+    ...(kuery ? { query: { query: kuery, language: 'kuery' as const } } : {}),
+    filters: filter.filters,
+  };
 }
 
 export function InvestigateSloDetail({
@@ -269,18 +297,44 @@ export function InvestigateSloDetail({
     shouldRefetch: false,
   });
 
+  const onWidgetAddRef = useRef(onWidgetAdd);
+
+  onWidgetAddRef.current = onWidgetAdd;
+
   useEffect(() => {
+    if (!slo) {
+      blocks.publish([]);
+      return;
+    }
+
+    const predefined = getQueryAndFiltersFromSlo(slo);
+
     blocks.publish([
       {
         id: 'view_slo_events',
         loading: false,
-        content: i18n.translate('xpack.slo.investigateSloDetail', {
+        content: i18n.translate('xpack.slo.investigateSloDetail.viewGoodAndBadEvents', {
           defaultMessage: 'View good and bad events',
         }),
-        onClick: () => {},
+        onClick: () => {
+          onWidgetAddRef.current(
+            createEsqlWidget({
+              title: i18n.translate('xpack.slo.investigateSloDetail.goodAndBadEventsWidgetTitle', {
+                defaultMessage: `Good and bad events for {sloName}`,
+                values: {
+                  sloName: slo.name,
+                },
+              }),
+              parameters: {
+                esql: `FROM ${slo.indicator.params.index}`,
+                predefined,
+              },
+            })
+          );
+        },
       },
     ]);
-  }, [blocks]);
+  }, [blocks, slo]);
 
   if (!slo || isLoading) {
     return <EuiLoadingSpinner />;

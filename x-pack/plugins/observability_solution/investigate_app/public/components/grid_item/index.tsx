@@ -136,13 +136,7 @@ export function GridItem({
         className={faded ? classNames(containerClassName, fadedClassName) : containerClassName}
         alignItems="stretch"
       >
-        <EuiFlexItem
-          grow={false}
-          onMouseDown={(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-        >
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup
             direction="row"
             gutterSize="m"
@@ -249,15 +243,7 @@ export function GridItem({
         </EuiFlexItem>
         <EuiFlexItem grow className={panelContainerClassName}>
           <EuiPanel hasBorder hasShadow={false} className={panelClassName}>
-            <div
-              className={panelContentClassName}
-              onMouseDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-            >
-              {children}
-            </div>
+            <div className={panelContentClassName}>{children}</div>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

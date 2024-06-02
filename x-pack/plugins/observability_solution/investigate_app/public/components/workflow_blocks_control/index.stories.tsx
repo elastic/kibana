@@ -33,7 +33,6 @@ function createWorkflowBlocks(): WorkflowBlock[] {
       content: '',
       description: '',
       loading: true,
-      color: 'lightShade',
       onClick: () => {},
     },
     {
@@ -42,7 +41,6 @@ function createWorkflowBlocks(): WorkflowBlock[] {
       description:
         'I need a really long description too, because that one needs to deal with overflow as well, and should stay on a single line',
       loading: false,
-      color: 'lightShade',
       onClick: () => {},
     },
   ];

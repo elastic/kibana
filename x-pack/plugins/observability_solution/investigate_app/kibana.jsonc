@@ -26,6 +26,8 @@
       "kibanaReact",
       "kibanaUtils",
       "textBasedLanguages",
+      "esqlDataGrid",
+      "observability"
     ],
     "optionalPlugins": [],
     "extraPublicDirs": []

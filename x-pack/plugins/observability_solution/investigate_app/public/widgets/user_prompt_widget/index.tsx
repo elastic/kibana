@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { TimelineUserPrompt } from '../../components/timeline_message';
 import { USER_PROMPT_WIDGET_NAME } from '../../constants';
 import { RegisterWidgetOptions } from '../register_widgets';
@@ -14,7 +15,7 @@ export function registerUserPromptWidget(options: RegisterWidgetOptions) {
     {
       type: USER_PROMPT_WIDGET_NAME,
       description: '',
-      chrome: 'disabled',
+      chrome: ChromeOption.disabled,
       schema: {
         type: 'object',
         properties: {

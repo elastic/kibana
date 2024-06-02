@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import {
+  createEsqlWidget,
   InvestigateWidgetColumnSpan,
   InvestigateWidgetCreate,
 } from '@kbn/investigate-plugin/public';
@@ -19,7 +20,6 @@ import { ESQL_WIDGET_NAME } from '../../constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { getDatatableFromEsqlResponse } from '../../utils/get_data_table_from_esql_response';
 import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_suggestion';
-import { createEsqlWidget } from '../../widgets/esql_widget/create_esql_widget';
 import { PreviewLensSuggestion } from '../preview_lens_suggestion';
 import { SuggestVisualizationList } from '../suggest_visualization_list';
 import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrides';

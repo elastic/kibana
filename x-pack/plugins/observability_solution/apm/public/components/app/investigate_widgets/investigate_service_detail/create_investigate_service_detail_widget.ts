@@ -9,9 +9,5 @@ import { createWidgetFactory } from '@kbn/investigate-plugin/public';
 import { APM_SERVICE_DETAIL_WIDGET_NAME } from '../../../../../common/investigate';
 import type { InvestigateServiceDetailWidgetParameters } from './types';
 
-export const createInvestigateServiceDetailWidget = createWidgetFactory<
-  InvestigateServiceDetailWidgetParameters,
-  { rows: number }
->(APM_SERVICE_DETAIL_WIDGET_NAME, {
-  rows: 16,
-});
+export const createInvestigateServiceDetailWidget =
+  createWidgetFactory<InvestigateServiceDetailWidgetParameters>(APM_SERVICE_DETAIL_WIDGET_NAME);
