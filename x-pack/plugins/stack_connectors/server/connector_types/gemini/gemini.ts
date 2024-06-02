@@ -316,7 +316,7 @@ const formatGeminiPayload = (
     const correctRole = row.role === 'assistant' ? 'model' : 'user';
     if (correctRole === 'user' && previousRole === 'user') {
       /** Append to the previous 'user' content
-       * This is to ensure that multiturn requests alternate between user and model 
+       * This is to ensure that multiturn requests alternate between user and model
        */
       payload.contents[payload.contents.length - 1].parts[0].text += ` ${row.content}`;
     } else {
