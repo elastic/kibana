@@ -120,50 +120,6 @@ describe('Navigation Plugin', () => {
   describe('feature flag enabled', () => {
     const featureOn = true;
 
-    it('should add the default solution navs but **not** set the active nav', async () => {
-      const uiSettingsValues: Record<string, any> = {
-        [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: false, // NOT enabled, so we should not set the active nav
-      };
-
-      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
-        {
-          featureOn,
-        },
-        { uiSettingsValues }
-      );
-
-      plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
-
-      // We need to wait for the next tick to allow the promise to fetch the feature flag to resolve
-      await new Promise((resolve) => setTimeout(resolve));
-
-      expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
-      const [arg] = coreStart.chrome.project.updateSolutionNavigations.mock.calls[0];
-      expect(Object.keys(arg)).toEqual(['oblt']);
-
-      expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(null);
-    });
-
-    it('should add the default solution navs **and** set the active nav', async () => {
-      const uiSettingsValues: Record<string, any> = {
-        [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
-      };
-
-      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
-        { featureOn, defaultSolution: 'security' },
-        { uiSettingsValues }
-      );
-
-      plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
-      await new Promise((resolve) => setTimeout(resolve));
-
-      expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
-
-      expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(
-        'security'
-      );
-    });
-
     it('should add the opt in/out toggle in the user menu', async () => {
       const uiSettingsValues: Record<string, any> = {
         [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,

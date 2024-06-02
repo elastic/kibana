@@ -183,7 +183,11 @@ class AgentPolicyService {
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
-    logger.debug(`Agent policy ${id} update completed`);
+    logger.debug(
+      `Agent policy ${id} update completed, revision: ${
+        options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
+      }`
+    );
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
@@ -389,6 +393,7 @@ class AgentPolicyService {
 
     const agentPolicy = {
       id: agentPolicySO.id,
+      version: agentPolicySO.version,
       ...agentPolicySO.attributes,
     };
 
@@ -664,6 +669,7 @@ class AgentPolicyService {
           'download_source_id',
           'fleet_server_host_id',
           'supports_agentless',
+          'global_data_tags',
         ]),
         ...newAgentPolicyProps,
       },
@@ -1039,6 +1045,14 @@ class AgentPolicyService {
       acc.push(fleetServerPolicy);
       return acc;
     }, [] as FleetServerPolicy[]);
+
+    appContextService
+      .getLogger()
+      .debug(
+        `Deploying policies: ${fleetServerPolicies
+          .map((pol) => `${pol.policy_id}:${pol.revision_idx}`)
+          .join(', ')}`
+      );
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
       {

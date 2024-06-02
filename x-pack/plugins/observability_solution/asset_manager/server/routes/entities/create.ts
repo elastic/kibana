@@ -24,6 +24,7 @@ import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   logger,
+  spaces,
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, EntityDefinition>(
     {
@@ -42,12 +43,15 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
       let definitionCreated = false;
       let ingestPipelineCreated = false;
       let transformCreated = false;
-      const soClient = (await context.core).savedObjects.client;
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const core = await context.core;
+      const soClient = core.savedObjects.client;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
+
       try {
         const definition = await saveEntityDefinition(soClient, req.body);
         definitionCreated = true;
-        await createAndInstallIngestPipeline(esClient, definition, logger);
+        await createAndInstallIngestPipeline(esClient, definition, logger, spaceId);
         ingestPipelineCreated = true;
         await createAndInstallTransform(esClient, definition, logger);
         transformCreated = true;
