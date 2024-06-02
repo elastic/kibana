@@ -27,6 +27,8 @@ import {
   RunActionParams,
   RunActionResponse,
   RunApiResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
   StreamingResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
