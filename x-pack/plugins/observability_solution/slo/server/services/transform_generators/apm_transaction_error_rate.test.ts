@@ -6,7 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { twoMinute } from '../fixtures/duration';
+import { oneMinute, twoMinute } from '../fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
   createSLO,
@@ -152,5 +152,29 @@ describe('APM Transaction Error Rate Transform Generator', () => {
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createAPMTransactionErrorRateIndicator(),
+      settings: {
+        frequency: oneMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-240s/m', // 1m + 2m + 60s
+        },
+      },
+    });
   });
 });

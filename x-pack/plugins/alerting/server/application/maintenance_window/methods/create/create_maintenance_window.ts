@@ -9,6 +9,7 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../../common';
@@ -26,8 +27,9 @@ export async function createMaintenanceWindow(
   params: CreateMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
   const { data } = params;
-  const { savedObjectsClient, getModificationMetadata, logger } = context;
+  const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
   const { title, duration, rRule, categoryIds, scopedQuery } = data;
+  const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
     createMaintenanceWindowParamsSchema.validate(params);
@@ -36,15 +38,18 @@ export async function createMaintenanceWindow(
   }
 
   let scopedQueryWithGeneratedValue = scopedQuery;
+
   try {
     if (scopedQuery) {
       const dsl = JSON.stringify(
         buildEsQuery(
           undefined,
           [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[]
+          scopedQuery.filters as Filter[],
+          esQueryConfig
         )
       );
+
       scopedQueryWithGeneratedValue = {
         ...scopedQuery,
         dsl,
