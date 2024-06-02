@@ -52,7 +52,7 @@ export function getModuleSpecifier(node: ts.Node): string {
   return getModuleSpecifier(node.parent);
 }
 
-export function getIdentifierDeclarationFromSource(node: ts.Node, source: ts.SourceFile) {
+export function getIdentifierDeclarationFromSource(node: ts.Node, source: ts.Declaration) {
   if (!ts.isIdentifier(node)) {
     throw new Error(`node is not an identifier ${node.getText()}`);
   }
@@ -146,14 +146,17 @@ export function getResolvedModuleSourceFile(
   program: ts.Program,
   importedModuleName: string
 ) {
-  const resolvedModule = (originalSource as any).resolvedModules.get(importedModuleName);
+  const moduleImportNode = (originalSource as any).imports.find(
+    (node: ts.SourceFile) => node.text === importedModuleName
+  );
+  const resolvedModule = program.getTypeChecker().getSymbolAtLocation(moduleImportNode);
   if (!resolvedModule) {
     throw new Error(
       `Import for [${importedModuleName}] in [${originalSource.fileName}] could not be resolved by TypeScript`
     );
   }
 
-  const resolvedModuleSourceFile = program.getSourceFile(resolvedModule.resolvedFileName);
+  const resolvedModuleSourceFile = resolvedModule.declarations?.[0];
   if (!resolvedModuleSourceFile) {
     throw new Error(`Unable to find resolved module ${importedModuleName}`);
   }
