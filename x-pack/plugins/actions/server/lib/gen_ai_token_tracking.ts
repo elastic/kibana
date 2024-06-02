@@ -208,10 +208,7 @@ export const getGenAiTokenTracking = async ({
   }
 
   // Process non-streamed Gemini response from `usageMetadata` object
-  if (
-    actionTypeId === '.gemini' &&
-    (validatedParams.subAction === 'run' || validatedParams.subAction === 'test')
-  ) {
+  if (actionTypeId === '.gemini') {
     const data = result.data as unknown as {
       usageMetadata: {
         promptTokenCount?: number;

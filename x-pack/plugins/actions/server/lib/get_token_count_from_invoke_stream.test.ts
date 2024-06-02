@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import { getTokenCountFromInvokeStream, parseGeminiStreamForUsageMetadata } from './get_token_count_from_invoke_stream';
+import {
+  getTokenCountFromInvokeStream,
+  parseGeminiStreamForUsageMetadata,
+} from './get_token_count_from_invoke_stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
@@ -57,25 +60,25 @@ describe('getTokenCountFromInvokeStream', () => {
     ],
   };
 
-  const gemini_chunk = {
+  const geminiChunk = {
     candidates: [
       {
         content: {
           role: 'model',
           parts: [
             {
-              text: '. I be no real-life pirate, but I be mighty good at pretendin!'
-            }
-          ]
+              text: '. I be no real-life pirate, but I be mighty good at pretendin!',
+            },
+          ],
         },
-      }
+      },
     ],
     usageMetadata: {
       promptTokenCount: 23,
       candidatesTokenCount: 50,
-      totalTokenCount: 73
-    }
-  }
+      totalTokenCount: 73,
+    },
+  };
 
   const PROMPT_TOKEN_COUNT = 34;
   const COMPLETION_TOKEN_COUNT = 2;
@@ -224,7 +227,7 @@ describe('getTokenCountFromInvokeStream', () => {
   describe('Gemini stream', () => {
     beforeEach(() => {
       stream = createStreamMock();
-      stream.write(`data: ${JSON.stringify(gemini_chunk)}`);
+      stream.write(`data: ${JSON.stringify(geminiChunk)}`);
     });
 
     it('counts the prompt, completion & total tokens for Gemini response', async () => {
