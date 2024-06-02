@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['cloud_security_posture']);
     loadTestFile(require.resolve('./compliance_dashboard'));
     loadTestFile(require.resolve('./csp_integrations_form'));
+    loadTestFile(require.resolve('./csp_integrations_form.essentials'));
   });
 }

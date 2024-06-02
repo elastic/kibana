@@ -27,7 +27,7 @@ interface SecuritySolutionContract {
 
 const CSP_UPSELLING_SERVICES_KEY = 'csp-upselling-services-key';
 
-const fetchUpsellingService = async (pluginsOnStart: PluginContractResolver) => {
+export const fetchUpsellingService = async (pluginsOnStart: PluginContractResolver) => {
   const pluginResult = await pluginsOnStart('securitySolution');
 
   if (pluginResult?.securitySolution?.found) {
@@ -39,7 +39,7 @@ const fetchUpsellingService = async (pluginsOnStart: PluginContractResolver) => 
 
 export const useServerlessServices = (pluginsOnStart?: PluginContractResolver) => {
   const { cloud, plugins } = useKibana().services;
-  const isServerless = !!cloud.serverless?.projectType;
+  const isServerless = !!cloud?.serverless?.projectType;
 
   const { data: upsellingService } = useQuery({
     queryKey: [CSP_UPSELLING_SERVICES_KEY],
