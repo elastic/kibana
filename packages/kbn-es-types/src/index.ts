@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  Field,
+  QueryDslFieldAndFormat,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   InferSearchResponseOf,
   AggregateOf as AggregationResultOf,
@@ -38,6 +42,9 @@ export type ESSearchResponse<
   TSearchRequest extends ESSearchRequest = ESSearchRequest,
   TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
+
+// `fields` parameter from a search request (estypes.SearchRequest)
+export type SearchField = QueryDslFieldAndFormat | Field;
 
 export type {
   InferSearchResponseOf,

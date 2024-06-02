@@ -22,4 +22,5 @@ export type {
   ESQLRow,
   ESQLSearchResponse,
   ESQLSearchParams,
+  SearchField,
 } from './src';

@@ -33448,7 +33448,21 @@
         "label": "SearchFieldValue",
         "description": [],
         "signature": [
-          "string | SearchField"
+          {
+            "pluginId": "@kbn/es-types",
+            "scope": "common",
+            "docId": "kibKbnEsTypesPluginApi",
+            "section": "def-common.SearchField",
+            "text": "SearchField"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Serializable",
+            "text": "Serializable"
+          }
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,
