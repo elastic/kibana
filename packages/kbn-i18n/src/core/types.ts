@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-declare module 'intl-relativeformat' {
-  export let defaultLocale: string;
-}
+export type FormatXMLElementFn<T, R = string | T | Array<string | T>> = (
+  parts: Array<string | T>
+) => R;
+export type PrimitiveType = string | number | boolean | null | undefined | Date;
