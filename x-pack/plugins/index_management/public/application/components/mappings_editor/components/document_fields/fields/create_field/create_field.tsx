@@ -14,6 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useCallback, useEffect } from 'react';
@@ -32,7 +33,7 @@ import { useSemanticText } from './semantic_text/use_semantic_text';
 const formWrapper = (props: any) => <form {...props} />;
 export interface InferenceToModelIdMap {
   [key: string]: {
-    trainedModelId?: string;
+    trainedModelId?: ElasticsearchModelDefaultOptions | string;
     isDeployed: boolean;
     isDeployable: boolean;
     defaultInferenceEndpoint: boolean;

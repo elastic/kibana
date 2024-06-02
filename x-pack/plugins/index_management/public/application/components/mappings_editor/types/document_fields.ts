@@ -245,3 +245,12 @@ export interface NormalizedRuntimeField {
 export interface NormalizedRuntimeFields {
   [id: string]: NormalizedRuntimeField;
 }
+export enum DefaultInferenceModels {
+  elser_model_2 = 'elser_model_2',
+  e5 = 'e5',
+}
+
+export enum DeploymentState {
+  'DEPLOYED' = 'deployed',
+  'NOT_DEPLOYED' = 'not_deployed',
+}

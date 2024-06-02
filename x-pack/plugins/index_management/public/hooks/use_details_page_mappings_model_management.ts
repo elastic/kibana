@@ -13,14 +13,18 @@ import { useAppContext } from '../application/app_context';
 import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
 import { deNormalize } from '../application/components/mappings_editor/lib';
 import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
-import { NormalizedFields } from '../application/components/mappings_editor/types';
+import {
+  DefaultInferenceModels,
+  DeploymentState,
+  NormalizedFields,
+} from '../application/components/mappings_editor/types';
 import { getInferenceModels } from '../application/services/api';
 
 interface InferenceModel {
   data: InferenceAPIConfigResponse[];
 }
 
-type DeploymentStatusType = Record<string, 'deployed' | 'not_deployed'>;
+type DeploymentStatusType = Record<string, DeploymentState>;
 
 const getCustomInferenceIdMap = (
   deploymentStatsByModelId: DeploymentStatusType,
@@ -50,7 +54,9 @@ export const getTrainedModelStats = (modelStats?: InferenceStatsResponse): Deplo
     modelStats?.trained_model_stats.reduce<DeploymentStatusType>((acc, modelStat) => {
       if (modelStat.model_id) {
         acc[modelStat.model_id] =
-          modelStat?.deployment_stats?.state === 'started' ? 'deployed' : 'not_deployed';
+          modelStat?.deployment_stats?.state === 'started'
+            ? DeploymentState.DEPLOYED
+            : DeploymentState.NOT_DEPLOYED;
       }
       return acc;
     }, {}) || {}
@@ -59,16 +65,19 @@ export const getTrainedModelStats = (modelStats?: InferenceStatsResponse): Deplo
 
 const getDefaultInferenceIds = (deploymentStatsByModelId: DeploymentStatusType) => {
   return {
-    elser_model_2: {
-      trainedModelId: '.elser_model_2',
+    [DefaultInferenceModels.elser_model_2]: {
+      trainedModelId: ElasticsearchModelDefaultOptions.elser,
       isDeployable: true,
-      isDeployed: deploymentStatsByModelId['.elser_model_2'] === 'deployed',
+      isDeployed:
+        deploymentStatsByModelId[ElasticsearchModelDefaultOptions.elser] ===
+        DeploymentState.DEPLOYED,
       defaultInferenceEndpoint: true,
     },
-    e5: {
-      trainedModelId: '.multilingual-e5-small',
+    [DefaultInferenceModels.e5]: {
+      trainedModelId: ElasticsearchModelDefaultOptions.e5,
       isDeployable: true,
-      isDeployed: deploymentStatsByModelId['.multilingual-e5-small'] === 'deployed',
+      isDeployed:
+        deploymentStatsByModelId[ElasticsearchModelDefaultOptions.e5] === DeploymentState.DEPLOYED,
       defaultInferenceEndpoint: true,
     },
   };

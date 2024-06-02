@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { useComponentTemplatesContext } from '../../../../../../component_templates/component_templates_context';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
-import { Field } from '../../../../../types';
+import { DefaultInferenceModels, Field } from '../../../../../types';
 import { NotificationToasts } from '../../../field_parameters/notification_toasts';
 
 interface UseSemanticTextProps {
@@ -31,7 +31,9 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const [nameValue, setNameValue] = useState<string>();
   const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
   const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
-  const [inferenceValue, setInferenceValue] = useState<string>('elser_model_2');
+  const [inferenceValue, setInferenceValue] = useState<string>(
+    DefaultInferenceModels.elser_model_2
+  );
 
   const useFieldEffect = (
     semanticTextform: FormHook,

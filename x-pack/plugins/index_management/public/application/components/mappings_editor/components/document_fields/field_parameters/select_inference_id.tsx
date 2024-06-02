@@ -45,6 +45,7 @@ import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_m
 import { InferenceToModelIdMap } from '../fields';
 import { NotificationToasts } from './notification_toasts';
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
+import { DefaultInferenceModels, DeploymentState } from '../../../types';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
   {
@@ -76,7 +77,7 @@ export const SelectInferenceId = ({
     });
   }, [ml]);
 
-  const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
+  const { form } = useForm({ defaultValue: { main: DefaultInferenceModels.elser_model_2 } });
   const { subscribe } = form;
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
@@ -115,19 +116,19 @@ export const SelectInferenceId = ({
         label: i18n.translate(
           'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.Elser',
           {
-            defaultMessage: 'elser_model_2',
+            defaultMessage: DefaultInferenceModels.elser_model_2,
           }
         ),
-        'data-test-subj': 'default-inference_elser_model_2',
+        'data-test-subj': `default-inference_${DefaultInferenceModels.elser_model_2}`,
       },
       {
         label: i18n.translate(
           'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.E5',
           {
-            defaultMessage: 'e5',
+            defaultMessage: DefaultInferenceModels.e5,
           }
         ),
-        'data-test-subj': 'default-inference_e5',
+        'data-test-subj': `default-inference_${DefaultInferenceModels.e5}`,
       },
     ];
   }, []);
@@ -169,7 +170,6 @@ export const SelectInferenceId = ({
 
         const combined: EuiSelectableOption[] = [
           {
-            checked: 'on',
             label: inferenceId,
             'data-test-subj': `custom-inference_${inferenceId}`,
           },
@@ -183,23 +183,24 @@ export const SelectInferenceId = ({
         newModelId[inferenceId] = {
           trainedModelId: defaultEndpointId,
           isDeployable,
-          isDeployed: getTrainedModelStats(trainedModelStats)[defaultEndpointId] === 'deployed',
+          isDeployed:
+            getTrainedModelStats(trainedModelStats)[defaultEndpointId] === DeploymentState.DEPLOYED,
           defaultInferenceEndpoint: false,
         };
         setNewInferenceEndpoint(newModelId);
-        await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-          inferenceId,
-          taskType,
-          modelConfig
-        );
-        resendRequest();
+        // await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
+        //   inferenceId,
+        //   taskType,
+        //   modelConfig
+        // );
+        // resendRequest();
       } catch (error) {
         NotificationToasts({ toasts, error });
         // reset options
         setOptions([...oldOptions]);
       }
     },
-    [isInferenceFlyoutVisible, resendRequest, ml, setNewInferenceEndpoint, options, toasts]
+    [isInferenceFlyoutVisible, ml, setNewInferenceEndpoint, options, toasts]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {
@@ -212,7 +213,7 @@ export const SelectInferenceId = ({
   }, [subscribe, onChange]);
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
   useEffect(() => {
-    setValue(selectedOptionLabel ?? 'elser_model_2');
+    setValue(selectedOptionLabel ?? DefaultInferenceModels.elser_model_2);
   }, [selectedOptionLabel, setValue]);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
   const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
