@@ -9,7 +9,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { ApmAvailabilityIndicatorTypeForm as Component } from './apm_availability_indicator_type_form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 

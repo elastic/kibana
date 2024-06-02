@@ -31209,6 +31209,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.ESQL_TABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_TABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"es_ql\""
+        ],
+        "path": "src/plugins/data/common/search/strategies/esql_search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.EsqlExpressionFunctionDefinition",
         "type": "Type",
         "tags": [],
@@ -33433,7 +33448,21 @@
         "label": "SearchFieldValue",
         "description": [],
         "signature": [
-          "string | SearchField"
+          {
+            "pluginId": "@kbn/es-types",
+            "scope": "common",
+            "docId": "kibKbnEsTypesPluginApi",
+            "section": "def-common.SearchField",
+            "text": "SearchField"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Serializable",
+            "text": "Serializable"
+          }
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
         "deprecated": false,

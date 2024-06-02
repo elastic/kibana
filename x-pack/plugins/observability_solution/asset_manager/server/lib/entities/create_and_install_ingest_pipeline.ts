@@ -15,9 +15,10 @@ import { generateIngestPipelineId } from './ingest_pipeline/generate_ingest_pipe
 export async function createAndInstallIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
-  logger: Logger
+  logger: Logger,
+  spaceId: string
 ) {
-  const processors = generateProcessors(definition);
+  const processors = generateProcessors(definition, spaceId);
   const id = generateIngestPipelineId(definition);
   try {
     await retryTransientEsErrors(
@@ -29,7 +30,7 @@ export async function createAndInstallIngestPipeline(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot create entity ingest pipeline for [${definition.id}] entity defintion`);
+    logger.error(`Cannot create entity ingest pipeline for [${definition.id}] entity definition`);
     if (e.meta?.body?.error?.type === 'security_exception') {
       throw new EntitySecurityException(e.meta.body.error.reason, definition);
     }

@@ -29,7 +29,7 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
-export { fetch$, type FetchContext } from './interfaces/fetch/fetch';
+export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
 export {
   initializeTimeRange,
   type SerializedTimeRange,
@@ -39,6 +39,7 @@ export {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   apiPublishesWritableUnifiedSearch,
+  useSearchApi,
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
