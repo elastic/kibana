@@ -700,16 +700,9 @@ export class SearchSource {
    * flat representation (taking into account merging rules)
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(
-    root = this,
-    searchRequest: SearchRequest = { body: {} },
-    // selects fields to be processed. used by useDataViewLazy param since sort field requires an existing field list
-    filter?: string[]
-  ): SearchRequest {
+  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
-      if (!filter || filter.includes(key)) {
-        this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
-      }
+      this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
     if (this.parent) {
       this.parent.mergeProps(root, searchRequest);
@@ -789,7 +782,7 @@ export class SearchSource {
   }
 
   public async loadDataViewFields(dataView: DataViewLazy) {
-    const request = this.mergeProps(this, { body: {} }, ['query', 'filter']);
+    const request = this.mergeProps(this, { body: {} });
     let fields = dataView.timeFieldName ? [dataView.timeFieldName] : [];
     const sort = this.getField('sort');
     if (sort) {
