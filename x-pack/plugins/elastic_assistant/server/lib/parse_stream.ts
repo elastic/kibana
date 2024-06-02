@@ -115,41 +115,68 @@ export const parseGeminiStream: StreamParser = async (stream, logger, abortSigna
 };
 
 /** Parse Gemini stream response body */
-export const parseGeminiResponse = (responseBody: string) =>{
+export const parseGeminiResponse = (responseBody: string) => {
   return responseBody
     .split('\n')
-    .filter((line) => {
-      return line.startsWith('data: ') && !line.endsWith('[DONE]');
-    })
-    .map((line) => {
-      return JSON.parse(line.replace('data: ', ''));
-    })
-    .filter(
-      (
-        line
-      ): line is {
+    .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
+    .map((line) => JSON.parse(line.replace('data: ', '')))
+    .filter((line): line is {
         candidates: Array<{
           content: { role: string; parts: Array<{ text: string }> };
           finishReason: string;
           safetyRatings: Array<{ category: string; probability: string }>;
         }>;
-      usageMetadata: {
-        promptTokenCount: number;
-        candidatesTokenCount: number;
-        totalTokenCount: number;
+        usageMetadata: {
+          promptTokenCount: number;
+          candidatesTokenCount: number;
+          totalTokenCount: number;
         };
-     } => {
-        return 'candidates' in line;
-      }
-    )
+      } => 'candidates' in line)
     .reduce((prev, line) => {
       if (line.candidates[0] && line.candidates[0].content) {
         const parts = line.candidates[0].content.parts;
         const text = parts.map(part => part.text).join('');
         return prev + text;
       }
+      return prev;
     }, '');
-  }
+};
+
+// export const parseGeminiResponse = (responseBody: string) =>{
+//   return responseBody
+//     .split('\n')
+//     .filter((line) => {
+//       return line.startsWith('data: ') && !line.endsWith('[DONE]');
+//     })
+//     .map((line) => {
+//       return JSON.parse(line.replace('data: ', ''));
+//     })
+//     .filter(
+//       (
+//         line
+//       ): line is {
+//         candidates: Array<{
+//           content: { role: string; parts: Array<{ text: string }> };
+//           finishReason: string;
+//           safetyRatings: Array<{ category: string; probability: string }>;
+//         }>;
+//       usageMetadata: {
+//         promptTokenCount: number;
+//         candidatesTokenCount: number;
+//         totalTokenCount: number;
+//         };
+//      } => {
+//         return 'candidates' in line;
+//       }
+//     )
+//     .reduce((prev, line) => {
+//       if (line.candidates[0] && line.candidates[0].content) {
+//         const parts = line.candidates[0].content.parts;
+//         const text = parts.map(part => part.text).join('');
+//         return prev + text;
+//       }
+//     }, '');
+//   }
 
 
 
