@@ -16,13 +16,13 @@ import { getProductTypeByPLI } from '../../hooks/use_product_type_by_pli';
  */
 export const CloudSecurityPosturePLIBlock = memo(() => {
   const requiredPLI =
-    getProductTypeByPLI(ProductFeatureKey.cloudSecurityPosture) || 'Cloud Essentials';
+    getProductTypeByPLI(ProductFeatureKey.cloudSecurityPosture) || 'Cloud Protection Essentials';
 
   return (
     <>
       <EuiSpacer size="s" />
       <EuiCard
-        data-test-subj="cloud-security-posture-protectionUpdatesLockedCard"
+        data-test-subj="cloud-security-posture-integration-pli-auth-block"
         isDisabled={true}
         description={false}
         icon={<EuiIcon size="xl" type="lock" />}

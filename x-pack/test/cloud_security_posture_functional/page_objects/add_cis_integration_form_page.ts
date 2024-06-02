@@ -201,6 +201,11 @@ export function AddCisIntegrationFormPageProvider({
     return await testSubjects.find('confirmModalTitleText');
   };
 
+  const getIntegrationPliAuthBlock = async () => {
+    return await testSubjects.exists('cloud-security-posture-integration-pli-auth-block');
+    // return await testSubjects.find('cloud-security-posture-integration-pli-auth-block');
+  };
+
   const fillInTextField = async (selector: string, text: string) => {
     const textField = await testSubjects.find(selector);
     await textField.type(text);
@@ -282,5 +287,6 @@ export function AddCisIntegrationFormPageProvider({
     selectValue,
     getValueInEditPage,
     isOptionChecked,
+    getIntegrationPliAuthBlock,
   };
 }

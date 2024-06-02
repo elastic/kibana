@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import {
   PluginContractResolver,
   FoundPluginContractResolverResponseItem,
@@ -15,8 +16,8 @@ import { useKibana } from './use_kibana';
 // this is only a part of UpsellingService, which is included in the exported contract of securitySolution
 // the full class can be found in x-pack/plugins/security_solution/upselling/service/upselling_service.ts
 interface UpsellingServiceInterface {
-  sections: Map<string, React.ComponentType>;
-  pages: Map<string, React.ComponentType>;
+  sections: Map<string, ComponentType>;
+  pages: Map<string, ComponentType>;
   messages: Map<string, string>;
 }
 

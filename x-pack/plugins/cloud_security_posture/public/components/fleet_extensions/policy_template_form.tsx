@@ -534,7 +534,9 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 );
 
 export const CspPolicyTemplateForm = memo<
-  PackagePolicyReplaceDefineStepExtensionComponentProps & { pluginsOnStart: PluginContractResolver }
+  PackagePolicyReplaceDefineStepExtensionComponentProps & {
+    pluginsOnStart?: PluginContractResolver;
+  }
 >(
   ({
     agentPolicy,
@@ -552,6 +554,7 @@ export const CspPolicyTemplateForm = memo<
     const CspIntegrationInstallationUpsellingPliBlock = upsellingService?.sections.get(
       'cloud_security_posture_integration_installation'
     );
+
     useEffect(() => {
       if (
         isServerless &&
