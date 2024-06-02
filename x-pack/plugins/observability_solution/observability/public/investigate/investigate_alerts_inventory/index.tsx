@@ -128,6 +128,7 @@ export function InvestigateAlertsInventory({
           more_like_this: {
             fields: allowedFields,
             like: [{ _index: alert._index, _id: alert[ALERT_UUID] as unknown as string }],
+            min_term_freq: 1,
           },
         });
       }

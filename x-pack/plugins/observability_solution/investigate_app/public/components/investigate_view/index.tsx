@@ -42,8 +42,13 @@ const DEFAULT_COLUMN_SPAN = InvestigateWidgetColumnSpan.Four;
 const DEFAULT_ROW_SPAN = 12;
 
 const containerClassName = css`
+  overflow-x: auto;
   overflow-y: auto;
   padding: 24px 24px 0px 24px;
+`;
+
+const scrollContainerClassName = css`
+  overflow-x: auto;
 `;
 
 const addWidgetContainerClassName = css`
@@ -141,7 +146,7 @@ export function InvestigateView({}: {}) {
       ${backgroundColorOpaque} calc(100% - 8px),
       ${backgroundColorTransparent} 100%
     );
-    z-index: 1;
+    z-index: 100;
   `;
 
   const range = useDateRange();
@@ -370,14 +375,16 @@ export function InvestigateView({}: {}) {
   return (
     <MiniMapContextProvider container={scrollableContainer}>
       <EuiFlexGroup direction="row" className={containerClassName}>
-        <EuiFlexItem grow>
+        <EuiFlexItem grow className={scrollContainerClassName}>
           <EuiFlexGroup
             direction="column"
             gutterSize="s"
             justifyContent="flexEnd"
             ref={(element) => {
-              stickToBottomRef(element);
-              setScrollableContainer(element);
+              // the type for `EuiFlexGroup.ref` is not correct
+              const asHtmlElement = element as unknown as HTMLDivElement;
+              stickToBottomRef(asHtmlElement);
+              setScrollableContainer(asHtmlElement);
             }}
           >
             <EuiFlexItem className={searchBarContainerClassName}>
