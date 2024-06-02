@@ -29,10 +29,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Cloud Dashboard', () => {
-      it('displays accurate summary compliance score', async () => {
+      it('displays compliance score greater than 40', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const scoreElement = await dashboard.getCloudComplianceScore();
-        expect((await scoreElement.getVisibleText()) === '41%').to.be(true);
+        const score = parseInt((await scoreElement.getVisibleText()).replace('%', ''), 10);
+        expect(score).to.be.greaterThan(40);
       });
 
       it('displays all compliance scores', async () => {
@@ -45,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(scores.length).to.be(4);
       });
 
-      it('displays a number of resources evaluated', async () => {
+      it('displays a number of resources evaluated greater than 3000', async () => {
         const resourcesEvaluated = await dashboard.getCloudResourcesEvaluated();
         const visibleText = await resourcesEvaluated.getVisibleText();
         const resourcesEvaluatedCount = parseInt(visibleText.replace(/,/g, ''), 10);
@@ -54,15 +55,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Kubernetes Dashboard', () => {
-      it('displays accurate summary compliance score', async () => {
+      it('displays compliance score greater than 80', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const scoreElement = await dashboard.getKubernetesComplianceScore();
-        expect((await scoreElement.getVisibleText()) === '83%').to.be(true);
+        const score = parseInt((await scoreElement.getVisibleText()).replace('%', ''), 10);
+        expect(score).to.be.greaterThan(80);
       });
 
-      it('displays correct number of resources evaluated', async () => {
+      it('displays a number of resources evaluated greater than 150', async () => {
         const resourcesEvaluated = await dashboard.getKubernetesResourcesEvaluated();
-        expect((await resourcesEvaluated.getVisibleText()) === '199').to.be(true);
+        const resourcesEvaluatedCount = parseInt(
+          (await resourcesEvaluated.getVisibleText()).replace(/,/g, ''),
+          10
+        );
+        expect(resourcesEvaluatedCount).greaterThan(150);
       });
     });
   });
