@@ -48,9 +48,18 @@ export const getAttackDiscoveryRoute = (
         try {
           const statusCheck = await attackDiscoveryTask.statusCheck();
           console.log('steph statusCheck result', statusCheck);
+          const staticId = await attackDiscoveryTask.getTaskById(
+            'd5b4d04c-cf11-4a1d-8310-cfe61501f91e'
+          );
+          console.log('steph staticId result', staticId);
+          statusCheck.forEach(async ({ id }) => {
+            const dynId = await attackDiscoveryTask.getTaskById(id);
+
+            console.log(`steph dynId result ${id}`, dynId);
+          });
           return response.ok({
             body: {
-              inProgressRequests: ['nothing'],
+              inProgressRequests: statusCheck.map(({ state }) => state.connectorId),
             },
           });
         } catch (err) {

@@ -164,7 +164,7 @@ export class AttackDiscoveryTask {
       const currentTask = await this.taskManager?.schedule({
         taskType: AttackDiscoveryTaskConstants.TYPE,
         scope: AttackDiscoveryTaskConstants.SCOPE,
-        state: { request: params.request },
+        state: { connectorId: params.connectorId },
         params: {
           version: AttackDiscoveryTaskConstants.VERSION,
           ...params,
@@ -178,17 +178,31 @@ export class AttackDiscoveryTask {
     }
   };
 
-  public async statusCheck() {
+  public async getTaskById(id: string): Promise<any> {
+    try {
+      console.log('stephh statusCheck start');
+      const taskById = await this.taskManager?.get(id);
+      return taskById;
+    } catch (e) {
+      this.logger.error(
+        `Error status checking task ${AttackDiscoveryTaskConstants.TYPE}, received ${e.message}`
+      );
+      return [];
+    }
+  }
+
+  public async statusCheck(): Promise<ConcreteTaskInstance[]> {
     try {
       console.log('stephh statusCheck start');
       const statusCheckResult = await this.taskManager?.fetch({
         query: taskManagerQuery,
       });
-      console.log('stephh statusCheck ned', statusCheckResult);
+      return statusCheckResult ? statusCheckResult.docs : [];
     } catch (e) {
       this.logger.error(
         `Error status checking task ${AttackDiscoveryTaskConstants.TYPE}, received ${e.message}`
       );
+      return [];
     }
   }
 

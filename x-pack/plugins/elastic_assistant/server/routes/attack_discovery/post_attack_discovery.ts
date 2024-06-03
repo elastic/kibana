@@ -58,7 +58,6 @@ export const postAttackDiscoveryRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        const currentUser = await assistantContext.getCurrentUser();
         const spaceId = assistantContext.getSpaceId();
         try {
           const pluginName = getPluginNameFromRequest({
@@ -99,7 +98,9 @@ export const postAttackDiscoveryRoute = (
 
           return response.ok({
             // TODO what to do?
-            body: {},
+            body: {
+              taskId: result.id,
+            },
           });
         } catch (err) {
           logger.error(err);
