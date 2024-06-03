@@ -52,6 +52,9 @@ describe('getGeneratedTitle', () => {
         error: jest.fn(),
       },
       messages,
+      tracer: {
+        startActiveSpan: jest.fn(),
+      },
       ...options,
     });
 
@@ -204,6 +207,9 @@ describe('getGeneratedTitle', () => {
       chat: chatSpy,
       logger,
       messages,
+      tracer: {
+        startActiveSpan: jest.fn(),
+      },
     });
 
     const title = await lastValueFrom(title$);
