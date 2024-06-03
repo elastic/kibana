@@ -17,12 +17,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import {
-  RuleDefinition,
-  useLoadRuleTypesQuery,
-  getRuleErrors,
-  InitialRule,
-} from '@kbn/alerts-ui-shared';
+import { RuleDefinition, getRuleErrors, InitialRule } from '@kbn/alerts-ui-shared/src/rule_form';
+import { useLoadRuleTypesQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 interface RuleDefinitionSandboxProps {
   data: DataPublicPluginStart;
