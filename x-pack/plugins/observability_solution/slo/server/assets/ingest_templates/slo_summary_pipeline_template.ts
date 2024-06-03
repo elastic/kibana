@@ -198,11 +198,31 @@ export const getSLOSummaryPipelineTemplate = (
         script: {
           description: 'Computes the last five minute burn rate value',
           lang: 'painless',
+          params: {
+            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
+            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+              ? 5 / slo.objective.timesliceWindow!.asMinutes()
+              : 0,
+          },
           source: `
-            if (ctx["fiveMinuteBurnRate"]["totalEvents"] == null || ctx["fiveMinuteBurnRate"]["totalEvents"] == 0) {
+            def totalEvents = ctx["fiveMinuteBurnRate"]["totalEvents"];
+            def goodEvents = ctx["fiveMinuteBurnRate"]["goodEvents"];
+            def errorBudgetInitial = ctx["errorBudgetInitial"];
+
+            if (totalEvents == null || totalEvents == 0) {
               ctx["fiveMinuteBurnRate"]["value"] = 0.0;
+              return;
+            }
+
+            def totalSlicesInRange = params["totalSlicesInRange"];
+            def isTimeslice = params["isTimeslice"];
+            if (isTimeslice && totalSlicesInRange > 0) {
+              def badEvents = (double)totalEvents - (double)goodEvents;
+              def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+              ctx["fiveMinuteBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
             } else {
-              ctx["fiveMinuteBurnRate"]["value"] = (1.0 - ((double)ctx["fiveMinuteBurnRate"]["goodEvents"] / (double)ctx["fiveMinuteBurnRate"]["totalEvents"])) / ctx["errorBudgetInitial"];
+              def sliValue = (double)goodEvents / (double)totalEvents;
+              ctx["fiveMinuteBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
             }
           `,
         },
@@ -211,11 +231,31 @@ export const getSLOSummaryPipelineTemplate = (
         script: {
           description: 'Computes the last hour burn rate value',
           lang: 'painless',
+          params: {
+            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
+            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+              ? 60 / slo.objective.timesliceWindow!.asMinutes()
+              : 0,
+          },
           source: ` 
-            if (ctx["oneHourBurnRate"]["totalEvents"] == null || ctx["oneHourBurnRate"]["totalEvents"] == 0) {
+            def totalEvents = ctx["fiveMinuteBurnRate"]["totalEvents"];
+            def goodEvents = ctx["fiveMinuteBurnRate"]["goodEvents"];
+            def errorBudgetInitial = ctx["errorBudgetInitial"];
+
+            if (totalEvents == null || totalEvents == 0) {
               ctx["oneHourBurnRate"]["value"] = 0.0;
+              return;
+            }
+
+            def totalSlicesInRange = params["totalSlicesInRange"];
+            def isTimeslice = params["isTimeslice"];
+            if (isTimeslice && totalSlicesInRange > 0) {
+              def badEvents = (double)totalEvents - (double)goodEvents;
+              def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+              ctx["oneHourBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
             } else {
-              ctx["oneHourBurnRate"]["value"] = (1.0 - ((double)ctx["oneHourBurnRate"]["goodEvents"] / (double)ctx["oneHourBurnRate"]["totalEvents"])) / ctx["errorBudgetInitial"];
+              def sliValue = (double)goodEvents / (double)totalEvents;
+              ctx["oneHourBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
             }
           `,
         },
@@ -224,12 +264,32 @@ export const getSLOSummaryPipelineTemplate = (
         script: {
           description: 'Computes the last day burn rate value',
           lang: 'painless',
+          params: {
+            isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
+            totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+              ? 1440 / slo.objective.timesliceWindow!.asMinutes()
+              : 0,
+          },
           source: ` 
-              if (ctx["oneDayBurnRate"]["totalEvents"] == null || ctx["oneDayBurnRate"]["totalEvents"] == 0) {
-                ctx["oneDayBurnRate"]["value"] = 0.0;
-              } else {
-                ctx["oneDayBurnRate"]["value"] = (1.0 - ((double)ctx["oneDayBurnRate"]["goodEvents"] / (double)ctx["oneDayBurnRate"]["totalEvents"])) / ctx["errorBudgetInitial"];
-              }
+            def totalEvents = ctx["fiveMinuteBurnRate"]["totalEvents"];
+            def goodEvents = ctx["fiveMinuteBurnRate"]["goodEvents"];
+            def errorBudgetInitial = ctx["errorBudgetInitial"];
+
+            if (totalEvents == null || totalEvents == 0) {
+              ctx["oneDayBurnRate"]["value"] = 0.0;
+              return;
+            }
+
+            def totalSlicesInRange = params["totalSlicesInRange"];
+            def isTimeslice = params["isTimeslice"];
+            if (isTimeslice && totalSlicesInRange > 0) {
+              def badEvents = (double)totalEvents - (double)goodEvents;
+              def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+              ctx["oneDayBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+            } else {
+              def sliValue = (double)goodEvents / (double)totalEvents;
+              ctx["oneDayBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+            }
             `,
         },
       },
