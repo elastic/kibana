@@ -43,11 +43,9 @@ export const CreateArchivesSources: Task = {
         if (platform.isServerless()) {
           await deleteAll(
             [
-              build.resolvePathForPlatform(
-                platform,
-                'node_modules/@kbn/screenshotting-plugin/server/assets'
-              ),
-            ],
+              'x-pack/plugins/canvas/shareable_runtime/build',
+              'node_modules/@kbn/screenshotting-plugin/server/assets',
+            ].map((path) => build.resolvePathForPlatform(platform, path)),
             log
           );
           await copyAll(
