@@ -89,6 +89,21 @@ export const commandDefinitions: CommandDefinition[] = [
     },
   },
   {
+    name: 'metrics',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
+      defaultMessage: 'DESCRIPTION',
+    }),
+    examples: [
+      'metrics index [, index2 ...] [aggregate [, aggregate2 ...] [by field [, field2 ...]]]',
+    ],
+    options: [], // TODO ...
+    modes: [],
+    signature: {
+      multipleParams: true,
+      params: [{ name: 'index', type: 'source', wildcards: true }],
+    },
+  },
+  {
     name: 'stats',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.statsDoc', {
       defaultMessage:
