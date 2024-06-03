@@ -145,7 +145,7 @@ describe('Legend Settings', () => {
       onLegendStatsChange,
     });
     expect(screen.queryByRole('button', { name: 'Layout' })).toBeNull();
-    fireEvent.click(screen.getByRole('combobox', { name: 'Values' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Statistics' }));
     fireEvent.click(screen.getByRole('option', { name: 'Current and last value' }));
     // expect(screen.getByRole('group', { name: 'Layout' })).toBeInTheDocument();
     expect(onLegendStatsChange).toBeCalledWith([LegendValue.CurrentAndLastValue], false);
