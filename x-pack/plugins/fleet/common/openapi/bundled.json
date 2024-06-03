@@ -1622,6 +1622,14 @@
           "name": "prerelease",
           "description": "Specify if version is prerelease",
           "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ]
     },
@@ -3814,6 +3822,10 @@
                 "properties": {
                   "agentPolicyId": {
                     "type": "string"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "bypass validation checks that can prevent agent policy deletion"
                   }
                 },
                 "required": [
@@ -7660,6 +7672,23 @@
           "supports_agentless": {
             "type": "boolean",
             "description": "Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment."
+          },
+          "global_data_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
+            }
           }
         },
         "required": [
@@ -7741,6 +7770,23 @@
           "force": {
             "type": "boolean",
             "description": "Force agent policy creation even if packages are not verified."
+          },
+          "global_data_tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "description": "User defined data tags that are added to all of the inputs. The values can be strings or numbers."
+            }
           }
         },
         "required": [

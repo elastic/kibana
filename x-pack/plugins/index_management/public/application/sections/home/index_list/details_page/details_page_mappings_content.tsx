@@ -183,12 +183,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       }
 
       await fetchInferenceToModelIdMap();
-
-      setIsModalVisible(pendingDeployments.length > 0);
     } catch (exception) {
       setSaveMappingError(exception.message);
     }
-  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled, pendingDeployments]);
+  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled]);
 
   const updateMappings = useCallback(async () => {
     try {
@@ -557,11 +555,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-      {isModalVisible && (
+      {isModalVisible && isSemanticTextEnabled && (
         <TrainedModelsDeploymentModal
           pendingDeployments={pendingDeployments}
           errorsInTrainedModelDeployment={errorsInTrainedModelDeployment}
-          isSemanticTextEnabled={isSemanticTextEnabled}
           setIsModalVisible={setIsModalVisible}
           refreshModal={refreshModal}
           url={url}
