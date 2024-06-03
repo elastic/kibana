@@ -16,7 +16,6 @@ import { handleInvalidCategorization } from './invalid';
 import { handleErrors } from './errors';
 import { handleReview } from './review';
 import { CATEGORIZATION_EXAMPLE_ANSWER, ECS_CATEGORIES, ECS_TYPES } from './constants';
-import { ESClient } from '../../util/es';
 
 const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   lastExecutedChain: {
@@ -146,7 +145,6 @@ function chainRouter(state: CategorizationState): string {
 }
 
 export async function getCategorizationGraph(client: IScopedClusterClient, model: BedrockChat) {
-  ESClient.setClient(client);
   const workflow = new StateGraph({
     channels: graphState,
   })
@@ -155,7 +153,9 @@ export async function getCategorizationGraph(client: IScopedClusterClient, model
     .addNode('handleCategorization', (state: CategorizationState) =>
       handleCategorization(state, model)
     )
-    .addNode('handleValidatePipeline', handleValidatePipeline)
+    .addNode('handleValidatePipeline', (state: CategorizationState) =>
+      handleValidatePipeline(state, client)
+    )
     .addNode('handleCategorizationValidation', handleCategorizationValidation)
     .addNode('handleInvalidCategorization', (state: CategorizationState) =>
       handleInvalidCategorization(state, model)

@@ -6,7 +6,6 @@
  */
 
 import { FakeLLM } from '@langchain/core/utils/testing';
-import { getModel } from '../../providers/bedrock';
 import { handleErrors } from './errors';
 import { RelatedState } from '../../types';
 import {
@@ -19,17 +18,11 @@ const mockLlm = new FakeLLM({
   response: JSON.stringify(relatedMockProcessors, null, 2),
 });
 
-jest.mock('../../providers/bedrock', () => ({
-  getModel: jest.fn(),
-}));
 const testState: RelatedState = relatedTestState;
 
 describe('Testing related handler', () => {
-  beforeEach(() => {
-    (getModel as jest.Mock).mockReturnValue(mockLlm);
-  });
   it('handleErrors()', async () => {
-    const response = await handleErrors(testState);
+    const response = await handleErrors(testState, mockLlm);
     expect(response.currentPipeline).toStrictEqual(relatedExpectedHandlerResponse.currentPipeline);
     expect(response.lastExecutedChain).toBe('error');
   });

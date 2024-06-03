@@ -14,7 +14,6 @@ import { handleRelated } from './related';
 import { handleErrors } from './errors';
 import { handleReview } from './review';
 import { RELATED_ECS_FIELDS, RELATED_EXAMPLE_ANSWER } from './constants';
-import { ESClient } from '../../util/es';
 
 const graphState: StateGraphArgs<RelatedState>['channels'] = {
   lastExecutedChain: {
@@ -134,12 +133,13 @@ function chainRouter(state: RelatedState): string {
 }
 
 export async function getRelatedGraph(client: IScopedClusterClient, model: BedrockChat) {
-  ESClient.setClient(client);
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
     .addNode('handleRelated', (state: RelatedState) => handleRelated(state, model))
-    .addNode('handleValidatePipeline', handleValidatePipeline)
+    .addNode('handleValidatePipeline', (state: RelatedState) =>
+      handleValidatePipeline(state, client)
+    )
     .addNode('handleErrors', (state: RelatedState) => handleErrors(state, model))
     .addNode('handleReview', (state: RelatedState) => handleReview(state, model))
     .addEdge(START, 'modelInput')

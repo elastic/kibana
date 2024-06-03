@@ -8,7 +8,6 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { getCategorizationGraph } from './graph';
-import { getModel } from '../../providers/bedrock';
 import {
   categorizationExpectedResults,
   categorizationErrorMockedResponse,
@@ -35,22 +34,10 @@ jest.mock('./errors');
 jest.mock('./review');
 jest.mock('./categorization');
 jest.mock('./invalid');
-jest.mock('../../providers/bedrock', () => ({
-  getModel: jest.fn(),
-}));
 
 jest.mock('../../util/pipeline', () => ({
   testPipeline: jest.fn(),
 }));
-
-jest.mock('../../util/es', () => {
-  return {
-    ESClient: {
-      setClient: jest.fn(),
-      getClient: jest.fn(),
-    },
-  };
-});
 
 describe('runCategorizationGraph', () => {
   const mockClient = {
@@ -68,9 +55,6 @@ describe('runCategorizationGraph', () => {
     const mockInvokeError = jest.fn().mockResolvedValue(categorizationErrorMockedResponse);
     const mockInvokeInvalid = jest.fn().mockResolvedValue(categorizationInvalidMockedResponse);
     const mockInvokeReview = jest.fn().mockResolvedValue(categorizationReviewMockedResponse);
-
-    // Return a fake LLM to prevent API calls from being made, or require API credentials
-    (getModel as jest.Mock).mockReturnValue(mockLlm);
 
     // We do not care about ES in these tests, the mock is just to prevent errors.
 
@@ -114,14 +98,14 @@ describe('runCategorizationGraph', () => {
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getCategorizationGraph(mockClient);
+      await getCategorizationGraph(mockClient, mockLlm);
     } catch (error) {
       // noop
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const categorizationGraph = await getCategorizationGraph(mockClient);
+    const categorizationGraph = await getCategorizationGraph(mockClient, mockLlm);
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)

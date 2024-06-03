@@ -19,7 +19,10 @@ export function createAgentInput(specificDataStreamDir: string, inputTypes: Inpu
   const commonFile = readSync(commonFilePath);
 
   for (const inputType of inputTypes) {
-    const inputTypeFilePath = joinPath(agentTemplatesDir, `${inputType}.yml.hbs`);
+    const inputTypeFilePath = joinPath(
+      agentTemplatesDir,
+      `${inputType.replaceAll('-', '_')}.yml.hbs`
+    );
     const inputTypeFile = readSync(inputTypeFilePath);
 
     const combinedContents = `${inputTypeFile}\n${commonFile}`;

@@ -8,26 +8,21 @@
 import { join as joinPath } from 'path';
 import nunjucks from 'nunjucks';
 import { DataStream } from '../../common';
-import { asyncCopy, asyncEnsureDir, asyncCreate, asyncListDir } from '../util';
+import { copySync, ensureDirSync, createSync, listDirSync } from '../util';
 
-export async function createDatastream(
+export function createDatastream(
   packageName: string,
   specificDataStreamDir: string,
   dataStream: DataStream
-): Promise<void> {
+): void {
   const dataStreamName = dataStream.name;
   const pipelineDir = joinPath(specificDataStreamDir, 'elasticsearch', 'ingest_pipeline');
   const title = dataStream.title;
   const description = dataStream.description;
 
-  await asyncEnsureDir(specificDataStreamDir);
-  await createDataStreamFolders(specificDataStreamDir, pipelineDir);
-  await createPipelineTests(
-    specificDataStreamDir,
-    dataStream.rawSamples,
-    packageName,
-    dataStreamName
-  );
+  ensureDirSync(specificDataStreamDir);
+  createDataStreamFolders(specificDataStreamDir, pipelineDir);
+  createPipelineTests(specificDataStreamDir, dataStream.rawSamples, packageName, dataStreamName);
 
   const dataStreams: string[] = [];
   for (const inputType of dataStream.inputTypes) {
@@ -37,7 +32,10 @@ export async function createDatastream(
       package_name: packageName,
       data_stream_name: dataStreamName,
     };
-    const dataStreamManifest = nunjucks.render(`${inputType}_manifest.yml.njk`, mappedValues);
+    const dataStreamManifest = nunjucks.render(
+      `${inputType.replaceAll('-', '_')}_manifest.yml.njk`,
+      mappedValues
+    );
     const commonManifest = nunjucks.render('common_manifest.yml.njk', mappedValues);
 
     const combinedManifest = `${dataStreamManifest}\n${commonManifest}`;
@@ -59,43 +57,40 @@ export async function createDatastream(
     data_streams: dataStreams,
   });
 
-  await asyncCreate(joinPath(specificDataStreamDir, 'manifest.yml'), finalManifest);
+  createSync(joinPath(specificDataStreamDir, 'manifest.yml'), finalManifest);
 }
 
-async function createDataStreamFolders(
-  specificDataStreamDir: string,
-  pipelineDir: string
-): Promise<void> {
+function createDataStreamFolders(specificDataStreamDir: string, pipelineDir: string): void {
   const dataStreamTemplatesDir = joinPath(__dirname, '../templates/data_stream');
   try {
-    const items = await asyncListDir(dataStreamTemplatesDir);
+    const items = listDirSync(dataStreamTemplatesDir);
 
     for (const item of items) {
       const s = joinPath(dataStreamTemplatesDir, item);
       const d = joinPath(specificDataStreamDir, item);
-      await asyncCopy(s, d);
+      copySync(s, d);
     }
 
-    await asyncEnsureDir(pipelineDir);
+    ensureDirSync(pipelineDir);
   } catch (error) {
     throw error;
   }
 }
 
-async function createPipelineTests(
+function createPipelineTests(
   specificDataStreamDir: string,
   rawSamples: string[],
   packageName: string,
   dataStreamName: string
-): Promise<void> {
+): void {
   const pipelineTestTemplatesDir = joinPath(__dirname, '../templates/pipeline_tests');
   const pipelineTestsDir = joinPath(specificDataStreamDir, '_dev/test/pipeline');
-  await asyncEnsureDir(pipelineTestsDir);
-  const items = await asyncListDir(pipelineTestTemplatesDir);
+  ensureDirSync(pipelineTestsDir);
+  const items = listDirSync(pipelineTestTemplatesDir);
   for (const item of items) {
     const s = joinPath(pipelineTestTemplatesDir, item);
-    const d = joinPath(pipelineTestsDir, item);
-    await asyncCopy(s, d);
+    const d = joinPath(pipelineTestsDir, item.replaceAll('_', '-'));
+    copySync(s, d);
   }
   const formattedPackageName = packageName.replace(/_/g, '-');
   const formattedDataStreamName = dataStreamName.replace(/_/g, '-');
@@ -103,7 +98,7 @@ async function createPipelineTests(
     pipelineTestsDir,
     `test-${formattedPackageName}-${formattedDataStreamName}.log`
   );
-  await asyncCreate(testFileName, rawSamples.join('\n'));
+  createSync(testFileName, rawSamples.join('\n'));
 }
 
 // We are skipping this one for now, as its not really needed for custom integrations
@@ -123,7 +118,7 @@ async function createPipelineTests(
 
   fs.mkdirSync(systemTestFolder, { recursive: true });
 
-  const systemTestTemplate = env.getTemplate(`test-${inputType}-config.yml.njk`);
+  const systemTestTemplate = env.getTemplate(`test_${inputType.replaceAll('-', '_')}_config.yml.njk`);
   const systemTestRendered = systemTestTemplate.render(mappedValues);
 
   const systemTestFileName = joinPath(systemTestFolder, `test-${inputType}-config.yml`);

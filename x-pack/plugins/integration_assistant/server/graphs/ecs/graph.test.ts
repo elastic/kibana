@@ -7,7 +7,6 @@
 
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { getEcsGraph } from './graph';
-import { getModel } from '../../providers/bedrock';
 import {
   ecsInitialMappingMockedResponse,
   ecsDuplicateMockedResponse,
@@ -25,9 +24,6 @@ const mockLlm = new FakeLLM({
   response: "I'll callback later.",
 });
 
-jest.mock('../../providers/bedrock', () => ({
-  getModel: jest.fn(),
-}));
 jest.mock('./mapping');
 jest.mock('./duplicates');
 jest.mock('./missing');
@@ -41,9 +37,6 @@ describe('EcsGraph', () => {
       const mockInvokeDuplicates = jest.fn().mockResolvedValue(ecsDuplicateMockedResponse);
       const mockInvokeMissingKeys = jest.fn().mockResolvedValue(ecsMissingKeysMockedResponse);
       const mockInvokeInvalidEcs = jest.fn().mockResolvedValue(ecsInvalidMappingMockedResponse);
-
-      // Return a fake LLM to prevent API calls from being made, or require API credentials
-      (getModel as jest.Mock).mockReturnValue(mockLlm);
 
       // Returns the initial response, with one duplicate field, to trigger the next step.
       (handleEcsMapping as jest.Mock).mockImplementation(async () => ({
@@ -72,7 +65,7 @@ describe('EcsGraph', () => {
       // When getEcsGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
       try {
-        await getEcsGraph();
+        await getEcsGraph(mockLlm);
       } catch (error) {
         fail(`getEcsGraph threw an error: ${error}`);
       }
@@ -81,7 +74,7 @@ describe('EcsGraph', () => {
       // The mocked outputs are specifically crafted to trigger ALL different conditions, allowing us to test the whole graph.
       // This is why we have all the expects ensuring each function was called.
 
-      const ecsGraph = await getEcsGraph();
+      const ecsGraph = await getEcsGraph(mockLlm);
       const response = await ecsGraph.invoke(mockedRequest);
       expect(response.results).toStrictEqual(ecsMappingExpectedResults);
 

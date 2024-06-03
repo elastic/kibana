@@ -108,7 +108,7 @@ processors:
       tag: rename_destination_as_organization_name
       target_field: destination.as.organization.name
       ignore_missing: true
-{% if fields_to_remove %}
+{% if fields_to_remove.length > 0 %}
   - remove:
       field: 
       {% for field in fields_to_remove %}

@@ -6,7 +6,6 @@
  */
 
 import { FakeLLM } from '@langchain/core/utils/testing';
-import { getModel } from '../../providers/bedrock';
 import { handleEcsMapping } from './mapping';
 import { EcsMappingState } from '../../types';
 import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
@@ -15,17 +14,11 @@ const mockLlm = new FakeLLM({
   response: '{ "message": "ll callback later."}',
 });
 
-jest.mock('../../providers/bedrock', () => ({
-  getModel: jest.fn(),
-}));
 const testState: EcsMappingState = ecsTestState;
 
 describe('Testing ecs handler', () => {
-  beforeEach(() => {
-    (getModel as jest.Mock).mockReturnValue(mockLlm);
-  });
   it('handleEcsMapping()', async () => {
-    const response = await handleEcsMapping(testState);
+    const response = await handleEcsMapping(testState, mockLlm);
     expect(response.currentMapping).toStrictEqual({ message: 'll callback later.' });
     expect(response.lastExecutedChain).toBe('ecsMapping');
   });

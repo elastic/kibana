@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { CATEGORIZATION_VALIDATION_PROMPT } from './prompts';
 import { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 import { Pipeline } from '../../../common';
 
-export async function handleInvalidCategorization(state: CategorizationState, model) {
+export async function handleInvalidCategorization(state: CategorizationState, model: BedrockChat) {
   const categorizationInvalidPrompt = CATEGORIZATION_VALIDATION_PROMPT;
 
   const outputParser = new JsonOutputParser();

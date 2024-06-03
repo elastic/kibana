@@ -6,10 +6,10 @@
  */
 import { join as joinPath } from 'path';
 import yaml from 'js-yaml';
-import { asyncCreate } from '../util';
+import { createSync } from '../util';
 
-export async function createPipeline(specificDataStreamDir: string, pipeline: object) {
+export function createPipeline(specificDataStreamDir: string, pipeline: object): void {
   const filePath = joinPath(specificDataStreamDir, 'elasticsearch/ingest_pipeline/default.yml');
   const yamlContent = '---\n' + yaml.dump(pipeline, { sortKeys: false });
-  await asyncCreate(filePath, yamlContent);
+  createSync(filePath, yamlContent);
 }

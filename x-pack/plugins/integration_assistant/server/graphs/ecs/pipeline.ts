@@ -7,8 +7,8 @@
 import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
-import { ECS_TYPES } from './constants';
 import { EcsMappingState } from '../../types';
+import { ECS_TYPES } from './constants';
 
 interface IngestPipeline {
   [key: string]: any;
@@ -155,7 +155,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
 
   const processors = generateProcessors(state.currentMapping, samples);
   // Retrieve all source field names from convert processors to populate single remove processor:
-  const fieldsToRemove = processors.filter((p: any) => p.convert).map((p: any) => p.convert.field);
+  const fieldsToRemove = processors.map((p: any) => p.convert?.field).filter((f: any) => f != null);
   const mappedValues = {
     processors,
     ecs_version: state.ecsVersion,

@@ -16,7 +16,7 @@ export async function handleMissingKeys(state: EcsMappingState, model: BedrockCh
 
   const currentMapping = await ecsMissingGraph.invoke({
     ecs: state.ecs,
-    current_mapping: state.currentMapping,
+    current_mapping: JSON.stringify(state.currentMapping, null, 2),
     ex_answer: state.exAnswer,
     formatted_samples: state.formattedSamples,
     missing_keys: state?.missingKeys,
