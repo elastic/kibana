@@ -27,7 +27,7 @@ import {
   stopAndDeleteHistoryTransform,
   stopAndDeleteLatestTransform,
 } from '../../lib/entities/stop_and_delete_transform';
-import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
+import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import {
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
@@ -40,7 +40,7 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, EntityDefinition>(
     {
-      path: `${ENTITY_API_PREFIX}/definition`,
+      path: `${ENTITY_INTERNAL_API_PREFIX}/definition`,
       validate: {
         body: (body, res) => {
           try {

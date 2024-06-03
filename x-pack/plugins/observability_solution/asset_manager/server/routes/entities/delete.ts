@@ -21,7 +21,7 @@ import {
 } from '../../lib/entities/delete_ingest_pipeline';
 import { deleteEntityDefinition } from '../../lib/entities/delete_entity_definition';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
+import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 
 export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -29,7 +29,7 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.delete<{ id: string }, unknown, unknown>(
     {
-      path: `${ENTITY_API_PREFIX}/definition/{id}`,
+      path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),

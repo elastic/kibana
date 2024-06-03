@@ -30,7 +30,7 @@ import {
 } from '../../lib/entities/create_and_install_transform';
 import { startTransform } from '../../lib/entities/start_transform';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
+import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -39,7 +39,7 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
-      path: `${ENTITY_API_PREFIX}/definition/{id}/_reset`,
+      path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}/_reset`,
       validate: {
         params: schema.object({
           id: schema.string(),
