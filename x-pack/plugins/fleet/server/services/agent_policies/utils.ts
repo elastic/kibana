@@ -13,6 +13,7 @@ import type { AgentPolicySOAttributes } from '../../types';
 export const mapAgentPolicySavedObjectToAgentPolicy = ({
   /* eslint-disable @typescript-eslint/naming-convention */
   id,
+  namespaces,
   attributes: {
     name,
     namespace,
@@ -43,6 +44,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
 }: SavedObject<AgentPolicySOAttributes>): AgentPolicy => {
   return {
     id,
+    space_id: namespaces?.[0] ? namespaces?.[0] : undefined,
     name,
     namespace,
     description,

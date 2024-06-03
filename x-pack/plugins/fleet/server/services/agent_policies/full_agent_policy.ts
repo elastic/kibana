@@ -85,7 +85,6 @@ export async function getFullAgentPolicy(
     downloadSourceUri,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
-
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
@@ -160,6 +159,7 @@ export async function getFullAgentPolicy(
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
+    namespaces: agentPolicy.space_id ? [agentPolicy.space_id] : undefined,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(

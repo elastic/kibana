@@ -157,6 +157,7 @@ export const putFleetServerHostHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
+    console.log(error);
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
         body: { message: `Fleet server ${request.params.itemId} not found` },

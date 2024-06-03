@@ -33,11 +33,13 @@ export async function agentPolicyUpdateEventHandler(
   esClient: ElasticsearchClient,
   action: string,
   agentPolicyId: string,
-  options?: { skipDeploy?: boolean }
+  options?: { skipDeploy?: boolean; spaceId?: string }
 ) {
   // `soClient` from ingest `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
-  const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
+  const internalSoClient = options?.spaceId
+    ? appContextService.getInternalUserSOClientForSpaceId(options?.spaceId)
+    : appContextService.getInternalUserSOClient(fakeRequest);
 
   if (action === 'created') {
     await generateEnrollmentAPIKey(soClient, esClient, {
