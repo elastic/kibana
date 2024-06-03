@@ -2405,6 +2405,11 @@
       "warning": []
     },
     {
+      "query": "ROW a=1::LONG | LOOKUP t ON a",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index | keep ",
       "error": [
         "SyntaxError: missing ID_PATTERN at '<EOF>'"

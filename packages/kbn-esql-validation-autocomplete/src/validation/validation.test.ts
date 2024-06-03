@@ -607,6 +607,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from index | limit 4', []);
     });
 
+    describe('lookup', () => {
+      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP t ON a', []);
+    });
+
     describe('keep', () => {
       testErrorsAndWarnings('from index | keep ', ["SyntaxError: missing ID_PATTERN at '<EOF>'"]);
       testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
