@@ -16,17 +16,15 @@ describe('EmptyJourney component', () => {
         body={
           <React.Fragment>
             <p>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="This journey did not contain any steps."
                 id="xpack.uptime.synthetics.emptyJourney.message.heading"
-                values={Object {}}
               />
             </p>
             <p>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="There is no further information to display."
                 id="xpack.uptime.synthetics.emptyJourney.message.footer"
-                values={Object {}}
               />
             </p>
           </React.Fragment>
@@ -34,10 +32,9 @@ describe('EmptyJourney component', () => {
         iconType="cross"
         title={
           <h2>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="There are no steps for this journey"
               id="xpack.uptime.synthetics.emptyJourney.title"
-              values={Object {}}
             />
           </h2>
         }
@@ -51,14 +48,13 @@ describe('EmptyJourney component', () => {
         body={
           <React.Fragment>
             <p>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="This journey did not contain any steps."
                 id="xpack.uptime.synthetics.emptyJourney.message.heading"
-                values={Object {}}
               />
             </p>
             <p>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="The journey's check group is {codeBlock}."
                 id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
                 values={
@@ -71,10 +67,9 @@ describe('EmptyJourney component', () => {
               />
             </p>
             <p>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="There is no further information to display."
                 id="xpack.uptime.synthetics.emptyJourney.message.footer"
-                values={Object {}}
               />
             </p>
           </React.Fragment>
@@ -82,10 +77,9 @@ describe('EmptyJourney component', () => {
         iconType="cross"
         title={
           <h2>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="There are no steps for this journey"
               id="xpack.uptime.synthetics.emptyJourney.title"
-              values={Object {}}
             />
           </h2>
         }

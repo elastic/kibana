@@ -23,6 +23,7 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  FLEET_SETUP_LOCK_TYPE,
 } from '../constants';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -100,6 +101,22 @@ export const getSavedObjectTypes = (
   const { useSpaceAwareness } = options;
 
   return {
+    [FLEET_SETUP_LOCK_TYPE]: {
+      name: FLEET_SETUP_LOCK_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'agnostic',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        properties: {
+          status: { type: 'keyword' },
+          uuid: { type: 'text' },
+          started_at: { type: 'date' },
+        },
+      },
+    },
     // Deprecated
     [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
       name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -167,6 +184,7 @@ export const getSavedObjectTypes = (
           keep_monitoring_alive: { type: 'boolean' },
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
+          global_data_tags: { type: 'flattened', index: false },
         },
       },
       migrations: {
@@ -193,6 +211,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 supports_agentless: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                global_data_tags: { type: 'flattened', index: false },
               },
             },
           ],

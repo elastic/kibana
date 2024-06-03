@@ -7,7 +7,7 @@ exports[`Logs should render a default message 1`] = `
   title="No log data found"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="We did not find any log data and we are unable to diagnose why. {link}"
       id="xpack.monitoring.logs.reason.defaultMessage"
       values={
@@ -16,10 +16,9 @@ exports[`Logs should render a default message 1`] = `
             href="jest-metadata-mock-url"
             target="_blank"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Please verify your setup is correct."
               id="xpack.monitoring.logs.reason.defaultMessageLink"
-              values={Object {}}
             />
           </EuiLink>,
         }
@@ -36,7 +35,7 @@ exports[`Logs should render with a bad indices reason 1`] = `
   title="Corrupted filebeat index"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="There is an issue reading from your filebeat indices.  {link}."
       id="xpack.monitoring.logs.reason.correctIndexNameMessage"
       values={
@@ -61,7 +60,7 @@ exports[`Logs should render with a no cluster found reason 1`] = `
   title="No logs for this cluster"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Check that your {link} is correct."
       id="xpack.monitoring.logs.reason.noClusterMessage"
       values={
@@ -86,7 +85,7 @@ exports[`Logs should render with a no index found reason 1`] = `
   title="No logs for this index"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="We found logs, but none for this index. If this problem continues, check that your {link} is correct."
       id="xpack.monitoring.logs.reason.noIndexMessage"
       values={
@@ -111,7 +110,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
   title="No log data found"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Set up {link}, then configure your Elasticsearch output to your monitoring cluster."
       id="xpack.monitoring.logs.reason.noIndexPatternMessage"
       values={
@@ -136,7 +135,7 @@ exports[`Logs should render with a no node found reason 1`] = `
   title="No logs for this Elasticsearch node"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Check that your {link} is correct."
       id="xpack.monitoring.logs.reason.noNodeMessage"
       values={
@@ -161,7 +160,7 @@ exports[`Logs should render with a no structured logs reason 1`] = `
   title="No structured logs found"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Check if the {varPaths} setting {link}."
       id="xpack.monitoring.logs.reason.notUsingStructuredLogsMessage"
       values={
@@ -189,7 +188,7 @@ exports[`Logs should render with a no type found reason 1`] = `
   title="No logs for Elasticsearch"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Follow {link} to set up Elasticsearch."
       id="xpack.monitoring.logs.reason.noTypeMessage"
       values={
@@ -214,10 +213,9 @@ exports[`Logs should render with a time period reason 1`] = `
   title="No logs for the selected time"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Use the time filter to adjust your timeframe."
       id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
-      values={Object {}}
     />
   </p>
 </EuiCallOut>
@@ -230,10 +228,9 @@ exports[`Logs should render with a time period reason for both scenarios 1`] = `
   title="No logs for the selected time"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Use the time filter to adjust your timeframe."
       id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
-      values={Object {}}
     />
   </p>
 </EuiCallOut>
