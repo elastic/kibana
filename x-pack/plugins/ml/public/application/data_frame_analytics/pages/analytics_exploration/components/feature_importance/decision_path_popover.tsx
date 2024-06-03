@@ -108,7 +108,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
           <EuiText size={'xs'} color="subdued" style={{ paddingTop: 5 }}>
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlotHelpText"
-              defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted value for '{predictionFieldName}'."
+              defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted value for ''{predictionFieldName}''."
               values={{
                 predictionFieldName,
                 linkedFeatureImportanceValues: (

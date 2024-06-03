@@ -32,10 +32,9 @@ exports[`it renders without blowing up 1`] = `
         data-test-subj="showHidePrivilege"
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="hide"
           id="xpack.security.management.editRole.collapsiblePanel.hideLinkText"
-          values={Object {}}
         />
       </EuiLink>
     </EuiFlexItem>
