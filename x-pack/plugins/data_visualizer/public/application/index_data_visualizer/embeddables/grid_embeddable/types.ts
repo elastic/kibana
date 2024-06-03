@@ -19,7 +19,7 @@ import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_vi
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
-import type { DataVisualizerTableItem } from '../../../common/components/stats_table/data_visualizer_stats_table';
+import type { DataVisualizerTableItem } from '../../../common/components/stats_table/types';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**

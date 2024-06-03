@@ -19,7 +19,7 @@ import {
   getAssociatedSmartFieldsAsString,
   SmartFieldFallbackTooltip,
 } from '@kbn/unified-field-list';
-import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/data_visualizer_stats_table';
+import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 
@@ -52,37 +52,6 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     searchSessionId,
     additionalFieldGroups,
   } = props;
-
-  const visibleFields = useMemo(
-    () => convertFieldsToFallbackFields({ fields: columns, additionalFieldGroups }),
-    [additionalFieldGroups, columns]
-  );
-  const allFallbackFields = useMemo(
-    () => getAllFallbackFields(additionalFieldGroups),
-    [additionalFieldGroups]
-  );
-  const renderFieldName = useCallback(
-    (fieldName: string, item: DataVisualizerTableItem) => {
-      const displayName = item.displayName ?? item.fieldName;
-      const isDerivedAsPartOfSmartField = allFallbackFields.includes(fieldName);
-      const associatedSmartFields = isDerivedAsPartOfSmartField
-        ? getAssociatedSmartFieldsAsString(fieldName, additionalFieldGroups)
-        : '';
-
-      return (
-        <>
-          {displayName}
-          {isDerivedAsPartOfSmartField ? (
-            <>
-              {' '}
-              <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
-            </>
-          ) : null}
-        </>
-      );
-    },
-    [additionalFieldGroups, allFallbackFields]
-  );
 
   const visibleFields = useMemo(
     () => convertFieldsToFallbackFields({ fields: columns, additionalFieldGroups }),
