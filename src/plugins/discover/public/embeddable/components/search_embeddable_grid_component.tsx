@@ -18,17 +18,21 @@ import {
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
+import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
+import { SavedSearchAttributesManager } from '../initialize_search_embeddable_api';
 import type { EmbeddableComponentSearchProps, SearchEmbeddableApi } from '../types';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
+import { getSortForEmbeddable } from '../../utils';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi;
   query?: AggregateQuery | Query;
   onAddFilter: DocViewFilterFn;
+  stateManager: SavedSearchAttributesManager;
 }
 
 const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
@@ -51,13 +55,28 @@ export function SearchEmbeddableGridComponent({
   api,
   query,
   onAddFilter,
+  stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
-  const [dataViews, rows, columns, sort, savedSearchId] = useBatchedPublishingSubjects(
+  const [
+    dataViews,
+    rows,
+    columns,
+    sort,
+    sampleSize,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    savedSearchId,
+  ] = useBatchedPublishingSubjects(
     api.dataViews,
     api.rows$,
     api.columns$,
     api.sort$,
+    api.sampleSize$,
+    api.rowHeight$,
+    api.headerRowHeight$,
+    api.rowsPerPage$,
     api.savedObjectId
   );
 
@@ -78,34 +97,33 @@ export function SearchEmbeddableGridComponent({
       savedSearchId,
       dataView: dataViews?.[0],
       columns: columns ?? [],
-      sort,
-      // sort: getSortForEmbeddable(savedSearch, savedSearch.sort, discoverServices.uiSettings),
-      // rowHeightState: savedSearch.rowHeight,
-      // headerRowHeightState: savedSearch.headerRowHeight,
-      // rowsPerPageState: savedSearch.rowsPerPage,
-      // sampleSizeState: savedSearch.sampleSize,
-      // onUpdateRowHeight: (rowHeight: number | undefined) => {
-      //   api.savedSearch$.next({ ...savedSearch, rowHeight });
-      // },
-      // onUpdateHeaderRowHeight: (headerRowHeight: number | undefined) => {
-      //   api.savedSearch$.next({ ...savedSearch, headerRowHeight });
-      // },
-      // onUpdateRowsPerPage: (rowsPerPage: number | undefined) => {
-      //   api.savedSearch$.next({ ...savedSearch, rowsPerPage });
-      // },
-      // onUpdateSampleSize: (sampleSize: number | undefined) => {
-      //   api.savedSearch$.next({ ...savedSearch, sampleSize });
-      // },
-      // onSetColumns: (updatedColumns: string[]) => {
-      //   api.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
-      // },
-      // onSort: (nextSort: string[][]) => {
-      //   const sortOrderArr: SortOrder[] = [];
-      //   nextSort.forEach((arr) => {
-      //     sortOrderArr.push(arr as SortOrder);
-      //   });
-      //   api.savedSearch$.next({ ...savedSearch, sort: sortOrderArr });
-      // },
+      sort: getSortForEmbeddable(sort, dataViews?.[0], discoverServices.uiSettings, false),
+      rowHeightState: rowHeight,
+      headerRowHeightState: headerRowHeight,
+      rowsPerPageState: rowsPerPage,
+      sampleSizeState: sampleSize,
+      onUpdateRowHeight: (newRowHeight: number | undefined) => {
+        stateManager.rowHeight.next(newRowHeight);
+      },
+      onUpdateHeaderRowHeight: (newHeaderRowHeight: number | undefined) => {
+        stateManager.headerRowHeight.next(newHeaderRowHeight);
+      },
+      onUpdateRowsPerPage: (newRowsPerPage: number | undefined) => {
+        stateManager.rowsPerPage.next(newRowsPerPage);
+      },
+      onUpdateSampleSize: (newSampleSize: number | undefined) => {
+        stateManager.sampleSize.next(newSampleSize);
+      },
+      onSetColumns: (updatedColumns: string[]) => {
+        stateManager.columns.next(updatedColumns);
+      },
+      onSort: (nextSort: string[][]) => {
+        const sortOrderArr: SortOrder[] = [];
+        nextSort.forEach((arr) => {
+          sortOrderArr.push(arr as SortOrder);
+        });
+        stateManager.sort.next(sortOrderArr);
+      },
     };
   }, [
     panelTitle,
@@ -116,6 +134,12 @@ export function SearchEmbeddableGridComponent({
     dataViews,
     columns,
     sort,
+    sampleSize,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    stateManager,
+    discoverServices.uiSettings,
   ]);
 
   // const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);

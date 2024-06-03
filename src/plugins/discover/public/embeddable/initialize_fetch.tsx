@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { lastValueFrom, switchMap } from 'rxjs';
+import { combineLatest, lastValueFrom, switchMap } from 'rxjs';
 
 import {
   buildDataTableRecord,
+  SEARCH_EMBEDDABLE_TYPE,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
@@ -17,7 +18,7 @@ import { EsHitRecord } from '@kbn/discover-utils/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { fetch$, FetchContext } from '@kbn/presentation-publishing';
+import { apiHasExecutionContext, fetch$, FetchContext } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 
@@ -42,9 +43,9 @@ export function initializeFetch({
   const requestAdapter = new RequestAdapter();
   let abortController = new AbortController(); // ???
 
-  const fetchSubscription = fetch$(api)
+  const fetchSubscription = combineLatest([fetch$(api), api.sort$])
     .pipe(
-      switchMap(async (fetchContext) => {
+      switchMap(async ([fetchContext, sort]) => {
         // api.blockingError$.next(undefined);
         const dataView = api.dataViews.getValue()?.[0];
         const searchSource = api.searchSource$.getValue();
@@ -52,7 +53,6 @@ export function initializeFetch({
           return;
         }
         const query = searchSource.getField('query');
-        const sort = api.sort$.getValue();
         const sampleSize = api.sampleSize$.getValue();
 
         // Abort any in-progress requests
@@ -94,8 +94,8 @@ export function initializeFetch({
               this.input.query
             );
           }
-          const parentContext = api.parentApi?.executionContext;
-          console.log('parent context', parentContext);
+          // const parentContext = api.parentApi?.executionContext;
+          // console.log('parent context', parentContext);
           // const child: KibanaExecutionContext = {
           //   type: SEARCH_EMBEDDABLE_TYPE,
           //   name: 'discover',
@@ -128,7 +128,17 @@ export function initializeFetch({
                     'This request queries Elasticsearch to fetch the data for the search.',
                 }),
               },
-              // executionContext,
+              executionContext: apiHasExecutionContext(api.parentApi)
+                ? api.parentApi?.executionContext
+                : {
+                    type: SEARCH_EMBEDDABLE_TYPE,
+                    name: 'discover',
+                    id: savedSearch.id,
+                    description:
+                      api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
+                    // description: this.output.title || this.output.defaultTitle || '',
+                    // url: this.output.editUrl,
+                  },
               disableWarningToasts: true,
             })
           );

@@ -37,7 +37,7 @@ export type VisContextUnmapped =
 /** @internal **/
 export interface SavedSearchAttributes {
   title: string; // duplicate title??? verify this
-  sort: SortOrder;
+  sort: SortOrder[];
   columns: string[];
   description: string; // duplicate description??? verify this
   grid: DiscoverGridSettings;

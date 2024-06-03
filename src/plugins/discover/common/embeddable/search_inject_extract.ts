@@ -8,6 +8,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
 import { SearchEmbeddableSerializedState } from './types';
 
 export const inject = (
@@ -36,7 +37,7 @@ export const inject = (
 };
 
 export const extract = (state: {
-  attributes: SearchEmbeddableSerializedState;
+  attributes: SavedSearchByValueAttributes;
 }): SerializedPanelState<{
   attributes: SearchEmbeddableSerializedState;
 }> => {

@@ -67,14 +67,12 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
 //   SerializedTitles & { savedObjectId?: string };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
-  // HasSavedSearch &
-  // HasSearchSource &
   PublishesDataViews &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
   PublishesSavedSearchAttributes &
-  HasInPlaceLibraryTransforms &
+  HasInPlaceLibraryTransforms & // TODO: Should it be in place?
   // PublishesSearchSession
   // PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
@@ -83,9 +81,12 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
 export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
   rows$: BehaviorSubject<DataTableRecord[]>;
   columns$: BehaviorSubject<string[] | undefined>;
-  sort$: BehaviorSubject<SortOrder | undefined>;
+  sort$: BehaviorSubject<SortOrder[] | undefined>;
   sampleSize$: BehaviorSubject<number | undefined>;
   searchSource$: BehaviorSubject<ISearchSource>;
+  rowHeight$: BehaviorSubject<number | undefined>;
+  headerRowHeight$: BehaviorSubject<number | undefined>;
+  rowsPerPage$: BehaviorSubject<number | undefined>;
   savedSearchViewMode$: BehaviorSubject<VIEW_MODE | undefined>;
   // dataViewId$: BehaviorSubject<string | undefined>;
 }

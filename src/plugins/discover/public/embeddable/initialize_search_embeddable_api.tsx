@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { StateComparators } from '@kbn/presentation-publishing';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { DiscoverServices } from '../build_services';
 import {
   PublishesSavedSearchAttributes,
@@ -55,7 +56,7 @@ export const initializeSearchEmbeddableApi = async (
   const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
-  const sort$ = new BehaviorSubject<SortOrder | undefined>(initialState.sort);
+  const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
   const breakdownField$ = new BehaviorSubject<string | undefined>(initialState.breakdownField);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
@@ -80,7 +81,7 @@ export const initializeSearchEmbeddableApi = async (
       rowsPerPage: [rowsPerPage$, (value) => rowsPerPage$.next(value)],
       headerRowHeight: [headerRowHeight$, (value) => headerRowHeight$.next(value)],
       columns: [columns$, (value) => columns$.next(value)],
-      sort: [sort$, (value) => sort$.next(value)],
+      sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
       sampleSize: [sampleSize$, (value) => sampleSize$.next(value)],
       breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
       viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
@@ -96,6 +97,9 @@ export const initializeSearchEmbeddableApi = async (
       searchSource$,
       sampleSize$,
       dataViews,
+      rowHeight$,
+      headerRowHeight$,
+      rowsPerPage$,
       savedSearchViewMode$,
       getSavedSearch: (): SavedSearch => {
         return Object.keys(stateManager).reduce((prev, key) => {

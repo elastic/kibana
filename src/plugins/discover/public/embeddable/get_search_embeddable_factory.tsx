@@ -107,9 +107,12 @@ export const getSearchEmbeddableFactory = ({
         // snapshotState,
       } = await initializeSearchEmbeddableApi(initialState, { startServices, discoverServices });
 
-      const serializeState = (): SerializedPanelState<SearchEmbeddableSerializedState> => {
+      const serializeState = async (): Promise<
+        SerializedPanelState<SearchEmbeddableSerializedState>
+      > => {
         const searchSource = searchEmbeddableApi.searchSource$.getValue();
         const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
+
         const savedSearchAttributes = toSavedSearchAttributes(
           searchEmbeddableApi.getSavedSearch(),
           searchSourceJSON
@@ -120,12 +123,27 @@ export const getSearchEmbeddableFactory = ({
         //   : originalReferences;
 
         const { rawState, references } = extract({
-          attributes: { ...savedSearchAttributes, references: originalReferences },
+          attributes: {
+            ...savedSearchAttributes,
+            ...serializeTitles(),
+            references: originalReferences,
+          },
         });
-        return {
-          rawState: rawState as unknown as SearchEmbeddableSerializedState,
-          references,
-        };
+
+        const savedObjectId = savedObjectId$.getValue();
+        if (savedObjectId) {
+          await attributeService.saveMethod(
+            rawState.attributes as SavedSearchByValueAttributes,
+            savedObjectId$.getValue()
+          );
+
+          return { rawState: { savedObjectId }, references };
+        } else {
+          return {
+            rawState: rawState as unknown as SearchEmbeddableSerializedState,
+            references,
+          };
+        }
       };
 
       const getAppTarget = async () => {
@@ -163,9 +181,10 @@ export const getSearchEmbeddableFactory = ({
           canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
           libraryId$: savedObjectId$,
           saveToLibrary: async (title: string) => {
+            console.log('save to library', title);
             const savedObjectId = await attributeService.saveMethod(
               {
-                ...serializeState().rawState.attributes,
+                ...(await serializeState()).rawState.attributes,
                 title,
               } as SavedSearchByValueAttributes,
               savedObjectId$.getValue()
@@ -208,7 +227,7 @@ export const getSearchEmbeddableFactory = ({
             path: appTarget.path,
             state: {
               embeddableId: uuid,
-              valueInput: api.getByValueState(),
+              valueInput: serializeState().rawState,
               originatingApp: parentApiContext.currentAppId,
               searchSessionId: fetchContext$.getValue()?.searchSessionId,
               originatingPath: parentApiContext.getCurrentPath?.(),
@@ -235,11 +254,10 @@ export const getSearchEmbeddableFactory = ({
         api,
         Component: () => {
           // const searchSource = useStateFromPublishingSubject(searchEmbeddableApi.dataViews);
-          const [dataViews, columns, rows, searchSource, savedSearchViewMode] =
+          const [dataViews, columns, searchSource, savedSearchViewMode] =
             useBatchedPublishingSubjects(
               searchEmbeddableApi.dataViews,
               searchEmbeddableApi.columns$,
-              searchEmbeddableApi.rows$,
               searchEmbeddableApi.searchSource$,
               searchEmbeddableApi.savedSearchViewMode$
             );
@@ -309,7 +327,11 @@ export const getSearchEmbeddableFactory = ({
                     discoverServices.uiActions.getTriggerCompatibleActions
                   }
                 >
-                  <SearchEmbeddableGridComponent api={api} onAddFilter={onAddFilter} />
+                  <SearchEmbeddableGridComponent
+                    api={api}
+                    onAddFilter={onAddFilter}
+                    stateManager={searchEmbeddableStateManager}
+                  />
                 </CellActionsProvider>
               )}
             </KibanaContextProvider>
