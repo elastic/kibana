@@ -434,7 +434,7 @@ function DiscoverDocumentsComponent({
                 externalCustomRenderers={cellRenderers}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 customControlColumnsConfiguration={customControlColumnsConfiguration}
-                  additionalFieldGroups={additionalFieldGroups}
+                additionalFieldGroups={additionalFieldGroups}
               />
             </CellActionsProvider>
           </div>
