@@ -457,6 +457,11 @@
     "proxy_headers",
     "url"
   ],
+  "fleet-setup-lock": [
+    "started_at",
+    "status",
+    "uuid"
+  ],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"

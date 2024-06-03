@@ -225,6 +225,12 @@ export interface EndpointActionData<
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
+  /**
+   * If `alert_id` is defined, then action request is of type `automated`
+   *
+   * **IMPORTANT**: should be used only when response actions are created from a Rule (automated response actions)
+   *                as this property is used to determine if an action is of type `automated`
+   */
   alert_id?: string[];
   hosts?: Record<string, { name: string }>;
 }
