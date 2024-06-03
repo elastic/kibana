@@ -22,7 +22,7 @@
       "licensing",
       "share",
       "kibanaUtils",
-      "alerting",
+      "alerting"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]
