@@ -43,15 +43,17 @@ export const entityDefinitionSchema = z.object({
       })
     ),
   }),
-  latest: z.object({
-    settings: z.optional(
-      z.object({
-        syncField: z.optional(z.string()),
-        syncDelay: z.optional(z.string()),
-        frequency: z.optional(z.string()),
-      })
-    ),
-  }),
+  latest: z.optional(
+    z.object({
+      settings: z.optional(
+        z.object({
+          syncField: z.optional(z.string()),
+          syncDelay: z.optional(z.string()),
+          frequency: z.optional(z.string()),
+        })
+      ),
+    })
+  ),
 });
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;

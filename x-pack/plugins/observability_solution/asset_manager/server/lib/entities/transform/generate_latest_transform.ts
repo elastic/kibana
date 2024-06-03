@@ -31,11 +31,11 @@ export function generateLatestTransform(
       index: `${ENTITY_LATEST_BASE_PREFIX}.noop`,
       pipeline: generateLatestIngestPipelineId(definition),
     },
-    frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
+    frequency: definition.latest?.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
     sync: {
       time: {
-        field: definition.history.settings?.syncField ?? 'event.ingested',
-        delay: definition.history.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+        field: definition.latest?.settings?.syncField ?? 'event.ingested',
+        delay: definition.latest?.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
       },
     },
     settings: {
