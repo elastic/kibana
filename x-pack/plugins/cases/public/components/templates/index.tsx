@@ -39,7 +39,7 @@ const TemplatesComponent: React.FC<Props> = ({
   const canAddTemplates = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);
 
-  const onAddCustomField = useCallback(() => {
+  const onAddTemplate = useCallback(() => {
     if (templates.length === MAX_TEMPLATES_LENGTH && !error) {
       setError(true);
       return;
@@ -92,7 +92,7 @@ const TemplatesComponent: React.FC<Props> = ({
                 isLoading={isLoading}
                 isDisabled={disabled || error}
                 size="s"
-                onClick={onAddCustomField}
+                onClick={onAddTemplate}
                 iconType="plusInCircle"
                 data-test-subj="add-template"
               >
