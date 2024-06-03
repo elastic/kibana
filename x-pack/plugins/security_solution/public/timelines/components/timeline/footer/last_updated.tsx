@@ -13,11 +13,13 @@ interface FixedWidthLastUpdatedContainerProps {
   updatedAt: number;
 }
 
-export const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
+export const LastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
   ({ updatedAt }) => {
     const { timelines } = useKibana().services;
-    return updatedAt > 0 ? <span>{timelines.getLastUpdated({ updatedAt })}</span> : null;
+    return updatedAt > 0 ? (
+      <span data-test-subj="last-updated-container">{timelines.getLastUpdated({ updatedAt })}</span>
+    ) : null;
   }
 );
 
-FixedWidthLastUpdatedContainer.displayName = 'FixedWidthLastUpdatedContainer';
+LastUpdatedContainer.displayName = 'LastUpdatedContainer';
