@@ -11,28 +11,18 @@ import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import apm from 'elastic-apm-node';
 import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
-import { sampleSize } from 'lodash';
-import * as Rx from 'rxjs';
 import { take } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServer, getServerOptions } from '@kbn/server-http-tools';
 
-import { DevConfig, HttpConfig } from './config';
-import { Log } from './log';
+import { DevConfig, HttpConfig } from '../config';
+import { Log } from '../log';
+import { getRandomBasePath } from './utils';
+import type { BasePathProxyServer, BasePathProxyServerOptions } from './types';
 
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
-const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
-// Thank you, Spencer! :elasticheart:
-const getRandomBasePath = () =>
-  Math.random() * 100 < 1 ? 'spalger' : sampleSize(alphabet, 3).join('');
-
-export interface BasePathProxyServerOptions {
-  shouldRedirectFromOldBasePath: (path: string) => boolean;
-  delayUntil: () => Rx.Observable<void>;
-}
-
-export class BasePathProxyServer {
+export class Http1BasePathProxyServer implements BasePathProxyServer {
   private readonly httpConfig: HttpConfig;
   private server?: Server;
   private httpsAgent?: HttpsAgent;
