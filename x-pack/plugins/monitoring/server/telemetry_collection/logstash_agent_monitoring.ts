@@ -145,7 +145,7 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
    * @param {Object} plugins - plugin information keyed by cluster UUIDs to count the unique plugins
    * @param {string} monitoringClusterUuid - monitoring cluster UUID
    */
-  private processLogstashStateResults(
+  private processStateResults(
     results: estypes.SearchResponse<LogstashState>,
     { clusters, allEphemeralIds, plugins }: LogstashProcessOptions,
     monitoringClusterUuid: string
@@ -301,7 +301,7 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
       });
       const hitsLength = results?.hits?.hits.length || 0;
       if (hitsLength > 0) {
-        this.processLogstashStateResults(results, options, monitoringClusterUuid);
+        this.processStateResults(results, options, monitoringClusterUuid);
       }
     }
 

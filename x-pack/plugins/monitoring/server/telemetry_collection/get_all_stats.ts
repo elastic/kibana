@@ -92,18 +92,21 @@ export function handleAllStats(
 
   // Logstash agent driven monitoring isn't based on cluster UUID
   // or standalone LS clusters will be reported with monitoring cluster UUIDs
-  const logstashOrphanClusterStats = Object.entries(logstash)
-    .filter(([clusterUuid]) => !mappedClusterUuids.includes(clusterUuid))
-    .map(([clusterUuid, logstashBaseStats]) => ({
-      cluster_name: LOGSTASH_SYSTEM_ID,
-      timestamp: `${moment.utc().format()}`,
-      version: logstashBaseStats.versions.length > 0 ? logstashBaseStats.versions[0].version : '',
-      cluster_uuid: clusterUuid,
-      stack_stats: {
-        [LOGSTASH_SYSTEM_ID]: logstashBaseStats,
-      },
-      cluster_stats: {},
-    }));
+  const logstashOrphanClusterStats = logstash
+    ? Object.entries(logstash)
+        .filter(([clusterUuid]) => !mappedClusterUuids.includes(clusterUuid))
+        .map(([clusterUuid, logstashBaseStats]) => ({
+          cluster_name: LOGSTASH_SYSTEM_ID,
+          timestamp: `${moment.utc().format()}`,
+          version:
+            logstashBaseStats.versions.length > 0 ? logstashBaseStats.versions[0].version : '',
+          cluster_uuid: clusterUuid,
+          stack_stats: {
+            [LOGSTASH_SYSTEM_ID]: logstashBaseStats,
+          },
+          cluster_stats: {},
+        }))
+    : [];
   return mappedClusters.concat(logstashOrphanClusterStats);
 }
 

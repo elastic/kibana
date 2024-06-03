@@ -976,6 +976,7 @@
         "plugins": {}
       },
       "logstash": {
+        "monitoringClusterUuid": "TkHOX_-1TzWwbROwQJU5IA",
         "count":  1,
         "cluster_stats": {
           "collection_types": {
