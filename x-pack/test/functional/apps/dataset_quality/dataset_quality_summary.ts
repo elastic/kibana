@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     it('shows poor, degraded and good count', async () => {
+      await PageObjects.datasetQuality.refreshTable();
       const summary = await PageObjects.datasetQuality.parseSummaryPanel();
       expect(summary).to.eql({
         datasetHealthPoor: '0',
@@ -53,18 +54,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         })
       );
 
-      await browser.refresh();
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
+      await PageObjects.datasetQuality.refreshTable();
 
-      await retry.try(async () => {
-        const summary = await PageObjects.datasetQuality.parseSummaryPanel();
-        const { estimatedData, ...restOfSummary } = summary;
-        expect(restOfSummary).to.eql({
-          datasetHealthPoor: '1',
-          datasetHealthDegraded: '0',
-          datasetHealthGood: '2',
-          activeDatasets: '1 of 3',
-        });
+      const summary = await PageObjects.datasetQuality.parseSummaryPanel();
+      const { estimatedData, ...restOfSummary } = summary;
+      expect(restOfSummary).to.eql({
+        datasetHealthPoor: '1',
+        datasetHealthDegraded: '0',
+        datasetHealthGood: '2',
+        activeDatasets: '1 of 3',
       });
     });
 
@@ -89,18 +87,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         })
       );
 
-      await browser.refresh();
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
+      await PageObjects.datasetQuality.refreshTable();
 
-      await retry.try(async () => {
-        const { estimatedData, ...restOfSummary } =
-          await PageObjects.datasetQuality.parseSummaryPanel();
-        expect(restOfSummary).to.eql({
-          datasetHealthPoor: '1',
-          datasetHealthDegraded: '1',
-          datasetHealthGood: '1',
-          activeDatasets: '2 of 3',
-        });
+      const { estimatedData, ...restOfSummary } =
+        await PageObjects.datasetQuality.parseSummaryPanel();
+      expect(restOfSummary).to.eql({
+        datasetHealthPoor: '1',
+        datasetHealthDegraded: '1',
+        datasetHealthGood: '1',
+        activeDatasets: '2 of 3',
       });
     });
 
@@ -118,16 +113,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         })
       );
 
-      await browser.refresh(); // Summary panel doesn't update reactively
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
+      await PageObjects.datasetQuality.refreshTable(); // Summary panel doesn't update reactively
 
-      await retry.try(async () => {
-        const { activeDatasets: updatedActiveDatasets, estimatedData: updatedEstimatedData } =
-          await PageObjects.datasetQuality.parseSummaryPanel();
+      const { activeDatasets: updatedActiveDatasets, estimatedData: updatedEstimatedData } =
+        await PageObjects.datasetQuality.parseSummaryPanel();
 
-        expect(updatedActiveDatasets).to.eql('3 of 3');
-        expect(updatedEstimatedData).to.not.eql(existingEstimatedData);
-      });
+      expect(updatedActiveDatasets).to.eql('3 of 3');
+      expect(updatedEstimatedData).to.not.eql(existingEstimatedData);
     });
   });
 }

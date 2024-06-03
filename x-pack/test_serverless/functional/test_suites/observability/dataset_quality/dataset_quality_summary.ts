@@ -17,8 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
   ]);
   const synthtrace = getService('svlLogsSynthtraceClient');
-  const browser = getService('browser');
-  const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
   const excludeKeysFromServerless = ['estimatedData']; // https://github.com/elastic/kibana/issues/178954
 
@@ -34,13 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows poor, degraded and good count', async () => {
+      await PageObjects.datasetQuality.refreshTable();
       const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
       expect(summary).to.eql({
         datasetHealthPoor: '0',
         datasetHealthDegraded: '0',
         datasetHealthGood: '3',
         activeDatasets: '0 of 3',
-        // estimatedData: '0.0 B', https://github.com/elastic/kibana/issues/178954
       });
     });
 
@@ -55,20 +53,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         })
       );
 
-      await browser.refresh();
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
+      await PageObjects.datasetQuality.refreshTable();
 
-      await retry.try(async () => {
-        const summary = await PageObjects.datasetQuality.parseSummaryPanel(
-          excludeKeysFromServerless
-        );
-        const { estimatedData, ...restOfSummary } = summary;
-        expect(restOfSummary).to.eql({
-          datasetHealthPoor: '1',
-          datasetHealthDegraded: '0',
-          datasetHealthGood: '2',
-          activeDatasets: '1 of 3',
-        });
+      const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
+      expect(summary).to.eql({
+        datasetHealthPoor: '1',
+        datasetHealthDegraded: '0',
+        datasetHealthGood: '2',
+        activeDatasets: '1 of 3',
       });
     });
 
@@ -93,25 +85,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         })
       );
 
-      await browser.refresh();
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
+      await PageObjects.datasetQuality.refreshTable();
 
-      await retry.try(async () => {
-        const { estimatedData, ...restOfSummary } =
-          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
-        expect(restOfSummary).to.eql({
-          datasetHealthPoor: '1',
-          datasetHealthDegraded: '1',
-          datasetHealthGood: '1',
-          activeDatasets: '2 of 3',
-        });
+      const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
+      expect(summary).to.eql({
+        datasetHealthPoor: '1',
+        datasetHealthDegraded: '1',
+        datasetHealthGood: '1',
+        activeDatasets: '2 of 3',
       });
     });
 
-    it('updates active datasets and estimated data KPIs', async () => {
-      const { estimatedData: _existingEstimatedData } =
-        await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
-
+    it('updates active datasets', async () => {
       // Index document at current time to mark dataset as active
       await synthtrace.index(
         getLogsForDataset({
@@ -122,18 +107,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         })
       );
 
-      await browser.refresh(); // Summary panel doesn't update reactively
-      await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
+      await PageObjects.datasetQuality.refreshTable();
 
-      await retry.try(async () => {
-        const { activeDatasets: updatedActiveDatasets, estimatedData: _updatedEstimatedData } =
-          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
+      const { activeDatasets: updatedActiveDatasets } =
+        await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
 
-        expect(updatedActiveDatasets).to.eql('3 of 3');
-
-        // TODO: `_stats` not available on Serverless. // https://github.com/elastic/kibana/issues/178954
-        // expect(_updatedEstimatedData).to.not.eql(_existingEstimatedData);
-      });
+      expect(updatedActiveDatasets).to.eql('3 of 3');
     });
   });
 }

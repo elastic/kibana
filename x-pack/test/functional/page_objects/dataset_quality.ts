@@ -142,13 +142,17 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiBasicTable-loading', 20 * 1000);
     },
 
-    async waitUntilSummaryPanelLoaded() {
+    async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
       await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
-      await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
+      if (isStateful) {
+        await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
+      }
     },
 
     async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
-      await this.waitUntilSummaryPanelLoaded();
+      const isStateful = !excludeKeys.includes('estimatedData');
+
+      await this.waitUntilSummaryPanelLoaded(isStateful);
 
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
