@@ -103,6 +103,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         showBorder: useMargins,
         showNotifications: true,
         showShadow: false,
+        onPanelStatusChange,
       };
 
       // render React embeddable
@@ -123,7 +124,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         <EmbeddablePanel
           key={type}
           index={index}
-          onPanelStatusChange={onPanelStatusChange}
           embeddable={() => container.untilEmbeddableLoaded(id)}
           {...panelProps}
         />
