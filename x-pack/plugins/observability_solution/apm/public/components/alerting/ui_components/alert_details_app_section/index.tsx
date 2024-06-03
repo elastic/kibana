@@ -179,6 +179,8 @@ export function AlertDetailsAppSection({
                 environment={environment}
                 start={from}
                 end={to}
+                alertStart={alert.start}
+                alertEnd={alert.fields[ALERT_END]}
                 comparisonChartTheme={comparisonChartTheme}
                 comparisonEnabled={false}
                 offset={''}
@@ -191,6 +193,8 @@ export function AlertDetailsAppSection({
                 environment={environment}
                 start={from}
                 end={to}
+                alertStart={alert.start}
+                alertEnd={alert.fields[ALERT_END]}
                 comparisonChartTheme={comparisonChartTheme}
                 timeZone={timeZone}
               />
