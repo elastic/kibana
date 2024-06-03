@@ -78,7 +78,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
                 <p>
                   Tagging data collected from input{' '}
                   {unsupportedInputs.map((input, index) => (
-                    <strong>
+                    <strong key={index}>
                       {input}
                       {index < unsupportedInputs.length - 1 ? ', ' : ''}
                     </strong>
