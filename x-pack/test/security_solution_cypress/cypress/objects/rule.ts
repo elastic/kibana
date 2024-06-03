@@ -216,7 +216,7 @@ export const getUnmappedRule = (
 ): QueryRuleCreateProps => ({
   type: 'query',
   query: '*:*',
-  index: ['unmapped*'],
+  index: ['auditbeat-unmapped*'],
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'high',
@@ -478,7 +478,7 @@ export const getNewThreatIndicatorRule = (
   query: '*:*',
   threat_query: '*:*',
   threat_language: 'kuery',
-  index: ['suspicious-*'],
+  index: ['auditbeat-suspicious-*'],
   severity: 'critical',
   risk_score: 20,
   tags: ['test', 'threat'],
