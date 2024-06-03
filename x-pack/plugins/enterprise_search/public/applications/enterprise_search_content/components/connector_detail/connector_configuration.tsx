@@ -28,6 +28,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
 
+import { EXAMPLE_CONNECTOR_SERVICE_TYPES } from '../../../../../common/constants';
+
 import { Status } from '../../../../../common/types/api';
 import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callout';
 import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
@@ -40,12 +42,12 @@ import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { isAdvancedSyncRuleSnippetEmpty } from '../../utils/sync_rules_helpers';
-import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 
 import { getConnectorTemplate } from '../search_index/connector/constants';
 
 import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/connector_filtering_logic';
+import { SyncsContextMenu } from '../shared/header_actions/syncs_context_menu';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
@@ -95,6 +97,34 @@ export const ConnectorConfiguration: React.FC = () => {
   return (
     <>
       <EuiSpacer />
+      {
+        // TODO remove this callout when example status is removed
+        connector &&
+          connector.service_type &&
+          EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(connector.service_type) && (
+            <>
+              <EuiCallOut
+                iconType="iInCircle"
+                color="warning"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
+                  {
+                    defaultMessage: 'Example connector',
+                  }
+                )}
+              >
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
+                    defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
+                  />
+                </EuiText>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )
+      }
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
