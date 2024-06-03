@@ -100,4 +100,3 @@ describe('CustomFields', () => {
     expect(renderResult.getByText('value1')).toBeInTheDocument();
   });
 });
-
