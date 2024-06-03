@@ -93,6 +93,8 @@ export class ProjectNavigationService {
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
+  constructor(private isServerless: boolean) {}
+
   public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
     this.application = application;
     this.navLinksService = navLinksService;
@@ -159,45 +161,18 @@ export class ProjectNavigationService {
           this.activeNodes$,
           chromeBreadcrumbs$,
           this.projectName$,
-          this.solutionNavDefinitions$,
-          this.nextSolutionNavDefinitionId$,
-          this.activeSolutionNavDefinitionId$,
           this.cloudLinks$,
         ]).pipe(
-          map(
-            ([
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
+            return buildBreadcrumbs({
+              projectName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
-              projectName,
-              solutionNavDefinitions,
-              nextSolutionNavDefinitionId,
-              activeSolutionNavDefinitionId,
               cloudLinks,
-            ]) => {
-              const solutionNavigations =
-                Object.keys(solutionNavDefinitions).length > 0 &&
-                (nextSolutionNavDefinitionId !== null || activeSolutionNavDefinitionId !== null)
-                  ? {
-                      definitions: solutionNavDefinitions,
-                      activeId: activeSolutionNavDefinitionId,
-                      onChange: (id: string) => {
-                        this.goToSolutionHome(id);
-                        this.changeActiveSolutionNavigation(id);
-                      },
-                    }
-                  : undefined;
-
-              return buildBreadcrumbs({
-                projectName,
-                projectBreadcrumbs,
-                activeNodes,
-                chromeBreadcrumbs,
-                solutionNavigations,
-                cloudLinks,
-              });
-            }
-          )
+              isServerless: this.isServerless,
+            });
+          })
         );
       },
       /** In stateful Kibana, get the registered solution navigations */

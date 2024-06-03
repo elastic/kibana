@@ -17,7 +17,6 @@ import * as i18n from './translations';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { hasData } from './helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useLicense } from '../../../hooks/use_license';
 import { RelatedAlertsByProcessAncestry } from './related_alerts_by_process_ancestry';
 import { RelatedCases } from './related_cases';
@@ -47,9 +46,6 @@ interface Props {
 export const Insights = React.memo<Props>(
   ({ browserFields, eventId, data, isReadOnly, scopeId }) => {
     const { cases } = useKibana().services;
-    const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
-      'insightsRelatedAlertsByProcessAncestry'
-    );
     const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
     const originalDocumentId = find(
       { category: 'kibana', field: 'kibana.alert.ancestors.id' },
@@ -70,8 +66,7 @@ export const Insights = React.memo<Props>(
       { category: 'process', field: 'process.entry_leader.entity_id' },
       data
     );
-    const hasProcessSessionInfo =
-      isRelatedAlertsByProcessAncestryEnabled && hasData(processSessionField);
+    const hasProcessSessionInfo = hasData(processSessionField);
 
     const sourceEventField = find(
       { category: 'kibana', field: 'kibana.alert.original_event.id' },
@@ -98,10 +93,7 @@ export const Insights = React.memo<Props>(
       hasProcessSessionInfo;
 
     const canShowAncestryInsight =
-      isRelatedAlertsByProcessAncestryEnabled &&
-      hasProcessEntityInfo &&
-      originalDocumentId &&
-      originalDocumentIndex;
+      hasProcessEntityInfo && originalDocumentId && originalDocumentIndex;
 
     // If we're in read-only mode or don't have any insight-related data,
     // don't render anything.

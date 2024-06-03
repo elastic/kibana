@@ -244,8 +244,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       savedObjectId: params.path.onboardingId,
       observabilityOnboardingState: {
         ...savedObservabilityOnboardingState,
-        type: 'logFiles',
-        progress: {},
       } as ObservabilityOnboardingFlow,
     });
 
@@ -281,14 +279,14 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
 
 type Integration =
   | {
-      pkgName: string;
-      installSource: 'registry';
-    }
+    pkgName: string;
+    installSource: 'registry';
+  }
   | {
-      pkgName: string;
-      installSource: 'custom';
-      logFilePaths: string[];
-    };
+    pkgName: string;
+    installSource: 'custom';
+    logFilePaths: string[];
+  };
 
 async function ensureInstalledIntegrations(
   integrationsToInstall: Integration[],
