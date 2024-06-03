@@ -49,6 +49,7 @@ import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
 import { UserAvatarTip } from './components/user_avatar_tip';
 import { NoUsersTip } from './components/user_missing_tip';
+import { ManagedAvatarTip } from './components/managed_avatar_tip';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -578,8 +579,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             <NoUsersTip />
           </>
         ),
-        render: (field: string, record: { createdBy?: string }) =>
-          record.createdBy ? <UserAvatarTip uid={record.createdBy} /> : null,
+        render: (field: string, record: { createdBy?: string; managed?: boolean }) =>
+          record.createdBy ? (
+            <UserAvatarTip uid={record.createdBy} />
+          ) : record.managed ? (
+            <ManagedAvatarTip entityName={entityName} />
+          ) : null,
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
         width: '100px',
@@ -683,6 +688,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     tableItemsRowActions,
     inspectItem,
+    entityName,
   ]);
 
   const itemsById = useMemo(() => {
