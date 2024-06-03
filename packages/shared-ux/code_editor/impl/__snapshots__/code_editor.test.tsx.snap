@@ -16,16 +16,8 @@ exports[`<CodeEditor /> is rendered 1`] = `
   height={250}
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -59,22 +51,22 @@ exports[`<CodeEditor /> is rendered 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -101,19 +93,36 @@ exports[`<CodeEditor /> is rendered 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
   languageId="loglang"
@@ -133,7 +142,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
       content={
         <React.Fragment>
           <p>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Press {key} to start editing."
               id="sharedUXPackages.codeEditor.startEditing"
               values={
@@ -146,7 +155,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
             />
           </p>
           <p>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Press {key} to stop editing."
               id="sharedUXPackages.codeEditor.stopEditing"
               values={

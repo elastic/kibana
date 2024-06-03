@@ -21,6 +21,10 @@ export const patchCommentRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    description: `Update an alert or comment in a case`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const query = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(request.body);

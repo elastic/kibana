@@ -4850,10 +4850,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesPhaseEvents.onPhaseChange",
+            "id": "def-common.PublishesPhaseEvents.phase$",
             "type": "Object",
             "tags": [],
-            "label": "onPhaseChange",
+            "label": "phase$",
             "description": [],
             "signature": [
               "{ source: ",
