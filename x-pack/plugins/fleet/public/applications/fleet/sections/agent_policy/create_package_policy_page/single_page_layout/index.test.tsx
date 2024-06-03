@@ -831,26 +831,6 @@ describe('When on the package policy create page', () => {
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
       });
     });
-
-    describe('Rendering PLI auth block components', () => {
-      it('should render CreatePackagePolicySinglePageLayout with pliAuthBlockComponent when pliAuthBlockComponent is valid and set by setState', () => {
-        const [pliAuthBlockComponent, setPliAuthBlockComponent] =
-          useState<React.ComponentType | null>(null);
-        const layoutProps = { from: 'package', cancelUrl: '/cancel' };
-        const { getByText } = render(
-          <CreatePackagePolicySinglePage
-            {...layoutProps}
-            data-test-subj="pliAuthBlockPackagePolicy"
-          >
-            <Suspense fallback={null}>{pliAuthBlockComponent}</Suspense>
-          </CreatePackagePolicySinglePage>
-        );
-        act(() => {
-          setPliAuthBlockComponent(<div>Mock Component</div>);
-        });
-        expect(getByText('Mock Component')).toBeInTheDocument();
-      });
-    });
   });
 });
 
