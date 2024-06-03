@@ -62,14 +62,16 @@ export async function getTemplateInputs(
   pkgName: string,
   pkgVersion: string,
   format: 'yml',
-  prerelease?: boolean
+  prerelease?: boolean,
+  ignoreUnverified?: boolean
 ): Promise<string>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string,
   format: 'json',
-  prerelease?: boolean
+  prerelease?: boolean,
+  ignoreUnverified?: boolean
 ): Promise<{ inputs: TemplateAgentPolicyInput[] }>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
