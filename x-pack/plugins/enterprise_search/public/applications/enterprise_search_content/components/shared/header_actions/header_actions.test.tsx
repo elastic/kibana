@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { apiIndex, connectorIndex, crawlerIndex } from '../../../../__mocks__/view_index.mock';
+import { apiIndex, connectorIndex, crawlerIndex } from '../../../__mocks__/view_index.mock';
 
 import React from 'react';
 
-import { CrawlerStatusIndicator } from '../../../shared/crawler_status_indicator/crawler_status_indicator';
+import { SearchPlaygroundPopover } from '../../search_index/components/header_actions/search_playground_popover';
+
+import { CrawlerStatusIndicator } from '../crawler_status_indicator/crawler_status_indicator';
 
 import { getHeaderActions } from './header_actions';
-import { SearchPlaygroundPopover } from './search_playground_popover';
 import { SyncsContextMenu } from './syncs_context_menu';
 
 describe('Header Actions', () => {
