@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { GroupOption, GroupPanelRenderer, GroupStatsRenderer } from '@kbn/grouping/src';
+import { GroupOption, GroupPanelRenderer, GroupStatsRenderers } from '@kbn/grouping/src';
 
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
@@ -40,7 +40,7 @@ export const useCloudSecurityGrouping = ({
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
   unit: (count: number) => string;
   groupPanelRenderer?: GroupPanelRenderer<any>;
-  groupStatsRenderer?: GroupStatsRenderer<any>;
+  groupStatsRenderer?: GroupStatsRenderers<any>;
   groupingLevel?: number;
   groupingLocalStorageKey: string;
   maxGroupingLevels?: number;
@@ -60,7 +60,7 @@ export const useCloudSecurityGrouping = ({
     componentProps: {
       unit,
       groupPanelRenderer,
-      groupStatsRenderer,
+      groupStatsRenderers: groupStatsRenderer,
       groupsUnit,
     },
     defaultGroupingOptions,

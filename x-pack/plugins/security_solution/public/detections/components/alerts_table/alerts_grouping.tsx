@@ -104,7 +104,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
-      groupStatsRenderer: getStats,
+      groupStatsRenderers: getStats,
       onGroupToggle,
       unit: defaultUnit,
     },

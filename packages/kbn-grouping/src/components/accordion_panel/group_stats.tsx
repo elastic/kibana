@@ -15,8 +15,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { Filter } from '@kbn/es-query';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { StatRenderer } from '../types';
 import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
@@ -27,8 +29,22 @@ interface GroupStatsProps<T> {
   groupNumber: number;
   onTakeActionsOpen?: () => void;
   statRenderers?: StatRenderer[];
-  takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
 }
+
+const Separator = () => {
+  return (
+    <EuiFlexItem
+      grow={false}
+      role="separator"
+      css={css`
+        align-self: center;
+        height: 20px;
+        border-right: ${euiThemeVars.euiBorderThin};
+      `}
+    />
+  );
+};
 
 const GroupStatsComponent = <T,>({
   bucketKey,
@@ -39,23 +55,15 @@ const GroupStatsComponent = <T,>({
   takeActionItems: getTakeActionItems,
 }: GroupStatsProps<T>) => {
   const [isPopoverOpen, setPopover] = useState(false);
-  const [takeActionItems, setTakeActionItems] = useState<JSX.Element[]>([]);
+  const takeActionItems = useMemo(() => {
+    return getTakeActionItems?.(groupFilter, groupNumber) ?? [];
+  }, [getTakeActionItems, groupFilter, groupNumber]);
 
   const onButtonClick = useCallback(() => {
-    if (!isPopoverOpen && takeActionItems.length === 0) {
-      setTakeActionItems(getTakeActionItems(groupFilter, groupNumber));
-    }
     return !isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen);
-  }, [
-    getTakeActionItems,
-    groupFilter,
-    groupNumber,
-    isPopoverOpen,
-    onTakeActionsOpen,
-    takeActionItems.length,
-  ]);
+  }, [isPopoverOpen, onTakeActionsOpen]);
 
-  const statsComponent = useMemo(
+  const statsComponents = useMemo(
     () =>
       statRenderers?.map((stat) => {
         const { dataTestSubj, component } =
@@ -83,33 +91,34 @@ const GroupStatsComponent = <T,>({
             </span>
           </EuiFlexItem>
         );
-      }),
+      }) ?? [],
     [statRenderers]
   );
 
   const takeActionMenu = useMemo(
-    () => (
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          anchorPosition="downLeft"
-          button={
-            <EuiButtonEmpty
-              data-test-subj="take-action-button"
-              onClick={onButtonClick}
-              iconType="arrowDown"
-              iconSide="right"
-            >
-              {TAKE_ACTION}
-            </EuiButtonEmpty>
-          }
-          closePopover={() => setPopover(false)}
-          isOpen={isPopoverOpen}
-          panelPaddingSize="none"
-        >
-          <EuiContextMenuPanel items={takeActionItems} />
-        </EuiPopover>
-      </EuiFlexItem>
-    ),
+    () =>
+      takeActionItems.length ? (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            anchorPosition="downLeft"
+            button={
+              <EuiButtonEmpty
+                data-test-subj="take-action-button"
+                onClick={onButtonClick}
+                iconType="arrowDown"
+                iconSide="right"
+              >
+                {TAKE_ACTION}
+              </EuiButtonEmpty>
+            }
+            closePopover={() => setPopover(false)}
+            isOpen={isPopoverOpen}
+            panelPaddingSize="none"
+          >
+            <EuiContextMenuPanel items={takeActionItems} />
+          </EuiPopover>
+        </EuiFlexItem>
+      ) : null,
     [isPopoverOpen, onButtonClick, takeActionItems]
   );
 
@@ -117,11 +126,15 @@ const GroupStatsComponent = <T,>({
     <EuiFlexGroup
       data-test-subj="group-stats"
       key={`stats-${bucketKey}`}
-      gutterSize="none"
+      gutterSize="m"
       alignItems="center"
     >
-      {statsComponent}
-      {takeActionMenu}
+      {[...statsComponents, takeActionMenu].filter(Boolean).map((component, index, { length }) => (
+        <Fragment key={index}>
+          {component}
+          {index < length - 1 && <Separator />}
+        </Fragment>
+      ))}
     </EuiFlexGroup>
   );
 };

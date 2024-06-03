@@ -11,10 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
-import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 
 export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -24,7 +24,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         body: buildRouteValidation(
           t.exact(
             t.partial({
-              aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsSchemas])),
+              aggs: t.object,
               feature_ids: t.union([t.array(t.string), t.undefined]),
               index: t.string,
               query: t.object,
@@ -32,7 +32,8 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
               size: t.union([PositiveInteger, t.undefined]),
               sort: t.union([t.array(t.object), t.undefined]),
               track_total_hits: t.union([t.boolean, t.undefined]),
-              _source: t.union([t.array(t.string), t.undefined]),
+              runtime_mappings: t.object,
+              _source: t.union([t.array(t.string), t.boolean, t.undefined]),
             })
           )
         ),
@@ -54,6 +55,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           sort,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           track_total_hits,
+          runtime_mappings: runtimeMappings,
           _source,
         } = request.body;
         const racContext = await context.rac;
@@ -67,7 +69,8 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           size,
           sort: sort as SortOptions[],
           track_total_hits,
-          _source,
+          runtime_mappings: runtimeMappings as MappingRuntimeFields,
+          _source: _source as false | string[],
         });
         if (alerts == null) {
           return response.notFound({
