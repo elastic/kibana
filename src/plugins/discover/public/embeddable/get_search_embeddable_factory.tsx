@@ -177,6 +177,7 @@ export const getSearchEmbeddableFactory = ({
               ...searchEmbeddableApi.getSavedSearch(),
               title,
             });
+            defaultPanelTitle$.next(title);
             savedObjectId$.next(savedObjectId!);
             return savedObjectId!;
           },
@@ -188,6 +189,14 @@ export const getSearchEmbeddableFactory = ({
             }),
           unlinkFromLibrary: () => {
             savedObjectId$.next(undefined);
+            if ((titlesApi.panelTitle.getValue() ?? '').length === 0) {
+              titlesApi.setPanelTitle(defaultPanelTitle$.getValue());
+            }
+            if ((titlesApi.panelDescription.getValue() ?? '').length === 0) {
+              titlesApi.setPanelDescription(defaultPanelDescription$.getValue());
+            }
+            defaultPanelTitle$.next(undefined);
+            defaultPanelDescription$.next(undefined);
           },
           serializeState,
         },
