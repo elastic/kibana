@@ -46,6 +46,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
         'xpack.enterpriseSearch.appSearch.documents.search.multiCheckboxFacetsView.noValue.selectOption',
         {
           defaultMessage: '<No value>',
+          ignoreTag: true,
         }
       ),
   });
