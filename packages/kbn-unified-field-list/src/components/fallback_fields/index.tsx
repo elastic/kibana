@@ -6,24 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { LogLevelId } from '@kbn/logging';
+import { dynamic } from '@kbn/shared-ux-utility';
 
-/**
- * @internal
- */
-export interface BrowserLoggingConfig {
-  root: BrowserRootLoggerConfig;
-  loggers: BrowserLoggerConfig[];
-}
+const SmartFieldFallbackTooltip = dynamic(() => import('./smart_fields_tooltip'));
 
-export interface BrowserLoggerConfig {
-  name: string;
-  level: LogLevelId;
-}
-
-/**
- * @internal
- */
-export interface BrowserRootLoggerConfig {
-  level: LogLevelId;
-}
+export { SmartFieldFallbackTooltip };
