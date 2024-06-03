@@ -7,13 +7,15 @@
  */
 
 import * as recast from 'recast';
+const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
+import { functions } from '../src/esql_documentation_sections';
 
-function main() {
+(function () {
   const functionDocs = loadFunctionDocs();
   writeFunctionDocs(functionDocs);
-}
+})();
 
 function loadFunctionDocs() {
   // read the markdown files from  /Users/andrewtate/workspace/elastic/kibana/blue/elasticsearch/docs/reference/esql/functions/kibana/docs
@@ -50,11 +52,11 @@ function loadFunctionDocs() {
 function writeFunctionDocs(functionDocs: Map<string, string>) {
   const codeStrings = Array.from(functionDocs.entries()).map(
     ([name, doc]) => `
-  {
+  const foo = {
     label: i18n.translate(
       'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
       {
-        defaultMessage: '${name}',
+        defaultMessage: '${name.toUpperCase()}',
       }
     ),
     description: (
@@ -70,10 +72,67 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
         )}
       />
     ),
-  },`
+  };`
   );
 
-  console.log(codeStrings[0]);
+  const parseTypescript = (code: string) =>
+    // recast.parse(code, { parser: require('recast/parsers/typescript') });
+    recast.parse(code);
+
+  const ast = parseTypescript(
+    fs.readFileSync(path.join(__dirname, '../src/esql_documentation_sections.tsx'), 'utf-8')
+  );
+
+  const functionsList = findFunctionsList(ast);
+
+  functionsList.elements = codeStrings.map(
+    (codeString) => parseTypescript(codeString).program.body[0].declarations[0].init
+  );
+
+  const newFileContents = recast.print(ast);
+
+  fs.writeFileSync(
+    path.join(__dirname, '../src/esql_documentation_sections.tsx'),
+    newFileContents.code
+  );
 }
 
-main();
+/**
+ * This function searches the AST for the describe block containing per-function tests
+ * @param ast
+ * @returns
+ */
+function findFunctionsList(ast: any): recast.types.namedTypes.ArrayExpression {
+  let foundArray: recast.types.namedTypes.ArrayExpression | null = null;
+
+  const functionsArrayIdentifier = Object.keys({ functions })[0];
+
+  recast.visit(ast, {
+    visitVariableDeclarator(astPath) {
+      if (
+        n.Identifier.check(astPath.node.id) &&
+        astPath.node.id.name === functionsArrayIdentifier
+      ) {
+        this.traverse(astPath);
+      }
+      return false;
+    },
+    visitProperty(astPath) {
+      if (
+        n.Identifier.check(astPath.node.key) &&
+        astPath.node.key.name === 'items' &&
+        n.ArrayExpression.check(astPath.node.value)
+      ) {
+        foundArray = astPath.node.value;
+        this.abort();
+      }
+      return false;
+    },
+  });
+
+  if (!foundArray) {
+    throw new Error('Could not find the functions array in the AST');
+  }
+
+  return foundArray;
+}
