@@ -15,7 +15,9 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   id,
   namespaces,
   version,
-  attributes: {
+  attributes,
+}: SavedObject<AgentPolicySOAttributes>): AgentPolicy => {
+  const {
     name,
     namespace,
     monitoring_enabled,
@@ -41,8 +43,8 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
     schema_version,
     status,
     unenroll_timeout,
-  },
-}: SavedObject<AgentPolicySOAttributes>): AgentPolicy => {
+  } = attributes || {};
+
   return {
     id,
     version,
