@@ -214,6 +214,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, onTextLangQueryChange]
   );
 
+  const onCommentLine = useCallback(() => {
+    const currentPosition = editor1.current?.getPosition();
+    const lineNumber = currentPosition?.lineNumber;
+    if (lineNumber) {
+      const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
+      const hasComment = lineContent?.startsWith('//');
+      const commentedLine = hasComment ? lineContent?.replace('//', '') : `// ${lineContent}`;
+      // executeEdits allows to keep edit in history
+      editor1.current?.executeEdits('comment', [
+        {
+          range: {
+            startLineNumber: lineNumber,
+            startColumn: 0,
+            endLineNumber: lineNumber,
+            endColumn: (lineContent?.length ?? 0) + 1,
+          },
+          text: commentedLine,
+        },
+      ]);
+    }
+  }, []);
+
   const onQuerySubmit = useCallback(() => {
     if (isQueryLoading && allowQueryCancellation) {
       abortController?.abort();
@@ -921,6 +943,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           // eslint-disable-next-line no-bitwise
                           monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                           onQuerySubmit
+                        );
+
+                        // on CMD/CTRL + / comment out the entire line
+                        editor.addCommand(
+                          // eslint-disable-next-line no-bitwise
+                          monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                          onCommentLine
                         );
 
                         if (!isCodeEditorExpanded) {
