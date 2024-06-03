@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../kibana';
+import { KibanaServices } from '../../kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { isolateHost, unIsolateHost } from '.';
 import { hostIsolationRequestBodyMock } from './mocks';
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
-} from '../../../../common/endpoint/constants';
+} from '../../../../../common/endpoint/constants';
 
-jest.mock('../kibana');
+jest.mock('../../kibana');
 
 describe('When using Host Isolation library', () => {
   const mockKibanaServices = KibanaServices.get as jest.Mock;

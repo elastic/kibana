@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { getHostMetadata } from './api';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint/endpoint_pending_actions';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 import { HostStatus } from '../../../../../common/endpoint/types';
 

@@ -8,9 +8,11 @@
 import type {
   PendingActionsRequestQuery,
   PendingActionsResponse,
-} from '../../../../common/endpoint/types';
-import { KibanaServices } from '../kibana';
-import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+} from '../../../../../common/endpoint/types';
+import { KibanaServices } from '../../kibana';
+import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
+
+// FIXME:PT refactor these to use common hooks
 
 /**
  * Retrieve a list of pending actions against the given Fleet Agent Ids provided on input

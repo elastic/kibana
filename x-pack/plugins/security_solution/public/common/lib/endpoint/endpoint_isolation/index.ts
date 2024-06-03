@@ -8,12 +8,14 @@
 import type {
   HostIsolationRequestBody,
   ResponseActionApiResponse,
-} from '../../../../common/endpoint/types';
-import { KibanaServices } from '../kibana';
+} from '../../../../../common/endpoint/types';
+import { KibanaServices } from '../../kibana';
 import {
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
-} from '../../../../common/endpoint/constants';
+} from '../../../../../common/endpoint/constants';
+
+// FIXME:PT refactor usage of these and use common hooks
 
 /** Isolates a Host running either elastic endpoint or fleet agent */
 export const isolateHost = async (

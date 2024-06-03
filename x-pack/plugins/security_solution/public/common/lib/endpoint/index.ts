@@ -6,3 +6,5 @@
  */
 
 export * from './utils';
+export * from './endpoint_isolation';
+export * from './endpoint_pending_actions';
