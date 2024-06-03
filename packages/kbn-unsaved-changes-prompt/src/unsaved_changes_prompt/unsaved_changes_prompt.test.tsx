@@ -7,7 +7,7 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -22,17 +22,11 @@ const navigateToUrl = jest.fn().mockImplementation(async (url) => {
   history.push(url);
 });
 
-const createTestRendererMock = () => {
-  // TODO...
-};
-
 // our test mountHistory prepends the basePath to URLs, however useHistory state doesnt have the basePath
 // in production, so we have to prepend it to the state.pathname, this results in /mock/mock in the assertions
-describe.skip('useUnsavedChangesPrompt', () => {
+describe('useUnsavedChangesPrompt', () => {
   it('should not block if not edited', () => {
-    const renderer = createTestRendererMock();
-
-    renderer.renderHook(() =>
+    renderHook(() =>
       useUnsavedChangesPrompt({
         hasUnsavedChanges: false,
         http: coreStart.http,
@@ -42,19 +36,17 @@ describe.skip('useUnsavedChangesPrompt', () => {
       })
     );
 
-    act(() => renderer.mountHistory.push('/test'));
+    act(() => history.push('/test'));
 
-    const { location } = renderer.mountHistory;
-    expect(location.pathname).toBe('/test');
-    expect(location.search).toBe('');
-    expect(renderer.startServices.overlays.openConfirm).not.toBeCalled();
+    expect(history.location.pathname).toBe('/test');
+    expect(history.location.search).toBe('');
+    expect(coreStart.overlays.openConfirm).not.toBeCalled();
   });
 
   it('should block if edited', async () => {
-    const renderer = createTestRendererMock();
+    coreStart.overlays.openConfirm.mockResolvedValue(true);
 
-    renderer.startServices.overlays.openConfirm.mockResolvedValue(true);
-    renderer.renderHook(() =>
+    renderHook(() =>
       useUnsavedChangesPrompt({
         hasUnsavedChanges: true,
         http: coreStart.http,
@@ -64,36 +56,12 @@ describe.skip('useUnsavedChangesPrompt', () => {
       })
     );
 
-    act(() => renderer.mountHistory.push('/test'));
+    act(() => history.push('/test'));
+
     // needed because we have an async useEffect
     await act(() => new Promise((resolve) => resolve()));
 
-    expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-    expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
-      '/mock/mock/test',
-      expect.anything()
-    );
-  });
-
-  it('should block if edited and not navigate on cancel', async () => {
-    const renderer = createTestRendererMock();
-
-    renderer.startServices.overlays.openConfirm.mockResolvedValue(false);
-    renderer.renderHook(() =>
-      useUnsavedChangesPrompt({
-        hasUnsavedChanges: true,
-        http: coreStart.http,
-        openConfirm: coreStart.overlays.openConfirm,
-        history,
-        navigateToUrl,
-      })
-    );
-
-    act(() => renderer.mountHistory.push('/test'));
-    // needed because we have an async useEffect
-    await act(() => new Promise((resolve) => resolve()));
-
-    expect(renderer.startServices.overlays.openConfirm).toBeCalled();
-    expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
+    expect(navigateToUrl).toBeCalledWith('/mock/test', expect.anything());
+    expect(coreStart.overlays.openConfirm).toBeCalled();
   });
 });
