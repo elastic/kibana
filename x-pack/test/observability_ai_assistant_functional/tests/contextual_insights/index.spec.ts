@@ -17,14 +17,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const ui = getService('observabilityAIAssistantUI');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const retry = getService('retry');
   const log = getService('log');
-  const browser = getService('browser');
-  const deployment = getService('deployment');
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
-  const { common } = getPageObjects(['header', 'common']);
+  const { header, common } = getPageObjects(['header', 'common']);
 
   async function createSynthtraceErrors() {
     const start = moment().subtract(5, 'minutes').valueOf();
@@ -94,6 +93,19 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     await common.navigateToUrl('apm', 'services/opbeans-go/errors/some-expection-key', {
       shouldUseHashForSubUrl: false,
     });
+    await header.waitUntilLoadingHasFinished();
+  }
+
+  // open contextual insights component and ensure it was opened
+  async function openContextualInsights() {
+    await retry.try(async () => {
+      await testSubjects.click(ui.pages.contextualInsights.button);
+      const isOpen =
+        (await (
+          await find.byCssSelector(`[aria-controls="${ui.pages.contextualInsights.container}"]`)
+        ).getAttribute('aria-expanded')) === 'true';
+      expect(isOpen).to.be(true);
+    });
   }
 
   describe('Contextual insights for APM errors', () => {
@@ -136,7 +148,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         proxy.close();
       });
 
-      it.only('should show the contextual insight component on the APM error details page', async () => {
+      it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
         const interceptor = proxy.intercept(
@@ -145,7 +157,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           'This error is nothing to worry about. Have a nice day!'
         );
 
-        await testSubjects.click(ui.pages.contextualInsights.button);
+        await openContextualInsights();
 
         await interceptor.waitAndComplete();
 
