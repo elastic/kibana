@@ -85,6 +85,7 @@ const DEFAULT_PACKAGE_POLICY = {
   description: '',
   namespace: '',
   policy_id: '',
+  policy_ids: [],
   enabled: true,
   inputs: [],
 };
@@ -186,7 +187,7 @@ export function useOnSubmit({
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
-      const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
+      const hasAgentPolicy = newPackagePolicy.policy_ids[0] !== '';
       if (
         hasPackage &&
         (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&

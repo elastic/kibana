@@ -86,7 +86,9 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       if (!doOnSaveNavigation.current) {
         return;
       }
-      const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
+      const packagePolicyPath = getPath('policy_details', {
+        policyId: packagePolicy.policy_ids[0],
+      });
 
       const [onSaveNavigateTo, onSaveQueryParams]: [
         Parameters<ApplicationStart['navigateToApp']>,
@@ -121,7 +123,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         navigateToApp(...onSaveNavigateTo);
       }
     },
-    [packagePolicy.policy_id, getPath, navigateToApp, routeState, queryParamsPolicyId]
+    [packagePolicy.policy_ids, getPath, navigateToApp, routeState, queryParamsPolicyId]
   );
 
   return onSaveNavigate;

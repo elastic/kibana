@@ -205,7 +205,7 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
     );
     usedPackages.forEach(({ attributes: { name } }) => {
       packagePoliciesByPackage[name].forEach((packagePolicy) => {
-        if (!agentPoliciesById[packagePolicy.policy_id]) {
+        if (packagePolicy.policy_ids.every((policyId) => !agentPoliciesById[policyId])) {
           orphanedPackagePolicies.push(packagePolicy);
         }
       });

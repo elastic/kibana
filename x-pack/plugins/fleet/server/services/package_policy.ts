@@ -230,7 +230,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const agentPolicy = await agentPolicyService.get(
       soClient,
-      enrichedPackagePolicy.policy_id,
+      enrichedPackagePolicy.policy_ids[0],
       true
     );
 
@@ -241,7 +241,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.package?.name
       );
     }
-    await validateIsNotHostedPolicy(soClient, enrichedPackagePolicy.policy_id, options?.force);
+    for (const policyId of enrichedPackagePolicy.policy_ids) {
+      await validateIsNotHostedPolicy(soClient, policyId, options?.force);
+    }
 
     // trailing whitespace causes issues creating API keys
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
@@ -361,9 +363,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
 
     if (options?.bumpRevision ?? true) {
-      await agentPolicyService.bumpRevision(soClient, esClient, enrichedPackagePolicy.policy_id, {
-        user: options?.user,
-      });
+      for (const policyId of enrichedPackagePolicy.policy_ids) {
+        await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+          user: options?.user,
+        });
+      }
     }
 
     const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
@@ -402,7 +406,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
-    const agentPolicyIds = new Set(packagePolicies.map((pkgPolicy) => pkgPolicy.policy_id));
+    const agentPolicyIds = new Set(packagePolicies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
 
     for (const agentPolicyId of agentPolicyIds) {
       await validateIsNotHostedPolicy(soClient, agentPolicyId, options?.force);
@@ -437,7 +441,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
         const packagePolicyId = packagePolicy.id ?? uuidv4();
-        const agentPolicyId = packagePolicy.policy_id;
+        const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
 
         let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
 
@@ -486,7 +490,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               : {}),
             inputs,
             elasticsearch,
-            policy_id: agentPolicyId,
+            policy_id: agentPolicyIdsOfPackagePolicy[0],
+            policy_ids: agentPolicyIdsOfPackagePolicy,
             revision: 1,
             created_at: isoDate,
             created_by: options?.user?.username ?? 'system',
@@ -553,7 +558,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
-    const agentPolicyId = packagePolicy.policy_id;
+    const agentPolicyIds = packagePolicy.policy_ids;
 
     let inputs = getInputsWithStreamIds(packagePolicy, packagePolicy.id);
     const { id, ...pkgPolicyWithoutId } = packagePolicy;
@@ -588,7 +593,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         : {}),
       inputs,
       elasticsearch,
-      policy_id: agentPolicyId,
+      policy_id: agentPolicyIds[0],
+      policy_ids: agentPolicyIds,
     };
   }
 
@@ -644,7 +650,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<PackagePolicy[]> {
     const packagePolicySO = await soClient.find<PackagePolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      filter: `${SAVED_OBJECT_TYPE}.attributes.policy_id:${escapeSearchQueryPhrase(agentPolicyId)}`,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.policy_ids:${escapeSearchQueryPhrase(
+        agentPolicyId
+      )}`,
       perPage: SO_SEARCH_LIMIT,
     });
     if (!packagePolicySO) {
@@ -948,15 +956,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
     // Bump revision of associated agent policy
-    logger.debug(`Bumping revision of associated agent policy ${packagePolicy.policy_id}`);
-    const bumpPromise = agentPolicyService.bumpRevision(
-      soClient,
-      esClient,
-      packagePolicy.policy_id,
-      {
-        user: options?.user,
-      }
-    );
+    logger.debug(`Bumping revision of associated agent policies ${packagePolicy.policy_ids}`);
+    const bumpPromises = [];
+    for (const policyId of packagePolicy.policy_ids) {
+      bumpPromises.push(
+        agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+          user: options?.user,
+        })
+      );
+    }
     const assetRemovePromise = removeOldAssets({
       soClient,
       pkgName: newPolicy.package!.name,
@@ -966,7 +974,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
       : Promise.resolve();
 
-    await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
+    await Promise.all([...bumpPromises, assetRemovePromise, deleteSecretsPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
     logger.debug(`Package policy ${id} update completed`);
@@ -1109,7 +1117,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       policiesToUpdate
     );
 
-    const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
+    const agentPolicyIds = new Set(packagePolicyUpdates.flatMap((p) => p.policy_ids));
 
     const bumpPromise = pMap(agentPolicyIds, async (agentPolicyId) => {
       // Bump revision of associated agent policy
@@ -1216,7 +1224,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const uniqueAgentPolicyIds = [
-      ...new Set(packagePolicies.map((packagePolicy) => packagePolicy.policy_id)),
+      ...new Set(packagePolicies.flatMap((packagePolicy) => packagePolicy.policy_ids)),
     ];
 
     const hostedAgentPolicies: string[] = [];
@@ -1250,7 +1258,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
 
-        if (hostedAgentPolicies.includes(packagePolicy.policy_id)) {
+        if (packagePolicy.policy_ids.some((policyId) => hostedAgentPolicies.includes(policyId))) {
           throw new HostedAgentPolicyRestrictionRelatedError(
             'Cannot remove integrations of hosted agent policy'
           );
@@ -1285,6 +1293,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               version: packagePolicy.package?.version || '',
             },
             policy_id: packagePolicy.policy_id,
+            policy_ids: packagePolicy.policy_ids,
           });
           if (packagePolicy?.secret_references?.length) {
             secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
@@ -1304,12 +1313,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     if (!options?.skipUnassignFromAgentPolicies) {
       const uniquePolicyIdsR = [
-        ...new Set(result.filter((r) => r.success && r.policy_id).map((r) => r.policy_id!)),
+        ...new Set(
+          result
+            .filter((r) => r.success && r.policy_ids && r.policy_ids.length > 0)
+            .flatMap((r) => r.policy_ids!)
+        ),
       ];
 
       const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
-        if (cur.success && cur.policy_id && cur.package?.name === 'endpoint') {
-          return acc.add(cur.policy_id);
+        if (cur.success && cur.policy_ids && cur.package?.name === 'endpoint') {
+          for (const policyId of cur.policy_ids) {
+            acc.add(policyId);
+          }
         }
         return acc;
       }, new Set());
@@ -1711,6 +1726,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             experimental_data_stream_features: newPolicy.package?.experimental_data_stream_features,
           },
           policy_id: newPolicy.policy_id ?? agentPolicyId,
+          policy_ids: newPolicy.policy_ids ?? [agentPolicyId],
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
         };
