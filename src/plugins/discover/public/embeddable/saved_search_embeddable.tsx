@@ -168,7 +168,7 @@ export class SavedSearchEmbeddable
         this.services.core.chrome.getActiveSolutionNavId$()
       );
 
-      this.services.profilesManager.resolveRootProfile({ solutionNavId });
+      await this.services.profilesManager.resolveRootProfile({ solutionNavId });
 
       // deferred loading of this embeddable is complete
       this.setInitializationFinished();
