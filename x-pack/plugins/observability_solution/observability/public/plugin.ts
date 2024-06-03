@@ -451,10 +451,7 @@ export class Plugin
       return registerAlertsTableConfiguration(
         alertsTableConfigurationRegistry,
         this.observabilityRuleTypeRegistry,
-        config,
-        pluginsStart.dataViews,
-        coreStart.http,
-        coreStart.notifications
+        config
       );
     });
 

@@ -10,7 +10,7 @@ import { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { getGroupingQuery } from '@kbn/grouping';
+import { getGroupingQuery, type GroupingAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
@@ -137,7 +137,9 @@ export const AlertsGroupingLevel = memo(
 
     const [finalQuery, setFinalQuery] = useState(queryGroups);
 
-    const { data: alertGroupsData, isLoading: isLoadingGroups } = useFindAlertsQuery({
+    const { data: alertGroupsData, isLoading: isLoadingGroups } = useFindAlertsQuery<
+      GroupingAggregation<AlertsGroupingAggregation>
+    >({
       http,
       toasts: notifications.toasts,
       enabled: finalQuery && !isNoneGroup([selectedGroup]),
