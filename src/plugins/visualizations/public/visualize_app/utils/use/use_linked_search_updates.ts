@@ -47,7 +47,7 @@ export const useLinkedSearchUpdates = (
         if (showToast) {
           services.toastNotifications.addSuccess(
             i18n.translate('visualizations.linkedToSearch.unlinkSuccessNotificationText', {
-              defaultMessage: `Unlinked from saved search '{searchTitle}'`,
+              defaultMessage: `Unlinked from saved search ''{searchTitle}''`,
               values: {
                 searchTitle: savedSearch.title,
               },
