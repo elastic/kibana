@@ -16,6 +16,12 @@ import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 
 import { DiscoverServices } from '../build_services';
 import {
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  DEFAULT_ROWS_PER_PAGE,
+  DEFAULT_ROW_HEIGHT_LINES,
+  DEFAULT_SAMPLE_SIZE,
+} from './constants';
+import {
   PublishesSavedSearchAttributes,
   SearchEmbeddableAttributes,
   SearchEmbeddableRuntimeState,
@@ -76,16 +82,32 @@ export const initializeSearchEmbeddableApi = async (
 
   const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableAttributes> => {
     return {
+      managed: [managed$, (value) => managed$.next(value)],
       searchSource: [searchSource$, (value) => searchSource$.next(value)],
-      rowHeight: [rowHeight$, (value) => rowHeight$.next(value)],
-      rowsPerPage: [rowsPerPage$, (value) => rowsPerPage$.next(value)],
-      headerRowHeight: [headerRowHeight$, (value) => headerRowHeight$.next(value)],
-      columns: [columns$, (value) => columns$.next(value)],
-      sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
-      sampleSize: [sampleSize$, (value) => sampleSize$.next(value)],
       breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
       viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
-      managed: [managed$, (value) => managed$.next(value)],
+      sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],
+      columns: [columns$, (value) => columns$.next(value), (a, b) => deepEqual(a, b)],
+      sampleSize: [
+        sampleSize$,
+        (value) => sampleSize$.next(value),
+        (a, b) => (a ?? DEFAULT_SAMPLE_SIZE) === (b ?? DEFAULT_SAMPLE_SIZE),
+      ],
+      rowsPerPage: [
+        rowsPerPage$,
+        (value) => rowsPerPage$.next(value),
+        (a, b) => (a ?? DEFAULT_ROWS_PER_PAGE) === (b ?? DEFAULT_ROWS_PER_PAGE),
+      ],
+      rowHeight: [
+        rowHeight$,
+        (value) => rowHeight$.next(value),
+        (a, b) => (a ?? DEFAULT_ROW_HEIGHT_LINES) === (b ?? DEFAULT_ROW_HEIGHT_LINES),
+      ],
+      headerRowHeight: [
+        headerRowHeight$,
+        (value) => headerRowHeight$.next(value),
+        (a, b) => (a ?? DEFAULT_HEADER_ROW_HEIGHT_LINES) === (b ?? DEFAULT_HEADER_ROW_HEIGHT_LINES),
+      ],
     };
   };
 
