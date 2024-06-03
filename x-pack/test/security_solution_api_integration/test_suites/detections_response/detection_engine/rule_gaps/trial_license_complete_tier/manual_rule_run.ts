@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should return bad request error when some of the rules are disabledx', async () => {
+      it('should return bad request error when some of the rules are disabled', async () => {
         const intervalInMinutes = 25;
         const interval = `${intervalInMinutes}m`;
         const createdRule1 = await createRule(
