@@ -250,7 +250,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      if (event.ctrlKey || event.metaKey || event.shiftKey) {
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
         window.open(url, '_blank');
       } else {
         navigateToUrl(url);
