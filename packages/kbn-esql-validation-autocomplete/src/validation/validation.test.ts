@@ -245,6 +245,14 @@ describe('validation logic', () => {
       },
     });
 
+    // The following block tests a case that is allowed in Kibana
+    // by suppressing the parser error in packages/kbn-esql-ast/src/ast_parser.ts
+    describe('ESQL query can be empty', () => {
+      testErrorsAndWarnings('', []);
+      testErrorsAndWarnings(' ', []);
+      testErrorsAndWarnings('     ', []);
+    });
+
     describe('ESQL query should start with a source command', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
@@ -352,6 +360,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from *ex*`, []);
       testErrorsAndWarnings(`from in*ex`, []);
       testErrorsAndWarnings(`from ind*ex`, []);
+      testErrorsAndWarnings(`from *,-.*`, []);
       testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
 
       testErrorsAndWarnings(`from remote-*:indexes*`, []);
