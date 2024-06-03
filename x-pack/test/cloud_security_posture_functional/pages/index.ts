@@ -26,5 +26,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./findings_old_data'));
     loadTestFile(require.resolve('./vulnerabilities'));
     loadTestFile(require.resolve('./vulnerabilities_grouping'));
+    loadTestFile(require.resolve('./benchmark'));
   });
 }
