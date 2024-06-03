@@ -91,10 +91,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   }
 
   async function navigateToError() {
-    await common.navigateToApp('apm');
-    await browser.get(
-      `${deployment.getHostPort()}/app/apm/services/opbeans-go/errors/some-expection-key`
-    );
+    await common.navigateToUrl('apm', 'services/opbeans-go/errors/some-expection-key', {
+      shouldUseHashForSubUrl: false,
+    });
   }
 
   describe('Contextual insights for APM errors', () => {
@@ -137,18 +136,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         proxy.close();
       });
 
-      it('should show the contextual insight component on the APM error details page', async () => {
+      it.only('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        proxy
-          .intercept(
-            'conversation',
-            (body) => !isFunctionTitleRequest(body),
-            'This error is nothing to worry about. Have a nice day!'
-          )
-          .complete();
+        const interceptor = proxy.intercept(
+          'conversation',
+          (body) => !isFunctionTitleRequest(body),
+          'This error is nothing to worry about. Have a nice day!'
+        );
 
         await testSubjects.click(ui.pages.contextualInsights.button);
+
+        await interceptor.waitAndComplete();
 
         await retry.try(async () => {
           const llmResponse = await testSubjects.getVisibleText(ui.pages.contextualInsights.text);

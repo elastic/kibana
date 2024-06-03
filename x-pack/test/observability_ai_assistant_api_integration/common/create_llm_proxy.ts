@@ -98,7 +98,7 @@ export class LlmProxy {
         waitForIntercept: () => Promise<LlmResponseSimulator>;
       }
     : {
-        complete: () => Promise<void>;
+        waitAndComplete: () => Promise<void>;
       } {
     const waitForInterceptPromise = Promise.race([
       new Promise<LlmResponseSimulator>((outerResolve) => {
@@ -162,7 +162,7 @@ export class LlmProxy {
       : responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
 
     return {
-      complete: async () => {
+      waitAndComplete: async () => {
         const simulator = await waitForInterceptPromise;
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);
@@ -195,4 +195,8 @@ async function getRequestBody(request: http.IncomingMessage): Promise<string> {
       reject(error);
     });
   });
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
