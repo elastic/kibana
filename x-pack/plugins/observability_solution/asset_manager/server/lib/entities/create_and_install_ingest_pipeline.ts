@@ -15,9 +15,10 @@ import { generateIngestPipelineId } from './ingest_pipeline/generate_ingest_pipe
 export async function createAndInstallIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
-  logger: Logger
+  logger: Logger,
+  spaceId: string
 ) {
-  const processors = generateProcessors(definition);
+  const processors = generateProcessors(definition, spaceId);
   const id = generateIngestPipelineId(definition);
   try {
     await retryTransientEsErrors(
