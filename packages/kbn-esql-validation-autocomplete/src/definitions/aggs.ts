@@ -28,7 +28,7 @@ function createNumericAggDefinition({
     name,
     type: 'agg',
     description,
-    supportedCommands: ['stats'],
+    supportedCommands: ['stats', 'metrics'],
     signatures: [
       {
         params: [
@@ -98,7 +98,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the maximum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
@@ -117,7 +117,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the minimum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
@@ -138,7 +138,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.countDoc', {
         defaultMessage: 'Returns the count of the values in a field.',
       }),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [
@@ -164,7 +164,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [
@@ -188,7 +188,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
@@ -212,7 +212,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
         defaultMessage: 'Returns all values in a group as an array.',
       }),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'expression', type: 'any', noNestingFunctions: true }],
