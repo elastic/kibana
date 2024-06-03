@@ -6,7 +6,8 @@
  */
 
 import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
@@ -14,80 +15,23 @@ import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 
-const mapForDisplay = (savedObjectType: string) => {
-  switch (savedObjectType) {
-    case 'canvas-workpad':
-      return {
-        icon: 'canvasApp',
-        displayName: 'Canvas',
-      };
-    case 'config':
-      return {
-        icon: 'advancedSettingsApp',
-        displayName: 'Config',
-      };
-    case 'dashboard':
-      return {
-        icon: 'dashboardApp',
-        displayName: 'Dashboard',
-      };
-    case 'index-pattern':
-      return {
-        icon: 'indexSettings',
-        displayName: 'Index Pattern',
-      };
-    case 'graph-workspace':
-      return {
-        icon: 'graphApp',
-        displayName: 'Graph Workspace',
-      };
-    case 'lens':
-      return {
-        icon: 'lensApp',
-        displayName: 'Lens',
-      };
-    case 'map':
-      return {
-        icon: 'emsApp',
-        displayName: 'Map',
-      };
-    case 'search':
-      return {
-        icon: 'discoverApp',
-        displayName: 'Saved Search',
-      };
-    case 'visualization':
-      return {
-        icon: 'visualizeApp',
-        displayName: 'Visualization',
-      };
-    default:
-      // eslint-disable-next-line no-console
-      console.error(`Can not map for display type: ${savedObjectType}`);
-      return {
-        icon: 'gear',
-        displayName: savedObjectType,
-      };
-  }
-};
-
 export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
   const { id: spaceId } = space;
-  const { spacesManager } = useViewSpaceServices();
+  const { spacesManager, getUrlForApp, navigateToUrl } = useViewSpaceServices();
   const [items, setItems] = useState<SpaceContentTypeSummaryItem[] | null>(null);
 
   const columns: Array<EuiBasicTableColumn<SpaceContentTypeSummaryItem>> = [
     {
       field: 'type',
       name: 'Type',
-      render: (value: string) => {
-        const { icon, displayName } = mapForDisplay(value);
+      render: (_value: string, item: SpaceContentTypeSummaryItem) => {
+        const { icon, displayName } = item;
         return (
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} size="m" />
+              <EuiIcon type={icon ?? 'gear'} size="m" />
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>{displayName}</EuiFlexItem>
+            <EuiFlexItem grow={true}>{capitalize(displayName)}</EuiFlexItem>
           </EuiFlexGroup>
         );
       },
@@ -95,6 +39,20 @@ export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
     {
       field: 'count',
       name: 'Count',
+      render: (value: string, item: SpaceContentTypeSummaryItem) => {
+        const href = getUrlForApp('management', {
+          path: `/kibana/objects?type=${item.type}`,
+        });
+        return (
+          <EuiLink
+            onClick={() => {
+              navigateToUrl(href);
+            }}
+          >
+            {value}
+          </EuiLink>
+        );
+      },
     },
   ];
 

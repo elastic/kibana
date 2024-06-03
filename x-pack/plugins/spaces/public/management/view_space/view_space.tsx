@@ -77,6 +77,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [tabs, selectedTabContent] = useTabs(space, features, roles, selectedTabId);
+  const { capabilities, getUrlForApp, navigateToUrl } = props;
 
   useEffect(() => {
     if (!spaceId) {
@@ -148,10 +149,8 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   };
 
   const SettingsButton = () => {
-    const { capabilities, getUrlForApp, navigateToUrl } = props;
-
     const href = getUrlForApp('management', {
-      path: `kibana/spaces/edit/${space.id}`,
+      path: `/kibana/spaces/edit/${space.id}`,
     });
 
     return capabilities.spaces.manage ? (
@@ -183,7 +182,11 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   };
 
   return (
-    <ViewSpaceContextProvider spacesManager={spacesManager}>
+    <ViewSpaceContextProvider
+      spacesManager={spacesManager}
+      navigateToUrl={navigateToUrl}
+      getUrlForApp={getUrlForApp}
+    >
       <EuiText>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

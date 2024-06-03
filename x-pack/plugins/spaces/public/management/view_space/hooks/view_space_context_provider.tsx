@@ -8,9 +8,13 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 
+import type { ApplicationStart } from '@kbn/core-application-browser';
+
 import type { SpacesManager } from '../../../spaces_manager';
 
 interface ViewSpaceServices {
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   spacesManager: SpacesManager;
 }
 
