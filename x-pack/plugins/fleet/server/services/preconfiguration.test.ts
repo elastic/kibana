@@ -421,6 +421,7 @@ describe('policy preconfiguration', () => {
                 namespace: 'default',
                 description: 'test',
                 package: { name: 'test_package' },
+                policy_ids: ['test-id'],
                 inputs: {
                   'test_template-foo': {
                     vars: {

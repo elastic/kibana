@@ -2384,7 +2384,7 @@ function _enforceFrozenVars(
 
 export interface NewPackagePolicyWithId extends NewPackagePolicy {
   id?: string;
-  policy_id: string;
+  policy_id?: string;
   version?: string;
 }
 

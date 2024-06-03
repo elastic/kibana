@@ -127,6 +127,7 @@ describe('8.4.0 Endpoint Package Policy migration', () => {
         },
         id: 'notEndpoint',
         policy_id: '',
+        policy_ids: [''],
         enabled: true,
         namespace: '',
         revision: 0,
