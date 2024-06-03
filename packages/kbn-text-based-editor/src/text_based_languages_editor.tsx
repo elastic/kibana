@@ -220,7 +220,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     if (lineNumber) {
       const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
       const hasComment = lineContent?.startsWith('//');
-      const commentedLine = hasComment ? lineContent?.replace('//', '') : `// ${lineContent}`;
+      const commentedLine = hasComment ? lineContent?.replace('//', '') : `//${lineContent}`;
       // executeEdits allows to keep edit in history
       editor1.current?.executeEdits('comment', [
         {
