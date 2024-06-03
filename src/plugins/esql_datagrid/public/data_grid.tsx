@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -83,16 +83,20 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [activeColumns, props.core.notifications, props.dataView, props.flyoutType]
   );
 
-  const columnsMeta = props.columns.reduce((acc, column) => {
-    acc[column.id] = {
-      type: column.meta?.type,
-      esType: column.meta?.esType ?? column.meta?.type,
-    };
-    return acc;
-  }, {} as DataTableColumnsMeta);
+  const columnsMeta = useMemo(() => {
+    return props.columns.reduce((acc, column) => {
+      acc[column.id] = {
+        type: column.meta?.type,
+        esType: column.meta?.esType ?? column.meta?.type,
+      };
+      return acc;
+    }, {} as DataTableColumnsMeta);
+  }, [props.columns]);
 
-  const columnNames = props.columns?.map(({ name }) => name);
-  const rows: DatatableRow[] = props.rows.map((row) => zipObject(columnNames, row));
+  const rows: DatatableRow[] = useMemo(() => {
+    const columnNames = props.columns?.map(({ name }) => name);
+    return props.rows.map((row) => zipObject(columnNames, row));
+  }, [props.columns, props.rows]);
 
   return (
     <UnifiedDataTable
@@ -117,11 +121,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}
-      sampleSizeState={500}
+      sampleSizeState={rows.length}
       rowsPerPageState={10}
-      onSetColumns={(columns) => {
-        setActiveColumns(columns);
-      }}
+      onSetColumns={setActiveColumns}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       showTimeCol

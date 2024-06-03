@@ -645,15 +645,17 @@ export const UnifiedDataTable = ({
     () =>
       onFieldEdited
         ? (fieldName: string) => {
-            closeFieldEditor.current = services?.dataViewFieldEditor?.openEditor({
-              ctx: {
-                dataView,
-              },
-              fieldName,
-              onSave: async () => {
-                await onFieldEdited();
-              },
-            });
+            closeFieldEditor.current =
+              onFieldEdited &&
+              services?.dataViewFieldEditor?.openEditor({
+                ctx: {
+                  dataView,
+                },
+                fieldName,
+                onSave: async () => {
+                  await onFieldEdited();
+                },
+              });
           }
         : undefined,
     [dataView, onFieldEdited, services?.dataViewFieldEditor]
