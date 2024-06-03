@@ -92,6 +92,7 @@ import {
   logDocumentProfileProvider,
   logsDataSourceProfileProvider,
   o11yRootProfileProvider,
+  ecsDocumentProfileProvider,
 } from './context_awareness/profiles/example_profiles';
 
 /**
@@ -464,6 +465,7 @@ export class DiscoverPlugin
     this.rootProfileService.registerProvider(o11yRootProfileProvider);
     this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
     this.documentProfileService.registerProvider(logDocumentProfileProvider);
+    this.documentProfileService.registerProvider(ecsDocumentProfileProvider);
   }
 
   private createProfilesManager() {

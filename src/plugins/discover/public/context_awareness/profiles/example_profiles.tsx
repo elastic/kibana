@@ -139,9 +139,10 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
 export const logDocumentProfileProvider: DocumentProfileProvider = {
   profileId: 'log-document-profile',
   profile: {
-    getDocViewsRegistry: (prev) => (registry) => {
+    getDocViewsRegistry: (prev) => (registry, services) => {
       registry.enableById('doc_view_logs_overview');
-      return prev(registry);
+      registry.enableById('doc_view_fields_inventory');
+      return prev(registry, services);
     },
   },
   resolve: (params) => {
@@ -150,6 +151,28 @@ export const logDocumentProfileProvider: DocumentProfileProvider = {
         isMatch: true,
         context: {
           type: DocumentType.Log,
+        },
+      };
+    }
+
+    return { isMatch: false };
+  },
+};
+
+export const ecsDocumentProfileProvider: DocumentProfileProvider = {
+  profileId: 'ecs-document-profile',
+  profile: {
+    getDocViewsRegistry: (prev) => (registry, services) => {
+      registry.enableById('doc_view_fields_inventory');
+      return prev(registry, services);
+    },
+  },
+  resolve: (params) => {
+    if (getFieldValue(params.record, 'ecs.version') !== undefined) {
+      return {
+        isMatch: true,
+        context: {
+          type: DocumentType.Ecs,
         },
       };
     }

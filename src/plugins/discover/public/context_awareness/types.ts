@@ -10,6 +10,7 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DiscoverServices } from '../build_services';
 
 export interface Profile {
   getTopNavItems: () => TopNavMenuData[];
@@ -17,5 +18,8 @@ export interface Profile {
     | { columns: string[]; settings?: DiscoverGridSettings['columns'] }
     | undefined;
   getCellRenderers: () => CustomCellRenderer;
-  getDocViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  getDocViewsRegistry: (
+    prevRegistry: DocViewsRegistry,
+    services: DiscoverServices
+  ) => DocViewsRegistry;
 }

@@ -174,7 +174,7 @@ export function DiscoverGridFlyout({
         : registry
     );
 
-    return (registry: DocViewsRegistry) => getDocViewsRegistry(registry);
+    return (registry: DocViewsRegistry) => getDocViewsRegistry(registry, services);
   }, [flyoutCustomization, getDocViewsRegistryAccessor]);
 
   const renderDefaultContent = useCallback(

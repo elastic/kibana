@@ -12,6 +12,7 @@ import { ProfileService } from '../profile_service';
 
 export enum DocumentType {
   Log = 'log',
+  Ecs = 'ecs',
   Default = 'default',
 }
 

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { FieldsInventory } from './fields_inventory';
 
-export * from './doc_viewer';
-export * from './doc_viewer_source';
-export * from './doc_viewer_table';
-export * from './json_code_editor';
-export * from './doc_viewer_fields_inventory';
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldsInventory;

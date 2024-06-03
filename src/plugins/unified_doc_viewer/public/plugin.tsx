@@ -38,6 +38,7 @@ const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_t
 });
 const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table'), { fallback });
 const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source'), { fallback });
+const LazyFieldsInventory = dynamic(() => import('./components/doc_viewer_fields_inventory'), { fallback });
 
 export interface UnifiedDocViewerSetup {
   registry: DocViewsRegistry;
@@ -110,6 +111,18 @@ export class UnifiedDocViewerPublicPlugin
             onRefresh={() => {}}
           />
         );
+      },
+    });
+
+    this.docViewsRegistry.add({
+      id: 'doc_view_fields_inventory',
+      title: i18n.translate('unifiedDocViewer.docViews.fieldInventory.title', {
+        defaultMessage: 'Field Inventory',
+      }),
+      order: 40,
+      enabled: false, // Disabled doc view by default, can be programmatically enabled using the DocViewsRegistry.prototype.enableById method.
+      component: (props) => {
+        return <LazyFieldsInventory {...props} />;
       },
     });
 
