@@ -87,6 +87,7 @@ const EmbeddableFieldStatsTableWrapper = (
       onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
+      renderFieldName={props.renderFieldName}
     />
   );
 };

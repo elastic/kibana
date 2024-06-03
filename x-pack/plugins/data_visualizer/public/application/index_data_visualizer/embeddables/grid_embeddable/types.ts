@@ -19,6 +19,7 @@ import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_vi
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
+import type { DataVisualizerTableItem } from '../../../common/components/stats_table/data_visualizer_stats_table';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**
@@ -96,6 +97,7 @@ export interface FieldStatisticTableEmbeddableProps {
    * Inject Kibana services to override in Kibana provider context
    */
   overridableServices?: { data: DataPublicPluginStart };
+  renderFieldName?: (fieldName: string, item: DataVisualizerTableItem) => JSX.Element;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<
