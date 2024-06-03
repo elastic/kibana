@@ -85,7 +85,7 @@ const DEFAULT_PACKAGE_POLICY = {
   description: '',
   namespace: '',
   policy_id: '',
-  policy_ids: [],
+  policy_ids: [''],
   enabled: true,
   inputs: [],
 };
@@ -187,7 +187,8 @@ export function useOnSubmit({
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
-      const hasAgentPolicy = newPackagePolicy.policy_ids[0] !== '';
+      const hasAgentPolicy =
+        newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '';
       if (
         hasPackage &&
         (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&
@@ -233,9 +234,9 @@ export function useOnSubmit({
   }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
 
   useEffect(() => {
-    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+    if (agentPolicy && !packagePolicy.policy_ids.includes(agentPolicy.id)) {
       updatePackagePolicy({
-        policy_id: agentPolicy.id,
+        policy_ids: [agentPolicy.id],
       });
     }
   }, [packagePolicy, agentPolicy, updatePackagePolicy]);
@@ -295,7 +296,7 @@ export function useOnSubmit({
             withSysMonitoring,
           });
           setAgentPolicy(createdPolicy);
-          updatePackagePolicy({ policy_id: createdPolicy.id });
+          updatePackagePolicy({ policy_ids: [createdPolicy.id] });
         } catch (e) {
           setFormState('VALID');
           notifications.toasts.addError(e, {
@@ -307,7 +308,9 @@ export function useOnSubmit({
         }
       }
 
-      const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
+      const agentPolicyIdToSave = createdPolicy?.id
+        ? [createdPolicy?.id]
+        : packagePolicy.policy_ids;
 
       const shouldForceInstallOnAgentless =
         isAgentlessAgentPolicy(createdPolicy) ||
@@ -320,7 +323,7 @@ export function useOnSubmit({
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
-        policy_id: agentPolicyIdToSave,
+        policy_ids: agentPolicyIdToSave,
         force: forceInstall,
       });
 

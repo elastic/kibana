@@ -219,6 +219,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     let secretReferences: PolicySecretReference[] | undefined;
     logger.debug(`Creating new package policy`);
 
+    this.keepPolicyIdInSync(packagePolicy);
+
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
       packagePolicy,
@@ -381,6 +383,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     );
   }
 
+  keepPolicyIdInSync(packagePolicy: NewPackagePolicy): void {
+    if (!packagePolicy.policy_id) {
+      packagePolicy.policy_id = packagePolicy.policy_ids[0];
+    }
+    if (!packagePolicy.policy_ids || packagePolicy.policy_ids.length === 0) {
+      packagePolicy.policy_ids = [packagePolicy.policy_id];
+    }
+  }
+
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -398,6 +409,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
       }
+
+      this.keepPolicyIdInSync(packagePolicy);
 
       auditLoggingService.writeCustomSoAuditLog({
         action: 'create',
@@ -528,8 +541,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Assign it to the given agent policy
 
     if (options?.bumpRevision ?? true) {
-      for (const agentPolicyIdT of agentPolicyIds) {
-        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyIdT, {
+      for (const agentPolicyId of agentPolicyIds) {
+        await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
           user: options?.user,
         });
       }
@@ -558,7 +571,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies([packagePolicy], soClient);
-    const agentPolicyIds = packagePolicy.policy_ids;
 
     let inputs = getInputsWithStreamIds(packagePolicy, packagePolicy.id);
     const { id, ...pkgPolicyWithoutId } = packagePolicy;
@@ -593,8 +605,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         : {}),
       inputs,
       elasticsearch,
-      policy_id: agentPolicyIds[0],
-      policy_ids: agentPolicyIds,
     };
   }
 
@@ -802,6 +812,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     });
     const logger = appContextService.getLogger();
+
+    this.keepPolicyIdInSync(packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: PolicySecretReference[] | undefined;
@@ -1028,6 +1040,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
         const id = packagePolicyUpdate.id;
+        this.keepPolicyIdInSync(packagePolicyUpdate);
         const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
         const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
         if (!oldPackagePolicy) {

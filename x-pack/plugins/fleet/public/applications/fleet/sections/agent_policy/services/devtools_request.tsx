@@ -50,12 +50,10 @@ export function generateCreatePackagePolicyDevToolsRequest(
   packagePolicy: NewPackagePolicy & { force?: boolean }
 ) {
   return generateKibanaDevToolsRequest('POST', packagePolicyRouteService.getCreatePath(), {
-    policy_id:
-      packagePolicy.policy_ids.length > 0 ? packagePolicy.policy_ids[0] : '<agent_policy_id>',
     policy_ids:
       packagePolicy.policy_ids.length > 0 ? packagePolicy.policy_ids : ['<agent_policy_id>'],
     package: formatPackage(packagePolicy.package),
-    ...omit(packagePolicy, 'policy_id', 'policy_ids', 'package', 'enabled'),
+    ...omit(packagePolicy, 'policy_ids', 'package', 'enabled'),
     inputs: formatInputs(packagePolicy.inputs),
     vars: formatVars(packagePolicy.vars),
   });

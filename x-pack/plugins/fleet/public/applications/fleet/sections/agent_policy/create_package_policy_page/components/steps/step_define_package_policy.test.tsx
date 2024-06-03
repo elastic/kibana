@@ -111,7 +111,7 @@ describe('StepDefinePackagePolicy', () => {
       description: 'desc',
       namespace: 'default',
       policy_id: '',
-      policy_ids: [],
+      policy_ids: [''],
       enabled: true,
       inputs: [],
     };

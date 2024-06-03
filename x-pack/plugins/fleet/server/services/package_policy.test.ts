@@ -317,6 +317,7 @@ describe('Package policy service', () => {
           version: '0.0.1',
         },
         policy_id: 'test',
+        policy_ids: ['test'],
         id: 'b684f590-feeb-11ed-b202-b7f403f1dee9',
       });
     });
@@ -4715,6 +4716,7 @@ describe('Package policy service', () => {
         inputs: [{ type: 'logfile', enabled: false }],
         package: { name: 'apache', version: '0.3.3' },
         policy_id: '1',
+        policy_ids: ['1'],
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -4727,6 +4729,7 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
+        policy_ids: ['1'],
         inputs: [
           {
             enabled: false,
@@ -4791,6 +4794,7 @@ describe('Package policy service', () => {
         inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
         package: { name: 'aws', version: '1.0.0' },
         policy_id: '1',
+        policy_ids: ['1'],
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
         savedObjectsClientMock.create(),
@@ -4803,6 +4807,7 @@ describe('Package policy service', () => {
         package: { name: 'aws', title: 'AWS', version: '1.0.0' },
         enabled: true,
         policy_id: '1',
+        policy_ids: ['1'],
         inputs: [
           {
             type: 'aws/metrics',
@@ -4864,6 +4869,7 @@ describe('Package policy service', () => {
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: false,
         policy_id: '2',
+        policy_ids: ['2'],
         inputs: [
           {
             enabled: true,
