@@ -399,6 +399,77 @@ describe('getStreamObservable', () => {
     });
   });
 
+  it('should emit loading state and chunks for Gemini', (done) => {
+    const chunk1 = `data: {"candidates": [{"contents":[{"role":"model","parts":[{"text":"My"}]}]}]}\rdata: {"candidates": [{"contents":[{"role":"model","parts":[{"text":"new"}]}]}]}`;
+    const chunk2 = `\rdata: {"candidates": [{"contents":[{"role":"model","parts":[{"text":"message"}]}, "finishReason": "STOP",]}]}\rdata: [DONE]`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' new', ' message'],
+        message: 'My new message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+      const source = getStreamObservable({
+        ...defaultProps,
+        actionTypeId: '.gemini',
+      });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+
   it('should stream errors when reader contains errors', (done) => {
     const completeSubject = new Subject<void>();
     const expectedStates: PromptObservableState[] = [
