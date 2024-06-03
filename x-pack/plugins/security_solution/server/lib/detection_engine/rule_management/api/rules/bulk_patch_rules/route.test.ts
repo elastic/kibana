@@ -34,7 +34,7 @@ describe('Bulk patch rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // update succeeds
-    clients.rulesManagementClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     bulkPatchRulesRoute(server.router, logger);
   });
@@ -72,7 +72,7 @@ describe('Bulk patch rules route', () => {
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
-      clients.rulesManagementClient.patchRule.mockResolvedValueOnce(
+      clients.detectionRulesClient.patchRule.mockResolvedValueOnce(
         getRuleMock(
           getMlRuleParams({
             anomalyThreshold,
@@ -101,7 +101,7 @@ describe('Bulk patch rules route', () => {
     });
 
     it('rejects patching a rule to ML if mlAuthz fails', async () => {
-      clients.rulesManagementClient.patchRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -125,7 +125,7 @@ describe('Bulk patch rules route', () => {
     });
 
     it('rejects patching an existing ML rule if mlAuthz fails', async () => {
-      clients.rulesManagementClient.patchRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
       const { type, ...payloadWithoutType } = typicalMlRulePayload();
