@@ -729,7 +729,7 @@ export const functions = {
   items: [
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.abs',
         {
           defaultMessage: 'ABS',
         }
@@ -761,7 +761,7 @@ ROW number = -1.0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acos',
         {
           defaultMessage: 'ACOS',
         }
@@ -793,7 +793,7 @@ ROW a=.9
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asin',
         {
           defaultMessage: 'ASIN',
         }
@@ -826,7 +826,7 @@ ROW a=.9
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan',
         {
           defaultMessage: 'ATAN',
         }
@@ -859,7 +859,7 @@ ROW a=12.9
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2',
         {
           defaultMessage: 'ATAN2',
         }
@@ -892,7 +892,7 @@ ROW y=12.9, x=.6
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.bucket',
         {
           defaultMessage: 'BUCKET',
         }
@@ -927,7 +927,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.case',
         {
           defaultMessage: 'CASE',
         }
@@ -968,7 +968,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cbrt',
         {
           defaultMessage: 'CBRT',
         }
@@ -1001,7 +1001,7 @@ ROW d = 1000.0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceil',
         {
           defaultMessage: 'CEIL',
         }
@@ -1034,7 +1034,7 @@ Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`do
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidr_match',
         {
           defaultMessage: 'CIDR_MATCH',
         }
@@ -1067,7 +1067,7 @@ FROM hosts
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesce',
         {
           defaultMessage: 'COALESCE',
         }
@@ -1099,7 +1099,7 @@ ROW a=null, b="b"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concat',
         {
           defaultMessage: 'CONCAT',
         }
@@ -1132,7 +1132,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cos',
         {
           defaultMessage: 'COS',
         }
@@ -1164,7 +1164,7 @@ ROW a=1.8
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosh',
         {
           defaultMessage: 'COSH',
         }
@@ -1196,7 +1196,7 @@ ROW a=1.8
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_diff',
         {
           defaultMessage: 'DATE_DIFF',
         }
@@ -1229,7 +1229,7 @@ ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-1
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_extract',
         {
           defaultMessage: 'DATE_EXTRACT',
         }
@@ -1261,7 +1261,7 @@ ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_format',
         {
           defaultMessage: 'DATE_FORMAT',
         }
@@ -1294,7 +1294,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_parse',
         {
           defaultMessage: 'DATE_PARSE',
         }
@@ -1326,7 +1326,7 @@ ROW date_string = "2022-05-06"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.date_trunc',
         {
           defaultMessage: 'DATE_TRUNC',
         }
@@ -1358,12 +1358,9 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
-        {
-          defaultMessage: 'E',
-        }
-      ),
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.e', {
+        defaultMessage: 'E',
+      }),
       description: (
         <Markdown
           readOnly
@@ -1390,7 +1387,7 @@ ROW E()
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ends_with',
         {
           defaultMessage: 'ENDS_WITH',
         }
@@ -1423,7 +1420,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floor',
         {
           defaultMessage: 'FLOOR',
         }
@@ -1458,7 +1455,7 @@ similar to Math.floor.
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from_base64',
         {
           defaultMessage: 'FROM_BASE64',
         }
@@ -1490,7 +1487,7 @@ row a = "ZWxhc3RpYw=="
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatest',
         {
           defaultMessage: 'GREATEST',
         }
@@ -1524,7 +1521,7 @@ Note: When run on \`keyword\` or \`text\` fields, this returns the last string i
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.least',
         {
           defaultMessage: 'LEAST',
         }
@@ -1556,7 +1553,7 @@ ROW a = 10, b = 20
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.left',
         {
           defaultMessage: 'LEFT',
         }
@@ -1591,7 +1588,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.length',
         {
           defaultMessage: 'LENGTH',
         }
@@ -1624,7 +1621,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.locate',
         {
           defaultMessage: 'LOCATE',
         }
@@ -1656,7 +1653,7 @@ row a = "hello"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log',
         {
           defaultMessage: 'LOG',
         }
@@ -1690,7 +1687,7 @@ ROW base = 2.0, value = 8.0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10',
         {
           defaultMessage: 'LOG10',
         }
@@ -1724,7 +1721,7 @@ ROW d = 1000.0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrim',
         {
           defaultMessage: 'LTRIM',
         }
@@ -1759,7 +1756,7 @@ ROW message = "   some text  ",  color = " red "
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_avg',
         {
           defaultMessage: 'MV_AVG',
         }
@@ -1791,7 +1788,7 @@ ROW a=[3, 5, 1, 6]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_concat',
         {
           defaultMessage: 'MV_CONCAT',
         }
@@ -1823,7 +1820,7 @@ ROW a=["foo", "zoo", "bar"]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_count',
         {
           defaultMessage: 'MV_COUNT',
         }
@@ -1855,7 +1852,7 @@ ROW a=["foo", "zoo", "bar"]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_dedupe',
         {
           defaultMessage: 'MV_DEDUPE',
         }
@@ -1888,7 +1885,7 @@ Note: \`MV_DEDUPE\` may, but won't always, sort the values in the column.
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_first',
         {
           defaultMessage: 'MV_FIRST',
         }
@@ -1928,7 +1925,7 @@ ROW a="foo;bar;baz"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_last',
         {
           defaultMessage: 'MV_LAST',
         }
@@ -1968,7 +1965,7 @@ ROW a="foo;bar;baz"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_max',
         {
           defaultMessage: 'MV_MAX',
         }
@@ -2000,7 +1997,7 @@ ROW a=[3, 5, 1]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_median',
         {
           defaultMessage: 'MV_MEDIAN',
         }
@@ -2032,7 +2029,7 @@ ROW a=[3, 5, 1]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_min',
         {
           defaultMessage: 'MV_MIN',
         }
@@ -2064,7 +2061,7 @@ ROW a=[2, 1]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_slice',
         {
           defaultMessage: 'MV_SLICE',
         }
@@ -2096,7 +2093,7 @@ row a = [1, 2, 2, 3]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sort',
         {
           defaultMessage: 'MV_SORT',
         }
@@ -2128,7 +2125,7 @@ ROW a = [4, 2, -3, 2]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_sum',
         {
           defaultMessage: 'MV_SUM',
         }
@@ -2160,7 +2157,7 @@ ROW a=[3, 5, 6]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mv_zip',
         {
           defaultMessage: 'MV_ZIP',
         }
@@ -2193,7 +2190,7 @@ ROW a = ["x", "y", "z"], b = ["1", "2"]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.now',
         {
           defaultMessage: 'NOW',
         }
@@ -2223,12 +2220,9 @@ ROW current_date = NOW()
       ),
     },
     {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
-        {
-          defaultMessage: 'PI',
-        }
-      ),
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pi', {
+        defaultMessage: 'PI',
+      }),
       description: (
         <Markdown
           readOnly
@@ -2255,7 +2249,7 @@ ROW PI()
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.pow',
         {
           defaultMessage: 'POW',
         }
@@ -2288,7 +2282,7 @@ Note: It is still possible to overflow a double result here; in that case, null 
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.replace',
         {
           defaultMessage: 'REPLACE',
         }
@@ -2322,7 +2316,7 @@ ROW str = "Hello World"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.right',
         {
           defaultMessage: 'RIGHT',
         }
@@ -2357,7 +2351,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.round',
         {
           defaultMessage: 'ROUND',
         }
@@ -2393,7 +2387,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrim',
         {
           defaultMessage: 'RTRIM',
         }
@@ -2428,7 +2422,7 @@ ROW message = "   some text  ",  color = " red "
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signum',
         {
           defaultMessage: 'SIGNUM',
         }
@@ -2461,7 +2455,7 @@ ROW d = 100.0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sin',
         {
           defaultMessage: 'SIN',
         }
@@ -2493,7 +2487,7 @@ ROW a=1.8
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinh',
         {
           defaultMessage: 'SINH',
         }
@@ -2525,7 +2519,7 @@ ROW a=1.8
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.split',
         {
           defaultMessage: 'SPLIT',
         }
@@ -2557,7 +2551,7 @@ ROW words="foo;bar;baz;qux;quux;corge"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrt',
         {
           defaultMessage: 'SQRT',
         }
@@ -2590,7 +2584,7 @@ ROW d = 100.0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_contains',
         {
           defaultMessage: 'ST_CONTAINS',
         }
@@ -2624,7 +2618,7 @@ FROM airport_city_boundaries
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_disjoint',
         {
           defaultMessage: 'ST_DISJOINT',
         }
@@ -2659,7 +2653,7 @@ FROM airport_city_boundaries
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_intersects',
         {
           defaultMessage: 'ST_INTERSECTS',
         }
@@ -2695,7 +2689,7 @@ FROM airports
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_within',
         {
           defaultMessage: 'ST_WITHIN',
         }
@@ -2729,7 +2723,7 @@ FROM airport_city_boundaries
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_x',
         {
           defaultMessage: 'ST_X',
         }
@@ -2762,7 +2756,7 @@ ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.st_y',
         {
           defaultMessage: 'ST_Y',
         }
@@ -2795,7 +2789,7 @@ ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.starts_with',
         {
           defaultMessage: 'STARTS_WITH',
         }
@@ -2828,7 +2822,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substring',
         {
           defaultMessage: 'SUBSTRING',
         }
@@ -2861,7 +2855,7 @@ FROM employees
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tan',
         {
           defaultMessage: 'TAN',
         }
@@ -2893,7 +2887,7 @@ ROW a=1.8
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanh',
         {
           defaultMessage: 'TANH',
         }
@@ -2925,7 +2919,7 @@ ROW a=1.8
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tau',
         {
           defaultMessage: 'TAU',
         }
@@ -2956,7 +2950,7 @@ ROW TAU()
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_base64',
         {
           defaultMessage: 'TO_BASE64',
         }
@@ -2988,7 +2982,7 @@ row a = "elastic"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_boolean',
         {
           defaultMessage: 'TO_BOOLEAN',
         }
@@ -3023,7 +3017,7 @@ ROW str = ["true", "TRuE", "false", "", "yes", "1"]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianpoint',
         {
           defaultMessage: 'TO_CARTESIANPOINT',
         }
@@ -3057,7 +3051,7 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_cartesianshape',
         {
           defaultMessage: 'TO_CARTESIANSHAPE',
         }
@@ -3091,7 +3085,7 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_datetime',
         {
           defaultMessage: 'TO_DATETIME',
         }
@@ -3125,7 +3119,7 @@ ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-0
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_degrees',
         {
           defaultMessage: 'TO_DEGREES',
         }
@@ -3157,7 +3151,7 @@ ROW rad = [1.57, 3.14, 4.71]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_double',
         {
           defaultMessage: 'TO_DOUBLE',
         }
@@ -3191,7 +3185,7 @@ ROW str1 = "5.20128E11", str2 = "foo"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geopoint',
         {
           defaultMessage: 'TO_GEOPOINT',
         }
@@ -3224,7 +3218,7 @@ ROW wkt = "POINT(42.97109630194 14.7552534413725)"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_geoshape',
         {
           defaultMessage: 'TO_GEOSHAPE',
         }
@@ -3257,7 +3251,7 @@ ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_integer',
         {
           defaultMessage: 'TO_INTEGER',
         }
@@ -3292,7 +3286,7 @@ ROW long = [5013792, 2147483647, 501379200000]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_ip',
         {
           defaultMessage: 'TO_IP',
         }
@@ -3325,7 +3319,7 @@ ROW str1 = "1.1.1.1", str2 = "foo"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_long',
         {
           defaultMessage: 'TO_LONG',
         }
@@ -3359,7 +3353,7 @@ ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_lower',
         {
           defaultMessage: 'TO_LOWER',
         }
@@ -3391,7 +3385,7 @@ ROW message = "Some Text"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_radians',
         {
           defaultMessage: 'TO_RADIANS',
         }
@@ -3423,7 +3417,7 @@ ROW deg = [90.0, 180.0, 270.0]
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_string',
         {
           defaultMessage: 'TO_STRING',
         }
@@ -3455,7 +3449,7 @@ ROW a=10
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_unsigned_long',
         {
           defaultMessage: 'TO_UNSIGNED_LONG',
         }
@@ -3489,7 +3483,7 @@ ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_upper',
         {
           defaultMessage: 'TO_UPPER',
         }
@@ -3521,7 +3515,7 @@ ROW message = "Some Text"
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.to_version',
         {
           defaultMessage: 'TO_VERSION',
         }
@@ -3552,7 +3546,7 @@ ROW v = TO_VERSION("1.2.3")
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trim',
         {
           defaultMessage: 'TRIM',
         }

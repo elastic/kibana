@@ -51,7 +51,7 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
     ([name, doc]) => `
   const foo = {
     label: i18n.translate(
-      'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction',
+      'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.${name}',
       {
         defaultMessage: '${name.toUpperCase()}',
       }
