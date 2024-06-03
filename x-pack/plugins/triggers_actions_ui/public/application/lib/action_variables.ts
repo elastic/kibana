@@ -114,7 +114,7 @@ const AlertProvidedActionVariableDescriptions: Record<
   ActionVariablesWithoutName
 > = {
   [LegacyAlertProvidedActionVariables.alertId]: {
-    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertIdLabel', {
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertIdLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleId,
