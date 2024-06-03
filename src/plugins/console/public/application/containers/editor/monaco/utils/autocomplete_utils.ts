@@ -25,11 +25,11 @@ import { parseBody, parseLine, parseUrl } from './tokens_utils';
 import {
   END_OF_URL_TOKEN,
   i18nTexts,
+  methodWhitespaceRegex,
+  methodWithUrlRegex,
   newLineRegex,
-  shouldAutocompletePropertyNameRegex,
-  shouldAutocompletePropertyValueRegex,
-  shouldAutocompleteUrlPartRegex,
-  shouldAutocompleteUrlRegex,
+  propertyNameRegex,
+  propertyValueRegex,
 } from './constants';
 
 /*
@@ -246,9 +246,9 @@ export const getBodyCompletionItems = async (
     endLineNumber: lineNumber,
     endColumn: column,
   };
-  const bodyContent = model.getValueInRange(bodyRange);
+  const bodyContentBeforePosition = model.getValueInRange(bodyRange);
 
-  const bodyTokens = parseBody(bodyContent);
+  const bodyTokens = parseBody(bodyContentBeforePosition);
   // needed for scope linking + global term resolving
   context.endpointComponentResolver = getEndpointBodyCompleteComponents;
   context.globalComponentResolver = getGlobalAutocompleteComponents;
@@ -264,12 +264,18 @@ export const getBodyCompletionItems = async (
   if (!context) {
     return [];
   }
+  // loading async suggestions
   if (context.asyncResultsState?.isLoading && context.asyncResultsState) {
     const results = await context.asyncResultsState.results;
-    return getSuggestions(model, position, results, context, bodyContent);
+    return getSuggestions(model, position, results, context, bodyContentBeforePosition);
   }
-
-  return getSuggestions(model, position, context.autoCompleteSet ?? [], context, bodyContent);
+  return getSuggestions(
+    model,
+    position,
+    context.autoCompleteSet ?? [],
+    context,
+    bodyContentBeforePosition
+  );
 };
 
 const getSuggestions = (
@@ -277,18 +283,23 @@ const getSuggestions = (
   position: monaco.Position,
   autocompleteSet: ResultTerm[],
   context: AutoCompleteContext,
-  bodyContent: string
+  bodyContentBeforePosition: string
 ) => {
   const wordUntilPosition = model.getWordUntilPosition(position);
-  // if there is " after the cursor, replace it
-  let endColumn = position.column;
-  const charAfterPosition = model.getValueInRange({
+  const lineContentAfterPosition = model.getValueInRange({
     startLineNumber: position.lineNumber,
     startColumn: position.column,
     endLineNumber: position.lineNumber,
-    endColumn: position.column + 1,
+    endColumn: model.getLineMaxColumn(position.lineNumber),
   });
-  if (charAfterPosition === '"') {
+  // if the rest of the line is empty or there is only "
+  // then template can be inserted, otherwise only name
+  context.addTemplate = isEmptyOrDoubleQuote(lineContentAfterPosition);
+
+  // if there is " after the cursor, include it in the insert range
+  let endColumn = position.column;
+
+  if (lineContentAfterPosition.startsWith('"')) {
     endColumn = endColumn + 1;
   }
   const range = {
@@ -307,8 +318,7 @@ const getSuggestions = (
         const suggestion = {
           // convert name to a string
           label: item.name + '',
-          // TODO need to add more logic for when to insert template and when not to (context.addTemplate)
-          insertText: getInsertText(item, bodyContent, context),
+          insertText: getInsertText(item, bodyContentBeforePosition, context),
           detail: i18nTexts.api,
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
@@ -344,7 +354,7 @@ const getInsertText = (
   if (conditionalTemplate) {
     template = conditionalTemplate;
   }
-  if (template !== undefined) {
+  if (template !== undefined && context.addTemplate) {
     let templateLines;
     const { __raw, value: templateValue } = template;
     if (__raw && templateValue) {
@@ -404,9 +414,18 @@ const getConditionalTemplate = (
  */
 export const shouldTriggerSuggestions = (lineContent: string): boolean => {
   return (
-    shouldAutocompleteUrlRegex.test(lineContent) ||
-    shouldAutocompleteUrlPartRegex.test(lineContent) ||
-    shouldAutocompletePropertyNameRegex.test(lineContent) ||
-    shouldAutocompletePropertyValueRegex.test(lineContent)
+    methodWhitespaceRegex.test(lineContent) ||
+    methodWithUrlRegex.test(lineContent) ||
+    propertyNameRegex.test(lineContent) ||
+    propertyValueRegex.test(lineContent)
   );
+};
+
+/*
+ * This function checks if the content of the line after the cursor is either empty
+ * or it only has a double quote.
+ */
+export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
+  lineContent = lineContent.trim();
+  return !lineContent || lineContent === '"';
 };

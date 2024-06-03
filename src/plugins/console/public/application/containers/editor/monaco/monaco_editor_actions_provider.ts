@@ -92,8 +92,8 @@ export class MonacoEditorActionsProvider {
       await debouncedHighlightRequests();
     });
 
-    // listen to backspace keyup event to trigger suggestions
     editor.onKeyUp((event) => {
+      // trigger autocomplete on backspace
       if (event.keyCode === monaco.KeyCode.Backspace) {
         debouncedTriggerSuggestions();
       }
