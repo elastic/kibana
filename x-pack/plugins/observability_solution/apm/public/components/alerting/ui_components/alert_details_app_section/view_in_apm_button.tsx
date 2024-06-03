@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
 export function ViewInAPMButton({
@@ -28,7 +28,10 @@ export function ViewInAPMButton({
   to: string;
   kuery?: string;
 }) {
-  const { share } = useApmPluginContext() || {};
+  const {
+    services: { share },
+  } = useKibana();
+
   const serviceNavigator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
 
   if (!serviceNavigator) {

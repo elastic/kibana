@@ -5,10 +5,17 @@
  * 2.0.
  */
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 
 import { ViewInAPMButton } from './view_in_apm_button';
-import * as apmContext from '../../../../context/apm_plugin/use_apm_plugin_context';
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: jest.fn().mockReturnValue({
+    services: {},
+  }),
+}));
 
 describe('ViewInApmButton', () => {
   const config = {
@@ -31,14 +38,16 @@ describe('ViewInApmButton', () => {
   });
 
   it('reners correctly', () => {
-    jest.spyOn(apmContext, 'useApmPluginContext').mockReturnValue({
-      share: {
-        url: {
-          locators: {
-            // @ts-ignore
-            get: () => ({
-              navigate: jest.fn(),
-            }),
+    useKibana.mockReturnValue({
+      services: {
+        share: {
+          url: {
+            locators: {
+              // @ts-ignore
+              get: () => ({
+                navigate: jest.fn(),
+              }),
+            },
           },
         },
       },
