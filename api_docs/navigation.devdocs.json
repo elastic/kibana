@@ -814,7 +814,8 @@
             "label": "intl",
             "description": [],
             "signature": [
-              "ReactIntl.InjectedIntl | undefined"
+              "IntlShape",
+              " | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
