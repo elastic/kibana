@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge } from '@elastic/eui';
+// import { EuiBadge } from '@elastic/eui';
 import {
   DataTableRecord,
-  getMessageFieldWithFallbacks,
-  LogDocumentOverview,
+  // getMessageFieldWithFallbacks,
+  // LogDocumentOverview,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { capitalize } from 'lodash';
-import React from 'react';
+// import { euiThemeVars } from '@kbn/ui-theme';
+// import { capitalize } from 'lodash';
+// import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from './data_source_profile';
 import { DocumentProfileProvider, DocumentType } from './document_profile';
@@ -42,44 +42,39 @@ export const o11yRootProfileProvider: RootProfileProvider = {
 export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'logs-data-source-profile',
   profile: {
-    getCellRenderers: (prev) => () => ({
-      ...prev(),
-      '@timestamp': (props) => {
-        const timestamp = getFieldValue(props.row, '@timestamp');
-
-        return (
-          <EuiBadge color="hollow" title={timestamp}>
-            {timestamp}
-          </EuiBadge>
-        );
-      },
-      'log.level': (props) => {
-        const level = getFieldValue(props.row, 'log.level');
-
-        if (!level) {
-          return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
-        }
-
-        const levelMap: Record<string, string> = {
-          info: 'primary',
-          debug: 'default',
-          error: 'danger',
-        };
-
-        return (
-          <EuiBadge color={levelMap[level]} title={level}>
-            {capitalize(level)}
-          </EuiBadge>
-        );
-      },
-      message: (props) => {
-        const { value } = getMessageFieldWithFallbacks(
-          props.row.flattened as unknown as LogDocumentOverview
-        );
-
-        return value || <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
-      },
-    }),
+    // getCellRenderers: (prev) => () => ({
+    //   ...prev(),
+    //   '@timestamp': (props) => {
+    //     const timestamp = getFieldValue(props.row, '@timestamp');
+    //     return (
+    //       <EuiBadge color="hollow" title={timestamp}>
+    //         {timestamp}
+    //       </EuiBadge>
+    //     );
+    //   },
+    //   'log.level': (props) => {
+    //     const level = getFieldValue(props.row, 'log.level');
+    //     if (!level) {
+    //       return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
+    //     }
+    //     const levelMap: Record<string, string> = {
+    //       info: 'primary',
+    //       debug: 'default',
+    //       error: 'danger',
+    //     };
+    //     return (
+    //       <EuiBadge color={levelMap[level]} title={level}>
+    //         {capitalize(level)}
+    //       </EuiBadge>
+    //     );
+    //   },
+    //   message: (props) => {
+    //     const { value } = getMessageFieldWithFallbacks(
+    //       props.row.flattened as unknown as LogDocumentOverview
+    //     );
+    //     return value || <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
+    //   },
+    // }),
   },
   resolve: (params) => {
     let indices: string[] = [];
