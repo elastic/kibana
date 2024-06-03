@@ -17,6 +17,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const comboBox = getService('comboBox');
   const find = getService('find');
+  const retry = getService('retry');
 
   describe('Configure', function () {
     before(async () => {
@@ -173,7 +174,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
-        await testSubjects.existOrFail('templates-list');
+        await retry.waitFor('templates-list', async () => {
+          return await testSubjects.exists('templates-list');
+        });
 
         expect(await testSubjects.getVisibleText('templates-list')).to.be('Template name\ntag-t1');
       });

@@ -18,6 +18,7 @@ import * as i18n from './translations';
 import { Connector } from './connector';
 import type { ActionConnector } from '../../containers/configure/types';
 import type { CasesConfigurationUI } from '../../containers/types';
+import { OptionalFieldLabel } from '../create/optional_field_label';
 import { TemplateTags } from './template_tags';
 
 interface FormFieldsProps {
@@ -57,6 +58,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
             path="templateDescription"
             component={TextAreaField}
             componentProps={{
+              labelAppend: OptionalFieldLabel,
               euiFieldProps: {
                 'data-test-subj': 'template-description-input',
                 fullWidth: true,

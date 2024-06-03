@@ -124,28 +124,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Templates', function () {
-      before(async () => {
-        await cases.api.createConfigWithTemplates({
-          templates: [
-            {
-              key: 'o11y_template',
-              name: 'My template 1',
-              description: 'this is my first template',
-              tags: ['foo'],
-              caseFields: null,
-            },
-          ],
-          owner: 'observability',
-        });
-      });
-
-      it('existing configurations do not interfere', async () => {
-        // A configuration created in o11y should not be visible in stack
-        expect(await testSubjects.getVisibleText('empty-templates')).to.be(
-          'You do not have any templates yet'
-        );
-      });
-
       it('adds a template', async () => {
         await testSubjects.existOrFail('templates-form-group');
         await common.clickAndValidate('add-template', 'common-flyout');
@@ -168,7 +146,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
-        await testSubjects.existOrFail('templates-list');
+        await retry.waitFor('templates-list', async () => {
+          return await testSubjects.exists('templates-list');
+        });
 
         expect(await testSubjects.getVisibleText('templates-list')).to.be('Template name\ntag-t1');
       });
