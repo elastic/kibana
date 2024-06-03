@@ -14,10 +14,9 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Frequency"
         id="searchConnectors.cronEditor.fieldFrequencyLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -44,7 +43,6 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
             <FormattedMessage
               defaultMessage="Frequency"
               id="searchConnectors.cronEditor.fieldFrequencyLabel"
-              values={Object {}}
             >
               Frequency
             </FormattedMessage>
@@ -563,10 +561,9 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Time"
           id="searchConnectors.cronEditor.cronDaily.fieldTimeLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -594,7 +591,6 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Time"
                 id="searchConnectors.cronEditor.cronDaily.fieldTimeLabel"
-                values={Object {}}
               >
                 Time
               </FormattedMessage>
@@ -1996,10 +1992,9 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Frequency"
         id="searchConnectors.cronEditor.fieldFrequencyLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -2026,7 +2021,6 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
             <FormattedMessage
               defaultMessage="Frequency"
               id="searchConnectors.cronEditor.fieldFrequencyLabel"
-              values={Object {}}
             >
               Frequency
             </FormattedMessage>
@@ -2444,10 +2438,9 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Minute"
           id="searchConnectors.cronEditor.cronHourly.fieldTimeLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -2475,7 +2468,6 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Minute"
                 id="searchConnectors.cronEditor.cronHourly.fieldTimeLabel"
-                values={Object {}}
               >
                 Minute
               </FormattedMessage>
@@ -3195,10 +3187,9 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Frequency"
         id="searchConnectors.cronEditor.fieldFrequencyLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -3225,7 +3216,6 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
             <FormattedMessage
               defaultMessage="Frequency"
               id="searchConnectors.cronEditor.fieldFrequencyLabel"
-              values={Object {}}
             >
               Frequency
             </FormattedMessage>
@@ -3419,10 +3409,9 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Minute"
           id="searchConnectors.cronEditor.cronMinutely.fieldTimeLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -3450,7 +3439,6 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Minute"
                 id="searchConnectors.cronEditor.cronMinutely.fieldTimeLabel"
-                values={Object {}}
               >
                 Minute
               </FormattedMessage>
@@ -3623,10 +3611,9 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Frequency"
         id="searchConnectors.cronEditor.fieldFrequencyLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -3653,7 +3640,6 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
             <FormattedMessage
               defaultMessage="Frequency"
               id="searchConnectors.cronEditor.fieldFrequencyLabel"
-              values={Object {}}
             >
               Frequency
             </FormattedMessage>
@@ -4301,10 +4287,9 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Date"
           id="searchConnectors.cronEditor.cronMonthly.fieldDateLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -4332,7 +4317,6 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Date"
                 id="searchConnectors.cronEditor.cronMonthly.fieldDateLabel"
-                values={Object {}}
               >
                 Date
               </FormattedMessage>
@@ -4752,10 +4736,9 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Time"
           id="searchConnectors.cronEditor.cronMonthly.fieldTimeLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -4783,7 +4766,6 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Time"
                 id="searchConnectors.cronEditor.cronMonthly.fieldTimeLabel"
-                values={Object {}}
               >
                 Time
               </FormattedMessage>
@@ -6209,10 +6191,9 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Frequency"
         id="searchConnectors.cronEditor.fieldFrequencyLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -6239,7 +6220,6 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
             <FormattedMessage
               defaultMessage="Frequency"
               id="searchConnectors.cronEditor.fieldFrequencyLabel"
-              values={Object {}}
             >
               Frequency
             </FormattedMessage>
@@ -6791,10 +6771,9 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Day"
           id="searchConnectors.cronEditor.cronWeekly.fieldDateLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -6822,7 +6801,6 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Day"
                 id="searchConnectors.cronEditor.cronWeekly.fieldDateLabel"
-                values={Object {}}
               >
                 Day
               </FormattedMessage>
@@ -7002,10 +6980,9 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Time"
           id="searchConnectors.cronEditor.cronWeekly.fieldTimeLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -7033,7 +7010,6 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Time"
                 id="searchConnectors.cronEditor.cronWeekly.fieldTimeLabel"
-                values={Object {}}
               >
                 Time
               </FormattedMessage>
@@ -8447,10 +8423,9 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Frequency"
         id="searchConnectors.cronEditor.fieldFrequencyLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -8477,7 +8452,6 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             <FormattedMessage
               defaultMessage="Frequency"
               id="searchConnectors.cronEditor.fieldFrequencyLabel"
-              values={Object {}}
             >
               Frequency
             </FormattedMessage>
@@ -9178,10 +9152,9 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Month"
           id="searchConnectors.cronEditor.cronYearly.fieldMonthLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -9209,7 +9182,6 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Month"
                 id="searchConnectors.cronEditor.cronYearly.fieldMonthLabel"
-                values={Object {}}
               >
                 Month
               </FormattedMessage>
@@ -9439,10 +9411,9 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Date"
           id="searchConnectors.cronEditor.cronYearly.fieldDateLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -9470,7 +9441,6 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Date"
                 id="searchConnectors.cronEditor.cronYearly.fieldDateLabel"
-                values={Object {}}
               >
                 Date
               </FormattedMessage>
@@ -9890,10 +9860,9 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Time"
           id="searchConnectors.cronEditor.cronYearly.fieldTimeLabel"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -9921,7 +9890,6 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
               <FormattedMessage
                 defaultMessage="Time"
                 id="searchConnectors.cronEditor.cronYearly.fieldTimeLabel"
-                values={Object {}}
               >
                 Time
               </FormattedMessage>

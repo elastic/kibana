@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-declare module 'intl-relativeformat' {
-  export let defaultLocale: string;
-}
+export const TLS_V1 = 'TLSv1';
+export const TLS_V1_1 = 'TLSv1.1';
+export const TLS_V1_2 = 'TLSv1.2';
+export const TLS_V1_3 = 'TLSv1.3';
