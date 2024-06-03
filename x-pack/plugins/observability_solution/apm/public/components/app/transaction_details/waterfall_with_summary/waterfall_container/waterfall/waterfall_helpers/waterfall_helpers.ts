@@ -105,6 +105,8 @@ export interface IWaterfallNode {
   expanded: boolean;
   // level in the tree
   level: number;
+  // flag to indicate if children are loaded
+  hasInitializedChildren: boolean;
 }
 
 export type IWaterfallNodeFlatten = Omit<IWaterfallNode, 'children'>;
@@ -533,11 +535,14 @@ function buildTree({
           level,
           expanded: level < maxLevelOpen,
           childrenToLoad: 0,
+          hasInitializedChildren: false,
         };
 
         node.children.push(currentNode);
         queue.push(currentNode);
       });
+
+      node.hasInitializedChildren = true;
     }
   }
 
@@ -570,6 +575,7 @@ export function buildTraceTree({
     level: 0,
     expanded: isOpen,
     childrenToLoad: 0,
+    hasInitializedChildren: false,
   };
 
   return buildTree({ root, maxLevelOpen, waterfall, path });
@@ -628,13 +634,16 @@ export const updateTraceTreeNode = ({
     if (node.id === updatedNode.id) {
       Object.assign(node, updatedNode);
 
-      if (updatedNode.expanded && updatedNode.childrenToLoad !== node.children.length) {
-        node.children = buildTree({
-          root: node,
-          waterfall,
-          maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
-          path,
-        }).children;
+      if (updatedNode.expanded && !updatedNode.hasInitializedChildren) {
+        Object.assign(
+          node,
+          buildTree({
+            root: node,
+            waterfall,
+            maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
+            path,
+          })
+        );
       }
 
       if (parent) {
