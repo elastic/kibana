@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { fireEvent, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
@@ -37,26 +38,26 @@ const inferenceEndpoints = [
 ] as InferenceAPIConfigResponse[];
 
 describe('When the tabular page is loaded', () => {
-  const setup = registerTestBed(TabularPage, {
-    defaultProps: {
-      addEndpointLabel: 'Add endpoint',
-      setIsInferenceFlyoutVisible: setIsInferenceFlyoutVisibleMock,
-      inferenceEndpoints,
-    },
-    memoryRouter: { wrapComponent: false },
-  });
-  const { exists, find } = setup();
-
-  it('should display the description for creation of the first inference endpoint', () => {
-    expect(find('allInferenceEndpointsPage').text()).toContain(
-      'Manage your Elastic and third-party endpoints'
+  beforeEach(() => {
+    render(
+      <TabularPage
+        addEndpointLabel="Add endpoint"
+        setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisibleMock}
+        inferenceEndpoints={inferenceEndpoints}
+      />
     );
   });
 
+  it('should display the description for creation of the first inference endpoint', () => {
+    expect(
+      screen.getByText(
+        'Manage your Elastic and third-party endpoints generated from the Inference API.'
+      )
+    ).toBeInTheDocument();
+  });
+
   it('calls setIsInferenceFlyoutVisible when the addInferenceEndpoint button is clicked', async () => {
-    await act(async () => {
-      find('addEndpointButtonForAllInferenceEndpoints').simulate('click');
-    });
+    fireEvent.click(screen.getByTestId('addEndpointButtonForAllInferenceEndpoints'));
     expect(setIsInferenceFlyoutVisibleMock).toHaveBeenCalled();
   });
 });

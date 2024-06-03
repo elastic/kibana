@@ -42,13 +42,11 @@ export const useTableData = (
       const aValue = a[queryParams.sortField];
       const bValue = b[queryParams.sortField];
 
-      if (aValue < bValue) {
-        return queryParams.sortOrder === SortOrder.desc ? 1 : -1;
+      if (queryParams.sortOrder === SortOrder.asc) {
+        return aValue.localeCompare(bValue);
+      } else {
+        return bValue.localeCompare(aValue);
       }
-      if (aValue > bValue) {
-        return queryParams.sortOrder === SortOrder.asc ? -1 : 1;
-      }
-      return 0;
     });
   }, [tableData, queryParams]);
 
