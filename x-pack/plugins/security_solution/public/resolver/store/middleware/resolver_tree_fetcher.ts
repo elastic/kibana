@@ -55,14 +55,17 @@ export function ResolverTreeFetcher(
       let dataSourceAgentId: string | undefined;
       let result: ResolverNode[] | undefined;
       const timeRangeFilters = selectors.timeRangeFilters(state.analyzer[id]);
-
+      let dataBaseParametersWithAgentId = {
+        ...databaseParameters,
+        agentId: '',
+      };
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
-      api.dispatch(appRequestedResolverData({ id, parameters: databaseParameters }));
+      api.dispatch(appRequestedResolverData({ id, parameters: dataBaseParametersWithAgentId }));
       try {
         const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
-          _id: databaseParameters.databaseDocumentID,
-          indices: databaseParameters.indices,
+          _id: dataBaseParametersWithAgentId.databaseDocumentID,
+          indices: dataBaseParametersWithAgentId.indices,
           signal: lastRequestAbortController.signal,
         });
 
@@ -71,7 +74,7 @@ export function ResolverTreeFetcher(
           api.dispatch(
             serverFailedToReturnResolverData({
               id,
-              parameters: databaseParameters,
+              parameters: dataBaseParametersWithAgentId,
             })
           );
           return;
@@ -83,11 +86,15 @@ export function ResolverTreeFetcher(
           agentId: dataSourceAgentId,
         } = matchingEntities[0]);
 
+        dataBaseParametersWithAgentId = {
+          ...dataBaseParametersWithAgentId,
+          agentId: dataSourceAgentId,
+        };
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
           timeRange: timeRangeFilters,
-          indices: databaseParameters.indices,
+          indices: dataBaseParametersWithAgentId.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),
           agentId: dataSourceAgentId,
@@ -102,7 +109,7 @@ export function ResolverTreeFetcher(
           const unboundedTree = await dataAccessLayer.resolverTree({
             dataId: entityIDToFetch,
             schema: dataSourceSchema,
-            indices: databaseParameters.indices,
+            indices: dataBaseParametersWithAgentId.indices,
             ancestors: ancestorsRequestAmount(dataSourceSchema),
             descendants: descendantsRequestAmount(),
             agentId: dataSourceAgentId,
@@ -119,7 +126,7 @@ export function ResolverTreeFetcher(
                 result: { ...resolverTree, nodes: unboundedTree },
                 dataSource,
                 schema: dataSourceSchema,
-                parameters: databaseParameters,
+                parameters: dataBaseParametersWithAgentId,
                 detectedBounds: {
                   from: String(oldestTimestamp),
                   to: String(newestTimestamp),
@@ -135,7 +142,7 @@ export function ResolverTreeFetcher(
                 result: resolverTree,
                 dataSource,
                 schema: dataSourceSchema,
-                parameters: databaseParameters,
+                parameters: dataBaseParametersWithAgentId,
               })
             );
           }
@@ -146,16 +153,26 @@ export function ResolverTreeFetcher(
               result: resolverTree,
               dataSource,
               schema: dataSourceSchema,
-              parameters: databaseParameters,
+              parameters: dataBaseParametersWithAgentId,
             })
           );
         }
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {
-          api.dispatch(appAbortedResolverDataRequest({ id, parameters: databaseParameters }));
+          api.dispatch(
+            appAbortedResolverDataRequest({
+              id,
+              parameters: dataBaseParametersWithAgentId,
+            })
+          );
         } else {
-          api.dispatch(serverFailedToReturnResolverData({ id, parameters: databaseParameters }));
+          api.dispatch(
+            serverFailedToReturnResolverData({
+              id,
+              parameters: dataBaseParametersWithAgentId,
+            })
+          );
         }
       }
     }

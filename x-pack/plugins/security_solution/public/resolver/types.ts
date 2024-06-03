@@ -201,6 +201,8 @@ export interface TreeFetcherParameters {
   indices: string[];
 
   filters: TimeFilters;
+
+  agentId: string;
 }
 
 /**
@@ -236,6 +238,8 @@ export interface NodeEventsInCategoryState {
      */
     parameters: PanelViewAndParameters;
   };
+
+  agentId: string;
 
   /**
    * Flag for showing an error message when fetching additional related events.
@@ -721,12 +725,14 @@ export interface DataAccessLayer {
     after,
     timeRange,
     indexPatterns,
+    agentId,
   }: {
     entityID: string;
     category: string;
     after?: string;
     timeRange?: TimeRange;
     indexPatterns: string[];
+    agentId: string;
   }) => Promise<ResolverPaginatedEvents>;
 
   /**
@@ -738,11 +744,13 @@ export interface DataAccessLayer {
     timeRange,
     indexPatterns,
     limit,
+    agentId,
   }: {
     ids: string[];
     timeRange?: TimeRange;
     indexPatterns: string[];
     limit: number;
+    agentId: string;
   }): Promise<SafeResolverEvent[]>;
 
   /**
@@ -838,6 +846,7 @@ export interface ResolverProps {
    * A flag to update data from an external source
    */
   shouldUpdate: boolean;
+  agentId: string;
 }
 
 /**
@@ -934,6 +943,7 @@ export type PanelViewAndParameters =
          * The nodeID (e.g. `process.entity_id`) for the node that will be shown in detail
          */
         nodeID: string;
+        agentId: string;
       };
     }
   | {

@@ -53,6 +53,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
           query: {},
           body: JSON.stringify({
             indexPatterns,
+            agentId,
             ...getRangeFilter(timeRange),
             filter: JSON.stringify({
               bool: {
@@ -80,12 +81,14 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
       after,
       timeRange,
       indexPatterns,
+      agentId,
     }: {
       entityID: string;
       category: string;
       after?: string;
       timeRange?: TimeRange;
       indexPatterns: string[];
+      agentId: string;
     }): Promise<ResolverPaginatedEvents> {
       const commonFields = {
         query: { afterEvent: after, limit: 25 },
@@ -101,6 +104,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
             ...commonFields.body,
             entityType: 'alerts',
             eventID: entityID,
+            agentId,
           }),
         });
       } else {
@@ -108,11 +112,13 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
           query: commonFields.query,
           body: JSON.stringify({
             ...commonFields.body,
+            agentId,
             filter: JSON.stringify({
               bool: {
                 filter: [
                   { term: { 'process.entity_id': entityID } },
                   { term: { 'event.category': category } },
+                  { term: { 'agent.id': agentId } },
                 ],
               },
             }),
@@ -130,22 +136,26 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
       timeRange,
       indexPatterns,
       limit,
+      agentId,
     }: {
       ids: string[];
       timeRange?: TimeRange;
       indexPatterns: string[];
       limit: number;
+      agentId: string;
     }): Promise<SafeResolverEvent[]> {
       const query = {
         query: { limit },
         body: JSON.stringify({
           indexPatterns,
+          agentId,
           ...getRangeFilter(timeRange),
           filter: JSON.stringify({
             bool: {
               filter: [
                 { terms: { 'process.entity_id': ids } },
                 { term: { 'event.category': 'process' } },
+                { term: { 'agent.id': agentId } },
               ],
             },
           }),
@@ -205,6 +215,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
           {
             query: { limit: 1 },
             body: JSON.stringify({
+              agentId,
               indexPatterns,
               ...getRangeFilter(timeRange),
               filter: JSON.stringify(filter),
@@ -223,6 +234,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
               ...getRangeFilter(timeRange),
               entityType: 'alertDetail',
               eventID,
+              agentId,
             }),
           }
         );
