@@ -14,12 +14,12 @@ import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
-} from '../../../management/hooks/agents/use_get_agent_status';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+} from '../../../../../management/hooks/agents/use_get_agent_status';
+import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 
-jest.mock('../../../management/hooks/agents/use_get_agent_status');
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
+jest.mock('../../../../hooks/use_experimental_features');
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;

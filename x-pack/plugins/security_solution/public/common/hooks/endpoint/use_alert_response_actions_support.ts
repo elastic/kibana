@@ -11,7 +11,6 @@ import { find, some } from 'lodash/fp';
 import { getAlertDetailsFieldValue } from '../../lib/endpoint/utils/get_event_details_field_values';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 
-// FIXME:PT Move these constants below
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,

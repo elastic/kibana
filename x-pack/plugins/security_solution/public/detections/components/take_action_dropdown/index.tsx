@@ -26,7 +26,7 @@ import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_ac
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
 
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
-import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
+import { useHostIsolationAction } from '../../../common/components/endpoint/host_isolation';
 import type { Status } from '../../../../common/api/detection_engine';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';

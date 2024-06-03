@@ -10,16 +10,16 @@ import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-} from '../endpoint_responder/translations';
-import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { AgentStatusInfo } from '../../../../common/endpoint/types';
-import { HostStatus } from '../../../../common/endpoint/types';
-import { useEndpointHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
+} from '../../../../../detections/components/endpoint_responder/translations';
+import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
+import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
+import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../../common/endpoint/types';
+import { useEndpointHostIsolationStatus } from '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import type { AlertTableContextMenuItem } from '../alerts_table/types';
-import { useAgentStatusHook } from '../../../management/hooks/agents/use_get_agent_status';
+import { useUserPrivileges } from '../../../user_privileges';
+import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
+import { useAgentStatusHook } from '../../../../../management/hooks/agents/use_get_agent_status';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;

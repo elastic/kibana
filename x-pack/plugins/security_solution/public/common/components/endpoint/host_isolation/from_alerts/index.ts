@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export * from './isolate_success';
-export * from './isolate_form';
-export * from './unisolate_form';
-export * from './action_completion_return_button';
-export * from './from_alerts';
-export * from './from_cases';
+export * from './host_isolation_panel';
+export * from './use_host_isolation_action';
+export * from './translations';

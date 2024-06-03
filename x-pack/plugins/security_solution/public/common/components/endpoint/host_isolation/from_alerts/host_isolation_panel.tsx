@@ -8,12 +8,12 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
-import { getAlertDetailsFieldValue } from '../../../common/lib/endpoint/utils/get_event_details_field_values';
-import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { getAlertDetailsFieldValue } from '../../../../lib/endpoint/utils/get_event_details_field_values';
+import { useCasesFromAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_cases_from_alerts';
+import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import { IsolateHost } from './isolate';
 import { UnisolateHost } from './unisolate';
-import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
+import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 
 export const HostIsolationPanel = React.memo(
   ({

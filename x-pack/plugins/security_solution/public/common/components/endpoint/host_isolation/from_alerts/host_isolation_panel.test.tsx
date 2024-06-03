@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 import { HostIsolationPanel } from '.';
-import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
+import { useKibana as mockUseKibana } from '../../../../lib/kibana/__mocks__';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 });
 
 const useKibanaMock = mockUseKibana as jest.Mock;
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../lib/kibana');
 
 describe('HostIsolationPanel', () => {
   const renderWithContext = (Element: React.ReactElement) =>
