@@ -49,6 +49,20 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
     return isApiCompatible(embeddable);
   }
 
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return apiHasParentApi(embeddable) && apiCanExpandPanels(embeddable.parentApi);
+  }
+
+  public subscribeToCompatibilityChanges(
+    { embeddable }: EmbeddableApiContext,
+    onChange: (isCompatible: boolean, action: ExpandPanelAction) => void
+  ) {
+    if (!isApiCompatible(embeddable)) return;
+    return embeddable.parentApi.expandedPanelId.subscribe(() => {
+      onChange(isApiCompatible(embeddable), this);
+    });
+  }
+
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     embeddable.parentApi.expandPanel(
