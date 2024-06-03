@@ -4,11 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find } from 'lodash/fp';
 
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-
-export const getFieldValues = (
+/**
+ * Gets the array of values for a given field in an Alert Details data
+ *
+ * @param category
+ * @param field
+ * @param data
+ */
+const getEventDetailsFieldValues = (
   {
     category,
     field,
@@ -17,9 +24,7 @@ export const getFieldValues = (
     field: string;
   },
   data: TimelineEventsDetailsItem[] | null
-) => {
-  // FIXME:PT move utility higher up to `common`
-
+): string[] => {
   const categoryCompat =
     category === 'signal' ? 'kibana' : category === 'kibana' ? 'signal' : category;
   const fieldCompat =
@@ -30,11 +35,20 @@ export const getFieldValues = (
       : field;
   return (
     find({ category, field }, data)?.values ??
-    find({ category: categoryCompat, field: fieldCompat }, data)?.values
+    find({ category: categoryCompat, field: fieldCompat }, data)?.values ??
+    []
   );
 };
 
-export const getFieldValue = (
+/**
+ * Gets a single value for a given Alert Details data field. If the field has multiple values,
+ * the first one will be returned.
+ *
+ * @param category
+ * @param field
+ * @param data
+ */
+export const getAlertDetailsFieldValue = (
   {
     category,
     field,
@@ -43,8 +57,7 @@ export const getFieldValue = (
     field: string;
   },
   data: TimelineEventsDetailsItem[] | null
-) => {
-  // FIXME:PT move these utilities to common place
-  const currentField = getFieldValues({ category, field }, data);
+): string => {
+  const currentField = getEventDetailsFieldValues({ category, field }, data);
   return currentField && currentField.length > 0 ? currentField[0] : '';
 };

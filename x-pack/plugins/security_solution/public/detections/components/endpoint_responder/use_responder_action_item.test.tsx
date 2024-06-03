@@ -8,14 +8,14 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useResponderActionItem } from './use_responder_action_item';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { getFieldValue } from '../host_isolation/helpers';
 // import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
 // import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import { useResponderActionData } from './use_responder_action_data';
+import { getAlertDetailsFieldValue } from '../../../common/lib/endpoint/utils/get_event_details_field_values';
 
 jest.mock('../../../common/components/user_privileges');
 // jest.mock('../../../common/utils/endpoint_alert_check');
-jest.mock('../host_isolation/helpers');
+// jest.mock('../host_isolation/helpers');
 // jest.mock('../../../common/utils/crowdstrike_alert_check');
 // jest.mock('../../../common/utils/sentinelone_alert_check');
 jest.mock('./use_responder_action_data');
@@ -26,7 +26,7 @@ describe('useResponderActionItem', () => {
   // FIXME:PT fix test once refactor done
 
   // const mockIsTimelineEventItemAnAlert = isTimelineEventItemAnAlert as jest.Mock;
-  const mockGetFieldValue = getFieldValue as jest.Mock;
+  const mockGetFieldValue = getAlertDetailsFieldValue as jest.Mock;
   // const mockIsAlertFromCrowdstrikeEvent = isAlertFromCrowdstrikeEvent as jest.Mock;
   // const mockIsAlertFromSentinelOneEvent = isAlertFromSentinelOneEvent as jest.Mock;
   const mockUseResponderActionData = useResponderActionData as jest.Mock;
@@ -87,7 +87,7 @@ describe('useResponderActionItem', () => {
     // mockIsTimelineEventItemAnAlert.mockReturnValue(true);
     mockGetFieldValue.mockReturnValue('endpoint-id');
     // mockIsAlertFromCrowdstrikeEvent.mockReturnValue(false);
-    mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
+    // mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
 
     renderHook(() => useResponderActionItem([], jest.fn()));
 
@@ -109,7 +109,7 @@ describe('useResponderActionItem', () => {
     // mockIsTimelineEventItemAnAlert.mockReturnValue(true);
     mockGetFieldValue.mockReturnValue('crowdstrike-id');
     // mockIsAlertFromCrowdstrikeEvent.mockReturnValue(true);
-    mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
+    // mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
 
     renderHook(() => useResponderActionItem([], jest.fn()));
 
@@ -132,7 +132,7 @@ describe('useResponderActionItem', () => {
     // mockIsTimelineEventItemAnAlert.mockReturnValue(true);
     mockGetFieldValue.mockReturnValue('sentinelone-id');
     // mockIsAlertFromCrowdstrikeEvent.mockReturnValue(false);
-    mockIsAlertFromSentinelOneEvent.mockReturnValue(true);
+    // mockIsAlertFromSentinelOneEvent.mockReturnValue(true);
 
     renderHook(() => useResponderActionItem([], jest.fn()));
 

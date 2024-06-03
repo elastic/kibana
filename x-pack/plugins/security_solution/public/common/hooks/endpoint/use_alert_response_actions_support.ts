@@ -8,10 +8,10 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
+import { getAlertDetailsFieldValue } from '../../lib/endpoint/utils/get_event_details_field_values';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 
 // FIXME:PT Move these constants below
-import { getFieldValue } from '../../../detections/components/host_isolation/helpers';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -88,18 +88,18 @@ export const useAlertResponseActionsSupport = (
     }
 
     if (agentType === 'endpoint') {
-      return getFieldValue({ category: 'agent', field: 'agent.id' }, eventData);
+      return getAlertDetailsFieldValue({ category: 'agent', field: 'agent.id' }, eventData);
     }
 
     if (agentType === 'sentinel_one') {
-      return getFieldValue(
+      return getAlertDetailsFieldValue(
         { category: 'observer', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one },
         eventData
       );
     }
 
     if (agentType === 'crowdstrike') {
-      return getFieldValue(
+      return getAlertDetailsFieldValue(
         { category: 'crowdstrike', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike },
         eventData
       );
@@ -141,11 +141,11 @@ export const useAlertResponseActionsSupport = (
   }, [agentType, isFeatureEnabled]);
 
   const hostName = useMemo(() => {
-    return getFieldValue({ category: 'host', field: 'host.name' }, eventData);
+    return getAlertDetailsFieldValue({ category: 'host', field: 'host.name' }, eventData);
   }, [eventData]);
 
   const platform = useMemo(() => {
-    return getFieldValue({ category: 'host', field: 'host.os.family' }, eventData);
+    return getAlertDetailsFieldValue({ category: 'host', field: 'host.os.family' }, eventData);
   }, [eventData]);
 
   return useMemo<AlertResponseActionsSupport>(() => {

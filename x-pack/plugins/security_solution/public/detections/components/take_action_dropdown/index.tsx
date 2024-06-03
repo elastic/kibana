@@ -11,6 +11,7 @@ import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-typ
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getAlertDetailsFieldValue } from '../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import {
@@ -26,7 +27,6 @@ import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_i
 
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { getFieldValue } from '../host_isolation/helpers';
 import type { Status } from '../../../../common/api/detection_engine';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
@@ -97,7 +97,10 @@ export const TakeActionDropdown = React.memo(
         ].reduce<ActionsData>(
           (acc, curr) => ({
             ...acc,
-            [curr.name]: getFieldValue({ category: curr.category, field: curr.field }, detailsData),
+            [curr.name]: getAlertDetailsFieldValue(
+              { category: curr.category, field: curr.field },
+              detailsData
+            ),
           }),
           {} as ActionsData
         ),
@@ -111,7 +114,7 @@ export const TakeActionDropdown = React.memo(
     const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
 
     const osQueryAgentId = useMemo(
-      () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+      () => getAlertDetailsFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
       [detailsData]
     );
 

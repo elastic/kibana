@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
+import { getAlertDetailsFieldValue } from '../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { getFieldValue } from './helpers';
 import { IsolateHost } from './isolate';
 import { UnisolateHost } from './unisolate';
 import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
@@ -33,7 +33,7 @@ export const HostIsolationPanel = React.memo(
     } = useAlertResponseActionsSupport(details);
 
     const alertId = useMemo(
-      () => getFieldValue({ category: '_id', field: '_id' }, details),
+      () => getAlertDetailsFieldValue({ category: '_id', field: '_id' }, details),
       [details]
     );
 
