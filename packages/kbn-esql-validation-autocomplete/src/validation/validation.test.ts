@@ -2682,6 +2682,126 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval coalesce(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval coalesce(nullVar)', []);
+        testErrorsAndWarnings('row var = coalesce(now(), to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row coalesce(now(), to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_datetime(now()), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = coalesce("a", now())', []);
+        testErrorsAndWarnings('row coalesce("a", now())', []);
+        testErrorsAndWarnings('row var = coalesce(to_string(true), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = coalesce(true, to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row coalesce(true, to_geoshape("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_boolean(true), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = coalesce(to_ip("127.0.0.1"), 5)', []);
+        testErrorsAndWarnings('row coalesce(to_ip("127.0.0.1"), 5)', []);
+        testErrorsAndWarnings(
+          'row var = coalesce(to_ip(to_ip("127.0.0.1")), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = coalesce(to_version("1.0.0"), to_ip("127.0.0.1"))', [
+          'Argument of [coalesce] must be [boolean], found value [to_ip("127.0.0.1")] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where coalesce(numberField, ipField) > 0', [
+          'Argument of [coalesce] must be [boolean], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where length(coalesce(stringField, dateField)) > 0',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | where length(coalesce(stringField, ipField)) > 0', [
+          'Argument of [coalesce] must be [date], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval coalesce(numberField, ipField)', [
+          'Argument of [coalesce] must be [boolean], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(dateField, cartesianPointField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval coalesce(dateField, cartesianPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(to_datetime(dateField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval coalesce(dateField, ipField)', [
+          'Argument of [coalesce] must be [cartesian_point], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = coalesce(stringField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(stringField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(to_string(booleanField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval coalesce(stringField, ipField)', [
+          'Argument of [coalesce] must be [date], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(booleanField, geoShapeField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval coalesce(booleanField, geoShapeField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(to_boolean(booleanField), to_geoshape(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval coalesce(booleanField, ipField)', [
+          'Argument of [coalesce] must be [geo_shape], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = coalesce(ipField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(ipField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(to_ip(ipField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval coalesce(ipField, ipField)', [
+          'Argument of [coalesce] must be [number], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval coalesce(cartesianPointField, ipField)', [
+          'Argument of [coalesce] must be [boolean], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval coalesce(cartesianShapeField, ipField)', [
+          'Argument of [coalesce] must be [boolean], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval coalesce(geoPointField, ipField)', [
+          'Argument of [coalesce] must be [boolean], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval coalesce(geoShapeField, ipField)', [
+          'Argument of [coalesce] must be [boolean], found value [ipField] type [ip]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval coalesce(versionField, ipField)', [
+          'Argument of [coalesce] must be [boolean], found value [ipField] type [ip]',
+        ]);
       });
 
       describe('concat', () => {
@@ -10000,6 +10120,58 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_base64(stringField)', []);
         testErrorsAndWarnings('from a_index | eval to_base64(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_base64(nullVar)', []);
+      });
+
+      describe('ip_prefix', () => {
+        testErrorsAndWarnings('row var = ip_prefix(to_ip("127.0.0.1"), 5, 5)', []);
+        testErrorsAndWarnings('row ip_prefix(to_ip("127.0.0.1"), 5, 5)', []);
+
+        testErrorsAndWarnings(
+          'row var = ip_prefix(to_ip(to_ip("127.0.0.1")), to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = ip_prefix(true, true, true)', [
+          'Argument of [ip_prefix] must be [ip], found value [true] type [boolean]',
+          'Argument of [ip_prefix] must be [number], found value [true] type [boolean]',
+          'Argument of [ip_prefix] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(ipField, numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(to_ip(ipField), to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(booleanField, booleanField, booleanField)',
+          [
+            'Argument of [ip_prefix] must be [ip], found value [booleanField] type [boolean]',
+            'Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, numberField, numberField, extraArg)',
+          ['Error: [ip_prefix] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort ip_prefix(ipField, numberField, numberField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval ip_prefix(null, null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval ip_prefix(nullVar, nullVar, nullVar)', []);
       });
     });
   });

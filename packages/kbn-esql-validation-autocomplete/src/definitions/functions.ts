@@ -278,6 +278,11 @@ const coalesceDefinition: FunctionDefinition = {
           type: 'date',
           optional: false,
         },
+        {
+          name: 'rest',
+          type: 'cartesian_point',
+          optional: true,
+        },
       ],
       returnType: 'date',
       minParams: 1,
@@ -305,6 +310,11 @@ const coalesceDefinition: FunctionDefinition = {
           type: 'string',
           optional: false,
         },
+        {
+          name: 'rest',
+          type: 'date',
+          optional: true,
+        },
       ],
       returnType: 'string',
       minParams: 1,
@@ -332,6 +342,11 @@ const coalesceDefinition: FunctionDefinition = {
           type: 'boolean',
           optional: false,
         },
+        {
+          name: 'rest',
+          type: 'geo_shape',
+          optional: true,
+        },
       ],
       returnType: 'boolean',
       minParams: 1,
@@ -358,6 +373,11 @@ const coalesceDefinition: FunctionDefinition = {
           name: 'first',
           type: 'ip',
           optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'number',
+          optional: true,
         },
       ],
       returnType: 'ip',
@@ -954,7 +974,6 @@ const greatestDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.greatest', {
     defaultMessage:
       'Returns the maximum value from multiple columns. This is similar to <<esql-mv_max>>\nexcept it is intended to run on multiple columns at once.',
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -1078,13 +1097,49 @@ const greatestDefinition: FunctionDefinition = {
   examples: ['ROW a = 10, b = 20\n| EVAL g = GREATEST(a, b)'],
 };
 
+const ipPrefixDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'ip_prefix',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ip_prefix', {
+    defaultMessage: 'Truncates an IP to a given prefix length.',
+  }),
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'ip',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'prefixLengthV4',
+          type: 'number',
+          optional: false,
+        },
+        {
+          name: 'prefixLengthV6',
+          type: 'number',
+          optional: false,
+        },
+      ],
+      returnType: 'ip',
+    },
+  ],
+  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [
+    'row ip4 = to_ip("1.2.3.4"), ip6 = to_ip("fe80::cae2:65ff:fece:feb9")\n| eval ip4_prefix = ip_prefix(ip4, 24, 0), ip6_prefix = ip_prefix(ip6, 0, 112);',
+  ],
+};
+
 const leastDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'least',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.least', {
     defaultMessage:
       'Returns the minimum value from multiple columns. This is similar to <<esql-mv_min>> except it is intended to run on multiple columns at once.',
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -1757,7 +1812,6 @@ const mvFirstDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_first', {
     defaultMessage:
       "Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like <<esql-split>>.\n\nThe order that <<esql-multivalued-fields, multivalued fields>> are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the minimum value use <<esql-mv_min>> instead of\n`MV_FIRST`. `MV_MIN` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_FIRST`.",
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -1874,7 +1928,6 @@ const mvLastDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_last', {
     defaultMessage:
       "Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like <<esql-split>>.\n\nThe order that <<esql-multivalued-fields, multivalued fields>> are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the maximum value use <<esql-mv_max>> instead of\n`MV_LAST`. `MV_MAX` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_LAST`.",
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -2914,7 +2967,6 @@ const stContainsDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_contains', {
     defaultMessage:
       'Returns whether the first geometry contains the second geometry.\nThis is the inverse of the <<esql-st_within,ST_WITHIN>> function.',
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -3053,7 +3105,6 @@ const stDisjointDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_disjoint', {
     defaultMessage:
       'Returns whether the two geometries or geometry columns are disjoint.\nThis is the inverse of the <<esql-st_intersects,ST_INTERSECTS>> function.\nIn mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅',
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -3192,7 +3243,6 @@ const stIntersectsDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_intersects', {
     defaultMessage:
       'Returns true if two geometries intersect.\nThey intersect if they have any point in common, including their interior points\n(points along lines or within polygons).\nThis is the inverse of the <<esql-st_disjoint,ST_DISJOINT>> function.\nIn mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅',
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -3331,7 +3381,6 @@ const stWithinDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_within', {
     defaultMessage:
       'Returns whether the first geometry is within the second geometry.\nThis is the inverse of the <<esql-st_contains,ST_CONTAINS>> function.',
-    ignoreTag: true,
   }),
   alias: undefined,
   signatures: [
@@ -3849,7 +3898,6 @@ const toDatetimeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_datetime', {
     defaultMessage:
       "Converts an input value to a date value.\nA string will only be successfully converted if it's respecting the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.\nTo convert dates in other formats, use <<esql-date_parse>>.",
-    ignoreTag: true,
   }),
   alias: ['to_dt'],
   signatures: [
@@ -4578,6 +4626,7 @@ export const evalFunctionDefinitions = [
   floorDefinition,
   fromBase64Definition,
   greatestDefinition,
+  ipPrefixDefinition,
   leastDefinition,
   leftDefinition,
   lengthDefinition,
