@@ -156,6 +156,7 @@ export const registerNodesCpuRoute = (router: IRouter, logger: Logger) => {
                 message: notFoundMessage,
                 name: request.query.name,
                 reason: "Not found",
+                nodes: [],
                 },
             });
         };

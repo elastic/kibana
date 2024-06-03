@@ -60,27 +60,11 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
                 name: request.query.name,
                 namespace: namespace,
                 reason: "Not found",
+                pods: [],
               },
             });
           }
-          if (podObjects.pods.length === 1) {
-            const pod = podObjects.pods[0];
-            return response.ok({
-              body: {
-                'time': podObjects.time,
-                'name': pod.name,
-                'namespace': pod.namespace,
-                'node': pod.node,
-                'memory_available': pod.memory_available,
-                'memory_usage': pod.memory_usage,
-                'memory_usage_median_deviation': pod.memory_usage_median_deviation,
-                'memory_utilization': round(pod.memory_utilization, 3),
-                'reason': pod.reason,
-                'message': pod.message,
-                'alarm': pod.alarm
-              },
-            });
-          }
+          
           return response.ok({
             body: {
               time: podObjects.time,

@@ -92,6 +92,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
                 name: request.query.name,
                 namespace: request.query.namespace,
                 reason: "Not found",
+                daemonsets: [],
               },
             });
         }
@@ -111,19 +112,14 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
                   name: daemonsetNames[0],
                   namespace: request.query.namespace,
                   reason: "Not found",
+                  daemonsets: [],
                 },
               });
           }
           return response.ok({
             body: {
               time: daemonObject.time,
-              message: daemonObject.message,
-              readyNodes: daemonObject.readyNodes,
-              desiredNodes: daemonObject.desiredNodes,
-              name: daemonObject.name,
-              namespace: daemonObject.namespace,
-              reason: daemonObject.reason,
-              events: daemonObject.events
+              daemonsets: [daemonObject]
             },
           });
         }

@@ -83,7 +83,6 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         }
 
         const client = (await context.core).elasticsearch.client.asCurrentUser;
-        console.log("AAAAAAAAAA");
         console.log(podNames);
         if (podNames.length === 0){
           const message =  `Pod ${request.query.namespace}/${request.query.name} not found`
@@ -94,6 +93,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
                 name: request.query.name,
                 namespace: request.query.namespace,
                 reason: "Not found",
+                pods: [],
               },
             });
         }
@@ -113,18 +113,14 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
                   name: podNames[0],
                   namespace: request.query.namespace,
                   reason: "Not found",
+                  pods: [],
                 },
               });
           }
           return response.ok({
             body: {
               time: podObject.time,
-              message: podObject.message,
-              state: podObject.state,
-              name: podObject.name,
-              namespace: podObject.namespace,
-              node: podObject.node,
-              failingReason: podObject.failingReason,
+              pods: [podObject],
             },
           });
         }

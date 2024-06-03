@@ -114,7 +114,7 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
             var pods_cpu_medium = new Array();
             var pods_cpu_high = new Array();
             var pods_deviation_high = new Array();
-            namespace = podObjects[0].namesapce;
+            namespace = podObjects[0].namespace;
             for (const podObject of podObjects) {
               if (podObject.alarm == "Medium") {
                 pods_cpu_medium.push(podObject.name);

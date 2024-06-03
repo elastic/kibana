@@ -4,9 +4,6 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   useEuiTheme,
   EuiSpacer,
   EuiText,
@@ -14,17 +11,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiButtonGroup,
   EuiButton,
-  EuiFlyoutFooter,
-  EuiTab,
-  EuiTabs,
-  EuiLink,
   EuiToolTip,
-  EuiLoadingSpinner,
   EuiIcon,
   EuiBasicTableColumn,
   EuiInMemoryTable,
-  EuiTableSortingType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -33,7 +28,6 @@ const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;
   margin: 0 auto;
 `;
-
 
 export class kubernetesObservability implements Plugin {
   public setup(core: CoreSetup) {
@@ -75,6 +69,43 @@ export class kubernetesObservability implements Plugin {
   public stop() {}
 }
 
+export type Query = {
+  namespace: string;
+  name: string;
+};
+
+export const NAMESPACE_OPTIONS = [
+  {
+    id: 'default',
+    label: i18n.translate('xpack.kubernetesObservability.k8sAPI.namespaceButtons.default', {
+      defaultMessage: 'default',
+    }),
+  },
+  {
+    id: 'kube-system',
+    label: i18n.translate('xpack.kubernetesObservability.k8sAPI.namespaceButtons.kube-system', {
+      defaultMessage: 'kube-system',
+    }),
+  },
+];
+
+export const NAMESPACE_SELECT_OPTIONS = [
+  {
+    value: 'all',
+    inputDisplay: 'all',
+    disabled: false
+  },
+  {
+    value: 'default',
+    inputDisplay: 'default',
+    disabled: false
+  },
+  {
+    value: 'kube-system',
+    inputDisplay: 'kube-system',
+    disabled: false
+  },
+];
 
 export class PublicKubernetesObservabilityClient {
     constructor(private readonly http: HttpStart) {}
@@ -93,65 +124,131 @@ export class PublicKubernetesObservabilityClient {
       return results;
     }
 
-    async getPodsStatus() {
+    async getPodsStatus(pod: any, namespace: any) {
       console.log("CALLED TO GET PODS STATUS")
-      const results = await this.http.get('/api/kubernetes/pods/status', {version: '1',});
+      var query = {} as Query;
+      if (pod !== undefined) {
+        query['name'] = pod
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/pods/status', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getDeploymentsStatus() {
-      console.log("CALLED TO GET DEPLOYMENTS STATUS")
-      const results = await this.http.get('/api/kubernetes/deployments/status', {version: '1',});
+    async getDeploymentsStatus(deployment: any , namespace: any) {
+      console.log("CALLED TO GET DEPLOYMENTS STATUS FOR " + deployment + " in " + namespace)
+      var query = {} as Query;
+      if (deployment !== undefined) {
+        query['name'] = deployment
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      } 
+      const results = await this.http.get('/api/kubernetes/deployments/status', {
+        version: '1',
+        query,
+      });
       console.log(results);
       return results;
     }
 
-    async getDaemonsetsStatus() {
-      console.log("CALLED TO GET DAEMONSETS STATUS")
-      const results = await this.http.get('/api/kubernetes/daemonsets/status', {version: '1',});
+    async getDaemonsetsStatus(daemon: any, namespace: any) {
+      console.log("CALLED TO GET DAEMONSETS STATUS FOR " + daemon + " in " + namespace)
+      var query = {} as Query;
+      if (daemon !== undefined) {
+        query['name'] = daemon
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/daemonsets/status', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getDeploymentsMemory() {
+    async getDeploymentsMemory(deployment: any, namespace: any) {
       console.log("CALLED TO GET DEPLOYMENTS MEMORY")
-      const results = await this.http.get('/api/kubernetes/deployments/memory', {version: '1',});
+      var query = {} as Query;
+      if (deployment !== undefined) {
+        query['name'] = deployment
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/deployments/memory', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getDeploymentsCpu() {
+    async getDeploymentsCpu(deployment: any, namespace: any) {
       console.log("CALLED TO GET DEPLOYMENTS CPU")
-      const results = await this.http.get('/api/kubernetes/deployments/cpu', {version: '1',});
+      var query = {} as Query;
+      if (deployment !== undefined) {
+        query['name'] = deployment
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/deployments/cpu', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getDaemonsetsMemory() {
+    async getDaemonsetsMemory(daemon: any, namespace: any) {
       console.log("CALLED TO GET DAEMONSETS MEMORY")
-      const results = await this.http.get('/api/kubernetes/daemonsets/memory', {version: '1',});
+      var query = {} as Query;
+      if (daemon !== undefined) {
+        query['name'] = daemon
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/daemonsets/memory', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getDaemonsetsCpu() {
+    async getDaemonsetsCpu(daemon: any, namespace: any) {
       console.log("CALLED TO GET DAEMONSETS CPU")
-      const results = await this.http.get('/api/kubernetes/daemonsets/cpu', {version: '1',});
+      var query = {} as Query;
+      if (daemon !== undefined) {
+        query['name'] = daemon
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/daemonsets/cpu', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getPodsCpu() {
+    async getPodsCpu(pod: any, namespace: any) {
       console.log("CALLED TO GET PODS CPU")
-      const results = await this.http.get('/api/kubernetes/pods/cpu', {version: '1',});
+      var query = {} as Query;
+      if (pod !== undefined) {
+        query['name'] = pod
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/pods/cpu', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getPodsMemory() {
+    async getPodsMemory(pod: any, namespace: any) {
       console.log("CALLED TO GET PODS MEMORY")
-      const results = await this.http.get('/api/kubernetes/pods/memory', {version: '1',});
+      var query = {} as Query;
+      if (pod !== undefined) {
+        query['name'] = pod
+      }
+      if (namespace !== undefined) {
+        query['namespace'] = namespace
+      }
+      const results = await this.http.get('/api/kubernetes/pods/memory', {version: '1', query});
       console.log(results);
       return results;
     }
@@ -162,7 +259,6 @@ const  KubernetesObservabilityComp = ({
 }: {
   client?: any;
 }) => {
-  const { euiTheme, colorMode } = useEuiTheme();
   const [nodesMem, setNodesMem] = useState([]);
   const [nodeMemtime, setNodeMemTime] = useState([]);
   const [nodeCpuTime, setNodeCpuTime] = useState([]);
@@ -185,41 +281,68 @@ const  KubernetesObservabilityComp = ({
   const [podsMem, setPodsMem] = useState([]);
   const [podsCpuTime, setPodsCpuTime] = useState([]);
   const [podsCpu, setPodsCpu] = useState([]);
-  console.log("called");
-  console.log(client);
+  const [namespace, setNamespace] = useState('all');
+  const [hasTimeElapsed, setHasTimeElapsed] = useState(true);
+  const [services, setServices] = useState(['all']);
+  const [service, setService] = useState('all');
+  useEffect(() => {
+    const timer = setInterval(() => {
+      console.log('This will run after 10 second!')
+      setHasTimeElapsed(true)
+      setHasTimeElapsed(false)
+    }, 300000);
+    return () => clearInterval(timer);
+  }, []);
   
   useEffect(() => {
-    client.getNodesMemory().then(data => {
-      console.log(data);
-      setNodeMemTime(data.time);
-      const nodesArray = data.nodes;
-      const keys = ['name', 'memory_utilization', 'message', 'alarm'];
-
-      const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-      setNodesMem(nodes);
-      })
-      .catch(error => {
-          console.log(error)
-      });
-  }, [client]); // *** Note the dependency
+    console.log("NAMESPACE CHANGED TO " + namespace);
+  }, [namespace]); // *** Note the dependency
   
   useEffect(() => {
-    client.getNodesCpu().then(data => {
-      console.log(data);
-      setNodeCpuTime(data.time);
-      const nodesArray = data.nodes;
-      const keys = ['name', 'cpu_utilization', 'message', 'alarm'];
-
-      const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-      setNodesCpu(nodes);
-      })
-      .catch(error => {
-          console.log(error)
-      });
-  }, [client]); // *** Note the dependency
+    console.log("SERVICE CHANGED TO " + service);
+  }, [service]); // *** Note the dependency
 
   useEffect(() => {
-    client.getDeploymentsStatus().then(data => {
+    if (hasTimeElapsed) {
+      client.getNodesMemory().then(data => {
+        console.log(data);
+        console.log("AAAAAAAAA DUE TO TIMEOUT NODES")
+        setNodeMemTime(data.time);
+        const nodesArray = data.nodes;
+        const keys = ['name', 'memory_utilization', 'message', 'alarm'];
+  
+        const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setNodesMem(nodes);
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [client, hasTimeElapsed]); // *** Note the dependency
+  
+  useEffect(() => {
+    if (hasTimeElapsed) {
+      client.getNodesCpu().then(data => {
+        console.log(data);
+        setNodeCpuTime(data.time);
+        const nodesArray = data.nodes;
+        const keys = ['name', 'cpu_utilization', 'message', 'alarm'];
+
+        const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setNodesCpu(nodes);
+        })
+        .catch(error => {
+            console.log(error)
+      });
+    }
+  }, [client, hasTimeElapsed]); // *** Note the dependency
+
+  useEffect(() => {
+    console.log("CALLED DUE TO CHANGE");
+    const ns = namespace === 'all' ? undefined : namespace;
+    const svc = service === 'all' ? undefined : service;
+    console.log("NAMESPACE " + ns);
+    client.getDeploymentsStatus(svc, ns).then(data => {
       console.log(data);
       setDeploysStatusTime(data.time);
       const deployArray = data.deployments;
@@ -231,17 +354,21 @@ const  KubernetesObservabilityComp = ({
         } else {
           deploy["status"] = "Warning"
         }
+        services.indexOf(deploy.name) === -1 ? setServices(services => [...services, deploy.name]) : console.log('already there');
       });
       const deploys = deployArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
       setDeploysStatus(deploys);
       })
       .catch(error => {
           console.log(error)
-      });
-  }, [client]); // *** Note the dependency
+    });
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
-    client.getDaemonsetsStatus().then(data => {
+    console.log("CALLED DUE TO CHANGE");
+    const ns = namespace === 'all' ? undefined : namespace;
+    console.log("NAMESPACE " + ns);
+    client.getDaemonsetsStatus(undefined, ns).then(data => {
       console.log(data);
       setDaemonsStatusTime(data.time);
       const daemonsArray = data.daemonsets;
@@ -253,6 +380,8 @@ const  KubernetesObservabilityComp = ({
         } else {
           daemon["status"] = "Warning"
         }
+        services.indexOf(daemon.name) === -1 ? setServices(services => [...services, daemon.name]) : console.log('already there');
+
       });
       const daemons = daemonsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
       setDaemonsStatus(daemons);
@@ -260,10 +389,11 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
-    client.getDeploymentsMemory().then(data => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    client.getDeploymentsMemory(undefined, ns).then(data => {
       console.log(data);
       setDeploysMemTime(data.time);
       const deployArray = data.deployments;
@@ -275,10 +405,11 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
-    client.getDeploymentsCpu().then(data => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    client.getDeploymentsCpu(undefined, ns).then(data => {
       console.log(data);
       setDeploysCpuTime(data.time);
       const deployArray = data.deployments;
@@ -290,10 +421,11 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
-    client.getDaemonsetsMemory().then(data => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    client.getDaemonsetsMemory(undefined, ns).then(data => {
       console.log(data);
       setDaemonsMemTime(data.time);
       const daemonArray = data.daemonsets;
@@ -305,10 +437,11 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
-    client.getDaemonsetsMemory().then(data => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    client.getDaemonsetsCpu(undefined, ns).then(data => {
       console.log(data);
       setDaemonsCpuTime(data.time);
       const daemonArray = data.daemonsets;
@@ -320,10 +453,11 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
-    client.getPodsMemory().then(data => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    client.getPodsMemory(undefined, ns).then(data => {
       console.log(data);
       setPodsMemTime(data.time);
       const podsArray = data.pods;
@@ -335,10 +469,11 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
-    client.getPodsCpu().then(data => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    client.getPodsCpu(undefined, ns).then(data => {
       console.log(data);
       setPodsCpuTime(data.time);
       const podsArray = data.pods;
@@ -350,10 +485,11 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
-    client.getPodsStatus().then(data => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    client.getPodsStatus(undefined, ns).then(data => {
       console.log(data);
       setPodsStatusTime(data.time);
       const podsArray = data.pods;
@@ -372,7 +508,7 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   const nodeMemcolumns: Array<EuiBasicTableColumn<any>> = [
     {
@@ -1325,7 +1461,79 @@ const  KubernetesObservabilityComp = ({
 
   return (
     <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
+      <EuiFlexGroup alignItems="flexStart" direction="row">
+        <EuiFlexItem>
+          <EuiDescribedFormGroup
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.k8sobservability.namespaces.selectNamespaceTitle"
+                  defaultMessage="Namespace"
+                />
+              </h4>
+            }
+            description={
+              <FormattedMessage
+                id="xpack.k8sobservability.namespaces.selectNamespaceDesc"
+                defaultMessage="Select namespace to filter upon."
+              />
+            }
+          >
+            <EuiFormRow
+              fullWidth
+              isDisabled={false}
+              isInvalid={false}
+            >
+              <EuiSuperSelect
+                disabled={false}
+                valueOfSelected={namespace}
+                fullWidth
+                onChange={(id) => setNamespace(id)}
+                options={NAMESPACE_SELECT_OPTIONS}
+              />
+              </EuiFormRow>
+          </EuiDescribedFormGroup>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiDescribedFormGroup
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.k8sobservability.services.selectServiceTitle"
+                  defaultMessage="Service"
+                />
+              </h4>
+            }
+            description={
+              <FormattedMessage
+                id="xpack.k8sobservability.services.selectServiceDesc"
+                defaultMessage="Select service to filter upon."
+              />
+            }
+          >
+            <EuiFormRow
+              fullWidth
+              isDisabled={false}
+              isInvalid={false}
+            >
+              <EuiSuperSelect
+                disabled={false}
+                valueOfSelected={service}
+                fullWidth
+                onChange={(id) => setService(id)}
+                options={services.map((service) => ({
+                  value: service,
+                  inputDisplay: service,
+                }))}
+              />
+              </EuiFormRow>
+          </EuiDescribedFormGroup>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexGroup alignItems="center" direction="column">
+        
         <EuiFlexItem>
             <EuiTitle size="s">
               <h3 id="KubernetesNodesMemoryTitle">

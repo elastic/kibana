@@ -93,6 +93,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
                 name: request.query.name,
                 namespace: request.query.namespace,
                 reason: "Not found",
+                deployments: [],
               },
             });
         }
@@ -112,19 +113,14 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
                     name: deployNames[0],
                     namespace: request.query.namespace,
                     reason: "Not found",
+                    deployments: [],
                   },
                 });
             }
             return response.ok({
               body: {
                 time: deployObject.time,
-                message: deployObject.message,
-                replicasAvailable: deployObject.replicasAvailable,
-                replicasDesired: deployObject.replicasDesired,
-                name: deployObject.name,
-                namespace: deployObject.namespace,
-                reason: deployObject.reason,
-                events: deployObject.events
+                deployments: [deployObject]
               },
             });
         }

@@ -61,26 +61,11 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
                 name: request.query.name,
                 namespace: namespace,
                 reason: "Not found",
+                pods: [],
               },
             });
           }
-          if (podObjects.pods.length === 1) {
-            const pod = podObjects.pods[0];
-            return response.ok({
-              body: {
-                'time': podObjects.time,
-                'name': pod.name,
-                'namespace': pod.namespace,
-                'node': pod.node,
-                'cpu_utilization': round(pod.cpu_utilization, 3),
-                'cpu_utilization_median_deviation': round(pod.cpu_utilization_median_deviation, 3),
-                'reason': pod.reason,
-                'message': pod.message,
-                'alarm': pod.alarm,
-                'deviation_alarm': pod.deviation_alarm
-              },
-            });
-          }
+          
           return response.ok({
             body: {
               time: podObjects.time,
