@@ -33,6 +33,7 @@ const mockDashboard = (
     dashboard: {
       ...getMockPresentationContainer(),
       children$,
+      getPanelCount: () => Object.keys(children$.value).length,
       firstLoad: true,
       creationStartTime: Date.now(),
     },
@@ -184,6 +185,8 @@ describe('startQueryPerformanceTracking', () => {
       })
     );
   });
+
+  it('reports Dashboard first load', () => {});
 
   it('subscribes to newly added panels', async () => {
     const children: { [key: string]: unknown } = {

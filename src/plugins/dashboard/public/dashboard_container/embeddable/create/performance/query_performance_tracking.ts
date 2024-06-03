@@ -66,7 +66,7 @@ export const startQueryPerformanceTracking = (
       pairwise()
     )
     .subscribe(([lastLoading, currentLoading]) => {
-      const panelCount = Object.keys(dashboard.children$.getValue()).length;
+      const panelCount = dashboard.getPanelCount();
       const now = performance.now();
       const loadType: DashboardLoadType = isFirstDashboardLoadOfSession
         ? 'sessionFirstLoad'
