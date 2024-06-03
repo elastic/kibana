@@ -27,6 +27,8 @@ import { discoverServiceMock } from '../__mocks__/services';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { DiscoverGrid } from '../components/discover_grid';
+import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 
 jest.mock('./get_discover_locator_params', () => {
   const actual = jest.requireActual('./get_discover_locator_params');
@@ -155,6 +157,9 @@ describe('saved search embeddable', () => {
       }
     );
 
+    const { profilesManagerMock } = createContextAwarenessMocks();
+
+    servicesMock.profilesManager = profilesManagerMock;
     servicesMock.core.chrome.getActiveSolutionNavId$ = () => new BehaviorSubject('test');
   });
 
@@ -518,6 +523,17 @@ describe('saved search embeddable', () => {
         dataView: dataViewMock,
         query: embeddable.getInput().query,
       });
+    });
+
+    it('should pass cell renderers from profile', async () => {
+      const { embeddable } = createEmbeddable();
+      await waitOneTick();
+      embeddable.render(mountpoint);
+      const discoverGridComponent = discoverComponent.find(DiscoverGrid);
+      expect(discoverGridComponent.exists()).toBeTruthy();
+      expect(Object.keys(discoverGridComponent.prop('externalCustomRenderers')!)).toEqual([
+        'rootProfile',
+      ]);
     });
   });
 });

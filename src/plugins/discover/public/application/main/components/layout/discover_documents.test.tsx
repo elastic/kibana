@@ -141,7 +141,7 @@ describe('Discover documents layout', () => {
   });
 
   describe('context awareness', () => {
-    it('should pass cell renders from profile', async () => {
+    it('should pass cell renderers from profile', async () => {
       customisationService.set({
         id: 'data_table',
         logsEnabled: true,
