@@ -35,6 +35,7 @@ const twoDeci = (num: number) => Math.round(num * 100) / 100;
 run(
   async ({ log, flagsReader, addCleanupTask }) => {
     const update = flagsReader.boolean('update');
+    const serverless = flagsReader.boolean('serverless');
     const pathStartsWith = flagsReader.arrayOfStrings('include-path');
     const excludePathsMatching = flagsReader.arrayOfStrings('exclude-path') ?? [];
 
@@ -48,18 +49,19 @@ run(
     );
 
     log.info('Starting es...');
-    await log.indent(4, async () => {
+    const esCluster = await log.indent(4, async () => {
       const cluster = createTestEsCluster({ log });
       await cluster.start();
-      addCleanupTask(() => cluster.cleanup());
+      return cluster;
     });
 
     log.info('Starting Kibana...');
-    await log.indent(4, async () => {
+    const kbWorker = await log.indent(4, async () => {
       log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
       const { msg$, proc } = startTSWorker<Result>({
         log,
         src: require.resolve('./kibana_worker'),
+        execArgv: serverless ? ['--serverless'] : undefined,
       });
       await Rx.firstValueFrom(
         msg$.pipe(
@@ -69,7 +71,12 @@ run(
           })
         )
       );
-      addCleanupTask(() => proc.kill('SIGILL'));
+      return proc;
+    });
+
+    addCleanupTask(async () => {
+      await esCluster.cleanup();
+      kbWorker.kill('SIGILL');
     });
 
     try {
@@ -114,15 +121,17 @@ run(
       Get the current OAS from Kibana's /api/oas API
     `,
     flags: {
-      boolean: ['update'],
+      boolean: ['update', 'serverless'],
       string: ['include-path', 'exclude-path'],
       default: {
         fix: false,
+        serverless: false,
       },
       help: `
         --include-path            Path to include. Path must start with provided value. Can be passed multiple times.
         --exclude-path            Path to exclude. Path must NOT start with provided value. Can be passed multiple times.
         --update                  Write the current OAS to ${chalk.cyan(OAS_FILE_PATH)}.
+        --serverless              Whether to run Kibana in serverless mode, defaults to false.
       `,
     },
   }

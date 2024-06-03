@@ -16,6 +16,7 @@ export type Result = 'ready';
   if (!process.send) {
     throw new Error('worker must be run in a node.js fork');
   }
+  const serverless = process.execArgv.includes('--serverless');
 
   const settings = {
     logging: {
@@ -31,6 +32,7 @@ export type Result = 'ready';
   set(settings, PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH, true);
 
   const root = createRootWithCorePlugins(settings, {
+    serverless,
     basePath: false,
     cache: false,
     dev: true,
