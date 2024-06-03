@@ -41,7 +41,7 @@ export const registerCreateRoute = ({
           return response.conflict({
             body: new Error(
               i18n.translate('xpack.idxMgmt.componentTemplates.createRoute.duplicateErrorMessage', {
-                defaultMessage: "There is already a component template with name '{name}'.",
+                defaultMessage: "There is already a component template with name ''{name}''.",
                 values: {
                   name,
                 },
