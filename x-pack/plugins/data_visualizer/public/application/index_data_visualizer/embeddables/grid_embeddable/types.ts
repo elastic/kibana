@@ -18,6 +18,7 @@ import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_vi
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
+import type { DataVisualizerTableItem } from '../../../common/components/stats_table/data_visualizer_stats_table';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**
@@ -91,6 +92,7 @@ export interface FieldStatisticTableEmbeddableProps {
   shouldGetSubfields?: boolean;
   lastReloadRequestTime?: number;
   onTableUpdate?: (update: Partial<DataVisualizerTableState>) => void;
+  renderFieldName?: (fieldName: string, item: DataVisualizerTableItem) => JSX.Element;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<
