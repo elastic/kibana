@@ -22,7 +22,6 @@ const navigateToUrl = jest.fn().mockImplementation(async (url) => {
   history.push(url);
 });
 
-
 describe('useUnsavedChangesPrompt', () => {
   it('should not block if not edited', () => {
     renderHook(() =>
