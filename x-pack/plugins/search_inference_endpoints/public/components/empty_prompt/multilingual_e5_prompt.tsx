@@ -23,6 +23,7 @@ export const MultilingualE5Prompt: React.FC<MultilingualE5PromptProps> = ({
   <EuiCard
     display="primary"
     textAlign="left"
+    data-test-subj="multilingualE5PromptForEmptyState"
     description={i18n.translate(
       'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.e5Description',
       {

@@ -29,7 +29,6 @@ import { TABLE_COLUMNS } from './table_columns';
 
 interface TabularPageProps {
   addEndpointLabel: string;
-  breadcrumbs: string[];
   inferenceEndpoints: InferenceAPIConfigResponse[];
   setIsInferenceFlyoutVisible: (value: boolean) => void;
 }
@@ -43,7 +42,6 @@ const getSortField = (field: string): SortFieldInferenceEndpoint => {
 
 export const TabularPage: React.FC<TabularPageProps> = ({
   addEndpointLabel,
-  breadcrumbs,
   setIsInferenceFlyoutVisible,
   inferenceEndpoints,
 }) => {
@@ -125,6 +123,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({
       <EuiPageTemplate offset={0} restrictWidth={false} grow={false}>
         <EuiPageTemplate.Header
           css={{ '.euiPageHeaderContent > .euiFlexGroup': { flexWrap: 'wrap' } }}
+          data-test-subj="allInferenceEndpointsPage"
           pageTitle={i18n.translate(
             'xpack.searchInferenceEndpoints.inferenceEndpoints.allInferenceEndpoints.title',
             {
@@ -145,6 +144,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({
                   key="newInferenceEndpoint"
                   color="primary"
                   iconType="plusInCircle"
+                  data-test-subj="addEndpointButtonForAllInferenceEndpoints"
                   fill
                   onClick={() => setIsInferenceFlyoutVisible(true)}
                 >

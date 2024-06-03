@@ -47,7 +47,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
       }
       body={
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="createFirstInferenceEndpointDescription">
             {i18n.translate(
               'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.createFirstInferenceEndpointDescription',
               {
@@ -62,6 +62,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
                 color="primary"
                 fill
                 iconType="plusInCircle"
+                data-test-subj="addEndpointButtonForEmptyPrompt"
                 onClick={() => setIsInferenceFlyoutVisible(true)}
               >
                 {addEndpointLabel}

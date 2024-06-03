@@ -22,6 +22,7 @@ export const ElserPrompt: React.FC<ElserPromptProps> = ({
   <EuiCard
     display="primary"
     textAlign="left"
+    data-test-subj="elserPromptForEmptyState"
     description={i18n.translate(
       'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.elserDescription',
       {
