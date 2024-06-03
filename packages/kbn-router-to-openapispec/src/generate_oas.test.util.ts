@@ -55,7 +55,7 @@ const getRouterDefaults = () => ({
   method: 'get',
   options: {
     tags: ['foo'],
-    description: 'route',
+    summary: 'route',
   },
   validationSchemas: {
     request: {
@@ -82,7 +82,7 @@ const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
-    description: 'versioned route',
+    summary: 'versioned route',
     access: 'public',
   },
   handlers: [

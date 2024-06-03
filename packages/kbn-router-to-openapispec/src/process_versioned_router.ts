@@ -84,7 +84,7 @@ export const processVersionedRouter = (
       const hasVersionFilter = Boolean(filters?.version);
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: {
-          summary: route.options.description ?? '',
+          summary: route.options.summary ?? '',
           requestBody: hasBody
             ? {
                 content: hasVersionFilter
