@@ -129,11 +129,10 @@ export const getTopNavConfig = (
   }: VisualizeServices
 ) => {
   const { vis } = visInstance;
-  const baseSavedVis = visInstance.savedVis;
   const serializedVis = serializeStateFn?.().rawState.savedVis ?? null;
   const savedVis = serializedVis
     ? {
-        ...omit(baseSavedVis, 'kibanaSavedObjectMeta'),
+        id: serializedVis.id,
         title: serializedVis.title,
         description: serializedVis.description,
         visState: {
@@ -147,7 +146,7 @@ export const getTopNavConfig = (
         searchSourceFields: serializedVis.data.searchSource,
         uiStateJSON: vis.uiState.toString(),
       }
-    : baseSavedVis;
+    : visInstance.savedVis;
 
   /**
    * Called when the user clicks "Save" button.
@@ -155,6 +154,7 @@ export const getTopNavConfig = (
   async function doSave(
     saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
   ) {
+    if (!savedVis) return;
     const newlyCreated = !Boolean(savedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
@@ -162,6 +162,8 @@ export const getTopNavConfig = (
     });
 
     setHasUnsavedChanges(false);
+
+    console.log('SAVED VIS', savedVis);
 
     try {
       const id = await saveVisualization(
