@@ -45,7 +45,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             .transaction({ transactionName: 'GET /banana' })
             .errors(
               serviceInstance
-                .error({ message: 'Some exception', type: 'exception' })
+                .error({
+                  message: 'Some exception',
+                  type: 'exception',
+                  groupingKey: 'some-expection-key',
+                })
                 .timestamp(timestamp)
             )
             .duration(10)
@@ -88,8 +92,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   async function navigateToError() {
     await common.navigateToApp('apm');
-    await browser.get(`${deployment.getHostPort()}/app/apm/services/opbeans-go/errors/`);
-    await testSubjects.click('errorGroupId');
+    await browser.get(
+      `${deployment.getHostPort()}/app/apm/services/opbeans-go/errors/some-expection-key`
+    );
   }
 
   describe('Contextual insights for APM errors', () => {
@@ -122,7 +127,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/184071
-    describe.skip('when there are connectors', () => {
+    describe('when there are connectors', () => {
       let proxy: LlmProxy;
 
       before(async () => {

@@ -22,9 +22,11 @@ export class ApmError extends Serializable<ApmFields> {
 
   serialize() {
     const [data] = super.serialize();
-    data['error.grouping_key'] = generateLongId(
-      this.fields['error.grouping_name'] || this.fields['error.exception']?.[0]?.message
-    );
+    data['error.grouping_key'] =
+      this.fields['error.grouping_key'] ??
+      generateLongId(
+        this.fields['error.grouping_name'] || this.fields['error.exception']?.[0]?.message
+      );
     return [data];
   }
 
