@@ -7,12 +7,12 @@
 
 import moment from 'moment';
 import {
-  Comparator,
   Aggregators,
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { getElasticsearchMetricQuery } from './metric_query';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   const expressionParams: CustomMetricExpressionParams = {
@@ -26,7 +26,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   };
   const searchConfiguration: SearchConfigurationType = {
     index: {

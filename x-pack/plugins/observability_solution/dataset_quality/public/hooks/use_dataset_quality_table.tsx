@@ -17,12 +17,12 @@ import { useDatasetQualityContext } from '../components/dataset_quality/context'
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
+import { SortDirection } from '../../common/types';
 
-export type Direction = 'asc' | 'desc';
-export type SortField = keyof DataStreamStat;
+export type DatasetTableSortField = keyof DataStreamStat;
 
 const sortingOverrides: Partial<{
-  [key in SortField]: SortField | ((item: DataStreamStat) => Primitive);
+  [key in DatasetTableSortField]: DatasetTableSortField | ((item: DataStreamStat) => Primitive);
 }> = {
   ['title']: 'name',
   ['size']: DataStreamStat.calculateFilteredSize,
@@ -167,11 +167,11 @@ export const useDatasetQualityTable = () => {
   const onTableChange = useCallback(
     (options: {
       page: { index: number; size: number };
-      sort?: { field: SortField; direction: Direction };
+      sort?: { field: DatasetTableSortField; direction: SortDirection };
     }) => {
       service.send({
         type: 'UPDATE_TABLE_CRITERIA',
-        criteria: {
+        dataset_criteria: {
           page: options.page.index,
           rowsPerPage: options.page.size,
           sort: {

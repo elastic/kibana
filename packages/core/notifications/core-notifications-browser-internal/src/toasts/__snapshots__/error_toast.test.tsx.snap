@@ -44,10 +44,9 @@ exports[`renders matching snapshot 1`] = `
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="See the full error"
         id="core.toasts.errorToast.seeFullError"
-        values={Object {}}
       />
     </EuiButton>
   </div>

@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('save the dashboard', async () => {
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await a11y.testAppSnapshot();
     });
 
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Make a clone of the dashboard', async () => {
-      await PageObjects.dashboard.clickClone();
+      await PageObjects.dashboard.duplicateDashboard();
       await a11y.testAppSnapshot();
     });
 
