@@ -583,7 +583,7 @@ const adjustCommandsForCrowdstrike = ({
             'manual'
           );
 
-    // If command is not supported by SentinelOne - disable it
+    // If command is not supported by Crowdstrike - disable it
     if (
       !agentSupportsResponseAction ||
       (command.name === 'isolate' && !isHostIsolationEnabled) ||
