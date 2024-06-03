@@ -5,10 +5,9 @@ exports[`PipelineViewer component passes expected props 1`] = `
   <EuiPageBody>
     <EuiScreenReaderOnly>
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Logstash pipelines"
           id="xpack.monitoring.logstash.pipeline_viewer.heading"
-          values={Object {}}
         />
       </h1>
     </EuiScreenReaderOnly>
@@ -81,10 +80,9 @@ exports[`PipelineViewer component renders DetailDrawer when selected vertex is n
   <EuiPageBody>
     <EuiScreenReaderOnly>
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Logstash pipelines"
           id="xpack.monitoring.logstash.pipeline_viewer.heading"
-          values={Object {}}
         />
       </h1>
     </EuiScreenReaderOnly>
