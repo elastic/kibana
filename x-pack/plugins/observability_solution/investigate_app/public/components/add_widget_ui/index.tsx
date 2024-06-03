@@ -93,8 +93,8 @@ export function AddWidgetUI({
   const [mode, setMode] = useState(AddWidgetMode.Assistant);
 
   const workflowBlocksControl = useWorkflowBlocks({
-    start: start.toString(),
-    end: end.toString(),
+    start: start.toISOString(),
+    end: end.toISOString(),
     dynamicBlocks: workflowBlocks,
     isTimelineEmpty: timeline.items.length === 0,
     onWidgetAdd,

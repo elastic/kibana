@@ -33,6 +33,8 @@ export function useWorkflowBlocks({
 
   const alertsWorkflowBlock = useAlertsWorkflowBlock({
     onWidgetAdd,
+    start,
+    end,
   });
 
   const apmWorkflowBlock = useApmWorkflowBlock({

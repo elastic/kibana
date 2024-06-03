@@ -14,12 +14,25 @@ import type { OnWidgetAdd } from '@kbn/investigate-plugin/public';
 import { createInvestigateAlertsInventoryWidget } from '@kbn/observability-plugin/public';
 import { useKibana } from '../use_kibana';
 
-export function useAlertsWorkflowBlock({ onWidgetAdd }: { onWidgetAdd: OnWidgetAdd }) {
+export function useAlertsWorkflowBlock({
+  onWidgetAdd,
+  start,
+  end,
+}: {
+  onWidgetAdd: OnWidgetAdd;
+  start: string;
+  end: string;
+}) {
   const { core } = useKibana();
 
   const onWidgetAddRef = useRef(onWidgetAdd);
 
   onWidgetAddRef.current = onWidgetAdd;
+
+  console.log({
+    start,
+    end,
+  });
 
   const alertsResult = useAbortableAsync(
     ({ signal }) => {
@@ -36,7 +49,9 @@ export function useAlertsWorkflowBlock({ onWidgetAdd }: { onWidgetAdd: OnWidgetA
                   {
                     range: {
                       '@timestamp': {
-                        gte: 'now-15m/m',
+                        gte: start,
+                        lte: end,
+                        format: 'date_optional_time',
                       },
                     },
                   },
@@ -52,7 +67,7 @@ export function useAlertsWorkflowBlock({ onWidgetAdd }: { onWidgetAdd: OnWidgetA
         }
       );
     },
-    [core.http]
+    [core.http, start, end]
   );
 
   return useMemo<WorkflowBlock>(() => {
