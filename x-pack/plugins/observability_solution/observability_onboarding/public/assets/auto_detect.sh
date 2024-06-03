@@ -19,11 +19,11 @@ help() {
     echo "Usage: sudo ./auto-detect.sh <arguments>"
     echo ""
     echo "Arguments:"
-    echo "  --install-key <value>  Base64 Encoded API key that has priviledges to install integrations."
-    echo "  --ingest-key <value>   Base64 Encoded API key that has priviledges to ingest data."
-    echo "  --kibana-url <value>  Kibana API endpoint."
-    echo "  --id <value>   Onboarding flow ID."
-    echo "  --ea-version <value>   Elastic Agent version."
+    echo "  --install-key=<value>  Base64 Encoded API key that has priviledges to install integrations."
+    echo "  --ingest-key=<value>   Base64 Encoded API key that has priviledges to ingest data."
+    echo "  --kibana-url=<value>  Kibana API endpoint."
+    echo "  --id=<value>   Onboarding flow ID."
+    echo "  --ea-version=<value>   Elastic Agent version."
     exit 1
 }
 
