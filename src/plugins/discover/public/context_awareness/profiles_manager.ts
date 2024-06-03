@@ -9,7 +9,15 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual, memoize } from 'lodash';
-import { BehaviorSubject, combineLatest, filter, map, Observable, startWith } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  Observable,
+  startWith,
+} from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
 import type {
@@ -151,6 +159,7 @@ export class ProfilesManager {
       observables.push(
         this.recordId$.pipe(
           startWith(record.id),
+          distinctUntilChanged(),
           filter((recordId) => recordId === record.id)
         )
       );
