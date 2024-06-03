@@ -36,14 +36,14 @@ import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
 import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from '../store/sourcerer/helpers';
+import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
-import type { SourcererState } from '../store/sourcerer';
+import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
 
