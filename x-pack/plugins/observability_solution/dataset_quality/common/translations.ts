@@ -50,6 +50,13 @@ export const flyoutOpenInLogsExplorerText = i18n.translate(
   }
 );
 
+export const flyoutOpenInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',
   {
