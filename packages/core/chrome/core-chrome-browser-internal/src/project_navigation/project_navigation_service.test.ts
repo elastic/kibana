@@ -60,16 +60,18 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
+  isServerless = true,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
+  isServerless?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
   });
   history.replace(locationPathName);
 
-  const projectNavigationService = new ProjectNavigationService();
+  const projectNavigationService = new ProjectNavigationService(isServerless);
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
   const application = {
@@ -560,19 +562,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -625,19 +625,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -684,19 +682,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
