@@ -66,10 +66,6 @@ jest.mock('../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
-
 jest.mock('../../../common/utils/endpoint_alert_check', () => {
   const realEndpointAlertCheckUtils = jest.requireActual(
     '../../../common/utils/endpoint_alert_check'

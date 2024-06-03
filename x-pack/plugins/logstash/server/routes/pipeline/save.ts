@@ -21,6 +21,10 @@ export function registerPipelineSaveRoute(
   router.put(
     {
       path: '/api/logstash/pipeline/{id}',
+      options: {
+        access: 'public',
+        description: `Create a managed Logstash pipeline`,
+      },
       validate: {
         params: schema.object({
           id: schema.string(),

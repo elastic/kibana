@@ -5559,6 +5559,62 @@
         "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-server.NamingCollisionError",
+        "type": "Class",
+        "tags": [],
+        "label": "NamingCollisionError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "server",
+            "docId": "kibFleetPluginApi",
+            "section": "def-server.NamingCollisionError",
+            "text": "NamingCollisionError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/plugins/fleet/server/services/epm/packages/custom_integrations/validation/check_naming_collision.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.NamingCollisionError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/packages/custom_integrations/validation/check_naming_collision.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.NamingCollisionError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/packages/custom_integrations/validation/check_naming_collision.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -7868,7 +7924,7 @@
                 "section": "def-common.Installation",
                 "text": "Installation"
               },
-              " | undefined>"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
             "deprecated": false,
@@ -7959,7 +8015,7 @@
                 "section": "def-common.InstallResult",
                 "text": "InstallResult"
               },
-              " | undefined>"
+              ">"
             ],
             "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
             "deprecated": false,
@@ -8024,6 +8080,114 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.installCustomIntegration",
+            "type": "Function",
+            "tags": [],
+            "label": "installCustomIntegration",
+            "description": [],
+            "signature": [
+              "(options: { pkgName: string; kibanaVersion?: string | undefined; force?: boolean | undefined; spaceId?: string | undefined; datasets: ",
+              "CustomPackageDatasetConfiguration",
+              "[]; }) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallResult",
+                "text": "InstallResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.installCustomIntegration.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installCustomIntegration.$1.pkgName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pkgName",
+                    "description": [],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installCustomIntegration.$1.kibanaVersion",
+                    "type": "string",
+                    "tags": [],
+                    "label": "kibanaVersion",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installCustomIntegration.$1.force",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installCustomIntegration.$1.spaceId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "spaceId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installCustomIntegration.$1.datasets",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "datasets",
+                    "description": [],
+                    "signature": [
+                      "CustomPackageDatasetConfiguration",
+                      "[]"
                     ],
                     "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
                     "deprecated": false,
@@ -19321,6 +19485,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21181,6 +21359,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.FullAgentPolicyInput.processors",
+            "type": "Array",
+            "tags": [],
+            "label": "processors",
+            "description": [],
+            "signature": [
+              "FullAgentPolicyAddFields",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.FullAgentPolicyInput.Unnamed",
             "type": "IndexSignature",
             "tags": [],
@@ -22785,6 +22978,21 @@
             "description": [],
             "signature": [
               "boolean | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.global_data_tags",
+            "type": "Array",
+            "tags": [],
+            "label": "global_data_tags",
+            "description": [],
+            "signature": [
+              "GlobalDataTag",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,

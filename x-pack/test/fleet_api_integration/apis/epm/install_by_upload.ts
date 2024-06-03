@@ -12,7 +12,7 @@ import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { HTTPError } from 'superagent';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
@@ -20,7 +20,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const dockerServers = getService('dockerServers');
   const esClient = getService('es');
 
   const testPkgArchiveTgz = path.join(
@@ -60,7 +59,6 @@ export default function (providerContext: FtrProviderContext) {
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
   const testPkgNewVersion = '0.1.5';
-  const server = dockerServers.get('registry');
 
   const deletePackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -71,7 +69,7 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     afterEach(async () => {
-      if (server) {
+      if (isDockerRegistryEnabledOrSkipped(providerContext)) {
         // remove the packages just in case it being installed will affect other tests
         await deletePackage(testPkgName, testPkgVersion);
       }
