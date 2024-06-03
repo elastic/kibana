@@ -635,7 +635,7 @@ export const getEndpointRule = (): QueryRuleCreateProps => ({
   description: 'The new rule description.',
   severity: 'high',
   risk_score: 17,
-  interval: '10s',
+  interval: '1m',
   from: 'now-50000h',
   max_signals: 100,
   exceptions_list: [
