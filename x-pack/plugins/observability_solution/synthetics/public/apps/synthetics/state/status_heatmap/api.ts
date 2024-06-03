@@ -6,7 +6,7 @@
  */
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { MonitorStatusHeatmap } from '../../../../../common/runtime_types';
+import { MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export const fetchMonitorStatusHeatmap = async ({
@@ -21,7 +21,7 @@ export const fetchMonitorStatusHeatmap = async ({
   from: string | number;
   to: string | number;
   interval: number;
-}): Promise<MonitorStatusHeatmap[]> =>
+}): Promise<MonitorStatusHeatmapBucket[]> =>
   apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS_HEATMAP, {
     monitorId,
     location,

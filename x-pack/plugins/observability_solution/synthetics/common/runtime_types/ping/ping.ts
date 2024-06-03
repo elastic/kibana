@@ -307,7 +307,7 @@ export const GetPingsParamsType = t.intersection([
 
 export type GetPingsParams = t.TypeOf<typeof GetPingsParamsType>;
 
-export const MonitorStatusHeatmapType = t.type({
+export const MonitorStatusHeatmapBucketType = t.type({
   doc_count: t.number,
   down: t.type({
     value: t.number,
@@ -319,4 +319,4 @@ export const MonitorStatusHeatmapType = t.type({
   key_as_string: t.string,
 });
 
-export type MonitorStatusHeatmap = t.TypeOf<typeof MonitorStatusHeatmapType>;
+export type MonitorStatusHeatmapBucket = t.TypeOf<typeof MonitorStatusHeatmapBucketType>;
