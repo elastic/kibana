@@ -18,5 +18,6 @@ module.exports = {
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
+    require_mocha_tagging: require('./rules/require_mocha_tagging'),
   },
 };
