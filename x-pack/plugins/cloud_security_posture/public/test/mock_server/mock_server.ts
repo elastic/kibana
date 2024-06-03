@@ -15,7 +15,7 @@ import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
 import { CspClientPluginStartDeps } from '../../types';
-import { MOCK_SERVER_BASE_URL, MOCK_SERVER_LICENSING_INFO_URL } from './constants';
+import { MOCK_SERVER_LICENSING_INFO_URL } from './handlers/licensing.handlers.mock';
 
 /**
  * Mock the lastValueFrom function from rxjs to return the result of the promise instead of the Observable
@@ -76,6 +76,8 @@ export const startMockServer = (server: SetupServerApi) => {
     server.resetHandlers();
   });
 };
+
+const MOCK_SERVER_BASE_URL = 'http://localhost';
 
 /**
  * Get a set of dependencies for the mock server overriding default mock dependencies to perform

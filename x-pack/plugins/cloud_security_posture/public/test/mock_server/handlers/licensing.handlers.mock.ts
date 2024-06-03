@@ -6,7 +6,8 @@
  */
 
 import { http, HttpResponse } from 'msw';
-import { MOCK_SERVER_LICENSING_INFO_URL } from '../../constants';
+
+export const MOCK_SERVER_LICENSING_INFO_URL = `/api/licensing/info`;
 
 export const defaultApiLicensingInfo = http.get(MOCK_SERVER_LICENSING_INFO_URL, () => {
   const date = new Date();

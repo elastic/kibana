@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const MOCK_SERVER_BASE_URL = 'http://localhost';
-export const MOCK_SERVER_LICENSING_INFO_URL = `${MOCK_SERVER_BASE_URL}/api/licensing/info`;
+export * from './no_findings_states';

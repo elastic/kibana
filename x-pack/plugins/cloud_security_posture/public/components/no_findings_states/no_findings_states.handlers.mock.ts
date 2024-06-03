@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { http, HttpResponse } from 'msw';
-import { MOCK_SERVER_BASE_URL } from '../../../constants';
-import * as benchmarks from './mocks/benchmarks.json';
 
-export const defaultBenchmarks = http.get(
-  `${MOCK_SERVER_BASE_URL}/internal/cloud_security_posture/benchmarks`,
+import { http, HttpResponse } from 'msw';
+
+export const fleetCspPackageHandler = http.get(
+  `/api/fleet/epm/packages/cloud_security_posture`,
   () => {
-    return HttpResponse.json(benchmarks);
+    return HttpResponse.json({
+      item: {
+        name: 'cloud_security_posture',
+        version: '1.9.0',
+      },
+    });
   }
 );

@@ -7,17 +7,12 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { setupMockServer, startMockServer } from '../test/mock_server/mock_server';
-import { renderWrapper } from '../test/mock_server/mock_server_test_provider';
+import { setupMockServer, startMockServer } from '../../test/mock_server/mock_server';
+import { renderWrapper } from '../../test/mock_server/mock_server_test_provider';
 import { NoFindingsStates } from './no_findings_states';
-import {
-  statusIndexing,
-  statusIndexTimeout,
-  statusNotDeployed,
-  statusNotInstalled,
-  statusUnprivileged,
-  statusIndexed,
-} from '../test/mock_server/handlers/internal/cloud_security_posture/status_handlers';
+import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
+import * as benchmarksHandlers from '../../../server/routes/benchmarks/benchmarks.handlers.mock';
+import { fleetCspPackageHandler } from './no_findings_states.handlers.mock';
 
 const server = setupMockServer();
 
@@ -28,8 +23,12 @@ const renderNoFindingsStates = (postureType: 'cspm' | 'kspm' = 'cspm') => {
 describe('NoFindingsStates', () => {
   startMockServer(server);
 
+  beforeEach(() => {
+    server.use(fleetCspPackageHandler);
+  });
+
   it('shows integrations installation prompt with installation links when integration is not-installed', async () => {
-    server.use(statusNotInstalled);
+    server.use(statusHandlers.notInstalledHandler);
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
@@ -54,7 +53,8 @@ describe('NoFindingsStates', () => {
     });
   });
   it('shows install agent prompt with install agent link when status is not-deployed', async () => {
-    server.use(statusNotDeployed);
+    server.use(statusHandlers.notDeployedHandler);
+    server.use(benchmarksHandlers.cspmInstalledHandler);
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
@@ -65,12 +65,13 @@ describe('NoFindingsStates', () => {
     await waitFor(() => {
       expect(screen.getByRole('link', { name: /install agent/i })).toHaveAttribute(
         'href',
-        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=1f850b02-c6db-4378-9323-d439db4d65b4&integration=9b69ad21-1451-462c-9cd7-cc7dee50a34e'
+        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=30cba674-531c-4225-b392-3f7810957511&integration=630f3e42-659e-4499-9007-61e36adf1d97'
       );
     });
   });
   it('shows install agent prompt with install agent link when status is not-deployed and postureType is KSPM', async () => {
-    server.use(statusNotDeployed);
+    server.use(statusHandlers.notDeployedHandler);
+    server.use(benchmarksHandlers.kspmInstalledHandler);
     renderNoFindingsStates('kspm');
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
@@ -84,12 +85,12 @@ describe('NoFindingsStates', () => {
       });
       expect(link).toHaveAttribute(
         'href',
-        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=689ca301-cf52-4251-b427-85817fa53800&integration=c14da36e-8476-455f-a8a8-127013a4ccee'
+        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=e2f72eea-bf76-4576-bed8-e29d2df102a7&integration=6aedf856-bc21-49aa-859a-a0952789f898'
       );
     });
   });
   it('shows indexing message when status is indexing', async () => {
-    server.use(statusIndexing);
+    server.use(statusHandlers.indexingHandler);
 
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -105,7 +106,7 @@ describe('NoFindingsStates', () => {
     ).toBeInTheDocument();
   });
   it('shows timeout message when status is index-timeout', async () => {
-    server.use(statusIndexTimeout);
+    server.use(statusHandlers.indexTimeoutHandler);
 
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -121,7 +122,7 @@ describe('NoFindingsStates', () => {
     ).toBeInTheDocument();
   });
   it('shows unprivileged message when status is unprivileged', async () => {
-    server.use(statusUnprivileged);
+    server.use(statusHandlers.unprivilegedHandler);
 
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -142,7 +143,7 @@ describe('NoFindingsStates', () => {
     });
   });
   it('renders empty container when the status does not match a no finding status', async () => {
-    server.use(statusIndexed);
+    server.use(statusHandlers.indexedHandler);
 
     const { container } = renderNoFindingsStates();
 

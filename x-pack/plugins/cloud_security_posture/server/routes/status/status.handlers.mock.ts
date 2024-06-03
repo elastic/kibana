@@ -5,11 +5,10 @@
  * 2.0.
  */
 import { http, HttpResponse } from 'msw';
-import { MOCK_SERVER_BASE_URL } from '../../../constants';
 
-const STATUS_URL = `${MOCK_SERVER_BASE_URL}/internal/cloud_security_posture/status`;
+const STATUS_URL = `/internal/cloud_security_posture/status`;
 
-export const statusNotInstalled = http.get(STATUS_URL, () => {
+export const notInstalledHandler = http.get(STATUS_URL, () => {
   return HttpResponse.json({
     cspm: {
       status: 'not-installed',
@@ -49,7 +48,7 @@ export const statusNotInstalled = http.get(STATUS_URL, () => {
   });
 });
 
-export const statusNotDeployed = http.get(STATUS_URL, () => {
+export const notDeployedHandler = http.get(STATUS_URL, () => {
   return HttpResponse.json({
     cspm: {
       status: 'not-deployed',
@@ -90,7 +89,7 @@ export const statusNotDeployed = http.get(STATUS_URL, () => {
   });
 });
 
-export const statusIndexing = http.get(STATUS_URL, () => {
+export const indexingHandler = http.get(STATUS_URL, () => {
   return HttpResponse.json({
     cspm: {
       status: 'indexing',
@@ -130,7 +129,7 @@ export const statusIndexing = http.get(STATUS_URL, () => {
   });
 });
 
-export const statusIndexTimeout = http.get(STATUS_URL, () => {
+export const indexTimeoutHandler = http.get(STATUS_URL, () => {
   return HttpResponse.json({
     cspm: {
       status: 'index-timeout',
@@ -170,7 +169,7 @@ export const statusIndexTimeout = http.get(STATUS_URL, () => {
   });
 });
 
-export const statusUnprivileged = http.get(STATUS_URL, () => {
+export const unprivilegedHandler = http.get(STATUS_URL, () => {
   return HttpResponse.json({
     cspm: {
       status: 'unprivileged',
@@ -210,7 +209,7 @@ export const statusUnprivileged = http.get(STATUS_URL, () => {
   });
 });
 
-export const statusIndexed = http.get(STATUS_URL, () => {
+export const indexedHandler = http.get(STATUS_URL, () => {
   return HttpResponse.json({
     cspm: {
       status: 'indexed',
