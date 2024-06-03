@@ -63,7 +63,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderers,
       unit: (totalCount) =>
-        i18n.translate('alertsUiShared.unit', {
+        i18n.translate('alertsGrouping.unit', {
           values: { totalCount },
           defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
         }),
