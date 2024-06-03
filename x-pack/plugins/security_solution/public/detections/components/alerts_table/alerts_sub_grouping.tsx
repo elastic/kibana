@@ -14,6 +14,7 @@ import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
