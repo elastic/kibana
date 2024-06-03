@@ -14004,6 +14004,152 @@
     ]
   },
   {
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/benchmark.ts",
+    "fileName": "benchmark.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR",
+      "HAS SKIP",
+      "HAS TODO"
+    ],
+    "lines": [
+      "  describe('Access with custom roles')",
+      "    it.skip('Access with valid user role')",
+      "    it.skip('todo - Access with invalid user role')",
+      "    describe('Access with custom roles - rule page')",
+      "      it('Access with valid user role')",
+      "      it.skip('todo - Access with invalid user role')"
+    ],
+    "testSuits": [
+      {
+        "id": "access-with-custom-roles",
+        "rawLine": "  describe('Access with custom roles', async () => {",
+        "line": "  describe('Access with custom roles')",
+        "label": "Access with custom roles",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-valid-user-role",
+        "rawLine": "    it.skip('Access with valid user role', async () => {",
+        "line": "    it.skip('Access with valid user role')",
+        "label": "Access with valid user role",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": true,
+        "isTodo": false
+      },
+      {
+        "id": "todo---access-with-invalid-user-role",
+        "rawLine": "    it.skip('todo - Access with invalid user role', async () => {});",
+        "line": "    it.skip('todo - Access with invalid user role')",
+        "label": "todo - Access with invalid user role",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": true,
+        "isTodo": true
+      },
+      {
+        "id": "access-with-custom-roles---rule-page",
+        "rawLine": "    describe('Access with custom roles - rule page', async () => {",
+        "line": "    describe('Access with custom roles - rule page')",
+        "label": "Access with custom roles - rule page",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-valid-user-role",
+        "rawLine": "      it('Access with valid user role', async () => {",
+        "line": "      it('Access with valid user role')",
+        "label": "Access with valid user role",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "todo---access-with-invalid-user-role",
+        "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
+        "line": "      it.skip('todo - Access with invalid user role')",
+        "label": "todo - Access with invalid user role",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": true,
+        "isTodo": true
+      }
+    ],
+    "tree": [
+      {
+        "id": "access-with-custom-roles",
+        "rawLine": "  describe('Access with custom roles', async () => {",
+        "line": "  describe('Access with custom roles')",
+        "label": "Access with custom roles",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "access-with-valid-user-role",
+            "rawLine": "    it.skip('Access with valid user role', async () => {",
+            "line": "    it.skip('Access with valid user role')",
+            "label": "Access with valid user role",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "todo---access-with-invalid-user-role",
+            "rawLine": "    it.skip('todo - Access with invalid user role', async () => {});",
+            "line": "    it.skip('todo - Access with invalid user role')",
+            "label": "todo - Access with invalid user role",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": true
+          },
+          {
+            "id": "access-with-custom-roles---rule-page",
+            "rawLine": "    describe('Access with custom roles - rule page', async () => {",
+            "line": "    describe('Access with custom roles - rule page')",
+            "label": "Access with custom roles - rule page",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "access-with-valid-user-role",
+                "rawLine": "      it('Access with valid user role', async () => {",
+                "line": "      it('Access with valid user role')",
+                "label": "Access with valid user role",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "todo---access-with-invalid-user-role",
+                "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
+                "line": "      it.skip('todo - Access with invalid user role')",
+                "label": "todo - Access with invalid user role",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": true,
+                "isTodo": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts",
     "fileName": "cis_integration_cnvm.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
@@ -15841,6 +15987,7 @@
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
+      "HAS SKIP",
       "HAS TODO"
     ],
     "lines": [
@@ -15851,7 +15998,7 @@
       "      it('todo - displays accurate summary compliance score', async () => {});",
       "    describe('Access with custom roles')",
       "      it('Access with valid user role')",
-      "      it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621"
+      "      it.skip('todo - Access with invalid user role')"
     ],
     "testSuits": [
       {
@@ -15926,12 +16073,12 @@
       },
       {
         "id": "todo---access-with-invalid-user-role",
-        "rawLine": "      // it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
-        "line": "      it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
+        "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
+        "line": "      it.skip('todo - Access with invalid user role')",
         "label": "todo - Access with invalid user role",
         "indent": 6,
         "type": "it",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": true
       }
     ],
@@ -16012,12 +16159,12 @@
               },
               {
                 "id": "todo---access-with-invalid-user-role",
-                "rawLine": "      // it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
-                "line": "      it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
+                "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
+                "line": "      it.skip('todo - Access with invalid user role')",
                 "label": "todo - Access with invalid user role",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": true
               }
             ]
@@ -17250,77 +17397,43 @@
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
-      "HAS SKIP",
-      "HAS TODO"
+      "HAS SKIP"
     ],
     "lines": [
-      "  describe('Access with custom roles - rule')",
-      "    it('Access with valid user role')",
-      "    it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
-      "  describe.skip('Cloud Posture Rules Page', function () {",
-      "    describe('Rules Page - Rules Counters', () => {",
-      "      it('Shows posture score when there are findings', async () => {",
-      "      it('Clicking the posture score button leads to the dashboard', async () => {",
-      "      it('Shows integrations count when there are findings', async () => {",
-      "      it('Clicking the integrations counter button leads to the integration page', async () => {",
-      "      it('Shows the failed findings counter when there are findings', async () => {",
-      "      it('Clicking the failed findings button leads to the findings page', async () => {",
-      "      it('Shows the disabled rules count', async () => {",
-      "      it('Clicking the disabled rules button shows enables the disabled filter', async () => {",
-      "      it('Shows empty state when there are no findings', async () => {",
-      "    describe('Rules Page - Bulk Action buttons', () => {",
-      "      it('It should disable Enable option when there are all rules selected are already enabled ', async () => {",
-      "      it('It should disable both Enable and Disable options when there are no rules selected', async () => {",
-      "      it('It should disable Disable option when there are all rules selected are already Disabled', async () => {",
-      "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {",
-      "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {",
-      "      it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {",
-      "      it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {",
-      "    describe('Rules Page - CIS Section & Rule Number filters', () => {",
-      "      it('Table should only show result that has the same section as in the Section filter', async () => {",
-      "      it('Table should only show result that has the same section as in the Rule number filter', async () => {",
-      "      it('Table should only show result that passes both Section and Rule number filter', async () => {",
-      "    describe('Rules Page - Flyout', () => {",
-      "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {",
-      "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {",
-      "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {",
-      "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {"
+      "  describe.skip('Cloud Posture Rules Page')",
+      "    describe('Rules Page - Rules Counters')",
+      "      it('Shows posture score when there are findings')",
+      "      it('Clicking the posture score button leads to the dashboard')",
+      "      it('Shows integrations count when there are findings')",
+      "      it('Clicking the integrations counter button leads to the integration page')",
+      "      it('Shows the failed findings counter when there are findings')",
+      "      it('Clicking the failed findings button leads to the findings page')",
+      "      it('Shows the disabled rules count')",
+      "      it('Clicking the disabled rules button shows enables the disabled filter')",
+      "      it('Shows empty state when there are no findings')",
+      "    describe('Rules Page - Bulk Action buttons')",
+      "      it('It should disable Enable option when there are all rules selected are already enabled ')",
+      "      it('It should disable both Enable and Disable options when there are no rules selected')",
+      "      it('It should disable Disable option when there are all rules selected are already Disabled')",
+      "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules')",
+      "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle')",
+      "      it('Should only display Enabled rules when Enabled Rules filter is ON')",
+      "      it('Should only display Disabled rules when Disabled Rules filter is ON')",
+      "    describe('Rules Page - CIS Section & Rule Number filters')",
+      "      it('Table should only show result that has the same section as in the Section filter')",
+      "      it('Table should only show result that has the same section as in the Rule number filter')",
+      "      it('Table should only show result that passes both Section and Rule number filter')",
+      "    describe('Rules Page - Flyout')",
+      "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout')",
+      "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled')",
+      "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout')",
+      "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled')"
     ],
     "testSuits": [
       {
-        "id": "access-with-custom-roles---rule",
-        "rawLine": "  describe('Access with custom roles - rule', async () => {",
-        "line": "  describe('Access with custom roles - rule')",
-        "label": "Access with custom roles - rule",
-        "indent": 2,
-        "type": "describe",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "access-with-valid-user-role",
-        "rawLine": "    it('Access with valid user role', async () => {",
-        "line": "    it('Access with valid user role')",
-        "label": "Access with valid user role",
-        "indent": 4,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "todo---access-with-invalid-user-role",
-        "rawLine": "    // it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
-        "line": "    it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
-        "label": "todo - Access with invalid user role",
-        "indent": 4,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": true
-      },
-      {
         "id": "cloud-posture-rules-page",
-        "rawLine": "  // describe.skip('Cloud Posture Rules Page', function () {",
-        "line": "  describe.skip('Cloud Posture Rules Page', function () {",
+        "rawLine": "  describe.skip('Cloud Posture Rules Page', function () {",
+        "line": "  describe.skip('Cloud Posture Rules Page')",
         "label": "Cloud Posture Rules Page",
         "indent": 2,
         "type": "describe",
@@ -17329,8 +17442,8 @@
       },
       {
         "id": "rules-page---rules-counters",
-        "rawLine": "  //   describe('Rules Page - Rules Counters', () => {",
-        "line": "    describe('Rules Page - Rules Counters', () => {",
+        "rawLine": "    describe('Rules Page - Rules Counters', () => {",
+        "line": "    describe('Rules Page - Rules Counters')",
         "label": "Rules Page - Rules Counters",
         "indent": 4,
         "type": "describe",
@@ -17339,8 +17452,8 @@
       },
       {
         "id": "shows-posture-score-when-there-are-findings",
-        "rawLine": "  //     it('Shows posture score when there are findings', async () => {",
-        "line": "      it('Shows posture score when there are findings', async () => {",
+        "rawLine": "      it('Shows posture score when there are findings', async () => {",
+        "line": "      it('Shows posture score when there are findings')",
         "label": "Shows posture score when there are findings",
         "indent": 6,
         "type": "it",
@@ -17349,8 +17462,8 @@
       },
       {
         "id": "clicking-the-posture-score-button-leads-to-the-dashboard",
-        "rawLine": "  //     it('Clicking the posture score button leads to the dashboard', async () => {",
-        "line": "      it('Clicking the posture score button leads to the dashboard', async () => {",
+        "rawLine": "      it('Clicking the posture score button leads to the dashboard', async () => {",
+        "line": "      it('Clicking the posture score button leads to the dashboard')",
         "label": "Clicking the posture score button leads to the dashboard",
         "indent": 6,
         "type": "it",
@@ -17359,8 +17472,8 @@
       },
       {
         "id": "shows-integrations-count-when-there-are-findings",
-        "rawLine": "  //     it('Shows integrations count when there are findings', async () => {",
-        "line": "      it('Shows integrations count when there are findings', async () => {",
+        "rawLine": "      it('Shows integrations count when there are findings', async () => {",
+        "line": "      it('Shows integrations count when there are findings')",
         "label": "Shows integrations count when there are findings",
         "indent": 6,
         "type": "it",
@@ -17369,8 +17482,8 @@
       },
       {
         "id": "clicking-the-integrations-counter-button-leads-to-the-integration-page",
-        "rawLine": "  //     it('Clicking the integrations counter button leads to the integration page', async () => {",
-        "line": "      it('Clicking the integrations counter button leads to the integration page', async () => {",
+        "rawLine": "      it('Clicking the integrations counter button leads to the integration page', async () => {",
+        "line": "      it('Clicking the integrations counter button leads to the integration page')",
         "label": "Clicking the integrations counter button leads to the integration page",
         "indent": 6,
         "type": "it",
@@ -17379,8 +17492,8 @@
       },
       {
         "id": "shows-the-failed-findings-counter-when-there-are-findings",
-        "rawLine": "  //     it('Shows the failed findings counter when there are findings', async () => {",
-        "line": "      it('Shows the failed findings counter when there are findings', async () => {",
+        "rawLine": "      it('Shows the failed findings counter when there are findings', async () => {",
+        "line": "      it('Shows the failed findings counter when there are findings')",
         "label": "Shows the failed findings counter when there are findings",
         "indent": 6,
         "type": "it",
@@ -17389,8 +17502,8 @@
       },
       {
         "id": "clicking-the-failed-findings-button-leads-to-the-findings-page",
-        "rawLine": "  //     it('Clicking the failed findings button leads to the findings page', async () => {",
-        "line": "      it('Clicking the failed findings button leads to the findings page', async () => {",
+        "rawLine": "      it('Clicking the failed findings button leads to the findings page', async () => {",
+        "line": "      it('Clicking the failed findings button leads to the findings page')",
         "label": "Clicking the failed findings button leads to the findings page",
         "indent": 6,
         "type": "it",
@@ -17399,8 +17512,8 @@
       },
       {
         "id": "shows-the-disabled-rules-count",
-        "rawLine": "  //     it('Shows the disabled rules count', async () => {",
-        "line": "      it('Shows the disabled rules count', async () => {",
+        "rawLine": "      it('Shows the disabled rules count', async () => {",
+        "line": "      it('Shows the disabled rules count')",
         "label": "Shows the disabled rules count",
         "indent": 6,
         "type": "it",
@@ -17409,8 +17522,8 @@
       },
       {
         "id": "clicking-the-disabled-rules-button-shows-enables-the-disabled-filter",
-        "rawLine": "  //     it('Clicking the disabled rules button shows enables the disabled filter', async () => {",
-        "line": "      it('Clicking the disabled rules button shows enables the disabled filter', async () => {",
+        "rawLine": "      it('Clicking the disabled rules button shows enables the disabled filter', async () => {",
+        "line": "      it('Clicking the disabled rules button shows enables the disabled filter')",
         "label": "Clicking the disabled rules button shows enables the disabled filter",
         "indent": 6,
         "type": "it",
@@ -17419,8 +17532,8 @@
       },
       {
         "id": "shows-empty-state-when-there-are-no-findings",
-        "rawLine": "  //     it('Shows empty state when there are no findings', async () => {",
-        "line": "      it('Shows empty state when there are no findings', async () => {",
+        "rawLine": "      it('Shows empty state when there are no findings', async () => {",
+        "line": "      it('Shows empty state when there are no findings')",
         "label": "Shows empty state when there are no findings",
         "indent": 6,
         "type": "it",
@@ -17429,8 +17542,8 @@
       },
       {
         "id": "rules-page---bulk-action-buttons",
-        "rawLine": "  //   describe('Rules Page - Bulk Action buttons', () => {",
-        "line": "    describe('Rules Page - Bulk Action buttons', () => {",
+        "rawLine": "    describe('Rules Page - Bulk Action buttons', () => {",
+        "line": "    describe('Rules Page - Bulk Action buttons')",
         "label": "Rules Page - Bulk Action buttons",
         "indent": 4,
         "type": "describe",
@@ -17439,8 +17552,8 @@
       },
       {
         "id": "it-should-disable-enable-option-when-there-are-all-rules-selected-are-already-enabled-",
-        "rawLine": "  //     it('It should disable Enable option when there are all rules selected are already enabled ', async () => {",
-        "line": "      it('It should disable Enable option when there are all rules selected are already enabled ', async () => {",
+        "rawLine": "      it('It should disable Enable option when there are all rules selected are already enabled ', async () => {",
+        "line": "      it('It should disable Enable option when there are all rules selected are already enabled ')",
         "label": "It should disable Enable option when there are all rules selected are already enabled ",
         "indent": 6,
         "type": "it",
@@ -17449,8 +17562,8 @@
       },
       {
         "id": "it-should-disable-both-enable-and-disable-options-when-there-are-no-rules-selected",
-        "rawLine": "  //     it('It should disable both Enable and Disable options when there are no rules selected', async () => {",
-        "line": "      it('It should disable both Enable and Disable options when there are no rules selected', async () => {",
+        "rawLine": "      it('It should disable both Enable and Disable options when there are no rules selected', async () => {",
+        "line": "      it('It should disable both Enable and Disable options when there are no rules selected')",
         "label": "It should disable both Enable and Disable options when there are no rules selected",
         "indent": 6,
         "type": "it",
@@ -17459,8 +17572,8 @@
       },
       {
         "id": "it-should-disable-disable-option-when-there-are-all-rules-selected-are-already-disabled",
-        "rawLine": "  //     it('It should disable Disable option when there are all rules selected are already Disabled', async () => {",
-        "line": "      it('It should disable Disable option when there are all rules selected are already Disabled', async () => {",
+        "rawLine": "      it('It should disable Disable option when there are all rules selected are already Disabled', async () => {",
+        "line": "      it('It should disable Disable option when there are all rules selected are already Disabled')",
         "label": "It should disable Disable option when there are all rules selected are already Disabled",
         "indent": 6,
         "type": "it",
@@ -17469,8 +17582,8 @@
       },
       {
         "id": "both-option-should-not-be-disabled-if-selected-rules-contains-both-enabled-and-disabled-rules",
-        "rawLine": "  //     it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {",
-        "line": "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {",
+        "rawLine": "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {",
+        "line": "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules')",
         "label": "Both option should not be disabled if selected rules contains both enabled and disabled rules",
         "indent": 6,
         "type": "it",
@@ -17479,8 +17592,8 @@
       },
       {
         "id": "rules-page---enable-rules-and-disabled-rules-filter-toggle",
-        "rawLine": "  //   describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {",
-        "line": "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {",
+        "rawLine": "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {",
+        "line": "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle')",
         "label": "Rules Page - Enable Rules and Disabled Rules Filter Toggle",
         "indent": 4,
         "type": "describe",
@@ -17489,8 +17602,8 @@
       },
       {
         "id": "should-only-display-enabled-rules-when-enabled-rules-filter-is-on",
-        "rawLine": "  //     it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {",
-        "line": "      it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {",
+        "rawLine": "      it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {",
+        "line": "      it('Should only display Enabled rules when Enabled Rules filter is ON')",
         "label": "Should only display Enabled rules when Enabled Rules filter is ON",
         "indent": 6,
         "type": "it",
@@ -17499,8 +17612,8 @@
       },
       {
         "id": "should-only-display-disabled-rules-when-disabled-rules-filter-is-on",
-        "rawLine": "  //     it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {",
-        "line": "      it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {",
+        "rawLine": "      it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {",
+        "line": "      it('Should only display Disabled rules when Disabled Rules filter is ON')",
         "label": "Should only display Disabled rules when Disabled Rules filter is ON",
         "indent": 6,
         "type": "it",
@@ -17509,8 +17622,8 @@
       },
       {
         "id": "rules-page---cis-section-&-rule-number-filters",
-        "rawLine": "  //   describe('Rules Page - CIS Section & Rule Number filters', () => {",
-        "line": "    describe('Rules Page - CIS Section & Rule Number filters', () => {",
+        "rawLine": "    describe('Rules Page - CIS Section & Rule Number filters', () => {",
+        "line": "    describe('Rules Page - CIS Section & Rule Number filters')",
         "label": "Rules Page - CIS Section & Rule Number filters",
         "indent": 4,
         "type": "describe",
@@ -17519,8 +17632,8 @@
       },
       {
         "id": "table-should-only-show-result-that-has-the-same-section-as-in-the-section-filter",
-        "rawLine": "  //     it('Table should only show result that has the same section as in the Section filter', async () => {",
-        "line": "      it('Table should only show result that has the same section as in the Section filter', async () => {",
+        "rawLine": "      it('Table should only show result that has the same section as in the Section filter', async () => {",
+        "line": "      it('Table should only show result that has the same section as in the Section filter')",
         "label": "Table should only show result that has the same section as in the Section filter",
         "indent": 6,
         "type": "it",
@@ -17529,8 +17642,8 @@
       },
       {
         "id": "table-should-only-show-result-that-has-the-same-section-as-in-the-rule-number-filter",
-        "rawLine": "  //     it('Table should only show result that has the same section as in the Rule number filter', async () => {",
-        "line": "      it('Table should only show result that has the same section as in the Rule number filter', async () => {",
+        "rawLine": "      it('Table should only show result that has the same section as in the Rule number filter', async () => {",
+        "line": "      it('Table should only show result that has the same section as in the Rule number filter')",
         "label": "Table should only show result that has the same section as in the Rule number filter",
         "indent": 6,
         "type": "it",
@@ -17539,8 +17652,8 @@
       },
       {
         "id": "table-should-only-show-result-that-passes-both-section-and-rule-number-filter",
-        "rawLine": "  //     it('Table should only show result that passes both Section and Rule number filter', async () => {",
-        "line": "      it('Table should only show result that passes both Section and Rule number filter', async () => {",
+        "rawLine": "      it('Table should only show result that passes both Section and Rule number filter', async () => {",
+        "line": "      it('Table should only show result that passes both Section and Rule number filter')",
         "label": "Table should only show result that passes both Section and Rule number filter",
         "indent": 6,
         "type": "it",
@@ -17549,8 +17662,8 @@
       },
       {
         "id": "rules-page---flyout",
-        "rawLine": "  //   describe('Rules Page - Flyout', () => {",
-        "line": "    describe('Rules Page - Flyout', () => {",
+        "rawLine": "    describe('Rules Page - Flyout', () => {",
+        "line": "    describe('Rules Page - Flyout')",
         "label": "Rules Page - Flyout",
         "indent": 4,
         "type": "describe",
@@ -17559,8 +17672,8 @@
       },
       {
         "id": "users-are-able-to-enable/disable-rule-from-switch-on-rule-flyout",
-        "rawLine": "  //     it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {",
-        "line": "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {",
+        "rawLine": "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {",
+        "line": "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout')",
         "label": "Users are able to Enable/Disable Rule from Switch on Rule Flyout",
         "indent": 6,
         "type": "it",
@@ -17569,8 +17682,8 @@
       },
       {
         "id": "alerts-section-of-rules-flyout-shows-disabled-text-when-rules-are-disabled",
-        "rawLine": "  //     it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {",
-        "line": "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {",
+        "rawLine": "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {",
+        "line": "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled')",
         "label": "Alerts section of Rules Flyout shows Disabled text when Rules are disabled",
         "indent": 6,
         "type": "it",
@@ -17579,8 +17692,8 @@
       },
       {
         "id": "users-are-able-to-enable/disable-rule-from-take-action-on-rule-flyout",
-        "rawLine": "  //     it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {",
-        "line": "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {",
+        "rawLine": "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {",
+        "line": "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout')",
         "label": "Users are able to Enable/Disable Rule from Take Action on Rule Flyout",
         "indent": 6,
         "type": "it",
@@ -17589,8 +17702,8 @@
       },
       {
         "id": "alerts-section-of-rules-flyout-shows-detection-rule-counter-component-when-rules-are-enabled",
-        "rawLine": "  //     it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {",
-        "line": "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {",
+        "rawLine": "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {",
+        "line": "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled')",
         "label": "Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled",
         "indent": 6,
         "type": "it",
@@ -17600,41 +17713,9 @@
     ],
     "tree": [
       {
-        "id": "access-with-custom-roles---rule",
-        "rawLine": "  describe('Access with custom roles - rule', async () => {",
-        "line": "  describe('Access with custom roles - rule')",
-        "label": "Access with custom roles - rule",
-        "indent": 2,
-        "type": "describe",
-        "isSkipped": false,
-        "isTodo": false,
-        "children": [
-          {
-            "id": "access-with-valid-user-role",
-            "rawLine": "    it('Access with valid user role', async () => {",
-            "line": "    it('Access with valid user role')",
-            "label": "Access with valid user role",
-            "indent": 4,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "todo---access-with-invalid-user-role",
-            "rawLine": "    // it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
-            "line": "    it('todo - Access with invalid user role', async () => {}); // Blocked by https://github.com/elastic/kibana/issues/184621",
-            "label": "todo - Access with invalid user role",
-            "indent": 4,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": true
-          }
-        ]
-      },
-      {
         "id": "cloud-posture-rules-page",
-        "rawLine": "  // describe.skip('Cloud Posture Rules Page', function () {",
-        "line": "  describe.skip('Cloud Posture Rules Page', function () {",
+        "rawLine": "  describe.skip('Cloud Posture Rules Page', function () {",
+        "line": "  describe.skip('Cloud Posture Rules Page')",
         "label": "Cloud Posture Rules Page",
         "indent": 2,
         "type": "describe",
@@ -17643,8 +17724,8 @@
         "children": [
           {
             "id": "rules-page---rules-counters",
-            "rawLine": "  //   describe('Rules Page - Rules Counters', () => {",
-            "line": "    describe('Rules Page - Rules Counters', () => {",
+            "rawLine": "    describe('Rules Page - Rules Counters', () => {",
+            "line": "    describe('Rules Page - Rules Counters')",
             "label": "Rules Page - Rules Counters",
             "indent": 4,
             "type": "describe",
@@ -17653,8 +17734,8 @@
             "children": [
               {
                 "id": "shows-posture-score-when-there-are-findings",
-                "rawLine": "  //     it('Shows posture score when there are findings', async () => {",
-                "line": "      it('Shows posture score when there are findings', async () => {",
+                "rawLine": "      it('Shows posture score when there are findings', async () => {",
+                "line": "      it('Shows posture score when there are findings')",
                 "label": "Shows posture score when there are findings",
                 "indent": 6,
                 "type": "it",
@@ -17663,8 +17744,8 @@
               },
               {
                 "id": "clicking-the-posture-score-button-leads-to-the-dashboard",
-                "rawLine": "  //     it('Clicking the posture score button leads to the dashboard', async () => {",
-                "line": "      it('Clicking the posture score button leads to the dashboard', async () => {",
+                "rawLine": "      it('Clicking the posture score button leads to the dashboard', async () => {",
+                "line": "      it('Clicking the posture score button leads to the dashboard')",
                 "label": "Clicking the posture score button leads to the dashboard",
                 "indent": 6,
                 "type": "it",
@@ -17673,8 +17754,8 @@
               },
               {
                 "id": "shows-integrations-count-when-there-are-findings",
-                "rawLine": "  //     it('Shows integrations count when there are findings', async () => {",
-                "line": "      it('Shows integrations count when there are findings', async () => {",
+                "rawLine": "      it('Shows integrations count when there are findings', async () => {",
+                "line": "      it('Shows integrations count when there are findings')",
                 "label": "Shows integrations count when there are findings",
                 "indent": 6,
                 "type": "it",
@@ -17683,8 +17764,8 @@
               },
               {
                 "id": "clicking-the-integrations-counter-button-leads-to-the-integration-page",
-                "rawLine": "  //     it('Clicking the integrations counter button leads to the integration page', async () => {",
-                "line": "      it('Clicking the integrations counter button leads to the integration page', async () => {",
+                "rawLine": "      it('Clicking the integrations counter button leads to the integration page', async () => {",
+                "line": "      it('Clicking the integrations counter button leads to the integration page')",
                 "label": "Clicking the integrations counter button leads to the integration page",
                 "indent": 6,
                 "type": "it",
@@ -17693,8 +17774,8 @@
               },
               {
                 "id": "shows-the-failed-findings-counter-when-there-are-findings",
-                "rawLine": "  //     it('Shows the failed findings counter when there are findings', async () => {",
-                "line": "      it('Shows the failed findings counter when there are findings', async () => {",
+                "rawLine": "      it('Shows the failed findings counter when there are findings', async () => {",
+                "line": "      it('Shows the failed findings counter when there are findings')",
                 "label": "Shows the failed findings counter when there are findings",
                 "indent": 6,
                 "type": "it",
@@ -17703,8 +17784,8 @@
               },
               {
                 "id": "clicking-the-failed-findings-button-leads-to-the-findings-page",
-                "rawLine": "  //     it('Clicking the failed findings button leads to the findings page', async () => {",
-                "line": "      it('Clicking the failed findings button leads to the findings page', async () => {",
+                "rawLine": "      it('Clicking the failed findings button leads to the findings page', async () => {",
+                "line": "      it('Clicking the failed findings button leads to the findings page')",
                 "label": "Clicking the failed findings button leads to the findings page",
                 "indent": 6,
                 "type": "it",
@@ -17713,8 +17794,8 @@
               },
               {
                 "id": "shows-the-disabled-rules-count",
-                "rawLine": "  //     it('Shows the disabled rules count', async () => {",
-                "line": "      it('Shows the disabled rules count', async () => {",
+                "rawLine": "      it('Shows the disabled rules count', async () => {",
+                "line": "      it('Shows the disabled rules count')",
                 "label": "Shows the disabled rules count",
                 "indent": 6,
                 "type": "it",
@@ -17723,8 +17804,8 @@
               },
               {
                 "id": "clicking-the-disabled-rules-button-shows-enables-the-disabled-filter",
-                "rawLine": "  //     it('Clicking the disabled rules button shows enables the disabled filter', async () => {",
-                "line": "      it('Clicking the disabled rules button shows enables the disabled filter', async () => {",
+                "rawLine": "      it('Clicking the disabled rules button shows enables the disabled filter', async () => {",
+                "line": "      it('Clicking the disabled rules button shows enables the disabled filter')",
                 "label": "Clicking the disabled rules button shows enables the disabled filter",
                 "indent": 6,
                 "type": "it",
@@ -17733,8 +17814,8 @@
               },
               {
                 "id": "shows-empty-state-when-there-are-no-findings",
-                "rawLine": "  //     it('Shows empty state when there are no findings', async () => {",
-                "line": "      it('Shows empty state when there are no findings', async () => {",
+                "rawLine": "      it('Shows empty state when there are no findings', async () => {",
+                "line": "      it('Shows empty state when there are no findings')",
                 "label": "Shows empty state when there are no findings",
                 "indent": 6,
                 "type": "it",
@@ -17745,8 +17826,8 @@
           },
           {
             "id": "rules-page---bulk-action-buttons",
-            "rawLine": "  //   describe('Rules Page - Bulk Action buttons', () => {",
-            "line": "    describe('Rules Page - Bulk Action buttons', () => {",
+            "rawLine": "    describe('Rules Page - Bulk Action buttons', () => {",
+            "line": "    describe('Rules Page - Bulk Action buttons')",
             "label": "Rules Page - Bulk Action buttons",
             "indent": 4,
             "type": "describe",
@@ -17755,8 +17836,8 @@
             "children": [
               {
                 "id": "it-should-disable-enable-option-when-there-are-all-rules-selected-are-already-enabled-",
-                "rawLine": "  //     it('It should disable Enable option when there are all rules selected are already enabled ', async () => {",
-                "line": "      it('It should disable Enable option when there are all rules selected are already enabled ', async () => {",
+                "rawLine": "      it('It should disable Enable option when there are all rules selected are already enabled ', async () => {",
+                "line": "      it('It should disable Enable option when there are all rules selected are already enabled ')",
                 "label": "It should disable Enable option when there are all rules selected are already enabled ",
                 "indent": 6,
                 "type": "it",
@@ -17765,8 +17846,8 @@
               },
               {
                 "id": "it-should-disable-both-enable-and-disable-options-when-there-are-no-rules-selected",
-                "rawLine": "  //     it('It should disable both Enable and Disable options when there are no rules selected', async () => {",
-                "line": "      it('It should disable both Enable and Disable options when there are no rules selected', async () => {",
+                "rawLine": "      it('It should disable both Enable and Disable options when there are no rules selected', async () => {",
+                "line": "      it('It should disable both Enable and Disable options when there are no rules selected')",
                 "label": "It should disable both Enable and Disable options when there are no rules selected",
                 "indent": 6,
                 "type": "it",
@@ -17775,8 +17856,8 @@
               },
               {
                 "id": "it-should-disable-disable-option-when-there-are-all-rules-selected-are-already-disabled",
-                "rawLine": "  //     it('It should disable Disable option when there are all rules selected are already Disabled', async () => {",
-                "line": "      it('It should disable Disable option when there are all rules selected are already Disabled', async () => {",
+                "rawLine": "      it('It should disable Disable option when there are all rules selected are already Disabled', async () => {",
+                "line": "      it('It should disable Disable option when there are all rules selected are already Disabled')",
                 "label": "It should disable Disable option when there are all rules selected are already Disabled",
                 "indent": 6,
                 "type": "it",
@@ -17785,8 +17866,8 @@
               },
               {
                 "id": "both-option-should-not-be-disabled-if-selected-rules-contains-both-enabled-and-disabled-rules",
-                "rawLine": "  //     it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {",
-                "line": "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {",
+                "rawLine": "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {",
+                "line": "      it('Both option should not be disabled if selected rules contains both enabled and disabled rules')",
                 "label": "Both option should not be disabled if selected rules contains both enabled and disabled rules",
                 "indent": 6,
                 "type": "it",
@@ -17797,8 +17878,8 @@
           },
           {
             "id": "rules-page---enable-rules-and-disabled-rules-filter-toggle",
-            "rawLine": "  //   describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {",
-            "line": "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {",
+            "rawLine": "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {",
+            "line": "    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle')",
             "label": "Rules Page - Enable Rules and Disabled Rules Filter Toggle",
             "indent": 4,
             "type": "describe",
@@ -17807,8 +17888,8 @@
             "children": [
               {
                 "id": "should-only-display-enabled-rules-when-enabled-rules-filter-is-on",
-                "rawLine": "  //     it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {",
-                "line": "      it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {",
+                "rawLine": "      it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {",
+                "line": "      it('Should only display Enabled rules when Enabled Rules filter is ON')",
                 "label": "Should only display Enabled rules when Enabled Rules filter is ON",
                 "indent": 6,
                 "type": "it",
@@ -17817,8 +17898,8 @@
               },
               {
                 "id": "should-only-display-disabled-rules-when-disabled-rules-filter-is-on",
-                "rawLine": "  //     it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {",
-                "line": "      it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {",
+                "rawLine": "      it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {",
+                "line": "      it('Should only display Disabled rules when Disabled Rules filter is ON')",
                 "label": "Should only display Disabled rules when Disabled Rules filter is ON",
                 "indent": 6,
                 "type": "it",
@@ -17829,8 +17910,8 @@
           },
           {
             "id": "rules-page---cis-section-&-rule-number-filters",
-            "rawLine": "  //   describe('Rules Page - CIS Section & Rule Number filters', () => {",
-            "line": "    describe('Rules Page - CIS Section & Rule Number filters', () => {",
+            "rawLine": "    describe('Rules Page - CIS Section & Rule Number filters', () => {",
+            "line": "    describe('Rules Page - CIS Section & Rule Number filters')",
             "label": "Rules Page - CIS Section & Rule Number filters",
             "indent": 4,
             "type": "describe",
@@ -17839,8 +17920,8 @@
             "children": [
               {
                 "id": "table-should-only-show-result-that-has-the-same-section-as-in-the-section-filter",
-                "rawLine": "  //     it('Table should only show result that has the same section as in the Section filter', async () => {",
-                "line": "      it('Table should only show result that has the same section as in the Section filter', async () => {",
+                "rawLine": "      it('Table should only show result that has the same section as in the Section filter', async () => {",
+                "line": "      it('Table should only show result that has the same section as in the Section filter')",
                 "label": "Table should only show result that has the same section as in the Section filter",
                 "indent": 6,
                 "type": "it",
@@ -17849,8 +17930,8 @@
               },
               {
                 "id": "table-should-only-show-result-that-has-the-same-section-as-in-the-rule-number-filter",
-                "rawLine": "  //     it('Table should only show result that has the same section as in the Rule number filter', async () => {",
-                "line": "      it('Table should only show result that has the same section as in the Rule number filter', async () => {",
+                "rawLine": "      it('Table should only show result that has the same section as in the Rule number filter', async () => {",
+                "line": "      it('Table should only show result that has the same section as in the Rule number filter')",
                 "label": "Table should only show result that has the same section as in the Rule number filter",
                 "indent": 6,
                 "type": "it",
@@ -17859,8 +17940,8 @@
               },
               {
                 "id": "table-should-only-show-result-that-passes-both-section-and-rule-number-filter",
-                "rawLine": "  //     it('Table should only show result that passes both Section and Rule number filter', async () => {",
-                "line": "      it('Table should only show result that passes both Section and Rule number filter', async () => {",
+                "rawLine": "      it('Table should only show result that passes both Section and Rule number filter', async () => {",
+                "line": "      it('Table should only show result that passes both Section and Rule number filter')",
                 "label": "Table should only show result that passes both Section and Rule number filter",
                 "indent": 6,
                 "type": "it",
@@ -17871,8 +17952,8 @@
           },
           {
             "id": "rules-page---flyout",
-            "rawLine": "  //   describe('Rules Page - Flyout', () => {",
-            "line": "    describe('Rules Page - Flyout', () => {",
+            "rawLine": "    describe('Rules Page - Flyout', () => {",
+            "line": "    describe('Rules Page - Flyout')",
             "label": "Rules Page - Flyout",
             "indent": 4,
             "type": "describe",
@@ -17881,8 +17962,8 @@
             "children": [
               {
                 "id": "users-are-able-to-enable/disable-rule-from-switch-on-rule-flyout",
-                "rawLine": "  //     it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {",
-                "line": "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {",
+                "rawLine": "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {",
+                "line": "      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout')",
                 "label": "Users are able to Enable/Disable Rule from Switch on Rule Flyout",
                 "indent": 6,
                 "type": "it",
@@ -17891,8 +17972,8 @@
               },
               {
                 "id": "alerts-section-of-rules-flyout-shows-disabled-text-when-rules-are-disabled",
-                "rawLine": "  //     it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {",
-                "line": "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {",
+                "rawLine": "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {",
+                "line": "      it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled')",
                 "label": "Alerts section of Rules Flyout shows Disabled text when Rules are disabled",
                 "indent": 6,
                 "type": "it",
@@ -17901,8 +17982,8 @@
               },
               {
                 "id": "users-are-able-to-enable/disable-rule-from-take-action-on-rule-flyout",
-                "rawLine": "  //     it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {",
-                "line": "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {",
+                "rawLine": "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {",
+                "line": "      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout')",
                 "label": "Users are able to Enable/Disable Rule from Take Action on Rule Flyout",
                 "indent": 6,
                 "type": "it",
@@ -17911,8 +17992,8 @@
               },
               {
                 "id": "alerts-section-of-rules-flyout-shows-detection-rule-counter-component-when-rules-are-enabled",
-                "rawLine": "  //     it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {",
-                "line": "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {",
+                "rawLine": "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {",
+                "line": "      it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled')",
                 "label": "Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled",
                 "indent": 6,
                 "type": "it",
