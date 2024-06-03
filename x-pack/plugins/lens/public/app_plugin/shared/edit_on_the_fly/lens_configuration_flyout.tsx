@@ -37,7 +37,11 @@ import {
   useLensDispatch,
 } from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { EXPRESSION_BUILD_ERROR_ID, extractReferencesFromState } from '../../../utils';
+import {
+  EXPRESSION_BUILD_ERROR_ID,
+  extractReferencesFromState,
+  getAbsoluteDateRange,
+} from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -93,6 +97,10 @@ export function LensEditConfigurationFlyout({
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
+
+  framePublicAPI.absDateRange = getAbsoluteDateRange(
+    startDependencies.data.query.timefilter.timefilter
+  );
 
   const layers = useMemo(
     () => activeDatasource.getLayers(datasourceState),
@@ -230,7 +238,6 @@ export function LensEditConfigurationFlyout({
       },
       references,
       visualizationType: visualization.activeId,
-      title: visualization.activeId ?? '',
     };
     if (savedObjectId) {
       saveByRef?.(attrs);

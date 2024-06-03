@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 
 export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query' | 'filters'>> =
   React.memo((props) => {
@@ -18,14 +18,16 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
     });
-    const savedSearch = useSavedSearch();
+    const additionalFieldGroups = useAdditionalFieldGroups();
+
+    if (!services.dataVisualizer) return null;
 
     return (
       <FieldStatisticsTable
         {...props}
-        savedSearch={savedSearch}
         query={querySubscriberResult.query}
         filters={querySubscriberResult.filters}
+        additionalFieldGroups={additionalFieldGroups}
       />
     );
   });

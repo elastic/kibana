@@ -105,7 +105,6 @@
     "@kbn/react-field",
     "@kbn/field-types",
     "@kbn/securitysolution-rules",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/cases-components",
     "@kbn/event-log-plugin",
     "@kbn/task-manager-plugin",
@@ -143,7 +142,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
-    "@kbn/securitysolution-grouping",
+    "@kbn/grouping",
     "@kbn/securitysolution-data-table",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
@@ -154,7 +153,6 @@
     "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/alerts-ui-shared",
-    "@kbn/text-based-editor",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
@@ -201,6 +199,12 @@
     "@kbn/security-plugin-types-server",
     "@kbn/deeplinks-security",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/field-utils",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/langchain",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
   ]
 }

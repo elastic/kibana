@@ -20,7 +20,7 @@ import type {
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
@@ -37,6 +37,8 @@ import type {
   CommandOptionsDefinition,
   FunctionArgSignature,
   FunctionDefinition,
+  FunctionParameterType,
+  FunctionReturnType,
   SignatureArgType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -130,7 +132,7 @@ function buildFunctionLookup() {
   if (!fnLookups) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionsDefinitions,
+        evalFunctionDefinitions,
         statsAggregationFunctionDefinitions,
         groupingFunctionDefinitions
       )
@@ -214,14 +216,23 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-function compareLiteralType(argTypes: string, item: ESQLLiteral) {
-  if (item.literalType !== 'string') {
-    return argTypes === item.literalType;
+function compareLiteralType(argType: string, item: ESQLLiteral) {
+  if (item.literalType === 'null') {
+    return true;
   }
-  if (argTypes === 'chrono_literal') {
+
+  if (item.literalType !== 'string') {
+    if (argType === item.literalType) {
+      return true;
+    }
+    return false;
+  }
+
+  if (argType === 'chrono_literal') {
     return chronoLiterals.some(({ name }) => name === item.text);
   }
-  return argTypes === item.literalType;
+  // date-type parameters accept string literals because of ES auto-casting
+  return ['string', 'date'].includes(argType);
 }
 
 export function getColumnHit(
@@ -238,11 +249,19 @@ export function isArrayType(type: string) {
   return ARRAY_REGEXP.test(type);
 }
 
+const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
+  ['number[]', 'number'],
+  ['date[]', 'date'],
+  ['boolean[]', 'boolean'],
+  ['string[]', 'string'],
+  ['any[]', 'any'],
+]);
+
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: string) {
-  return type.replace(ARRAY_REGEXP, '');
+export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
+  return arrayToSingularMap.get(type) ?? type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -274,10 +293,14 @@ export function printFunctionSignature(arg: ESQLFunction): string {
             ...fnDef?.signatures[0],
             params: arg.args.map((innerArg) =>
               Array.isArray(innerArg)
-                ? { name: `InnerArgument[]`, type: '' }
-                : { name: innerArg.text, type: innerArg.type }
+                ? { name: `InnerArgument[]`, type: 'any' as const }
+                : // this cast isn't actually correct, but we're abusing the
+                  // getFunctionSignatures API anyways
+                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
             ),
-            returnType: '',
+            // this cast isn't actually correct, but we're abusing the
+            // getFunctionSignatures API anyways
+            returnType: '' as FunctionReturnType,
           },
         ],
       },
@@ -405,7 +428,7 @@ export function isEqualType(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ct === 'any' || argType === ct);
+    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
   }
 }
 
@@ -498,7 +521,7 @@ export function columnExists(
 }
 
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index)) {
+  if (sources.has(index) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));

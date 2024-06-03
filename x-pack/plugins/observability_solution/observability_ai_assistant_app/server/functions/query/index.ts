@@ -11,7 +11,6 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
@@ -128,7 +127,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
         path: '_query',
         body: {
           query,
-          version: ESQL_LATEST_VERSION,
         },
       })) as ESQLSearchReponse;
 

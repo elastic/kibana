@@ -12,6 +12,7 @@ import React, { useCallback, Fragment, useMemo, useState, useContext } from 'rea
 import styled from 'styled-components';
 
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { getSourcererScopeId } from '../../../helpers';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -30,7 +31,7 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
@@ -200,7 +201,6 @@ interface DefaultFieldRendererProps {
   moreMaxHeight?: string;
   render?: (item: string) => React.ReactNode;
   rowItems: string[] | null | undefined;
-  sourcererScopeId?: SourcererScopeName;
   scopeId?: string;
 }
 
@@ -212,7 +212,6 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
   render,
   rowItems,
-  sourcererScopeId,
   scopeId,
 }) => {
   if (rowItems != null && rowItems.length > 0) {
@@ -235,8 +234,8 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
               field={attrName}
               value={rowItem}
               isAggregatable={true}
-              fieldType={'keyword'}
               scopeId={scopeId}
+              fieldType={'keyword'}
             >
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
@@ -261,7 +260,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             overflowIndexStart={displayCount}
             render={render}
             rowItems={rowItems}
-            sourcererScopeId={sourcererScopeId}
+            scopeId={scopeId}
           />
         </EuiFlexItem>
       </DraggableContainerFlexGroup>
@@ -284,7 +283,7 @@ interface DefaultFieldRendererOverflowProps {
   render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
-  sourcererScopeId?: SourcererScopeName;
+  scopeId?: string;
 }
 
 interface MoreContainerProps {
@@ -294,20 +293,14 @@ interface MoreContainerProps {
   moreMaxHeight: string;
   overflowIndexStart: number;
   render?: (item: string) => React.ReactNode;
-  sourcererScopeId?: SourcererScopeName;
+  scopeId?: string;
 }
 
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({
-    fieldName,
-    idPrefix,
-    moreMaxHeight,
-    overflowIndexStart,
-    render,
-    values,
-    sourcererScopeId,
-  }) => {
+  ({ fieldName, idPrefix, moreMaxHeight, overflowIndexStart, render, values, scopeId }) => {
     const { timelineId } = useContext(TimelineContext);
+    const defaultedScopeId = scopeId ?? timelineId;
+    const sourcererScopeId = getSourcererScopeId(defaultedScopeId ?? '');
 
     const moreItemsWithHoverActions = useMemo(
       () =>
@@ -323,14 +316,9 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   visibleCellActions={5}
                   showActionTooltips
                   triggerId={SecurityCellActionsTrigger.DEFAULT}
-                  data={{
-                    value,
-                    field: fieldName,
-                  }}
+                  data={{ value, field: fieldName }}
                   sourcererScopeId={sourcererScopeId ?? SourcererScopeName.default}
-                  metadata={{
-                    scopeId: timelineId ?? undefined,
-                  }}
+                  metadata={{ scopeId: defaultedScopeId ?? undefined }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>
                 </SecurityCellActions>
@@ -340,7 +328,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [values, overflowIndexStart, idPrefix, fieldName, timelineId, render, sourcererScopeId]
+      [values, overflowIndexStart, idPrefix, fieldName, sourcererScopeId, defaultedScopeId, render]
     );
 
     return (
@@ -362,15 +350,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({
-    attrName,
-    idPrefix,
-    moreMaxHeight,
-    overflowIndexStart = 5,
-    render,
-    rowItems,
-    sourcererScopeId,
-  }) => {
+  ({ attrName, idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems, scopeId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
@@ -411,7 +391,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               values={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
-              sourcererScopeId={sourcererScopeId}
+              scopeId={scopeId}
             />
           </EuiPopover>
         )}

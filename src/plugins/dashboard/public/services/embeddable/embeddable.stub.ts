@@ -16,6 +16,7 @@ export const embeddableServiceFactory: EmbeddableServiceFactory = () => {
   const pluginMock = embeddablePluginMock.createStartContract();
 
   return {
+    reactEmbeddableRegistryHasKey: pluginMock.reactEmbeddableRegistryHasKey,
     getEmbeddableFactories: pluginMock.getEmbeddableFactories,
     getEmbeddableFactory: pluginMock.getEmbeddableFactory,
     getStateTransfer: pluginMock.getStateTransfer,

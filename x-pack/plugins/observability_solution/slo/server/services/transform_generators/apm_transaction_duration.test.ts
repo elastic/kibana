@@ -150,4 +150,28 @@ describe('APM Transaction Duration Transform Generator', () => {
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
   });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createAPMTransactionDurationIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
+      },
+    });
+  });
 });

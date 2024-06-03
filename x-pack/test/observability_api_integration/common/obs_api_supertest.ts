@@ -24,7 +24,7 @@ export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequ
   TEndpoint
 >;
 
-export function createObsApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createObsApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';

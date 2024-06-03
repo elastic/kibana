@@ -68,6 +68,7 @@ export type AttackDiscoveryPostRequestBodyInput = z.input<typeof AttackDiscovery
 export type AttackDiscoveryPostResponse = z.infer<typeof AttackDiscoveryPostResponse>;
 export const AttackDiscoveryPostResponse = z.object({
   connector_id: z.string().optional(),
+  alertsContextCount: z.number().optional(),
   attackDiscoveries: z.array(AttackDiscovery).optional(),
   replacements: Replacements.optional(),
   status: z.string().optional(),

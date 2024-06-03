@@ -73,6 +73,7 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  isValidDataset,
   INVALID_NAMESPACE_CHARACTERS,
   getFileMetadataIndexName,
   getFileDataIndexName,

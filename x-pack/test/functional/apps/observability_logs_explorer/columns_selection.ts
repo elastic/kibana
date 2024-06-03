@@ -130,9 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(cellValue.includes('error.message')).to.be(false);
           expect(cellValue.includes('event.original')).to.be(false);
 
-          const cellAttribute = await cellElement.findByTestSubject(
-            'logsExplorerCellDescriptionList'
-          );
+          const cellAttribute = await cellElement.findByTestSubject('discoverCellDescriptionList');
           expect(cellAttribute).not.to.be.empty();
         });
       });

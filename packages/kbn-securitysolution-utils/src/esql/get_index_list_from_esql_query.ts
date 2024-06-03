@@ -11,9 +11,13 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
  * parses ES|QL query and returns array of indices
  */
 export const getIndexListFromEsqlQuery = (query: string | undefined): string[] => {
-  const indexString = getIndexPatternFromESQLQuery(query);
+  try {
+    const indexString = getIndexPatternFromESQLQuery(query);
 
-  return getIndexListFromIndexString(indexString);
+    return getIndexListFromIndexString(indexString);
+  } catch (e) {
+    return [];
+  }
 };
 
 /**

@@ -51,7 +51,7 @@ export const createVersionedRouter = (args: { routes: VersionedRouterMeta[] }) =
 
 const getRouterDefaults = () => ({
   isVersioned: false,
-  path: '/foo/{id}',
+  path: '/foo/{id}/{path*}',
   method: 'get',
   options: {
     tags: ['foo'],
@@ -61,6 +61,7 @@ const getRouterDefaults = () => ({
     request: {
       params: schema.object({
         id: schema.string({ maxLength: 36, meta: { description: 'id' } }),
+        path: schema.string({ maxLength: 36, meta: { description: 'path' } }),
       }),
       query: schema.object({
         page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),

@@ -20,6 +20,7 @@ import type {
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
+  ESQLAstBaseItem,
   ESQLCommand,
   ESQLLiteral,
   ESQLList,
@@ -35,6 +36,18 @@ import type {
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
+}
+
+export function createAstBaseItem<Name = string>(
+  name: Name,
+  ctx: ParserRuleContext
+): ESQLAstBaseItem<Name> {
+  return {
+    name,
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
 }
 
 export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand {
@@ -212,13 +225,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
-  return [67 /* esql_parser.QUOTED_IDENTIFIER */]
+  return [27 /* esql_parser.QUOTED_STRING */, 68 /* esql_parser.QUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
-  return [66 /* esql_parser.UNQUOTED_IDENTIFIER */, 72 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
+  return [67 /* esql_parser.UNQUOTED_IDENTIFIER */, 73 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.getToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
@@ -238,11 +251,13 @@ function safeBackticksRemoval(text: string | undefined) {
 }
 
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
-  return (
+  const result =
     getUnquotedText(ctx)?.getText() ||
     safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
-    safeBackticksRemoval(ctx.getText()) // for some reason some quoted text is not detected correctly by the parser
-  );
+    safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
+
+  // TODO - understand why <missing null> is now returned as the match text for the FROM command
+  return result === '<missing null>' ? '' : result;
 }
 
 export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx: T | T[]): T[] {

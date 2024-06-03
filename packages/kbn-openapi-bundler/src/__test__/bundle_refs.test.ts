@@ -267,7 +267,7 @@ describe('OpenAPI Bundler - bundle references', () => {
       },
     });
 
-    const { '2023-10-31.yaml': bundledSpec } = await bundleSpecs({ '1': spec1, '2': spec2 });
+    const [bundledSpec] = Object.values(await bundleSpecs({ '1': spec1, '2': spec2 }));
 
     expect(bundledSpec.paths['/api/some_api']).toEqual({
       get: spec1.paths['/api/some_api']!.get,

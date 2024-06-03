@@ -354,6 +354,7 @@ export interface DocLinks {
     };
     readonly privileges: string;
     readonly manageDetectionRules: string;
+    readonly createDetectionRules: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -550,6 +551,7 @@ export interface DocLinks {
     remoteESOoutput: string;
     performancePresets: string;
     scalingKubernetesResourcesAndLimits: string;
+    roleAndPrivileges: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -651,6 +653,10 @@ export interface DocLinks {
   };
   readonly playground: {
     readonly chatPlayground: string;
+    readonly retrievalOptimize: string;
+    readonly retrieval: string;
+    readonly context: string;
+    readonly hiddenFields: string;
   };
 }
 
