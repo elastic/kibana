@@ -23,7 +23,7 @@ export const alertRuleData: AlertRuleData = {
     bar: true,
   },
   revision: 0,
-  snoozed: false,
+  muted: false,
   spaceId: 'default',
   tags: ['rule-', '-tags'],
   alertDelay: 0,

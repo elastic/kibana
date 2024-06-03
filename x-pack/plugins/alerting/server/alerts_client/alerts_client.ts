@@ -464,7 +464,7 @@ export class AlertsClient<
             >({
               legacyAlert: activeAlerts[id],
               rule: this.rule,
-              snoozed: this.options.rule.snoozed,
+              muted: this.options.rule.muted,
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],

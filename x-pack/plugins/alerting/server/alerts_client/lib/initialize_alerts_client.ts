@@ -33,7 +33,7 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   logger: Logger;
   maxAlerts: number;
   rule: RuleData<Params>;
-  snoozed: boolean;
+  muted: boolean;
   ruleType: UntypedNormalizedRuleType;
   runTimestamp?: Date;
   startedAt: Date | null;
@@ -54,7 +54,7 @@ export const initializeAlertsClient = async <
   logger,
   maxAlerts,
   rule,
-  snoozed,
+  muted,
   ruleType,
   runTimestamp,
   startedAt,
@@ -92,9 +92,9 @@ export const initializeAlertsClient = async <
           executionId,
           id: rule.id,
           name: rule.name,
+          muted,
           parameters: rule.params,
           revision: rule.revision,
-          snoozed,
           spaceId: context.spaceId,
           tags: rule.tags,
           alertDelay: rule.alertDelay?.active ?? 0,

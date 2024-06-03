@@ -40,7 +40,7 @@ describe('buildNewAlert', () => {
       buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       })
@@ -75,7 +75,7 @@ describe('buildNewAlert', () => {
       buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       })
@@ -114,7 +114,7 @@ describe('buildNewAlert', () => {
       buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       })
@@ -154,7 +154,7 @@ describe('buildNewAlert', () => {
       >({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         timestamp: '2023-03-28T12:27:28.159Z',
         payload: { count: 1, url: `https://url1`, 'kibana.alert.nested_field': 2 },
         kibanaVersion: '8.9.0',
@@ -192,7 +192,7 @@ describe('buildNewAlert', () => {
       buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         runTimestamp: '2030-12-15T02:44:13.124Z',
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
@@ -233,7 +233,7 @@ describe('buildNewAlert', () => {
       >({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         timestamp: '2023-03-28T12:27:28.159Z',
         payload: {
           count: 1,
@@ -287,7 +287,7 @@ describe('buildNewAlert', () => {
       >({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         timestamp: '2023-03-28T12:27:28.159Z',
         payload: {
           count: 1,
@@ -342,7 +342,7 @@ describe('buildNewAlert', () => {
       >({
         legacyAlert,
         rule: alertRule,
-        snoozed: false,
+        muted: false,
         timestamp: '2023-03-28T12:27:28.159Z',
         payload: {
           count: 1,
@@ -378,7 +378,7 @@ describe('buildNewAlert', () => {
     });
   });
 
-  test('should build alert document with snoozed set to true', () => {
+  test('should build alert document with muted set to true', () => {
     const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
     legacyAlert.scheduleActions('default');
 
@@ -386,7 +386,7 @@ describe('buildNewAlert', () => {
       buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        snoozed: true,
+        muted: true,
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       })
@@ -402,7 +402,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
-      [ALERT_MUTED]: false,
+      [ALERT_MUTED]: true,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',

@@ -839,6 +839,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -1119,11 +1124,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -1901,6 +1901,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -2181,11 +2186,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -2963,6 +2963,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -3243,11 +3248,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -4025,6 +4025,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -4305,11 +4310,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -5087,6 +5087,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -5367,11 +5372,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -6155,6 +6155,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -6435,11 +6440,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -7217,6 +7217,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -7497,11 +7502,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -8279,6 +8279,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.muted": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.new_terms": Object {
       "array": true,
       "required": false,
@@ -8559,11 +8564,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.rule.snoozed": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,

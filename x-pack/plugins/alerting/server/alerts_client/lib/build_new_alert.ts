@@ -46,7 +46,7 @@ interface BuildNewAlertOpts<
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
-  snoozed: boolean;
+  muted: boolean;
   payload?: DeepPartial<AlertData>;
   runTimestamp?: string;
   timestamp: string;
@@ -67,7 +67,7 @@ export const buildNewAlert = <
 >({
   legacyAlert,
   rule,
-  snoozed,
+  muted: muted,
   runTimestamp,
   timestamp,
   payload,
@@ -94,7 +94,7 @@ export const buildNewAlert = <
         [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
         [ALERT_INSTANCE_ID]: legacyAlert.getId(),
         [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
-        [ALERT_MUTED]: snoozed,
+        [ALERT_MUTED]: muted,
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
         [ALERT_STATUS]: 'active',
         [ALERT_UUID]: legacyAlert.getUuid(),

@@ -206,7 +206,7 @@ export class AdHocTaskRunner {
         revision: rule.revision,
         params: rule.params,
       },
-      snoozed: false,
+      muted: false,
       ruleType,
       runTimestamp: this.runDate,
       startedAt: new Date(scheduleToRun.runAt),

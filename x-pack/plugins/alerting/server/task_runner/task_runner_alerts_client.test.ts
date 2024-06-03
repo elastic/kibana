@@ -317,11 +317,11 @@ describe('Task Runner', () => {
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             id: '1',
             name: 'rule-name',
+            muted: false,
             parameters: {
               bar: true,
             },
             revision: 0,
-            snoozed: false,
             spaceId: 'default',
             tags: ['rule-', '-tags'],
           },

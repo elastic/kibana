@@ -528,10 +528,10 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should index a new alert when alert is snoozed', async () => {
+        test('should index a new alert when alert is muted', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
-            rule: { ...alertsClientParams.rule, snoozed: true },
+            rule: { ...alertsClientParams.rule, muted: true },
           });
 
           await alertsClient.initializeExecution(defaultExecutionOpts);
@@ -707,9 +707,7 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
-                    rule: {
-                      snoozed: false,
-                    },
+                    muted: false,
                     start: '2023-03-28T12:27:28.159Z',
                     uuid: 'abc',
                   },
@@ -992,9 +990,7 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '2' },
-                    rule: {
-                      snoozed: false,
-                    },
+                    muted: false,
                     start: '2023-03-28T02:27:28.159Z',
                     uuid: 'def',
                   },
@@ -1045,9 +1041,7 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
-                    rule: {
-                      snoozed: false,
-                    },
+                    muted: false,
                     uuid: 'abc',
                   },
                 },
