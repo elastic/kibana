@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -42,11 +43,13 @@ export function SectionContainer({
   showExperimentalBadge = false,
 }: Props) {
   const { http } = useKibana().services;
+  const euiAccordionId = useGeneratedHtmlId({ prefix: 'euiAccordion' });
+
   return (
     <EuiPanel color="subdued">
       <EuiAccordion
         initialIsOpen={initialIsOpen}
-        id={title}
+        id={euiAccordionId}
         buttonContentClassName="accordion-button"
         data-test-subj={`accordion-${title}`}
         buttonContent={
