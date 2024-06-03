@@ -88,9 +88,7 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
 }
 
 /**
- * This function searches the AST for the describe block containing per-function tests
- * @param ast
- * @returns
+ * This function searches the AST for the functions list
  */
 function findFunctionsList(ast: any): recast.types.namedTypes.ArrayExpression {
   let foundArray: recast.types.namedTypes.ArrayExpression | null = null;
