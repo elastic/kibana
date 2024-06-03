@@ -48,6 +48,7 @@ import {
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
 import { shouldSuppressInstanceId } from './lib/should_suppress_instance_id';
+import { getSloSummary } from './lib/summary_repository';
 
 export const getRuleExecutor = ({
   basePath,
@@ -135,6 +136,9 @@ export const getRuleExecutor = ({
             hasReachedLimit = true;
             break; // once limit is reached, we break out of the loop and don't schedule any more alerts
           }
+
+          const sloSummary = await getSloSummary(esClient.asCurrentUser, slo, instanceId);
+
           const reason = buildReason(
             instanceId,
             windowDef.actionGroup,
@@ -188,6 +192,10 @@ export const getRuleExecutor = ({
             sloName: slo.name,
             sloInstanceId: instanceId,
             slo,
+            sliValue: sloSummary?.sliValue ?? -1,
+            sloStatus: sloSummary?.status ?? 'NO_DATA',
+            sloErrorBudgetRemaining: sloSummary?.errorBudgetRemaining ?? 1,
+            sloErrorBudgetConsumed: sloSummary?.errorBudgetConsumed ?? 0,
             suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
           };
 
@@ -195,6 +203,7 @@ export const getRuleExecutor = ({
           scheduledActionsCount++;
         }
       }
+
       alertsClient.setAlertLimitReached(hasReachedLimit);
     }
 

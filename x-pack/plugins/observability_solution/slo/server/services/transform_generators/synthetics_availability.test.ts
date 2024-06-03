@@ -10,6 +10,7 @@ import { SLODefinition } from '../../domain/models';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
+import { twoMinute } from '../fixtures/duration';
 
 const generator = new SyntheticsAvailabilityTransformGenerator();
 
@@ -401,6 +402,30 @@ describe('Synthetics Availability Transform Generator', () => {
     expect(transform.source.query?.bool?.filter).toContainEqual({
       term: {
         'meta.space_id': spaceId,
+      },
+    });
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createSyntheticsAvailabilityIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo, 'default');
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
       },
     });
   });

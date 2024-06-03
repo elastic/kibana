@@ -31,14 +31,18 @@ import type {
 } from '../../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import type { State, inputsModel } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../app/actions/constants';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
-import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
+import {
+  StyledTimelineUnifiedDataTable,
+  StyledEuiProgress,
+  UnifiedTimelineGlobalStyles,
+} from '../styles';
 import { timelineActions } from '../../../../store';
 import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
@@ -411,6 +415,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             dataLoadingState === DataLoadingState.loadingMore) && (
             <StyledEuiProgress data-test-subj="discoverDataGridUpdating" size="xs" color="accent" />
           )}
+          <UnifiedTimelineGlobalStyles />
           <DataGridMemoized
             ariaLabelledBy="timelineDocumentsAriaLabel"
             className={'udtTimeline'}

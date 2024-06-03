@@ -52,6 +52,26 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage(pkgName, pkgOlderVersion);
     });
 
+    it('should install an older version if force is true when package is already installed', async () => {
+      // install latest package
+      await supertest
+        .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ packages: [pkgName] })
+        .expect(200);
+
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ packages: [{ name: pkgName, version: pkgOlderVersion }], force: true })
+        .expect(200);
+
+      expect(response.body.items.length).equal(1);
+      expect(response.body.items[0].version).equal(pkgOlderVersion);
+
+      await uninstallPackage(pkgName, pkgOlderVersion);
+    });
+
     it('should reject installing an older version if force is false', async () => {
       const response = await supertest
         .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
@@ -59,8 +79,8 @@ export default function (providerContext: FtrProviderContext) {
         .send({ packages: [{ name: pkgName, version: pkgOlderVersion }] })
         .expect(200);
 
-      expect(response.body.response[0].statusCode).equal(400);
-      expect(response.body.response[0].error).equal(
+      expect(response.body.items[0].statusCode).equal(400);
+      expect(response.body.items[0].error).equal(
         'multiple_versions-0.1.0 is out-of-date and cannot be installed or updated'
       );
     });
