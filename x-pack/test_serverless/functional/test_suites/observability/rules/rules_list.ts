@@ -699,6 +699,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should filter rules by the rule status', async () => {
+      const setRuleStatus = async (testSubj: string, checked: boolean) => {
+        const readAriaChecked = async (): Promise<boolean> => {
+          const statusItem = await testSubjects.find(testSubj);
+          return statusItem ? JSON.parse(await statusItem.getAttribute('aria-checked')) : null;
+        };
+
+        await retry.try(async () => {
+          if ((await readAriaChecked()) !== checked) {
+            await testSubjects.click(testSubj);
+            await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+          }
+
+          expect(await readAriaChecked()).toEqual(checked);
+        });
+      };
+
       // Enabled alert
       const rule1 = await createRule({
         supertest,
@@ -740,35 +756,28 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       log.debug('ruleStatusFilterButton: Select only enabled');
       await testSubjects.click('ruleStatusFilterButton');
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-enabled', true);
       await assertRulesLength(2);
 
       log.debug('ruleStatusFilterButton: Select enabled or disabled (e.g. all)');
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-disabled', true);
       await assertRulesLength(4);
 
       log.debug('ruleStatusFilterButton: Select only disabled');
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-enabled', false);
       await assertRulesLength(2);
 
       log.debug('ruleStatusFilterButton: Select only snoozed');
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await testSubjects.click('ruleStatusFilterOption-snoozed');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-disabled', false);
+      await setRuleStatus('ruleStatusFilterOption-snoozed', true);
       await assertRulesLength(2);
 
       log.debug('ruleStatusFilterButton: Select disabled or snoozed');
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-disabled', true);
       await assertRulesLength(3);
 
       log.debug('ruleStatusFilterButton: Select enabled or disabled or snoozed');
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-enabled', true);
       await assertRulesLength(4);
 
       log.debug('ruleStatusFilterButton: Clear it again because it is still selected');
