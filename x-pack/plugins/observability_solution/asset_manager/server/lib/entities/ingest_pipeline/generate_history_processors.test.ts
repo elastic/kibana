@@ -10,7 +10,7 @@ import { generateHistoryProcessors } from './generate_history_processors';
 
 describe('generateHistoryProcessors(definition)', () => {
   it('should genearte a valid pipeline', () => {
-    const processors = generateHistoryProcessors(entityDefinition);
+    const processors = generateHistoryProcessors(entityDefinition, 'default');
     expect(processors).toMatchSnapshot();
   });
 });

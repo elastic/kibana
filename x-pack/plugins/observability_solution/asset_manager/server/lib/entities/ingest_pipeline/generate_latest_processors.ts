@@ -74,7 +74,7 @@ export function generateLatestProcessors(definition: EntityDefinition, spaceId: 
     {
       set: {
         field: '_index',
-        value: generateLatestIndexName(definition),
+        value: `${generateLatestIndexName(definition)}.${spaceId}`,
       },
     },
   ];
