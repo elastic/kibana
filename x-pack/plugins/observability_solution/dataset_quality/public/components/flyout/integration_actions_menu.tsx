@@ -21,7 +21,6 @@ import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
-import { PrivilegesWarningIconWrapper } from '../common';
 
 const integrationActionsText = i18n.translate('xpack.datasetQuality.flyoutIntegrationActionsText', {
   defaultMessage: 'Integration actions',
@@ -99,25 +98,21 @@ export function IntegrationActionsMenu({
 
   const panelItems = useMemo(() => {
     const firstLevelItems: EuiContextMenuPanelItemDescriptor[] = [
-      {
-        renderItem: () => (
-          <MenuActionItem
-            buttonText={
-              <PrivilegesWarningIconWrapper
-                hasPrivileges={canUserViewIntegrations}
-                title={seeIntegrationText}
-                mode="tooltip"
-              >
-                {seeIntegrationText}
-              </PrivilegesWarningIconWrapper>
-            }
-            dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
-            routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
-            iconType="package"
-            disabled={!canUserViewIntegrations}
-          />
-        ),
-      },
+      ...(canUserViewIntegrations
+        ? [
+            {
+              renderItem: () => (
+                <MenuActionItem
+                  buttonText={seeIntegrationText}
+                  dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
+                  routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
+                  iconType="package"
+                  disabled={!canUserViewIntegrations}
+                />
+              ),
+            },
+          ]
+        : []),
       {
         renderItem: () => (
           <MenuActionItem
@@ -137,21 +132,13 @@ export function IntegrationActionsMenu({
       },
     ];
 
-    if (dashboards.length || !canUserAccessDashboards) {
+    if (dashboards.length && canUserAccessDashboards) {
       firstLevelItems.push({
         icon: 'dashboardApp',
         panel: 1,
-        name: (
-          <PrivilegesWarningIconWrapper
-            hasPrivileges={canUserAccessDashboards}
-            title={viewDashboardsText}
-            mode="tooltip"
-          >
-            {viewDashboardsText}
-          </PrivilegesWarningIconWrapper>
-        ),
+        name: viewDashboardsText,
         'data-test-subj': 'datasetQualityFlyoutIntegrationActionViewDashboards',
-        disabled: !canUserAccessDashboards,
+        disabled: false,
       });
     } else if (dashboardsLoading) {
       firstLevelItems.push({

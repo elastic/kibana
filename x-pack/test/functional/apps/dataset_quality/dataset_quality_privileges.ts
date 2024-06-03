@@ -171,15 +171,22 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.closeFlyout();
         });
 
-        it('"View dashboards" and "See integration" is disabled for underprivileged user', async () => {
+        it('"View dashboards" and "See integration" are hidden for underprivileged user', async () => {
           await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
           await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-View dashboards`
+          // "See Integration" is hidden
+          await testSubjects.missingOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+              'Overview'
+            )
           );
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-See integration`
+
+          // "View Dashboards" is hidden
+          await testSubjects.missingOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+              'ViewDashboards'
+            )
           );
 
           await PageObjects.datasetQuality.closeFlyout();
