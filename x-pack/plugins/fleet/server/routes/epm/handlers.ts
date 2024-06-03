@@ -588,12 +588,26 @@ export const getInputsHandler: FleetRequestHandler<
 
   try {
     const { pkgName, pkgVersion } = request.params;
-    const { format, prerelease } = request.query;
+    const { format, prerelease, ignoreUnverified } = request.query;
     let body;
     if (format === 'json') {
-      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json', prerelease);
+      body = await getTemplateInputs(
+        soClient,
+        pkgName,
+        pkgVersion,
+        'json',
+        prerelease,
+        ignoreUnverified
+      );
     } else if (format === 'yml' || format === 'yaml') {
-      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml', prerelease);
+      body = await getTemplateInputs(
+        soClient,
+        pkgName,
+        pkgVersion,
+        'yml',
+        prerelease,
+        ignoreUnverified
+      );
     }
     return response.ok({ body });
   } catch (error) {
