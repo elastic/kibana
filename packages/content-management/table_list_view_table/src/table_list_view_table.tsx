@@ -43,7 +43,7 @@ import {
 import { useServices } from './services';
 import type { SavedObjectsFindOptionsReference } from './services';
 import { getReducer } from './reducer';
-import type { SortColumnField } from './components';
+import { type SortColumnField, getInitialSorting, saveSorting } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
@@ -144,6 +144,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
     field: SortColumnField;
     direction: Direction;
   };
+  sortColumnChanged: boolean;
   tableFilter: {
     createdBy: string[];
   };
@@ -354,8 +355,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     return getReducer<T>();
   }, []);
 
-  const initialState = useMemo<State<T>>(
-    () => ({
+  const initialState = useMemo<State<T>>(() => {
+    const initialSort = getInitialSorting(listingId);
+    return {
       items: [],
       hasNoItems: undefined,
       totalItems: 0,
@@ -373,16 +375,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageSize: initialPageSize,
         pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
       },
-      tableSort: {
-        field: 'attributes.title' as const,
-        direction: 'asc',
-      },
+      tableSort: initialSort.tableSort,
+      sortColumnChanged: !initialSort.isDefault,
       tableFilter: {
         createdBy: [],
       },
-    }),
-    [initialPageSize]
-  );
+    };
+  }, [initialPageSize, listingId]);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -950,6 +949,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // Effects
   // ------------
   useDebounce(fetchItems, 300, [fetchItems, refreshListBouncer]);
+
+  useEffect(() => {
+    saveSorting(listingId, tableSort);
+  }, [listingId, tableSort]);
 
   useEffect(() => {
     if (!urlStateEnabled) {
