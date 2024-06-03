@@ -79,7 +79,7 @@ export interface NewPackagePolicy {
   enabled: boolean;
   is_managed?: boolean;
   // deprecated
-  policy_id: string;
+  policy_id?: string;
   policy_ids: string[];
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];

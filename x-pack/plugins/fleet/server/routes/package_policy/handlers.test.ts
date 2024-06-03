@@ -73,6 +73,7 @@ jest.mock(
                 updated_at: '2022-12-19T20:43:45.879Z',
                 updated_by: 'elastic',
                 policy_id: `agent-policy-id-a`,
+                policy_ids: [`agent-policy-id-a`],
                 enabled: true,
                 inputs: [],
                 namespace: 'default',
@@ -208,6 +209,7 @@ describe('When calling package policy', () => {
         updated_at: '',
         updated_by: '',
         ...existingPolicy,
+        policy_ids: [existingPolicy.policy_id],
         inputs: [
           {
             ...existingPolicy.inputs[0],
@@ -236,6 +238,7 @@ describe('When calling package policy', () => {
         name: 'endpoint-2',
         description: '',
         policy_id: '3',
+        policy_ids: ['3'],
         enabled: false,
         inputs: [
           {
@@ -344,6 +347,7 @@ describe('When calling package policy', () => {
                 version: '1.0.0',
               },
               policy_id: 'agent-policy-id-a',
+              policy_ids: ['agent-policy-id-a'],
               revision: 1,
               updated_at: '2022-12-19T20:43:45.879Z',
               updated_by: 'elastic',
