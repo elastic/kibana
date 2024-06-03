@@ -115,6 +115,69 @@ export function generateSummaryTransformForOccurrences(
             field: '@timestamp',
           },
         },
+        fiveMinuteBurnRate: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: `now-5m/m`,
+              },
+            },
+          },
+          aggs: {
+            goodEvents: {
+              sum: {
+                field: 'slo.numerator',
+              },
+            },
+            totalEvents: {
+              sum: {
+                field: 'slo.denominator',
+              },
+            },
+          },
+        },
+        oneHourBurnRate: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: `now-1h/m`,
+              },
+            },
+          },
+          aggs: {
+            goodEvents: {
+              sum: {
+                field: 'slo.numerator',
+              },
+            },
+            totalEvents: {
+              sum: {
+                field: 'slo.denominator',
+              },
+            },
+          },
+        },
+        oneDayBurnRate: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: `now-1d/m`,
+              },
+            },
+          },
+          aggs: {
+            goodEvents: {
+              sum: {
+                field: 'slo.numerator',
+              },
+            },
+            totalEvents: {
+              sum: {
+                field: 'slo.denominator',
+              },
+            },
+          },
+        },
       },
     },
     description: `Summarise the rollup data of SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}].`,

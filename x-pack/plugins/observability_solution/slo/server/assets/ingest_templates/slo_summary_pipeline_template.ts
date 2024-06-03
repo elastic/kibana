@@ -194,6 +194,45 @@ export const getSLOSummaryPipelineTemplate = (
           ignore_failure: true,
         },
       },
+      {
+        script: {
+          description: 'Computes the last five minute burn rate value',
+          lang: 'painless',
+          source: `
+            if (ctx["fiveMinuteBurnRate"]["totalEvents"] == null || ctx["fiveMinuteBurnRate"]["totalEvents"] == 0) {
+              ctx["fiveMinuteBurnRate"]["value"] = 0.0;
+            } else {
+              ctx["fiveMinuteBurnRate"]["value"] = (1.0 - ((double)ctx["fiveMinuteBurnRate"]["goodEvents"] / (double)ctx["fiveMinuteBurnRate"]["totalEvents"])) / ctx["errorBudgetInitial"];
+            }
+          `,
+        },
+      },
+      {
+        script: {
+          description: 'Computes the last hour burn rate value',
+          lang: 'painless',
+          source: ` 
+            if (ctx["oneHourBurnRate"]["totalEvents"] == null || ctx["oneHourBurnRate"]["totalEvents"] == 0) {
+              ctx["oneHourBurnRate"]["value"] = 0.0;
+            } else {
+              ctx["oneHourBurnRate"]["value"] = (1.0 - ((double)ctx["oneHourBurnRate"]["goodEvents"] / (double)ctx["oneHourBurnRate"]["totalEvents"])) / ctx["errorBudgetInitial"];
+            }
+          `,
+        },
+      },
+      {
+        script: {
+          description: 'Computes the last day burn rate value',
+          lang: 'painless',
+          source: ` 
+              if (ctx["oneDayBurnRate"]["totalEvents"] == null || ctx["oneDayBurnRate"]["totalEvents"] == 0) {
+                ctx["oneDayBurnRate"]["value"] = 0.0;
+              } else {
+                ctx["oneDayBurnRate"]["value"] = (1.0 - ((double)ctx["oneDayBurnRate"]["goodEvents"] / (double)ctx["oneDayBurnRate"]["totalEvents"])) / ctx["errorBudgetInitial"];
+              }
+            `,
+        },
+      },
     ],
     _meta: {
       description: `Ingest pipeline for SLO summary data [id: ${slo.id}, revision: ${slo.revision}]`,

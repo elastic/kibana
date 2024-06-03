@@ -118,6 +118,69 @@ export function generateSummaryTransformForTimeslicesAndRolling(
             field: '@timestamp',
           },
         },
+        fiveMinuteBurnRate: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: `now-5m/m`,
+              },
+            },
+          },
+          aggs: {
+            goodEvents: {
+              sum: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+            totalEvents: {
+              value_count: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+          },
+        },
+        oneHourBurnRate: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: `now-1h/m`,
+              },
+            },
+          },
+          aggs: {
+            goodEvents: {
+              sum: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+            totalEvents: {
+              value_count: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+          },
+        },
+        oneDayBurnRate: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: `now-1d/m`,
+              },
+            },
+          },
+          aggs: {
+            goodEvents: {
+              sum: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+            totalEvents: {
+              value_count: {
+                field: 'slo.isGoodSlice',
+              },
+            },
+          },
+        },
       },
     },
     description: `Summarise the rollup data of SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}].`,

@@ -15,7 +15,15 @@ import type { GroupByField } from '../components/slo_list_group_by';
 import type { SLOView } from '../components/toggle_slo_view';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
-export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
+export type SortField =
+  | 'sli_value'
+  | 'error_budget_consumed'
+  | 'error_budget_remaining'
+  | 'status'
+  | 'burn_rate_5m'
+  | 'burn_rate_1h'
+  | 'burn_rate_1d';
+
 export type SortDirection = 'asc' | 'desc';
 
 export interface SearchState {
