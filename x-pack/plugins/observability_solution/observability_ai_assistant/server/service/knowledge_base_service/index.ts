@@ -618,6 +618,7 @@ export class KnowledgeBaseService {
             'public',
             '@timestamp',
             'role',
+            'user.name',
           ],
         },
       });
@@ -658,7 +659,7 @@ export class KnowledgeBaseService {
           namespace,
         },
         pipeline: this.dependencies.resources.pipelines.kb,
-        refresh: false,
+        refresh: 'wait_for',
       });
     } catch (error) {
       if (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') {

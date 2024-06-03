@@ -30,12 +30,11 @@ import type {
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import { v4 as uuidv4 } from 'uuid';
 import type { Results } from '../../../routes/actions/mocks';
 import { mockAuditLogSearchResult } from '../../../routes/actions/mocks';
-import { ActivityLogItemTypes } from '../../../../../common/endpoint/types';
+import type { FetchActionResponsesResult } from '../..';
 
 describe('When using Actions service utilities', () => {
   let fleetActionGenerator: FleetActionGenerator;
@@ -138,7 +137,7 @@ describe('When using Actions service utilities', () => {
               agents: [],
             })
           ),
-          []
+          { fleetResponses: [], endpointResponses: [] }
         )
       ).toEqual({
         ...NOT_COMPLETED_OUTPUT,
@@ -154,7 +153,7 @@ describe('When using Actions service utilities', () => {
               agents: ['123'],
             })
           ),
-          []
+          { fleetResponses: [], endpointResponses: [] }
         )
       ).toEqual(NOT_COMPLETED_OUTPUT);
     });
@@ -167,28 +166,19 @@ describe('When using Actions service utilities', () => {
               agents: ['123'],
             })
           ),
-          [
-            fleetActionGenerator.generateActivityLogActionResponse({
-              item: { data: { action_id: '123' } },
-            }),
-          ]
+          {
+            fleetResponses: [
+              fleetActionGenerator.generateResponse({
+                action_id: '123',
+              }),
+            ],
+            endpointResponses: [],
+          }
         )
       ).toEqual(NOT_COMPLETED_OUTPUT);
     });
 
     it('should show complete as `true` with completion date if Endpoint Response received', () => {
-      const endpointResponse = endpointActionGenerator.generateActivityLogActionResponse({
-        item: {
-          data: {
-            '@timestamp': COMPLETED_AT,
-            agent: { id: '123' },
-            EndpointActions: {
-              completed_at: COMPLETED_AT,
-              data: { output: { type: 'json', content: { code: 'aaa' } } },
-            },
-          },
-        },
-      });
       expect(
         getActionCompletionInfo(
           mapToNormalizedActionRequest(
@@ -196,7 +186,19 @@ describe('When using Actions service utilities', () => {
               agents: ['123'],
             })
           ),
-          [endpointResponse]
+          {
+            fleetResponses: [],
+            endpointResponses: [
+              endpointActionGenerator.generateResponse({
+                '@timestamp': COMPLETED_AT,
+                agent: { id: '123' },
+                EndpointActions: {
+                  completed_at: COMPLETED_AT,
+                  data: { output: { type: 'json', content: { code: 'aaa' } } },
+                },
+              }),
+            ],
+          }
         )
       ).toEqual({
         isCompleted: true,
@@ -224,25 +226,6 @@ describe('When using Actions service utilities', () => {
 
     it('should return action outputs (if any) per agent id', () => {
       const processes = endpointActionGenerator.randomResponseActionProcesses(3);
-      const endpointResponse = endpointActionGenerator.generateActivityLogActionResponse({
-        item: {
-          data: {
-            '@timestamp': COMPLETED_AT,
-            agent: { id: '123' },
-            EndpointActions: {
-              completed_at: COMPLETED_AT,
-              data: {
-                output: {
-                  type: 'json',
-                  content: {
-                    entries: processes,
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
       expect(
         getActionCompletionInfo(
           mapToNormalizedActionRequest(
@@ -250,7 +233,26 @@ describe('When using Actions service utilities', () => {
               agents: ['123'],
             })
           ),
-          [endpointResponse]
+          {
+            fleetResponses: [],
+            endpointResponses: [
+              endpointActionGenerator.generateResponse({
+                '@timestamp': COMPLETED_AT,
+                agent: { id: '123' },
+                EndpointActions: {
+                  completed_at: COMPLETED_AT,
+                  data: {
+                    output: {
+                      type: 'json',
+                      content: {
+                        entries: processes,
+                      },
+                    },
+                  },
+                },
+              }),
+            ],
+          }
         )
       ).toEqual({
         isCompleted: true,
@@ -277,30 +279,26 @@ describe('When using Actions service utilities', () => {
     });
 
     describe('and action failed', () => {
-      let fleetResponseAtError: ActivityLogActionResponse;
-      let endpointResponseAtError: EndpointActivityLogActionResponse;
+      let fleetResponseAtError: EndpointActionResponse;
+      let endpointResponseAtError: LogsEndpointActionResponse;
 
       beforeEach(() => {
         const actionId = uuidv4();
-        fleetResponseAtError = fleetActionGenerator.generateActivityLogActionResponse({
-          item: {
-            data: { agent_id: '123', action_id: actionId, error: 'agent failed to deliver' },
-          },
+        fleetResponseAtError = fleetActionGenerator.generateResponse({
+          agent_id: '123',
+          action_id: actionId,
+          error: 'agent failed to deliver',
         });
 
-        endpointResponseAtError = endpointActionGenerator.generateActivityLogActionResponse({
-          item: {
-            data: {
-              '@timestamp': '2022-05-18T13:03:54.756Z',
-              agent: { id: '123' },
-              error: {
-                message: 'endpoint failed to apply',
-              },
-              EndpointActions: {
-                action_id: actionId,
-                completed_at: '2022-05-18T13:03:54.756Z',
-              },
-            },
+        endpointResponseAtError = endpointActionGenerator.generateResponse({
+          '@timestamp': '2022-05-18T13:03:54.756Z',
+          agent: { id: '123' },
+          error: {
+            message: 'endpoint failed to apply',
+          },
+          EndpointActions: {
+            action_id: actionId,
+            completed_at: '2022-05-18T13:03:54.756Z',
           },
         });
       });
@@ -313,17 +311,17 @@ describe('When using Actions service utilities', () => {
                 agents: ['123'],
               })
             ),
-            [endpointResponseAtError]
+            { fleetResponses: [], endpointResponses: [endpointResponseAtError] }
           )
         ).toEqual({
-          completedAt: endpointResponseAtError.item.data['@timestamp'],
+          completedAt: endpointResponseAtError['@timestamp'],
           errors: ['Endpoint action response error: endpoint failed to apply'],
           isCompleted: true,
           wasSuccessful: false,
           outputs: expect.anything(),
           agentState: {
             '123': {
-              completedAt: endpointResponseAtError.item.data['@timestamp'],
+              completedAt: endpointResponseAtError['@timestamp'],
               errors: ['Endpoint action response error: endpoint failed to apply'],
               isCompleted: true,
               wasSuccessful: false,
@@ -340,17 +338,17 @@ describe('When using Actions service utilities', () => {
                 agents: ['123'],
               })
             ),
-            [fleetResponseAtError]
+            { fleetResponses: [fleetResponseAtError], endpointResponses: [] }
           )
         ).toEqual({
-          completedAt: fleetResponseAtError.item.data.completed_at,
+          completedAt: fleetResponseAtError.completed_at,
           errors: ['Fleet action response error: agent failed to deliver'],
           isCompleted: true,
           wasSuccessful: false,
           outputs: {},
           agentState: {
             '123': {
-              completedAt: fleetResponseAtError.item.data.completed_at,
+              completedAt: fleetResponseAtError.completed_at,
               errors: ['Fleet action response error: agent failed to deliver'],
               isCompleted: true,
               wasSuccessful: false,
@@ -367,10 +365,10 @@ describe('When using Actions service utilities', () => {
                 agents: ['123'],
               })
             ),
-            [fleetResponseAtError, endpointResponseAtError]
+            { fleetResponses: [fleetResponseAtError], endpointResponses: [endpointResponseAtError] }
           )
         ).toEqual({
-          completedAt: endpointResponseAtError.item.data['@timestamp'],
+          completedAt: endpointResponseAtError['@timestamp'],
           errors: [
             'Endpoint action response error: endpoint failed to apply',
             'Fleet action response error: agent failed to deliver',
@@ -380,7 +378,7 @@ describe('When using Actions service utilities', () => {
           outputs: expect.anything(),
           agentState: {
             '123': {
-              completedAt: endpointResponseAtError.item.data['@timestamp'],
+              completedAt: endpointResponseAtError['@timestamp'],
               errors: [
                 'Endpoint action response error: endpoint failed to apply',
                 'Fleet action response error: agent failed to deliver',
@@ -396,66 +394,63 @@ describe('When using Actions service utilities', () => {
     describe('with multiple agent ids', () => {
       let agentIds: string[];
       let actionId: string;
-      let action123Responses: Array<
-        | ActivityLogActionResponse
-        | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
-      >;
-      let action456Responses: Array<
-        | ActivityLogActionResponse
-        | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
-      >;
-      let action789Responses: Array<
-        | ActivityLogActionResponse
-        | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
-      >;
+      let action123Responses: FetchActionResponsesResult;
+      let action456Responses: FetchActionResponsesResult;
+      let action789Responses: FetchActionResponsesResult;
 
       beforeEach(() => {
         agentIds = ['123', '456', '789'];
         actionId = uuidv4();
-        action123Responses = [
-          fleetActionGenerator.generateActivityLogActionResponse({
-            item: { data: { agent_id: '123', error: '', action_id: actionId } },
-          }),
-          endpointActionGenerator.generateActivityLogActionResponse({
-            item: {
-              data: {
-                '@timestamp': '2022-01-05T19:27:23.816Z',
-                agent: { id: '123' },
-                EndpointActions: { action_id: actionId, completed_at: '2022-01-05T19:27:23.816Z' },
-              },
-            },
-          }),
-        ];
+        action123Responses = {
+          fleetResponses: [
+            fleetActionGenerator.generateResponse({
+              agent_id: '123',
+              error: '',
+              action_id: actionId,
+            }),
+          ],
+          endpointResponses: [
+            endpointActionGenerator.generateResponse({
+              '@timestamp': '2022-01-05T19:27:23.816Z',
+              agent: { id: '123' },
+              EndpointActions: { action_id: actionId, completed_at: '2022-01-05T19:27:23.816Z' },
+            }),
+          ],
+        };
 
-        action456Responses = [
-          fleetActionGenerator.generateActivityLogActionResponse({
-            item: { data: { action_id: actionId, agent_id: '456', error: '' } },
-          }),
-          endpointActionGenerator.generateActivityLogActionResponse({
-            item: {
-              data: {
-                '@timestamp': COMPLETED_AT,
-                agent: { id: '456' },
-                EndpointActions: { action_id: actionId, completed_at: COMPLETED_AT },
-              },
-            },
-          }),
-        ];
+        action456Responses = {
+          fleetResponses: [
+            fleetActionGenerator.generateResponse({
+              action_id: actionId,
+              agent_id: '456',
+              error: '',
+            }),
+          ],
+          endpointResponses: [
+            endpointActionGenerator.generateResponse({
+              '@timestamp': COMPLETED_AT,
+              agent: { id: '456' },
+              EndpointActions: { action_id: actionId, completed_at: COMPLETED_AT },
+            }),
+          ],
+        };
 
-        action789Responses = [
-          fleetActionGenerator.generateActivityLogActionResponse({
-            item: { data: { action_id: actionId, agent_id: '789', error: '' } },
-          }),
-          endpointActionGenerator.generateActivityLogActionResponse({
-            item: {
-              data: {
-                '@timestamp': '2022-03-05T19:27:23.816Z',
-                agent: { id: '789' },
-                EndpointActions: { action_id: actionId, completed_at: '2022-03-05T19:27:23.816Z' },
-              },
-            },
-          }),
-        ];
+        action789Responses = {
+          fleetResponses: [
+            fleetActionGenerator.generateResponse({
+              action_id: actionId,
+              agent_id: '789',
+              error: '',
+            }),
+          ],
+          endpointResponses: [
+            endpointActionGenerator.generateResponse({
+              '@timestamp': '2022-03-05T19:27:23.816Z',
+              agent: { id: '789' },
+              EndpointActions: { action_id: actionId, completed_at: '2022-03-05T19:27:23.816Z' },
+            }),
+          ],
+        };
       });
 
       it('should show complete as `false` if no responses', () => {
@@ -466,7 +461,7 @@ describe('When using Actions service utilities', () => {
                 agents: agentIds,
               })
             ),
-            []
+            { fleetResponses: [], endpointResponses: [] }
           )
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
@@ -496,14 +491,18 @@ describe('When using Actions service utilities', () => {
                 agents: agentIds,
               })
             ),
-            [
-              ...action123Responses,
-
-              // Action id: 456 === Not complete (only fleet response)
-              action456Responses[0],
-
-              ...action789Responses,
-            ]
+            {
+              fleetResponses: [
+                ...action123Responses.fleetResponses,
+                ...action456Responses.fleetResponses,
+                ...action789Responses.fleetResponses,
+              ],
+              endpointResponses: [
+                ...action123Responses.endpointResponses,
+                ...action789Responses.endpointResponses,
+                // Action id: 456 === Not complete (only fleet response)
+              ],
+            }
           )
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
@@ -539,7 +538,18 @@ describe('When using Actions service utilities', () => {
                 agents: agentIds,
               })
             ),
-            [...action123Responses, ...action456Responses, ...action789Responses]
+            {
+              fleetResponses: [
+                ...action123Responses.fleetResponses,
+                ...action456Responses.fleetResponses,
+                ...action789Responses.fleetResponses,
+              ],
+              endpointResponses: [
+                ...action123Responses.endpointResponses,
+                ...action456Responses.endpointResponses,
+                ...action789Responses.endpointResponses,
+              ],
+            }
           )
         ).toEqual({
           isCompleted: true,
@@ -571,8 +581,8 @@ describe('When using Actions service utilities', () => {
       });
 
       it('should complete as `true` if one agent only received a fleet response with error on it', () => {
-        action456Responses[0].item.data.error = 'something is no good';
-        action456Responses[0].item.data['@timestamp'] = '2022-05-06T12:50:19.747Z';
+        action456Responses.fleetResponses[0].error = 'something is no good';
+        action456Responses.fleetResponses[0]['@timestamp'] = '2022-05-06T12:50:19.747Z';
 
         expect(
           getActionCompletionInfo(
@@ -581,14 +591,18 @@ describe('When using Actions service utilities', () => {
                 agents: agentIds,
               })
             ),
-            [
-              ...action123Responses,
-
-              // Action id: 456 === is complete with only a fleet response that has `error`
-              action456Responses[0],
-
-              ...action789Responses,
-            ]
+            {
+              fleetResponses: [
+                ...action123Responses.fleetResponses,
+                ...action456Responses.fleetResponses,
+                ...action789Responses.fleetResponses,
+              ],
+              endpointResponses: [
+                ...action123Responses.endpointResponses,
+                ...action789Responses.endpointResponses,
+                // Action id: 456 === is complete with only a fleet response that has `error`
+              ],
+            }
           )
         ).toEqual({
           completedAt: '2022-05-06T12:50:19.747Z',
@@ -604,7 +618,7 @@ describe('When using Actions service utilities', () => {
               wasSuccessful: true,
             },
             '456': {
-              completedAt: action456Responses[0].item.data['@timestamp'],
+              completedAt: action456Responses.fleetResponses[0]['@timestamp'],
               errors: ['Fleet action response error: something is no good'],
               isCompleted: true,
               wasSuccessful: false,
@@ -621,18 +635,15 @@ describe('When using Actions service utilities', () => {
 
       it('should include output for agents for which the action was complete', () => {
         // Add output to the completed actions
-        (
-          action123Responses[1] as EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
-        ).item.data.EndpointActions.data.output = {
+
+        action123Responses.endpointResponses[0].EndpointActions.data.output = {
           type: 'json',
           content: {
             code: 'bar',
           },
         };
 
-        (
-          action789Responses[1] as EndpointActivityLogActionResponse
-        ).item.data.EndpointActions.data.output = {
+        action789Responses.endpointResponses[0].EndpointActions.data.output = {
           type: 'text',
           // @ts-expect-error need to fix ActionResponseOutput type
           content: 'some endpoint output data',
@@ -645,14 +656,18 @@ describe('When using Actions service utilities', () => {
                 agents: agentIds,
               })
             ),
-            [
-              ...action123Responses,
-
-              // Action id: 456 === Not complete (only fleet response)
-              action456Responses[0],
-
-              ...action789Responses,
-            ]
+            {
+              fleetResponses: [
+                ...action123Responses.fleetResponses,
+                ...action456Responses.fleetResponses,
+                ...action789Responses.fleetResponses,
+              ],
+              endpointResponses: [
+                ...action123Responses.endpointResponses,
+                ...action789Responses.endpointResponses,
+                // Action id: 456 === Not complete (only fleet response)
+              ],
+            }
           )
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
@@ -975,7 +990,7 @@ describe('When using Actions service utilities', () => {
 
   describe('#createActionDetailsRecord()', () => {
     let actionRequest: NormalizedActionRequest;
-    let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
+    let actionResponses: FetchActionResponsesResult;
     let agentHostInfo: Record<string, string>;
 
     beforeEach(() => {
@@ -993,31 +1008,22 @@ describe('When using Actions service utilities', () => {
         hosts: {},
       };
 
-      actionResponses = [
-        {
-          type: ActivityLogItemTypes.FLEET_RESPONSE,
-          item: {
-            id: actionRequest.id,
-            data: fleetActionGenerator.generateResponse({
+      actionResponses = {
+        fleetResponses: [
+          fleetActionGenerator.generateResponse({
+            action_id: actionRequest.id,
+            agent_id: actionRequest.agents[0],
+          }),
+        ],
+        endpointResponses: [
+          endpointActionGenerator.generateResponse({
+            agent: { id: actionRequest.agents },
+            EndpointActions: {
               action_id: actionRequest.id,
-              agent_id: actionRequest.agents[0],
-            }),
-          },
-        },
-
-        {
-          type: ActivityLogItemTypes.RESPONSE,
-          item: {
-            id: actionRequest.id,
-            data: endpointActionGenerator.generateResponse({
-              agent: { id: actionRequest.agents },
-              EndpointActions: {
-                action_id: actionRequest.id,
-              },
-            }),
-          },
-        },
-      ];
+            },
+          }),
+        ],
+      };
 
       agentHostInfo = {
         [actionRequest.agents[0]]: 'host-a',

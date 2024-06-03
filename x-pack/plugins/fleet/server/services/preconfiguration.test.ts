@@ -306,6 +306,7 @@ jest.mock('./app_context', () => ({
     getExperimentalFeatures: jest.fn().mockReturnValue({
       agentless: false,
     }),
+    getInternalUserSOClientForSpaceId: jest.fn(),
   },
 }));
 
@@ -1123,6 +1124,69 @@ describe('policy preconfiguration', () => {
       expect(policies.length).toEqual(1);
       expect(policies[0].id).toBe('test-id');
       expect(nonFatalErrorsB.length).toBe(0);
+    });
+
+    it('should used a namespaced saved objet client if the agent policy space_id is set', async () => {
+      const TEST_NAMESPACE = 'test';
+      const namespacedSOClient = getPutPreconfiguredPackagesMock();
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      jest
+        .mocked(appContextService)
+        .getInternalUserSOClientForSpaceId.mockReturnValue(namespacedSOClient);
+
+      await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [
+          {
+            name: 'Test policy',
+            namespace: 'default',
+            id: 'test-id',
+            space_id: TEST_NAMESPACE,
+            is_managed: true,
+            package_policies: [
+              {
+                package: { name: 'test_package' },
+                name: 'test_package1',
+              },
+            ],
+          },
+        ] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: '3.0.0' }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+        agentless: true,
+      } as any);
+
+      expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledTimes(1);
+      expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith(TEST_NAMESPACE);
+
+      expect(mockedPackagePolicyService.create).toBeCalledTimes(1);
+      expect(mockedPackagePolicyService.create).toBeCalledWith(
+        namespacedSOClient, // namespaced so client
+        expect.anything(), // es client
+        expect.objectContaining({
+          name: 'test_package1',
+        }),
+        expect.anything() // options
+      );
+
+      expect(spyAgentPolicyServiceUpdate).toBeCalledTimes(1);
+      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+        namespacedSOClient, // namespaced so client
+        expect.anything(), // es client
+        expect.anything(), // id
+        expect.objectContaining({
+          is_managed: true,
+        }),
+        expect.anything() // options
+      );
     });
   });
 
