@@ -136,7 +136,7 @@ export const useRulesTableActions = ({
                 timeRange: modalManualRuleRunConfirmationResult,
               });
             },
-            enabled: (rule: Rule) => !rule.immutable,
+            enabled: (rule: Rule) => rule.enabled,
           } as DefaultItemAction<Rule>,
         ]
       : []),

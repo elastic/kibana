@@ -18,7 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import moment from 'moment';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 
 import * as i18n from './translations';
@@ -31,9 +31,22 @@ interface ManualRuleRunModalProps {
 const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const [startDate, setStartDate] = useState(moment().subtract(1, 'd'));
-  const [endDate, setEndDate] = useState(moment());
-  const isInvalid = startDate.isAfter(endDate);
+  const now = useMemo(() => moment(), []);
+
+  const [startDate, setStartDate] = useState(now.clone().subtract(1, 'd'));
+  const [endDate, setEndDate] = useState(now.clone());
+
+  const isEndDateInFuture = endDate.isAfter(now);
+  const isInvalid = isEndDateInFuture || startDate.isSameOrAfter(endDate);
+  const errorMessage = useMemo(
+    () =>
+      isInvalid
+        ? isEndDateInFuture
+          ? i18n.MANUAL_RULE_RUN_FUTURE_TIME_RANGE_ERROR
+          : i18n.MANUAL_RULE_RUN_INVALID_TIME_RANGE_ERROR
+        : null,
+    [isEndDateInFuture, isInvalid]
+  );
 
   const handleConfirm = useCallback(() => {
     onConfirm({ startDate, endDate });
@@ -64,7 +77,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
             </EuiFlexGroup>
           }
           isInvalid={isInvalid}
-          error={isInvalid ? i18n.MANUAL_RULE_RUN_INVALID_TIME_RANGE_ERROR : null}
+          error={errorMessage}
         >
           <EuiDatePickerRange
             data-test-subj="manual-rule-run-time-range"

@@ -154,7 +154,7 @@ const RuleActionsOverflowComponent = ({
                   <EuiContextMenuItem
                     key={i18nActions.MANUAL_RULE_RUN}
                     icon="play"
-                    disabled={!userHasPermissions}
+                    disabled={!userHasPermissions || !rule.enabled}
                     data-test-subj="rules-details-manual-rule-run"
                     onClick={async () => {
                       startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });

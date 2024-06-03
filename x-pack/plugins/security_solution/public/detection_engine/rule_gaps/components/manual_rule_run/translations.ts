@@ -47,3 +47,10 @@ export const MANUAL_RULE_RUN_INVALID_TIME_RANGE_ERROR = i18n.translate(
     defaultMessage: 'Selected time range is invalid',
   }
 );
+
+export const MANUAL_RULE_RUN_FUTURE_TIME_RANGE_ERROR = i18n.translate(
+  'xpack.securitySolution.manuelRuleRun.futureTimeRangeError',
+  {
+    defaultMessage: 'Manual rule run cannot be scheduled for the future',
+  }
+);
