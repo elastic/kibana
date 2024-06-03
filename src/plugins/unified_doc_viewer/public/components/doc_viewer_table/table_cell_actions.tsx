@@ -24,7 +24,7 @@ export interface TableRow {
 
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
-  row?: TableRow;
+  row: TableRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
 }
 
 export function isFilterInOutPairDisabled(row: TableRow): boolean {
