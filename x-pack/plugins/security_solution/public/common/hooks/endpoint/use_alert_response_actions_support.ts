@@ -21,8 +21,19 @@ import {
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 export interface AlertResponseActionsSupport {
+  /** Does the host/agent for the given alert have support for response actions */
   isSupported: boolean;
-  /** Only defined when `isSupported` is set to `true` */
+
+  /**
+   * If the Event Data provide was for a SIEM alert (generated as a result of a Rule run) or
+   * just an event.
+   */
+  isAlert: boolean;
+
+  /**
+   * Full details around support for response actions.
+   * NOTE That some data may not be blank if `isSupported` is `false`
+   */
   details: {
     /** Defaults to `endpoint` when unable to determine agent type */
     agentType: ResponseActionAgentType;
@@ -150,6 +161,7 @@ export const useAlertResponseActionsSupport = (
   return useMemo<AlertResponseActionsSupport>(() => {
     return {
       isSupported: Boolean(isFeatureEnabled && agentId && agentType),
+      isAlert,
       details: {
         agentType: agentType || 'endpoint',
         agentId,
@@ -159,5 +171,14 @@ export const useAlertResponseActionsSupport = (
         agentSupport: supportedActions,
       },
     };
-  }, [agentId, agentIdField, agentType, hostName, isFeatureEnabled, platform, supportedActions]);
+  }, [
+    agentId,
+    agentIdField,
+    agentType,
+    hostName,
+    isAlert,
+    isFeatureEnabled,
+    platform,
+    supportedActions,
+  ]);
 };
