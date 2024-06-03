@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('saved objects management apis', () => {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./bulk_get'));
+    loadTestFile(require.resolve('./bulk_delete'));
   });
 }
