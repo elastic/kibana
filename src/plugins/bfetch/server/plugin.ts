@@ -18,6 +18,7 @@ import {
   RequestHandler,
   KibanaResponseFactory,
   AnalyticsServiceStart,
+  HttpProtocol,
 } from '@kbn/core/server';
 
 import { map$ } from '@kbn/std';
@@ -65,11 +66,19 @@ export interface BfetchServerSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerStart {}
 
-const streamingHeaders = {
-  'Content-Type': 'application/x-ndjson',
-  Connection: 'keep-alive',
-  'Transfer-Encoding': 'chunked',
-  'X-Accel-Buffering': 'no',
+const getStreamingHeaders = (protocol: HttpProtocol): Record<string, string> => {
+  if (protocol === 'http2') {
+    return {
+      'Content-Type': 'application/x-ndjson',
+      'X-Accel-Buffering': 'no',
+    };
+  }
+  return {
+    'Content-Type': 'application/x-ndjson',
+    Connection: 'keep-alive',
+    'Transfer-Encoding': 'chunked',
+    'X-Accel-Buffering': 'no',
+  };
 };
 
 interface Query {
@@ -144,7 +153,7 @@ export class BfetchServerPlugin
         const data = request.body;
         const compress = request.query.compress;
         return response.ok({
-          headers: streamingHeaders,
+          headers: getStreamingHeaders(request.protocol),
           body: createStream(
             handlerInstance.getResponseStream(data),
             logger,
