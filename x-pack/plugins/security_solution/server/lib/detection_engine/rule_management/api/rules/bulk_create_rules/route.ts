@@ -62,7 +62,7 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const ruleDefinitions = request.body;
           const dupes = getDuplicates(ruleDefinitions, 'rule_id');
@@ -109,7 +109,7 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                     });
                   }
 
-                  const createdRule = await rulesManagementClient.createCustomRule({
+                  const createdRule = await detectionRulesClient.createCustomRule({
                     params: payloadRule,
                   });
 
