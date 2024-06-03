@@ -256,9 +256,7 @@ export class FeatureTable extends Component<Props, {}> {
     }
 
     updatedSpace.disabledFeatures = disabledFeatures;
-    if (this.props.onChange) {
-      this.props.onChange(updatedSpace);
-    }
+    this.props.onChange?.(updatedSpace);
   };
 
   private getAllFeatureIds = () =>
@@ -287,9 +285,7 @@ export class FeatureTable extends Component<Props, {}> {
       );
     }
 
-    if (this.props.onChange) {
-      this.props.onChange(updatedSpace);
-    }
+    this.props.onChange?.(updatedSpace);
   };
 
   private getCategoryHelpText = (category: AppCategory) => {
