@@ -6,15 +6,14 @@ exports[`CallOuts should render normally 1`] = `
     color="danger"
     iconType="cross"
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Deprecation languages in use"
         id="indexPatternManagement.editIndexPattern.scripted.deprecationLangHeader"
-        values={Object {}}
       />
     }
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
         id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
         values={
@@ -23,10 +22,9 @@ exports[`CallOuts should render normally 1`] = `
             "link": <EuiLink
               href="http://www.elastic.co/painlessDocs"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Painless"
                 id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
-                values={Object {}}
               />
             </EuiLink>,
           }
