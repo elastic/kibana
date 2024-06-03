@@ -60,16 +60,18 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
+  isServerless = true,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
+  isServerless?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
   });
   history.replace(locationPathName);
 
-  const projectNavigationService = new ProjectNavigationService();
+  const projectNavigationService = new ProjectNavigationService(isServerless);
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
   const application = {
