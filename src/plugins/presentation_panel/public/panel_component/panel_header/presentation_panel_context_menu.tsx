@@ -263,8 +263,6 @@ export const PresentationPanelContextMenu = ({
     [contextMenuActions]
   );
 
-  console.log({ quickActions, hoverActionPanels });
-
   const notificationElements = useMemo(() => {
     if (!showNotifications || !api) return [];
     return notifications?.map((notification) => {

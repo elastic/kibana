@@ -86,11 +86,11 @@ describe('filters notification action', () => {
     expect(await action.isCompatible(context)).toBe(true);
   });
 
-  it('is incompatible when api is in view mode', async () => {
+  it('is available when api is in view mode', async () => {
     updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
     updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     updateViewMode('view');
-    expect(await action.isCompatible(context)).toBe(false);
+    expect(await action.isCompatible(context)).toBe(true);
   });
 
   it('calls onChange when view mode changes', () => {
@@ -99,7 +99,7 @@ describe('filters notification action', () => {
     updateQuery({ esql: 'FROM test_dataview' } as AggregateQuery);
     action.subscribeToCompatibilityChanges(context, onChange);
     updateViewMode('view');
-    expect(onChange).toHaveBeenCalledWith(false, action);
+    expect(onChange).toHaveBeenCalledWith(true, action);
   });
 
   it('calls onChange when filters change', async () => {
