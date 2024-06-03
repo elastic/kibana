@@ -33,6 +33,7 @@ export const scheduleRuleRun = async (
     .post(INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
+    .set('x-elastic-internal-origin', 'Kibana')
     .send(params)
     .expect(expectedStatusCode);
   return response.body;

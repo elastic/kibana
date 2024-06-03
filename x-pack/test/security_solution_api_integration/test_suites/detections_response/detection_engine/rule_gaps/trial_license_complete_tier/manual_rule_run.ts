@@ -280,6 +280,38 @@ export default ({ getService }: FtrProviderContext) => {
           ])
         );
       });
+
+      it('should return bad request error when end date is in future', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            interval,
+          })
+        );
+
+        const endDate = moment().add(30, 'm');
+        const startDate = endDate.clone().subtract(1, 'h');
+
+        const results = await scheduleRuleRun(
+          supertest,
+          [createdRule.id],
+          {
+            startDate,
+            endDate,
+          },
+          400
+        );
+
+        expect(results).toEqual({
+          error: 'Bad Request',
+          message: '[request body.0]: Backfill cannot be scheduled for the future',
+          statusCode: 400,
+        });
+      });
     });
   });
 };
