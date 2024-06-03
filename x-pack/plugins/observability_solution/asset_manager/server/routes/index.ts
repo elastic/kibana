@@ -21,21 +21,18 @@ import { checkEntityDiscoveryEnabledRoute } from './enablement/check';
 import { enableEntityDiscoveryRoute } from './enablement/enable';
 import { disableEntityDiscoveryRoute } from './enablement/disable';
 
-export function setupRoutes<T extends RequestHandlerContext>({
-  router,
-  server, 
-}: SetupRouteOptions<T>) {
-  pingRoute<T>({ router, server });
-  sampleAssetsRoutes<T>({ router, server });
-  assetsRoutes<T>({ router, server });
-  hostsRoutes<T>({ router, server });
-  servicesRoutes<T>({ router, server });
-  containersRoutes<T>({ router, server });
-  podsRoutes<T>({ router, server });
-  createEntityDefinitionRoute<T>({ router, server });
-  deleteEntityDefinitionRoute<T>({ router, server });
-  resetEntityDefinitionRoute<T>({ router, server });
-  enableEntityDiscoveryRoute<T>({ router, server });
-  disableEntityDiscoveryRoute<T>({ router, server });
-  checkEntityDiscoveryEnabledRoute<T>({ router, server });
+export function setupRoutes<T extends RequestHandlerContext>(dependencies: SetupRouteOptions<T>) {
+  pingRoute<T>(dependencies);
+  sampleAssetsRoutes<T>(dependencies);
+  assetsRoutes<T>(dependencies);
+  hostsRoutes<T>(dependencies);
+  servicesRoutes<T>(dependencies);
+  containersRoutes<T>(dependencies);
+  podsRoutes<T>(dependencies);
+  createEntityDefinitionRoute<T>(dependencies);
+  deleteEntityDefinitionRoute<T>(dependencies);
+  resetEntityDefinitionRoute<T>(dependencies);
+  enableEntityDiscoveryRoute<T>(dependencies);
+  disableEntityDiscoveryRoute<T>(dependencies);
+  checkEntityDiscoveryEnabledRoute<T>(dependencies);
 }

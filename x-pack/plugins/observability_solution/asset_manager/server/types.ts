@@ -23,6 +23,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 export interface AssetManagerServerSetup {
   core: CoreStart;
@@ -42,6 +43,7 @@ export interface AssetManagerPluginSetupDependencies {
   apmDataAccess: ApmDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 export interface AssetManagerPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;

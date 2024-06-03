@@ -22,8 +22,8 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineActions } from '../../../../store';
 import {
   useDeepEqualSelector,

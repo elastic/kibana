@@ -86,8 +86,13 @@ export class AssetManagerServerPlugin
       logger: this.logger,
     } as AssetManagerServerSetup;
 
-  
-    setupRoutes<RequestHandlerContext>({ router: router, server: this.server });
+    setupRoutes<RequestHandlerContext>({
+      router,
+      assetClient,
+      logger: this.logger,
+      spaces: plugins.spaces,
+      server: this.server,
+    });
 
     return {
       assetClient,
