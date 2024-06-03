@@ -149,7 +149,7 @@ export class LlmProxy {
         });
       }),
       new Promise<LlmResponseSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 5000ms`)), 5000);
+        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 10000ms`)), 10000);
       }),
     ]);
 

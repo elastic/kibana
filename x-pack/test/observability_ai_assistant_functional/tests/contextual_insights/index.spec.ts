@@ -118,15 +118,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       ]);
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/184029
-    describe.skip('when there are no connectors', () => {
+    describe('when there are no connectors', () => {
       it('should not show the contextual insight component', async () => {
         await navigateToError();
         await testSubjects.missingOrFail(ui.pages.contextualInsights.button);
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/184071
     describe('when there are connectors', () => {
       let proxy: LlmProxy;
 
