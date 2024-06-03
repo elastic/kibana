@@ -47,7 +47,7 @@ describe('Import rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    clients.rulesManagementClient.importRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.importRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -80,7 +80,7 @@ describe('Import rules route', () => {
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      clients.rulesManagementClient.importRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -185,7 +185,7 @@ describe('Import rules route', () => {
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
-        clients.rulesManagementClient.importRule.mockRejectedValue({
+        clients.detectionRulesClient.importRule.mockRejectedValue({
           message: 'rule_id: "rule-1" already exists',
           statusCode: 409,
         });
@@ -403,7 +403,7 @@ describe('Import rules route', () => {
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.rulesManagementClient.importRule.mockRejectedValueOnce({
+        clients.detectionRulesClient.importRule.mockRejectedValueOnce({
           message: 'rule_id: "rule-1" already exists',
           statusCode: 409,
         });
