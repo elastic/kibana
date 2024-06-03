@@ -59,7 +59,7 @@ a|
 * `All` for the *Management > {stack-rules-feature}* feature.
 * `All` for the *Management > Rules Settings* feature.
 * `All` for the *Management > {connectors-feature}* feature.
-* `Read` index privileges for the `.alerts-*` system indices or `.alerts-*-<space-id>`, where `<space-id>` is the {kib} space name
+* `Read` index privileges for the `.alerts-*` system indices
 
 [NOTE]
 ====
@@ -82,7 +82,7 @@ a|
 * `Read` for the *Management > {stack-rules-feature}* feature.
 * `Read` for the *Management > Rules Settings* feature.
 * `Read` for the *Management > {connectors-feature}* feature.
-* `Read` index privileges for the `.alerts-*` system indices or `.alerts-*-<space-id>`, where `<space-id>` is the {kib} space name
+* `Read` index privileges for the `.alerts-*` system indices
 
 [NOTE]
 ====
