@@ -13,7 +13,7 @@ import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { patchRule } from './rules_management_client';
+import { patchRule } from './detection_rules_client';
 import { readRules } from './read_rules';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -23,7 +23,7 @@ jest.mock('../../../../machine_learning/validation');
 
 jest.mock('./read_rules');
 
-describe('RuleManagementClient.patchRule', () => {
+describe('DetectionRulesClient.patchRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   const mlAuthz = (buildMlAuthz as jest.Mock)();
 
