@@ -7,17 +7,11 @@
  */
 
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 
 import { SavedSearchAttributes } from '../../../common';
-import {
-  convertToSavedSearch,
-  getSearchSavedObject,
-} from '../../../common/service/get_saved_searches';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { convertToSavedSearch } from '../../../common/service/get_saved_searches';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
-import { saveSearchSavedObject } from './save_saved_searches';
 import type { SavedSearch, SavedSearchByValueAttributes } from './types';
 
 export interface SavedSearchUnwrapMetaInfo {
@@ -66,50 +60,3 @@ export const splitReferences = (attributes: SavedSearchByValueAttributes) => {
     },
   };
 };
-
-export interface SavedSearchAttributeService {
-  saveMethod: (attributes: SavedSearchByValueAttributes, savedObjectId?: string) => Promise<string>;
-  unwrapMethod: (savedObjectId: string) => Promise<SavedSearchUnwrapResult>;
-  checkForDuplicateTitle: (
-    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
-  ) => Promise<void>;
-}
-
-export const getSavedSearchAttributeService = (
-  deps: SavedSearchesServiceDeps
-): SavedSearchAttributeService => ({
-  saveMethod: async (
-    attributes: SavedSearchByValueAttributes,
-    savedObjectId?: string
-  ): Promise<string> => {
-    const { references, attributes: attrs } = splitReferences(attributes);
-    const id = await saveSearchSavedObject(
-      savedObjectId,
-      attrs,
-      references,
-      deps.contentManagement
-    );
-    return id;
-  },
-  unwrapMethod: async (savedObjectId: string): Promise<SavedSearchUnwrapResult> => {
-    const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(deps));
-
-    return {
-      attributes: savedObjectToEmbeddableAttributes(so.item),
-      metaInfo: {
-        sharingSavedObjectProps: so.meta,
-        managed: so.item.managed,
-      },
-    };
-  },
-  checkForDuplicateTitle: (
-    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
-  ) => {
-    return checkForDuplicateTitle({
-      title: props.newTitle,
-      isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-      onTitleDuplicate: props.onTitleDuplicate,
-      contentManagement: deps.contentManagement,
-    });
-  },
-});

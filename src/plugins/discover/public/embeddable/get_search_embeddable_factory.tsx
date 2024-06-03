@@ -23,14 +23,10 @@ import {
   FetchContext,
   initializeTitles,
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
-import {
-  SavedSearchByValueAttributes,
-  SavedSearchUnwrapResult,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { DiscoverServices } from '../build_services';
@@ -55,7 +51,8 @@ export const getSearchEmbeddableFactory = ({
   };
   discoverServices: DiscoverServices;
 }) => {
-  const { attributeService, toSavedSearch } = discoverServices.savedSearch.byValue;
+  const { get, save, checkForDuplicateTitle } = discoverServices.savedSearch;
+  const { toSavedSearch } = discoverServices.savedSearch.byValue;
 
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
@@ -65,82 +62,75 @@ export const getSearchEmbeddableFactory = ({
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: async (serializedState) => {
       console.log('serializedState', serializedState);
-
       const savedObjectId = serializedState.rawState.savedObjectId;
+      if (savedObjectId) {
+        const so = await get(savedObjectId);
+        return {
+          ...so,
+          savedObjectId,
+          savedObjectTitle: so.title,
+          savedObjectDescription: so.description,
+          title: serializedState?.rawState.title, // panel title
+          description: serializedState?.rawState.description, // panel description
+        };
+      }
+
       const savedSearch = await toSavedSearch(
-        savedObjectId,
-        savedObjectId
-          ? await attributeService.unwrapMethod(savedObjectId)
-          : (inject(
-              serializedState.rawState,
-              serializedState.references ?? []
-            ) as SavedSearchUnwrapResult)
+        undefined,
+        inject(
+          serializedState.rawState,
+          serializedState.references ?? []
+        ) as SavedSearchUnwrapResult
       );
-      console.log('savedSearch', savedSearch);
-
-      // const { searchSourceJSON, references: originalReferences } =
-      //   savedSearch.searchSource.serialize();
-      // console.log(searchSourceJSON, originalReferences);
-      /** TODO: Remove unused state? kibanaSavedObjectMeta for example */
-
       return { ...savedSearch, savedObjectId };
-      // return {
-      //   ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
-      //   searchSource: savedSearch.searchSource,
-      // };
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       console.log('initialState', initialState);
-
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
+      const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(
+        initialState?.savedObjectTitle
+      );
+      const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
+        initialState?.savedObjectDescription
+      );
+      const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
-      const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
 
-      const {
-        searchEmbeddableApi,
-        searchEmbeddableComparators,
-        searchEmbeddableStateManager,
-        // serializeSearchEmbeddable,
-        // stateManager
-        // snapshotState,
-      } = await initializeSearchEmbeddableApi(initialState, { discoverServices });
+      const { searchEmbeddableApi, searchEmbeddableComparators, searchEmbeddableStateManager } =
+        await initializeSearchEmbeddableApi(initialState, { discoverServices });
 
-      const serializeState = async (): Promise<
-        SerializedPanelState<SearchEmbeddableSerializedState>
-      > => {
-        const searchSource = searchEmbeddableApi.searchSource$.getValue();
-        const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
-
-        const savedSearchAttributes = toSavedSearchAttributes(
-          searchEmbeddableApi.getSavedSearch(),
-          searchSourceJSON
-        );
-
-        // const references = savedObjectsTagging
-        //   ? savedObjectsTagging.ui.updateTagsReferences(originalReferences, savedSearch.tags ?? [])
-        //   : originalReferences;
-
-        const { rawState, references } = extract({
-          attributes: {
-            ...savedSearchAttributes,
-            ...serializeTitles(),
-            references: originalReferences,
-          },
-        });
-
+      const serializeState = async (
+        title?: string
+      ): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
         const savedObjectId = savedObjectId$.getValue();
         if (savedObjectId) {
-          await attributeService.saveMethod(
-            rawState.attributes as SavedSearchByValueAttributes,
-            savedObjectId$.getValue()
-          );
-
-          return { rawState: { savedObjectId }, references };
+          const id = await save({
+            ...searchEmbeddableApi.getSavedSearch(),
+            id: savedObjectId,
+            title: title ?? defaultPanelTitle$.getValue(),
+            description: defaultPanelDescription$.getValue(),
+          });
+          return { rawState: { savedObjectId: id, ...serializeTitles() }, references: [] };
         } else {
+          const searchSource = searchEmbeddableApi.searchSource$.getValue();
+          const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
+          const savedSearchAttributes = toSavedSearchAttributes(
+            searchEmbeddableApi.getSavedSearch(),
+            searchSourceJSON
+          );
+          const { rawState, references } = extract({
+            attributes: {
+              ...savedSearchAttributes,
+              references: originalReferences,
+            },
+          });
           return {
-            rawState: rawState as unknown as SearchEmbeddableSerializedState,
+            rawState: {
+              ...serializeTitles(),
+              ...(rawState as unknown as SearchEmbeddableSerializedState),
+            },
             references,
           };
         }
@@ -169,6 +159,8 @@ export const getSearchEmbeddableFactory = ({
           dataLoading: dataLoading$,
           blockingError: blockingError$,
           savedObjectId: savedObjectId$,
+          defaultPanelTitle: defaultPanelTitle$,
+          defaultPanelDescription: defaultPanelDescription$,
           getTypeDisplayName: () =>
             i18n.translate('discover.embeddable.search.displayName', {
               defaultMessage: 'search',
@@ -181,19 +173,15 @@ export const getSearchEmbeddableFactory = ({
           canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
           libraryId$: savedObjectId$,
           saveToLibrary: async (title: string) => {
-            console.log('save to library', title);
-            const savedObjectId = await attributeService.saveMethod(
-              {
-                ...(await serializeState()).rawState.attributes,
-                title,
-              } as SavedSearchByValueAttributes,
-              savedObjectId$.getValue()
-            );
-            savedObjectId$.next(savedObjectId);
-            return savedObjectId;
+            const savedObjectId = await save({
+              ...searchEmbeddableApi.getSavedSearch(),
+              title,
+            });
+            savedObjectId$.next(savedObjectId!);
+            return savedObjectId!;
           },
           checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
-            attributeService.checkForDuplicateTitle({
+            checkForDuplicateTitle({
               newTitle,
               isTitleDuplicateConfirmed,
               onTitleDuplicate,
@@ -207,6 +195,11 @@ export const getSearchEmbeddableFactory = ({
           ...titleComparators,
           ...searchEmbeddableComparators,
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
+          savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
+          savedObjectDescription: [
+            defaultPanelDescription$,
+            (value) => defaultPanelDescription$.next(value),
+          ],
         }
       );
 
@@ -227,7 +220,7 @@ export const getSearchEmbeddableFactory = ({
             path: appTarget.path,
             state: {
               embeddableId: uuid,
-              valueInput: serializeState().rawState,
+              valueInput: searchEmbeddableApi.getSavedSearch(),
               originatingApp: parentApiContext.currentAppId,
               searchSessionId: fetchContext$.getValue()?.searchSessionId,
               originatingPath: parentApiContext.getCurrentPath?.(),

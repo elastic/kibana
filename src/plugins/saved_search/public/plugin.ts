@@ -16,6 +16,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { LATEST_VERSION, SavedSearchType } from '../common';
@@ -30,11 +31,8 @@ import {
   SaveSavedSearchOptions,
   toSavedSearch,
 } from './services/saved_searches';
+import { checkForDuplicateTitle } from './services/saved_searches/check_for_duplicate_title';
 import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
-import {
-  getSavedSearchAttributeService,
-  SavedSearchAttributeService,
-} from './services/saved_searches/saved_search_attribute_service';
 
 /**
  * Saved search plugin public Setup contract
@@ -53,12 +51,14 @@ export interface SavedSearchPublicPluginStart {
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
+  checkForDuplicateTitle: (
+    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
+  ) => Promise<void>;
   byValue: {
     toSavedSearch: (
       id: string | undefined,
       result: SavedSearchUnwrapResult
     ) => Promise<SavedSearch>;
-    attributeService: SavedSearchAttributeService;
   };
 }
 
@@ -139,11 +139,20 @@ export class SavedSearchPublicPlugin
       save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
         return service.save(savedSearch, options);
       },
+      checkForDuplicateTitle: (
+        props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
+      ) => {
+        return checkForDuplicateTitle({
+          title: props.newTitle,
+          isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+          onTitleDuplicate: props.onTitleDuplicate,
+          contentManagement: deps.contentManagement,
+        });
+      },
       byValue: {
         toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
           return toSavedSearch(id, result, deps);
         },
-        attributeService: getSavedSearchAttributeService(deps),
       },
     };
   }

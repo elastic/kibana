@@ -53,7 +53,11 @@ export type SearchEmbeddableAttributes = Pick<
 >;
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
-  SerializedTitles & { savedObjectId?: string };
+  SerializedTitles & {
+    savedObjectTitle?: string;
+    savedObjectId?: string;
+    savedObjectDescription?: string;
+  };
 
 // export type SearchEmbeddableRuntimeState = Omit<
 //   SavedSearchByValueAttributes,
