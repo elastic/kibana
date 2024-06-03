@@ -137,7 +137,7 @@ export class LogstashSelfMonitoring implements LogstashMonitoring {
    * @param {Object} clusters - LogstashBaseStats in an object keyed by the cluster UUIDs
    * @param {Object} plugins - plugin information keyed by cluster UUIDs to count the unique plugins
    */
-  private processLogstashStateResults(
+  private processStateResults(
     results: estypes.SearchResponse<LogstashState>,
     clusterUuid: string,
     { clusters, plugins }: LogstashProcessOptions
@@ -265,10 +265,7 @@ export class LogstashSelfMonitoring implements LogstashMonitoring {
             { term: { cluster_uuid: clusterUuid } },
             {
               bool: {
-                should: [
-                  { term: { type: 'logstash_stats' } },
-                  { term: { 'metricset.name': 'node_stats' } },
-                ],
+                should: [{ term: { type: 'logstash_stats' } }],
               },
             },
           ],
@@ -354,7 +351,7 @@ export class LogstashSelfMonitoring implements LogstashMonitoring {
     const hitsLength = results?.hits?.hits.length || 0;
     if (hitsLength > 0) {
       // further augment the clusters object with more stats
-      this.processLogstashStateResults(results, clusterUuid, options);
+      this.processStateResults(results, clusterUuid, options);
     }
     return Promise.resolve();
   }

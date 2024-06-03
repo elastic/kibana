@@ -24,7 +24,7 @@ const SELF_MONITORING: string = 'self';
 const METRICBEAT_MONITORING: string = 'metricbeat';
 const AGENT_MONITORING: string = 'agent';
 
-const logstashMonitoringInstances: { [key: string]: LogstashMonitoring } = {
+export const logstashMonitoringInstances: { [key: string]: LogstashMonitoring } = {
   self: new LogstashSelfMonitoring(),
   metricbeat: new LogstashMetricbeatMonitoring(),
   agent: new LogstashAgentMonitoring(),

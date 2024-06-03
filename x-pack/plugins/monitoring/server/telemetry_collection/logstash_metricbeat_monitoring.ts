@@ -76,6 +76,9 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
     }
   }
 
+  getIndexPattern(): { [key: string]: string } {
+    return this.indexPattern;
+  }
   /*
    * Update a clusters object with processed Logstash stats for metricbeat monitoring
    * @param {Array} results - array of LogstashStats docs from ES
@@ -148,7 +151,7 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
    * @param {Object} plugins - plugin information keyed by cluster UUIDs to count the unique plugins
    * @param {string} monitoringClusterUuid - monitoring cluster UUID
    */
-  private processLogstashStateResults(
+  private processStateResults(
     results: estypes.SearchResponse<LogstashState>,
     { clusters, plugins }: LogstashProcessOptions,
     monitoringClusterUuid: string
@@ -157,7 +160,7 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
     currHits.forEach((hit) => {
       const clusterUuid =
         hit._source?.logstash?.elasticsearch?.cluster?.id || monitoringClusterUuid;
-      const pipelineStats = clusters[clusterUuid].cluster_stats?.pipelines;
+      const pipelineStats = clusters[clusterUuid]?.cluster_stats?.pipelines;
       const thisLogstashStatePipeline = hit._source?.logstash?.node?.state?.pipeline;
 
       if (pipelineStats !== undefined && thisLogstashStatePipeline !== undefined) {
@@ -365,7 +368,7 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
     const hitsLength = results?.hits?.hits.length || 0;
     if (hitsLength > 0) {
       // further augment the clusters object with more stats
-      this.processLogstashStateResults(results, options, monitoringClusterUuid);
+      this.processStateResults(results, options, monitoringClusterUuid);
     }
     return Promise.resolve();
   }
