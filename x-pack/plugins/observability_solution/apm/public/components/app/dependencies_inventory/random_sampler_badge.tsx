@@ -20,7 +20,7 @@ export function RandomSamplerBadge() {
       >
         <EuiBadge iconType="iInCircle" color="hollow">
           {i18n.translate('xpack.apm.dependencies.randomSampler.badge', {
-            defaultMessage: `Based on sampled transactions`,
+            defaultMessage: `Based on sampled spans`,
           })}
         </EuiBadge>
       </EuiToolTip>
