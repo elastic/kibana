@@ -13,6 +13,13 @@ import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { of, map } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import {
+  convertFieldsToFallbackFields,
+  getAllFallbackFields,
+  getAssociatedSmartFieldsAsString,
+  SmartFieldFallbackTooltip,
+} from '@kbn/unified-field-list';
+import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/data_visualizer_stats_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
@@ -40,7 +47,39 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     trackUiMetric,
     searchSessionId,
+    additionalFieldGroups,
   } = props;
+
+  const visibleFields = useMemo(
+    () => convertFieldsToFallbackFields({ fields: columns, additionalFieldGroups }),
+    [additionalFieldGroups, columns]
+  );
+  const allFallbackFields = useMemo(
+    () => getAllFallbackFields(additionalFieldGroups),
+    [additionalFieldGroups]
+  );
+  const renderFieldName = useCallback(
+    (fieldName: string, item: DataVisualizerTableItem) => {
+      const displayName = item.displayName ?? item.fieldName;
+      const isDerivedAsPartOfSmartField = allFallbackFields.includes(fieldName);
+      const associatedSmartFields = isDerivedAsPartOfSmartField
+        ? getAssociatedSmartFieldsAsString(fieldName, additionalFieldGroups)
+        : '';
+
+      return (
+        <>
+          {displayName}
+          {isDerivedAsPartOfSmartField ? (
+            <>
+              {' '}
+              <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
+            </>
+          ) : null}
+        </>
+      );
+    },
+    [additionalFieldGroups, allFallbackFields]
+  );
 
   const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
   const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
@@ -96,7 +135,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         savedSearch={savedSearch}
         filters={filters}
         query={query}
-        visibleFieldNames={columns}
+        visibleFieldNames={visibleFields}
         sessionId={searchSessionId}
         totalDocuments={totalDocuments}
         samplingOption={samplingOption}
@@ -104,6 +143,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter={onAddFilter}
         showPreviewByDefault={showPreviewByDefault}
         onTableUpdate={updateState}
+        renderFieldName={renderFieldName}
       />
     </EuiFlexItem>
   );
