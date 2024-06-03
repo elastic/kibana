@@ -68,7 +68,7 @@ export interface StatRenderer {
   badge?: BadgeMetric;
 }
 
-export type GroupStatsRenderer<T> = (
+export type GroupStatsRenderers<T> = (
   selectedGroup: string,
   fieldBucket: RawBucket<T>
 ) => StatRenderer[];

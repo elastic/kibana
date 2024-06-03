@@ -8,7 +8,7 @@ import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderer,
+  GroupStatsRenderers,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
@@ -115,7 +115,7 @@ export const useLatestVulnerabilitiesGrouping = ({
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<VulnerabilitiesGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderer<VulnerabilitiesGroupingAggregation>;
+  groupStatsRenderer?: GroupStatsRenderers<VulnerabilitiesGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;

@@ -23,8 +23,8 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
-import type { ParsedGroupingAggregation, GroupPanelRenderer } from './types';
-import { GroupingBucket, GroupStatsRenderer, OnGroupToggle } from './types';
+import type { ParsedGroupingAggregation, GroupPanelRenderer, GroupStatsRenderers } from './types';
+import { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
@@ -33,7 +33,7 @@ export interface GroupingProps<T> {
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
-  groupStatsRenderer?: GroupStatsRenderer<T>;
+  groupStatsRenderers?: GroupStatsRenderers<T>;
   groupingId: string;
   groupingLevel?: number;
   inspectButton?: JSX.Element;
@@ -45,7 +45,7 @@ export interface GroupingProps<T> {
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   onGroupClose: () => void;
   selectedGroup: string;
-  takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -59,8 +59,8 @@ const GroupingComponent = <T,>({
   activePage,
   data,
   groupPanelRenderer,
+  groupStatsRenderers,
   groupSelector,
-  groupStatsRenderer,
   groupingId,
   groupingLevel = 0,
   inspectButton,
@@ -125,14 +125,14 @@ const GroupingComponent = <T,>({
                   }
                   groupNumber={groupNumber}
                   statRenderers={
-                    groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
+                    groupStatsRenderers && groupStatsRenderers(selectedGroup, groupBucket)
                   }
                   takeActionItems={takeActionItems}
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
-              groupPanelRenderer={
+              groupPanel={
                 groupPanelRenderer &&
                 groupPanelRenderer(selectedGroup, groupBucket, nullGroupMessage, isLoading)
               }
@@ -166,7 +166,7 @@ const GroupingComponent = <T,>({
     [
       data?.groupByFields?.buckets,
       groupPanelRenderer,
-      groupStatsRenderer,
+      groupStatsRenderers,
       groupingId,
       groupingLevel,
       isLoading,

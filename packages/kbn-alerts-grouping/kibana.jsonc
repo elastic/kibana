@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/alerts-grouping",
+  "owner": "@elastic/response-ops"
+}

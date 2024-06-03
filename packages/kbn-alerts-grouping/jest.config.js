@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-
-export const NO_INDEX_PATTERNS: DataView[] = [];
-export * from '../common/constants';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-alerts-grouping'],
+};
