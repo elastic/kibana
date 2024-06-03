@@ -63,11 +63,13 @@ export const InvokeAIActionParamsSchema = schema.object({
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
-  usageMetadata: schema.object({
-    promptTokenCount: schema.number(),
-    candidatesTokenCount: schema.number(),
-    totalTokenCount: schema.number(),
-  }),
+  usageMetadata: schema.maybe(
+    schema.object({
+      promptTokenCount: schema.number(),
+      candidatesTokenCount: schema.number(),
+      totalTokenCount: schema.number(),
+    })
+  ),
 });
 
 export const StreamingResponseSchema = schema.any();
