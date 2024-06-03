@@ -14,5 +14,17 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/es-query",
+    "@kbn/grouping",
+    "@kbn/i18n",
+    "@kbn/alerts-ui-shared",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/data-views-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/data-plugin",
+  ]
 }
