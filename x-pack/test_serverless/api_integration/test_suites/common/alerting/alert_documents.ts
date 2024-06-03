@@ -14,6 +14,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -38,7 +39,6 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_RULE_SNOOZED,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from './helpers/alerting_api_helper';
@@ -154,6 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_MUTED]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -175,7 +176,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
         [ALERT_RULE_PRODUCER]: hits1[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
-        [ALERT_RULE_SNOOZED]: false,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],
         [ALERT_RULE_UUID]: ruleId,

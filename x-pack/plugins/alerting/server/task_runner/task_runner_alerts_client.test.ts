@@ -78,6 +78,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -98,7 +99,6 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_RULE_SNOOZED,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
@@ -573,6 +573,7 @@ describe('Task Runner', () => {
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
               [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+              [ALERT_MUTED]: false,
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
               [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -583,7 +584,6 @@ describe('Task Runner', () => {
               [ALERT_RULE_REVISION]: 0,
               [ALERT_RULE_TYPE_ID]: 'test',
               [ALERT_RULE_TAGS]: ['rule-', '-tags'],
-              [ALERT_RULE_SNOOZED]: false,
               [ALERT_RULE_UUID]: '1',
               [ALERT_START]: DATE_1970,
               [ALERT_STATUS]: 'active',

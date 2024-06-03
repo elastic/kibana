@@ -17,6 +17,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_MUTED,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -26,7 +27,6 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REVISION,
-  ALERT_RULE_SNOOZED,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -81,6 +81,11 @@ export const alertFieldMap = {
   [ALERT_MAINTENANCE_WINDOW_IDS]: {
     type: 'keyword',
     array: true,
+    required: false,
+  },
+  [ALERT_MUTED]: {
+    type: 'boolean',
+    array: false,
     required: false,
   },
   [ALERT_CONSECUTIVE_MATCHES]: {
@@ -150,11 +155,6 @@ export const alertFieldMap = {
     type: 'long',
     array: false,
     required: true,
-  },
-  [ALERT_RULE_SNOOZED]: {
-    type: 'boolean',
-    array: false,
-    required: false,
   },
   [ALERT_RULE_TAGS]: {
     type: 'keyword',
