@@ -464,7 +464,7 @@ const UnstyledProcessEventDot = React.memo(
           >
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.processDescription"
-              defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} false {{descriptionText}}}"
+              defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} other {{descriptionText}}}"
               values={{
                 isEventBeingAnalyzed: isOrigin,
                 descriptionText,
