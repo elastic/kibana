@@ -128,13 +128,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openExportTab();
         const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = (await copyButton.getAttribute('data-share-url')) ?? '';
+        const reportURL = decodeURIComponent(
+          (await copyButton.getAttribute('data-share-url')) ?? ''
+        );
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
-          decodeURIComponent(reportURL).split(
-            'query:(range:(order_date:(format:strict_date_optional_time'
-          ).length - 1;
+          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
 
         expect(timeFiltersNumberInSharedURL).to.be(1);
@@ -142,10 +142,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(timeFiltersNumberInReportURL).to.be(1);
         expect(
-          decodeURIComponent(reportURL).includes(
-            'query:(range:(order_date:(format:strict_date_optional_time'
+          reportURL.includes(
+            `query:(range:(order_date:(format:strict_date_optional_time,gte:'${moment()
+              .add(-1, 'days')
+              .format('YYYY-MM-DDT')}`
           )
         ).to.be(true);
+
+        expect(reportURL.includes(`lte:'${moment().format('YYYY-MM-DDT')}`)).to.be(true);
 
         // return keyboard state
         await browser.getActions().keyUp(Key.CONTROL).perform();
