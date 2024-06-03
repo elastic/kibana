@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return ruleName === alertName;
     });
     await testSubjects.click('thresholdPopover');
-    await testSubjects.setValue('alertThresholdInput', '1');
+    await testSubjects.setValue('alertThresholdInput0', '1');
 
     await testSubjects.click('forLastExpression');
     await testSubjects.setValue('timeWindowSizeNumber', '30');
