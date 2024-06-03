@@ -120,7 +120,7 @@ export const performBulkActionRoute = (
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -203,7 +203,7 @@ export const performBulkActionRoute = (
                     return null;
                   }
 
-                  await rulesManagementClient.deleteRule({
+                  await detectionRulesClient.deleteRule({
                     ruleId: rule.id,
                   });
 
