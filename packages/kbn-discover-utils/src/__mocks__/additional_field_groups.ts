@@ -6,6 +6,21 @@
  * Side Public License, v 1.
  */
 
-export * from './data_view';
-export * from './es_hits';
-export * from './additional_field_groups';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+
+const smartFields = [
+  new DataViewField({
+    name: 'content',
+    type: 'smart_field',
+    searchable: false,
+    aggregatable: false,
+  }),
+];
+const fallbackFields = {
+  content: ['message'],
+};
+
+export const additionalFieldGroups = {
+  smartFields,
+  fallbackFields,
+};
