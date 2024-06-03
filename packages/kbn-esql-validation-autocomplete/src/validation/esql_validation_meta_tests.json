@@ -203,16 +203,209 @@
       "warning": []
     },
     {
-      "query": "from index,",
+      "query": "metrics index,",
       "error": [
         "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
       ],
       "warning": []
     },
     {
-      "query": "metrics index\n, \tindex\t,\n \t ",
+      "query": "metrics index\n, \tother_index\t,\n \t ",
       "error": [
         "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics index = 1",
+      "error": [
+        "SyntaxError: token recognition error at: '='",
+        "SyntaxError: token recognition error at: '1'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "METRICS .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "mEtRiCs .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics `index`",
+      "error": [
+        "SyntaxError: token recognition error at: '`'",
+        "SyntaxError: token recognition error at: '`'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "METRICS index, other_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "METRICS index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "METRICS average()",
+      "error": [
+        "Unknown index [average()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics custom_function()",
+      "error": [
+        "Unknown index [custom_function()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics ind*, other*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics index*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics *a_i*dex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics in*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics *n*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics *n*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics i*d*x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics i*d*x",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics i***x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics i****",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics i**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics index**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics *ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics *ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics in*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics ind*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics *,-.*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics indexes*",
+      "error": [
+        "Unknown index [indexes*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics remote-*:indexes*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics remote-*:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics remote-ccs:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics a_index, remote-ccs:indexes",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics my-index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "metrics numberField",
+      "error": [
+        "Unknown index [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics policy",
+      "error": [
+        "Unknown index [policy]"
       ],
       "warning": []
     },
