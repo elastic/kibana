@@ -89,6 +89,9 @@ export function createPluginSetupContext<
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
     },
+    injection: {
+      load: deps.injection.load.bind(deps.injection, plugin.opaqueId),
+    },
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
@@ -152,6 +155,9 @@ export function createPluginStartContext<
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
+    },
+    injection: {
+      getContainer: deps.injection.getContainer.bind(deps.injection, plugin.opaqueId),
     },
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,

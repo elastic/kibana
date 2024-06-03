@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { interfaces } from 'inversify';
 import type { PluginInitializer } from '@kbn/core-plugins-browser';
 
 /**
@@ -15,13 +16,21 @@ import type { PluginInitializer } from '@kbn/core-plugins-browser';
 export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string, unknown>>;
 
 /**
+ * @internal
+ */
+export interface PluginDefinition {
+  module?: interfaces.ContainerModule;
+  plugin?: UnknownPluginInitializer;
+}
+
+/**
  * Custom window type for loading bundles. Do not extend global Window to avoid leaking these types.
  * @internal
  */
 export interface CoreWindow {
   __kbnBundles__: {
     has(key: string): boolean;
-    get(key: string): { plugin: UnknownPluginInitializer } | undefined;
+    get(key: string): PluginDefinition | undefined;
   };
 }
 
@@ -37,9 +46,9 @@ export function read(name: string) {
   }
 
   const pluginExport = coreWindow.__kbnBundles__.get(exportId);
-  if (typeof pluginExport?.plugin !== 'function') {
-    throw new Error(`Definition of plugin "${name}" should be a function.`);
-  } else {
-    return pluginExport.plugin;
+  if (!pluginExport?.module && typeof pluginExport?.plugin !== 'function') {
+    throw new Error(`Definition of plugin "${name}" should either be a function or a module.`);
   }
+
+  return pluginExport;
 }

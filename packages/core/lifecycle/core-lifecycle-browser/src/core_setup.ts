@@ -8,6 +8,7 @@
 
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { CoreDiServiceSetup } from '@kbn/core-di-common';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
@@ -45,6 +46,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
+  /** {@link CoreDiServiceSetup} */
+  injection: CoreDiServiceSetup;
   /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */
