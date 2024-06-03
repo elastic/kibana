@@ -112,7 +112,9 @@ export class PluginsService
         pluginDepContracts
       );
 
-      contracts.set(pluginName, contract);
+      if (contract) {
+        contracts.set(pluginName, contract);
+      }
       this.satupPlugins.push(pluginName);
     }
 
@@ -148,7 +150,9 @@ export class PluginsService
         pluginDepContracts
       );
 
-      contracts.set(pluginName, contract);
+      if (contract) {
+        contracts.set(pluginName, contract);
+      }
     }
 
     this.runtimeResolver.resolveStartRequests(contracts);
