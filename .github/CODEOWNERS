@@ -67,6 +67,7 @@ src/plugins/bfetch @elastic/appex-sharedux
 packages/kbn-calculate-auto @elastic/obs-ux-management-team
 packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/plugins/canvas @elastic/kibana-presentation
+packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
 x-pack/plugins/cases @elastic/response-ops
@@ -1248,6 +1249,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /config/ @elastic/kibana-core
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
+/packages/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
@@ -1546,7 +1548,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/common/cti @elastic/security-detection-engine
 /x-pack/plugins/security_solution/common/field_maps @elastic/security-detection-engine
 
-/x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-detection-engine
+/x-pack/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui @elastic/security-detection-engine
 /x-pack/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engine
@@ -1562,7 +1564,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
-/x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-detection-engine
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 

@@ -14,7 +14,7 @@ import type {
 import { readRules } from '../../../../rule_management/logic/rule_management/read_rules';
 import { transform } from '../../../../rule_management/utils/utils';
 
-// TODO: https://github.com/elastic/kibana/issues/125642 Move to rule_management into a RuleManagementClient
+// TODO: https://github.com/elastic/kibana/issues/125642 Move to rule_management into a DetectionRulesClient
 
 export const fetchRuleById = async (
   rulesClient: RulesClient,

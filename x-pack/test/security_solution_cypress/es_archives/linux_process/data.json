@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "qxnqn3sBBf0WZxoXk7tg",
-    "index": "run-parts",
+    "index": "auditbeat-run-parts",
     "source": {
       "@timestamp": "2021-09-01T05:52:29.9451497Z",
       "agent": {

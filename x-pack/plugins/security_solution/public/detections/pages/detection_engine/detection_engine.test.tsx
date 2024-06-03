@@ -10,7 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
 import { useUserData } from '../../components/user_info';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { State } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
@@ -58,7 +58,7 @@ jest.mock('../../components/alerts_table/alerts_grouping', () => ({
 
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../components/user_info');
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
