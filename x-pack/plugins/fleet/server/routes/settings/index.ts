@@ -53,7 +53,7 @@ export const putSettingsHandler: FleetRequestHandler<
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
+    await agentPolicyService.bumpAllAgentPolicies(esClient, {
       user: user || undefined,
     });
     const body = {

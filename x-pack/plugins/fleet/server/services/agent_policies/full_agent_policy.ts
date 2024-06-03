@@ -159,7 +159,6 @@ export async function getFullAgentPolicy(
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
-    namespaces: agentPolicy.space_id ? [agentPolicy.space_id] : undefined,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
@@ -192,6 +191,10 @@ export async function getFullAgentPolicy(
       signature: '',
     },
   };
+
+  if (agentPolicy.space_id) {
+    fullAgentPolicy.namespaces = [agentPolicy.space_id];
+  }
 
   const dataPermissions =
     (await storedPackagePoliciesToAgentPermissions(

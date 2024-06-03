@@ -543,8 +543,10 @@ describe('Agent policy', () => {
         monitoring_enabled: ['metrics'],
       });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, undefined);
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        soClient
+      );
+      await agentPolicyService.bumpAllAgentPolicies(esClient, undefined);
 
       expect(soClient.bulkUpdate).toHaveBeenCalledWith([
         {
@@ -571,8 +573,10 @@ describe('Agent policy', () => {
         monitoring_enabled: ['metrics'],
       });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, 'output-id-123');
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        soClient
+      );
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
@@ -719,12 +723,10 @@ describe('Agent policy', () => {
         monitoring_enabled: ['metrics'],
       });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
-        soClient,
-        esClient,
-        'test-id-1'
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        soClient
       );
+      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, 'test-id-1');
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
