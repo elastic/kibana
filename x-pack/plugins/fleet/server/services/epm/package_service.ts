@@ -112,7 +112,8 @@ export interface PackageClient {
   getAgentPolicyInputs(
     pkgName: string,
     pkgVersion?: string,
-    prerelease?: false
+    prerelease?: false,
+    ignoreUnverified?: boolean
   ): Promise<TemplateAgentPolicyInput[]>;
 
   reinstallEsAssets(
@@ -276,7 +277,12 @@ class PackageClientImpl implements PackageClient {
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
-  public async getAgentPolicyInputs(pkgName: string, pkgVersion?: string, prerelease?: false) {
+  public async getAgentPolicyInputs(
+    pkgName: string,
+    pkgVersion?: string,
+    prerelease?: false,
+    ignoreUnverified?: boolean
+  ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
 
     // If pkgVersion isn't specified, find the latest package version
@@ -290,7 +296,8 @@ class PackageClientImpl implements PackageClient {
       pkgName,
       pkgVersion,
       'json',
-      prerelease
+      prerelease,
+      ignoreUnverified
     );
 
     return inputs;

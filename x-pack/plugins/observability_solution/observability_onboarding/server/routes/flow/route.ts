@@ -298,7 +298,7 @@ async function ensureInstalledIntegrations(
     if (installSource === 'registry') {
       const pkg = await packageClient.ensureInstalledPackage({ pkgName });
       const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
-      agentPolicyInputs.push(...inputs);
+      agentPolicyInputs.push(...inputs.filter((input) => input.type !== 'httpjson'));
     } else if (installSource === 'custom') {
       const input: TemplateAgentPolicyInput = {
         id: `filestream-${pkgName}`,
