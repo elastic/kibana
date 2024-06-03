@@ -160,7 +160,24 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     idleSocket?: number;
   };
 
-  /** A short, human-friendly description of this endpoint */
+  /**
+   * Human-friendly summary of this route, used for (OAS) documentation
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Retrieve foo resources given an ID`,
+   * })
+   * ```
+   */
+  summary?: string;
+
+  /**
+   * A description of this API. [CommonMark syntax](https://spec.commonmark.org)
+   * may be used for rich text
+   */
   description?: string;
 }
 
