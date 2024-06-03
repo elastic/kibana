@@ -16,7 +16,6 @@ import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { ErrorStatePrompt } from '../shared/error_state';
 import { HttpLogic } from '../shared/http';
-import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { InferenceEndpoints } from './components/inference_endpoints';
@@ -24,13 +23,12 @@ import { NotFound } from './components/not_found';
 import { INFERENCE_ENDPOINTS_PATH, ERROR_STATE_PATH, ROOT_PATH } from './routes';
 
 export const EnterpriseSearchRelevance: React.FC<InitialAppData> = (props) => {
-  const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   const showView = () => {
-    if (config.host && config.canDeployEntSearch && incompatibleVersions) {
+    if (incompatibleVersions) {
       return (
         <VersionMismatchPage
           enterpriseSearchVersion={enterpriseSearchVersion}
@@ -45,11 +43,7 @@ export const EnterpriseSearchRelevance: React.FC<InitialAppData> = (props) => {
   return (
     <Routes>
       <Route exact path={ERROR_STATE_PATH}>
-        {config.host && config.canDeployEntSearch && errorConnectingMessage ? (
-          <ErrorStatePrompt />
-        ) : (
-          <Redirect to={INFERENCE_ENDPOINTS_PATH} />
-        )}
+        {errorConnectingMessage ? <ErrorStatePrompt /> : <Redirect to={INFERENCE_ENDPOINTS_PATH} />}
       </Route>
       <Route>{showView()}</Route>
     </Routes>
