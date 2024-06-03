@@ -86,8 +86,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     if (processorStateRef.current) {
       const state = processorStateRef.current;
       if (await state.validate()) {
-        // We only want to show unsaved changed prompts to the user after the form
-        // has been submitted.
+        // We only want to show unsaved changed prompts to the user when the form
+        // hasnt been submitted.
         setHasSubmittedForm(true);
 
         // Save the form state, this will also trigger a redirect to pipelines list
