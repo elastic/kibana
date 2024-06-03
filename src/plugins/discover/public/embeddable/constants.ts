@@ -22,6 +22,3 @@ export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER: Trigger = {
 } as const;
 
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
-export const DEFAULT_ROW_HEIGHT_LINES = 3;
-export const DEFAULT_SAMPLE_SIZE = 500;
-export const DEFAULT_ROWS_PER_PAGE = 100;

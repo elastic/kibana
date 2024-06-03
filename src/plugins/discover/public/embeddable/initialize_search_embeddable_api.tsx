@@ -9,18 +9,15 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
+import { ROW_HEIGHT_OPTION, SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 
+import { getDefaultRowsPerPage } from '../../common/constants';
 import { DiscoverServices } from '../build_services';
-import {
-  DEFAULT_HEADER_ROW_HEIGHT_LINES,
-  DEFAULT_ROWS_PER_PAGE,
-  DEFAULT_ROW_HEIGHT_LINES,
-  DEFAULT_SAMPLE_SIZE,
-} from './constants';
+import { DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import {
   PublishesSavedSearchAttributes,
   SearchEmbeddableAttributes,
@@ -36,13 +33,8 @@ export type SavedSearchAttributesManager = {
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableRuntimeState,
   {
-    startServices,
     discoverServices,
   }: {
-    startServices: {
-      executeTriggerActions: (triggerId: string, context: object) => Promise<void>;
-      // isEditable: () => boolean;
-    };
     discoverServices: DiscoverServices;
   }
 ): Promise<{
@@ -80,6 +72,10 @@ export const initializeSearchEmbeddableApi = async (
     searchSource: searchSource$,
   };
 
+  const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
+  const defaultRowsPerPage = getDefaultRowsPerPage(discoverServices.uiSettings);
+  const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
+
   const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableAttributes> => {
     return {
       managed: [managed$, (value) => managed$.next(value)],
@@ -91,17 +87,17 @@ export const initializeSearchEmbeddableApi = async (
       sampleSize: [
         sampleSize$,
         (value) => sampleSize$.next(value),
-        (a, b) => (a ?? DEFAULT_SAMPLE_SIZE) === (b ?? DEFAULT_SAMPLE_SIZE),
+        (a, b) => (a ?? defaultSampleSize) === (b ?? defaultSampleSize),
       ],
       rowsPerPage: [
         rowsPerPage$,
         (value) => rowsPerPage$.next(value),
-        (a, b) => (a ?? DEFAULT_ROWS_PER_PAGE) === (b ?? DEFAULT_ROWS_PER_PAGE),
+        (a, b) => (a ?? defaultRowsPerPage) === (b ?? defaultRowsPerPage),
       ],
       rowHeight: [
         rowHeight$,
         (value) => rowHeight$.next(value),
-        (a, b) => (a ?? DEFAULT_ROW_HEIGHT_LINES) === (b ?? DEFAULT_ROW_HEIGHT_LINES),
+        (a, b) => (a ?? defaultRowHeight) === (b ?? defaultRowHeight),
       ],
       headerRowHeight: [
         headerRowHeight$,

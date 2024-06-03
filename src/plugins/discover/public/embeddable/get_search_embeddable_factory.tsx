@@ -105,7 +105,7 @@ export const getSearchEmbeddableFactory = ({
         // serializeSearchEmbeddable,
         // stateManager
         // snapshotState,
-      } = await initializeSearchEmbeddableApi(initialState, { startServices, discoverServices });
+      } = await initializeSearchEmbeddableApi(initialState, { discoverServices });
 
       const serializeState = async (): Promise<
         SerializedPanelState<SearchEmbeddableSerializedState>
