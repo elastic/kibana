@@ -255,7 +255,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
         formattedConfig,
         errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidParams', {
           defaultMessage: 'Invalid params: {error}',
-          values: { error },
+          values: { error: error.message },
         }),
       };
     }
@@ -270,7 +270,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
         formattedConfig,
         errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidPlaywrightOptions', {
           defaultMessage: 'Invalid playwright_options: {error}',
-          values: { error },
+          values: { error: error.message },
         }),
       };
     }

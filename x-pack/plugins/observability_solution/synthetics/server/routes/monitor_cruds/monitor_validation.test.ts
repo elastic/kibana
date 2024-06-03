@@ -664,8 +664,7 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: '{d}' } as any)).toEqual({
-      errorMessage:
-        "Invalid params: SyntaxError: Expected property name or '}' in JSON at position 1",
+      errorMessage: "Invalid params: Expected property name or '}' in JSON at position 1",
       formattedConfig: {
         type: 'browser',
         params: '{d}',
@@ -678,7 +677,7 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: { a: [] } } as any)).toEqual({
-      errorMessage: 'Invalid params: Error: [a]: expected value of type [string] but got [Array]',
+      errorMessage: 'Invalid params: [a]: expected value of type [string] but got [Array]',
       formattedConfig: {
         type: 'browser',
         params: { a: [] },
@@ -703,7 +702,7 @@ describe('normalizeAPIConfig', () => {
     });
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{d}' } as any)).toEqual({
       errorMessage:
-        "Invalid playwright_options: SyntaxError: Expected property name or '}' in JSON at position 1",
+        "Invalid playwright_options: Expected property name or '}' in JSON at position 1",
       formattedConfig: {
         playwright_options: '{d}',
         type: 'browser',
