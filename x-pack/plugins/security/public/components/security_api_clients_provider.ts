@@ -8,7 +8,7 @@
 import constate from 'constate';
 
 import type { UserProfileAPIClient } from '../account_management';
-import type { RolesAPIClient, UserAPIClient } from '../management';
+import type { UserAPIClient } from '../management';
 
 /**
  * Represents a collection of the high-level abstractions (clients) to interact with the Security specific APIs.
@@ -16,7 +16,6 @@ import type { RolesAPIClient, UserAPIClient } from '../management';
 export interface SecurityApiClients {
   userProfiles: UserProfileAPIClient;
   users: UserAPIClient;
-  roles: RolesAPIClient;
 }
 
 /**

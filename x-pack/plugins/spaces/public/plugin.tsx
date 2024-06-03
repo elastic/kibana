@@ -68,7 +68,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     if (!this.isServerless) {
       const getRolesAPIClient = async () => {
-        const { security } = await core.plugins.onStart<{ security: SecurityPluginStart }>(
+        const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
           'security'
         );
 
@@ -76,7 +76,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           throw new Error('Security plugin is not available as runtime dependency.');
         }
 
-        return security.contract.roles;
+        return security.contract.authz.roles;
       };
 
       if (plugins.home) {

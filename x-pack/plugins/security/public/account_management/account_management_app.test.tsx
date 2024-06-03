@@ -14,7 +14,7 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { accountManagementApp } from './account_management_app';
 import * as AccountManagementPageImports from './account_management_page';
 import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
-import { RolesAPIClient, UserAPIClient } from '../management';
+import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 
 const AccountManagementPageMock = jest
@@ -33,7 +33,6 @@ describe('accountManagementApp', () => {
       securityApiClients: {
         userProfiles: new UserProfileAPIClient(http),
         users: new UserAPIClient(http),
-        roles: new RolesAPIClient(http),
       },
     });
 
@@ -60,7 +59,6 @@ describe('accountManagementApp', () => {
       securityApiClients: {
         userProfiles: new UserProfileAPIClient(http),
         users: new UserAPIClient(http),
-        roles: new RolesAPIClient(http),
       },
     });
 

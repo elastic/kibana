@@ -16,7 +16,7 @@ import * as UserProfileImports from './user_profile/user_profile';
 import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
 import type { UserProfileData } from '../../common';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { RolesAPIClient, UserAPIClient } from '../management';
+import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 
 const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
@@ -59,7 +59,6 @@ describe('<AccountManagementPage>', () => {
         securityApiClients={{
           userProfiles: new UserProfileAPIClient(coreStart.http),
           users: new UserAPIClient(coreStart.http),
-          roles: new RolesAPIClient(coreStart.http),
         }}
       >
         <AccountManagementPage />

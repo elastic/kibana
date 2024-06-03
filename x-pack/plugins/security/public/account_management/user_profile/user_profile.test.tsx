@@ -16,7 +16,7 @@ import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { RolesAPIClient, UserAPIClient } from '../../management';
+import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
 
@@ -33,7 +33,6 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     securityApiClients={{
       userProfiles: new UserProfileAPIClient(coreStart.http),
       users: new UserAPIClient(coreStart.http),
-      roles: new RolesAPIClient(coreStart.http),
     }}
   >
     {children}
@@ -201,7 +200,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={nonCloudUser} data={data} />
@@ -224,7 +222,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={cloudUser} data={data} />
@@ -249,7 +246,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={nonCloudUser} data={data} />
@@ -283,7 +279,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={cloudUser} data={data} />
@@ -334,7 +329,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={nonCloudUser} data={data} />
@@ -371,7 +365,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={nonCloudUser} data={data} />
@@ -410,7 +403,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={nonCloudUser} data={data} />
@@ -438,7 +430,6 @@ describe('useUserProfileForm', () => {
           securityApiClients={{
             userProfiles: new UserProfileAPIClient(coreStart.http),
             users: new UserAPIClient(coreStart.http),
-            roles: new RolesAPIClient(coreStart.http),
           }}
         >
           <UserProfile user={nonCloudUser} data={data} />

@@ -36,12 +36,6 @@ function createStartMock() {
       userProfileLoaded$: of(true),
       enabled$: of(true),
     },
-    roles: {
-      getRoles: jest.fn(),
-      getRole: jest.fn(),
-      deleteRole: jest.fn(),
-      saveRole: jest.fn(),
-    },
     uiApi: getUiApiMock.createStart(),
   };
 }
