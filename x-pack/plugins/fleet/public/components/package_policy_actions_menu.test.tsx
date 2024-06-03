@@ -72,6 +72,7 @@ function createMockPackagePolicy(
     updated_at: '',
     updated_by: '',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     namespace: 'default',
     inputs: [],

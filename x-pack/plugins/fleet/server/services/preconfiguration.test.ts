@@ -1374,6 +1374,7 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
         created_by: 'system',
         inputs: [],
         policy_id: 'abc123',
+        policy_ids: ['abc123'],
       },
     ],
     is_protected: false,

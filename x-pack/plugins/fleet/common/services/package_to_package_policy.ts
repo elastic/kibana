@@ -224,6 +224,7 @@ export const packageToPackagePolicy = (
     },
     enabled: true,
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
     vars: undefined,
   };

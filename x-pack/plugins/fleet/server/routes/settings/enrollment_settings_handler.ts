@@ -141,7 +141,7 @@ export const getFleetServerPolicies = async (
 
   // Extract associated fleet server agent policy IDs
   const fleetServerAgentPolicyIds = [
-    ...new Set(fleetServerPackagePolicies.items.map((p) => p.policy_id)),
+    ...new Set(fleetServerPackagePolicies.items.flatMap((p) => p.policy_ids)),
   ];
 
   // Retrieve associated agent policies

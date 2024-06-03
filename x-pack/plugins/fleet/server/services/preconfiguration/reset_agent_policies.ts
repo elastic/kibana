@@ -51,7 +51,7 @@ async function _deleteGhostPackagePolicies(
 
   const policyIds = Array.from(
     packagePolicies.reduce((acc, packagePolicy) => {
-      acc.add(packagePolicy.policy_id);
+      packagePolicy.policy_ids.forEach((policyId) => acc.add(policyId));
 
       return acc;
     }, new Set<string>())
@@ -74,7 +74,9 @@ async function _deleteGhostPackagePolicies(
   await pMap(
     packagePolicies,
     (packagePolicy) => {
-      if (agentPolicyExistsMap.get(packagePolicy.policy_id) === false) {
+      if (
+        packagePolicy.policy_ids.every((policyId) => agentPolicyExistsMap.get(policyId) === false)
+      ) {
         logger.info(`Deleting ghost package policy ${packagePolicy.name} (${packagePolicy.id})`);
         return soClient.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicy.id);
       }

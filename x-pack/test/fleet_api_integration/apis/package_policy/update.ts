@@ -104,6 +104,7 @@ export default function (providerContext: FtrProviderContext) {
         description: '',
         namespace: 'default',
         policy_id: agentPolicyId,
+        policy_ids: [agentPolicyId],
         enabled: true,
         inputs: [
           {

@@ -56,7 +56,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
     });
 
     for (const item of res.items) {
-      policyIds.add(item.policy_id);
+      item.policy_ids.forEach((id) => policyIds.add(id));
     }
 
     if (res.items.length === 0) {

@@ -97,6 +97,7 @@ const PackagePolicyBaseSchema = {
   description: schema.maybe(schema.string()),
   namespace: schema.maybe(PackagePolicyNamespaceSchema),
   policy_id: schema.string(),
+  policy_ids: schema.arrayOf(schema.string()),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(

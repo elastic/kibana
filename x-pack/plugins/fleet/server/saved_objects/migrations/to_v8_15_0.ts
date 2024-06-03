@@ -37,3 +37,14 @@ export const migratePackagePolicySetRequiresRootToV8150: SavedObjectModelDataBac
 
   return { attributes: updatedPackagePolicyDoc.attributes };
 };
+
+export const migratePackagePolicyIdsToV8150: SavedObjectModelDataBackfillFn<
+  PackagePolicy,
+  PackagePolicy
+> = (packagePolicyDoc) => {
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
+
+  updatedPackagePolicyDoc.attributes.policy_ids = [updatedPackagePolicyDoc.attributes.policy_id];
+
+  return { attributes: updatedPackagePolicyDoc.attributes };
+};
