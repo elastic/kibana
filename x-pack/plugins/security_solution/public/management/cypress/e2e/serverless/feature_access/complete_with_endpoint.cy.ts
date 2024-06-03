@@ -47,7 +47,10 @@ describe(
         });
       }
 
-      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+      // TODO: update tests when `scan` is included in PLIs
+      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+        (apiName) => apiName !== 'scan'
+      )) {
         it(`should allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('all', actionName, username, password);
         });
@@ -70,7 +73,10 @@ describe(
         });
       });
 
-      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+      // TODO: update tests when `scan` is included in PLIs
+      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+        (apiName) => apiName !== 'scan'
+      )) {
         it(`should allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('all', actionName, username, password);
         });
