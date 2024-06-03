@@ -61,7 +61,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
         <h3 data-test-subj="globalDataTagHeader">
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.globalDataTagHeader"
-            defaultMessage="Custom fields 2"
+            defaultMessage="Custom fields"
           />
         </h3>
       }

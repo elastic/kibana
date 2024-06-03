@@ -44,7 +44,7 @@ describe('CustomFields', () => {
       package_policies: [createPackagePolicyMock()],
     });
     renderComponent(mockAgentPolicy);
-    expect(renderResult.getByText('Custom fields 2')).toBeInTheDocument();
+    expect(renderResult.getByText('Custom fields')).toBeInTheDocument();
     expect(renderResult.getByText('This policy has no custom fields')).toBeInTheDocument();
   });
 
