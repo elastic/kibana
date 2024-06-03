@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SslConfig, sslSchema } from './ssl_config';
-export { TLS_V1, TLS_V1_1, TLS_V1_2, TLS_V1_3 } from './constants';
+import { sampleSize } from 'lodash';
+
+const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
+
+// Thank you, Spencer! :elasticheart:
+export const getRandomBasePath = () =>
+  Math.random() * 100 < 1 ? 'spalger' : sampleSize(alphabet, 3).join('');

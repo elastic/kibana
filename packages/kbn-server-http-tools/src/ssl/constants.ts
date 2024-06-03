@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { SslConfig, sslSchema } from './ssl_config';
-export { TLS_V1, TLS_V1_1, TLS_V1_2, TLS_V1_3 } from './constants';
+export const TLS_V1 = 'TLSv1';
+export const TLS_V1_1 = 'TLSv1.1';
+export const TLS_V1_2 = 'TLSv1.2';
+export const TLS_V1_3 = 'TLSv1.3';
