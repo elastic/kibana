@@ -9,13 +9,10 @@
 import 'brace/mode/json';
 import './index.scss';
 
-import { EuiResizableContainer } from '@elastic/eui';
+import { EuiErrorBoundary, EuiResizableContainer } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   EditorRenderProps,
   EmbeddableApiHandler,
@@ -34,26 +31,28 @@ import { SerializeStateFn } from '@kbn/visualizations-plugin/public/visualize_ap
 import { BehaviorSubject } from 'rxjs';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';
-
-const localStorage = new Storage(window.localStorage);
+import { SerializedTitles } from '@kbn/presentation-publishing';
 
 function DefaultEditor({
   core,
   data,
   vis,
+  initialState,
   uiState,
   timeRange,
   filters,
   query,
+  dataView,
   embeddableApiHandler,
   eventEmitter,
   linked,
   savedSearch,
   references = [],
 }: EditorRenderProps & {
-  vis: Vis;
+  initialState: VisualizeSerializedState;
   eventEmitter: EventEmitter;
   embeddableApiHandler: EmbeddableApiHandler;
+  dataView?: string;
   references: Reference[];
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -61,7 +60,9 @@ function DefaultEditor({
     timeRange$: new BehaviorSubject(timeRange),
     query$: new BehaviorSubject(query),
     filters$: new BehaviorSubject(filters),
+    dataView$: new BehaviorSubject(dataView),
   });
+  const [titles, setTitles] = useState<SerializedTitles>({ title: '', description: '' });
   const [onUpdateVis, setOnUpdateVis] = useState<(serializedVis: SerializedVis) => void>(
     () => () => {}
   );
@@ -78,8 +79,6 @@ function DefaultEditor({
    */
   const onEditorMouseLeave = useCallback(() => {}, []);
 
-  console.log('REFERENCES', references);
-
   useEffect(() => {
     parentApi.timeRange$.next(timeRange);
   }, [parentApi, timeRange]);
@@ -89,100 +88,92 @@ function DefaultEditor({
   useEffect(() => {
     parentApi.filters$.next(filters);
   }, [parentApi, filters]);
+  useEffect(() => {
+    parentApi.dataView$.next(dataView);
+  }, [parentApi, dataView]);
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
-    <KibanaRenderContextProvider {...core}>
-      <KibanaContextProvider
-        services={{
-          appName: 'vis_default_editor',
-          storage: localStorage,
-          data,
-          ...core,
-        }}
-      >
-        <EuiResizableContainer className="visEditor--default" onMouseLeave={onEditorMouseLeave}>
-          {(EuiResizablePanel, EuiResizableButton) => (
-            <>
-              <EuiResizablePanel
-                className="visEditor__visualization"
-                initialSize={100 - editorInitialWidth}
-                minSize="25%"
-                paddingSize="none"
-                wrapperProps={{
-                  className: `visEditor__visualization__wrapper ${
-                    isCollapsed ? 'visEditor__visualization__wrapper-expanded' : ''
-                  }`,
+    <EuiErrorBoundary>
+      <EuiResizableContainer className="visEditor--default" onMouseLeave={onEditorMouseLeave}>
+        {(EuiResizablePanel, EuiResizableButton) => (
+          <>
+            <EuiResizablePanel
+              className="visEditor__visualization"
+              initialSize={100 - editorInitialWidth}
+              minSize="25%"
+              paddingSize="none"
+              wrapperProps={{
+                className: `visEditor__visualization__wrapper ${
+                  isCollapsed ? 'visEditor__visualization__wrapper-expanded' : ''
+                }`,
+              }}
+              data-shared-items-container
+              data-title={titles.title}
+              data-description={titles.description}
+            >
+              <ReactEmbeddableRenderer<VisualizeSerializedState, VisualizeApi>
+                type={VISUALIZE_EMBEDDABLE_TYPE}
+                getParentApi={() => ({
+                  ...parentApi,
+                  getSerializedStateForChild: () => ({
+                    rawState: initialState,
+                    references,
+                  }),
+                })}
+                onApiAvailable={(api) => {
+                  console.log('ON API AVAILABLE');
+                  api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
+                  api.subscribeToHasInspector((hasInspector) => {
+                    if (!hasInspector) return;
+                    const [, setOpenInspector] = embeddableApiHandler.openInspector;
+                    setOpenInspector(() => api.openInspector);
+                  });
+                  api.subscribeToNavigateToLens((navigateToLens) => {
+                    if (!navigateToLens) return;
+                    const [, setNavigateToLens] = embeddableApiHandler.navigateToLens;
+                    setNavigateToLens(() => navigateToLens);
+                  });
+                  setOnUpdateVis(() => api.updateVis);
+                  const [, setSerializeState] = embeddableApiHandler.serializeState;
+                  setSerializeState(() => api.serializeState as SerializeStateFn);
+                  setTitles(api.getTitles());
                 }}
-                data-shared-items-container
-                data-title={vis.title}
-                data-description={vis.description}
-              >
-                <ReactEmbeddableRenderer<VisualizeSerializedState, VisualizeApi>
-                  type={VISUALIZE_EMBEDDABLE_TYPE}
-                  getParentApi={() => ({
-                    ...parentApi,
-                    getSerializedStateForChild: () => ({
-                      rawState: {
-                        savedVis: vis.serialize(),
-                        title: vis.title,
-                        description: vis.description,
-                      },
-                      references,
-                    }),
-                  })}
-                  onApiAvailable={(api) => {
-                    api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
-                    api.subscribeToHasInspector((hasInspector) => {
-                      if (!hasInspector) return;
-                      const [, setOpenInspector] = embeddableApiHandler.openInspector;
-                      setOpenInspector(() => api.openInspector);
-                    });
-                    api.subscribeToNavigateToLens((navigateToLens) => {
-                      if (!navigateToLens) return;
-                      const [, setNavigateToLens] = embeddableApiHandler.navigateToLens;
-                      setNavigateToLens(() => navigateToLens);
-                    });
-                    setOnUpdateVis(() => api.setVis);
-                    const [, setSerializeState] = embeddableApiHandler.serializeState;
-                    setSerializeState(() => api.serializeState as SerializeStateFn);
-                  }}
-                />
-              </EuiResizablePanel>
-
-              <EuiResizableButton
-                alignIndicator="start"
-                className={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
               />
+            </EuiResizablePanel>
 
-              <EuiResizablePanel
-                initialSize={editorInitialWidth}
-                minSize={isCollapsed ? '0' : '350px'}
-                paddingSize="none"
-                wrapperProps={{
-                  className: `visEditor__collapsibleSidebar ${
-                    isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
-                  }`,
-                }}
-              >
-                <DefaultEditorSideBar
-                  isCollapsed={isCollapsed}
-                  onClickCollapse={onClickCollapse}
-                  onUpdateVis={onUpdateVis}
-                  vis={vis}
-                  uiState={uiState}
-                  isLinkedSearch={linked}
-                  savedSearch={savedSearch}
-                  timeRange={timeRange}
-                  eventEmitter={eventEmitter}
-                />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+            <EuiResizableButton
+              alignIndicator="start"
+              className={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
+            />
+
+            <EuiResizablePanel
+              initialSize={editorInitialWidth}
+              minSize={isCollapsed ? '0' : '350px'}
+              paddingSize="none"
+              wrapperProps={{
+                className: `visEditor__collapsibleSidebar ${
+                  isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
+                }`,
+              }}
+            >
+              <DefaultEditorSideBar
+                isCollapsed={isCollapsed}
+                onClickCollapse={onClickCollapse}
+                onUpdateVis={onUpdateVis}
+                vis={vis}
+                uiState={uiState}
+                isLinkedSearch={linked}
+                savedSearch={savedSearch}
+                timeRange={timeRange}
+                eventEmitter={eventEmitter}
+              />
+            </EuiResizablePanel>
+          </>
+        )}
+      </EuiResizableContainer>
+    </EuiErrorBoundary>
   );
 }
 

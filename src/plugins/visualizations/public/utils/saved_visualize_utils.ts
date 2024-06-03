@@ -224,7 +224,6 @@ export async function getSavedVisualization(
   if (typeof opts !== 'object') {
     opts = { id: opts } as GetVisOptions;
   }
-
   const id = (opts.id as string) || '';
   const savedObject = {
     id,

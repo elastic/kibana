@@ -70,4 +70,41 @@ class DefaultEditorController implements IEditorController {
   }
 }
 
+export const DefaultEditorWrapper: React.FC<EditorRenderProps> = ({
+  eventEmitter,
+  embeddableApiHandler,
+  vis,
+  initialState,
+  references,
+  ...props
+}) => {
+  return (
+    <EuiErrorBoundary>
+      <Suspense
+        fallback={
+          <div
+            style={{
+              display: 'flex',
+              flex: '1 1 auto',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <EuiLoadingChart size="xl" mono />
+          </div>
+        }
+      >
+        <DefaultEditor
+          eventEmitter={eventEmitter}
+          embeddableApiHandler={embeddableApiHandler}
+          vis={vis}
+          initialState={initialState}
+          references={references}
+          {...props}
+        />
+      </Suspense>
+    </EuiErrorBoundary>
+  );
+};
+
 export { DefaultEditorController };

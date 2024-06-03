@@ -45,7 +45,7 @@ export const useSavedVisInstance = (
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
-    visEditorController?: IEditorController;
+    VisEditor?: React.FC;
   }>({});
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
@@ -149,26 +149,16 @@ export const useSavedVisInstance = (
           }
         }
 
-        let visEditorController;
+        let VisEditor;
         // do not create editor in embeded mode
-        if (visEditorRef.current) {
-          if (isChromeVisible) {
-            const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
-
-            if (Editor) {
-              visEditorController = new Editor(
-                visEditorRef.current,
-                vis,
-                eventEmitter,
-                embeddableApiHandler,
-                references
-              );
-            }
-          }
+        if (isChromeVisible) {
+          const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
+          console.log('Editor:', Editor);
         }
+
         setState({
           savedVisInstance,
-          visEditorController,
+          VisEditor,
         });
       } catch (error) {
         try {
@@ -209,18 +199,10 @@ export const useSavedVisInstance = (
     isChromeVisible,
     visualizationIdFromUrl,
     state.savedVisInstance,
-    state.visEditorController,
+    state.VisEditor,
     embeddableInput,
     embeddableApiHandler,
   ]);
-
-  useEffect(() => {
-    return () => {
-      if (state.visEditorController) {
-        state.visEditorController.destroy();
-      }
-    };
-  }, [state]);
 
   return {
     ...state,

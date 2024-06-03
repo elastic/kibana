@@ -26,7 +26,7 @@
       "savedObjectsFinder",
       "savedObjectsManagement",
       "savedSearch",
-      "contentManagement",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "home",
@@ -36,12 +36,7 @@
       "serverless",
       "noDataPage"
     ],
-    "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact",
-      "charts",
-      "savedObjects",
-    ],
+    "requiredBundles": ["kibanaUtils", "kibanaReact", "charts", "savedObjects", "visDefaultEditor"],
     "extraPublicDirs": [
       "common/constants",
       "common/utils",

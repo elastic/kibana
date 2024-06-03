@@ -44,7 +44,7 @@ export const useEditorUpdates = (
       setCurrentAppState(initialState);
 
       const reloadVisualization = () => {
-        if (visEditorController) {
+        if (visEditorController?.render) {
           visEditorController.render({
             core: services,
             data: services.data,

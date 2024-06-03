@@ -7,9 +7,10 @@
  */
 
 import './visualize_editor.scss';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
+import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -26,6 +27,12 @@ import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
 import { VisualizeConstants } from '../../../common/constants';
 import { VisualizeEditorInput } from '../../react_embeddable/types';
+import { useInitialVisState } from '../utils/use/use_initial_vis_state';
+import { Query } from '@kbn/es-query';
+
+const DefaultEditor = React.lazy(async () => ({
+  default: (await import('@kbn/vis-default-editor-plugin/public')).DefaultEditor,
+}));
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
@@ -63,7 +70,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     setOriginatingApp(value);
     setOriginatingPath(pathValue);
   }, [services]);
-  const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
+  const { savedVisInstance, visEditorRef, VisEditor } = useSavedVisInstance(
     services,
     eventEmitter,
     isChromeVisible,
@@ -72,13 +79,18 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     visualizationIdFromUrl,
     embeddableInput
   );
-
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
   useExecutionContext(services.executionContext, {
     type: 'application',
     page: `editor${editorName ? `:${editorName}` : ''}`,
     id: visualizationIdFromUrl || 'new',
   });
+
+  const {
+    timefilter: { timefilter },
+    filterManager,
+    queryString,
+  } = services.data.query;
 
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
@@ -91,8 +103,11 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     setHasUnsavedChanges,
     appState,
     savedVisInstance,
-    visEditorController
+    VisEditor
   );
+  console.log('App state', currentAppState);
+  const [initialState, references] = useInitialVisState({ visualizationIdFromUrl, services });
+
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, savedVisInstance);
 
@@ -117,13 +132,43 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingPath={originatingPath}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
-      visEditorRef={visEditorRef}
       onAppLeave={onAppLeave}
       embeddableId={embeddableIdValue}
       eventEmitter={eventEmitter}
       openInspectorFn={openInspectorFn}
       navigateToLensFn={navigateToLensFn}
       serializeStateFn={serializeStateFn}
-    />
+    >
+      {savedVisInstance && (
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  display: 'flex',
+                  flex: '1 1 auto',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <EuiLoadingChart size="xl" mono />
+              </div>
+            }
+          >
+            <DefaultEditor
+              vis={savedVisInstance.vis}
+              initialState={initialState}
+              references={references}
+              embeddableApiHandler={embeddableApiHandler}
+              eventEmitter={eventEmitter}
+              timeRange={timefilter.getTime()}
+              filters={filterManager.getFilters()}
+              query={queryString.getQuery() as Query}
+              dataView={currentAppState?.dataView}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
+      )}
+    </VisualizeEditorCommon>
   );
 };

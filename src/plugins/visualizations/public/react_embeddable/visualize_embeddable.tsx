@@ -12,7 +12,7 @@ import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddab
 import { TimeRange } from '@kbn/es-query';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiPublishesDataView, apiPublishesSettings } from '@kbn/presentation-containers';
 import {
   apiHasAppContext,
   apiHasDisableTriggers,
@@ -31,7 +31,7 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getTimeFilter, getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
-import type { Vis } from '../vis';
+import type { SerializedVis, Vis } from '../vis';
 import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { deserializeState, serializeState } from './state';
@@ -86,6 +86,7 @@ export const getVisualizeEmbeddableFactory: (
           });
         },
         getVis: () => vis$.getValue(),
+        getTitles: () => serializeTitles(),
         getTypeDisplayName: () =>
           i18n.translate('visualizations.displayName', {
             defaultMessage: 'visualization',
@@ -111,7 +112,28 @@ export const getVisualizeEmbeddableFactory: (
           });
         },
         isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
-        setVis: async (newSerializedVis) => {
+        updateVis: async (visUpdates) => {
+          const currentSerializedVis = vis$.getValue().serialize();
+          const newSerializedVis = {
+            ...currentSerializedVis,
+            ...visUpdates,
+            params: {
+              ...currentSerializedVis.params,
+              ...visUpdates.params,
+            },
+            data: {
+              ...currentSerializedVis.data,
+              ...visUpdates.data,
+            },
+          } as SerializedVis;
+          console.log(
+            'prev',
+            currentSerializedVis,
+            'visUpdates',
+            visUpdates,
+            'newSerializedVis:',
+            newSerializedVis
+          );
           vis$.next(await createVisInstance(newSerializedVis));
           await updateExpressionParams();
         },
@@ -179,10 +201,25 @@ export const getVisualizeEmbeddableFactory: (
       }
     );
 
+    if (apiPublishesDataView(parentApi)) {
+      parentApi.dataView$.subscribe((dataView) => {
+        if (!dataView) return;
+        const {
+          data: { searchSource },
+        } = vis$.getValue().serialize();
+        const newSearchSource = {
+          ...searchSource,
+          index: dataView,
+        };
+        api.updateVis({ data: { searchSource: newSearchSource } });
+      });
+    }
+
     fetch$(api)
       .pipe(
         switchMap((data) => {
           return (async () => {
+            console.log('DATA', data);
             const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
               ? {
                   query: data.query,

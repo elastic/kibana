@@ -9,6 +9,7 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
+import { DeepPartial } from '@kbn/utility-types';
 import { HasVisualizeConfig } from '../embeddable';
 import type { Vis, VisParams } from '../types';
 import type { SerializedVis } from '../vis';
@@ -48,7 +49,7 @@ export const isVisualizeSavedObjectState = (
 export type VisualizeApi = HasEditCapabilities &
   HasVisualizeConfig &
   DefaultEmbeddableApi<VisualizeSerializedState> & {
-    setVis: (vis: SerializedVis<VisParams>) => void;
+    updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     subscribeToInitialRender: (listener: () => void) => void;
     subscribeToVisData: (listener: (data: unknown) => void) => void;
     subscribeToHasInspector: (listener: (hasInspector: boolean) => void) => void;
@@ -60,4 +61,5 @@ export type VisualizeApi = HasEditCapabilities &
     checkForDuplicateTitle: (title: string) => boolean;
     getByValueState: () => VisualizeSerializedState;
     getByReferenceState: (id: string) => Promise<VisualizeRuntimeState>;
+    getTitles: () => SerializedTitles;
   };

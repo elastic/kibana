@@ -111,7 +111,6 @@ export function convertSavedObjectAttributesToReferences(attributes: {
       id: attributes.savedSearchId,
     });
   }
-  console.log('CONVERT REFS', references);
   return references;
 }
 

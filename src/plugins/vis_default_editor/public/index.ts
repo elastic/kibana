@@ -10,6 +10,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { DefaultEditorController } from './default_editor_controller';
 import { VisDefaultEditorPlugin } from './plugin';
 
+export { default as DefaultEditor } from './default_editor';
 export { DefaultEditorController };
 export { useValidation } from './components/controls/utils';
 export { PalettePicker } from './components/controls/palette_picker';

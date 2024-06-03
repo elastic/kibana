@@ -48,7 +48,6 @@ interface VisualizeEditorCommonProps {
   hasUnappliedChanges: boolean;
   isEmbeddableRendered: boolean;
   onAppLeave: AppMountParameters['onAppLeave'];
-  visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   originatingPath?: string;
@@ -60,8 +59,7 @@ interface VisualizeEditorCommonProps {
   serializeStateFn?: SerializeStateFn;
 }
 
-export const VisualizeEditorCommon = ({
-  visInstance,
+export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
   appState,
   currentAppState,
   isChromeVisible,
@@ -75,12 +73,13 @@ export const VisualizeEditorCommon = ({
   setOriginatingApp,
   visualizationIdFromUrl,
   embeddableId,
-  visEditorRef,
   eventEmitter,
   openInspectorFn,
   navigateToLensFn,
   serializeStateFn,
-}: VisualizeEditorCommonProps) => {
+  visInstance,
+  children,
+}) => {
   const { services } = useKibana<VisualizeServices>();
 
   useEffect(() => {
@@ -211,7 +210,7 @@ export const VisualizeEditorCommon = ({
           </h1>
         </EuiScreenReaderOnly>
       )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
+      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'}>{children}</div>
     </div>
   );
 };
