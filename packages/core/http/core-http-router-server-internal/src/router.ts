@@ -35,6 +35,7 @@ import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
 import { prepareRouteConfigValidation } from './util';
+import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 
 export type ContextEnhancer<
   P,
@@ -265,6 +266,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
+      if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
+        kibanaResponse.options.headers = stripIllegalHttp2Headers({
+          headers: kibanaResponse.options.headers,
+          isDev: this.options.isDev ?? false,
+          logger: this.log,
+          requestContext: `${request.route.method} ${request.route.path}`,
+        });
+      }
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
       // capture error

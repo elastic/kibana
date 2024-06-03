@@ -521,7 +521,7 @@ export function columnExists(
 }
 
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index)) {
+  if (sources.has(index) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));

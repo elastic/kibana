@@ -7,7 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { i18n } from '@kbn/i18n';
+import { Formats } from '@kbn/i18n';
 import path from 'path';
 
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -145,7 +145,7 @@ function groupMessagesByNamespace(
 
 async function writeMessages(
   localizedMessagesByNamespace: GroupedMessageMap,
-  formats: typeof i18n.formats,
+  formats: Formats,
   options: IntegrateOptions
 ) {
   // If target file name is specified we need to write all the translations into one file,
