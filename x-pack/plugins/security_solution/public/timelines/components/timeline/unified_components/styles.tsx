@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -161,5 +161,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
+  }
+`;
+
+export const UnifiedTimelineGlobalStyles = createGlobalStyle`
+  body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
+    z-index: 1001 !important;
   }
 `;
