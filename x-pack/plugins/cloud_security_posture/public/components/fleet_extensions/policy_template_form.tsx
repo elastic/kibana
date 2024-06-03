@@ -30,8 +30,6 @@ import type {
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { PluginContractResolver } from '@kbn/core-plugins-contracts-browser';
-import { useServerlessServices } from '../../common/hooks/use_serverless_services';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
@@ -533,11 +531,7 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-export const CspPolicyTemplateForm = memo<
-  PackagePolicyReplaceDefineStepExtensionComponentProps & {
-    pluginsOnStart?: PluginContractResolver;
-  }
->(
+export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
     agentPolicy,
     newPolicy,
@@ -547,24 +541,7 @@ export const CspPolicyTemplateForm = memo<
     packageInfo,
     handleSetupTechnologyChange,
     agentlessPolicy,
-    pluginsOnStart,
-    setPliAuthBlockComponent,
   }) => {
-    const { upsellingService, isServerless } = useServerlessServices(pluginsOnStart);
-    const CspIntegrationInstallationUpsellingPliBlock = upsellingService?.sections.get(
-      'cloud_security_posture_integration_installation'
-    );
-
-    useEffect(() => {
-      if (
-        isServerless &&
-        !!CspIntegrationInstallationUpsellingPliBlock &&
-        setPliAuthBlockComponent
-      ) {
-        setPliAuthBlockComponent(CspIntegrationInstallationUpsellingPliBlock);
-      }
-    }, [isServerless, CspIntegrationInstallationUpsellingPliBlock, setPliAuthBlockComponent]);
-
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam

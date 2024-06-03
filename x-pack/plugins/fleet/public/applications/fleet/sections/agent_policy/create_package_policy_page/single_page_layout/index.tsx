@@ -112,9 +112,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
   );
-  const [pliAuthBlockComponent, setPliAuthBlockComponent] = useState<React.ComponentType | null>(
-    null
-  );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy);
@@ -364,7 +361,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             agentlessPolicy={agentlessPolicy}
-            setPliAuthBlockComponent={undefined}
           />
         </ExtensionWrapper>
       )

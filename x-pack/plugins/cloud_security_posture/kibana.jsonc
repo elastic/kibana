@@ -24,7 +24,6 @@
       "kibanaUtils",
       "alerting",
     ],
-    "runtimePluginDependencies": ["securitySolution"],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]
   }

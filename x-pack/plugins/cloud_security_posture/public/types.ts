@@ -25,7 +25,6 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import { UpsellingSectionId } from '@kbn/security-solution-upselling/service';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -68,7 +67,6 @@ export interface CspClientPluginStartDeps {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
   storage: Storage;
-  cloud: CloudSetup;
 
   // optional
   usageCollection?: UsageCollectionStart;
@@ -85,8 +83,6 @@ export interface CspSecuritySolutionContext {
     pageName: CloudSecurityPosturePageId;
     state?: Record<string, string | undefined>;
   }>;
-  /** hook to receive registered upselling components based on the current PLI */
-  useUpsellingComponent: (id: UpsellingSectionId) => ComponentType | null;
 }
 
 export type CloudSecurityPostureStartServices = Pick<
