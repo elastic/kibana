@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { DocumentProfileProvider } from '../../profiles';
-
-export const logsDocumentProfileProvider: DocumentProfileProvider = {
-  profileId: 'logs-document-profile',
-  profile: {},
-  resolve: (params) => {
-    return { isMatch: false };
-  },
-};
+export { logDocumentProfileProvider } from './profile';
