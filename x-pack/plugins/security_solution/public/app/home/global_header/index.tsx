@@ -19,12 +19,12 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
-import { Sourcerer } from '../../../common/components/sourcerer';
+import { Sourcerer } from '../../../sourcerer/components';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
+import { getScopeFromPath, showSourcererByPath } from '../../../sourcerer/containers';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { AssistantHeaderLink } from '../../../assistant/header_link';
 
