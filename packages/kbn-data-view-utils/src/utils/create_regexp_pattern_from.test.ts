@@ -10,7 +10,6 @@ import { createRegExpPatternFrom } from './create_regexp_pattern_from';
 
 describe('createRegExpPatternFrom should create a regular expression starting from a string that', () => {
   const regExpPattern = createRegExpPatternFrom('logs');
-  console.log(regExpPattern);
 
   it('tests positive for single index patterns starting with the passed base pattern', () => {
     expect('logs*').toMatch(regExpPattern);
