@@ -17,6 +17,7 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
+import { useSearchApi } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { pluginServices } from '../../../public/services';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
@@ -57,6 +58,7 @@ const renderReactEmbeddable = ({
   // wrap in functional component to allow usage of hooks
   const RendererWrapper: FC<{}> = () => {
     const getAppContext = useGetAppContext(core);
+    const searchApi = useSearchApi({ filters: input.filters });
 
     return (
       <ReactEmbeddableRenderer
@@ -66,8 +68,9 @@ const renderReactEmbeddable = ({
           ...container,
           getAppContext,
           getSerializedStateForChild: () => ({
-            rawState: omit(input, 'disableTriggers'),
+            rawState: omit(input, ['disableTriggers', 'filters']),
           }),
+          ...searchApi,
         })}
         key={`${type}_${uuid}`}
         onAnyStateChange={(newState) => {

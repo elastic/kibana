@@ -58,7 +58,7 @@
     "filesManagement": "src/plugins/files_management",
     "flot": "packages/kbn-flot-charts/lib",
     "generateCsv": "packages/kbn-generate-csv",
-    "grouping": "packages/kbn-securitysolution-grouping/src",
+    "grouping": "packages/kbn-grouping/src",
     "guidedOnboarding": "src/plugins/guided_onboarding",
     "guidedOnboardingPackage": "packages/kbn-guided-onboarding",
     "home": "src/plugins/home",
