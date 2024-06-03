@@ -28,10 +28,9 @@ exports[`renders DashboardSaveModal 1`] = `
               checked={true}
               data-test-subj="storeTimeWithDashboard"
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Store time with dashboard"
                   id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-                  values={Object {}}
                 />
               }
               onChange={[Function]}
@@ -42,10 +41,9 @@ exports[`renders DashboardSaveModal 1`] = `
           >
             <EuiIconTip
               content={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
                   id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
-                  values={Object {}}
                 />
               }
               position="top"

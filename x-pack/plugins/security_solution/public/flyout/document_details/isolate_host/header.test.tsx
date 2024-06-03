@@ -16,8 +16,10 @@ import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { TECHNICAL_PREVIEW } from '../../../common/translations';
 
 jest.mock('../../../common/hooks/use_experimental_features');
+
 // FIXME:PT Fix tests after refactor
 // jest.mock('../../../common/utils/sentinelone_alert_check');
+
 jest.mock('./context');
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;

@@ -77,13 +77,15 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
   Filter,
+  fromKueryExpression,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
+  getKqlFieldNames,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -134,6 +136,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  dataViews: DataViewsContract;
   scriptedFieldsEnabled: boolean;
 }
 
@@ -629,14 +632,14 @@ export class SearchSource {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
-    const addToRoot = (rootKey: string, value: any) => {
+    const addToRoot = (rootKey: string, value: unknown) => {
       data[rootKey] = value;
     };
 
     /**
      * Add the key and val to the body of the request
      */
-    const addToBody = (bodyKey: string, value: any) => {
+    const addToBody = (bodyKey: string, value: unknown) => {
       // ignore if we already have a value
       if (data.body[bodyKey] == null) {
         data.body[bodyKey] = value;
@@ -712,12 +715,12 @@ export class SearchSource {
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
-    typeof fld === 'string' ? fld : (fld.field as string);
+    typeof fld === 'string' ? fld : (fld?.field as string);
 
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
     bodyFields: SearchFieldValue[]
-  ) {
+  ): SearchFieldValue[] {
     if (!index) {
       return bodyFields;
     }
@@ -727,9 +730,7 @@ export class SearchSource {
       return bodyFields;
     }
     const sourceFiltersValues = sourceFilters.excludes;
-    const wildcardField = bodyFields.find(
-      (el: SearchFieldValue) => el === '*' || (el as Record<string, string>).field === '*'
-    );
+    const wildcardField = bodyFields.find((el) => this.getFieldName(el) === '*');
     const filter = fieldWildcardFilter(
       sourceFiltersValues,
       this.dependencies.getConfig(UI_SETTINGS.META_FIELDS)
@@ -748,7 +749,7 @@ export class SearchSource {
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
-    docvaluesIndex: Record<string, object>,
+    docvaluesIndex: Record<string, SearchFieldValue>,
     fld: SearchFieldValue,
     index?: DataView
   ) {
@@ -756,10 +757,7 @@ export class SearchSource {
       return fld;
     }
     const fieldName = this.getFieldName(fld);
-    const field = {
-      ...docvaluesIndex[fieldName],
-      ...fld,
-    };
+    const field = Object.assign({}, docvaluesIndex[fieldName], fld);
     if (!index) {
       return field;
     }
@@ -776,6 +774,47 @@ export class SearchSource {
       field.format = 'strict_date_optional_time';
     }
     return field;
+  }
+
+  public async loadDataViewFields(dataView: DataViewLazy) {
+    const request = this.mergeProps(this, { body: {} });
+    let fields = dataView.timeFieldName ? [dataView.timeFieldName] : [];
+    const sort = this.getField('sort');
+    if (sort) {
+      const sortArr = Array.isArray(sort) ? sort : [sort];
+      for (const s of sortArr) {
+        const keys = Object.keys(s);
+        fields = fields.concat(keys);
+      }
+    }
+    for (const query of request.query) {
+      if (query.query) {
+        const nodes = fromKueryExpression(query.query);
+        const queryFields = getKqlFieldNames(nodes);
+        fields = fields.concat(queryFields);
+      }
+    }
+    const filters = request.filters;
+    if (filters) {
+      const filtersArr = Array.isArray(filters) ? filters : [filters];
+      for (const f of filtersArr) {
+        fields = fields.concat(f.meta.key);
+      }
+    }
+    fields = fields.filter((f) => Boolean(f));
+
+    if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
+      // if source filtering is enabled, we need to fetch all the fields
+      return (await dataView.getFields({ fieldName: ['*'] })).getFieldMapSorted();
+    } else if (fields.length) {
+      return (
+        await dataView.getFields({
+          fieldName: fields,
+        })
+      ).getFieldMapSorted();
+    }
+    // no fields needed to be loaded for query
+    return {};
   }
 
   private flatten() {
@@ -894,7 +933,6 @@ export class SearchSource {
         fields,
         docvalueFields: body.docvalue_fields,
         fieldsFromSource,
-        // @ts-expect-error - Needs closer look to fix
         filteredDocvalueFields,
         metaFields,
         fieldListProvided,
@@ -930,7 +968,7 @@ export class SearchSource {
     fields: SearchFieldValue[];
     fieldsFromSource: SearchFieldValue[];
   }) {
-    const bodyFieldNames = fields.map((field: SearchFieldValue) => this.getFieldName(field));
+    const bodyFieldNames = fields.map((field) => this.getFieldName(field));
     return [...new Set([...bodyFieldNames, ...fieldsFromSource])];
   }
 
@@ -997,7 +1035,7 @@ export class SearchSource {
     fields: SearchFieldValue[];
     docvalueFields: Array<{ field: string; format: string }>;
     fieldsFromSource: SearchFieldValue[];
-    filteredDocvalueFields: Array<{ field: string; format: string }>;
+    filteredDocvalueFields: SearchFieldValue[];
     metaFields: string[];
     fieldListProvided: boolean;
     sourceFieldsProvided: boolean;
@@ -1016,13 +1054,11 @@ export class SearchSource {
       }
       return [
         ...fields,
-        ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
+        ...filteredDocvalueFields.filter((fld) => {
           const fldName = this.getFieldName(fld);
           return (
             fieldsFromSource.includes(fldName) &&
-            !(docvalueFields || [])
-              .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
-              .includes(fldName)
+            !(docvalueFields || []).map((d) => this.getFieldName(d)).includes(fldName)
           );
         }),
       ];
@@ -1040,7 +1076,7 @@ export class SearchSource {
     index?: DataView;
     fields: SearchFieldValue[];
     metaFields: string[];
-    filteredDocvalueFields: Array<{ field: string; format: string }>;
+    filteredDocvalueFields: SearchFieldValue[];
   }) {
     const bodyFields = this.getFieldsWithoutSourceFilters(index, fields);
     // if items that are in the docvalueFields are provided, we should
