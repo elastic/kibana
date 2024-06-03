@@ -19,7 +19,7 @@ import {
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
-import { useResponderActionItem } from '../endpoint_responder';
+import { useResponderActionItem } from '../../../common/components/endpoint/responder';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
 import { useAlertExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';

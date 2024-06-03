@@ -10,7 +10,7 @@ import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-} from '../../../../../detections/components/endpoint_responder/translations';
+} from '../../responder';
 import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';

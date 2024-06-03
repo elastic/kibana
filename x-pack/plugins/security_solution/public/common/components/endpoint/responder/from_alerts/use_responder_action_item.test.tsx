@@ -7,13 +7,13 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useResponderActionItem } from './use_responder_action_item';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useUserPrivileges } from '../../../user_privileges';
 // import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
 // import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import { useResponderActionData } from './use_responder_action_data';
-import { getAlertDetailsFieldValue } from '../../../common/lib/endpoint/utils/get_event_details_field_values';
+import { getAlertDetailsFieldValue } from '../../../../lib/endpoint/utils/get_event_details_field_values';
 
-jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../user_privileges');
 // jest.mock('../../../common/utils/endpoint_alert_check');
 // jest.mock('../host_isolation/helpers');
 // jest.mock('../../../common/utils/crowdstrike_alert_check');

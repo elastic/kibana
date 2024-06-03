@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { useResponderActionData } from './use_responder_action_data';
 import { renderHook } from '@testing-library/react-hooks';
-import { useGetEndpointDetails } from '../../../management/hooks';
-import { HostStatus } from '../../../../common/endpoint/types';
+import { useGetEndpointDetails } from '../../../../../management/hooks';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { HOST_ENDPOINT_UNENROLLED_TOOLTIP } from './translations';
 
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../management/hooks', () => ({
+jest.mock('../../../../hooks/use_experimental_features');
+jest.mock('../../../../../management/hooks', () => ({
   useGetEndpointDetails: (jest.fn() as jest.Mock).mockImplementation(() => ({ enabled: false })),
   useWithShowResponder: jest.fn(),
 }));

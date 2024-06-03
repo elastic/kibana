@@ -26,7 +26,7 @@ import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-} from '../endpoint_responder/translations';
+} from '../../../common/components/endpoint/responder';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 // FIXME:PT cleanup

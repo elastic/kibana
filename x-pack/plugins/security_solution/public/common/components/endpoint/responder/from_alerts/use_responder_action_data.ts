@@ -7,13 +7,13 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
+import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 import type {
   EndpointCapabilities,
   ResponseActionAgentType,
-} from '../../../../common/endpoint/service/response_actions/constants';
-import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
-import { HostStatus } from '../../../../common/endpoint/types';
+} from '../../../../../../common/endpoint/service/response_actions/constants';
+import { useGetEndpointDetails, useWithShowResponder } from '../../../../../management/hooks';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,

@@ -8,9 +8,9 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useResponderActionData } from './use_responder_action_data';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useUserPrivileges } from '../../../user_privileges';
 
 export const ResponderActionButton = memo<{ agentId: string; agentType: ResponseActionAgentType }>(
   ({ agentType, agentId }) => {

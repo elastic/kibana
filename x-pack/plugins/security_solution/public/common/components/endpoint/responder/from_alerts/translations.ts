@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
