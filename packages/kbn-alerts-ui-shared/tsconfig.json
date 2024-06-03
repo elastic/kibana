@@ -37,6 +37,9 @@
     "@kbn/core-doc-links-browser",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
+    "@kbn/search-types",
+    "@kbn/grouping",
+    "@kbn/alerts-grouping",
     "@kbn/utility-types",
   ]
 }
