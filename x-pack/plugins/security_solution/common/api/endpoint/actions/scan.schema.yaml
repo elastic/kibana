@@ -1,19 +1,19 @@
 openapi: 3.0.0
 info:
-  title: Get File Schema
+  title: Scan Schema
   version: '2023-10-31'
 paths:
-  /api/endpoint/action/get_file:
+  /api/endpoint/action/scan:
     post:
-      summary: Get File Action
-      operationId: EndpointGetFileAction
+      summary: Scan Action
+      operationId: EndpointScanAction
       x-codegen-enabled: false
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetFileActionRequestBody'
+              $ref: '#/components/schemas/ScanActionRequestBody'
       responses:
         '200':
           description: OK
@@ -24,7 +24,7 @@ paths:
 
 components:
   schemas:
-    GetFileActionRequestBody:
+    ScanActionRequestBody:
       allOf:
         - $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
