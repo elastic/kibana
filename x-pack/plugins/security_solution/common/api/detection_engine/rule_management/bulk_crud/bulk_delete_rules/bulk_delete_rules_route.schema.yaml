@@ -4,8 +4,8 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_bulk_delete:
-    x-labels: [ess]
     delete:
+      x-labels: [ess]
       operationId: BulkDeleteRules
       x-codegen-enabled: true
       deprecated: true

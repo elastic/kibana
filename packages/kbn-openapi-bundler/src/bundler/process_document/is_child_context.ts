@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor } from '../types';
+import { TraverseChildDocumentContext, TraverseDocumentContext } from './types/context';
 
-/**
- * Creates a node processor to skip nodes having provided `skipProperty` property
- * and omit them from the result document.
- */
-export function createSkipNodeWithInternalPropProcessor(
-  skipProperty: string
-): DocumentNodeProcessor {
-  return {
-    shouldRemove: (node) => skipProperty in node,
-  };
+export function isChildContext(
+  context: TraverseDocumentContext
+): context is TraverseChildDocumentContext {
+  return 'parentContext' in context;
 }

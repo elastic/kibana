@@ -6,6 +6,9 @@ paths:
   /internal/detection_engine/users/_find:
     summary: Suggests user profiles based on provided search term
     post:
+      x-labels:
+        - ess
+        - serverless
       operationId: SuggestUserProfiles
       x-codegen-enabled: true
       description: Suggests user profiles.

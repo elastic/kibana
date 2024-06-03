@@ -8,19 +8,16 @@
 
 import deepEqual from 'fast-deep-equal';
 import chalk from 'chalk';
-import {
-  Document,
-  ResolvedRef,
-  TraverseDocumentContext,
-  RefNode,
-  DocumentNode,
-  TraverseRootDocumentContext,
-  DocumentNodeProcessor,
-} from '../types';
-import { hasProp } from '../../utils/has_prop';
+import { hasProp } from '../../../utils/has_prop';
 import { isChildContext } from '../is_child_context';
-import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
+import { insertRefByPointer } from '../../../utils/insert_by_json_pointer';
 import { inlineRef } from './utils/inline_ref';
+import { ResolvedRef } from '../../ref_resolver/resolved_ref';
+import { Document } from '../../document';
+import { DocumentNode, RefNode } from '../types/node';
+import { TraverseDocumentContext, TraverseRootDocumentContext } from '../types/context';
+import { DocumentNodeProcessor } from './types/document_node_processor';
+import { TraverseDocumentNodeContext } from './types/traverse_document_node_context';
 
 /**
  * Node processor to bundle and conditionally dereference document references.
@@ -45,7 +42,11 @@ export class BundleRefProcessor implements DocumentNodeProcessor {
     }
   }
 
-  onRefNodeLeave(node: RefNode, resolvedRef: ResolvedRef, context: TraverseDocumentContext): void {
+  onRefNodeLeave(
+    node: RefNode,
+    resolvedRef: ResolvedRef,
+    context: TraverseDocumentNodeContext
+  ): void {
     if (!resolvedRef.pointer.startsWith('/components')) {
       throw new Error(
         `$ref pointer ${chalk.yellow(

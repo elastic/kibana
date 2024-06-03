@@ -6,6 +6,9 @@ paths:
   /api/detection_engine/tags:
     summary: Aggregates and returns rule tags
     get:
+      x-labels:
+        - ess
+        - serverless
       operationId: ReadTags
       x-codegen-enabled: true
       summary: Aggregates and returns all unique tags from all rules

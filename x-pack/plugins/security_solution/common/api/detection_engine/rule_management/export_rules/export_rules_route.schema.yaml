@@ -6,6 +6,9 @@ paths:
   /api/detection_engine/rules/_export:
     summary: Exports rules to an `.ndjson` file
     post:
+      x-labels:
+        - ess
+        - serverless
       operationId: ExportRules
       x-codegen-enabled: true
       summary: Export rules

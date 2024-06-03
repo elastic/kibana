@@ -5,6 +5,9 @@ info:
 paths:
   /api/detection_engine/rules:
     patch:
+      x-labels:
+        - ess
+        - serverless
       operationId: PatchRule
       x-codegen-enabled: true
       description: Patch a single rule

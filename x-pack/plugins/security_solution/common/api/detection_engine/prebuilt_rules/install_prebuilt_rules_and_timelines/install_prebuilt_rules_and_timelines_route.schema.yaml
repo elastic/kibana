@@ -5,6 +5,9 @@ info:
 paths:
   /api/detection_engine/rules/prepackaged:
     put:
+      x-labels:
+        - ess
+        - serverless
       operationId: InstallPrebuiltRulesAndTimelines
       x-codegen-enabled: true
       summary: Installs all Elastic prebuilt rules and timelines

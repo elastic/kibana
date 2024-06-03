@@ -4,8 +4,8 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_bulk_create:
-    x-labels: [ess]
     post:
+      x-labels: [ess]
       operationId: BulkCreateRules
       x-codegen-enabled: true
       deprecated: true

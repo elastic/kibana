@@ -5,6 +5,9 @@ info:
 paths:
   /api/detection_engine/rules:
     put:
+      x-labels:
+        - ess
+        - serverless
       operationId: UpdateRule
       x-codegen-enabled: true
       description: Update a single rule

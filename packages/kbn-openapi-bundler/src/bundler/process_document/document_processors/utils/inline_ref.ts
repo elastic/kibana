@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { TraverseChildDocumentContext, TraverseDocumentContext } from './types';
+import { ResolvedRef } from '../../../ref_resolver/resolved_ref';
+import { DocumentNode } from '../../types/node';
 
-export function isChildContext(
-  context: TraverseDocumentContext
-): context is TraverseChildDocumentContext {
-  return 'parentContext' in context;
+interface InlinableRefNode {
+  $ref?: string;
+}
+
+export function inlineRef(node: DocumentNode, resolvedRef: ResolvedRef): void {
+  Object.assign(node, resolvedRef.refNode);
+
+  delete (node as InlinableRefNode).$ref;
 }

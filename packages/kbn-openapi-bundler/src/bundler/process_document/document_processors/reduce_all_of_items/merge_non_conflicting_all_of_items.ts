@@ -9,8 +9,8 @@
 import { omit } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
-import { isPlainObjectType } from '../../../utils/is_plain_object_type';
-import { DocumentNodeProcessor } from '../../types';
+import { isPlainObjectType } from '../../../../utils/is_plain_object_type';
+import { DocumentNodeProcessor } from '../types/document_node_processor';
 
 type MergedObjectSchema = Required<Pick<OpenAPIV3.SchemaObject, 'type' | 'properties'>> &
   Pick<OpenAPIV3.SchemaObject, 'required'>;

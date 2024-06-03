@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor } from '../types';
+import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
  * Creates a node processor to skip paths starting with `/internal` and omit them from the result document.

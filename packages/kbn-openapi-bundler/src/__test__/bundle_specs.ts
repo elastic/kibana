@@ -22,6 +22,9 @@ import { bundle, BundlerConfig } from '../openapi_bundler';
 
 const ROOT_PATH = join(__dirname, '..', '..');
 
+// Suppress bundler logging via mocking the logger
+jest.mock('../logger');
+
 export async function bundleSpecs(
   oasSpecs: Record<string, OpenAPIV3.Document>,
   options?: BundlerConfig['options']

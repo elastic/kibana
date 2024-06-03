@@ -8,32 +8,17 @@
 
 import { dirname } from 'path';
 import { isPlainObject } from 'lodash';
-import { IRefResolver } from './ref_resolver';
-import {
-  DocumentNode,
-  ResolvedDocument,
-  TraverseDocumentContext,
-  ResolvedRef,
-  DocumentNodeProcessor,
-  RefNode,
-  PlainObjectNode,
-} from './types';
-import { parseRef } from '../utils/parse_ref';
-import { toAbsolutePath } from '../utils/to_absolute_path';
-import { isPlainObjectType } from '../utils/is_plain_object_type';
+import { IRefResolver } from '../ref_resolver/ref_resolver';
+import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import { parseRef } from '../../utils/parse_ref';
+import { toAbsolutePath } from '../../utils/to_absolute_path';
+import { isPlainObjectType } from '../../utils/is_plain_object_type';
 import { isChildContext } from './is_child_context';
-
-interface TraverseItem {
-  node: DocumentNode;
-  context: TraverseDocumentContext;
-  /**
-   * Keeps track of visited nodes to be able to detect circular references
-   */
-  visitedDocumentNodes: Set<DocumentNode>;
-  parentNode: DocumentNode;
-  parentKey: string | number;
-  resolvedRef?: ResolvedRef;
-}
+import { TraverseItem } from './traverse_item';
+import { createNodeContext } from './transform_traverse_item_to_node_context';
+import { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
+import { DocumentNode, PlainObjectNode, RefNode } from './types/node';
+import { TraverseDocumentContext } from './types/context';
 
 export async function processDocument(
   resolvedDocument: ResolvedDocument,
@@ -95,7 +80,7 @@ export async function processDocument(
         resolvedRef,
         parentContext: traverseItem.context,
         followedRef: absoluteRef,
-      };
+      } as const;
 
       traverseItem.resolvedRef = resolvedRef;
 
@@ -143,17 +128,15 @@ export async function processDocument(
     const traverseItem = postOrderTraversalStack[i];
 
     for (const processor of processors) {
+      const context = createNodeContext(traverseItem);
+
       // If ref has been inlined by one of the processors it's not a ref node anymore
       // so we can skip the following processors
       if (isRefNode(traverseItem.node) && traverseItem.resolvedRef) {
-        processor.onRefNodeLeave?.(
-          traverseItem.node as RefNode,
-          traverseItem.resolvedRef,
-          traverseItem.context
-        );
+        processor.onRefNodeLeave?.(traverseItem.node as RefNode, traverseItem.resolvedRef, context);
       }
 
-      processor.onNodeLeave?.(traverseItem.node, traverseItem.context);
+      processor.onNodeLeave?.(traverseItem.node, context);
     }
   }
 }
@@ -171,12 +154,10 @@ function applyEnterProcessors(
   traverseItem: TraverseItem,
   processors: DocumentNodeProcessor[]
 ): void {
+  const context = createNodeContext(traverseItem);
+
   for (const processor of processors) {
-    processor.onNodeEnter?.(traverseItem.node, {
-      ...traverseItem.context,
-      parentNode: traverseItem.parentNode,
-      parentKey: traverseItem.parentKey,
-    });
+    processor.onNodeEnter?.(traverseItem.node, context);
   }
 }
 
@@ -187,13 +168,9 @@ function shouldRemoveSubTree(
   traverseItem: TraverseItem,
   processors: DocumentNodeProcessor[]
 ): boolean {
-  return processors.some((p) =>
-    p.shouldRemove?.(traverseItem.node, {
-      ...traverseItem.context,
-      parentNode: traverseItem.parentNode,
-      parentKey: traverseItem.parentKey,
-    })
-  );
+  const context = createNodeContext(traverseItem);
+
+  return processors.some((p) => p.shouldRemove?.(traverseItem.node, context));
 }
 
 function removeNode(traverseItem: TraverseItem): void {

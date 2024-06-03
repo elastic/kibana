@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
-export interface InlinableRefNode {
-  $ref?: string;
+import { Document } from '../document';
+
+export interface ResolvedDocument {
+  /**
+   * Document's absolute path
+   */
+  absolutePath: string;
+  /**
+   * Document's root
+   */
+  document: Document;
 }

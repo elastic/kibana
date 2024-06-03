@@ -7,9 +7,10 @@
  */
 
 import path from 'path';
-import { extractByJsonPointer } from '../utils/extract_by_json_pointer';
-import { readYamlDocument } from '../utils/read_yaml_document';
-import { ResolvedDocument, ResolvedRef } from './types';
+import { extractByJsonPointer } from '../../utils/extract_by_json_pointer';
+import { readYamlDocument } from '../../utils/read_yaml_document';
+import { ResolvedRef } from './resolved_ref';
+import { ResolvedDocument } from './resolved_document';
 
 export interface IRefResolver {
   resolveRef(refDocumentAbsolutePath: string, pointer: string): Promise<ResolvedRef>;

@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { hasProp } from '../../utils/has_prop';
-import { isPlainObjectType } from '../../utils/is_plain_object_type';
-import { DocumentNodeProcessor, PlainObjectNode, ResolvedRef } from '../types';
+import { hasProp } from '../../../utils/has_prop';
+import { isPlainObjectType } from '../../../utils/is_plain_object_type';
+import { ResolvedRef } from '../../ref_resolver/resolved_ref';
+import { PlainObjectNode } from '../types/node';
+import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
  * Helps to remove unused components.

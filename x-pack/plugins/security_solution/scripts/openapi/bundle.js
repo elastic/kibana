@@ -18,7 +18,7 @@ bundle({
     'target/openapi/serverless/security_solution-{version}.bundled.schema.yaml'
   ),
   options: {
-    excludeXLabels: ['ess'],
+    includeLabels: ['serverless'],
   },
 });
 
@@ -29,6 +29,6 @@ bundle({
     'target/openapi/ess/security_solution-{version}.bundled.schema.yaml'
   ),
   options: {
-    excludeXLabels: ['serverless'],
+    includeLabels: ['ess'],
   },
 });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DocumentNodeProcessor } from '../../types';
+import { DocumentNodeProcessor } from '../types/document_node_processor';
 
 /**
  * Created a node processor to remove/unfold `allOf` with only single item.

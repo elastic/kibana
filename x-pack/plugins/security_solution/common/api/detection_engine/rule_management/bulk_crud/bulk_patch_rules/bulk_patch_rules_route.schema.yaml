@@ -4,8 +4,8 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_bulk_update:
-    x-labels: [ess]
     patch:
+      x-labels: [ess]
       operationId: BulkPatchRules
       x-codegen-enabled: true
       deprecated: true

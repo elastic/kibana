@@ -4,10 +4,10 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/rules:
-    x-labels:
-      - ess
-      - serverless
     post:
+      x-labels:
+        - ess
+        - serverless
       operationId: CreateRule
       x-codegen-enabled: true
       description: Create a single detection rule
