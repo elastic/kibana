@@ -93,16 +93,14 @@ describe('PluginWrapper', () => {
     };
 
     let startDependenciesResolved = false;
-    mockPluginReader.mockReturnValueOnce(
-      jest.fn(() => ({
-        setup: jest.fn(),
-        start: jest.fn(() => {
-          expect(startDependenciesResolved).toBe(false);
-          return pluginStartContract;
-        }),
-        stop: jest.fn(),
-      }))
-    );
+    mockInitializer.mockReturnValueOnce({
+      setup: jest.fn(),
+      start: jest.fn(() => {
+        expect(startDependenciesResolved).toBe(false);
+        return pluginStartContract;
+      }),
+      stop: jest.fn(),
+    });
     await plugin.setup({} as any, {} as any);
     const context = { any: 'thing' } as any;
     const deps = { otherDep: 'value' };
