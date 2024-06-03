@@ -42,6 +42,8 @@ export function createAddSwimlanePanelAction(
         getIconType: () => PLUGIN_ICON,
       },
     ],
+    // @ts-expect-error getIconType is typed as string, but EuiIcon accepts ReactComponent for custom icons.
+    // See https://github.com/elastic/kibana/issues/184643
     getIconType: () => (iconProps) =>
       (
         <svg
