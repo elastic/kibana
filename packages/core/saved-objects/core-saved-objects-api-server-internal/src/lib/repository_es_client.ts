@@ -7,9 +7,7 @@
  */
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { retryCallCluster } from '@kbn/core-elasticsearch-server-internal';
 import { decorateEsError } from './utils';
 
 const methods = [
@@ -35,9 +33,7 @@ export function createRepositoryEsClient(client: ElasticsearchClient): Repositor
     Object.defineProperty(acc, key, {
       value: async (params?: unknown, options?: TransportRequestOptions) => {
         try {
-          return await retryCallCluster(() =>
-            (client[key] as Function)(params, { maxRetries: 0, ...options })
-          );
+          return await (client[key] as Function)(params, options);
         } catch (e) {
           // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
           throw decorateEsError(e);
