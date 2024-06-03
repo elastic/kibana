@@ -94,7 +94,6 @@ export const getGenAiTokenTracking = async ({
       const { totalTokenCount, promptTokenCount, candidatesTokenCount } =
         await parseGeminiStreamForUsageMetadata({
           responseStream: result.data.pipe(new PassThrough()),
-          body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
           logger,
         });
 

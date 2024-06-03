@@ -139,24 +139,14 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
 export const parseGeminiStreamForUsageMetadata = async ({
   responseStream,
   logger,
-  body,
+}: {
+  responseStream: Readable;
+  logger: Logger;
 }): Promise<UsageMetadata> => {
   let responseBody = '';
-  // const { signal, ...chatCompletionRequest } = body;
 
   const onData = (chunk: Buffer) => {
-    // no special encoding, can safely use `${chunk}` and append to responseBody
     responseBody += chunk.toString();
-  };
-
-  const destroyStream = () => {
-    // Pause the stream to prevent further data events
-    responseStream.pause();
-    // Remove the 'data' event listener once the stream is paused
-    responseStream.removeListener('data', onData);
-    // Manually destroy the stream
-    responseStream.emit('close');
-    responseStream.destroy();
   };
 
   responseStream.on('data', onData);
@@ -168,7 +158,6 @@ export const parseGeminiStreamForUsageMetadata = async ({
     responseStream.on('error', (err) => {
       reject(err);
     });
-    // signal?.addEventListener('abort', destroyStream);
   });
 };
 
@@ -179,7 +168,7 @@ const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata => {
     .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
     .map((line) => JSON.parse(line.replace('data: ', '')));
 
-  const text = parsedLines
+  parsedLines
     .filter(
       (
         line
