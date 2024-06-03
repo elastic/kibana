@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-
-import { act } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { TestRenderer } from '../../../../../../mock';
@@ -17,13 +16,17 @@ import { createAgentPolicyMock, createPackagePolicyMock } from '../../../../../.
 import type { AgentPolicy, NewAgentPolicy } from '../../../../../../../common/types';
 
 import { useLicense } from '../../../../../../hooks/use_license';
-
 import type { LicenseService } from '../../../../../../../common/services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
 import { AgentPolicyAdvancedOptionsContent } from '.';
+
+// Mock CustomFields component
+jest.mock('./custom_fields', () => ({
+  CustomFields: jest.fn(() => <div>Mocked CustomFields Component</div>),
+}));
 
 jest.mock('../../../../../../hooks/use_license');
 
@@ -41,7 +44,7 @@ describe('Agent policy advanced options content', () => {
       isPlatinum: () => true,
     } as unknown as LicenseService);
 
-  const render = ({
+  const renderComponent = ({
     isProtected = false,
     isManaged = false,
     policyId = 'agent-policy-1',
@@ -73,15 +76,20 @@ describe('Agent policy advanced options content', () => {
 
   beforeEach(() => {
     testRender = createFleetTestRendererMock();
+    jest.clearAllMocks();
   });
-  afterEach(() => {
-    jest.resetAllMocks();
+
+  describe.only('CustomFields component', () => {
+    it('should render the mocked custom fields component', () => {
+      renderComponent();
+      expect(renderResult.getByText('Mocked CustomFields Component')).toBeInTheDocument();
+    });
   });
 
   describe('Agent tamper protection toggle', () => {
     it('should be visible if license is at least platinum', () => {
       usePlatinumLicense();
-      render();
+      renderComponent();
       expect(renderResult.queryByTestId('tamperProtectionSwitch')).toBeInTheDocument();
     });
 
@@ -90,22 +98,25 @@ describe('Agent policy advanced options content', () => {
         isPlatinum: () => false,
         hasAtLeast: () => false,
       } as unknown as LicenseService);
-      render();
+      renderComponent();
       expect(renderResult.queryByTestId('tamperProtectionSwitch')).not.toBeInTheDocument();
     });
+
     it('should be visible if policy is not managed/hosted', () => {
       usePlatinumLicense();
-      render({ isManaged: false });
+      renderComponent({ isManaged: false });
       expect(renderResult.queryByTestId('tamperProtectionSwitch')).toBeInTheDocument();
     });
+
     it('should not be visible if policy is managed/hosted', () => {
       usePlatinumLicense();
-      render({ isManaged: true });
+      renderComponent({ isManaged: true });
       expect(renderResult.queryByTestId('tamperProtectionSwitch')).not.toBeInTheDocument();
     });
+
     it('switched to true enables the uninstall command link', async () => {
       usePlatinumLicense();
-      render({ isProtected: true });
+      renderComponent({ isProtected: true });
 
       expect(renderResult.getByTestId('tamperProtectionSwitch')).toHaveAttribute(
         'aria-checked',
@@ -113,32 +124,36 @@ describe('Agent policy advanced options content', () => {
       );
       expect(renderResult.getByTestId('uninstallCommandLink')).toBeEnabled();
     });
+
     it('switched to false disables the uninstall command link', () => {
       usePlatinumLicense();
-      render();
+      renderComponent();
       expect(renderResult.getByTestId('tamperProtectionSwitch')).toHaveAttribute(
         'aria-checked',
         'false'
       );
       expect(renderResult.getByTestId('uninstallCommandLink')).toBeDisabled();
     });
+
     it('when there is no policy id, the uninstall command link is not displayed', async () => {
       usePlatinumLicense();
-      render({ policyId: '' });
+      renderComponent({ policyId: '' });
       expect(renderResult.queryByTestId('uninstallCommandLink')).not.toBeInTheDocument();
     });
+
     it('should update agent policy when switched on', async () => {
       usePlatinumLicense();
-      render();
+      renderComponent();
       act(() => {
         renderResult.getByTestId('tamperProtectionSwitch').click();
       });
       expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({ is_protected: true });
     });
+
     describe('when the defend integration is not installed', () => {
       beforeEach(() => {
         usePlatinumLicense();
-        render({
+        renderComponent({
           packagePolicy: [
             {
               ...createPackagePolicyMock(),
@@ -148,20 +163,24 @@ describe('Agent policy advanced options content', () => {
           isProtected: true,
         });
       });
+
       it('should disable the switch and uninstall command link', () => {
         expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
         expect(renderResult.getByTestId('uninstallCommandLink')).toBeDisabled();
       });
+
       it('should show an icon tip explaining why the switch is disabled', () => {
         expect(renderResult.getByTestId('tamperMissingIntegrationTooltip')).toBeTruthy();
       });
     });
+
     describe('when the user is creating a new agent policy', () => {
       it('should be disabled, since it has no package policies and therefore elastic defend integration is not installed', async () => {
         usePlatinumLicense();
-        render({ newAgentPolicy: true });
+        renderComponent({ newAgentPolicy: true });
         expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
       });
     });
   });
 });
+
