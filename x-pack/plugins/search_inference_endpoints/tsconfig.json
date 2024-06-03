@@ -4,10 +4,10 @@
     "outDir": "target/types",
   },
   "include": [
-    "__mocks__/**/*",
-    "common/**/*",
-    "public/*",
-    "server/**/*",
+    "__mocks__/**/*", 
+    "common/**/*", 
+    "public/**/*", 
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/config-schema",
