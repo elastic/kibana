@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { omit } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -21,6 +22,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
+  ALERT_IS_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
@@ -224,6 +226,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
+  [ALERT_IS_IMPROVING]: false,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -248,7 +251,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
 });
 
 const getOngoingIndexedAlertDoc = (overrides = {}) => ({
-  ...getNewIndexedAlertDoc(),
+  ...omit(getNewIndexedAlertDoc(), ALERT_IS_IMPROVING),
   [EVENT_ACTION]: 'active',
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING_HISTORY]: [true, false],
@@ -270,6 +273,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_STATUS]: 'recovered',
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_IS_IMPROVING]: true,
   ...overrides,
 });
 
@@ -1019,6 +1023,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_IS_IMPROVING]: true,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',

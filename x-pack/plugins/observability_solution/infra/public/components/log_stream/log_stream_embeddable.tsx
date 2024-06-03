@@ -6,17 +6,18 @@
  */
 
 import { Query, Filter } from '@kbn/es-query';
-import { CoreStart } from '@kbn/core/public';
-import React from 'react';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import React, { FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import { CoreProviders } from '../../apps/common_providers';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 import { datemathToEpochMillis } from '../../utils/datemath';
+import { useKibanaContextForPluginProvider } from '../../hooks/use_kibana';
 
 export const LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
 
@@ -82,7 +83,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     }
 
     ReactDOM.render(
-      <CoreProviders
+      <LogStreamEmbeddableProviders
         core={this.core}
         plugins={this.pluginDeps}
         pluginStart={this.pluginStart}
@@ -100,8 +101,33 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
             />
           </div>
         </EuiThemeProvider>
-      </CoreProviders>,
+      </LogStreamEmbeddableProviders>,
       this.node
     );
   }
 }
+
+export interface LogStreamEmbeddableProvidersProps {
+  core: CoreStart;
+  pluginStart: InfraClientStartExports;
+  plugins: InfraClientStartDeps;
+  theme$: AppMountParameters['theme$'];
+}
+
+export const LogStreamEmbeddableProviders: FC<
+  PropsWithChildren<LogStreamEmbeddableProvidersProps>
+> = ({ children, core, pluginStart, plugins }) => {
+  const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
+    core,
+    plugins,
+    pluginStart
+  );
+
+  return (
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
+        {children}
+      </KibanaContextProviderForPlugin>
+    </KibanaRenderContextProvider>
+  );
+};

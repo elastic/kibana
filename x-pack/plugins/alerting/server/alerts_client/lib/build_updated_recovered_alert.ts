@@ -11,13 +11,14 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_IS_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { RawAlertInstance } from '@kbn/alerting-state-types';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
@@ -44,6 +45,9 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   // Make sure that any alert fields that are updatable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
+
+  // Omit fields that are overwrite-able with undefined value
+  const cleanedAlert = omit(alert, ALERT_IS_IMPROVING);
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -77,12 +81,12 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   //   'kibana.alert.field1': 'value2'
   // }
   // the expanded field from the existing alert is removed
-  const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
+  const expandedAlert = removeUnflattenedFieldsFromAlert(cleanedAlert, {
     ...alertUpdates,
     ...refreshableAlertFields,
   });
 
-  return deepmerge.all([cleanedAlert, refreshableAlertFields, alertUpdates], {
+  return deepmerge.all([expandedAlert, refreshableAlertFields, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };

@@ -71,6 +71,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_IS_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',
@@ -138,6 +139,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_IS_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
@@ -235,6 +237,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_IS_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
@@ -296,85 +299,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
-        [ALERT_MAINTENANCE_WINDOW_IDS]: [],
-        [ALERT_STATUS]: 'recovered',
-        [ALERT_WORKFLOW_STATUS]: 'open',
-        [ALERT_DURATION]: 36000,
-        [ALERT_START]: '2023-03-28T12:27:28.159Z',
-        [ALERT_END]: '2023-03-30T12:27:28.159Z',
-        [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
-        [SPACE_IDS]: ['default'],
-        [VERSION]: '8.9.0',
-        [TAGS]: ['rule-', '-tags'],
-        ...(flattened
-          ? {
-              [EVENT_KIND]: 'signal',
-              [ALERT_INSTANCE_ID]: 'alert-A',
-              [ALERT_UUID]: 'abcdefg',
-            }
-          : {
-              event: {
-                kind: 'signal',
-              },
-              kibana: {
-                alert: {
-                  instance: { id: 'alert-A' },
-                  uuid: 'abcdefg',
-                },
-              },
-            }),
-      });
-    });
-
-    test('should return alert document with correct is_improving', () => {
-      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A', {
-        meta: { uuid: 'abcdefg' },
-      });
-      legacyAlert.scheduleActions('default').replaceState({
-        start: '2023-03-28T12:27:28.159Z',
-        end: '2023-03-30T12:27:28.159Z',
-        duration: '36000000',
-      });
-
-      const alert = flattened
-        ? {
-            ...existingAlert,
-            [ALERT_IS_IMPROVING]: false,
-          }
-        : {
-            ...existingAlert,
-            kibana: {
-              // @ts-expect-error
-              ...existingAlert.kibana,
-              alert: {
-                // @ts-expect-error
-                ...existingAlert.kibana.alert,
-                is_improving: false,
-              },
-            },
-          };
-
-      expect(
-        buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-          // @ts-expect-error
-          alert,
-          legacyAlert,
-          rule: alertRule,
-          runTimestamp: '2030-12-15T02:44:13.124Z',
-          recoveryActionGroup: 'recovered',
-          timestamp: '2023-03-29T12:27:28.159Z',
-          kibanaVersion: '8.9.0',
-        })
-      ).toEqual({
-        ...alertRule,
-        [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
-        [ALERT_RULE_EXECUTION_TIMESTAMP]: '2030-12-15T02:44:13.124Z',
-        [EVENT_ACTION]: 'close',
-        [ALERT_ACTION_GROUP]: 'recovered',
-        [ALERT_CONSECUTIVE_MATCHES]: 0,
-        [ALERT_FLAPPING]: false,
-        [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_IS_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',
@@ -480,6 +405,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_IS_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
@@ -583,6 +509,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_IS_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
         [ALERT_STATUS]: 'recovered',
@@ -685,6 +612,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
+        [ALERT_IS_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_STATUS]: 'recovered',

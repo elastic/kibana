@@ -287,6 +287,7 @@ const SkipFields = [
   'kibana.alert.workflow_tags',
   'kibana.alert.workflow_status',
   'kibana.alert.consecutive_matches',
+  'kibana.alert.is_improving',
   'kibana.alert.previous_action_group',
 ];
 
