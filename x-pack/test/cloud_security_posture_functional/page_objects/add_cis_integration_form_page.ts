@@ -203,7 +203,6 @@ export function AddCisIntegrationFormPageProvider({
 
   const getIntegrationPliAuthBlock = async () => {
     return await testSubjects.exists('cloud-security-posture-integration-pli-auth-block');
-    // return await testSubjects.find('cloud-security-posture-integration-pli-auth-block');
   };
 
   const fillInTextField = async (selector: string, text: string) => {

@@ -463,103 +463,105 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
-      <EuiErrorBoundary>
-        {formState === 'CONFIRM' && agentPolicy && (
-          <ConfirmDeployAgentPolicyModal
-            agentCount={agentCount}
-            agentPolicy={agentPolicy}
-            onConfirm={onSubmit}
-            onCancel={() => setFormState('VALID')}
-            showUnprivilegedAgentsCallout={Boolean(
-              packageInfo &&
-                isRootPrivilegesRequired(packageInfo) &&
-                (agentPolicy?.unprivileged_agents ?? 0) > 0
-            )}
-            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
-            dataStreams={rootPrivilegedDataStreams}
-          />
-        )}
-        {formState === 'SUBMITTED_NO_AGENTS' &&
-          agentPolicy &&
-          packageInfo &&
-          savedPackagePolicy && (
-            <PostInstallAddAgentModal
-              packageInfo={packageInfo}
-              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-            />
-          )}
-        {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' && agentPolicy && savedPackagePolicy && (
-          <PostInstallAzureArmTemplateModal
-            agentPolicy={agentPolicy}
-            packagePolicy={savedPackagePolicy}
-            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-          />
-        )}
-        {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
-          <PostInstallCloudFormationModal
-            agentPolicy={agentPolicy}
-            packagePolicy={savedPackagePolicy}
-            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-          />
-        )}
-        {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' && agentPolicy && savedPackagePolicy && (
-          <PostInstallGoogleCloudShellModal
-            agentPolicy={agentPolicy}
-            packagePolicy={savedPackagePolicy}
-            onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-            onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-          />
-        )}
-        {packageInfo && (
-          <IntegrationBreadcrumb
-            pkgTitle={integrationInfo?.title || packageInfo.title}
-            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-            integration={integrationInfo?.name}
-          />
-        )}
-        {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
-          <>
-            <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-        {numTransformAssets > 0 ? (
-          <>
-            <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
-            <EuiSpacer size="xl" />
-          </>
-        ) : null}
-        {showSecretsDisabledCallout && (
-          <>
-            <EuiCallOut
-              size="m"
-              color="warning"
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
-                  defaultMessage="Policy secrets are disabled"
-                />
-              }
-            >
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-                defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
-                values={{
-                  policySecretsLink: (
-                    <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
-                        defaultMessage="policy secrets"
-                      />
-                    </EuiLink>
-                  ),
-                  minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
-                }}
+          <EuiErrorBoundary>
+            {formState === 'CONFIRM' && agentPolicy && (
+              <ConfirmDeployAgentPolicyModal
+                agentCount={agentCount}
+                agentPolicy={agentPolicy}
+                onConfirm={onSubmit}
+                onCancel={() => setFormState('VALID')}
+                showUnprivilegedAgentsCallout={Boolean(
+                  packageInfo &&
+                    isRootPrivilegesRequired(packageInfo) &&
+                    (agentPolicy?.unprivileged_agents ?? 0) > 0
+                )}
+                unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+                dataStreams={rootPrivilegedDataStreams}
               />
-            </EuiCallOut>
+            )}
+            {formState === 'SUBMITTED_NO_AGENTS' &&
+              agentPolicy &&
+              packageInfo &&
+              savedPackagePolicy && (
+                <PostInstallAddAgentModal
+                  packageInfo={packageInfo}
+                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                />
+              )}
+            {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' && agentPolicy && savedPackagePolicy && (
+              <PostInstallAzureArmTemplateModal
+                agentPolicy={agentPolicy}
+                packagePolicy={savedPackagePolicy}
+                onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+              />
+            )}
+            {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
+              <PostInstallCloudFormationModal
+                agentPolicy={agentPolicy}
+                packagePolicy={savedPackagePolicy}
+                onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+              />
+            )}
+            {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' && agentPolicy && savedPackagePolicy && (
+              <PostInstallGoogleCloudShellModal
+                agentPolicy={agentPolicy}
+                packagePolicy={savedPackagePolicy}
+                onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+              />
+            )}
+            {packageInfo && (
+              <IntegrationBreadcrumb
+                pkgTitle={integrationInfo?.title || packageInfo.title}
+                pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+                integration={integrationInfo?.name}
+              />
+            )}
+            {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+              <>
+                <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
+            {numTransformAssets > 0 ? (
+              <>
+                <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
+                <EuiSpacer size="xl" />
+              </>
+            ) : null}
+            {showSecretsDisabledCallout && (
+              <>
+                <EuiCallOut
+                  size="m"
+                  color="warning"
+                  title={
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
+                      defaultMessage="Policy secrets are disabled"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
+                    defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
+                    values={{
+                      policySecretsLink: (
+                        <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
+                            defaultMessage="policy secrets"
+                          />
+                        </EuiLink>
+                      ),
+                      minimumSecretsVersion: (
+                        <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
 
                 <EuiSpacer size="m" />
               </>
