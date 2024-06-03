@@ -91,7 +91,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     isUrlField: false,
     helpText: (
       <FormattedMessage
-        defaultMessage="The GCP Project ID which has Vertex AI API(s) enabled . For more information on the URL, refer to the {geminiVertexAIDocs}."
+        defaultMessage="The GCP Project ID which has Vertex AI API(s) enabled. For more information on the URL, refer to the {geminiVertexAIDocs}."
         id="xpack.stackConnectors.components.gemini.geminiProjectDocumentation"
         values={{
           geminiVertexAIDocs: (
@@ -138,7 +138,7 @@ export const geminiSecrets: SecretsFieldSchema[] = [
     isPasswordField: true,
     helpText: (
       <FormattedMessage
-        defaultMessage="To authenticate to Gemini API please provide your GCP Service Account credentials JSON data .For more information, refer to the {geminiAuthDocs}."
+        defaultMessage="To authenticate to Gemini API please provide your GCP Service Account credentials JSON data. For more information, refer to the {geminiAuthDocs}."
         id="xpack.stackConnectors.components.gemini.geminiSecretDocumentation"
         values={{
           geminiAuthDocs: (
