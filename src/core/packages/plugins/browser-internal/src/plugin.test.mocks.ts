@@ -14,7 +14,9 @@ export const mockPlugin = {
 };
 export const mockInitializer = jest.fn(() => mockPlugin);
 
-export const mockPluginReader = jest.fn(() => mockInitializer);
+export const mockPluginReader = jest.fn(() => ({
+  plugin: mockInitializer,
+}));
 
 jest.mock('./plugin_reader', () => ({
   read: mockPluginReader,

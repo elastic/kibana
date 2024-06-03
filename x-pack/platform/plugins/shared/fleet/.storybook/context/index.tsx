@@ -21,6 +21,7 @@ import type {
 import { CoreScopedHistory } from '@kbn/core/public';
 import { coreFeatureFlagsMock } from '@kbn/core/public/mocks';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
+import type { CoreDiServiceStart } from '@kbn/core-di';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
@@ -95,6 +96,7 @@ export const StorybookContext: React.FC<{
           return <I18nProvider>{children}</I18nProvider>;
         },
       },
+      injection: {} as unknown as CoreDiServiceStart,
       notifications: getNotifications(),
       share: getShare(),
       uiSettings: getUiSettings(),

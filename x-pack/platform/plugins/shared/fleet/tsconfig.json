@@ -122,5 +122,6 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/handlebars",
     "@kbn/lock-manager",
+    "@kbn/core-di",
   ]
 }

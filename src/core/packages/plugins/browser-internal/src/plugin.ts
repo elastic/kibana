@@ -15,7 +15,7 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
-import { read } from './plugin_reader';
+import { type PluginDefinition, read } from './plugin_reader';
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -34,6 +34,7 @@ export class PluginWrapper<
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
   public readonly runtimePluginDependencies: DiscoveredPlugin['runtimePluginDependencies'];
+  private definition?: PluginDefinition;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
@@ -58,9 +59,18 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup {
+  public setup(
+    setupContext: CoreSetup<TPluginsStart, TStart>,
+    plugins: TPluginsSetup
+  ): TSetup | undefined {
+    this.definition = read(this.name);
     this.instance = this.createPluginInstance();
-    return this.instance.setup(setupContext, plugins);
+
+    if (this.definition.module) {
+      setupContext.injection.load(this.definition.module);
+    }
+
+    return this.instance?.setup(setupContext, plugins);
   }
 
   /**
@@ -70,9 +80,13 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public start(startContext: CoreStart, plugins: TPluginsStart) {
-    if (this.instance === undefined) {
+  public start(startContext: CoreStart, plugins: TPluginsStart): TStart | undefined {
+    if (this.definition === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
+    }
+
+    if (!this.instance) {
+      return;
     }
 
     const startContract = this.instance.start(startContext, plugins);
@@ -84,11 +98,11 @@ export class PluginWrapper<
    * Calls optional `stop` function exposed by the plugin initializer.
    */
   public stop() {
-    if (this.instance === undefined) {
+    if (this.definition === undefined) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    if (typeof this.instance.stop === 'function') {
+    if (typeof this.instance?.stop === 'function') {
       this.instance.stop();
     }
 
@@ -96,13 +110,16 @@ export class PluginWrapper<
   }
 
   private createPluginInstance() {
-    const initializer = read(this.name) as PluginInitializer<
+    if (!this.definition?.plugin) {
+      return;
+    }
+
+    const initializer = this.definition.plugin as PluginInitializer<
       TSetup,
       TStart,
       TPluginsSetup,
       TPluginsStart
     >;
-
     const instance = initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {

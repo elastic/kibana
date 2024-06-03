@@ -43,6 +43,7 @@ import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
+import { CoreInjectionService } from '@kbn/core-di-common-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -89,6 +90,7 @@ export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly featureFlags: FeatureFlagsService;
   private readonly injectedMetadata: InjectedMetadataService;
+  private readonly injection: CoreInjectionService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
@@ -144,6 +146,7 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.injection = new CoreInjectionService();
     this.featureFlags = new FeatureFlagsService(this.coreContext);
     this.security = new SecurityService(this.coreContext);
     this.userProfile = new UserProfileService(this.coreContext);
@@ -254,6 +257,7 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
+      const injection = this.injection.setup();
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });
@@ -272,6 +276,7 @@ export class CoreSystem {
         featureFlags,
         http,
         injectedMetadata,
+        injection,
         notifications,
         theme,
         uiSettings,
@@ -307,6 +312,7 @@ export class CoreSystem {
       const security = this.security.start();
       const userProfile = this.userProfile.start();
       const injectedMetadata = this.injectedMetadata.start();
+      const injection = this.injection.start();
       const uiSettings = this.uiSettings.start();
       const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
@@ -398,6 +404,7 @@ export class CoreSystem {
         savedObjects,
         i18n,
         injectedMetadata,
+        injection,
         notifications,
         overlays,
         uiSettings,
