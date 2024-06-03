@@ -67,7 +67,6 @@ import type {
   UploadedFileInfo,
   WithAllKeys,
 } from '../../../../../../common/endpoint/types';
-import { ActivityLogItemTypes } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
