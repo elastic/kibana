@@ -13,17 +13,14 @@ import path from 'path';
 import { functions } from '../src/esql_documentation_sections';
 
 (function () {
-  const functionDocs = loadFunctionDocs();
+  const pathToElasticsearch = process.argv[2];
+  const functionDocs = loadFunctionDocs(pathToElasticsearch);
   writeFunctionDocs(functionDocs);
 })();
 
-function loadFunctionDocs() {
-  // read the markdown files from  /Users/andrewtate/workspace/elastic/kibana/blue/elasticsearch/docs/reference/esql/functions/kibana/docs
-  // create a map of function name to markdown content where the function name is the name of the markdown file
-
+function loadFunctionDocs(pathToElasticsearch: string) {
   // Define the directory path
-  const dirPath =
-    '/Users/andrewtate/workspace/elastic/kibana/blue/elasticsearch/docs/reference/esql/functions/kibana/docs';
+  const dirPath = path.join(pathToElasticsearch, '/docs/reference/esql/functions/kibana/docs');
 
   // Read the directory
   const files = fs.readdirSync(dirPath);
@@ -75,26 +72,19 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
   };`
   );
 
-  const parseTypescript = (code: string) =>
-    // recast.parse(code, { parser: require('recast/parsers/typescript') });
-    recast.parse(code);
+  const pathToDocsFile = path.join(__dirname, '../src/esql_documentation_sections.tsx');
 
-  const ast = parseTypescript(
-    fs.readFileSync(path.join(__dirname, '../src/esql_documentation_sections.tsx'), 'utf-8')
-  );
+  const ast = recast.parse(fs.readFileSync(pathToDocsFile, 'utf-8'));
 
   const functionsList = findFunctionsList(ast);
 
   functionsList.elements = codeStrings.map(
-    (codeString) => parseTypescript(codeString).program.body[0].declarations[0].init
+    (codeString) => recast.parse(codeString).program.body[0].declarations[0].init
   );
 
   const newFileContents = recast.print(ast);
 
-  fs.writeFileSync(
-    path.join(__dirname, '../src/esql_documentation_sections.tsx'),
-    newFileContents.code
-  );
+  fs.writeFileSync(pathToDocsFile, newFileContents.code);
 }
 
 /**
