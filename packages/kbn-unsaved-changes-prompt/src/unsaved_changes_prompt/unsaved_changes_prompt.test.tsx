@@ -22,8 +22,7 @@ const navigateToUrl = jest.fn().mockImplementation(async (url) => {
   history.push(url);
 });
 
-// our test mountHistory prepends the basePath to URLs, however useHistory state doesnt have the basePath
-// in production, so we have to prepend it to the state.pathname, this results in /mock/mock in the assertions
+
 describe('useUnsavedChangesPrompt', () => {
   it('should not block if not edited', () => {
     renderHook(() =>
