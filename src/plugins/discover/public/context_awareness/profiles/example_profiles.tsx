@@ -24,19 +24,7 @@ import { RootProfileProvider, SolutionType } from './root_profile';
 
 export const o11yRootProfileProvider: RootProfileProvider = {
   profileId: 'o11y-root-profile',
-  profile: {
-    getTopNavItems: (prev) => () =>
-      [
-        {
-          id: 'o11y-root-entry',
-          label: 'O11y project entry',
-          run: () => {
-            alert('HELLO WORLD');
-          },
-        },
-        ...prev(),
-      ],
-  },
+  profile: {},
   resolve: (params) => {
     if (params.solutionNavId === 'oblt') {
       return {
@@ -54,25 +42,6 @@ export const o11yRootProfileProvider: RootProfileProvider = {
 export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'logs-data-source-profile',
   profile: {
-    getTopNavItems: (prev) => () =>
-      [
-        {
-          id: 'logs-data-source-entry',
-          label: 'Logs data source entry',
-          run: () => {
-            alert('HELLO WORLD');
-          },
-        },
-        ...prev(),
-      ],
-    getDefaultColumns: () => () => ({
-      columns: ['@timestamp', 'log.level', 'message'],
-      settings: {
-        'log.level': {
-          width: 120,
-        },
-      },
-    }),
     getCellRenderers: (prev) => () => ({
       ...prev(),
       '@timestamp': (props) => {
@@ -138,12 +107,7 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
 
 export const logDocumentProfileProvider: DocumentProfileProvider = {
   profileId: 'log-document-profile',
-  profile: {
-    getDocViewsRegistry: (prev) => (registry) => {
-      registry.enableById('doc_view_logs_overview');
-      return prev(registry);
-    },
-  },
+  profile: {},
   resolve: (params) => {
     if (getFieldValue(params.record, 'data_stream.type') === 'logs') {
       return {
