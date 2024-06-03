@@ -78,6 +78,20 @@ export const degradedDocsRt = rt.type({
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
+export const degradedFieldRt = rt.type({
+  name: rt.string,
+  count: rt.number,
+  lastOccurrence: rt.union([rt.null, rt.number]),
+});
+
+export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
+
+export const getDataStreamDegradedFieldsResponseRt = rt.type({
+  degradedFields: rt.array(degradedFieldRt),
+});
+
+export type DegradedFieldResponse = rt.TypeOf<typeof getDataStreamDegradedFieldsResponseRt>;
+
 export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
 });
@@ -114,8 +128,6 @@ export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
   estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
 });
-
-export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstimatedDataInBytesRT>;
 
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
   dataStreamsEstimatedDataInBytesRT

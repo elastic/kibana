@@ -16,7 +16,7 @@ import { getScopedActions, isInTableScope, isTimelineScope } from '../../../help
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
-import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';

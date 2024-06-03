@@ -29,7 +29,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
 
-  describe('Endpoint Exceptions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/184585
+  describe.skip('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(10 * 60_000);

@@ -21,7 +21,7 @@ export const suggestUsers = async ({
     DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
     {
       method: 'GET',
-      version: '2023-10-31',
+      version: '1',
       query: { searchTerm },
     }
   );
