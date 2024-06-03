@@ -21,7 +21,7 @@ import {
 } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
-import { getSystemLogsDataStreams } from '../../../common/elastic_agent_logs';
+import { getSystemLogsInputs } from '../../../common/elastic_agent_logs';
 
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 
@@ -245,8 +245,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       savedObjectId: params.path.onboardingId,
       observabilityOnboardingState: {
         ...savedObservabilityOnboardingState,
-        type: 'logFiles',
-        progress: {},
       } as ObservabilityOnboardingFlow,
     });
 
@@ -300,7 +298,7 @@ async function ensureInstalledIntegrations(
     const { pkgName, installSource } = integration;
     if (installSource === 'registry') {
       await packageClient.ensureInstalledPackage({ pkgName });
-      agentInputs.push(...getSystemLogsDataStreams(uuidv4()));
+      agentInputs.push(...getSystemLogsInputs(uuidv4()));
     } else if (installSource === 'custom') {
       const input = {
         id: `custom-logs-${uuidv4()}`,
