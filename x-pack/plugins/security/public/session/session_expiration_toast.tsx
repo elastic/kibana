@@ -14,7 +14,7 @@ import type { Observable } from 'rxjs';
 
 import type { ToastInput } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelativeTime } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { SessionState } from './session_timeout';
@@ -37,17 +37,14 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
     return null;
   }
 
+  const timeoutSeconds = Math.max(state.expiresInMs - SESSION_GRACE_PERIOD_MS, 0) / 1000;
+
   const expirationWarning = (
     <FormattedMessage
       id="xpack.security.sessionExpirationToast.body"
       defaultMessage="You will be logged out {timeout}."
       values={{
-        timeout: (
-          <FormattedRelative
-            value={Math.max(state.expiresInMs - SESSION_GRACE_PERIOD_MS, 0) + Date.now()}
-            updateInterval={1000}
-          />
-        ),
+        timeout: <FormattedRelativeTime value={timeoutSeconds} />,
       }}
     />
   );

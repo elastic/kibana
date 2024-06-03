@@ -4230,10 +4230,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.onPhaseChange",
+            "id": "def-public.Embeddable.phase$",
             "type": "Object",
             "tags": [],
-            "label": "onPhaseChange",
+            "label": "phase$",
             "description": [],
             "signature": [
               "{ source: ",
@@ -9634,6 +9634,14 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPhaseEvents",
+            "text": "PublishesPhaseEvents"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
@@ -14229,10 +14237,6 @@
             {
               "plugin": "profiling",
               "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "slo",
-              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
             },
             {
               "plugin": "links",

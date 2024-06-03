@@ -99,10 +99,9 @@ describe('buildEditFieldButton', () => {
           "size": "m",
         },
         "iconType": "pencil",
-        "label": <FormattedMessage
+        "label": <Memo(MemoizedFormattedMessage)
           defaultMessage="Edit data view field"
           id="unifiedDataTable.grid.editFieldButton"
-          values={Object {}}
         />,
         "onClick": [Function],
         "size": "xs",
