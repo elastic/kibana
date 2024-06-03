@@ -26,6 +26,8 @@ interface ESQLDataGridProps {
   isTableView?: boolean;
 }
 
+const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
+
 export const ESQLDataGrid = (props: ESQLDataGridProps) => {
   const { loading, value } = useAsync(() => {
     const startServicesPromise = untilPluginStartServicesReady();
@@ -34,8 +36,6 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
 
   const deps = value?.[0];
   if (loading || !deps) return <EuiLoadingSpinner />;
-
-  const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
 
   return (
     <KibanaContextProvider
