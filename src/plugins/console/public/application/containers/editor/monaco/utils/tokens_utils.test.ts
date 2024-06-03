@@ -118,6 +118,10 @@ describe('tokens_utils', () => {
         value: '{"property1":{"nested1":"value","nested2":{}},"',
         tokens: ['{'],
       },
+      {
+        value: '{\n  "explain": false,\n  "',
+        tokens: ['{'],
+      },
     ];
     for (const testCase of testCases) {
       const { value, tokens } = testCase;
