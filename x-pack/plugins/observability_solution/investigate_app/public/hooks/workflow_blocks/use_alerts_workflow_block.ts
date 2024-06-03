@@ -27,13 +27,6 @@ export function useAlertsWorkflowBlock({
 
   const onWidgetAddRef = useRef(onWidgetAdd);
 
-  onWidgetAddRef.current = onWidgetAdd;
-
-  console.log({
-    start,
-    end,
-  });
-
   const alertsResult = useAbortableAsync(
     ({ signal }) => {
       return core.http.post<{ hits: { total: { value: number } } }>(
@@ -51,7 +44,6 @@ export function useAlertsWorkflowBlock({
                       '@timestamp': {
                         gte: start,
                         lte: end,
-                        format: 'date_optional_time',
                       },
                     },
                   },
