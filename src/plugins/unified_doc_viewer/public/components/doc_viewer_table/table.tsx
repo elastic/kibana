@@ -424,7 +424,7 @@ export const DocViewerTable = ({
       const { columnId, children, cellActions, rowIndex } = props;
       const row = rows[rowIndex];
 
-      let warningMessage;
+      let warningMessage: string | undefined;
       if (columnId === GRID_COLUMN_FIELD_VALUE) {
         warningMessage = getFilterInOutPairDisabledWarning(row);
       } else if (columnId === GRID_COLUMN_FIELD_NAME) {
