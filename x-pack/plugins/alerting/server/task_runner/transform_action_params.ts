@@ -29,6 +29,8 @@ export interface TransformActionParamsOptions {
   alertUuid: string;
   alertActionGroup: string;
   alertActionGroupName: string;
+  alertPreviousActionGroup?: string;
+  alertPreviousActionGroupName?: string;
   actionParams: RuleActionParams;
   alertParams: RuleTypeParams;
   state: AlertInstanceState;
@@ -72,6 +74,8 @@ export function transformActionParams({
   alertUuid,
   alertActionGroup,
   alertActionGroupName,
+  alertPreviousActionGroup,
+  alertPreviousActionGroupName,
   context,
   actionParams,
   state,
@@ -112,6 +116,8 @@ export function transformActionParams({
       uuid: alertUuid,
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
+      previousActionGroup: alertPreviousActionGroup,
+      previousActionGroupName: alertPreviousActionGroupName,
       flapping,
       consecutiveMatches,
     },

@@ -26,6 +26,7 @@ export type GetDataResponse = Record<
   {
     warn: boolean;
     trigger: boolean;
+    low: boolean;
     value: number | null;
     bucketKey: BucketKey;
   } & AdditionalContext
@@ -50,6 +51,9 @@ interface Aggs {
     value: number;
   };
   shouldTrigger?: {
+    value: number;
+  };
+  shouldLow?: {
     value: number;
   };
   missingGroup?: {
@@ -97,6 +101,7 @@ const NO_DATA_RESPONSE = {
     value: null,
     warn: false,
     trigger: false,
+    low: false,
     bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
   },
 };
@@ -141,6 +146,7 @@ export const getData = async (
         const {
           shouldWarn,
           shouldTrigger,
+          shouldLow,
           missingGroup,
           currentPeriod,
           aggregatedValue: aggregatedValueForRate,
@@ -160,6 +166,7 @@ export const getData = async (
           previous[key] = {
             trigger: false,
             warn: false,
+            low: false,
             value: null,
             bucketKey: bucket.key,
           };
@@ -176,6 +183,7 @@ export const getData = async (
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
             warn: (shouldWarn && shouldWarn.value > 0) || false,
+            low: (shouldLow && shouldLow.value > 0) || false,
             value,
             bucketKey: bucket.key,
             container: containerList,
@@ -207,6 +215,7 @@ export const getData = async (
         aggregatedValue: aggregatedValueForRate,
         shouldWarn,
         shouldTrigger,
+        shouldLow,
       } = aggs.all.buckets.all;
 
       const { aggregatedValue, doc_count: docCount } = currentPeriod.buckets.all;
@@ -235,11 +244,16 @@ export const getData = async (
                 params.warningThreshold
               )
             : false;
+        const low =
+          params.lowThreshold && params.lowComparator
+            ? comparatorMap[params.lowComparator](value, params.lowThreshold)
+            : false;
         return {
           [UNGROUPED_FACTORY_KEY]: {
             value,
             warn,
             trigger,
+            low,
             bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
           },
         };
@@ -247,6 +261,7 @@ export const getData = async (
       return {
         [UNGROUPED_FACTORY_KEY]: {
           value,
+          low: (shouldLow && shouldLow.value > 0) || false,
           warn: (shouldWarn && shouldWarn.value > 0) || false,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
           bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },

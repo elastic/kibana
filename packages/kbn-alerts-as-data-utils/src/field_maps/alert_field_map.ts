@@ -16,7 +16,9 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
+  ALERT_IS_IMPROVING,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -77,6 +79,11 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  [ALERT_IS_IMPROVING]: {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
   [ALERT_MAINTENANCE_WINDOW_IDS]: {
     type: 'keyword',
     array: true,
@@ -96,6 +103,11 @@ export const alertFieldMap = {
     type: 'date',
     required: false,
     array: false,
+  },
+  [ALERT_PREVIOUS_ACTION_GROUP]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   [ALERT_REASON]: {
     type: 'keyword',

@@ -38,7 +38,6 @@ import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from '
 import {
   IAlertsClient,
   InitializeExecutionOpts,
-  ProcessAndLogAlertsOpts,
   TrackedAlerts,
   ReportedAlert,
   ReportedAlertData,
@@ -299,10 +298,6 @@ export class AlertsClient<
 
   public logAlerts(opts: LogAlertsOpts) {
     this.legacyAlertsClient.logAlerts(opts);
-  }
-
-  public processAndLogAlerts(opts: ProcessAndLogAlertsOpts) {
-    this.legacyAlertsClient.processAndLogAlerts(opts);
   }
 
   public getProcessedAlerts(

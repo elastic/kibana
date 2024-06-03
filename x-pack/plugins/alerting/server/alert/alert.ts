@@ -18,6 +18,8 @@ import {
   AlertInstanceContext,
   DefaultActionGroupId,
   LastScheduledActions,
+  SeveritySchema,
+  ActionGroup,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -172,6 +174,10 @@ export class Alert<
     return this.scheduledExecutionOptions;
   }
 
+  getSeverity() {
+    return this.meta.severity;
+  }
+
   unscheduleActions() {
     this.scheduledExecutionOptions = undefined;
     return this;
@@ -208,6 +214,42 @@ export class Alert<
   private ensureHasNoScheduledActions() {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
+    }
+  }
+
+  setIsImproving(actionGroups: Array<ActionGroup<string>>) {
+    const currentActionGroup = actionGroups.find(
+      (ag) => ag.id === this.scheduledExecutionOptions?.actionGroup
+    );
+    const previousActionGroup = actionGroups.find(
+      (ag) => ag.id === this.getLastScheduledActions()?.group
+    );
+
+    if (
+      currentActionGroup &&
+      previousActionGroup &&
+      currentActionGroup.severity &&
+      previousActionGroup.severity
+    ) {
+      const isImproving = currentActionGroup.severity.level < previousActionGroup.severity.level;
+      console.log(`isImproving ${isImproving}`);
+      if (!this.meta.severity) {
+        this.meta.severity = {} as SeveritySchema;
+      }
+      this.meta.severity.isImproving = isImproving;
+      if (isImproving) {
+        if (!this.meta.severity.startedImprovingAt) {
+          this.meta.severity.startedImprovingAt = new Date().toISOString();
+        }
+      } else {
+        this.meta.severity.startedImprovingAt = null;
+      }
+
+      console.log(`metaSeverity ${JSON.stringify(this.meta.severity)}`);
+    } else {
+      if (this.meta.severity) {
+        this.meta.severity = {} as SeveritySchema;
+      }
     }
   }
 

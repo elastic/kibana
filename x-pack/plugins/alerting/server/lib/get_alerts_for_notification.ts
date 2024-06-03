@@ -8,24 +8,43 @@
 import { keys } from 'lodash';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import { AlertInstanceState, AlertInstanceContext, ActionGroup } from '../types';
+
+export interface GetAlertsForNotificationOpts<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  flappingSettings: RulesSettingsFlappingProperties;
+  notifyOnActionGroupChange: boolean;
+  actionGroupId: string;
+  actionGroups: Array<ActionGroup<string>>;
+  alertDelay: number;
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  startedAt?: string | null;
+}
 
 export function getAlertsForNotification<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
->(
-  flappingSettings: RulesSettingsFlappingProperties,
-  notifyOnActionGroupChange: boolean,
-  actionGroupId: string,
-  alertDelay: number,
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
-  currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
-  startedAt?: string | null
-) {
+>({
+  flappingSettings,
+  notifyOnActionGroupChange,
+  actionGroups,
+  actionGroupId,
+  alertDelay,
+  newAlerts = {},
+  activeAlerts = {},
+  recoveredAlerts = {},
+  currentRecoveredAlerts = {},
+  startedAt,
+}: GetAlertsForNotificationOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   const currentActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   let delayedAlertsCount = 0;
 
@@ -33,6 +52,8 @@ export function getAlertsForNotification<
     const alert = activeAlerts[id];
     alert.incrementActiveCount();
     alert.resetPendingRecoveredCount();
+    alert.setIsImproving(actionGroups);
+
     // do not trigger an action notification if the number of consecutive
     // active alerts is less than the rule alertDelay threshold
     if (alert.getActiveCount() < alertDelay) {

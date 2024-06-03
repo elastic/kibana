@@ -22,5 +22,6 @@ export type {
   LatestAlertInstanceStateSchema as AlertInstanceState,
   LatestThrottledActionSchema as ThrottledActions,
   LatestLastScheduledActionsSchema as LastScheduledActions,
+  LatestSeveritySchema as SeveritySchema,
 } from './src/task_state';
 export { stateSchemaByVersion, emptyState as emptyTaskState } from './src/task_state';

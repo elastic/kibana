@@ -502,6 +502,7 @@ export class ExecutionHandler<
     const ruleUrl = this.buildRuleUrl(spaceId);
     const executableAlert = alert!;
     const actionGroup = action.group as ActionGroupIds;
+    const previousActionGroup = executableAlert.getLastScheduledActions()?.group;
     const transformActionParamsOptions: TransformActionParamsOptions = {
       actionsPlugin: this.taskRunnerContext.actionsPlugin,
       alertId: ruleId,
@@ -522,6 +523,14 @@ export class ExecutionHandler<
       actionParams: action.params,
       flapping: executableAlert.getFlapping(),
       ruleUrl: ruleUrl?.absoluteUrl,
+      ...(previousActionGroup
+        ? {
+            alertPreviousActionGroup: previousActionGroup,
+            alertPreviousActionGroupName: this.ruleTypeActionGroups!.get(
+              previousActionGroup as ActionGroupIds
+            )!,
+          }
+        : {}),
     };
 
     if (executableAlert.isAlertAsData()) {

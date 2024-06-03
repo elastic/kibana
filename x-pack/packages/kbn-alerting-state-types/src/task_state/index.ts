@@ -24,6 +24,7 @@ export type LatestAlertInstanceMetaSchema = TypeOf<typeof latest.metaSchema>;
 export type LatestAlertInstanceStateSchema = TypeOf<typeof latest.alertStateSchema>;
 export type LatestThrottledActionSchema = TypeOf<typeof latest.throttledActionSchema>;
 export type LatestLastScheduledActionsSchema = TypeOf<typeof latest.lastScheduledActionsSchema>;
+export type LatestSeveritySchema = TypeOf<typeof latest.severitySchema>;
 
 export const emptyState: LatestTaskStateSchema = {
   alertTypeState: {},

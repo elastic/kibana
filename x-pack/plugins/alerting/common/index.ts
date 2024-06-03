@@ -17,6 +17,7 @@ export * from './lib';
 export type {
   ThrottledActions,
   LastScheduledActions,
+  SeveritySchema,
   AlertInstanceMeta,
   AlertInstanceState,
   AlertInstanceContext,

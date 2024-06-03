@@ -15,6 +15,7 @@ export {
   metaSchema,
   alertStateSchema,
   lastScheduledActionsSchema,
+  severitySchema,
 } from './schema';
 
 export const versionDefinition = {

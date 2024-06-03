@@ -8,7 +8,6 @@ const createAlertsClientMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
       initializeExecution: jest.fn(),
-      processAndLogAlerts: jest.fn(),
       processAlerts: jest.fn(),
       logAlerts: jest.fn(),
       updateAlertMaintenanceWindowIds: jest.fn(),
