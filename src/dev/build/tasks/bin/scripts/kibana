@@ -43,7 +43,7 @@ test_node
 # Pointer compression builds will not set heap size > 4Gb
 # max-old-space-size is a subset of total heap size, so we add a 256mb buffer before switching builds
 CAN_USE_POINTER_COMPRESSION=$(NODE_OPTIONS=$NODE_OPTIONS $NODE -e 'console.log(v8.getHeapStatistics().heap_size_limit / 1024 / 1024 <= (4096 + 256))')
-if [[ "$CAN_USE_POINTER_COMPRESSION" == 'true' ]]; then
+if [[ "$CAN_USE_POINTER_COMPRESSION" == 'true' ]] && [[ $KBN_DISABLE_POINTER_COMPRESSION != 'true']]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
   test_node
 fi
