@@ -37,20 +37,6 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AttackDiscoveryToolParams => {
     const { alertsIndexPattern, llm, request, size } = params;
-    console.log('steppphh isSupported', {
-      request,
-      con1: requestHasRequiredAnonymizationParams(request),
-      con2: alertsIndexPattern != null,
-      con3: size != null,
-      con4: !sizeIsOutOfRange(size),
-      con5: llm != null,
-      allCon:
-        requestHasRequiredAnonymizationParams(request) &&
-        alertsIndexPattern != null &&
-        size != null &&
-        !sizeIsOutOfRange(size) &&
-        llm != null,
-    });
     return (
       requestHasRequiredAnonymizationParams(request) &&
       alertsIndexPattern != null &&

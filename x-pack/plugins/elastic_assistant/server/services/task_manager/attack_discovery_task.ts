@@ -6,11 +6,11 @@
  */
 
 import {
-  AuthenticatedUser,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
   LoggerFactory,
+  ScopeableRequest,
 } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -20,6 +20,7 @@ import type {
 import { AttackDiscoveryPostRequestBody, Replacements } from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { getFakeKibanaRequest } from './utils';
 import { appContextService, GetRegisteredTools } from '../app_context';
 import { ElasticAssistantPluginCoreSetupDependencies } from '../../types';
 import { getLangSmithTracer } from '../../routes/evaluate/utils';
@@ -59,7 +60,6 @@ export interface AttackDiscoveryTaskSetupContract {
 interface AttackDiscoveryParams {
   alertsIndexPattern: string;
   connectorId: string;
-  currentUser: AuthenticatedUser;
   pluginName: string;
   request: KibanaRequest;
   actionTypeId: AttackDiscoveryPostRequestBody['actionTypeId'];
@@ -68,6 +68,7 @@ interface AttackDiscoveryParams {
   langSmithProject: AttackDiscoveryPostRequestBody['langSmithProject'];
   replacements: AttackDiscoveryPostRequestBody['replacements'];
   size: AttackDiscoveryPostRequestBody['size'];
+  spaceId: string;
   connectorTimeout: number;
   langChainTimeout: number;
 }
@@ -80,6 +81,7 @@ export class AttackDiscoveryTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private taskManager?: TaskManagerStartContract;
+  private fakeRequest?: ScopeableRequest;
 
   constructor(setupContract: AttackDiscoveryTaskSetupContract) {
     const { core, logFactory, taskManager } = setupContract;
@@ -96,6 +98,19 @@ export class AttackDiscoveryTask {
           timeout: AttackDiscoveryTaskConstants.TIMEOUT,
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             this.logger.info(`createTaskRunner ${AttackDiscoveryTaskConstants.TYPE}.`);
+            const apiKey = `dontcommitthis`;
+            const basePathService = core.http.basePath;
+
+            this.fakeRequest = getFakeKibanaRequest(
+              basePathService,
+              taskInstance.params.spaceId,
+              apiKey
+            );
+            if (this.fakeRequest == null) {
+              throw new Error(
+                'An issue occurred creating the fake request for the Attack Discovery Tool'
+              );
+            }
             const getEsClient = () =>
               core.getStartServices().then(
                 ([
@@ -104,8 +119,7 @@ export class AttackDiscoveryTask {
                   },
                   // TODO is this right?
                 ]) => {
-                  console.log('stephhh currentUser1', taskInstance.state.request.body);
-                  return client.asScoped(taskInstance.state.request).asCurrentUser;
+                  return client.asScoped(this.fakeRequest).asCurrentUser;
                 }
               );
             const getActions = () =>
@@ -115,7 +129,6 @@ export class AttackDiscoveryTask {
               run: async () => {
                 const actions = await getActions();
                 const esClient = await getEsClient();
-                console.log('stephhh esClient', esClient);
                 this.logger.info(`createTaskRunner run ${AttackDiscoveryTaskConstants.TYPE}.`);
                 return this.runTask({
                   taskInstance,
@@ -209,10 +222,8 @@ export class AttackDiscoveryTask {
         langSmithProject,
         pluginName,
         replacements,
-        request: _request,
         size,
       } = taskInstance.params;
-      const request = JSON.parse(_request);
 
       let latestReplacements: Replacements = { ...replacements };
       const onNewReplacements = (newReplacements: Replacements) => {
@@ -224,6 +235,11 @@ export class AttackDiscoveryTask {
       const assistantTool = assistantTools.find((tool) => tool.id === 'attack-discovery');
       if (!assistantTool) {
         throw new Error('attack discovery tool not found');
+      }
+      if (this.fakeRequest == null) {
+        throw new Error(
+          'An issue occurred creating the fake request for the Attack Discovery Tool'
+        );
       }
 
       const traceOptions = {
@@ -242,7 +258,7 @@ export class AttackDiscoveryTask {
         connectorId,
         llmType: getLlmType(actionTypeId),
         logger: this.logger,
-        request,
+        request: this.fakeRequest,
         temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
         timeout: connectorTimeout,
         traceOptions,
@@ -256,14 +272,12 @@ export class AttackDiscoveryTask {
         langChainTimeout,
         llm,
         onNewReplacements,
-        request: { ...request, body: { replacements } },
+        request: { ...this.fakeRequest, body: { replacements } },
         size,
       });
 
-      console.log('stephh assistantToolParams', assistantToolParams);
       const toolInstance = assistantTool.getTool(assistantToolParams);
       const rawAttackDiscoveries = await toolInstance?.invoke('');
-      console.log('stephh toolInstance', toolInstance);
       if (rawAttackDiscoveries == null) {
         result = {
           isError: true,

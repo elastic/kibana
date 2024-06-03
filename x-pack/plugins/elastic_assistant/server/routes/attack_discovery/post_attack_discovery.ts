@@ -59,7 +59,7 @@ export const postAttackDiscoveryRoute = (
         const logger: Logger = assistantContext.logger;
 
         const currentUser = await assistantContext.getCurrentUser();
-        console.log('stephhh currentUser2', currentUser);
+        const spaceId = assistantContext.getSpaceId();
         try {
           const pluginName = getPluginNameFromRequest({
             request,
@@ -70,7 +70,7 @@ export const postAttackDiscoveryRoute = (
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
           const connectorId = decodeURIComponent(request.body.connectorId);
-          console.log('stephh attackDiscovery run request', request.body);
+
           const {
             actionTypeId,
             anonymizationFields,
@@ -81,7 +81,6 @@ export const postAttackDiscoveryRoute = (
           } = request.body;
           const result = await attackDiscoveryTask.run({
             alertsIndexPattern,
-            currentUser,
             connectorId,
             pluginName,
             request,
@@ -91,6 +90,7 @@ export const postAttackDiscoveryRoute = (
             langSmithProject,
             replacements,
             size,
+            spaceId,
             connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
           });
