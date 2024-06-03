@@ -29,12 +29,11 @@ import {
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
 
-import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
-
 import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,
 } from '../../utils/connector_helpers';
+import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
 
 import {
   ConnectorNameAndDescriptionLogic,
