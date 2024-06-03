@@ -161,8 +161,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean)',
         'monitoring.ui.min_interval_seconds (number)',
         'monitoring.ui.show_license_expiration (boolean)',
-        'navigation.solutionNavigation.enabled (boolean)',
-        'navigation.solutionNavigation.defaultSolution (alternatives)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',

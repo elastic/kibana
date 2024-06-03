@@ -10,7 +10,8 @@ import { entityDefinition } from '../helpers/fixtures/entity_definition';
 
 describe('generateProcessors(definition)', () => {
   it('should genearte a valid pipeline', () => {
-    const processors = generateProcessors(entityDefinition);
+    const spaceId = 'test';
+    const processors = generateProcessors(entityDefinition, spaceId);
     expect(processors).toMatchSnapshot();
   });
 });

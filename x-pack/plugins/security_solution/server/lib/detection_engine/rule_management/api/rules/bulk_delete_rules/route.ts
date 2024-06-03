@@ -55,7 +55,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
       const rulesClient = ctx.alerting.getRulesClient();
-      const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+      const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -76,7 +76,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
               return getIdBulkError({ id, ruleId });
             }
 
-            await rulesManagementClient.deleteRule({
+            await detectionRulesClient.deleteRule({
               ruleId: rule.id,
             });
 

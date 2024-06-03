@@ -58,7 +58,7 @@ jest.mock('uuid', () => ({
 jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 
-jest.mock('../../../../common/containers/sourcerer', () => ({
+jest.mock('../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
 }));
 
