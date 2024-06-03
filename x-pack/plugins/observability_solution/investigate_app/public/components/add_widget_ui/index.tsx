@@ -6,13 +6,14 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
+  GlobalWidgetParameters,
   InvestigateTimeline,
   InvestigateWidgetCreate,
+  OnWidgetAdd,
   WorkflowBlock,
 } from '@kbn/investigate-plugin/public';
 import { Moment } from 'moment';
 import React, { useState } from 'react';
-import { Filter, Query } from '@kbn/es-query';
 import { AddWidgetMode } from '../../constants/add_widget_mode';
 import { AddFromLibraryButton } from '../add_from_library_button';
 import { AddWidgetModeSelector } from '../add_widget_mode_selector';
@@ -21,23 +22,17 @@ import { EsqlWidgetControl } from '../esql_widget_control';
 import { NoteWidgetControl } from '../note_widget_control';
 import { useWorkflowBlocks } from '../../hooks/workflow_blocks/use_workflow_blocks';
 
-interface AddWidgetUIProps {
+type AddWidgetUIProps = {
   user: {
     name: string;
   };
   assistantAvailable: boolean;
-  onWidgetAdd: (widget: InvestigateWidgetCreate) => Promise<void>;
+  onWidgetAdd: OnWidgetAdd;
   timeline: InvestigateTimeline;
   start: Moment;
   end: Moment;
-  query: Query;
-  timeRange: {
-    from: string;
-    to: string;
-  };
-  filters: Filter[];
   workflowBlocks: WorkflowBlock[];
-}
+} & GlobalWidgetParameters;
 
 function getControlsForMode({
   user,
@@ -56,13 +51,7 @@ function getControlsForMode({
   timeline: InvestigateTimeline;
   start: Moment;
   end: Moment;
-  query: Query;
-  timeRange: {
-    from: string;
-    to: string;
-  };
-  filters: Filter[];
-}) {
+} & GlobalWidgetParameters) {
   switch (mode) {
     case AddWidgetMode.Esql:
       return (

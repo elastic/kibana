@@ -48,7 +48,7 @@ const containerClassName = css`
 `;
 
 const scrollContainerClassName = css`
-  overflow-x: auto;
+  overflow-x: clip;
 `;
 
 const addWidgetContainerClassName = css`
@@ -153,6 +153,8 @@ export function InvestigateView({}: {}) {
 
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
 
+  const { ref: stickToBottomRef, stickToBottom } = useStickToBottom();
+
   const [timeline, setTimeline] = useState<InvestigateTimelineWithLoadingState>({
     '@timestamp': new Date().getTime(),
     id: v4(),
@@ -182,6 +184,7 @@ export function InvestigateView({}: {}) {
   }, [range, filterOverrides]);
 
   const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
+    stickToBottom();
     return regenerateItem({
       widget: widgetCreate,
       signal: new AbortController().signal,
@@ -359,8 +362,6 @@ export function InvestigateView({}: {}) {
   useEffect(() => {
     regenerateCallbackRef.current({ globalWidgetParameters, items: itemsRef.current });
   }, [globalWidgetParameters]);
-
-  const { ref: stickToBottomRef } = useStickToBottom();
 
   const [scrollableContainer, setScrollableContainer] = useState<HTMLElement | null>(null);
 

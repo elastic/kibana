@@ -45,6 +45,21 @@ export function getMockInvestigateAppContext(): DeeplyMockedKeys<InvestigateAppK
           columns: [],
         });
       }),
+      queryWithMeta: jest
+        .fn()
+        .mockImplementation((): Promise<{ meta: EsqlQueryMeta; query: ESQLSearchResponse }> => {
+          return Promise.resolve({
+            meta: {
+              suggestions: [],
+              columns: [],
+              dataView: {} as DataView,
+            },
+            query: {
+              values: [],
+              columns: [],
+            },
+          });
+        }),
     },
   };
 

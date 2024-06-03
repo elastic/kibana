@@ -27,22 +27,22 @@ const lensClassName = css`
   height: 100%;
 `;
 
-function EsqlWidget({
+export function EsqlWidget({
   suggestion,
   dataView,
   esqlQuery,
   columns,
+  allColumns,
   values,
   blocks,
-  onWidgetAdd,
 }: {
   suggestion: Suggestion;
   dataView: DataView;
   esqlQuery: string;
   columns: ESQLSearchResponse['columns'];
+  allColumns: ESQLSearchResponse['all_columns'];
   values: ESQLSearchResponse['values'];
   blocks: WidgetRenderAPI['blocks'];
-  onWidgetAdd: WidgetRenderAPI['onWidgetAdd'];
 }) {
   const {
     dependencies: {
@@ -54,8 +54,9 @@ function EsqlWidget({
     return getDatatableFromEsqlResponse({
       columns,
       values,
+      all_columns: allColumns,
     });
-  }, [columns, values]);
+  }, [columns, values, allColumns]);
 
   const input = useMemo(() => {
     return getLensAttrsForSuggestion({
@@ -65,6 +66,10 @@ function EsqlWidget({
       table: datatable,
     });
   }, [suggestion, dataView, esqlQuery, datatable]);
+
+  const memoizedQueryObject = useMemo(() => {
+    return { esql: esqlQuery };
+  }, [esqlQuery]);
 
   useEffect(() => {
     if (datatable.columns.find((column) => column.name === 'message')) {
@@ -96,7 +101,7 @@ function EsqlWidget({
         rows={values}
         columns={datatable.columns}
         dataView={dataView}
-        query={{ esql: esqlQuery }}
+        query={memoizedQueryObject}
         flyoutType="overlay"
         initialColumns={initialColumns}
       />
@@ -181,11 +186,11 @@ export function registerEsqlWidget({
         <EsqlWidget
           dataView={dataView}
           columns={columns}
+          allColumns={undefined}
           values={values}
           suggestion={suggestion}
           esqlQuery={widget.parameters.esql}
           blocks={blocks}
-          onWidgetAdd={onWidgetAdd}
         />
       );
     }

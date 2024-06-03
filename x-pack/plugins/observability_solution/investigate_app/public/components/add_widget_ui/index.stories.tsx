@@ -42,7 +42,7 @@ const defaultStory: Story = {
       },
       filters: [],
       query: {
-        language: 'kql',
+        language: 'kuery',
         query: '',
       },
       timeRange: {

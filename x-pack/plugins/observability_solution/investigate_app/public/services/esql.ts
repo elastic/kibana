@@ -36,6 +36,9 @@ export interface EsqlQueryMeta {
 
 export interface EsqlService {
   query: (params: DefaultQueryParams) => Promise<ESQLSearchResponse>;
+  queryWithMeta: (
+    params: DefaultQueryParams
+  ) => Promise<{ query: ESQLSearchResponse; meta: EsqlQueryMeta }>;
   meta: (params: DefaultQueryParams) => Promise<EsqlQueryMeta>;
 }
 
@@ -76,6 +79,17 @@ export function createEsqlService({
   const esql: EsqlService = {
     query: async ({ query, signal, filter }) => {
       return await runQuery({ query, signal, filter });
+    },
+    queryWithMeta: async ({ query, signal, filter }) => {
+      const [meta, queryResult] = await Promise.all([
+        esql.meta({ query, signal, filter }),
+        esql.query({ query, signal, filter }),
+      ]);
+
+      return {
+        query: queryResult,
+        meta,
+      };
     },
     meta: async ({ query, signal, filter }) => {
       const indexPattern = getIndexPatternFromESQLQuery(query);

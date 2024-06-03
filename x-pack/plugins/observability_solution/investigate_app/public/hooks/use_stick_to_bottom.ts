@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RefCallback, useEffect, useState } from 'react';
+import { RefCallback, useCallback, useEffect, useState } from 'react';
 import { findScrollableParent } from '../utils/find_scrollable_parent';
+
+function scrollToBottom(scrollableElement: HTMLElement) {
+  scrollableElement.scrollTop = scrollableElement.scrollHeight;
+}
 
 export function useStickToBottom() {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -20,10 +24,6 @@ export function useStickToBottom() {
     }
 
     let stickToBottom = true;
-
-    function scrollToBottom(scrollableElement: HTMLElement) {
-      scrollableElement.scrollTop = scrollableElement.scrollHeight;
-    }
 
     const resizeObserver = new ResizeObserver((entries) => {
       if (stickToBottom) {
@@ -63,5 +63,12 @@ export function useStickToBottom() {
     };
   }, [container]);
 
-  return { ref };
+  const stickToBottom = useCallback(() => {
+    requestAnimationFrame(() => {
+      const scrollableElement = findScrollableParent(container);
+      scrollToBottom(scrollableElement);
+    });
+  }, [container]);
+
+  return { ref, stickToBottom };
 }
