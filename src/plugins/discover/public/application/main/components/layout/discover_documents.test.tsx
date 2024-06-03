@@ -29,7 +29,7 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 
 const customisationService = createCustomizationService();
-const { profilesManagerMock, rootProfileProviderMock } = createContextAwarenessMocks();
+const { profilesManagerMock } = createContextAwarenessMocks();
 
 async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
