@@ -8,12 +8,16 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash/fp';
 import { useState, useEffect, useCallback } from 'react';
-import { IntegrationSettings } from '../../types';
+import { Actions, AssistantState } from '../../hooks/use_assistant_state';
 import { runCategorizationGraph, runEcsGraph, runIntegrationBuilder, runRelatedGraph } from './api';
 
 interface PipelineGenerationProps {
-  integrationSettings: IntegrationSettings | undefined;
-  connectorId: string | undefined;
+  integrationSettings: AssistantState['integrationSettings'];
+  connectorId: AssistantState['connectorId'];
+  isGenerating: AssistantState['isGenerating'];
+  skip: boolean;
+  setIsGenerating: Actions['setIsGenerating'];
+  setResult: Actions['setResult'];
 }
 
 export type ProgressItem = 'ecs' | 'categorization' | 'related_graph' | 'integration_builder';
@@ -31,10 +35,11 @@ interface ParametersWithPipeline extends Parameters {
 export const usePipelineGeneration = ({
   integrationSettings,
   connectorId,
+  skip,
+  setIsGenerating,
+  setResult,
 }: PipelineGenerationProps) => {
   const { http, notifications } = useKibana().services;
-  const [result, setResult] = useState<object | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [error, setError] = useState<null | string>(null);
 
@@ -46,10 +51,9 @@ export const usePipelineGeneration = ({
   );
 
   useEffect(() => {
-    if (http == null || integrationSettings == null || notifications?.toasts == null) {
+    if (skip || http == null || integrationSettings == null || notifications?.toasts == null) {
       return;
     }
-    setIsLoading(true);
     const abortController = new AbortController();
     const deps = { http, abortSignal: abortController.signal };
 
@@ -61,6 +65,8 @@ export const usePipelineGeneration = ({
           rawSamples: integrationSettings.logsSampleParsed ?? [],
           connectorId,
         };
+        setIsGenerating(true);
+
         addProgress('ecs');
         const ecsGraphResult = await runEcsGraph(parameters, deps);
         if (abortController.signal.aborted) return;
@@ -85,19 +91,18 @@ export const usePipelineGeneration = ({
         const relatedGraphResult = await runRelatedGraph(parametersWithPipeline, deps);
         if (abortController.signal.aborted) return;
         if (!isEmpty(relatedGraphResult?.results)) {
-          parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
+          // parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
+          setResult(relatedGraphResult.results);
         }
 
         // addProgress('integration_builder');
         // const integrationBuilderResult = await runIntegrationBuilder(parametersWithPipeline, deps);
         // if (abortController.signal.aborted) return;
-
-        setResult(relatedGraphResult.results);
       } catch (e) {
         if (abortController.signal.aborted) return;
         setError(`Error: ${e.message}`);
       } finally {
-        setIsLoading(false);
+        setIsGenerating(false);
       }
     })();
 
@@ -105,11 +110,18 @@ export const usePipelineGeneration = ({
       console.log('aborting');
       abortController.abort();
     };
-  }, [addProgress, connectorId, http, integrationSettings, notifications?.toasts]);
+  }, [
+    skip,
+    setIsGenerating,
+    addProgress,
+    connectorId,
+    http,
+    integrationSettings,
+    notifications?.toasts,
+    setResult,
+  ]);
 
   return {
-    result,
-    isLoading,
     progress,
     error,
   };

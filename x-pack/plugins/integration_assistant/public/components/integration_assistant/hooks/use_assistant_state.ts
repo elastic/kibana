@@ -7,34 +7,48 @@
 
 import { useMemo, useReducer } from 'react';
 import type { IntegrationSettings } from '../types';
+// import { result } from './dummy_data';
 
-interface AssistantState {
+export interface AssistantState {
   step: number;
   connectorId?: string;
   integrationSettings?: IntegrationSettings;
   isGenerating: boolean;
-  result?: object; // TODO: type result properly
+  result?: {
+    pipeline: object;
+    docs: object[];
+  };
 }
 
-// const initialState: AssistantState = {
-//   step: 1,
-//   connectorId: undefined,
-//   integrationSettings: undefined,
-//   isGenerating: false,
-//   result: undefined,
-// };
 const initialState: AssistantState = {
   step: 1,
   connectorId: undefined,
-  integrationSettings: {
-    title: 'My Integration',
-    description: 'My manual integration description',
-    dataStreamTitle: 'My data stream title',
-    dataStreamDescription: 'My manual data stream description',
-  },
+  integrationSettings: undefined,
   isGenerating: false,
   result: undefined,
 };
+// const initialState: AssistantState = {
+//   step: 4,
+//   connectorId: undefined,
+//   integrationSettings: {
+//     title: 'My Integration',
+//     name: 'my_integration',
+//     description: 'My manual integration description',
+//     dataStreamTitle: 'My data stream title',
+//     dataStreamName: 'my_data_stream',
+//     dataStreamDescription: 'My manual data stream description',
+//   },
+//   isGenerating: false,
+//   result,
+// };
+
+export interface Actions {
+  setStep: (payload: AssistantState['step']) => void;
+  setConnectorId: (payload: AssistantState['connectorId']) => void;
+  setIntegrationSettings: (payload: AssistantState['integrationSettings']) => void;
+  setIsGenerating: (payload: AssistantState['isGenerating']) => void;
+  setResult: (payload: AssistantState['result']) => void;
+}
 
 type Action =
   | { type: 'SET_STEP'; payload: AssistantState['step'] }
@@ -46,7 +60,12 @@ type Action =
 const reducer = (state: AssistantState, action: Action): AssistantState => {
   switch (action.type) {
     case 'SET_STEP':
-      return { ...state, step: action.payload };
+      return {
+        ...state,
+        step: action.payload,
+        isGenerating: false,
+        ...(action.payload < state.step && { result: undefined }), // reset the result when we go back
+      };
     case 'SET_CONNECTOR_ID':
       return { ...state, connectorId: action.payload };
     case 'SET_INTEGRATION_SETTINGS':
@@ -63,21 +82,21 @@ const reducer = (state: AssistantState, action: Action): AssistantState => {
 export const useAssistantState = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const actions = useMemo(
+  const actions = useMemo<Actions>(
     () => ({
-      setStep: (payload: AssistantState['step']) => {
+      setStep: (payload) => {
         dispatch({ type: 'SET_STEP', payload });
       },
-      setConnectorId: (payload: AssistantState['connectorId']) => {
+      setConnectorId: (payload) => {
         dispatch({ type: 'SET_CONNECTOR_ID', payload });
       },
-      setIntegrationSettings: (payload: AssistantState['integrationSettings']) => {
+      setIntegrationSettings: (payload) => {
         dispatch({ type: 'SET_INTEGRATION_SETTINGS', payload });
       },
-      setIsGenerating: (payload: AssistantState['isGenerating']) => {
+      setIsGenerating: (payload) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
       },
-      setResult: (payload: AssistantState['result']) => {
+      setResult: (payload) => {
         dispatch({ type: 'SET_GENERATED_RESULT', payload });
       },
     }),

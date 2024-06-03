@@ -19,15 +19,16 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
+import { AssistantState } from '../../hooks/use_assistant_state';
 
 const MAX_LOGS_SAMPLE_SIZE = 10;
 
 interface LogsAnalysisProps {
-  integrationSettings: IntegrationSettings | undefined;
+  integrationSettings: AssistantState['integrationSettings'];
   setIntegrationSettings: (param: IntegrationSettings) => void;
 }
 
-// TODO: unit test this, add suport for ndjson
+// TODO: unit test this, add support for ndjson
 const parseLogsContent = (
   fileContent: string | undefined
 ): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[] } => {
@@ -101,15 +102,14 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
     }, [setIntegrationValues, setInvalidField]);
 
     useEffect(() => {
+      const defaultNames: Partial<IntegrationSettings> = {};
       if (integrationSettings?.title && integrationSettings.name == null) {
-        console.log('set name', getNameFromTitle(integrationSettings.title));
-        setIntegrationValues({ name: getNameFromTitle(integrationSettings.title) });
+        defaultNames.name = getNameFromTitle(integrationSettings.title);
       }
       if (integrationSettings?.dataStreamTitle && integrationSettings.dataStreamName == null) {
-        setIntegrationValues({
-          dataStreamName: getNameFromTitle(integrationSettings.dataStreamTitle),
-        });
+        defaultNames.dataStreamName = getNameFromTitle(integrationSettings.dataStreamTitle);
       }
+      setIntegrationValues(defaultNames);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -190,14 +190,14 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
                 isInvalid={invalidField.dataStreamName}
               />
             </EuiFormRow>
-            <EuiFormRow label={i18n.FORMAT_LABEL}>
+            {/* <EuiFormRow label={i18n.FORMAT_LABEL}>
               <EuiFieldText
                 name="format"
                 value="json/ndjson"
                 // onChange={onChangeFormat}
                 disabled
               />
-            </EuiFormRow>
+            </EuiFormRow> */}
             <EuiFormRow label={i18n.LOGS_SAMPLE_LABEL}>
               <EuiFilePicker
                 id="logsSampleFilePicker"

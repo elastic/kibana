@@ -14,17 +14,19 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 // import { JsonEditor } from '@kbn/es-ui-shared-plugin/public';
-import React, { useEffect } from 'react';
-import { IntegrationSettings } from '../../types';
+import React from 'react';
+import { Actions, AssistantState } from '../../hooks/use_assistant_state';
+import { FieldsTable } from './fields_table';
 import { ProgressItem, usePipelineGeneration } from './use_pipeline_generation';
 
 interface PipelineGenerationProps {
-  integrationSettings: IntegrationSettings | undefined;
-  connectorId: string | undefined;
-  result: object | undefined;
-  setIntegrationSettings: (param: IntegrationSettings) => void;
-  setIsGenerating: (param: boolean) => void;
-  setResult: (param: object | undefined) => void;
+  integrationSettings: AssistantState['integrationSettings'];
+  connectorId: AssistantState['connectorId'];
+  result: AssistantState['result'];
+  isGenerating: AssistantState['isGenerating'];
+  setIntegrationSettings: Actions['setIntegrationSettings'];
+  setIsGenerating: Actions['setIsGenerating'];
+  setResult: Actions['setResult'];
 }
 
 const progressText: Record<ProgressItem, string> = {
@@ -35,26 +37,32 @@ const progressText: Record<ProgressItem, string> = {
 };
 
 export const PipelineGeneration = React.memo<PipelineGenerationProps>(
-  ({ integrationSettings, connectorId, setIsGenerating, setResult }) => {
-    const { isLoading, progress, error, result } = usePipelineGeneration({
+  ({ integrationSettings, connectorId, isGenerating, result, setIsGenerating, setResult }) => {
+    const { progress, error } = usePipelineGeneration({
       integrationSettings,
       connectorId,
+      skip: result != null,
+      isGenerating,
+      setResult,
+      setIsGenerating,
     });
 
-    useEffect(() => {
-      setIsGenerating(isLoading);
-    }, [setIsGenerating, isLoading]);
+    // useEffect(() => {
+    //   setIsGenerating(isLoading);
+    // }, [setIsGenerating, isLoading]);
 
-    useEffect(() => {
-      setResult(result);
-    }, [setResult, result]);
+    // useEffect(() => {
+    //   console.log('pipeline', result?.pipeline);
+    //   console.log('docs', result?.docs);
+    //   setResult(result);
+    // }, [setResult, result]);
 
     //   return <JsonEditor value={result} onUpdate={() => {}} />;
 
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
-          {(isLoading || error) && (
+          {(isGenerating || error) && (
             <>
               <EuiProgress value={progress.length - 1} max={4} size="l" />
               <EuiSpacer size="m" />
@@ -85,11 +93,17 @@ export const PipelineGeneration = React.memo<PipelineGenerationProps>(
             </>
           )}
           {result && (
-            <CodeEditor
-              value={JSON.stringify(result.pipeline)}
-              languageId="json"
-              onChange={() => {}}
-            />
+            <>
+              <FieldsTable documents={result.docs} />
+              <EuiSpacer size="m" />
+              <CodeEditor
+                value={JSON.stringify(result.pipeline, null, 2)}
+                languageId="json"
+                onChange={() => {}}
+                width="100%"
+                height={400}
+              />
+            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

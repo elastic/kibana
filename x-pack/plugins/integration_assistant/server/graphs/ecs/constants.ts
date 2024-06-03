@@ -1833,6 +1833,7 @@ export const ECS_EXAMPLE_ANSWER = {
       metadata: {
         customerIDString: null,
         offset: null,
+        version: null,
         eventType: {
           target: 'event.code',
           confidence: 0.94,

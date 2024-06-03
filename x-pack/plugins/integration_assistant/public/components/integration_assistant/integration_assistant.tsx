@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -48,6 +48,8 @@ export const IntegrationAssistant = React.memo(() => {
     }
     return false;
   }, [state]);
+
+  const onGenerate = useCallback(() => actions.setIsGenerating(true), [actions]);
 
   if (!isAssistantEnabled) {
     return (
@@ -96,6 +98,8 @@ export const IntegrationAssistant = React.memo(() => {
               <PipelineGeneration
                 integrationSettings={state.integrationSettings}
                 connectorId={state.connectorId}
+                isGenerating={state.isGenerating}
+                result={state.result}
                 setIntegrationSettings={actions.setIntegrationSettings}
                 setIsGenerating={actions.setIsGenerating}
                 setResult={actions.setResult}
@@ -108,6 +112,8 @@ export const IntegrationAssistant = React.memo(() => {
         <IntegrationAssistantBottomBar
           currentStep={state.step}
           setStep={actions.setStep}
+          result={state.result}
+          onGenerate={onGenerate}
           isNextStepEnabled={isNextStepEnabled}
         />
       </KibanaPageTemplate.BottomBar>

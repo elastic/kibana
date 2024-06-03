@@ -69,12 +69,12 @@ export const IntegrationsAssistantSteps = React.memo<IntegrationsAssistantStepsP
         },
         {
           title: LOGS_ANALYSIS,
-          status: getStepStatus(3, currentStep, isGenerating),
+          status: getStepStatus(3, currentStep),
           onClick: getStepOnClick(3, currentStep, setStep),
         },
         {
           title: GENERATION,
-          status: getStepStatus(4, currentStep),
+          status: getStepStatus(4, currentStep, isGenerating),
           onClick: getStepOnClick(4, currentStep, setStep),
         },
         {
