@@ -29,7 +29,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const timeout = 60000 * 10;
 
-  describe('@ess @serverless Endpoint Exceptions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/184585
+  describe.skip('@ess @serverless Endpoint Exceptions', function () {
     const clearPrefilledEntries = async () => {
       const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
 

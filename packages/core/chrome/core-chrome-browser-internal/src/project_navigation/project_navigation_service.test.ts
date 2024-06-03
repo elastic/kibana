@@ -560,19 +560,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -625,19 +623,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -684,19 +680,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]

@@ -108,7 +108,7 @@ export class DataViewLazy extends AbstractDataView {
 
     return {
       getFieldMap: () => fieldMap,
-      getFieldMapSorted: () => {
+      getFieldMapSorted: (): Record<string, DataViewField> => {
         if (!hasBeenSorted) {
           fieldMapSorted = chain(fieldMap).toPairs().sortBy(0).fromPairs().value();
           hasBeenSorted = true;
