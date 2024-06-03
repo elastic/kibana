@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiIcon,
   EuiFlexItem,
   EuiPageTemplate,
   EuiFlexGroup,
@@ -31,7 +30,9 @@ import {
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
+import { ConnectorsSettings } from '../../connectorland/connector_settings';
 
+export const CONNECTORS_TAB = 'CONNECTORS_TAB' as const;
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
 export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
@@ -39,13 +40,6 @@ export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
 export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
 export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
-export type SettingsTabs =
-  | typeof CONVERSATIONS_TAB
-  | typeof QUICK_PROMPTS_TAB
-  | typeof SYSTEM_PROMPTS_TAB
-  | typeof ANONYMIZATION_TAB
-  | typeof KNOWLEDGE_BASE_TAB
-  | typeof EVALUATION_TAB;
 interface Props {
   conversations: Record<string, Conversation>;
   selectedConversation: Conversation;
@@ -125,6 +119,12 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       }
     }, [conversationSettings, selectedConversation]);
 
+    useEffect(() => {
+      if (selectedSettingsTab == null) {
+        setSelectedSettingsTab(CONNECTORS_TAB);
+      }
+    }, [selectedSettingsTab, setSelectedSettingsTab]);
+
     // Quick Prompt Selection State
     const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
     const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
@@ -174,36 +174,34 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const tabsConfig = useMemo(
       () => [
         {
+          id: CONNECTORS_TAB,
+          label: i18n.CONNECTORS_MENU_ITEM,
+        },
+        {
           id: CONVERSATIONS_TAB,
           label: i18n.CONVERSATIONS_MENU_ITEM,
-          prepend: <EuiIcon type="discuss" />,
         },
         {
           id: QUICK_PROMPTS_TAB,
           label: i18n.QUICK_PROMPTS_MENU_ITEM,
-          prepend: <EuiIcon type="editorComment" />,
         },
         {
           id: SYSTEM_PROMPTS_TAB,
           label: i18n.SYSTEM_PROMPTS_MENU_ITEM,
-          prepend: <EuiIcon type="editorComment" />,
         },
         {
           id: ANONYMIZATION_TAB,
           label: i18n.ANONYMIZATION_MENU_ITEM,
-          prepend: <EuiIcon type="eyeClosed" />,
         },
         {
           id: KNOWLEDGE_BASE_TAB,
           label: i18n.KNOWLEDGE_BASE_MENU_ITEM,
-          prepend: <EuiIcon type="notebookApp" />,
         },
         ...(modelEvaluatorEnabled
           ? [
               {
                 id: EVALUATION_TAB,
                 label: i18n.EVALUATION_MENU_ITEM,
-                prepend: <EuiIcon type="crossClusterReplicationApp" />,
               },
             ]
           : []),
@@ -235,7 +233,11 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     return (
       <>
-        <EuiPageTemplate.Header pageTitle="Settings" tabs={tabs} paddingSize="none" />
+        <EuiPageTemplate.Header
+          pageTitle={i18n.SECURITY_AI_SETTINGS}
+          tabs={tabs}
+          paddingSize="none"
+        />
         <EuiPageTemplate.Section
           paddingSize="l"
           css={css`
@@ -243,6 +245,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             padding-right: 0;
           `}
         >
+          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettings />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettings
               actionTypeRegistry={actionTypeRegistry}

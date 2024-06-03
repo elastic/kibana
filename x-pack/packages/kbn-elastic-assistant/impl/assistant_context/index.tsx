@@ -10,7 +10,10 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionTypeRegistryContract,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
@@ -37,7 +40,7 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
-import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
+import { SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
@@ -68,6 +71,8 @@ export interface AssistantProviderProps {
   baseSystemPrompts?: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
+  getAddConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getAddConnectorFlyout'];
+  getEditConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getEditConnectorFlyout'];
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
@@ -112,6 +117,7 @@ export interface UseAssistantContext {
   baseQuickPrompts: QuickPrompt[];
   baseSystemPrompts: Prompt[];
   baseConversations: Record<string, Conversation>;
+  getEditConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getEditConnectorFlyout'];
   getComments: (commentArgs: {
     abortStream: () => void;
     currentConversation?: Conversation;
@@ -130,7 +136,7 @@ export interface UseAssistantContext {
   promptContexts: Record<string, PromptContext>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
-  selectedSettingsTab: SettingsTabs;
+  selectedSettingsTab: SettingsTabs | null;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
@@ -164,6 +170,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseQuickPrompts = [],
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
   children,
+  getAddConnectorFlyout,
+  getEditConnectorFlyout,
   getComments,
   http,
   baseConversations,
@@ -264,7 +272,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Settings State
    */
-  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
 
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
@@ -293,6 +301,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseQuickPrompts,
       baseSystemPrompts,
       docLinks,
+      getAddConnectorFlyout,
+      getEditConnectorFlyout,
       getComments,
       http,
       knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
@@ -332,6 +342,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseQuickPrompts,
       baseSystemPrompts,
       docLinks,
+      getAddConnectorFlyout,
+      getEditConnectorFlyout,
       getComments,
       http,
       localStorageKnowledgeBase,

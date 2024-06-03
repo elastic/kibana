@@ -120,7 +120,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     http,
     notifications,
     storage,
-    triggersActionsUi: { actionTypeRegistry },
+    triggersActionsUi: { actionTypeRegistry, getAddConnectorFlyout, getEditConnectorFlyout },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   } = useKibana().services;
   const basePath = useBasePath();
@@ -168,6 +168,8 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
       baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
       baseConversations={baseConversations}
+      getAddConnectorFlyout={getAddConnectorFlyout}
+      getEditConnectorFlyout={getEditConnectorFlyout}
       getComments={getComments}
       http={http}
       title={ASSISTANT_TITLE}

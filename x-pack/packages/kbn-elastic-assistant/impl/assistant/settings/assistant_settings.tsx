@@ -44,6 +44,7 @@ const StyledEuiModal = styled(EuiModal)`
   height: 575px;
 `;
 
+export const CONNECTORS_TAB = 'CONNECTORS_TAB' as const;
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
 export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
@@ -51,13 +52,18 @@ export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
 export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
 export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
-export type SettingsTabs =
+export type BaseSettingsTabs =
   | typeof CONVERSATIONS_TAB
   | typeof QUICK_PROMPTS_TAB
   | typeof SYSTEM_PROMPTS_TAB
   | typeof ANONYMIZATION_TAB
   | typeof KNOWLEDGE_BASE_TAB
   | typeof EVALUATION_TAB;
+
+export type AdditionalSettingsTabs = typeof CONNECTORS_TAB;
+
+export type SettingsTabs = BaseSettingsTabs | AdditionalSettingsTabs;
+
 interface Props {
   defaultConnector?: AIConnector;
   onClose: (
@@ -92,6 +98,12 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
     } = useAssistantContext();
+
+    useEffect(() => {
+      if (selectedSettingsTab == null) {
+        setSelectedSettingsTab(CONVERSATIONS_TAB);
+      }
+    }, [selectedSettingsTab, setSelectedSettingsTab]);
 
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();

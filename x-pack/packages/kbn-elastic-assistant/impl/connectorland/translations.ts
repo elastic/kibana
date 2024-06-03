@@ -149,3 +149,38 @@ export const MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK = i18n.translate(
     defaultMessage: 'Conversation Settings',
   }
 );
+
+export const CREATE_CONNECTOR_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.createConnectorButton',
+  {
+    defaultMessage: 'Connector',
+  }
+);
+
+export const REFRESH_CONNECTORS_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.refreshConnectorsButton',
+  {
+    defaultMessage: 'Refresh',
+  }
+);
+
+export const EDIT_CONNECTOR_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.editConnectorButton',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+
+export const DELETE_CONNECTOR_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.deleteConnectorButton',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const MISSING_READ_CONNECTORS_CALLOUT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.missingReadConnectorsCalloutTitle',
+  {
+    defaultMessage: 'Missing Read Connectors Privileges',
+  }
+);
