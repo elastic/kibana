@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-declare module 'intl-relativeformat' {
-  export let defaultLocale: string;
-}
+import { dynamic } from '@kbn/shared-ux-utility';
+
+const SmartFieldFallbackTooltip = dynamic(() => import('./smart_fields_tooltip'));
+
+export { SmartFieldFallbackTooltip };

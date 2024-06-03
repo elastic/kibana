@@ -6,10 +6,9 @@ exports[`DeleteRuleModal renders as delete button after opening and closing moda
     color="danger"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete rule"
       id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
-      values={Object {}}
     />
   </EuiLink>
 </Fragment>
@@ -21,10 +20,9 @@ exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
     color="danger"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete rule"
       id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
-      values={Object {}}
     />
   </EuiLink>
 </Fragment>
@@ -36,10 +34,9 @@ exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
     color="danger"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete rule"
       id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
-      values={Object {}}
     />
   </EuiLink>
   <EuiConfirmModal
