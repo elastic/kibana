@@ -3295,7 +3295,7 @@ describe('xy_visualization', () => {
               },
             ],
             "fixableInEditor": true,
-            "longMessage": <FormattedMessage
+            "longMessage": <Memo(MemoizedFormattedMessage)
               defaultMessage="{label} contains array values. Your visualization may not render as expected."
               id="xpack.lens.xyVisualization.arrayValues"
               values={

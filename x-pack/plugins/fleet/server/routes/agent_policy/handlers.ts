@@ -64,13 +64,13 @@ export async function populateAssignedAgentsCount(
     agentPolicies,
     (agentPolicy: GetAgentPoliciesResponseItem) => {
       const totalAgents = getAgentsByKuery(esClient, soClient, {
-        showInactive: false,
+        showInactive: true,
         perPage: 0,
         page: 1,
         kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
       }).then(({ total }) => (agentPolicy.agents = total));
       const unprivilegedAgents = getAgentsByKuery(esClient, soClient, {
-        showInactive: false,
+        showInactive: true,
         perPage: 0,
         page: 1,
         kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${UNPRIVILEGED_AGENT_KUERY}`,
@@ -335,6 +335,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       request.body.agentPolicyId,
       {
         user: user || undefined,
+        force: request.body.force,
       }
     );
     return response.ok({

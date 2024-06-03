@@ -8,7 +8,6 @@
 
 import expect from '@kbn/expect';
 import request from 'superagent';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
@@ -414,7 +413,6 @@ export default function ({ getService }: FtrProviderContext) {
                     request: {
                       params: {
                         query: 'from .kibana | limit 1',
-                        version: ESQL_LATEST_VERSION,
                       },
                     },
                     options: {
@@ -443,7 +441,6 @@ export default function ({ getService }: FtrProviderContext) {
                     request: {
                       params: {
                         query: 'fro .kibana | limit 1',
-                        version: ESQL_LATEST_VERSION,
                       },
                     },
                     options: {

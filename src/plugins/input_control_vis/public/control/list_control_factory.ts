@@ -106,7 +106,7 @@ export class ListControl extends Control<PhraseFilterManager> {
       if (this.hasUnsetAncestor()) {
         this.disable(
           i18n.translate('inputControl.listControl.disableTooltip', {
-            defaultMessage: "Disabled until '{label}' is set.",
+            defaultMessage: "Disabled until ''{label}'' is set.",
             values: { label: this.ancestors[0].label },
           })
         );

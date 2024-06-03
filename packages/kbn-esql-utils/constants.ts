@@ -5,8 +5,4 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-// we are expecting to retrieve this from an API instead
-// https://github.com/elastic/elasticsearch/issues/107069
-export const ESQL_LATEST_VERSION = '2024.04.01';
 export const ENABLE_ESQL = 'enableESQL';
