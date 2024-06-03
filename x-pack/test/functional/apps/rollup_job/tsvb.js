@@ -22,7 +22,9 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('tsvb integration', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/57065
+  // Failing: See https://github.com/elastic/kibana/issues/184357
+  describe.skip('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
