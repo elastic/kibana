@@ -331,7 +331,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
       .then(() => {
         this.props.notifications.toasts.addSuccess({
           title: i18n.translate('xpack.security.management.editRoleMapping.saveSuccess', {
-            defaultMessage: `Saved role mapping '{roleMappingName}'`,
+            defaultMessage: `Saved role mapping ''{roleMappingName}''`,
             values: {
               roleMappingName,
             },
