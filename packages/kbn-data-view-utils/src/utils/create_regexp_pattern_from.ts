@@ -9,9 +9,9 @@
 export const createRegExpPatternFrom = (basePatterns: string | string[]) => {
   const patterns = Array.isArray(basePatterns) ? basePatterns : [basePatterns];
   // Create the base patterns union with strict boundaries
-  const basePatternGroup = `\\b(${patterns.join('|')})\\b([^,\\s]+)?`;
+  const basePatternGroup = `[^,\\s]*\\b(${patterns.join('|')})\\b([^,\\s]*)?`;
   // Apply base patterns union for local and remote clusters
-  const localAndRemotePatternGroup = `((${basePatternGroup})|([^:,\\s]+:${basePatternGroup}))`;
+  const localAndRemotePatternGroup = `((${basePatternGroup})|([^:,\\s]*:${basePatternGroup}))`;
   // Handle trailing comma and multiple pattern concatenation
   return new RegExp(`^${localAndRemotePatternGroup}(,${localAndRemotePatternGroup})*(,$|$)`, 'i');
 };

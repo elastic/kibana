@@ -10,6 +10,7 @@ import { createRegExpPatternFrom } from './create_regexp_pattern_from';
 
 describe('createRegExpPatternFrom should create a regular expression starting from a string that', () => {
   const regExpPattern = createRegExpPatternFrom('logs');
+  console.log(regExpPattern);
 
   it('tests positive for single index patterns starting with the passed base pattern', () => {
     expect('logs*').toMatch(regExpPattern);
@@ -21,6 +22,18 @@ describe('createRegExpPatternFrom should create a regular expression starting fr
     expect('logss-*').not.toMatch(regExpPattern);
     expect('metrics*').not.toMatch(regExpPattern);
     expect('metrics-*').not.toMatch(regExpPattern);
+  });
+
+  it('tests positive for single index patterns containing the passed base pattern', () => {
+    expect('foo-logs*').toMatch(regExpPattern);
+    expect('foo-logs-*').toMatch(regExpPattern);
+    expect('foo-logs-*-*').toMatch(regExpPattern);
+    expect('foo-logs-system.syslog-*').toMatch(regExpPattern);
+
+    expect('foo-logss*').not.toMatch(regExpPattern);
+    expect('foo-logss-*').not.toMatch(regExpPattern);
+    expect('foo-metrics*').not.toMatch(regExpPattern);
+    expect('foo-metrics-*').not.toMatch(regExpPattern);
   });
 
   it('tests positive for single index patterns with CCS prefixes', () => {
