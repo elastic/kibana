@@ -164,6 +164,13 @@
     "rule_execution_logic:server:ess": "npm run initialize-server:de rule_execution_logic ess",
     "rule_execution_logic:runner:ess": "npm run run-tests:de rule_execution_logic ess essEnv",
 
+    "rule_gaps:server:serverless": "npm run initialize-server:de rule_gaps serverless",
+    "rule_gaps:runner:serverless": "npm run run-tests:de rule_gaps serverless serverlessEnv",
+    "rule_gaps:qa:serverless": "npm run run-tests:rm rule_gaps serverless qaPeriodicEnv",
+    "rule_gaps:qa:serverless:release": "npm run run-tests:de rule_gaps serverless qaEnv",
+    "rule_gaps:server:ess": "npm run initialize-server:de rule_gaps ess",
+    "rule_gaps:runner:ess": "npm run run-tests:de rule_gaps ess essEnv",
+
     "rule_creation:server:serverless": "npm run initialize-server:rm rule_creation serverless",
     "rule_creation:runner:serverless": "npm run run-tests:rm rule_creation serverless serverlessEnv",
     "rule_creation:qa:serverless": "npm run run-tests:rm rule_creation serverless qaPeriodicEnv",
