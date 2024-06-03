@@ -338,7 +338,7 @@ export const FooterComponent = ({
           <LastUpdatedContainer updatedAt={updatedAt} />
         </EuiFlexItem>
 
-        <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
+        <EuiFlexItem grow={false}>
           {isLive ? (
             <EuiText size="s" data-test-subj="is-live-on-message">
               <b>
@@ -360,7 +360,6 @@ export const FooterComponent = ({
             </EuiText>
           ) : (
             <PagingControl
-              data-test-subj="paging-control"
               totalCount={totalCount}
               totalPages={totalPages}
               activePage={activePage}
