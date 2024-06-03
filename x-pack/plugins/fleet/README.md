@@ -1,6 +1,6 @@
 # Fleet
 
-The Fleet plugin allows Elastic Agents to be centrally managed in Kibana.
+Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
 Official documentation: https://www.elastic.co/guide/en/fleet/current/index.html.
 
