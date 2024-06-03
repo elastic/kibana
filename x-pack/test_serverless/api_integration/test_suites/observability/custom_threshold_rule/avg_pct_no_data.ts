@@ -7,11 +7,12 @@
 
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { NO_DATA_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { omit } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { kbnTestConfig } from '@kbn/test';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
 import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
@@ -24,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const dataViewApi = getService('dataViewApi');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
 
   describe('Custom Threshold rule - AVG - PCT - NoData', () => {
@@ -48,12 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await supertest
         .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
       await supertest
         .delete(`/api/actions/connector/${actionId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -210,9 +210,10 @@ export default function ({ getService }: FtrProviderContext) {
           docCountTarget: 1,
         });
 
+        const { protocol, hostname, port } = kbnTestConfig.getUrlParts();
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `http://localhost:5620/app/observability/alerts/${alertId}`
+          `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           'Average system.cpu.user.pct reported no data in the last 5m'

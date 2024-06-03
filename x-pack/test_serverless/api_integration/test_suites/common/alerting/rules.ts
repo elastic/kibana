@@ -6,7 +6,7 @@
  */
 
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -50,6 +50,15 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let connectorId: string;
     let ruleId: string;
+    let roleCredentials: RoleCredentials;
+
+    before(async () => {
+      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+    });
 
     before(async () => {
       roleAdmin = await svlUserManager.createApiKeyForRole('admin');
@@ -62,12 +71,10 @@ export default function ({ getService }: FtrProviderContext) {
     afterEach(async () => {
       await supertest
         .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
       await supertest
         .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         conflicts: 'proceed',
@@ -260,14 +267,17 @@ export default function ({ getService }: FtrProviderContext) {
         filter: testStart,
       });
 
-      await updateEsQueryRule({
-        supertest,
-        ruleId,
-        updates: {
-          name: 'def',
-          tags: ['fee', 'fi', 'fo'],
+      await updateEsQueryRule(
+        {
+          supertest,
+          ruleId,
+          updates: {
+            name: 'def',
+            tags: ['fee', 'fi', 'fo'],
+          },
         },
-      });
+        { roleCredentials }
+      );
 
       await runRule({
         supertestWithoutAuth,
@@ -423,10 +433,13 @@ export default function ({ getService }: FtrProviderContext) {
         testStart,
       });
 
-      await disableRule({
-        supertest,
-        ruleId,
-      });
+      await disableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       await waitForDisabled({
         esClient,
@@ -514,10 +527,13 @@ export default function ({ getService }: FtrProviderContext) {
         testStart,
       });
 
-      await disableRule({
-        supertest,
-        ruleId,
-      });
+      await disableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       await waitForDisabled({
         esClient,
@@ -564,58 +580,6 @@ export default function ({ getService }: FtrProviderContext) {
           timeWindowSize: 20,
           timeWindowUnit: 's',
         },
-        actions: [
-          {
-            group: 'query matched',
-            id: connectorId,
-            params: {
-              documents: [
-                {
-                  ruleId: '{{rule.id}}',
-                  ruleName: '{{rule.name}}',
-                  ruleParams: '{{rule.params}}',
-                  spaceId: '{{rule.spaceId}}',
-                  tags: '{{rule.tags}}',
-                  alertId: '{{alert.id}}',
-                  alertActionGroup: '{{alert.actionGroup}}',
-                  instanceContextValue: '{{context.instanceContextValue}}',
-                  instanceStateValue: '{{state.instanceStateValue}}',
-                  date: '{{date}}',
-                },
-              ],
-            },
-            frequency: {
-              notify_when: 'onThrottleInterval',
-              throttle: '1m',
-              summary: false,
-            },
-          },
-          {
-            group: 'recovered',
-            id: connectorId,
-            params: {
-              documents: [
-                {
-                  ruleId: '{{rule.id}}',
-                  ruleName: '{{rule.name}}',
-                  ruleParams: '{{rule.params}}',
-                  spaceId: '{{rule.spaceId}}',
-                  tags: '{{rule.tags}}',
-                  alertId: '{{alert.id}}',
-                  alertActionGroup: '{{alert.actionGroup}}',
-                  instanceContextValue: '{{context.instanceContextValue}}',
-                  instanceStateValue: '{{state.instanceStateValue}}',
-                  date: '{{date}}',
-                },
-              ],
-            },
-            frequency: {
-              notify_when: 'onThrottleInterval',
-              throttle: '1m',
-              summary: false,
-            },
-          },
-        ],
       });
       ruleId = createdRule.id;
 
@@ -633,23 +597,26 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // Update the rule to recover
-      await updateEsQueryRule({
-        supertest,
-        ruleId,
-        updates: {
-          name: 'never fire',
-          params: {
-            size: 100,
-            thresholdComparator: '<',
-            threshold: [-1],
-            index: ['alert-test-data'],
-            timeField: 'date',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            timeWindowSize: 20,
-            timeWindowUnit: 's',
+      await updateEsQueryRule(
+        {
+          supertest,
+          ruleId,
+          updates: {
+            name: 'never fire',
+            params: {
+              size: 100,
+              thresholdComparator: '<',
+              threshold: [-1],
+              index: ['alert-test-data'],
+              timeField: 'date',
+              esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+              timeWindowSize: 20,
+              timeWindowUnit: 's',
+            },
           },
         },
-      });
+        { roleCredentials }
+      );
 
       await runRule({
         supertestWithoutAuth,
@@ -666,10 +633,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(eventLogResp.hits.hits.length).to.be(2);
 
-      await disableRule({
-        supertest,
-        ruleId,
-      });
+      await disableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       await waitForDisabled({
         esClient,
@@ -748,15 +718,21 @@ export default function ({ getService }: FtrProviderContext) {
       });
       ruleId = createdRule.id;
 
-      await muteRule({
-        supertest,
-        ruleId,
-      });
+      await muteRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
-      await enableRule({
-        supertest,
-        ruleId,
-      });
+      await enableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       // Wait until alerts schedule actions twice to ensure actions had a chance to skip
       // execution once before disabling the alert and waiting for tasks to finish
@@ -770,10 +746,13 @@ export default function ({ getService }: FtrProviderContext) {
         testStart,
       });
 
-      await disableRule({
-        supertest,
-        ruleId,
-      });
+      await disableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       await waitForDisabled({
         esClient,
@@ -851,16 +830,22 @@ export default function ({ getService }: FtrProviderContext) {
       });
       ruleId = createdRule.id;
 
-      await muteAlert({
-        supertest,
-        ruleId,
-        alertId: 'query matched',
-      });
+      await muteAlert(
+        {
+          supertest,
+          ruleId,
+          alertId: 'query matched',
+        },
+        { roleCredentials }
+      );
 
-      await enableRule({
-        supertest,
-        ruleId,
-      });
+      await enableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       // Wait until alerts schedule actions twice to ensure actions had a chance to skip
       // execution once before disabling the alert and waiting for tasks to finish
@@ -874,10 +859,13 @@ export default function ({ getService }: FtrProviderContext) {
         testStart,
       });
 
-      await disableRule({
-        supertest,
-        ruleId,
-      });
+      await disableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       await waitForDisabled({
         esClient,
@@ -952,26 +940,38 @@ export default function ({ getService }: FtrProviderContext) {
       });
       ruleId = createdRule.id;
 
-      await muteAlert({
-        supertest,
-        ruleId,
-        alertId: 'query matched',
-      });
+      await muteAlert(
+        {
+          supertest,
+          ruleId,
+          alertId: 'query matched',
+        },
+        { roleCredentials }
+      );
 
-      await muteRule({
-        supertest,
-        ruleId,
-      });
+      await muteRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
-      await unmuteRule({
-        supertest,
-        ruleId,
-      });
+      await unmuteRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
-      await enableRule({
-        supertest,
-        ruleId,
-      });
+      await enableRule(
+        {
+          supertest,
+          ruleId,
+        },
+        { roleCredentials }
+      );
 
       // Should have one document indexed by the action
       const resp = await waitForDocumentInIndex({

@@ -6,15 +6,15 @@
  */
 
 import { expect } from 'expect';
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const supertest = getService('supertest');
 
-  // failsOnMKI, see https://github.com/elastic/kibana/issues/180348
   describe('/api/telemetry/v2/config API Telemetry config', function () {
-    this.tags(['failsOnMKI']);
     const baseConfig = {
       allowChangingOptInStatus: false,
       optIn: true,
@@ -24,11 +24,21 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
         serverless: 'observability',
       },
     };
+    let roleCredentials: RoleCredentials;
+
+    before(async () => {
+      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+    });
 
     it('GET should get the default config', async () => {
       const { body } = await supertest
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
+        .set(roleCredentials.apiKeyHeader)
         .expect(200);
       expect(body).toMatchObject(baseConfig);
     });
@@ -37,20 +47,24 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
       await supertest
         .put('/internal/core/_settings')
         .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleCredentials.apiKeyHeader)
         .set('elastic-api-version', '1')
         .send({ 'telemetry.labels.journeyName': 'my-ftr-test' })
         .expect(200, { ok: true });
 
-      await supertest
+      const response = await supertest
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
-        .expect(200, {
-          ...baseConfig,
-          labels: {
-            ...baseConfig.labels,
-            journeyName: 'my-ftr-test',
-          },
-        });
+        .set(roleCredentials.apiKeyHeader);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        ...baseConfig,
+        labels: expect.objectContaining({
+          ...baseConfig.labels,
+          journeyName: 'my-ftr-test',
+        }),
+      });
     });
   });
 }

@@ -7,6 +7,7 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import type { RoleCredentials } from '../../../../shared/services';
 import { expectToReject } from './utils';
 import {
   DatasetQualityApiClient,
@@ -17,6 +18,7 @@ import { DatasetQualityFtrContextProvider } from './common/services';
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
   const synthtrace = getService('logSynthtraceEsClient');
+  const svlUserManager = getService('svlUserManager');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
@@ -25,7 +27,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const serviceName = 'my-service';
   const hostName = 'synth-host';
 
-  async function callApi(dataStream: string) {
+  async function callApi(dataStream: string, authHeader: { Authorization: string }) {
     return await datasetQualityApiClient.slsUser({
       endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
       params: {
@@ -37,12 +39,15 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
           end,
         },
       },
+      authHeader,
     });
   }
 
   describe('gets the data stream details', () => {
+    let roleAuthc: RoleCredentials;
     before(async () => {
-      await synthtrace.index([
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      return synthtrace.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)
@@ -61,11 +66,14 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
           ),
       ]);
     });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('returns error when dataStream param is not provided', async () => {
       const expectedMessage = 'Data Stream name cannot be empty';
       const err = await expectToReject<DatasetQualityApiError>(() =>
-        callApi(encodeURIComponent(' '))
+        callApi(encodeURIComponent(' '), roleAuthc.apiKeyHeader)
       );
       expect(err.res.status).to.be(400);
       expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
@@ -74,17 +82,19 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     it('returns {} if matching data stream is not available', async () => {
       const nonExistentDataSet = 'Non-existent';
       const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
-      const resp = await callApi(nonExistentDataStream);
+      const resp = await callApi(nonExistentDataStream, roleAuthc.apiKeyHeader);
       expect(resp.body).empty();
     });
 
     it('returns "sizeBytes" as null in serverless', async () => {
-      const resp = await callApi(`${type}-${dataset}-${namespace}`);
+      const resp = await callApi(`${type}-${dataset}-${namespace}`, {
+        ...roleAuthc.apiKeyHeader,
+      });
       expect(resp.body.sizeBytes).to.be(null);
     });
 
     it('returns service.name and host.name correctly', async () => {
-      const resp = await callApi(`${type}-${dataset}-${namespace}`);
+      const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc.apiKeyHeader);
       expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
       expect(resp.body.hosts?.['host.name']).to.eql([hostName]);
     });

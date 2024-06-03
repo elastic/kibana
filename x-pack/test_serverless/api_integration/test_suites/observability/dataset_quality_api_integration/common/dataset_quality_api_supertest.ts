@@ -18,9 +18,10 @@ export function createDatasetQualityApiClient(st: supertest.Agent) {
     options: {
       type?: 'form-data';
       endpoint: TEndpoint;
+      authHeader: { Authorization: string };
     } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
   ): Promise<SupertestReturnType<TEndpoint>> => {
-    const { endpoint, type } = options;
+    const { endpoint, type, authHeader } = options;
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
@@ -41,6 +42,7 @@ export function createDatasetQualityApiClient(st: supertest.Agent) {
       const fields: Array<[string, any]> = Object.entries(params.body);
       const formDataRequest = st[method](url)
         .set(headers)
+        .set(authHeader)
         .set('Content-type', 'multipart/form-data');
 
       for (const field of fields) {

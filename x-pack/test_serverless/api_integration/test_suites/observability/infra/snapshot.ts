@@ -10,7 +10,7 @@ import type {
   SnapshotNodeResponse,
   SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { RoleCredentials } from '../../../../shared/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { DATES, ARCHIVE_NAME } from './constants';
@@ -18,40 +18,52 @@ import { DATES, ARCHIVE_NAME } from './constants';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
+
   const fetchSnapshot = async (
-    body: SnapshotRequest
+    body: SnapshotRequest,
+    options: { roleCredentials: RoleCredentials }
   ): Promise<SnapshotNodeResponse | undefined> => {
-    const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-    const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
     const response = await supertest
       .post('/api/metrics/snapshot')
-      .set('kbn-xsrf', 'foo')
-      .set('x-elastic-internal-origin', 'foo')
-      .auth(username, password)
+      .set(svlCommonApi.getInternalRequestHeader())
+      .set(options.roleCredentials.apiKeyHeader)
       .send(body)
       .expect(200);
     return response.body;
   };
 
   describe('API /metrics/snapshot', () => {
+    let roleCredentials: RoleCredentials;
+
     describe('Snapshot nodes', () => {
       const { min, max } = DATES.serverlessTestingHost;
-      before(async () => esArchiver.load(ARCHIVE_NAME));
-      after(async () => esArchiver.unload(ARCHIVE_NAME));
+      before(async () => {
+        roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+        return esArchiver.load(ARCHIVE_NAME);
+      });
+      after(async () => {
+        await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+        return esArchiver.unload(ARCHIVE_NAME);
+      });
 
       it('should work', async () => {
-        const snapshot = await fetchSnapshot({
-          sourceId: 'default',
-          timerange: {
-            to: max,
-            from: min,
-            interval: '10m',
+        const snapshot = await fetchSnapshot(
+          {
+            sourceId: 'default',
+            timerange: {
+              to: max,
+              from: min,
+              interval: '10m',
+            },
+            metrics: [{ type: 'cpu' }],
+            nodeType: 'host',
+            groupBy: [],
+            includeTimeseries: false,
           },
-          metrics: [{ type: 'cpu' }],
-          nodeType: 'host',
-          groupBy: [],
-          includeTimeseries: false,
-        });
+          { roleCredentials }
+        );
 
         if (!snapshot) {
           return;

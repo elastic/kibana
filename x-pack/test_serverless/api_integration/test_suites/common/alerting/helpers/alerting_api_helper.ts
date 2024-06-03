@@ -139,33 +139,37 @@ export async function createEsQueryRule({
 
 export const generateUniqueKey = () => uuidv4().replace(/-/g, '');
 
-export async function createAnomalyRule({
-  supertest,
-  name = generateUniqueKey(),
-  actions = [],
-  tags = ['foo', 'bar'],
-  schedule,
-  consumer = 'alerts',
-  notifyWhen,
-  enabled = true,
-  ruleTypeId = 'apm.anomaly',
-  params,
-}: {
-  supertest: SuperTestAgent;
-  name?: string;
-  consumer?: string;
-  actions?: any[];
-  tags?: any[];
-  schedule?: { interval: string };
-  notifyWhen?: string;
-  enabled?: boolean;
-  ruleTypeId?: string;
-  params?: any;
-}) {
+export async function createAnomalyRule(
+  {
+    supertest,
+    name = generateUniqueKey(),
+    actions = [],
+    tags = ['foo', 'bar'],
+    schedule,
+    consumer = 'alerts',
+    notifyWhen,
+    enabled = true,
+    ruleTypeId = 'apm.anomaly',
+    params,
+  }: {
+    supertest: SuperTestAgent;
+    name?: string;
+    consumer?: string;
+    actions?: any[];
+    tags?: any[];
+    schedule?: { interval: string };
+    notifyWhen?: string;
+    enabled?: boolean;
+    ruleTypeId?: string;
+    params?: any;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .send({
       enabled,
       params: params || {
@@ -189,33 +193,37 @@ export async function createAnomalyRule({
   return body;
 }
 
-export async function createLatencyThresholdRule({
-  supertest,
-  name = generateUniqueKey(),
-  actions = [],
-  tags = ['foo', 'bar'],
-  schedule,
-  consumer = 'apm',
-  notifyWhen,
-  enabled = true,
-  ruleTypeId = 'apm.transaction_duration',
-  params,
-}: {
-  supertest: SuperTestAgent;
-  name?: string;
-  consumer?: string;
-  actions?: any[];
-  tags?: any[];
-  schedule?: { interval: string };
-  notifyWhen?: string;
-  enabled?: boolean;
-  ruleTypeId?: string;
-  params?: any;
-}) {
+export async function createLatencyThresholdRule(
+  {
+    supertest,
+    name = generateUniqueKey(),
+    actions = [],
+    tags = ['foo', 'bar'],
+    schedule,
+    consumer = 'apm',
+    notifyWhen,
+    enabled = true,
+    ruleTypeId = 'apm.transaction_duration',
+    params,
+  }: {
+    supertest: SuperTestAgent;
+    name?: string;
+    consumer?: string;
+    actions?: any[];
+    tags?: any[];
+    schedule?: { interval: string };
+    notifyWhen?: string;
+    enabled?: boolean;
+    ruleTypeId?: string;
+    params?: any;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .send({
       enabled,
       params: params || {
@@ -238,33 +246,37 @@ export async function createLatencyThresholdRule({
   return body;
 }
 
-export async function createInventoryRule({
-  supertest,
-  name = generateUniqueKey(),
-  actions = [],
-  tags = ['foo', 'bar'],
-  schedule,
-  consumer = 'alerts',
-  notifyWhen,
-  enabled = true,
-  ruleTypeId = 'metrics.alert.inventory.threshold',
-  params,
-}: {
-  supertest: SuperTestAgent;
-  name?: string;
-  consumer?: string;
-  actions?: any[];
-  tags?: any[];
-  schedule?: { interval: string };
-  notifyWhen?: string;
-  enabled?: boolean;
-  ruleTypeId?: string;
-  params?: any;
-}) {
+export async function createInventoryRule(
+  {
+    supertest,
+    name = generateUniqueKey(),
+    actions = [],
+    tags = ['foo', 'bar'],
+    schedule,
+    consumer = 'alerts',
+    notifyWhen,
+    enabled = true,
+    ruleTypeId = 'metrics.alert.inventory.threshold',
+    params,
+  }: {
+    supertest: SuperTestAgent;
+    name?: string;
+    consumer?: string;
+    actions?: any[];
+    tags?: any[];
+    schedule?: { interval: string };
+    notifyWhen?: string;
+    enabled?: boolean;
+    ruleTypeId?: string;
+    params?: any;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .send({
       enabled,
       params: params || {
@@ -300,39 +312,48 @@ export async function createInventoryRule({
   return body;
 }
 
-export async function disableRule({
-  supertest,
-  ruleId,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-}) {
+export async function disableRule(
+  {
+    supertest,
+    ruleId,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_disable`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .expect(204);
   return body;
 }
 
-export async function updateEsQueryRule({
-  supertest,
-  ruleId,
-  updates,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-  updates: any;
-}) {
+export async function updateEsQueryRule(
+  {
+    supertest,
+    ruleId,
+    updates,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+    updates: any;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body: r } = await supertest
     .get(`/api/alerting/rule/${ruleId}`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .expect(200);
   const body = await supertest
     .put(`/api/alerting/rule/${ruleId}`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .send({
       ...{
         name: r.name,
@@ -373,79 +394,99 @@ export async function runRule({
   return response;
 }
 
-export async function muteRule({
-  supertest,
-  ruleId,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-}) {
+export async function muteRule(
+  {
+    supertest,
+    ruleId,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_mute_all`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .expect(204);
   return body;
 }
 
-export async function enableRule({
-  supertest,
-  ruleId,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-}) {
+export async function enableRule(
+  {
+    supertest,
+    ruleId,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_enable`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .expect(204);
   return body;
 }
 
-export async function muteAlert({
-  supertest,
-  ruleId,
-  alertId,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-  alertId: string;
-}) {
+export async function muteAlert(
+  {
+    supertest,
+    ruleId,
+    alertId,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+    alertId: string;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .expect(204);
   return body;
 }
 
-export async function unmuteRule({
-  supertest,
-  ruleId,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-}) {
+export async function unmuteRule(
+  {
+    supertest,
+    ruleId,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_unmute_all`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .expect(204);
   return body;
 }
 
-export async function snoozeRule({
-  supertest,
-  ruleId,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-}) {
+export async function snoozeRule(
+  {
+    supertest,
+    ruleId,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   const { body } = await supertest
     .post(`/internal/alerting/rule/${ruleId}/_snooze`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader)
     .send({
       snooze_schedule: {
         duration: 100000000,
@@ -460,19 +501,23 @@ export async function snoozeRule({
   return body;
 }
 
-export async function findRule({
-  supertest,
-  ruleId,
-}: {
-  supertest: SuperTestAgent;
-  ruleId: string;
-}) {
+export async function findRule(
+  {
+    supertest,
+    ruleId,
+  }: {
+    supertest: SuperTestAgent;
+    ruleId: string;
+  },
+  { roleCredentials }: { roleCredentials: RoleCredentials }
+) {
   if (!ruleId) {
     throw new Error(`'ruleId' is undefined`);
   }
   const response = await supertest
     .get(`/api/alerting/rule/${ruleId}`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set('x-elastic-internal-origin', 'foo')
+    .set(roleCredentials.apiKeyHeader);
   return response.body || {};
 }

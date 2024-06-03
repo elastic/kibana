@@ -10,7 +10,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from '../../common/alerting/helpers/alerting_api_helper';
 import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
@@ -31,6 +31,11 @@ export default function ({ getService }: FtrProviderContext) {
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;
     let ruleId: string;
+    let roleCredentials: RoleCredentials;
+
+    before(async () => {
+      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+    });
 
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
@@ -40,12 +45,11 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await supertest
         .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
       await supertest
         .delete(`/api/actions/connector/${actionId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
+
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },

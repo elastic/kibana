@@ -11,27 +11,33 @@ import {
   ProcessListAPIResponseRT,
 } from '@kbn/infra-plugin/common/http_api/host_details/process_list';
 import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { RoleCredentials } from '../../../../shared/services';
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES, ARCHIVE_NAME } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('API /metrics/process_list', () => {
-    const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-    const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
-
-    before(async () => esArchiver.load(ARCHIVE_NAME));
-    after(async () => esArchiver.unload(ARCHIVE_NAME));
+    let roleCredentials: RoleCredentials;
+    before(async () => {
+      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      return esArchiver.load(ARCHIVE_NAME);
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      return esArchiver.unload(ARCHIVE_NAME);
+    });
 
     it('works', async () => {
       const response = await supertest
         .post('/api/metrics/process_list')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
-        .auth(username, password)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleCredentials.apiKeyHeader)
         .send(
           ProcessListAPIRequestRT.encode({
             hostTerm: {
