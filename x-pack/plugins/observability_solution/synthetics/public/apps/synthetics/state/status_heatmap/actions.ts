@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createAction } from '@reduxjs/toolkit';
 import { MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
@@ -14,3 +15,10 @@ export const getMonitorStatusHeatmapAction = createAsyncAction<
   MonitorStatusHeatmapActionArgs,
   MonitorStatusHeatmapBucket[]
 >('MONITOR STATUS HEATMAP');
+
+export const clearMonitorStatusHeatmapAction = createAction<void>('CLEAR MONITOR STATUS HEATMAP');
+
+export const quietGetMonitorStatusHeatmapAction = createAsyncAction<
+  MonitorStatusHeatmapActionArgs,
+  MonitorStatusHeatmapBucket[]
+>('QUIET GET MONITOR STATUS HEATMAP');

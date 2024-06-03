@@ -38,7 +38,7 @@ import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
 import { fetchPingStatusesEffect } from './ping_status';
 import { fetchOverviewStatusEffect } from './overview_status';
-import { fetchMonitorStatusHeatmap } from './status_heatmap';
+import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 
 export const rootEffect = function* root(): Generator {
   yield all([
@@ -73,5 +73,6 @@ export const rootEffect = function* root(): Generator {
     fork(getDefaultAlertingEffect),
     fork(enableDefaultAlertingSilentlyEffect),
     fork(fetchMonitorStatusHeatmap),
+    fork(quietFetchMonitorStatusHeatmap),
   ]);
 };

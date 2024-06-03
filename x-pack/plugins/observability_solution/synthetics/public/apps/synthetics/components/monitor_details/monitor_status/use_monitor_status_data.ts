@@ -6,10 +6,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { throttle } from 'lodash';
 import { useSelector, useDispatch } from 'react-redux';
+import { useDebounce } from 'react-use';
+import { useLocation } from 'react-router-dom';
 
-import { scheduleToMinutes } from '../../../../../../common/lib/schedule_to_time';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
@@ -23,36 +23,43 @@ import {
   MonitorStatusTimeBin,
 } from './monitor_status_data';
 import { useSelectedLocation } from '../hooks/use_selected_location';
-import { getMonitorStatusHeatmapAction, selectHeatmap } from '../../../state/status_heatmap';
+import {
+  clearMonitorStatusHeatmapAction,
+  quietGetMonitorStatusHeatmapAction,
+  selectHeatmap,
+} from '../../../state/status_heatmap';
 
-export const useMonitorStatusData = ({
-  from,
-  to,
-}: Pick<MonitorStatusPanelProps, 'from' | 'to'>) => {
+type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & { initSize?: number };
+
+export const useMonitorStatusData = ({ from, to, initSize }: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
-  const monitorInterval = Math.max(3, monitor?.schedule ? scheduleToMinutes(monitor?.schedule) : 3);
+  const pageLocation = useLocation();
 
   const fromMillis = dateToMilli(from);
   const toMillis = dateToMilli(to);
   const totalMinutes = Math.ceil(toMillis - fromMillis) / (1000 * 60);
 
   const [binsAvailableByWidth, setBinsAvailableByWidth] = useState<number | null>(null);
-  const minsPerBin = Math.floor(
-    Math.max(
-      monitorInterval,
-      binsAvailableByWidth !== null ? totalMinutes / binsAvailableByWidth : 0
-    )
-  );
+  const [debouncedBinsCount, setDebouncedCount] = useState<number | null>(null);
+
+  const minsPerBin =
+    debouncedBinsCount !== null ? Math.floor(totalMinutes / debouncedBinsCount) : null;
 
   const dispatch = useDispatch();
   const { heatmap: dateHistogram, loading } = useSelector(selectHeatmap);
 
   useEffect(() => {
-    if (monitor?.id && location?.label) {
+    if (binsAvailableByWidth === null && initSize) {
+      setBinsAvailableByWidth(Math.floor(initSize / CHART_CELL_WIDTH));
+    }
+  }, [binsAvailableByWidth, initSize]);
+
+  useEffect(() => {
+    if (monitor?.id && location?.label && debouncedBinsCount !== null && minsPerBin !== null) {
       dispatch(
-        getMonitorStatusHeatmapAction.get({
+        quietGetMonitorStatusHeatmapAction.get({
           monitorId: monitor.id,
           location: location.label,
           from,
@@ -61,15 +68,33 @@ export const useMonitorStatusData = ({
         })
       );
     }
-  }, [dispatch, from, to, minsPerBin, location?.label, monitor?.id, lastRefresh]);
+  }, [
+    dispatch,
+    from,
+    to,
+    minsPerBin,
+    location?.label,
+    monitor?.id,
+    lastRefresh,
+    debouncedBinsCount,
+  ]);
 
-  // Disabling deps warning as we wanna throttle the callback
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    dispatch(clearMonitorStatusHeatmapAction());
+  }, [dispatch, pageLocation.pathname]);
+
   const handleResize = useCallback(
-    throttle((e: { width: number; height: number }) => {
-      setBinsAvailableByWidth(Math.floor(e.width / CHART_CELL_WIDTH));
-    }, 500),
+    (e: { width: number; height: number }) =>
+      setBinsAvailableByWidth(Math.floor(e.width / CHART_CELL_WIDTH)),
     []
+  );
+
+  useDebounce(
+    async () => {
+      setDebouncedCount(binsAvailableByWidth);
+    },
+    500,
+    [binsAvailableByWidth]
   );
 
   const { timeBins, timeBinMap, xDomain } = useMemo((): {
@@ -77,7 +102,17 @@ export const useMonitorStatusData = ({
     timeBinMap: Map<number, MonitorStatusTimeBin>;
     xDomain: { min: number; max: number };
   } => {
-    const timeBuckets = createTimeBuckets(minsPerBin, fromMillis, toMillis);
+    if (minsPerBin === null) {
+      return {
+        timeBins: [],
+        timeBinMap: new Map(),
+        xDomain: {
+          min: fromMillis,
+          max: toMillis,
+        },
+      };
+    }
+    const timeBuckets = createTimeBuckets(minsPerBin ?? 50, fromMillis, toMillis);
     const bins = createStatusTimeBins(timeBuckets, dateHistogram);
     return {
       timeBins: bins,

@@ -9,11 +9,22 @@ import { takeLatest } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { fetchMonitorStatusHeatmap as api } from './api';
 
-import { getMonitorStatusHeatmapAction } from './actions';
+import { getMonitorStatusHeatmapAction, quietGetMonitorStatusHeatmapAction } from './actions';
 
 export function* fetchMonitorStatusHeatmap() {
   yield takeLatest(
     getMonitorStatusHeatmapAction.get,
+    fetchEffectFactory(
+      api,
+      getMonitorStatusHeatmapAction.success,
+      getMonitorStatusHeatmapAction.fail
+    ) as ReturnType<typeof fetchEffectFactory>
+  );
+}
+
+export function* quietFetchMonitorStatusHeatmap() {
+  yield takeLatest(
+    quietGetMonitorStatusHeatmapAction.get,
     fetchEffectFactory(
       api,
       getMonitorStatusHeatmapAction.success,

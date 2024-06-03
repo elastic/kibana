@@ -11,7 +11,11 @@ import { MonitorStatusHeatmapBucket } from '../../../../../common/runtime_types'
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
-import { getMonitorStatusHeatmapAction } from './actions';
+import {
+  clearMonitorStatusHeatmapAction,
+  getMonitorStatusHeatmapAction,
+  quietGetMonitorStatusHeatmapAction,
+} from './actions';
 
 export interface MonitorStatusHeatmap {
   heatmap: MonitorStatusHeatmapBucket[];
@@ -27,6 +31,13 @@ const initialState: MonitorStatusHeatmap = {
 
 export const monitorStatusHeatmapReducer = createReducer(initialState, (builder) => {
   builder
+    .addCase(quietGetMonitorStatusHeatmapAction.success, (state, action) => {
+      state.heatmap = action.payload;
+      state.loading = false;
+    })
+    .addCase(quietGetMonitorStatusHeatmapAction.get, (state) => {
+      state.loading = true;
+    })
     .addCase(getMonitorStatusHeatmapAction.get, (state) => {
       state.loading = true;
       state.heatmap = [];
@@ -38,6 +49,9 @@ export const monitorStatusHeatmapReducer = createReducer(initialState, (builder)
     .addCase(getMonitorStatusHeatmapAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
+    })
+    .addCase(clearMonitorStatusHeatmapAction, (state) => {
+      state.heatmap = [];
     });
 });
 
