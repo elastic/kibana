@@ -25,7 +25,6 @@ import {
   EuiBetaBadge,
   EuiBadge,
   EuiSwitch,
-  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -34,14 +33,8 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
-  GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
 } from '../../../../../../../common/constants';
-import type {
-  NewAgentPolicy,
-  AgentPolicy,
-  PackagePolicy,
-  PackagePolicyInput,
-} from '../../../../types';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import {
   useStartServices,
   useConfig,
@@ -65,7 +58,6 @@ import {
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
-import { GlobalDataTagsTable } from './global_data_tags_table';
 import { CustomFields } from './custom_fields';
 
 interface Props {
@@ -121,31 +113,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
-
-  const isAgentPolicy = (policy: Partial<AgentPolicy | NewAgentPolicy>): policy is AgentPolicy => {
-    return (policy as AgentPolicy).package_policies !== undefined;
-  };
-
-  const findUnsupportedInputs = (
-    policy: Partial<AgentPolicy | NewAgentPolicy>,
-    excludedInputs: Set<string>
-  ): string[] => {
-    if (!isAgentPolicy(policy)) {
-      return [];
-    }
-
-    const found = new Set<string>([]);
-    policy.package_policies?.forEach((p: PackagePolicy) => {
-      p.inputs.forEach((input: PackagePolicyInput) => {
-        if (excludedInputs.has(input.type)) {
-          found.add(input.type);
-        }
-      });
-    });
-    return Array.from(found);
-  };
-
-  const unsupportedInputs = findUnsupportedInputs(agentPolicy, GLOBAL_DATA_TAG_EXCLUDED_INPUTS);
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -336,46 +303,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
           />
         </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
-        title={
-          <h3 data-test-subj="globalDataTagHeader">
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.globalDataTagHeader"
-              defaultMessage="Custom fields"
-            />
-          </h3>
-        }
-        description={
-          <>
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.globalDataTagDescription"
-              defaultMessage="Add a field and value set to all data colected from the agents enrolled in this policy."
-            />
-            {unsupportedInputs.length > 0 ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiCallOut title="Unsupported Inputs" color="warning" iconType="alert" size="s">
-                  <p>
-                    Tagging data collected from input{' '}
-                    {unsupportedInputs.map((input, index) => (
-                      <strong>
-                        {input}
-                        {index < unsupportedInputs.length - 1 ? ', ' : ''}
-                      </strong>
-                    ))}{' '}
-                    is not supported.
-                  </p>
-                </EuiCallOut>
-              </>
-            ) : null}
-          </>
-        }
-      >
-        <GlobalDataTagsTable
-          updateAgentPolicy={updateAgentPolicy}
-          initialTags={agentPolicy.global_data_tags ? agentPolicy.global_data_tags : []}
-        />
       </EuiDescribedFormGroup>
       <CustomFields updateAgentPolicy={updateAgentPolicy} agentPolicy={agentPolicy} />
       <EuiDescribedFormGroup
