@@ -12,9 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  tGridEnabled: true,
-  tGridEventRenderedViewEnabled: true,
-
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
@@ -30,11 +27,6 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/security_solution_api_integration/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
-
-  /**
-   * Enables the insights module for related alerts by process ancestry
-   */
-  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
@@ -84,7 +76,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: v8.14.0
    */
-  responseActionsSentinelOneV2Enabled: false,
+  responseActionsSentinelOneV2Enabled: true,
 
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: false,
@@ -101,6 +93,11 @@ export const allowedExperimentalValues = Object.freeze({
    * in ES.
    */
   responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
+   * Enables scan response action on Endpoint
+   */
+  responseActionScanEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -137,6 +134,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
+
+  /**
+   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   */
+  assistantKnowledgeBaseByDefault: false,
 
   /**
    * Enables the new user details flyout displayed on the Alerts table.
@@ -276,6 +278,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new rule's bulk action to manage custom highlighted fields
    */
   bulkCustomHighlightedFieldsEnabled: false,
+
+  /**
+   * Enables the manual rule run
+   */
+  manualRuleRunEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -127,6 +127,7 @@ export class CreateSLO {
       settings: {
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
+        preventInitialBackfill: params.settings?.preventInitialBackfill ?? false,
       },
       revision: params.revision ?? 1,
       enabled: true,

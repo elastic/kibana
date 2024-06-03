@@ -78,6 +78,7 @@ const generateId = htmlIdGenerator();
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
+  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -88,6 +89,13 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     visualizationDescription: this.props.description ? this.props.description : '',
     hasAttemptedSubmit: false,
   };
+
+  public componentDidMount() {
+    setTimeout(() => {
+      // defer so input focus ref value has been populated
+      this.savedObjectTitleInputRef.current?.focus();
+    }, 0);
+  }
 
   public render() {
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
@@ -111,7 +119,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         >
           <EuiFieldText
             fullWidth
-            autoFocus
+            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -337,13 +345,13 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               />
             }
             color="warning"
-            data-test-subj="titleDupicateWarnMsg"
+            data-test-subj="titleDuplicateWarnMsg"
             id={duplicateWarningId}
           >
             <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
-                defaultMessage="Saving '{title}' creates a duplicate title."
+                defaultMessage="Saving ''{title}'' creates a duplicate title."
                 values={{
                   title: this.state.title,
                 }}
