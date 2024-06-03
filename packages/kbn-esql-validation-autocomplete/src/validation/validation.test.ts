@@ -263,182 +263,189 @@ describe('validation logic', () => {
     });
 
     describe('metrics', () => {
-      testErrorsAndWarnings('m', [
-        `SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
-      ]);
-      testErrorsAndWarnings(`metrics `, [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
-      ]);
-      testErrorsAndWarnings(`metrics index,`, [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
-      ]);
-      testErrorsAndWarnings(`metrics index\n, \tother_index\t,\n \t `, [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
-      ]);
-      testErrorsAndWarnings(`metrics index = 1`, [
-        "SyntaxError: token recognition error at: '='",
-        "SyntaxError: token recognition error at: '1'",
-      ]);
-      testErrorsAndWarnings(`metrics .secret_index`, []);
-      testErrorsAndWarnings(`METRICS .secret_index`, []);
-      testErrorsAndWarnings(`mEtRiCs .secret_index`, []);
-      testErrorsAndWarnings('metrics `index`', [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'",
-      ]);
+      describe('indices', () => {
+        testErrorsAndWarnings('m', [
+          `SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
+        ]);
+        testErrorsAndWarnings(`metrics `, [
+          "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+        ]);
+        testErrorsAndWarnings(`metrics index,`, [
+          "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+        ]);
+        testErrorsAndWarnings(`metrics index\n, \tother_index\t,\n \t `, [
+          "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+        ]);
+        testErrorsAndWarnings(`metrics index = 1`, [
+          "SyntaxError: token recognition error at: '='",
+          "SyntaxError: token recognition error at: '1'",
+        ]);
+        testErrorsAndWarnings(`metrics .secret_index`, []);
+        testErrorsAndWarnings(`METRICS .secret_index`, []);
+        testErrorsAndWarnings(`mEtRiCs .secret_index`, []);
+        testErrorsAndWarnings('metrics `index`', [
+          "SyntaxError: token recognition error at: '`'",
+          "SyntaxError: token recognition error at: '`'",
+        ]);
 
-      testErrorsAndWarnings(`METRICS index, other_index`, []);
-      testErrorsAndWarnings(`METRICS index, missingIndex`, [
-        'Unknown index [missingIndex]',
-      ]);
-      testErrorsAndWarnings(`METRICS average()`, [
-        'Unknown index [average()]'
-      ]);
-      testErrorsAndWarnings(`metrics custom_function()`, [
-        'Unknown index [custom_function()]'
-      ]);
-      testErrorsAndWarnings(`metrics ind*, other*`, []);
-      testErrorsAndWarnings(`metrics index*`, []);
-      testErrorsAndWarnings(`metrics *a_i*dex*`, []);
-      testErrorsAndWarnings(`metrics in*ex*`, []);
-      testErrorsAndWarnings(`metrics *n*ex`, []);
-      testErrorsAndWarnings(`metrics *n*ex*`, []);
-      testErrorsAndWarnings(`metrics i*d*x*`, []);
-      testErrorsAndWarnings(`metrics i*d*x`, []);
-      testErrorsAndWarnings(`metrics i***x*`, []);
-      testErrorsAndWarnings(`metrics i****`, []);
-      testErrorsAndWarnings(`metrics i**`, []);
-      testErrorsAndWarnings(`metrics index**`, []);
-      testErrorsAndWarnings(`metrics *ex`, []);
-      testErrorsAndWarnings(`metrics *ex*`, []);
-      testErrorsAndWarnings(`metrics in*ex`, []);
-      testErrorsAndWarnings(`metrics ind*ex`, []);
-      testErrorsAndWarnings(`metrics *,-.*`, []);
-      testErrorsAndWarnings(`metrics indexes*`, [
-        'Unknown index [indexes*]',
-      ]);
-      testErrorsAndWarnings(`metrics remote-*:indexes*`, []);
-      testErrorsAndWarnings(`metrics remote-*:indexes`, []);
-      testErrorsAndWarnings(`metrics remote-ccs:indexes`, []);
-      testErrorsAndWarnings(`metrics a_index, remote-ccs:indexes`, []);
-      testErrorsAndWarnings('metrics .secret_index', []);
-      testErrorsAndWarnings('metrics my-index', []);
-      testErrorsAndWarnings('metrics numberField', [
-        'Unknown index [numberField]',
-      ]);
-      testErrorsAndWarnings('metrics policy', [
-        'Unknown index [policy]',
-      ]);
+        testErrorsAndWarnings(`METRICS index, other_index`, []);
+        testErrorsAndWarnings(`METRICS index, missingIndex`, [
+          'Unknown index [missingIndex]',
+        ]);
+        testErrorsAndWarnings(`METRICS average()`, [
+          'Unknown index [average()]'
+        ]);
+        testErrorsAndWarnings(`metrics custom_function()`, [
+          'Unknown index [custom_function()]'
+        ]);
+        testErrorsAndWarnings(`metrics ind*, other*`, []);
+        testErrorsAndWarnings(`metrics index*`, []);
+        testErrorsAndWarnings(`metrics *a_i*dex*`, []);
+        testErrorsAndWarnings(`metrics in*ex*`, []);
+        testErrorsAndWarnings(`metrics *n*ex`, []);
+        testErrorsAndWarnings(`metrics *n*ex*`, []);
+        testErrorsAndWarnings(`metrics i*d*x*`, []);
+        testErrorsAndWarnings(`metrics i*d*x`, []);
+        testErrorsAndWarnings(`metrics i***x*`, []);
+        testErrorsAndWarnings(`metrics i****`, []);
+        testErrorsAndWarnings(`metrics i**`, []);
+        testErrorsAndWarnings(`metrics index**`, []);
+        testErrorsAndWarnings(`metrics *ex`, []);
+        testErrorsAndWarnings(`metrics *ex*`, []);
+        testErrorsAndWarnings(`metrics in*ex`, []);
+        testErrorsAndWarnings(`metrics ind*ex`, []);
+        testErrorsAndWarnings(`metrics *,-.*`, []);
+        testErrorsAndWarnings(`metrics indexes*`, [
+          'Unknown index [indexes*]',
+        ]);
+        testErrorsAndWarnings(`metrics remote-*:indexes*`, []);
+        testErrorsAndWarnings(`metrics remote-*:indexes`, []);
+        testErrorsAndWarnings(`metrics remote-ccs:indexes`, []);
+        testErrorsAndWarnings(`metrics a_index, remote-ccs:indexes`, []);
+        testErrorsAndWarnings('metrics .secret_index', []);
+        testErrorsAndWarnings('metrics my-index', []);
+        testErrorsAndWarnings('metrics numberField', [
+          'Unknown index [numberField]',
+        ]);
+        testErrorsAndWarnings('metrics policy', [
+          'Unknown index [policy]',
+        ]);
+      });
     });
 
     describe('from', () => {
-      testErrorsAndWarnings('f', [
-        `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
-      ]);
-      testErrorsAndWarnings(`from `, ["SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"]);
-      testErrorsAndWarnings(`from index,`, [
-        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
-      ]);
-      testErrorsAndWarnings(`from assignment = 1`, [
-        "SyntaxError: mismatched input '=' expecting <EOF>",
-        'Unknown index [assignment]',
-      ]);
-      testErrorsAndWarnings(`from index`, []);
-      testErrorsAndWarnings(`FROM index`, []);
-      testErrorsAndWarnings(`FrOm index`, []);
-      testErrorsAndWarnings('from `index`', [
-        "SyntaxError: token recognition error at: '`'",
-        "SyntaxError: token recognition error at: '`'",
-      ]);
+      describe('indices', () => {
+        testErrorsAndWarnings('f', [
+          `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
+        ]);
+        testErrorsAndWarnings(`from `, ["SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"]);
+        testErrorsAndWarnings(`from index,`, [
+          "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+        ]);
+        testErrorsAndWarnings(`from assignment = 1`, [
+          "SyntaxError: mismatched input '=' expecting <EOF>",
+          'Unknown index [assignment]',
+        ]);
+        testErrorsAndWarnings(`from index`, []);
+        testErrorsAndWarnings(`FROM index`, []);
+        testErrorsAndWarnings(`FrOm index`, []);
+        testErrorsAndWarnings('from `index`', [
+          "SyntaxError: token recognition error at: '`'",
+          "SyntaxError: token recognition error at: '`'",
+        ]);
+        testErrorsAndWarnings(`from index, other_index`, []);
+        testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
+        testErrorsAndWarnings(`from fn()`, ['Unknown index [fn()]']);
+        testErrorsAndWarnings(`from average()`, ['Unknown index [average()]']);
+        testErrorsAndWarnings(`from ind*, other*`, []);
+        testErrorsAndWarnings(`from index*`, []);
+        testErrorsAndWarnings(`from *a_i*dex*`, []);
+        testErrorsAndWarnings(`from in*ex*`, []);
+        testErrorsAndWarnings(`from *n*ex`, []);
+        testErrorsAndWarnings(`from *n*ex*`, []);
+        testErrorsAndWarnings(`from i*d*x*`, []);
+        testErrorsAndWarnings(`from i*d*x`, []);
+        testErrorsAndWarnings(`from i***x*`, []);
+        testErrorsAndWarnings(`from i****`, []);
+        testErrorsAndWarnings(`from i**`, []);
+        testErrorsAndWarnings(`from index**`, []);
+        testErrorsAndWarnings(`from *ex`, []);
+        testErrorsAndWarnings(`from *ex*`, []);
+        testErrorsAndWarnings(`from in*ex`, []);
+        testErrorsAndWarnings(`from ind*ex`, []);
+        testErrorsAndWarnings(`from *,-.*`, []);
+        testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
+        testErrorsAndWarnings(`from remote-*:indexes*`, []);
+        testErrorsAndWarnings(`from remote-*:indexes`, []);
+        testErrorsAndWarnings(`from remote-ccs:indexes`, []);
+        testErrorsAndWarnings(`from a_index, remote-ccs:indexes`, []);
+        testErrorsAndWarnings('from .secret_index', []);
+        testErrorsAndWarnings('from my-index', []);
+        testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
+        testErrorsAndWarnings('from policy', ['Unknown index [policy]']);
+      });
 
-      testErrorsAndWarnings(`from index, other_index`, []);
-      testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
-      testErrorsAndWarnings(`from fn()`, ['Unknown index [fn()]']);
-      testErrorsAndWarnings(`from average()`, ['Unknown index [average()]']);
-      for (const isWrapped of [true, false]) {
-        function setWrapping(option: string) {
-          return isWrapped ? `[${option}]` : option;
+      describe('metadata', () => {
+        testErrorsAndWarnings(`from index (metadata _id)`, [
+          "SyntaxError: mismatched input '(metadata' expecting <EOF>",
+        ]);
+
+        for (const isWrapped of [true, false]) {
+          function setWrapping(option: string) {
+            return isWrapped ? `[${option}]` : option;
+          }
+          function addBracketsWarning() {
+            return isWrapped
+              ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+              : [];
+          }
+          testErrorsAndWarnings(
+            `from index ${setWrapping('METADATA _id')}`,
+            [],
+            addBracketsWarning()
+          );
+          testErrorsAndWarnings(
+            `from index ${setWrapping('metadata _id')}`,
+            [],
+            addBracketsWarning()
+          );
+  
+          testErrorsAndWarnings(
+            `from index ${setWrapping('METADATA _id, _source')}`,
+            [],
+            addBracketsWarning()
+          );
+          testErrorsAndWarnings(
+            `from index ${setWrapping('METADATA _id, _source2')}`,
+            [
+              `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+                ', '
+              )}]`,
+            ],
+            addBracketsWarning()
+          );
+          testErrorsAndWarnings(
+            `from index ${setWrapping('metadata _id, _source')} ${setWrapping('METADATA _id2')}`,
+            [
+              isWrapped
+                ? "SyntaxError: mismatched input '[' expecting <EOF>"
+                : "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
+            ],
+            addBracketsWarning()
+          );
+  
+          testErrorsAndWarnings(
+            `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
+            [],
+            addBracketsWarning()
+          );
+          testErrorsAndWarnings(
+            `from *:indexes ${setWrapping('METADATA _id')}`,
+            [],
+            addBracketsWarning()
+          );
         }
-        function addBracketsWarning() {
-          return isWrapped
-            ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
-            : [];
-        }
-        testErrorsAndWarnings(
-          `from index ${setWrapping('METADATA _id')}`,
-          [],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from index ${setWrapping('metadata _id')}`,
-          [],
-          addBracketsWarning()
-        );
-
-        testErrorsAndWarnings(
-          `from index ${setWrapping('METADATA _id, _source')}`,
-          [],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from index ${setWrapping('METADATA _id, _source2')}`,
-          [
-            `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
-              ', '
-            )}]`,
-          ],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from index ${setWrapping('metadata _id, _source')} ${setWrapping('METADATA _id2')}`,
-          [
-            isWrapped
-              ? "SyntaxError: mismatched input '[' expecting <EOF>"
-              : "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
-          ],
-          addBracketsWarning()
-        );
-
-        testErrorsAndWarnings(
-          `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
-          [],
-          addBracketsWarning()
-        );
-        testErrorsAndWarnings(
-          `from *:indexes ${setWrapping('METADATA _id')}`,
-          [],
-          addBracketsWarning()
-        );
-      }
-      testErrorsAndWarnings(`from index (metadata _id)`, [
-        "SyntaxError: mismatched input '(metadata' expecting <EOF>",
-      ]);
-      testErrorsAndWarnings(`from ind*, other*`, []);
-      testErrorsAndWarnings(`from index*`, []);
-      testErrorsAndWarnings(`from *a_i*dex*`, []);
-      testErrorsAndWarnings(`from in*ex*`, []);
-      testErrorsAndWarnings(`from *n*ex`, []);
-      testErrorsAndWarnings(`from *n*ex*`, []);
-      testErrorsAndWarnings(`from i*d*x*`, []);
-      testErrorsAndWarnings(`from i*d*x`, []);
-      testErrorsAndWarnings(`from i***x*`, []);
-      testErrorsAndWarnings(`from i****`, []);
-      testErrorsAndWarnings(`from i**`, []);
-      testErrorsAndWarnings(`from index**`, []);
-      testErrorsAndWarnings(`from *ex`, []);
-      testErrorsAndWarnings(`from *ex*`, []);
-      testErrorsAndWarnings(`from in*ex`, []);
-      testErrorsAndWarnings(`from ind*ex`, []);
-      testErrorsAndWarnings(`from *,-.*`, []);
-      testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
-      testErrorsAndWarnings(`from remote-*:indexes*`, []);
-      testErrorsAndWarnings(`from remote-*:indexes`, []);
-      testErrorsAndWarnings(`from remote-ccs:indexes`, []);
-      testErrorsAndWarnings(`from a_index, remote-ccs:indexes`, []);
-      testErrorsAndWarnings('from .secret_index', []);
-      testErrorsAndWarnings('from my-index', []);
-      testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
-      testErrorsAndWarnings('from policy', ['Unknown index [policy]']);
+      });
     });
 
     describe('row', () => {

@@ -488,105 +488,6 @@
       "warning": []
     },
     {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source2]",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id, _source] [METADATA _id2]",
-      "error": [
-        "SyntaxError: mismatched input '[' expecting <EOF>"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from remote-ccs:indexes [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from *:indexes [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source2",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id, _source METADATA _id2",
-      "error": [
-        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from remote-ccs:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from *:indexes METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index (metadata _id)",
-      "error": [
-        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
-      ],
-      "warning": []
-    },
-    {
       "query": "from ind*, other*",
       "error": [],
       "warning": []
@@ -720,6 +621,105 @@
       "error": [
         "Unknown index [policy]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from index (metadata _id)",
+      "error": [
+        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [metadata _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [METADATA _id, _source]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [METADATA _id, _source2]",
+      "error": [
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
+      ],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index [metadata _id, _source] [METADATA _id2]",
+      "error": [
+        "SyntaxError: mismatched input '[' expecting <EOF>"
+      ],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from remote-ccs:indexes [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from *:indexes [METADATA _id]",
+      "error": [],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
+    },
+    {
+      "query": "from index METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id, _source",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id, _source2",
+      "error": [
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id, _source METADATA _id2",
+      "error": [
+        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from remote-ccs:indexes METADATA _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from *:indexes METADATA _id",
+      "error": [],
       "warning": []
     },
     {
