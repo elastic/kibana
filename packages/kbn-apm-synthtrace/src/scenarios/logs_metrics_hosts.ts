@@ -222,8 +222,9 @@ export default scenario;
  * @param maxPickCount How many items to pick from the list. If maxPickCount > items.length, then it will pick all items.
  */
 function getRotatedItem<T>(index: number, items: T[], maxPickCount: number) {
+  const normalizedIndex = Math.floor(index > 1000000 ? index / 1000 : index); // To randomize timestamps
   const maxLength = Math.min(maxPickCount, items.length);
-  return items[index % maxLength];
+  return items[normalizedIndex % maxLength];
 }
 
 /**
