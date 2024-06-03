@@ -58,7 +58,13 @@ export function FieldName({
       <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
         {isPinned && (
           <EuiFlexItem grow={false} className="kbnDocViewer__fieldPinned">
-            <EuiIcon type="pinFilled" size="s" />
+            <EuiIcon
+              type="pinFilled"
+              size="s"
+              aria-label={i18n.translate('unifiedDocViewer.pinnedFieldTooltipContent', {
+                defaultMessage: 'Pinned field',
+              })}
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem
