@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseSeverity, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { navigateToCasesApp } from '../../../../../shared/lib/cases/helpers';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -164,7 +164,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.create.setTags('tagme');
         await cases.create.setCategory('new');
-        await cases.create.setSeverity(CaseSeverity.HIGH);
 
         await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);

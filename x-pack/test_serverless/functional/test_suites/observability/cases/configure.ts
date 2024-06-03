@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '@kbn/cases-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -165,7 +164,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.create.setTags('tagme');
         await cases.create.setCategory('new');
-        await cases.create.setSeverity(CaseSeverity.HIGH);
 
         await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
