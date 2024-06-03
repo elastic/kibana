@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { SolutionNavUserProfileToggle } from './solution_nav_userprofile_toggle';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+const SmartFieldFallbackTooltip = dynamic(() => import('./smart_fields_tooltip'));
+
+export { SmartFieldFallbackTooltip };

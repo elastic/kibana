@@ -6,8 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { NavigationServerPlugin } from './plugin';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
-export async function plugin() {
-  return new NavigationServerPlugin();
-}
+const smartFields = [
+  new DataViewField({
+    name: 'content',
+    type: 'smart_field',
+    searchable: false,
+    aggregatable: false,
+  }),
+];
+const fallbackFields = {
+  content: ['message'],
+};
+
+export const additionalFieldGroups = {
+  smartFields,
+  fallbackFields,
+};
