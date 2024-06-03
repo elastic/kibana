@@ -165,9 +165,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               sliValue: toHighPrecision(doc._source.sliValue),
               status: summaryDoc.status,
               summaryUpdatedAt: summaryDoc.summaryUpdatedAt,
-              fiveMinuteBurnRate: toHighPrecision(summaryDoc.fiveMinuteBurnRate.value ?? 0),
-              oneHourBurnRate: toHighPrecision(summaryDoc.oneHourBurnRate.value ?? 0),
-              oneDayBurnRate: toHighPrecision(summaryDoc.oneDayBurnRate.value ?? 0),
+              fiveMinuteBurnRate: toHighPrecision(summaryDoc.fiveMinuteBurnRate?.value ?? 0),
+              oneHourBurnRate: toHighPrecision(summaryDoc.oneHourBurnRate?.value ?? 0),
+              oneDayBurnRate: toHighPrecision(summaryDoc.oneDayBurnRate?.value ?? 0),
             },
             groupings: getFlattenedGroupings({
               groupings: summaryDoc.slo.groupings,

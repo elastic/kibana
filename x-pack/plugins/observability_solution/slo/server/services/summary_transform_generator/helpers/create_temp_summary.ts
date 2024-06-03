@@ -64,17 +64,17 @@ export interface EsSummaryDocument {
   summaryUpdatedAt: string | null;
   latestSliTimestamp: string | null;
   // >= 8.15
-  fiveMinuteBurnRate: {
+  fiveMinuteBurnRate?: {
     totalEvents: number;
     goodEvents: number;
     value: number;
   };
-  oneHourBurnRate: {
+  oneHourBurnRate?: {
     totalEvents: number;
     goodEvents: number;
     value: number;
   };
-  oneDayBurnRate: {
+  oneDayBurnRate?: {
     totalEvents: number;
     goodEvents: number;
     value: number;
