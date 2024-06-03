@@ -9,25 +9,74 @@ if [ -z "${BASH_VERSION:-}" ]; then
   fail "Bash is requred to run this script"
 fi
 
-if [ -z "$INSTALL_API_KEY_ENCODED" ]; then
-    fail "Install API key is required. Provide it using the INSTALL_API_KEY_ENCODED environment variable."
+install_api_key_encoded=""
+ingest_api_key_encoded=""
+kibana_api_endpoint=""
+onboarding_flow_id=""
+elastic_agent_version=""
+
+help() {
+    echo "Usage: sudo ./auto-detect.sh <arguments>"
+    echo ""
+    echo "Arguments:"
+    echo "  --install-key <value>  Base64 Encoded API key that has priviledges to install integrations."
+    echo "  --ingest-key <value>   Base64 Encoded API key that has priviledges to ingest data."
+    echo "  --kibana-url <value>  Kibana API endpoint."
+    echo "  --id <value>   Onboarding flow ID."
+    echo "  --ea-version <value>   Elastic Agent version."
+    exit 1
+}
+
+ensure_argument() {
+    if [ -z "$1" ]; then
+        echo "Error: Missing value for $2."
+        help
+    fi
+}
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Error: This script must be run as root."
+    help
 fi
 
-if [ -z "$INGEST_API_KEY_ENCODED" ]; then
-    fail "Ingest API key is required. Provide it using the INGEST_API_KEY_ENCODED environment variable."
-fi
+# Parse command line arguments
+for i in "$@"; do
+    case $i in
+        --install-key=*)
+            shift
+            install_api_key_encoded="${i#*=}"
+            ;;
+        --ingest-key=*)
+            shift
+            ingest_api_key_encoded="${i#*=}"
+            ;;
+        --kibana-url=*)
+            shift
+            kibana_api_endpoint="${i#*=}"
+            ;;
+        --id=*)
+            shift
+            onboarding_flow_id="${i#*=}"
+            ;;
+        --ea-version=*)
+            shift
+            elastic_agent_version="${i#*=}"
+            ;;
+        --help)
+            help
+            ;;
+        *)
+            echo "Unknown option: $i"
+            help
+            ;;
+    esac
+done
 
-if [ -z "$KIBANA_API_ENDPOINT" ]; then
-    fail "Kibana API endpoint is required. Provide it using the KIBANA_API_ENDPOINT environment variable."
-fi
-
-if [ -z "$ONBOARDING_FLOW_ID" ]; then
-    fail "Onboarding flow ID is required. Provide it using the ONBOARDING_FLOW_ID environment variable."
-fi
-
-if [ -z "$ELASTIC_AGENT_VERSION" ]; then
-    fail "Elastic Agent version is required. Provide it using the ELASTIC_AGENT_VERSION environment variable."
-fi
+ensure_argument "$install_api_key_encoded" "--install-key"
+ensure_argument "$ingest_api_key_encoded" "--ingest-key"
+ensure_argument "$kibana_api_endpoint" "--kibana-url"
+ensure_argument "$onboarding_flow_id" "--id"
+ensure_argument "$elastic_agent_version" "--ea-version"
 
 known_integrations_list_string=""
 selected_known_integrations_array=()
@@ -60,7 +109,7 @@ else
   fail "This script is only supported on linux and macOS"
 fi
 
-elastic_agent_artifact_name="elastic-agent-${ELASTIC_AGENT_VERSION}-${os}-${arch}"
+elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch}"
 
 update_step_progress() {
   local STEPNAME="$1"
@@ -74,8 +123,8 @@ update_step_progress() {
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
   fi
   curl --request POST \
-    --url "${KIBANA_API_ENDPOINT}/internal/observability_onboarding/flow/${ONBOARDING_FLOW_ID}/step/${STEPNAME}" \
-    --header "Authorization: ApiKey ${INSTALL_API_KEY_ENCODED}" \
+    --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
+    --header "Authorization: ApiKey ${install_api_key_encoded}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
     --header "x-elastic-internal-origin: Kibana" \
@@ -157,15 +206,15 @@ ensure_elastic_agent_healthy() {
 }
 
 download_elastic_agent_config() {
-  local decoded_ingest_api_key=$(echo "$INGEST_API_KEY_ENCODED" | base64 -d)
+  local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
   local tmp_path="/tmp/elastic-agent-config-template.yml"
 
   update_step_progress "ea-config" "loading"
 
   curl --request POST \
     -o $tmp_path \
-    --url "$KIBANA_API_ENDPOINT/internal/observability_onboarding/flow/$ONBOARDING_FLOW_ID/integrations/install" \
-    --header "Authorization: ApiKey $INSTALL_API_KEY_ENCODED" \
+    --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
+    --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
     --data "$(echo -e "$install_integrations_api_body_string")" \
     --no-progress-meter
