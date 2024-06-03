@@ -262,6 +262,21 @@ describe('validation logic', () => {
       );
     });
 
+    describe('metrics', () => {
+      testErrorsAndWarnings('m', [
+        `SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
+      ]);
+      testErrorsAndWarnings(`metrics `, [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+      ]);
+      testErrorsAndWarnings(`from index,`, [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+      ]);
+      testErrorsAndWarnings(`metrics index\n, \tindex\t,\n \t `, [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+      ]);
+    });
+
     describe('from', () => {
       testErrorsAndWarnings('f', [
         `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,

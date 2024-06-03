@@ -189,6 +189,34 @@
       "warning": []
     },
     {
+      "query": "m",
+      "error": [
+        "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics ",
+      "error": [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index,",
+      "error": [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
+      "query": "metrics index\n, \tindex\t,\n \t ",
+      "error": [
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
+      "warning": []
+    },
+    {
       "query": "f",
       "error": [
         "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
