@@ -234,7 +234,6 @@ describe('getTokenCountFromInvokeStream', () => {
       stream.complete();
       const tokens = await parseGeminiStreamForUsageMetadata({
         responseStream: stream.transform,
-        body,
         logger,
       });
 

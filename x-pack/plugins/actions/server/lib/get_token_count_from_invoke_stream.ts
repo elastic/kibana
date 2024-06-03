@@ -156,6 +156,7 @@ export const parseGeminiStreamForUsageMetadata = async ({
       resolve(parseGeminiUsageMetadata(responseBody));
     });
     responseStream.on('error', (err) => {
+      logger.error('An error occurred while calculating streaming response tokens');
       reject(err);
     });
   });
