@@ -17,26 +17,44 @@ import {
   generateShortId,
 } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
+import { Logger } from '../lib/utils/create_logger';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
+// Use e.g. # ... --scenarioOpts.numServices=5 --scenarioOpts.customFieldPrefix="metric"
+const DEFAULT_SCENARIO_OPTS = {
+  numSpaces: 1,
+  numServices: 10,
+  numHosts: 10,
+  numAgents: 5,
+  numDatasets: 6,
+  degradedRatio: 0.25, // Percentage of logs that are malformed (over limit or mapping conflict)
+  numCustomFields: 50, // Number of custom field (e.g. `log.custom.field-1: "abc"`) per document
+  customFieldPrefix: 'field', // Prefix for custom fields (e.g. `log.custom.field-1: "abc"`)
+  logsInterval: '1m',
+  logsRate: 10,
+};
+
 const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOptions) => {
   return {
     generate: ({ range, clients: { logsEsClient, infraEsClient, apmEsClient } }) => {
       const {
-        numSpaces = 1,
-        numServices = 10,
-        numHosts = 10,
-        numAgents = 5,
-        numDatasets = 6,
-        degradedRatio = 0.25, // Percentage of logs that are malformed (over limit or mapping conflict)
-        numCustomFields = 50, // Number of custom field (e.g. `log.custom.field-1: "abc"`) per document
-        logsInterval = '1m',
-        logsRate = 10,
-      } = runOptions.scenarioOpts || {};
+        numSpaces,
+        numServices,
+        numHosts,
+        numAgents,
+        numDatasets,
+        degradedRatio,
+        numCustomFields,
+        customFieldPrefix,
+        logsInterval,
+        logsRate,
+      } = { ...DEFAULT_SCENARIO_OPTS, ...(runOptions.scenarioOpts || {}) };
       const { logger } = runOptions;
+
+      killIfUnknownScenarioOptions(logger, runOptions.scenarioOpts || {});
 
       // Hosts
       const infraHosts = Array(numHosts)
@@ -160,7 +178,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
           const service = getRotatedItem(timestamp, SERVICE_NAMES, numServices);
           const logLevel = getRotatedItem(timestamp, LOG_LEVELS, LOG_LEVELS.length);
           const message = `Log message for logs-${dataset}-${space}. logLevel: ${logLevel}. isMalformed: ${isMalformed}. dataset: ${dataset}. space: ${space}. cloudRegion: ${cloudRegion}.`;
-          const extraFields = getExtraFields(numCustomFields, isMalformed);
+          const customFields = getExtraFields(numCustomFields, isMalformed, customFieldPrefix);
 
           return log
             .create()
@@ -187,7 +205,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
               'cloud.project.id': cloudProjectId,
               'cloud.instance.id': getRotatedItem(timestamp, CLUSTERS, 3).clusterId,
               'log.file.path': `/logs/${generateShortId()}/${logLevel}.txt`,
-              'log.custom': extraFields,
+              'log.custom': customFields,
             })
             .timestamp(timestamp);
         });
@@ -245,17 +263,25 @@ function getTimestampBlock(timestamp: number, milliInterval: number) {
  * @param isDegraded If true, will generate fields with more than 1024 characters, and will use a mix of numeric and
  * string values to cause mapping conflicts. If false, will generate first half with numeric values and second half with
  * string values.
+ * @param customFieldPrefix Prefix for the field key. Default is 'field'.
  */
-function getExtraFields(numFields: number, isDegraded = false) {
+function getExtraFields(
+  numFields: number,
+  isDegraded = false,
+  customFieldPrefix = DEFAULT_SCENARIO_OPTS.customFieldPrefix
+) {
   const extraFields: Record<string, unknown> = {};
   for (let i = 0; i < numFields; i++) {
     if (isDegraded) {
-      extraFields[`field-${i}`] = getRandomSlice(MORE_THAN_1024_CHARS, MORE_THAN_1024_CHARS.length);
+      extraFields[`${customFieldPrefix}-${i}`] = getRandomSlice(
+        MORE_THAN_1024_CHARS,
+        MORE_THAN_1024_CHARS.length
+      );
     } else {
       if (i % 2 === 0) {
-        extraFields[`field-${i}`] = Math.random() * 1000 * 1000; // Assign half of the fields with numeric values
+        extraFields[`${customFieldPrefix}-${i}`] = Math.random() * 1000 * 1000; // Assign half of the fields with numeric values
       } else {
-        extraFields[`field-${i}`] = getRandomSlice(MORE_THAN_1024_CHARS, 200);
+        extraFields[`${customFieldPrefix}-${i}`] = getRandomSlice(MORE_THAN_1024_CHARS, 200);
       }
     }
   }
@@ -269,6 +295,16 @@ function getRandomSlice(str: string, maxLength: number, startIndex = 0) {
   const start = Math.min(str.length, startIndex);
   const end = Math.min(str.length, start + Math.floor(Math.random() * maxLength));
   return str.slice(start, end);
+}
+
+function killIfUnknownScenarioOptions(logger: Logger, options: Record<string, unknown>) {
+  const unknownOptions = Object.keys(options).filter(
+    (key) => !Object.keys(DEFAULT_SCENARIO_OPTS).includes(key)
+  );
+  if (unknownOptions.length > 0) {
+    logger.error(`Unknown scenario option(s): ${unknownOptions.join(', ')}`);
+    process.exit(1);
+  }
 }
 
 const NAMESPACES = ['default', 'space-01', 'space-02', 'space-03'];
@@ -373,7 +409,7 @@ const DATASETS = [
   'synth.3',
 ];
 
-const LOG_LEVELS = ['info', 'error', 'warn', 'debug', 'trace'];
+const LOG_LEVELS = ['info', 'error', 'warn', 'debug'];
 
 const MORE_THAN_1024_CHARS =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
