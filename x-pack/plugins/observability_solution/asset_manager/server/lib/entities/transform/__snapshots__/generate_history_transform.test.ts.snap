@@ -107,19 +107,6 @@ Object {
     "index": Array [
       "kbn-data-forge-fake_stack.*",
     ],
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "gte": "now-5m",
-              },
-            },
-          },
-        ],
-      },
-    },
   },
   "sync": Object {
     "time": Object {
