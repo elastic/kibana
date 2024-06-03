@@ -63,6 +63,7 @@ export const useUnsavedChangesPrompt = ({
           cancelButtonText,
           confirmButtonText,
           buttonColor: 'danger',
+          'data-test-subj': 'navigationBlockConfirmModal',
         });
 
         if (confirmRes) {
