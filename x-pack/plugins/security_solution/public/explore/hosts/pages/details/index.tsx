@@ -73,7 +73,7 @@ import {
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
