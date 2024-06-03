@@ -20,6 +20,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
 import type { ResponseActionsClient } from '../..';
 import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
@@ -47,6 +48,7 @@ import type {
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../common/api/endpoint';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
@@ -224,6 +226,18 @@ const createUploadOptionsMock = (
   return merge(options, overrides);
 };
 
+const createScanOptionsMock = (
+  overrides: Partial<ScanActionRequestBody> = {}
+): ScanActionRequestBody => {
+  const options: ScanActionRequestBody = {
+    ...createNoParamsResponseActionOptionsMock(),
+    parameters: {
+      path: '/scan/folder',
+    },
+  };
+  return merge(options, overrides);
+};
+
 const createConnectorMock = (
   overrides: DeepPartial<ConnectorWithExtraFindData> = {}
 ): ConnectorWithExtraFindData => {
@@ -299,6 +313,7 @@ export const responseActionsClientMock = Object.freeze({
   createGetFileOptions: createGetFileOptionsMock,
   createExecuteOptions: createExecuteOptionsMock,
   createUploadOptions: createUploadOptionsMock,
+  createScanOptions: createScanOptionsMock,
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 

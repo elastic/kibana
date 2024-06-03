@@ -6,7 +6,6 @@
  */
 
 import type { Readable } from 'stream';
-import type { ScanActionRequestBody } from '../../../../../../common/api/endpoint/actions/scan_route';
 import type {
   ActionDetails,
   KillOrSuspendProcessRequestBody,
@@ -33,6 +32,7 @@ import type {
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
   BaseActionRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<

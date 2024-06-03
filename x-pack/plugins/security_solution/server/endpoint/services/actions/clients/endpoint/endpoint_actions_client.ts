@@ -7,7 +7,6 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
-import type { ScanActionRequestBody } from '../../../../../../common/api/endpoint/actions/scan_route';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -24,6 +23,7 @@ import type {
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import type {

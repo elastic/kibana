@@ -13,7 +13,6 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ScanActionRequestBody } from '../../../../../../common/api/endpoint/actions/scan_route';
 import { validateActionId } from '../../utils/validate_action_id';
 import {
   fetchActionResponses,
@@ -73,6 +72,7 @@ import type {
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
+  ScanActionRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';

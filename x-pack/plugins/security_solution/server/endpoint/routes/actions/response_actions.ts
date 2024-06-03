@@ -8,50 +8,48 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { ScanActionRequestBody } from '../../../../common/api/endpoint/actions/scan_route';
-import { ScanActionRequestSchema } from '../../../../common/api/endpoint/actions/scan_route';
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type {
-  NoParametersRequestSchema,
-  ResponseActionsRequestBody,
-  ExecuteActionRequestBody,
-  ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
-} from '../../../../common/api/endpoint';
 import {
-  ExecuteActionRequestSchema,
   EndpointActionGetFileSchema,
+  type ExecuteActionRequestBody,
+  ExecuteActionRequestSchema,
+  GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
   KillProcessRouteRequestSchema,
+  type NoParametersRequestSchema,
+  type ResponseActionGetFileRequestBody,
+  type ResponseActionsRequestBody,
+  type ScanActionRequestBody,
+  ScanActionRequestSchema,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
-  GetProcessesRouteRequestSchema,
+  type UploadActionApiRequestBody,
   UploadActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
-  ISOLATE_HOST_ROUTE_V2,
-  UNISOLATE_HOST_ROUTE_V2,
-  KILL_PROCESS_ROUTE,
-  SUSPEND_PROCESS_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
-  UNISOLATE_HOST_ROUTE,
-  GET_FILE_ROUTE,
-  EXECUTE_ROUTE,
-  UPLOAD_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
   SCAN_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
+  UNISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
+  UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
+  ActionDetails,
   EndpointActionDataParameterTypes,
+  KillOrSuspendProcessRequestBody,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
-  ActionDetails,
-  KillOrSuspendProcessRequestBody,
   ResponseActionsScanParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
