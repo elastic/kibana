@@ -111,6 +111,21 @@
   ],
   "testCases": [
     {
+      "query": "",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": " ",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "     ",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "eval",
       "error": [
         "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
@@ -427,6 +442,11 @@
     },
     {
       "query": "from ind*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from *,-.*",
       "error": [],
       "warning": []
     },
