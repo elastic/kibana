@@ -339,74 +339,72 @@ describe('When using `getActionList()', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       {
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: 'now-10d',
-                          },
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-10d',
                         },
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            lte: 'now',
-                          },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          lte: 'now',
                         },
                       },
-                      {
-                        terms: {
-                          'data.command': ['isolate', 'unisolate', 'get-file'],
-                        },
+                    },
+                    {
+                      terms: {
+                        'data.command': ['isolate', 'unisolate', 'get-file'],
                       },
-                      {
-                        terms: {
-                          input_type: ['endpoint'],
-                        },
+                    },
+                    {
+                      terms: {
+                        input_type: ['endpoint'],
                       },
-                      {
-                        terms: {
-                          agents: ['123'],
-                        },
+                    },
+                    {
+                      terms: {
+                        agents: ['123'],
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-                {
-                  bool: {
-                    should: [
-                      {
-                        query_string: {
-                          fields: ['user_id'],
-                          query: '*elastic*',
-                        },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      query_string: {
+                        fields: ['user_id'],
+                        query: '*elastic*',
                       },
-                    ],
-                    minimum_should_match: 1,
-                  },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         from: 0,
         index: '.logs-endpoint.actions-default',
         size: 20,
       },
-      { ignore: [404], meta: true }
+      { ignore: [404] }
     );
   });
 
@@ -430,77 +428,75 @@ describe('When using `getActionList()', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(
       1,
       {
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: 'now-1d',
-                          },
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-1d',
                         },
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            lte: 'now',
-                          },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          lte: 'now',
                         },
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                user_id: 'elastic',
-                              },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              user_id: 'elastic',
                             },
-                          ],
-                          minimum_should_match: 1,
-                        },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                user_id: 'kibana',
-                              },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              user_id: 'kibana',
                             },
-                          ],
-                          minimum_should_match: 1,
-                        },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
-                    ],
-                    minimum_should_match: 1,
-                  },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         from: 0,
         index: '.logs-endpoint.actions-default',
         size: 10,
       },
-      { ignore: [404], meta: true }
+      { ignore: [404] }
     );
   });
 
