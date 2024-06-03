@@ -6,24 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { LogLevelId } from '@kbn/logging';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
-/**
- * @internal
- */
-export interface BrowserLoggingConfig {
-  root: BrowserRootLoggerConfig;
-  loggers: BrowserLoggerConfig[];
-}
+const smartFields = [
+  new DataViewField({
+    name: 'content',
+    type: 'smart_field',
+    searchable: false,
+    aggregatable: false,
+  }),
+];
+const fallbackFields = {
+  content: ['message'],
+};
 
-export interface BrowserLoggerConfig {
-  name: string;
-  level: LogLevelId;
-}
-
-/**
- * @internal
- */
-export interface BrowserRootLoggerConfig {
-  level: LogLevelId;
-}
+export const additionalFieldGroups = {
+  smartFields,
+  fallbackFields,
+};
