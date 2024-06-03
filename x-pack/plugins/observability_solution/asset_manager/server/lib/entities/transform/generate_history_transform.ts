@@ -24,18 +24,7 @@ import { generateHistoryIngestPipelineId } from '../ingest_pipeline/generate_his
 export function generateHistoryTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
-  const filter: QueryDslQueryContainer[] = [
-    {
-      range: {
-        [definition.history.timestampField]: {
-          gte: `now-${
-            definition.history.lookbackPeriod?.toJSON() ??
-            definition.history.interval.asMinutes() * 5 + 'm'
-          }`,
-        },
-      },
-    },
-  ];
+  const filter: QueryDslQueryContainer[] = [];
 
   if (definition.filter) {
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
@@ -46,11 +35,13 @@ export function generateHistoryTransform(
     defer_validation: true,
     source: {
       index: definition.indexPatterns,
-      query: {
-        bool: {
-          filter,
+      ...(filter.length > 0 && {
+        query: {
+          bool: {
+            filter,
+          },
         },
-      },
+      }),
     },
     dest: {
       index: `${ENTITY_HISTORY_BASE_PREFIX}.noop`,
