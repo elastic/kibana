@@ -2025,6 +2025,15 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval date_diff(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_diff(nullVar, nullVar, nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | eval date_diff("year", "2022", "2022")', []);
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
+          [
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
+          ]
+        );
       });
 
       describe('abs', () => {
@@ -2898,6 +2907,18 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval date_extract(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_extract(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", "2022")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
+          [
+            'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [string]',
+          ]
+        );
       });
 
       describe('date_format', () => {
@@ -2937,6 +2958,10 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval date_format(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_format(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, concat("20", "22"))', [
+          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
       });
 
       describe('date_parse', () => {
@@ -3038,6 +3063,19 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval date_trunc(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
+          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | eval date_trunc("2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_trunc(concat("20", "22"), concat("20", "22"))',
+          [
+            'Argument of [date_trunc] must be [time_literal], found value [concat("20", "22")] type [string]',
+            'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+          ]
+        );
       });
 
       describe('e', () => {
@@ -9353,6 +9391,10 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats max("2022")', []);
+        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
+          'Argument of [max] must be [number], found value [concat("20", "22")] type [string]',
+        ]);
       });
 
       describe('min', () => {
@@ -9493,6 +9535,10 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats min("2022")', []);
+        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
+          'Argument of [min] must be [number], found value [concat("20", "22")] type [string]',
+        ]);
       });
 
       describe('count', () => {
@@ -9806,6 +9852,37 @@ describe('validation logic', () => {
             'Argument of [bucket] must be a constant, received [nullVar]',
             'Argument of [bucket] must be a constant, received [nullVar]',
           ]
+        );
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', [
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats by bucket(concat("20", "22"), 1 year)', [
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "a")', []);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 5, "a", "a")', [
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), concat("20", "22"))',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, "a", concat("20", "22"))',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "a")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), "a")',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
         );
       });
 
