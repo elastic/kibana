@@ -98,7 +98,7 @@ interface ImportRuleProps {
   options: ImportRuleOptions;
 }
 
-export interface IRulesManagementClient {
+export interface IDetectionRulesClient {
   createCustomRule: (createCustomRulePayload: CreateCustomRuleProps) => Promise<RuleAlertType>;
   createPrebuiltRule: (
     createPrebuiltRulePayload: CreatePrebuiltRuleProps
@@ -112,13 +112,13 @@ export interface IRulesManagementClient {
   importRule: (importRulePayload: ImportRuleProps) => Promise<RuleAlertType>;
 }
 
-export const createRulesManagementClient = (
+export const createDetectionRulesClient = (
   rulesClient: RulesClient,
   request: KibanaRequest,
   savedObjectsClient: SavedObjectsClientContract,
   licensing: LicensingApiRequestHandlerContext,
   ml?: SharedServices
-): IRulesManagementClient => {
+): IDetectionRulesClient => {
   const mlAuthz = buildMlAuthz({
     license: licensing.license,
     ml,

@@ -9,11 +9,13 @@ import React from 'react';
 
 import { Connector } from '@kbn/search-connectors';
 
-import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/types/indices';
-import { isCrawlerIndex, isConnectorIndex, getIngestionMethod } from '../../../../utils/indices';
-import { CrawlerStatusIndicator } from '../../../shared/crawler_status_indicator/crawler_status_indicator';
+import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
+import { isCrawlerIndex, isConnectorIndex, getIngestionMethod } from '../../../utils/indices';
 
-import { SearchPlaygroundPopover } from './search_playground_popover';
+import { SearchPlaygroundPopover } from '../../search_index/components/header_actions/search_playground_popover';
+
+import { CrawlerStatusIndicator } from '../crawler_status_indicator/crawler_status_indicator';
+
 import { SyncsContextMenu } from './syncs_context_menu';
 
 // Used to populate rightSideItems of an EuiPageTemplate, which is rendered right-to-left

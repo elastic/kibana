@@ -12,7 +12,6 @@ import {
   FeatureName,
   IngestPipelineParams,
   IngestionMethod,
-  IngestionStatus,
 } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
@@ -31,6 +30,11 @@ import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_ind
 import { ElasticsearchViewIndex } from '../../types';
 
 import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
+
+import {
+  hasDocumentLevelSecurityFeature,
+  hasIncrementalSyncFeature,
+} from '../../utils/connector_helpers';
 
 import {
   ConnectorNameAndDescriptionLogic,
@@ -72,7 +76,6 @@ export interface ConnectorViewValues {
   index: ElasticsearchViewIndex | undefined;
   indexName: string;
   ingestionMethod: IngestionMethod;
-  ingestionStatus: IngestionStatus;
   isCanceling: boolean;
   isHiddenIndex: boolean;
   isLoading: boolean;
@@ -144,6 +147,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         actions.fetchConnector({ connectorId: values.connectorId });
       }
     },
+    fetchConnectorApiSuccess: ({ connector }) => {
+      if (!values.index && connector?.index_name) {
+        actions.fetchIndex({ indexName: connector.index_name });
+      }
+    },
   }),
   path: ['enterprise_search', 'content', 'connector_view_logic'],
   selectors: ({ selectors }) => ({
@@ -185,8 +193,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
     hasDocumentLevelSecurityFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false,
+      (connector?: Connector) => hasDocumentLevelSecurityFeature(connector),
     ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
@@ -194,8 +201,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
     hasIncrementalSyncFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.INCREMENTAL_SYNC]?.enabled || false,
+      (connector?: Connector) => hasIncrementalSyncFeature(connector),
     ],
     htmlExtraction: [
       () => [selectors.connector],
