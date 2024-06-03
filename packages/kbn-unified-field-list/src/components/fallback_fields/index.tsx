@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './data_view';
-export * from './es_hits';
-export * from './additional_field_groups';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+const SmartFieldFallbackTooltip = dynamic(() => import('./smart_fields_tooltip'));
+
+export { SmartFieldFallbackTooltip };
