@@ -37,9 +37,12 @@ export const startQueryPerformanceTracking = (
     totalLoadTime: number;
     loadType: DashboardLoadType;
   }) => {
+    const duration =
+      loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
+
     reportPerformanceMetricEvent(analytics, {
       eventName: DASHBOARD_LOADED_EVENT,
-      duration: Math.max(timeToData, totalLoadTime),
+      duration,
       key1: 'time_to_data',
       value1: timeToData,
       key2: 'num_of_panels',
