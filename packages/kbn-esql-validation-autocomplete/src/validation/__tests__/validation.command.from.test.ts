@@ -6,27 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { ESQLCallbacks } from '../shared/types';
-import { ValidationOptions } from './types';
-import { validateQuery } from './validation';
-import { getCallbackMocks } from '../__tests__/helpers';
-
-const setup = async () => {
-  const callbacks = getCallbackMocks();
-  const validate = async (
-    query: string,
-    opts: ValidationOptions = {},
-    cb: ESQLCallbacks = callbacks
-  ) => {
-    return await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
-  };
-
-  return {
-    callbacks,
-    validate,
-  };
-};
+import { setup } from './helpers';
 
 test('does not load fields when validating only a single FROM, SHOW, ROW command', async () => {
   const { validate, callbacks } = await setup();
