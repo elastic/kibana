@@ -29,6 +29,7 @@ import { useAlertPrevalence } from '../../../../common/containers/alerts/use_ale
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
 
@@ -74,7 +75,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
@@ -95,6 +96,11 @@ jest.mock('../../../../explore/hosts/containers/hosts/details');
 jest.mock('../hooks/use_fetch_threat_intelligence');
 
 jest.mock('../../shared/hooks/use_prevalence');
+
+const mockUseTourContext = useTourContext as jest.Mock;
+jest.mock('../../../../common/components/guided_onboarding_tour', () => ({
+  useTourContext: jest.fn().mockReturnValue({ activeStep: 1, isTourShown: jest.fn(() => true) }),
+}));
 
 const renderInsightsSection = (contextValue: RightPanelContext) =>
   render(
@@ -152,6 +158,20 @@ describe('<InsightsSection />', () => {
 
   it('should render the component expanded if value is true in local storage', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const contextValue = {
+      eventId: 'some_Id',
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      getFieldsData: mockGetFieldsData,
+    } as unknown as RightPanelContext;
+
+    const wrapper = renderInsightsSection(contextValue);
+    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
+  });
+
+  it('should render the component expanded if guided onboarding tour is shown', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(false);
+    mockUseTourContext.mockReturnValue({ activeStep: 7, isTourShown: jest.fn(() => true) });
 
     const contextValue = {
       eventId: 'some_Id',

@@ -24,6 +24,8 @@ import {
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { InvalidTransformError } from '../../errors';
 import { SLODefinition } from '../../domain/models';
+import { getFilterRange } from './common';
+
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLODefinition, spaceId: string): TransformPutTransformRequest {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
@@ -108,13 +110,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': spaceId } },
-      {
-        range: {
-          '@timestamp': {
-            gte: `now-${slo.timeWindow.duration.format()}/d`,
-          },
-        },
-      },
+      getFilterRange(slo, '@timestamp'),
     ];
     const { monitorIds, tags, projects } = buildParamValues({
       monitorIds: indicator.params.monitorIds || [],

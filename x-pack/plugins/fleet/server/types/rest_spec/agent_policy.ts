@@ -79,6 +79,7 @@ export const CopyAgentPolicyRequestSchema = {
 export const DeleteAgentPolicyRequestSchema = {
   body: schema.object({
     agentPolicyId: schema.string(),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 
