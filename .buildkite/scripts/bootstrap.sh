@@ -28,6 +28,7 @@ fi
 if [[ "${BUILD_TS_REFS_CACHE_CAPTURE:-}" == "true" ]]; then
   echo "--- Upload ts-refs-cache"
   cd "$KIBANA_DIR/target/ts_refs_cache"
+  "$KIBANA_DIR/.buildkite/scripts/common/activate_service_account.sh" gs://kibana-ci-ts-refs-cache
   gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'
   cd "$KIBANA_DIR"
 fi
