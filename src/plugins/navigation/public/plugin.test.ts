@@ -9,7 +9,6 @@
 import { firstValueFrom, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import type { BuildFlavor } from '@kbn/config';
@@ -44,7 +43,6 @@ const setup = (
   const coreStart = coreMock.createStart();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const cloud = cloudMock.createStart();
-  const security = securityMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   cloudExperiments.getVariation.mockImplementation((key) => {
     if (key === SOLUTION_NAV_FEATURE_FLAG_NAME) {
@@ -52,9 +50,6 @@ const setup = (
     }
     return Promise.resolve(false);
   });
-
-  security.userProfiles.userProfileLoaded$ = of(true);
-  security.userProfiles.userProfile$ = of({ userSettings });
 
   const getGlobalSetting$ = jest.fn();
   const settingsGlobalClient = {
@@ -69,7 +64,6 @@ const setup = (
     coreStart,
     unifiedSearch,
     cloud,
-    security,
     cloudExperiments,
     config,
     setChromeStyle,
