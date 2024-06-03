@@ -112,7 +112,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
         <p>
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
-            defaultMessage="Saving '{title}' creates a duplicate title."
+            defaultMessage="Saving ''{title}'' creates a duplicate title."
             values={{
               title: dashboardSettingsState.title,
             }}
