@@ -58,7 +58,7 @@ export function FieldName({
       <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
         {isPinned && (
           <EuiFlexItem grow={false} className="kbnDocViewer__fieldPinned">
-            <EuiIcon type="pinFilled" />
+            <EuiIcon type="pinFilled" size="s" />
           </EuiFlexItem>
         )}
         <EuiFlexItem
