@@ -73,12 +73,12 @@ function FailedTransactionChart({
   environment: string;
   start: string;
   end: string;
+  alertStart?: number;
+  alertEnd?: number;
   comparisonChartTheme: RecursivePartial<Theme>;
   timeZone: string;
   kuery?: string;
   filters?: BoolQuery;
-  alertStart?: number;
-  alertEnd?: number;
 }) {
   const { euiTheme } = useEuiTheme();
   const {

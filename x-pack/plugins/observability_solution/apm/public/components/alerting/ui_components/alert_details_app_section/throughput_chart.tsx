@@ -61,8 +61,8 @@ function ThroughputChart({
   environment: string;
   start: string;
   end: string;
-  alertStart?: string;
-  alertEnd?: string;
+  alertStart?: number;
+  alertEnd?: number;
   comparisonChartTheme: RecursivePartial<Theme>;
   comparisonEnabled: boolean;
   offset: string;
