@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless search API - feature flags', function () {
-    loadTestFile(require.resolve('./platform_security'));
-    loadTestFile(require.resolve('../common/platform_security/roles_routes_feature_flag.ts'));
+  describe('Platform security APIs', function () {
+    loadTestFile(require.resolve('./authorization'));
   });
 }
