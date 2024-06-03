@@ -23,7 +23,7 @@ import { SpyRoute } from '../common/utils/route/spy_routes';
 import { licenseService } from '../common/hooks/use_license';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
-import { useSourcererDataView } from '../common/containers/sourcerer';
+import { useSourcererDataView } from '../sourcerer/containers';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SiemSearchBar } from '../common/components/search_bar';
 import { useGlobalTime } from '../common/containers/use_global_time';

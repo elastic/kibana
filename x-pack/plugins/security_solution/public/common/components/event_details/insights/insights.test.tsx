@@ -12,7 +12,6 @@ import { TestProviders } from '../../../mock';
 
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { licenseService } from '../../../hooks/use_license';
 import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { Insights } from './insights';
@@ -55,11 +54,6 @@ jest.mock('../../../hooks/use_license', () => {
   };
 });
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const dataWithoutAgentType: TimelineEventsDetailsItem[] = [
   {
@@ -178,23 +172,6 @@ describe('Insights', () => {
         ).toBeInTheDocument();
         expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       });
-    });
-  });
-
-  describe('with feature flag disabled', () => {
-    it('should not render neither the upsell, nor the insights for alerts by process ancestry', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-
-      render(
-        <TestProviders>
-          <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
-        </TestProviders>
-      );
-
-      expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
-      ).not.toBeInTheDocument();
     });
   });
 });
