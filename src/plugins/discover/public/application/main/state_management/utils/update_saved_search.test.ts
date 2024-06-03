@@ -124,7 +124,7 @@ describe('updateSavedSearch', () => {
     });
   });
 
-  it('should set breakdownField if state has breakdownField', async () => {
+  it('should pass breakdownField if state has breakdownField', async () => {
     const savedSearch = {
       ...savedSearchMock,
       searchSource: savedSearchMock.searchSource.createCopy(),
@@ -141,7 +141,7 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.breakdownField).toEqual('test');
   });
 
-  it('should set breakdownField to an empty string if state already has breakdownField', async () => {
+  it('should pass an empty string if state already has breakdownField', async () => {
     const savedSearch = {
       ...savedSearchMock,
       searchSource: savedSearchMock.searchSource.createCopy(),
@@ -151,7 +151,9 @@ describe('updateSavedSearch', () => {
       savedSearch,
       globalStateContainer: createGlobalStateContainer(),
       services: discoverServiceMock,
-      state: {},
+      state: {
+        breakdownField: undefined,
+      },
     });
     expect(savedSearch.breakdownField).toEqual('');
   });
