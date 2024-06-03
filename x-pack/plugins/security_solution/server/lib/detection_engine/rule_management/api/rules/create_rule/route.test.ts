@@ -31,7 +31,7 @@ describe('Create rule route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
-    clients.rulesManagementClient.createCustomRule.mockResolvedValue(
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(
       getRuleMock(getQueryRuleParams())
     );
 
@@ -71,7 +71,7 @@ describe('Create rule route', () => {
     });
 
     test('returns a 403 if ML Authz fails', async () => {
-      clients.rulesManagementClient.createCustomRule.mockImplementation(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -103,7 +103,7 @@ describe('Create rule route', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.rulesManagementClient.createCustomRule.mockImplementation(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(
