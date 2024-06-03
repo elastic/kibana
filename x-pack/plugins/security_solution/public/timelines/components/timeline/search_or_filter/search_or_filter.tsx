@@ -21,8 +21,8 @@ import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { Sourcerer } from '../../../../common/components/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { Sourcerer } from '../../../../sourcerer/components';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,

@@ -82,9 +82,8 @@ import {
 import {
   addFromLibrary,
   addOrUpdateEmbeddable,
-  runClone,
   runQuickSave,
-  runSaveAs,
+  runInteractiveSave,
   showSettings,
 } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
@@ -455,8 +454,7 @@ export class DashboardContainer
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
 
-  public runClone = runClone;
-  public runSaveAs = runSaveAs;
+  public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
   public showSettings = showSettings;

@@ -23,7 +23,13 @@ export const getAllCommentsRoute = createCasesRoute({
       case_id: schema.string(),
     }),
   },
-  options: { deprecated: true },
+  options: {
+    deprecated: true,
+  },
+  routerOptions: {
+    access: 'public',
+    description: `Gets all comments for a case`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
