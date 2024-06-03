@@ -15,9 +15,6 @@ export const entityDefinition = entityDefinitionSchema.parse({
     timestampField: '@timestamp',
     interval: '1m',
   },
-  latest: {
-    lookback: '5m',
-  },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],
   displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',
   metadata: ['tags', 'host.name'],
