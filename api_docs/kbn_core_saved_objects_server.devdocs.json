@@ -5716,6 +5716,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.SavedObject.error",
             "type": "Object",
             "tags": [],
@@ -6150,44 +6166,52 @@
             "path": "x-pack/plugins/actions/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/common/rule.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
+          },
+          {
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "alerting",
@@ -6535,6 +6559,20 @@
             "type": "string",
             "tags": [],
             "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
             "description": [],
             "signature": [
               "string | undefined"

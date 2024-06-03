@@ -10,6 +10,12 @@ Array [
   },
   Object {
     "set": Object {
+      "field": "entity.spaceId",
+      "value": "test",
+    },
+  },
+  Object {
+    "set": Object {
       "field": "entity.definitionId",
       "value": "admin-console-logs-service",
     },
