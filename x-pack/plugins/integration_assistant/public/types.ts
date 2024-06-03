@@ -6,10 +6,6 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import type {
-  NavigationPublicPluginStart,
-  NavigationPublicPluginSetup,
-} from '@kbn/navigation-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -24,13 +20,11 @@ export interface IntegrationAssistantPluginStart {
 }
 
 export interface IntegrationAssistantPluginSetupDependencies {
-  navigation: NavigationPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   spaces: SpacesPluginSetup;
 }
 
 export interface IntegrationAssistantPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   spaces: SpacesPluginStart;
 }
