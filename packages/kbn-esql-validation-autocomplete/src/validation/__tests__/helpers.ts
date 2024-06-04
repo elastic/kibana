@@ -31,6 +31,9 @@ export const setup = async () => {
   ) => {
     const { errors } = await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
     errors.sort((a: unknown, b: unknown) => String(a).localeCompare(String(b)));
+
+    expect(errors.length).toBe(expectedErrors.length);
+
     for (let i = 0; i < errors.length; i++) {
       const error = errors[i];
       if (error && typeof error === 'object') {
@@ -40,6 +43,7 @@ export const setup = async () => {
             : (error as EditorError).message
             ? (error as EditorError).message
             : String(error);
+
         expect(message).toBe(expectedErrors[i]);
       } else {
         expect(String(error)).toBe(expectedErrors[i]);
