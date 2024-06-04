@@ -30,6 +30,7 @@ export {
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  createLogsContextService,
   fieldConstants,
   formatFieldValue,
   formatHit,
@@ -42,5 +43,7 @@ export {
   isLegacyTableEnabled,
   usePager,
 } from './src';
+
+export type { LogsContextService } from './src';
 
 export * from './src/types';
