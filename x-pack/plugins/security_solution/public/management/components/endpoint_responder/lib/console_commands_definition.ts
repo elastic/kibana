@@ -366,7 +366,7 @@ export const getEndpointConsoleCommands = ({
       name: 'get-file',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.getFile.about,
-        isSupported: doesEndpointSupportCommand('processes'),
+        isSupported: doesEndpointSupportCommand('get-file'),
       }),
       RenderComponent: GetFileActionResult,
       meta: {
