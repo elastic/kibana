@@ -22,7 +22,7 @@ describe('validation', () => {
         ]);
       });
 
-      describe('sources', () => {
+      describe('... <sources> ...', () => {
         test('no errors on correct indices usage', async () => {
           const { expectErrors } = await setup();
 
@@ -92,17 +92,7 @@ describe('validation', () => {
         });
       });
 
-      describe('grouping', () => {
-        test('syntax does not allow BY *grouping* clause without *aggregates*', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors('metrics a_index BY stringField', [
-            "SyntaxError: extraneous input 'stringField' expecting <EOF>",
-          ]);
-        });
-      });
-
-      describe('aggregates', () => {
+      describe('... <aggregates> ...', () => {
         test('no errors when using aggregate functions correctly', async () => {
           const { expectErrors } = await setup();
 
@@ -336,6 +326,16 @@ describe('validation', () => {
         //       ]
         //     );
         //   });
+      });
+
+      describe('... BY <grouping>', () => {
+        test('syntax does not allow BY *grouping* clause without *aggregates*', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('metrics a_index BY stringField', [
+            "SyntaxError: extraneous input 'stringField' expecting <EOF>",
+          ]);
+        });
       });
     });
   });

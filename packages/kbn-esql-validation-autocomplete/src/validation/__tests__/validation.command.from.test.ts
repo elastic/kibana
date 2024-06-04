@@ -41,7 +41,7 @@ describe('validation', () => {
         await expectErrors('from ', ["SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"]);
       });
 
-      describe('sources', () => {
+      describe('... <sources> ...', () => {
         test('no errors on correct indices usage', async () => {
           const { expectErrors } = await setup();
 
@@ -119,7 +119,7 @@ describe('validation', () => {
         });
       });
 
-      describe('metadata', () => {
+      describe('... METADATA <indices>', () => {
         test('no errors on correct METADATA ... usage', async () => {
           const { expectErrors } = await setup();
 
