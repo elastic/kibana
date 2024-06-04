@@ -40,11 +40,14 @@ export function useUpdateAnnotation() {
     { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
     ['updateAnnotation'],
-    ({ annotation }) => {
+    async ({ annotation }) => {
       const body = JSON.stringify(annotation);
-      return http.put<CreateAnnotationResponse>(`/api/observability/annotation/${annotation.id}`, {
-        body,
-      });
+      return await http.put<CreateAnnotationResponse>(
+        `/api/observability/annotation/${annotation.id}`,
+        {
+          body,
+        }
+      );
     },
     {
       onSuccess: (data, { annotation }) => {

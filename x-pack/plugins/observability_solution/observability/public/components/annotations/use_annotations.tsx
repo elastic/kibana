@@ -9,6 +9,7 @@ import { BrushEvent, TooltipSpec, LineAnnotationEvent, RectAnnotationEvent } fro
 import { FormProvider, useForm } from 'react-hook-form';
 import moment from 'moment';
 import useKey from 'react-use/lib/useKey';
+import { clone } from 'lodash';
 import type { CreateAnnotationForm } from './components/create_annotation';
 import { ObservabilityAnnotations, CreateAnnotation } from './components';
 import { useEditAnnotation } from './hooks/use_edit_annotation';
@@ -16,6 +17,7 @@ import { useFetchAnnotations } from './use_fetch_annotations';
 import type { Annotation } from '../../../common/annotations';
 
 export const useAnnotations = ({
+  domain,
   sloId,
   sloInstanceId,
   editAnnotation,
@@ -23,16 +25,14 @@ export const useAnnotations = ({
   editAnnotation?: Annotation | null;
   sloId?: string;
   sloInstanceId?: string;
+  domain?: {
+    min: number | string;
+    max: number | string;
+  };
 } = {}) => {
   const [isCreateAnnotationsOpen, setIsCreateAnnotationsOpen] = useState(false);
   const methods = useForm<CreateAnnotationForm>({
-    defaultValues: {
-      ...getDefaultAnnotation(),
-      slo: {
-        id: sloId,
-        instanceId: sloInstanceId,
-      },
-    },
+    defaultValues: getDefaultAnnotation(sloId, sloInstanceId),
     mode: 'all',
   });
   const { setValue, reset } = methods;
@@ -40,8 +40,8 @@ export const useAnnotations = ({
   const [selectedEditAnnotation, setSelectedEditAnnotation] = useState<Annotation | null>(null);
 
   const { data, refetch } = useFetchAnnotations({
-    start: 'now-7d',
-    end: 'now',
+    start: domain?.min ? String(domain?.min) : 'now-30d',
+    end: domain?.min ? String(domain?.max) : 'now',
     sloId,
     sloInstanceId,
   });
@@ -55,7 +55,7 @@ export const useAnnotations = ({
 
   useEditAnnotation({
     reset,
-    editAnnotation: editAnnotation ?? selectedEditAnnotation,
+    editAnnotation,
     setIsCreateAnnotationsOpen,
   });
 
@@ -88,19 +88,34 @@ export const useAnnotations = ({
       if (annotations.rects.length) {
         const selectedAnnotation = data?.find((a) => annotations.rects[0].id.includes(a.id));
         if (selectedAnnotation) {
-          setSelectedEditAnnotation(selectedAnnotation);
+          const editData = clone(selectedAnnotation);
+          reset({
+            ...editData,
+            '@timestamp': moment(editData['@timestamp']),
+            '@timestampEnd': moment(editData['@timestampEnd']),
+          });
+          setIsCreateAnnotationsOpen(true);
+          setSelectedEditAnnotation(editData);
         }
       }
       if (annotations.lines.length) {
         const selectedAnnotation = data?.find((a) => annotations.lines[0].id.includes(a.id));
         if (selectedAnnotation) {
-          setSelectedEditAnnotation(selectedAnnotation);
+          const editData = clone(selectedAnnotation);
+          reset({
+            ...editData,
+            '@timestamp': moment(editData['@timestamp']),
+          });
+          setSelectedEditAnnotation(editData);
+          setIsCreateAnnotationsOpen(true);
         }
       }
     },
     wrapOnBrushEnd: (originalHandler: (event: BrushEvent) => void) => {
       return (event: BrushEvent) => {
         if (isCtrlPressed) {
+          reset(getDefaultAnnotation(sloId, sloInstanceId));
+          setSelectedEditAnnotation(null);
           const { to, from } = getBrushData(event);
           setValue('@timestamp', moment(from));
           setValue('@timestampEnd', moment(to));
@@ -154,7 +169,10 @@ export const useAnnotations = ({
   };
 };
 
-const getDefaultAnnotation = (): Partial<CreateAnnotationForm> => {
+const getDefaultAnnotation = (
+  sloId?: string,
+  sloInstanceId?: string
+): Partial<CreateAnnotationForm> => {
   return {
     message: '',
     '@timestamp': moment(),
@@ -174,6 +192,13 @@ const getDefaultAnnotation = (): Partial<CreateAnnotationForm> => {
         },
       },
     },
+    ...(sloId &&
+      sloInstanceId && {
+        slo: {
+          id: sloId,
+          instanceId: sloInstanceId,
+        },
+      }),
   };
 };
 

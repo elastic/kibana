@@ -29,7 +29,7 @@ export function AnnotationsList() {
 
   const [isEditing, setIsEditing] = useState<Annotation | null>(null);
 
-  const [start, setStart] = useState('now-7d');
+  const [start, setStart] = useState('now-30d');
   const [end, setEnd] = useState('now');
   const { data, isLoading, refetch } = useFetchAnnotations({
     start,

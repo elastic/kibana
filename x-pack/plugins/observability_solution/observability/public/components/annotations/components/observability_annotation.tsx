@@ -16,7 +16,9 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
-import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import moment from 'moment';
+import { CreateAnnotationForm } from './create_annotation';
+import { Annotation } from '../../../../common/annotations';
 import { DisplayAnnotation } from '../display_annotations';
 import { NewLineAnnotation } from './new_line_annotation';
 import { NewRectAnnotation } from './new_rect_annotation';
@@ -36,7 +38,7 @@ export function ObservabilityAnnotations({
   annotations,
   setIsCreateAnnotationsOpen,
 }: ObservabilityAnnotationsProps) {
-  const { setValue } = useFormContext<CreateAnnotationParams>();
+  const { setValue } = useFormContext<CreateAnnotationForm>();
 
   const actions: Array<TooltipAction<any, SeriesIdentifier>> = [
     {
@@ -45,7 +47,7 @@ export function ObservabilityAnnotations({
         { defaultMessage: 'Create annotation' }
       ),
       onSelect: (s, v) => {
-        setValue('@timestamp', s?.[0]?.datum.key ?? v?.[0]?.datum.key);
+        setValue('@timestamp', moment(new Date(s?.[0]?.datum.key ?? v?.[0]?.datum.key)));
         setIsCreateAnnotationsOpen(true);
       },
     },

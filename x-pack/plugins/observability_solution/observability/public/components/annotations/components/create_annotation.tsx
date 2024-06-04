@@ -56,24 +56,22 @@ export function CreateAnnotation({
     if (!isValid) return;
     const values = getValues();
     if (editAnnotation?.id) {
-      await updateAnnotation({
+      updateAnnotation({
         annotation: {
           ...values,
           id: editAnnotation.id,
           '@timestamp': values['@timestamp']?.toISOString()!,
           '@timestampEnd': values['@timestampEnd']?.toISOString(),
         },
-      });
-      onSave();
+      }).then(() => onSave());
     } else {
-      await createAnnotation({
+      createAnnotation({
         annotation: {
           ...values,
           '@timestamp': values['@timestamp']?.toISOString()!,
           '@timestampEnd': values['@timestampEnd']?.toISOString(),
         },
-      });
-      onSave();
+      }).then(() => onSave());
     }
   };
 

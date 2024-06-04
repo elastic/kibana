@@ -55,6 +55,10 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
   const { ObservabilityAnnotations, annotations, onAnnotationClick } = useAnnotations({
     sloId: slo?.id,
     sloInstanceId: slo?.instanceId,
+    domain: {
+      min: 'now-30d',
+      max: 'now',
+    },
   });
 
   const chartRef = useRef(null);

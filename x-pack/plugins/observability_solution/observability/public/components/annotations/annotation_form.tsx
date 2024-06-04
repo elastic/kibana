@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiForm, EuiFormRow, EuiHorizontalRule, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { AnnotationMeta } from './components/annotation_meta';
 import { Annotation, CreateAnnotationParams } from '../../../common/annotations';
-import { ComboBox, FieldText, TextArea } from './components/forward_refs';
+import { ComboBox, FieldText, Switch, TextArea } from './components/forward_refs';
 import { AnnotationRange } from './components/annotation_range';
 import { AnnotationAppearance } from './annotation_apearance';
 
@@ -30,7 +30,7 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
           required: 'Annotation type is required',
         }}
         render={({ field }) => (
-          <EuiSwitch
+          <Switch
             {...field}
             label={i18n.translate(
               'xpack.observability.annotationForm.euiFormRow.applyAsRangeLabel',

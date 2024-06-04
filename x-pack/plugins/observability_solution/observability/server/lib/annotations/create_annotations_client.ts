@@ -123,7 +123,7 @@ export function createAnnotationsClient(params: {
         return (
           await esClient.get<Annotation>(
             {
-              index,
+              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
               id: body._id,
               // expand_wildcards: 'all',
             },

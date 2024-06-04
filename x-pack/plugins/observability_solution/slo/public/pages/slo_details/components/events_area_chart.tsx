@@ -39,11 +39,6 @@ export function EventsAreaChart({
   const chartRef = useRef(null);
   const yAxisNumberFormat = slo.indicator.type === 'sli.metric.timeslice' ? '0,0[.00]' : '0,0';
 
-  const { ObservabilityAnnotations, annotations } = useAnnotations({
-    sloId: slo.id,
-    sloInstanceId: slo.instanceId,
-  });
-
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
@@ -60,6 +55,12 @@ export function EventsAreaChart({
     max:
       threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
   };
+
+  const { ObservabilityAnnotations, annotations } = useAnnotations({
+    domain,
+    sloId: slo.id,
+    sloInstanceId: slo.instanceId,
+  });
 
   return (
     <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>

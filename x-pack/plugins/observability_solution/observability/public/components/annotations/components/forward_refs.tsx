@@ -15,10 +15,18 @@ import {
   EuiTextAreaProps,
   EuiFieldTextProps,
   EuiFieldText,
+  EuiSelectProps,
+  EuiSelect,
+  EuiDatePicker,
+  EuiDatePickerProps,
 } from '@elastic/eui';
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>((props, ref) => (
   <EuiFieldText data-test-subj="o11yFieldTextFieldText" {...props} inputRef={ref} />
+));
+
+export const DatePicker = React.forwardRef<HTMLInputElement, EuiDatePickerProps>((props, ref) => (
+  <EuiDatePicker {...props} />
 ));
 
 export const TextArea = React.forwardRef<HTMLTextAreaElement, EuiTextAreaProps>((props, ref) => (
@@ -31,4 +39,8 @@ export const ComboBox = React.forwardRef<unknown, EuiComboBoxProps<string>>((pro
 
 export const Switch = React.forwardRef<unknown, EuiSwitchProps>((props, _ref) => (
   <EuiSwitch {...props} />
+));
+
+export const Select = React.forwardRef<HTMLSelectElement, EuiSelectProps>((props, ref) => (
+  <EuiSelect data-test-subj="o11ySelectSelect" {...props} inputRef={ref} />
 ));

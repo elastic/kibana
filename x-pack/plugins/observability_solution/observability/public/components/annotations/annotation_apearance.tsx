@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSelect,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -18,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import { IconSelect, LineStyleSettings } from '@kbn/visualization-ui-components';
 import React from 'react';
+import { Select } from './components/forward_refs';
 import { TextDecoration } from './components/text_decoration';
 import { Annotation } from '../../../common/annotations';
 import { FillOptions } from './components/fill_option';
@@ -69,7 +69,7 @@ export function AnnotationAppearance() {
                   name="annotation.style.line.iconPosition"
                   control={control}
                   render={({ field }) => (
-                    <EuiSelect
+                    <Select
                       compressed
                       data-test-subj="o11yAnnotationAppearanceSelect"
                       {...field}
