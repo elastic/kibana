@@ -177,7 +177,7 @@ export const appendFilterToESQLQueryFromValueClickAction = async ({
           // to create the time range filter correctly. The users can brush to update the time filter instead.
           const isDate = column.meta?.type === 'date';
 
-          if (value === null || value === undefined || isDate || !query) return;
+          if (value == null || isDate || !query) return;
 
           const queryString = query.esql;
           queryWithFilter = appendWhereClauseToESQLQuery(
