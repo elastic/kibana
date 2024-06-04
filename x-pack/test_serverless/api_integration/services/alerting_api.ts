@@ -12,11 +12,7 @@ import type {
 
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import {
-  RoleCredentials,
-  InternalRequestHeader,
-  SupertestWithoutAuthType,
-} from '../../shared/services';
+import { RoleCredentials } from '../../shared/services';
 import { SloBurnRateRuleParams } from './slo_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -26,18 +22,16 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const requestTimeout = 30 * 1000;
   const retryTimeout = 120 * 1000;
   const logger = getService('log');
+  const svlCommonApi = getService('svlCommonApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     async waitForRuleStatus({
-      supertestWithoutAuth,
       roleAuthc,
-      internalReqHeader,
       ruleId,
       expectedStatus,
     }: {
-      supertestWithoutAuth: SupertestWithoutAuthType;
       roleAuthc: RoleCredentials;
-      internalReqHeader: InternalRequestHeader;
       ruleId: string;
       expectedStatus: string;
     }) {
@@ -47,7 +41,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertestWithoutAuth
           .get(`/api/alerting/rule/${ruleId}`)
-          .set(internalReqHeader)
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         const { execution_status: executionStatus } = response.body || {};
@@ -108,21 +102,17 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     },
 
     async createIndexConnector({
-      supertestWithoutAuth,
       roleAuthc,
-      internalReqHeader,
       name,
       indexName,
     }: {
-      supertestWithoutAuth: SupertestWithoutAuthType;
       roleAuthc: RoleCredentials;
-      internalReqHeader: InternalRequestHeader;
       name: string;
       indexName: string;
     }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/actions/connector`)
-        .set(internalReqHeader)
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           name,
@@ -136,9 +126,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     },
 
     async createRule({
-      supertestWithoutAuth,
       roleAuthc,
-      internalReqHeader,
       name,
       ruleTypeId,
       params,
@@ -147,9 +135,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       schedule,
       consumer,
     }: {
-      supertestWithoutAuth: SupertestWithoutAuthType;
       roleAuthc: RoleCredentials;
-      internalReqHeader: InternalRequestHeader;
       ruleTypeId: string;
       name: string;
       params: MetricThresholdParams | ThresholdParams | SloBurnRateRuleParams;
@@ -160,7 +146,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/alerting/rule`)
-        .set(internalReqHeader)
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           params,
@@ -176,19 +162,13 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
-    async findRule(
-      supertestWithoutAuth: SupertestWithoutAuthType,
-      roleAuthc: RoleCredentials,
-      internalReqHeader: InternalRequestHeader,
-      ruleId: string
-    ) {
+    async findRule(roleAuthc: RoleCredentials, ruleId: string) {
       if (!ruleId) {
         throw new Error(`'ruleId' is undefined`);
       }
       const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
-
-        .set(internalReqHeader)
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },

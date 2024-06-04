@@ -14,7 +14,7 @@
 import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -24,11 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   const sloApi = getService('sloApi');
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
 
   describe('Burn rate rule', () => {
     const RULE_TYPE_ID = 'slo.rules.burnRate';
@@ -44,7 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
@@ -99,9 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
-          supertestWithoutAuth,
           roleAuthc,
-          internalReqHeader,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
@@ -131,9 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const dependencyRule = await alertingApi.createRule({
-          supertestWithoutAuth,
           roleAuthc,
-          internalReqHeader,
           tags: ['observability'],
           consumer: 'observability',
           name: 'SLO Burn Rate rule - Dependency',
@@ -206,9 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const createdRule = await alertingApi.createRule({
-          supertestWithoutAuth,
           roleAuthc,
-          internalReqHeader,
           tags: ['observability'],
           consumer: 'observability',
           name: 'SLO Burn Rate rule',
@@ -291,9 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          supertestWithoutAuth,
           roleAuthc,
-          internalReqHeader,
           ruleId,
           expectedStatus: 'active',
         });
@@ -313,12 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(
-          supertestWithoutAuth,
-          roleAuthc,
-          internalReqHeader,
-          ruleId
-        );
+        const match = await alertingApi.findRule(roleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be('observability');
       });

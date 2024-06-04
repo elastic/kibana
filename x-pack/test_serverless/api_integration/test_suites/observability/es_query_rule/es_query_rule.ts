@@ -58,9 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
-          supertestWithoutAuth,
           roleAuthc,
-          internalReqHeader,
           name: 'Index Connector: Alerting API test',
           indexName: ALERT_ACTION_INDEX,
         });
@@ -115,9 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          supertestWithoutAuth,
           roleAuthc,
-          internalReqHeader,
           ruleId,
           expectedStatus: 'active',
         });
@@ -125,12 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(
-          supertestWithoutAuth,
-          roleAuthc,
-          internalReqHeader,
-          ruleId
-        );
+        const match = await alertingApi.findRule(roleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be('observability');
       });
