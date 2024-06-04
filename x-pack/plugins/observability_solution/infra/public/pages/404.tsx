@@ -7,21 +7,29 @@
 
 import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
-import { MetricsPageTemplate } from './metrics/page_template';
+import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 interface NotFoundPageProps {
   title: string;
 }
 
 export const NotFoundPage = ({ title }: NotFoundPageProps) => {
+  const {
+    services: {
+      observabilityShared: {
+        navigation: { PageTemplate },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   return (
-    <MetricsPageTemplate
+    <PageTemplate
       pageHeader={{
         pageTitle: title,
       }}
       data-test-subj="infraNotFoundPage"
     >
       <NotFoundPrompt />
-    </MetricsPageTemplate>
+    </PageTemplate>
   );
 };

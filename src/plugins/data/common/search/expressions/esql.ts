@@ -21,7 +21,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext } from '..';
+import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
 import { UiSettingsCommon } from '../..';
 
 type Input = KibanaContext | null;
@@ -268,7 +268,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           return {
             type: 'datatable',
             meta: {
-              type: 'es_ql',
+              type: ESQL_TABLE_TYPE,
             },
             columns: allColumns,
             rows,

@@ -467,6 +467,19 @@ describe('Agent policy', () => {
       }
     });
 
+    it('should allow delete with force for agent policy which has managed package policy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
+        force: true,
+      });
+      expect(response.id).toEqual('mocked');
+    });
+
     it('should call audit logger', async () => {
       await agentPolicyService.delete(soClient, esClient, 'mocked');
 
