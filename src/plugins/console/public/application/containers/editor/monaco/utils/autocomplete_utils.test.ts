@@ -99,6 +99,10 @@ describe('autocomplete_utils', () => {
       const actual = shouldTriggerSuggestions('GET _search?test=');
       expect(actual).toBe(true);
     });
+    it('triggers suggestions for the url param value (index name with - and numbers)', () => {
+      const actual = shouldTriggerSuggestions('GET .test-index-01/_search?test=');
+      expect(actual).toBe(true);
+    });
     it('triggers no suggestions for the url param value when the value is typed', () => {
       const actual = shouldTriggerSuggestions('GET _search?test=value');
       expect(actual).toBe(false);

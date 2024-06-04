@@ -36,7 +36,7 @@ export const methodWhitespaceRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+$/i;
  * for example "GET _search/", "GET _search?", "GET _search?param=".
  * In this case autocomplete suggestions should be triggered for an url part or param.
  */
-export const methodWithUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+[a-z0-9\/._?=&]*[?=\/]$/i;
+export const methodWithUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+[a-z0-9\/._\-?=&]*[?=\/]$/i;
 /*
  * This regex matches a string that has
  * optional whitespace characters and a double quote, for example `  "`.

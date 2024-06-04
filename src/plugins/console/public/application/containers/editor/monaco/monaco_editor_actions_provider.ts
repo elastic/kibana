@@ -631,6 +631,7 @@ export class MonacoEditorActionsProvider {
       endColumn: position.column,
     });
     // if the line is empty or it matches specified regex, trigger suggestions
+    console.log({lineContentBefore})
     if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
       this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
     }
