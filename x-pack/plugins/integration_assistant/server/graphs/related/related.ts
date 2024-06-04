@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { BedrockChat } from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { BedrockChat } from '@kbn/langchain/server/language_models';
-import { RELATED_MAIN_PROMPT } from './prompts';
-import { RelatedState } from '../../types';
+import type { ESProcessorItem, Pipeline } from '../../../common';
+import type { RelatedState } from '../../types';
 import { combineProcessors } from '../../util/processors';
-import { Pipeline } from '../../../common';
+import { RELATED_MAIN_PROMPT } from './prompts';
 
 export async function handleRelated(state: RelatedState, model: BedrockChat) {
   const relatedMainPrompt = RELATED_MAIN_PROMPT;
@@ -20,7 +20,7 @@ export async function handleRelated(state: RelatedState, model: BedrockChat) {
     pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
     ex_answer: state.exAnswer,
     ecs: state.ecs,
-  })) as any[];
+  })) as ESProcessorItem[];
 
   const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
 

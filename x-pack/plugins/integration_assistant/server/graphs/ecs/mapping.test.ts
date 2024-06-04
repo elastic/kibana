@@ -7,7 +7,7 @@
 
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { handleEcsMapping } from './mapping';
-import { EcsMappingState } from '../../types';
+import type { EcsMappingState } from '../../types';
 import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
 
 const mockLlm = new FakeLLM({

@@ -8,16 +8,14 @@
     "server/**/*.ts",
     "common/**/*.ts",
     "__jest__/**/*",
-    "../../typings/**/*",
+    "../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/langchain",
     "@kbn/core-elasticsearch-server",
-    "@kbn/actions-plugin",
+    "@kbn/actions-plugin"
   ]
 }

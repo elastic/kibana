@@ -1,8 +1,8 @@
-Team owner: Security Integrations Scalability
-
 # Integration Assistant
 
 ## Overview
+
+Team owner: Security Integrations Scalability
 
 This is a new Kibana plugin created to help users with automatically generating integration packages based on provided log samples and relevant information
 
@@ -14,7 +14,7 @@ Exposes 4 API's that can be consumed by any frontend plugin, which are:
 - Categorization API
 - Related Fields API
 - Build Integration API
-- Optional Test Pipeline API (Used to update pipeline results if the ingest pipeline changes by a user in the UI).
+- Optional Test Pipeline API (Used to update pipeline results if the ingest pipeline is changed by a user in the UI).
 
 ## Development
 
@@ -45,15 +45,15 @@ All routes are defined under `./server/routes` in its own file, and then include
 **Integration Builder**
 
 The integration builder is the last step in the expected API flow (ECS Mapping -> Categorization -> Related Fields -> Integration Builder).
-With the provided package and data stream details, a optional logo and a list of sample logs, the API will build out the entire folder structure and files required for the integration package, archive it and return it as a `Buffer`.
+With the provided package and data stream details, an optional logo and a list of sample logs, the API will build out the entire folder structure and files required for the integration package, archive it and return it as a `Buffer`.
 
 **Templates**
 
-Currently the templates are stored as nunjucks files as they were converted from jinja2 templates, which uses the exact same format. Longer term this will most likely be switched to the Kibana forked Handlebars templating engine.
+Currently the templates are stored as `nunjucks` files as they were converted from `jinja2` templates, which use the exact same format. Longer term this will most likely be switched to the Kibana forked Handlebars templating engine.
 
 The templates are stored in the `./server/templates` directory and are used to generate the integration package files while running the Integration Builder API.
 
-One template (pipeline.yml.njk) is used by the ECS Mapping API to generate provide the boilerplate ingest pipeline structure we want to use for all generated integrations.
+One template (pipeline.yml.njk) is used by the ECS Mapping API to generate the boilerplate ingest pipeline structure we want to use for all generated integrations.
 
 ## Tests
 

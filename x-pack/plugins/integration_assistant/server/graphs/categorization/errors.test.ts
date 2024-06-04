@@ -7,7 +7,7 @@
 
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { handleErrors } from './errors';
-import { CategorizationState } from '../../types';
+import type { CategorizationState } from '../../types';
 import {
   categorizationTestState,
   categorizationMockProcessors,

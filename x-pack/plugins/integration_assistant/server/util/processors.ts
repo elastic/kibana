@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { ESProcessorItem, Pipeline } from '../../common';
 import { deepCopy } from './util';
-import type { Pipeline } from '../../common';
 
-export function combineProcessors(initialPipeline: Pipeline, processors: any[]): Pipeline {
+export function combineProcessors(
+  initialPipeline: Pipeline,
+  processors: ESProcessorItem[]
+): Pipeline {
   // Create a deep copy of the initialPipeline to avoid modifying the original input
   const currentPipeline = deepCopy(initialPipeline);
 
