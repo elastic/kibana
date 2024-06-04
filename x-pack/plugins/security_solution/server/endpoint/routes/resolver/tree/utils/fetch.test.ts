@@ -82,7 +82,6 @@ describe('fetcher test', () => {
       });
       const options: TreeOptions = {
         agentId: '',
-
         descendantLevels: 1,
         descendants: 5,
         ancestors: 0,
@@ -105,7 +104,6 @@ describe('fetcher test', () => {
     it('exists the loop when the options specify no descendants', async () => {
       const options: TreeOptions = {
         agentId: '',
-
         descendantLevels: 0,
         descendants: 0,
         ancestors: 0,

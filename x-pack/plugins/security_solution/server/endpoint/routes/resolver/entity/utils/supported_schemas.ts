@@ -129,7 +129,6 @@ export const getSupportedSchemas = (
 
 export function getFieldAsString(doc: unknown, field: string): string | undefined {
   const value = _.get(doc, field);
-  // console.log({ doc, field });
   if (value === undefined) {
     return undefined;
   }
