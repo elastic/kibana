@@ -75,7 +75,7 @@ export function rangeQuery(
       range: {
         [field]: {
           gte: start,
-          lte: end,
+          ...(end !== undefined ? { lte: end } : {}),
           format: 'epoch_millis',
         },
       },

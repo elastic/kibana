@@ -12,6 +12,7 @@ import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public
 import type { WorkflowBlock } from '@kbn/investigate-plugin/common';
 import type { OnWidgetAdd } from '@kbn/investigate-plugin/public';
 import { createInvestigateAlertsInventoryWidget } from '@kbn/observability-plugin/public';
+import { ALERT_TIME_RANGE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useKibana } from '../use_kibana';
 
 export function useAlertsWorkflowBlock({
@@ -41,7 +42,7 @@ export function useAlertsWorkflowBlock({
                 filter: [
                   {
                     range: {
-                      '@timestamp': {
+                      [ALERT_TIME_RANGE]: {
                         gte: start,
                         lte: end,
                       },
@@ -114,7 +115,9 @@ export function useAlertsWorkflowBlock({
               'xpack.investigateApp.workflowBlocks.alerts.activeAlertsWidgetTitle',
               { defaultMessage: 'Active alerts' }
             ),
-            parameters: {},
+            parameters: {
+              activeOnly: true,
+            },
           })
         );
       },

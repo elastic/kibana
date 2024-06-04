@@ -24,6 +24,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
   ECS_VERSION,
   EVENT_ACTION,
@@ -87,8 +88,9 @@ export function InvestigateAlertsInventory({
     // make sure there is no upper limit for @timestamp
     esFilter.bool.filter.push({
       range: {
-        '@timestamp': {
+        [ALERT_TIME_RANGE]: {
           gte: timeRange.from,
+          lte: timeRange.to,
         },
       },
     });
