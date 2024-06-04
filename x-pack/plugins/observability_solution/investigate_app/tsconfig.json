@@ -57,6 +57,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/apm-plugin",
     "@kbn/esql-datagrid",
-    "@kbn/observability-plugin"
+    "@kbn/observability-plugin",
+    "@kbn/rule-registry-plugin"
   ],
 }
