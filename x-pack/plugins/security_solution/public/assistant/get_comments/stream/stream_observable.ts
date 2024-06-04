@@ -23,9 +23,9 @@ interface StreamObservable {
 interface ResponseSchema {
   candidates: Candidate[];
   usageMetadata: {
-      promptTokenCount: number;
-      candidatesTokenCount: number;
-      totalTokenCount: number;
+    promptTokenCount: number;
+    candidatesTokenCount: number;
+    totalTokenCount: number;
   };
 }
 
@@ -231,45 +231,45 @@ export const getStreamObservable = ({
     // read data from Gemini stream
     function readGemini() {
       reader
-          .read()
-          .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-              try {
-                  if (done) {
-                      if (geminiBuffer) {
-                          chunks.push(getGeminiChunks([geminiBuffer])[0]);
-                      }
-                      observer.next({
-                          chunks,
-                          message: chunks.join(''),
-                          loading: false,
-                      });
-                      observer.complete();
-                      return;
-                  }
-
-                  const decoded = decoder.decode(value, { stream: true });
-                  const lines = decoded.split('\r');
-                  lines[0] = geminiBuffer + lines[0];
-                  geminiBuffer = lines.pop() || '';
-
-                  const nextChunks = getGeminiChunks(lines);
-                  nextChunks.forEach((chunk: string) => {
-                      chunks.push(chunk);
-                      observer.next({
-                          chunks,
-                          message: chunks.join(''),
-                          loading: true,
-                      });
-                  });
-              } catch (err) {
-                  observer.error(err);
-                  return;
+        .read()
+        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          try {
+            if (done) {
+              if (geminiBuffer) {
+                chunks.push(getGeminiChunks([geminiBuffer])[0]);
               }
-              readGemini();
-          })
-          .catch((err) => {
-              observer.error(err);
-          });
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: false,
+              });
+              observer.complete();
+              return;
+            }
+
+            const decoded = decoder.decode(value, { stream: true });
+            const lines = decoded.split('\r');
+            lines[0] = geminiBuffer + lines[0];
+            geminiBuffer = lines.pop() || '';
+
+            const nextChunks = getGeminiChunks(lines);
+            nextChunks.forEach((chunk: string) => {
+              chunks.push(chunk);
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: true,
+              });
+            });
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          readGemini();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
     }
 
     // this should never actually happen
@@ -367,20 +367,18 @@ const getLangChainChunks = (lines: string[]): string[] =>
  * @param lines
  * @returns {string[]} - Parsed string array from the Gemini response.
  */
- const getGeminiChunks = (lines: string[]): string[] => {
+const getGeminiChunks = (lines: string[]): string[] => {
   return lines
-      .filter((str) => !!str && str !== '[DONE]')
-      .map((line) => {
-          try {
-              line=line.replaceAll("data: ","");
-              const geminiResponse: ResponseSchema = JSON.parse(line);
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      try {
+        const newLine = line.replaceAll('data: ', '');
+        const geminiResponse: ResponseSchema = JSON.parse(newLine);
         return geminiResponse.candidates[0]?.content.parts.map((part) => part.text).join('') ?? '';
-          } catch (err) {
-              console.error('Error parsing line:', err);
-              return '';
-          }
-      });
+      } catch (err) {
+        return '';
+      }
+    });
 };
-
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();
