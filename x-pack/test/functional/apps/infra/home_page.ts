@@ -310,8 +310,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memory', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
-              const hosts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(metric);
-              expect(hosts.length).to.equal(chartsCount);
+              const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
+                metric
+              );
+              expect(containers.length).to.equal(chartsCount);
             });
           });
         });
