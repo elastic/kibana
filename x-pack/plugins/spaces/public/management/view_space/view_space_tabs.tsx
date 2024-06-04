@@ -38,7 +38,7 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
     },
     {
       id: TAB_ID_FEATURES,
-      name: 'Feature visibility',
+      name: 'Features',
       append: (
         <EuiNotificationBadge className="eui-alignCenter" size="m">
           {enabledFeatureCount} / {totalFeatureCount}

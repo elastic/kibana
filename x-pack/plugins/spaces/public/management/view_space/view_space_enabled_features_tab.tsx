@@ -37,7 +37,7 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space }) => {
           <h3>
             <FormattedMessage
               id="xpack.spaces.management.viewSpaceFeatures.enableFeaturesInSpaceMessage"
-              defaultMessage="Feature visibility"
+              defaultMessage="Set feature visibility"
             />
           </h3>
         </EuiTitle>
