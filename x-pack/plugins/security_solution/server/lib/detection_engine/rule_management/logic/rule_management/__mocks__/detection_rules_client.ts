@@ -6,11 +6,11 @@
  */
 
 import type {
-  IRulesManagementClient,
+  IDetectionRulesClient,
   CreateRuleOptions,
   _UpdateRuleProps,
   _PatchRuleProps,
-} from '../rules_management_client';
+} from '../detection_rules_client';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleCreateProps,
@@ -19,10 +19,10 @@ import type {
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { RuleAlertType } from '../../../../rule_schema';
 
-export type RulesManagementClientMock = jest.Mocked<IRulesManagementClient>;
+export type DetectionRulesClientMock = jest.Mocked<IDetectionRulesClient>;
 
-const createRulesManagementClientMock = () => {
-  const mocked: RulesManagementClientMock = {
+const createDetectionRulesClientMock = () => {
+  const mocked: DetectionRulesClientMock = {
     createCustomRule: jest.fn(),
     createPrebuiltRule: jest.fn(),
     updateRule: jest.fn(),
@@ -34,10 +34,10 @@ const createRulesManagementClientMock = () => {
   return mocked;
 };
 
-export const rulesManagementClientMock: {
-  create: () => RulesManagementClientMock;
+export const detectionRulesClientMock: {
+  create: () => DetectionRulesClientMock;
 } = {
-  create: createRulesManagementClientMock,
+  create: createDetectionRulesClientMock,
 };
 
 /* Mocks for internal methods */
