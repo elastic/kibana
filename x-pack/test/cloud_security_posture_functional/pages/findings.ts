@@ -394,7 +394,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Access with custom roles - findings', async () => {
+    describe('Access with custom roles', async () => {
       it('Access with valid user role', async () => {
         await cspSecurity.logout();
         await cspSecurity.login('csp_read_user');

@@ -46,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     // Blocked by https://github.com/elastic/kibana/issues/184621
-    it.skip('todo - Access with invalid user role', async () => {});
+    it.skip('Access with invalid user role', async () => {});
 
     // The entire describe block bellow should move to rule.ts byt the page test is blocked by:
     // FLAKY: https://github.com/elastic/kibana/issues/178413
@@ -69,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Blocked by https://github.com/elastic/kibana/issues/184621
-      it.skip('todo - Access with invalid user role', async () => {});
+      it.skip('Access with invalid user role', async () => {});
     });
   });
 }

@@ -14009,16 +14009,15 @@
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
-      "HAS SKIP",
-      "HAS TODO"
+      "HAS SKIP"
     ],
     "lines": [
       "  describe('Access with custom roles')",
       "    it.skip('Access with valid user role')",
-      "    it.skip('todo - Access with invalid user role')",
+      "    it.skip('Access with invalid user role')",
       "    describe('Access with custom roles - rule page')",
       "      it('Access with valid user role')",
-      "      it.skip('todo - Access with invalid user role')"
+      "      it.skip('Access with invalid user role')"
     ],
     "testSuits": [
       {
@@ -14042,14 +14041,14 @@
         "isTodo": false
       },
       {
-        "id": "todo---access-with-invalid-user-role",
-        "rawLine": "    it.skip('todo - Access with invalid user role', async () => {});",
-        "line": "    it.skip('todo - Access with invalid user role')",
-        "label": "todo - Access with invalid user role",
+        "id": "access-with-invalid-user-role",
+        "rawLine": "    it.skip('Access with invalid user role', async () => {});",
+        "line": "    it.skip('Access with invalid user role')",
+        "label": "Access with invalid user role",
         "indent": 4,
         "type": "it",
         "isSkipped": true,
-        "isTodo": true
+        "isTodo": false
       },
       {
         "id": "access-with-custom-roles---rule-page",
@@ -14072,14 +14071,14 @@
         "isTodo": false
       },
       {
-        "id": "todo---access-with-invalid-user-role",
-        "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
-        "line": "      it.skip('todo - Access with invalid user role')",
-        "label": "todo - Access with invalid user role",
+        "id": "access-with-invalid-user-role",
+        "rawLine": "      it.skip('Access with invalid user role', async () => {});",
+        "line": "      it.skip('Access with invalid user role')",
+        "label": "Access with invalid user role",
         "indent": 6,
         "type": "it",
         "isSkipped": true,
-        "isTodo": true
+        "isTodo": false
       }
     ],
     "tree": [
@@ -14104,14 +14103,14 @@
             "isTodo": false
           },
           {
-            "id": "todo---access-with-invalid-user-role",
-            "rawLine": "    it.skip('todo - Access with invalid user role', async () => {});",
-            "line": "    it.skip('todo - Access with invalid user role')",
-            "label": "todo - Access with invalid user role",
+            "id": "access-with-invalid-user-role",
+            "rawLine": "    it.skip('Access with invalid user role', async () => {});",
+            "line": "    it.skip('Access with invalid user role')",
+            "label": "Access with invalid user role",
             "indent": 4,
             "type": "it",
             "isSkipped": true,
-            "isTodo": true
+            "isTodo": false
           },
           {
             "id": "access-with-custom-roles---rule-page",
@@ -14134,14 +14133,14 @@
                 "isTodo": false
               },
               {
-                "id": "todo---access-with-invalid-user-role",
-                "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
-                "line": "      it.skip('todo - Access with invalid user role')",
-                "label": "todo - Access with invalid user role",
+                "id": "access-with-invalid-user-role",
+                "rawLine": "      it.skip('Access with invalid user role', async () => {});",
+                "line": "      it.skip('Access with invalid user role')",
+                "label": "Access with invalid user role",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": true,
-                "isTodo": true
+                "isTodo": false
               }
             ]
           }

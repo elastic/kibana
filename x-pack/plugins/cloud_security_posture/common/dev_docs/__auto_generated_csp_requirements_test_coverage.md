@@ -668,7 +668,7 @@ You can also check out the dedicated app view, which enables easier search and f
 
 ## Directory: x-pack/test/cloud_security_posture_functional
 
-**Total Tests:** 202 | **Skipped:** 41 (20.30%) | **Todo:** 5 (2.48%)
+**Total Tests:** 202 | **Skipped:** 41 (20.30%) | **Todo:** 3 (1.49%)
 
 ![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/HAS-SKIP-yellow) ![](https://img.shields.io/badge/HAS-TODO-green)
 
@@ -679,10 +679,10 @@ You can also check out the dedicated app view, which enables easier search and f
 |------------|------|---------|------|
 | [Access with custom roles](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
 | [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [todo - Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) | ![](https://img.shields.io/badge/todo-green) |
+| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
 | [Access with custom roles - rule page](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
 | [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it |  |  |
-| [todo - Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) | ![](https://img.shields.io/badge/todo-green) |
+| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
 | [Test adding Cloud Security Posture Integrations CNVM](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
 | [CNVM AWS](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
 | [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it |  |  |
