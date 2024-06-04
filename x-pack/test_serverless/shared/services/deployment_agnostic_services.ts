@@ -30,6 +30,8 @@ const deploymentAgnosticApiIntegrationServices = _.pick(apiIntegrationServices, 
   'usageAPI',
   'console',
   'securitySolutionApi',
+  'alertingApi',
+  'sloApi',
 ]);
 
 export const services = {

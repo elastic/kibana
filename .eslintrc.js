@@ -629,6 +629,8 @@ module.exports = {
         'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/test/security_solution_api_integration/**/config*.ts',
+        'x-pack/test/observability_solution_api_integration/*/test_suites/**/*',
+        'x-pack/test/observability_solution_api_integration/**/config*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -1860,6 +1862,14 @@ module.exports = {
       rules: {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
+    },
+
+    /** Observerability Solution API Integration tests
+     * Ensures appropriate mocha tagging for tests
+     */
+    {
+      files: ['x-pack/test/observability_solution_api_integration/**/*.{ts,tsx}'],
+      rules: { '@kbn/eslint/require_mocha_tagging': 'error' },
     },
 
     /**
