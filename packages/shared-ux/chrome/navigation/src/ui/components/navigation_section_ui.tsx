@@ -177,19 +177,9 @@ const renderPanelOpener = (
 
 const getEuiProps = (
   _navNode: ChromeProjectNavigationNode,
-  {
-    navigateToUrl,
-    openPanel,
-    closePanel,
-    isSideNavCollapsed,
-    treeDepth,
-    getIsCollapsed,
-    activeNodes,
-  }: {
+  deps: {
     navigateToUrl: NavigateToUrlFn;
-    openPanel: PanelContext['open'];
     closePanel: PanelContext['close'];
-    isSideNavCollapsed: boolean;
     treeDepth: number;
     getIsCollapsed: (path: string) => boolean;
     activeNodes: ChromeProjectNavigationNode[][];
@@ -202,6 +192,7 @@ const getEuiProps = (
   dataTestSubj: string;
   spaceBefore?: EuiThemeSize | null;
 } & Pick<EuiCollapsibleNavItemProps, 'linkProps' | 'onClick'> => {
+  const { navigateToUrl, closePanel, treeDepth, getIsCollapsed, activeNodes } = deps;
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const { path, href, onClick: customOnClick, isCollapsible = DEFAULT_IS_COLLAPSIBLE } = navNode;
 
@@ -233,15 +224,7 @@ const getEuiProps = (
     : navNode.children
         ?.map((child) =>
           // Recursively convert the children to EuiCollapsibleNavSubItemProps
-          nodeToEuiCollapsibleNavProps(child, {
-            navigateToUrl,
-            openPanel,
-            closePanel,
-            isSideNavCollapsed,
-            treeDepth: treeDepth + 1,
-            getIsCollapsed,
-            activeNodes,
-          })
+          nodeToEuiCollapsibleNavProps(child, { ...deps, treeDepth: treeDepth + 1 })
         )
         .filter(({ isVisible }) => isVisible)
         .map((res) => {
@@ -305,9 +288,7 @@ function nodeToEuiCollapsibleNavProps(
   _navNode: ChromeProjectNavigationNode,
   deps: {
     navigateToUrl: NavigateToUrlFn;
-    openPanel: PanelContext['open'];
     closePanel: PanelContext['close'];
-    isSideNavCollapsed: boolean;
     treeDepth: number;
     getIsCollapsed: (path: string) => boolean;
     activeNodes: ChromeProjectNavigationNode[][];
@@ -387,7 +368,7 @@ interface Props {
 
 export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode }) => {
   const { activeNodes } = useNavigation();
-  const { navigateToUrl, isSideNavCollapsed } = useServices();
+  const { navigateToUrl } = useServices();
   const [items, setItems] = useState<EuiCollapsibleNavSubItemProps[] | undefined>();
 
   const { navNode } = useMemo(
@@ -398,7 +379,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       }),
     [_navNode]
   );
-  const { open: openPanel, close: closePanel } = usePanel();
+  const { close: closePanel } = usePanel();
 
   const { getIsCollapsed, getAccordionProps } = useAccordionState({ navNode });
 
@@ -408,22 +389,12 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   } = useMemo(() => {
     return nodeToEuiCollapsibleNavProps(navNode, {
       navigateToUrl,
-      openPanel,
       closePanel,
-      isSideNavCollapsed,
       treeDepth: 0,
       getIsCollapsed,
       activeNodes,
     });
-  }, [
-    navNode,
-    navigateToUrl,
-    openPanel,
-    closePanel,
-    isSideNavCollapsed,
-    getIsCollapsed,
-    activeNodes,
-  ]);
+  }, [navNode, navigateToUrl, closePanel, getIsCollapsed, activeNodes]);
 
   const { items: topLevelItems } = props;
 
