@@ -248,104 +248,8 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'number',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'number',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'number',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'cartesian_point',
-          optional: true,
-        },
-      ],
-      returnType: 'date',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'date',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'string',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'date',
-          optional: true,
-        },
-      ],
-      returnType: 'string',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'string',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'string',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
           type: 'boolean',
           optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'geo_shape',
-          optional: true,
         },
       ],
       returnType: 'boolean',
@@ -371,7 +275,98 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'ip',
+          type: 'cartesian_point',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'cartesian_point',
+          optional: true,
+        },
+      ],
+      returnType: 'cartesian_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'cartesian_shape',
+          optional: true,
+        },
+      ],
+      returnType: 'cartesian_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'geo_point',
+          optional: true,
+        },
+      ],
+      returnType: 'geo_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_shape',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'geo_shape',
+          optional: true,
+        },
+      ],
+      returnType: 'geo_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'number',
+          optional: false,
+        },
+      ],
+      returnType: 'number',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'number',
           optional: false,
         },
         {
@@ -380,7 +375,7 @@ const coalesceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'ip',
+      returnType: 'number',
       minParams: 1,
     },
     {
@@ -392,7 +387,7 @@ const coalesceDefinition: FunctionDefinition = {
         },
         {
           name: 'rest',
-          type: 'boolean',
+          type: 'ip',
           optional: true,
         },
       ],
@@ -403,135 +398,27 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'cartesian_point',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'cartesian_point',
+      returnType: 'string',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'cartesian_point',
+          type: 'string',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'boolean',
+          type: 'string',
           optional: true,
         },
       ],
-      returnType: 'cartesian_point',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'cartesian_shape',
-          optional: false,
-        },
-      ],
-      returnType: 'cartesian_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'cartesian_shape',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'cartesian_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_point',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_point',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_point',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'geo_point',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_shape',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_shape',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'geo_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'version',
-          optional: false,
-        },
-      ],
-      returnType: 'version',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'version',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'version',
+      returnType: 'string',
       minParams: 1,
     },
   ],
@@ -1513,6 +1400,171 @@ const ltrimDefinition: FunctionDefinition = {
   examples: [
     'ROW message = "   some text  ",  color = " red "\n| EVAL message = LTRIM(message)\n| EVAL color = LTRIM(color)\n| EVAL message = CONCAT("\'", message, "\'")\n| EVAL color = CONCAT("\'", color, "\'")',
   ],
+};
+
+const mvAppendDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'mv_append',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_append', {
+    defaultMessage: 'Concatenates values of two multi-value fields.',
+  }),
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'boolean',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_point',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_point',
+          optional: false,
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'number',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'number',
+          optional: false,
+        },
+      ],
+      returnType: 'number',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'geo_shape',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'ip',
+          optional: false,
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'string',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'string',
+          optional: false,
+        },
+      ],
+      returnType: 'string',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'version',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'version',
+          optional: false,
+        },
+      ],
+      returnType: 'version',
+    },
+  ],
+  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [],
 };
 
 const mvAvgDefinition: FunctionDefinition = {
@@ -4634,6 +4686,7 @@ export const evalFunctionDefinitions = [
   logDefinition,
   log10Definition,
   ltrimDefinition,
+  mvAppendDefinition,
   mvAvgDefinition,
   mvConcatDefinition,
   mvCountDefinition,

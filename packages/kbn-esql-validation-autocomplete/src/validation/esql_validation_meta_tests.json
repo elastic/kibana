@@ -9869,31 +9869,6 @@
       "warning": []
     },
     {
-      "query": "row var = coalesce(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort coalesce(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = coalesce(true)",
       "error": [],
       "warning": []
@@ -9920,6 +9895,81 @@
     },
     {
       "query": "row var = coalesce(to_boolean(true), to_boolean(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row coalesce(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")), to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row coalesce(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_cartesianshape(to_cartesianpoint(\"POINT (30 10)\")), to_cartesianshape(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row coalesce(now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_datetime(now()), to_datetime(now()))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row coalesce(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_geopoint(to_geopoint(\"POINT (30 10)\")), to_geopoint(to_geopoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row coalesce(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_geoshape(to_geopoint(\"POINT (30 10)\")), to_geoshape(to_geopoint(\"POINT (30 10)\")))",
       "error": [],
       "warning": []
     },
@@ -9954,6 +10004,31 @@
       "warning": []
     },
     {
+      "query": "row var = coalesce(to_ip(\"127.0.0.1\"), to_ip(\"127.0.0.1\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row coalesce(to_ip(\"127.0.0.1\"), to_ip(\"127.0.0.1\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(to_ip(to_ip(\"127.0.0.1\")), to_ip(to_ip(\"127.0.0.1\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = coalesce(\"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row coalesce(\"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = coalesce(to_string(true))",
       "error": [],
       "warning": []
@@ -9974,8 +10049,23 @@
       "warning": []
     },
     {
+      "query": "row var = coalesce(to_version(\"1.0.0\"), to_version(\"1.0.0\"))",
+      "error": [
+        "Argument of [coalesce] must be [boolean], found value [to_version(\"1.0.0\")] type [version]",
+        "Argument of [coalesce] must be [boolean], found value [to_version(\"1.0.0\")] type [version]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where coalesce(numberField) > 0",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where coalesce(versionField) > 0",
+      "error": [
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]"
+      ],
       "warning": []
     },
     {
@@ -9984,13 +10074,36 @@
       "warning": []
     },
     {
+      "query": "from a_index | where coalesce(versionField, versionField) > 0",
+      "error": [
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]",
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where length(coalesce(stringField)) > 0",
       "error": [],
       "warning": []
     },
     {
+      "query": "from a_index | where length(coalesce(versionField)) > 0",
+      "error": [
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where length(coalesce(stringField, stringField)) > 0",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(coalesce(versionField, versionField)) > 0",
+      "error": [
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]",
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]"
+      ],
       "warning": []
     },
     {
@@ -10009,6 +10122,13 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval coalesce(versionField)",
+      "error": [
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = coalesce(booleanField, booleanField)",
       "error": [],
       "warning": []
@@ -10020,6 +10140,89 @@
     },
     {
       "query": "from a_index | eval var = coalesce(to_boolean(booleanField), to_boolean(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(versionField, versionField)",
+      "error": [
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]",
+        "Argument of [coalesce] must be [boolean], found value [versionField] type [version]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(to_datetime(dateField), to_datetime(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(to_geopoint(geoPointField), to_geopoint(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(to_geoshape(geoPointField), to_geoshape(geoPointField))",
       "error": [],
       "warning": []
     },
@@ -10054,6 +10257,31 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = coalesce(ipField, ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(ipField, ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(to_ip(ipField), to_ip(ipField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = coalesce(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval coalesce(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = coalesce(to_string(booleanField))",
       "error": [],
       "warning": []
@@ -10075,501 +10303,6 @@
     },
     {
       "query": "from a_index | sort coalesce(booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(5, true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(5, true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_integer(true), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(now())",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_datetime(now()))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(now(), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(now(), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_datetime(now()), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(\"a\", true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(\"a\", true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_string(true), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_ip(\"127.0.0.1\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_ip(\"127.0.0.1\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_ip(to_ip(\"127.0.0.1\")))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_ip(\"127.0.0.1\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_ip(\"127.0.0.1\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_ip(to_ip(\"127.0.0.1\")), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianpoint(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_cartesianpoint(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianpoint(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_cartesianpoint(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_cartesianshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianshape(to_cartesianpoint(\"POINT (30 10)\")))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianshape(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_cartesianshape(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_cartesianshape(to_cartesianpoint(\"POINT (30 10)\")), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geopoint(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_geopoint(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geopoint(to_geopoint(\"POINT (30 10)\")))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geopoint(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_geopoint(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geopoint(to_geopoint(\"POINT (30 10)\")), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geoshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_geoshape(\"POINT (30 10)\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geoshape(to_geopoint(\"POINT (30 10)\")))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geoshape(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_geoshape(\"POINT (30 10)\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_geoshape(to_geopoint(\"POINT (30 10)\")), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_version(\"1.0.0\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_version(\"1.0.0\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_version(\"a\"))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_version(\"1.0.0\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row coalesce(to_version(\"1.0.0\"), true)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = coalesce(to_version(\"a\"), to_boolean(true))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where coalesce(numberField, booleanField) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where length(coalesce(stringField, booleanField)) > 0",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(numberField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(numberField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_integer(booleanField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(dateField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(dateField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_datetime(dateField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(dateField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(dateField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_datetime(dateField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(stringField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(stringField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_string(booleanField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(ipField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(ipField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_ip(ipField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(ipField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(ipField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_ip(ipField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(cartesianPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_cartesianpoint(cartesianPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(cartesianPointField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(cartesianPointField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_cartesianpoint(cartesianPointField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(cartesianShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(cartesianShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_cartesianshape(cartesianPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(cartesianShapeField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(cartesianShapeField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_cartesianshape(cartesianPointField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(geoPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(geoPointField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_geopoint(geoPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(geoPointField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(geoPointField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_geopoint(geoPointField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(geoShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(geoShapeField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_geoshape(geoPointField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(geoShapeField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(geoShapeField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_geoshape(geoPointField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(versionField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(versionField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_version(stringField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(versionField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(versionField, booleanField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = coalesce(to_version(stringField), to_boolean(booleanField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort coalesce(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval coalesce(cartesianPointField)",
       "error": [],
       "warning": []
     },
@@ -25162,6 +24895,408 @@
     },
     {
       "query": "row nullVar = null | eval to_base64(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = ip_prefix(to_ip(\"127.0.0.1\"), 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row ip_prefix(to_ip(\"127.0.0.1\"), 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = ip_prefix(to_ip(to_ip(\"127.0.0.1\")), to_integer(true), to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = ip_prefix(true, true, true)",
+      "error": [
+        "Argument of [ip_prefix] must be [ip], found value [true] type [boolean]",
+        "Argument of [ip_prefix] must be [number], found value [true] type [boolean]",
+        "Argument of [ip_prefix] must be [number], found value [true] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = ip_prefix(ipField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ip_prefix(ipField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = ip_prefix(to_ip(ipField), to_integer(booleanField), to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ip_prefix(booleanField, booleanField, booleanField)",
+      "error": [
+        "Argument of [ip_prefix] must be [ip], found value [booleanField] type [boolean]",
+        "Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ip_prefix(ipField, numberField, numberField, extraArg)",
+      "error": [
+        "Error: [ip_prefix] function expects exactly 3 arguments, got 4."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort ip_prefix(ipField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ip_prefix(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval ip_prefix(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(true, true)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(true, true)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_boolean(true), to_boolean(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")), to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_cartesianshape(to_cartesianpoint(\"POINT (30 10)\")), to_cartesianshape(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_datetime(now()), to_datetime(now()))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_integer(true), to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_geopoint(to_geopoint(\"POINT (30 10)\")), to_geopoint(to_geopoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_geoshape(to_geopoint(\"POINT (30 10)\")), to_geoshape(to_geopoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_ip(\"127.0.0.1\"), to_ip(\"127.0.0.1\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(to_ip(\"127.0.0.1\"), to_ip(\"127.0.0.1\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_ip(to_ip(\"127.0.0.1\")), to_ip(to_ip(\"127.0.0.1\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(\"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(\"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_string(true), to_string(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_version(\"1.0.0\"), to_version(\"1.0.0\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_append(to_version(\"1.0.0\"), to_version(\"1.0.0\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_append(to_version(\"a\"), to_version(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_append(numberField, numberField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(mv_append(stringField, stringField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(booleanField, booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(booleanField, booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_boolean(booleanField), to_boolean(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_datetime(dateField), to_datetime(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_integer(booleanField), to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_geopoint(geoPointField), to_geopoint(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_geoshape(geoPointField), to_geoshape(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(ipField, ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(ipField, ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_ip(ipField), to_ip(ipField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_string(booleanField), to_string(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(versionField, versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(versionField, versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_append(to_version(stringField), to_version(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(booleanField, booleanField, extraArg)",
+      "error": [
+        "Error: [mv_append] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort mv_append(booleanField, booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_append(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_append(nullVar, nullVar)",
       "error": [],
       "warning": []
     }

@@ -214,40 +214,6 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     }),
   },
   // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
-  coalesce: {
-    signatures: supportedFieldTypes
-      .map<FunctionDefinition['signatures']>((type) => [
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-            {
-              name: 'rest',
-              type: 'boolean',
-              optional: true,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-      ])
-      .flat(),
-  },
-  // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
   mv_dedupe: {
     signatures: supportedFieldTypes.map<FunctionDefinition['signatures'][number]>((type) => ({
       params: [
