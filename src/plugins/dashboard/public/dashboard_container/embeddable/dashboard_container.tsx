@@ -40,7 +40,7 @@ import {
   HasSerializedChildState,
   TrackContentfulRender,
 } from '@kbn/presentation-containers';
-import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -52,6 +52,7 @@ import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
+import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
@@ -593,6 +594,7 @@ export class DashboardContainer
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
+        references: serialized.references,
       };
     }
     return panel;
