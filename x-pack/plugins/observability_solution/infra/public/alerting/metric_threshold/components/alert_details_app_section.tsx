@@ -161,7 +161,7 @@ export function AlertDetailsAppSection({
                   <Threshold
                     chartProps={chartProps}
                     id={`threshold-${generateUniqueKey(criterion)}`}
-                    threshold={criterion.threshold}
+                    thresholds={criterion.threshold}
                     value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
                     valueFormatter={(d) =>
                       metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
