@@ -25,12 +25,6 @@ import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { EmptyPromptPage } from './empty_prompt_page';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
 
-const inferenceEndpointsBreadcrumbs = [
-  i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpoints.breadcrumb', {
-    defaultMessage: 'Inference Endpoints',
-  }),
-];
-
 const addEndpointLabel = i18n.translate(
   'xpack.searchInferenceEndpoints.inferenceEndpoints.newInferenceEndpointButtonLabel',
   {
@@ -122,7 +116,6 @@ export const InferenceEndpoints: React.FC = () => {
         {inferenceEndpoints.length === 0 ? (
           <EmptyPromptPage
             addEndpointLabel={addEndpointLabel}
-            breadcrumbs={inferenceEndpointsBreadcrumbs}
             setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
           />
         ) : (

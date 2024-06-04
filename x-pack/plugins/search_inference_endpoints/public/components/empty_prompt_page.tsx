@@ -13,13 +13,11 @@ import { InferenceEndpointsProvider } from '../providers/inference_endpoints_pro
 
 interface EmptyPromptPageProps {
   addEndpointLabel: string;
-  breadcrumbs: string[];
   setIsInferenceFlyoutVisible: (value: boolean) => void;
 }
 
 export const EmptyPromptPage: React.FC<EmptyPromptPageProps> = ({
   addEndpointLabel,
-  breadcrumbs,
   setIsInferenceFlyoutVisible,
 }) => (
   <InferenceEndpointsProvider>
