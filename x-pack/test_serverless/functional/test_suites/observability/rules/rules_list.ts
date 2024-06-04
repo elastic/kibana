@@ -702,7 +702,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const setRuleStatus = async (testSubj: string, checked: boolean) => {
         const readAriaChecked = async (): Promise<boolean> => {
           const statusItem = await testSubjects.find(testSubj);
-          return statusItem ? JSON.parse(await statusItem.getAttribute('aria-checked')) : null;
+          return statusItem
+            ? JSON.parse((await statusItem.getAttribute('aria-checked')) || 'null')
+            : null;
         };
 
         await retry.try(async () => {
