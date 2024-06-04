@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { formatNumber } from '@elastic/eui';
 
@@ -40,16 +40,13 @@ export const getDegradedFieldsColumns = ({
   {
     name: fieldColumnName,
     field: 'name',
-    render: (fieldName: string) => {
-      return <EuiText size="xs">{fieldName}</EuiText>;
-    },
   },
   {
     name: countColumnName,
     sortable: true,
     field: 'count',
     render: (_, { count, timeSeries }) => {
-      const countValue = <EuiText size="xs">{formatNumber(count, NUMBER_FORMAT)}</EuiText>;
+      const countValue = formatNumber(count, NUMBER_FORMAT);
       return <SparkPlot series={timeSeries} valueLabel={countValue} isLoading={isLoading} />;
     },
   },
@@ -58,7 +55,7 @@ export const getDegradedFieldsColumns = ({
     sortable: true,
     field: 'lastOccurrence',
     render: (lastOccurrence: number) => {
-      return <EuiText size="xs">{dateFormatter.convert(lastOccurrence)}</EuiText>;
+      return dateFormatter.convert(lastOccurrence);
     },
   },
 ];
