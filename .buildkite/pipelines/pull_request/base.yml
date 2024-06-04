@@ -3,6 +3,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
+      diskSizeGB: 50
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
@@ -13,6 +14,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
+      diskSizeGB: 50
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
@@ -29,6 +31,7 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
+      diskSizeGB: 50
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
