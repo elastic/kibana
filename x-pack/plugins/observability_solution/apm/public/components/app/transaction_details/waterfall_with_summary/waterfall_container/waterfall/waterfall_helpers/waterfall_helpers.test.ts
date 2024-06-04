@@ -806,7 +806,7 @@ describe('waterfall_helpers', () => {
       },
       children: [
         {
-          id: 'mySpanIdD-0',
+          id: '0-mySpanIdD-0',
           item: {
             docType: 'span',
             doc: {
@@ -908,7 +908,7 @@ describe('waterfall_helpers', () => {
     describe('updateTraceTreeNode', () => {
       it('should update the "mySpanIdD" node setting "expanded" to true', () => {
         const updatedNode: IWaterfallNodeFlatten = {
-          id: 'mySpanIdD-0',
+          id: '0-mySpanIdD-0',
           item: {
             docType: 'span',
             doc: {

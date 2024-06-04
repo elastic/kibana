@@ -7,10 +7,17 @@
  */
 
 let seq = 0;
+const pid = String(process.pid);
 
 function generateId(seed?: string, length: number = 32) {
-  const str = seed ?? String(seq++);
-  return str.padStart(length, '0');
+  const id = seed ?? String(seq++);
+  const generatedId = pid + id.padStart(length - pid.length, '0');
+
+  if (generatedId.length > length) {
+    throw new Error('id is too long');
+  }
+
+  return generatedId;
 }
 
 export function generateShortId(seed?: string) {

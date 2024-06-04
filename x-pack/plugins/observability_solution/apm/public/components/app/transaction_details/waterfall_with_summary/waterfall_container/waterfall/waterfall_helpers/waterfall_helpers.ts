@@ -520,6 +520,7 @@ function buildTree({
     const node = queue[queueIndex];
 
     const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
+
     // Set childrenToLoad for all nodes enqueued.
     // this allows lazy loading of child nodes
     node.childrenToLoad = children.length;
@@ -529,7 +530,7 @@ function buildTree({
         const level = node.level + 1;
 
         const currentNode: IWaterfallNode = {
-          id: `${child.id}-${index}`,
+          id: `${level}-${child.id}-${index}`,
           item: child,
           children: [],
           level,
