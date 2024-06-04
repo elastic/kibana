@@ -69,7 +69,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
         <>
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.globalDataTagDescription"
-            defaultMessage="Add a field and value set to all data colected from the agents enrolled in this policy."
+            defaultMessage="Add a field and value set to all data collected from the agents enrolled in this policy."
           />
           {unsupportedInputs.length > 0 ? (
             <>
