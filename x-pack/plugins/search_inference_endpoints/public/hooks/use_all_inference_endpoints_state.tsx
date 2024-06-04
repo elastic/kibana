@@ -7,9 +7,12 @@
 
 import { useCallback, useState } from 'react';
 
-import type { QueryParams, AlInferenceEndpointsTableState } from './types';
+import type {
+  QueryParams,
+  AlInferenceEndpointsTableState,
+} from '../components/all_inference_endpoints/types';
 
-import { DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE } from './constants';
+import { DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE } from '../components/all_inference_endpoints/constants';
 
 interface UseAllInferenceEndpointsStateReturn {
   queryParams: QueryParams;

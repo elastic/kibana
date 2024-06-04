@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-import { useTableData } from './use_table_data';
+import { useTableData } from '../../hooks/use_table_data';
 
-import { useAllInferenceEndpointsState } from './use_all_inference_endpoints_state';
+import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 
 import { InferenceEndpointsProvider } from '../../providers/inference_endpoints_provider';
 import { EndpointsTable } from './endpoints_table';

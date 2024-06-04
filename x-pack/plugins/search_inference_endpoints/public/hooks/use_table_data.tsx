@@ -9,13 +9,13 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
-import { DEFAULT_TABLE_LIMIT } from './constants';
+import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   InferenceEndpointUI,
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
   QueryParams,
   SortOrder,
-} from './types';
+} from '../components/all_inference_endpoints/types';
 
 interface UseTableDataReturn {
   tableData: InferenceEndpointUI[];

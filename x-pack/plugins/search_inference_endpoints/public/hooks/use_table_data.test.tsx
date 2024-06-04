@@ -7,9 +7,9 @@
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { renderHook } from '@testing-library/react-hooks';
-import { QueryParams } from './types';
+import { QueryParams } from '../components/all_inference_endpoints/types';
 import { useTableData } from './use_table_data';
-import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
+import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../components/all_inference_endpoints/types';
 
 const inferenceEndpoints = [
   {

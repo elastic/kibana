@@ -33,7 +33,7 @@ export interface ServerlessSearchPluginStartDependencies {
   cloud: CloudStart;
   console: ConsolePluginStart;
   searchPlayground: SearchPlaygroundPluginStart;
-  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   management: ManagementStart;
   security: SecurityPluginStart;
   serverless: ServerlessPluginStart;
