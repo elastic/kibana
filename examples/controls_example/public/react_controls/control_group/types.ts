@@ -39,23 +39,22 @@ export type ControlGroupUnsavedChanges = Omit<
   filters: Filter[] | undefined;
 };
 
-export type ControlGroupApi<ChildStateType extends DefaultControlState = DefaultControlState> =
-  PresentationContainer &
-    DefaultEmbeddableApi<ControlGroupSerializedState> &
-    PublishesFilters &
-    PublishesDataViews &
-    HasSerializedChildState<ChildStateType> &
-    HasEditCapabilities &
-    PublishesDataLoading &
-    PublishesUnsavedChanges &
-    PublishesControlGroupDisplaySettings &
-    Partial<HasParentApi<PublishesUnifiedSearch>>;
+type ControlGroupChildState = DefaultControlState & { type: string; order: number };
+
+export type ControlGroupApi = PresentationContainer &
+  DefaultEmbeddableApi<ControlGroupSerializedState> &
+  PublishesFilters &
+  PublishesDataViews &
+  HasSerializedChildState<ControlGroupChildState> &
+  HasEditCapabilities &
+  PublishesDataLoading &
+  PublishesUnsavedChanges &
+  PublishesControlGroupDisplaySettings &
+  Partial<HasParentApi<PublishesUnifiedSearch>>;
 
 export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
-export interface ControlGroupRuntimeState<
-  ChildStateType extends ControlPanelState = ControlPanelState
-> {
+export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
@@ -63,7 +62,7 @@ export interface ControlGroupRuntimeState<
   showApplySelections?: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
-  initialChildControlState: ControlPanelsState<ChildStateType>;
+  initialChildControlState: ControlPanelsState<ControlGroupChildState>;
   /** TODO: Handle the editor config, which is used with the control group renderer component */
   editorConfig?: {
     hideDataViewSelector?: boolean;

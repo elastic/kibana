@@ -44,19 +44,16 @@ import {
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
-  ControlPanelState,
 } from './types';
 
-export const getControlGroupEmbeddableFactory = <
-  ChildControlState extends ControlPanelState = ControlPanelState
->(services: {
+export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
     ControlGroupSerializedState,
-    ControlGroupApi<ChildControlState>,
-    ControlGroupRuntimeState<ChildControlState>
+    ControlGroupApi,
+    ControlGroupRuntimeState
   > = {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),

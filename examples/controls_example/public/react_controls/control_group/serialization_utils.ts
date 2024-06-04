@@ -11,13 +11,11 @@ import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugi
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { DefaultControlApi, DefaultControlState } from '../types';
-import { ControlGroupRuntimeState, ControlGroupSerializedState, ControlPanelState } from './types';
+import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
-export const deserializeControlGroup = <
-  ChildControlState extends ControlPanelState = ControlPanelState
->(
+export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
-): ControlGroupRuntimeState<ChildControlState> => {
+): ControlGroupRuntimeState => {
   const panels = JSON.parse(state.rawState.panelsJSON);
   const ignoreParentSettings = JSON.parse(state.rawState.ignoreParentSettingsJSON);
 
