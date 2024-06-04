@@ -128,7 +128,6 @@ export const InferenceEndpoints: React.FC = () => {
         ) : (
           <TabularPage
             addEndpointLabel={addEndpointLabel}
-            breadcrumbs={inferenceEndpointsBreadcrumbs}
             setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
             inferenceEndpoints={inferenceEndpoints}
           />
