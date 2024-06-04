@@ -16,11 +16,14 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import type { Space } from '../../../common';
@@ -52,11 +55,15 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
   const columns: Array<EuiBasicTableColumn<Role>> = [
     {
       field: 'name',
-      name: 'Role',
+      name: i18n.translate('xpack.spaces.management.spaceDetails.roles.column.name.title', {
+        defaultMessage: 'Role',
+      }),
     },
     {
       field: 'privileges',
-      name: 'Privileges',
+      name: i18n.translate('xpack.spaces.management.spaceDetails.roles.column.privileges.title', {
+        defaultMessage: 'Privileges',
+      }),
       render: (_value, record) => {
         return record.kibana.map((kibanaPrivilege) => {
           return kibanaPrivilege.base.join(', ');
@@ -67,7 +74,12 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
       name: 'Actions',
       actions: [
         {
-          name: 'Remove from space',
+          name: i18n.translate(
+            'xpack.spaces.management.spaceDetails.roles.column.actions.remove.title',
+            {
+              defaultMessage: 'Remove from space',
+            }
+          ),
           description: 'Click this action to remove the role privileges from this space.',
           onClick: () => {
             window.alert('Not yet implemented.');
@@ -103,29 +115,43 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles }) => {
           }}
         />
       )}
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <p>Roles that can access this space. Privileges are managed at the role level.</p>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText>
+                <p>
+                  {i18n.translate('xpack.spaces.management.spaceDetails.roles.heading', {
+                    defaultMessage:
+                      'Roles that can access this space. Privileges are managed at the role level.',
+                  })}
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} color="primary">
+              <EuiButton
+                onClick={() => {
+                  setShowRolesPrivilegeEditor(true);
+                }}
+              >
+                {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign', {
+                  defaultMessage: 'Assign role',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} color="primary">
-          <EuiButton
-            onClick={() => {
-              setShowRolesPrivilegeEditor(true);
-            }}
-          >
-            Assign role
-          </EuiButton>
+        <EuiFlexItem>
+          <EuiBasicTable
+            tableCaption="Demo of EuiBasicTable"
+            rowHeader="firstName"
+            columns={columns}
+            items={rolesInUse}
+            rowProps={getRowProps}
+            cellProps={getCellProps}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiBasicTable
-        tableCaption="Demo of EuiBasicTable"
-        rowHeader="firstName"
-        columns={columns}
-        items={rolesInUse}
-        rowProps={getRowProps}
-        cellProps={getCellProps}
-      />
     </>
   );
 };
@@ -147,7 +173,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const getSaveButton = () => {
     return (
       <EuiButton onClick={onSaveClick} fill data-test-subj={'createRolesPrivilegeButton'}>
-        Assign roles
+        {i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
+          defaultMessage: 'Assign roles',
+        })}
       </EuiButton>
     );
   };
@@ -160,10 +188,14 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <p>
-          Roles will be granted access to the current space according to their default privileges.
-          Use the &lsquo;Customize&rsquo; option to override default privileges.
-        </p>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.spaces.management.spaceDetails.privilegeForm.heading"
+              defaultMessage="Roles will be granted access to the current space according to their default privileges. Use the &lsquo;Customize&rsquo; option to override default privileges."
+            />
+          </p>
+        </EuiText>
         {getForm()}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -175,7 +207,9 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               flush="left"
               data-test-subj={'cancelRolesPrivilegeButton'}
             >
-              Cancel
+              {i18n.translate('xpack.spaces.management.spaceDetails.roles.cancelRoleButton', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{getSaveButton()}</EuiFlexItem>

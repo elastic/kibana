@@ -199,9 +199,9 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
     // use href to force full page reload (needed in order to change spaces)
     return (
-      <EuiButton iconType="merge" href={urlToSelectedSpace}>
+      <EuiButton iconType="merge" href={urlToSelectedSpace} data-test-subj="spaceSwitcherButton">
         <FormattedMessage
-          id="viewSpace.switchToSpaceButton.label"
+          id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
           defaultMessage="Switch to this space"
         />
       </EuiButton>
@@ -216,19 +216,19 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
       getUrlForApp={getUrlForApp}
     >
       <EuiText>
-        <EuiFlexGroup>
+        <EuiFlexGroup data-test-subj="spaceDetailsHeader">
           <EuiFlexItem grow={false}>
             <HeaderAvatar />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1>{space.name}</h1>
+              <h1 data-test-subj="spaceTitle">{space.name}</h1>
             </EuiTitle>
             <EuiText size="s">
               <p>
                 {space.description ?? (
                   <FormattedMessage
-                    id="viewSpace.description"
+                    id="xpack.spaces.management.spaceDetails.space.description"
                     defaultMessage="Organize your saved objects and show related features for creating new content."
                   />
                 )}

@@ -9,6 +9,7 @@ import { EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
 import type { KibanaFeature } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
@@ -33,12 +34,16 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
   return [
     {
       id: TAB_ID_CONTENT,
-      name: 'Content',
+      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.feature.heading', {
+        defaultMessage: 'Content',
+      }),
       content: <ViewSpaceContent space={space} />,
     },
     {
       id: TAB_ID_FEATURES,
-      name: 'Features',
+      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.feature.heading', {
+        defaultMessage: 'Feature visibility',
+      }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" size="m">
           {enabledFeatureCount} / {totalFeatureCount}
@@ -48,7 +53,9 @@ export const getTabs = (space: Space, features: KibanaFeature[], roles: Role[]):
     },
     {
       id: TAB_ID_ROLES,
-      name: 'Assigned roles',
+      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.roles.heading', {
+        defaultMessage: 'Assigned roles',
+      }),
       append: (
         <EuiNotificationBadge className="eui-alignCenter" size="m">
           {roles.length}
