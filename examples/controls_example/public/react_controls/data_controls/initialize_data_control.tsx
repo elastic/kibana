@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, combineLatestWith, distinctUntilChanged, mergeMap } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -73,10 +73,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   dataViewId
     .pipe(
       combineLatestWith(fieldName),
-      distinctUntilChanged(
-        ([oldId, oldField], [newId, newField]) => oldId === newId && oldField === newField
-      ),
-      mergeMap(async ([currentDataViewId, currentFieldName]) => {
+      switchMap(async ([currentDataViewId, currentFieldName]) => {
         defaultControlApi.setDataLoading(true);
         const dataView = await services.dataViews.get(currentDataViewId);
         const field = dataView.getFieldByName(currentFieldName);
