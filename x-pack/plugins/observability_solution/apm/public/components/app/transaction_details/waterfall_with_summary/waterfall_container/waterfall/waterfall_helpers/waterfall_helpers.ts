@@ -529,7 +529,7 @@ function buildTree({
         const level = node.level + 1;
 
         const currentNode: IWaterfallNode = {
-          id: btoa(`${node.id}-${child.id}-${index}`),
+          id: `${child.id}-${index}`,
           item: child,
           children: [],
           level,

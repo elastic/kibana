@@ -207,7 +207,6 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
       data-test-subj="waterfallItem"
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
-      key={node.item.id}
       id={node.item.id}
       hasError={node.item.doc.event?.outcome === 'failure'}
       marginLeftLevel={marginLeftLevel}
