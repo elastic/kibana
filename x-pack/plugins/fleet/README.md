@@ -76,7 +76,7 @@ Create a `config/kibana.dev.yml` file if you don't have one by copying the exist
 
 To get started, it is recommended to set the following settings:
 
-1\. The URL at which Kibana is available for end users: unless explicitly specified, this path is randomized in dev mode(refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To set it, add the following to your `kibana.dev.yml`:
+1\. The URL at which Kibana is available for end users: unless explicitly specified, this path is randomized in dev mode (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To set it, add the following to your `kibana.dev.yml`:
 ```yml
 server.basePath: /yourPath
 ```
@@ -118,7 +118,7 @@ If you are still encountering errors after `yarn kbn clean`, you can try a more 
 
 [Fleet Server](https://github.com/elastic/fleet-server) is the component that manages Elastic Agents within Fleet. It needs to be set up in order to enroll Elastic Agents into Fleet and is itself a special instance of Elastic Agent.
 
-This means that developing with enrolled agents requires at least two Elastic Agent instances (a Fleet Server and data shipping agents). As only one instance is allowed per host, the usual method is to run these instances in virtual machines or Docker containers. The [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) guide details this.
+This means that developing with enrolled agents requires at least two Elastic Agent instances: a Fleet Server and data shipping agents. As only one instance is allowed per host, the usual method is to run these instances in virtual machines or Docker containers. The [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) guide details this.
 
 Note: if you need to do simultaneous Kibana and Fleet Server development, refer to the [Developing Kibana and Fleet Server simulatanously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) guide
 

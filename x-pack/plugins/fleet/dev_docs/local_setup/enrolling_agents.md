@@ -61,7 +61,7 @@ xpack.fleet.outputs:
 
 ## Using Multipass VMs
 
-[Multipass](https://multipass.run/) is lightweight virtualization tool for running Ubuntu VMs. Follow instructions at https://multipass.run/install or to install Multipass on your local machine.
+[Multipass](https://multipass.run/) is a lightweight virtualization tool for running Ubuntu VMs. Follow the instructions at https://multipass.run/install to install Multipass on your local machine.
 
 Advantages of running Elastic Agents on a VM include:
 - More realistic setup.
@@ -69,7 +69,14 @@ Advantages of running Elastic Agents on a VM include:
 - Agents can be upgraded.
 - Elastic Defend can be installed.
 
-To run a Fleet Server and agents on VMs, make sure the default output host defined in your `kibana.dev.yml` uses your local IP (NB: using `localhost` can cause connection issues). The default Fleet Server host can be set once the VM for the Fleet Server is running. In Fleet UI, this should be reflected in Fleet settings:
+To run a Fleet Server and agents on VMs, make sure the default output host defined in your `kibana.dev.yml` uses your local IP address (NB: using `localhost` can cause connection issues). For Mac users using a WiFi connection, the local IP address can be retrieved with:
+```sh
+ipconfig getifaddr en0
+```
+
+The default Fleet Server host can be set once the VM for the Fleet Server is running.
+
+In Fleet UI, these host URLs should be reflected in the Settings page:
 ![Fleet settings UI showing hosts for agents on VM](./screenshots/vm_fleet_settings.png)
 
 ### Running a Fleet Server
@@ -102,7 +109,7 @@ Copy the second IP address into the host URLs of the Fleet Server host in your `
 multipass shell fleet-server
 ```
 
-3\. Open Kibana in the browser and head over to Fleet. initially, there should be no Fleet Server:
+3\. Open Kibana in a browser and head over to Fleet. Initially, there should be no Fleet Server:
 ![Fleet UI with no Fleet Server](./screenshots/no_fleet_server.png)
 
 4\. Click "Add Fleet Server". In the flyout, check that the Fleet Server host is correct and click "Continue".
@@ -155,11 +162,13 @@ multipass restart --all
 
 Official documentation: https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html
 
-The main advantage of running Elastic Agents on a Docker container is a one command setup that can be easily to scripted (see [Using the `run_dockerized_agent.sh` script](#using-the-run_dockerized_agentsh-script) below).There are a few limitations, however, including:
+The main advantage of running Elastic Agents in a Docker container is a one command setup that can be easily be scripted (see [Using the `run_dockerized_agent.sh` script](#using-the-run_dockerized_agentsh-script) below). There are a few limitations, however, including:
 - Agents cannot be upgraded.
 - Elastic Defend cannot be installed.
 
-To use dockerized Fleet Server and agents, make sure the default Fleet Server host and default output defined in your `kibana.dev.yml` use `host.docker.internal`. In Fleet UI, this should be reflected in Fleet settings:
+To use dockerized Fleet Server and agents, make sure the default Fleet Server host and default output defined in your `kibana.dev.yml` use `host.docker.internal`.
+
+In Fleet UI, these host URLs should be reflected in the Settings page:
 ![Fleet settings UI showing hosts for dockerized agents](./screenshots/docker_fleet_settings.png)
 
 ### Running a Fleet Server
