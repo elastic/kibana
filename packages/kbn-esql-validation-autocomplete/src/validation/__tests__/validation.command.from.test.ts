@@ -31,7 +31,7 @@ test('loads fields with FROM source when commands after pipe present', async () 
 
 describe('validation', () => {
   describe('command', () => {
-    describe('FROM', () => {
+    describe('FROM <sources> [ METADATA <indices> ]', () => {
       test('errors on invalid command start', async () => {
         const { expectErrors } = await setup();
 

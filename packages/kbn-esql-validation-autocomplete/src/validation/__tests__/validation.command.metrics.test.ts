@@ -10,7 +10,7 @@ import { setup } from './helpers';
 
 describe('validation', () => {
   describe('command', () => {
-    describe('METRICS', () => {
+    describe('METRICS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
       test('errors on invalid command start', async () => {
         const { expectErrors } = await setup();
 
