@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const datasetQualityAppTitle = i18n.translate('xpack.datasetQuality.appTitle', {
-  defaultMessage: 'Logs data quality',
+  defaultMessage: 'Dataset Quality',
 });
 
 export const noDatasetsDescription = i18n.translate('xpack.datasetQuality.noDatasetsDescription', {
