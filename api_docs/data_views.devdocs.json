@@ -17493,7 +17493,15 @@
                 "section": "def-common.DataViewField",
                 "text": "DataViewField"
               },
-              "; }; getFieldMapSorted: () => {}; }>"
+              "; }; getFieldMapSorted: () => Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">; }>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
             "deprecated": false,
