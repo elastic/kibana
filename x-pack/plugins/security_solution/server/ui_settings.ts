@@ -36,7 +36,6 @@ import {
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
-  ENABLE_EXPANDABLE_FLYOUT_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../common/constants';
@@ -172,23 +171,6 @@ export const initUiSettings = (
         defaultMessage: '<p>Enables the News feed</p>',
         values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-    },
-    [ENABLE_EXPANDABLE_FLYOUT_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableExpandableFlyoutLabel', {
-        defaultMessage: 'Expandable flyout',
-      }),
-      value: true,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableExpandableFlyoutDescription',
-        {
-          defaultMessage: '<p>Enables the expandable flyout</p>',
-          values: { p: (chunks) => `<p>${chunks}</p>` },
-        }
-      ),
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: true,
