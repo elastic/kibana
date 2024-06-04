@@ -74,6 +74,7 @@ export const JobsListPage: FC<Props> = ({
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
+  // callback to allow import flyout to refresh jobs list
   const [refreshJobs, setRefreshJobs] = useState<(() => void) | null>(null);
 
   const mlServices = useMemo(
