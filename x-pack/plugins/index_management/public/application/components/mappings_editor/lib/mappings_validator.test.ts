@@ -40,6 +40,7 @@ describe('Mappings configuration validator', () => {
       _size: {
         enabled: true,
       },
+      subobjects: true,
     };
 
     const { errors } = validateMappings(mappings, [MapperSizePluginId]);
@@ -85,6 +86,7 @@ describe('Mappings configuration validator', () => {
       _size: {
         enabled: true,
       },
+      subobjects: true,
     };
 
     const { value, errors } = validateMappings(mappings, []);
@@ -93,6 +95,7 @@ describe('Mappings configuration validator', () => {
       dynamic: true,
       properties: {},
       dynamic_templates: [],
+      subobjects: true,
     });
 
     expect(errors).not.toBe(undefined);
@@ -125,7 +128,7 @@ describe('Properties validator', () => {
       prop5: [], // To be removed
       prop6: {
         properties: {
-          prop1: { type: 'text' },
+          prop1: { type: 'text', subobjects: false },
           prop2: 'abc', // To be removed
         },
       },
@@ -137,7 +140,7 @@ describe('Properties validator', () => {
       prop6: {
         type: 'object',
         properties: {
-          prop1: { type: 'text' },
+          prop1: { type: 'text', subobjects: false },
         },
       },
     });
@@ -158,7 +161,7 @@ describe('Properties validator', () => {
         type: 'object',
         properties: {
           prop1: {},
-          prop2: { type: 'keyword' },
+          prop2: { type: 'keyword', subobjects: false },
         },
       },
     };
@@ -179,6 +182,7 @@ describe('Properties validator', () => {
           },
           prop2: {
             type: 'keyword',
+            subobjects: false,
           },
         },
       },
@@ -226,7 +230,7 @@ describe('Properties validator', () => {
 
   it('should strip parameters that are unknown', () => {
     const properties = {
-      prop1: { type: 'text', unknown: true, anotherUnknown: 123 },
+      prop1: { type: 'text', unknown: true, anotherUnknown: 123, subobjects: false },
       prop2: { type: 'keyword', store: true, index: true, doc_values_binary: true },
       prop3: {
         type: 'object',
@@ -239,7 +243,7 @@ describe('Properties validator', () => {
     const { value, errors } = validateProperties(properties as any);
 
     expect(value).toEqual({
-      prop1: { type: 'text' },
+      prop1: { type: 'text', subobjects: false },
       prop2: { type: 'keyword', store: true, index: true, doc_values_binary: true },
       prop3: {
         type: 'object',
