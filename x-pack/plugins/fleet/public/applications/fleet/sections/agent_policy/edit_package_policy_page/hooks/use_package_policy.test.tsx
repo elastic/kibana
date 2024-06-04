@@ -26,6 +26,7 @@ const mockPackagePolicy = {
   package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
   enabled: true,
   policy_id: 'agent-policy-1',
+  policy_ids: ['agent-policy-1'],
   vars: {},
   inputs: [
     {
@@ -60,6 +61,7 @@ jest.mock('../../../../../../hooks/use_request', () => ({
             package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
             enabled: true,
             policy_id: 'agent-policy-1',
+            policy_ids: ['agent-policy-1'],
             inputs: [
               {
                 type: 'logfile',
@@ -175,6 +177,7 @@ jest.mock('../../../../../../hooks/use_request', () => ({
             package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
             enabled: true,
             policy_id: 'agent-policy-1',
+            policy_ids: ['agent-policy-1'],
             vars: {},
             inputs: [
               {
@@ -202,6 +205,7 @@ jest.mock('../../../../../../hooks/use_request', () => ({
             package: { name: 'nginx', title: 'Nginx', version: '1.4.0' },
             enabled: true,
             policy_id: 'agent-policy-1',
+            policy_ids: ['agent-policy-1'],
             vars: {
               new_package_level_var: { value: 'test', type: 'text' },
             },
@@ -292,6 +296,9 @@ describe('usePackagePolicy', () => {
           "version": "1.4.0",
         },
         "policy_id": "agent-policy-1",
+        "policy_ids": Array [
+          "agent-policy-1",
+        ],
         "vars": Object {
           "new_package_level_var": Object {
             "type": "text",

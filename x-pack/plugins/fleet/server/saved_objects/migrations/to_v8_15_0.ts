@@ -44,7 +44,9 @@ export const migratePackagePolicyIdsToV8150: SavedObjectModelDataBackfillFn<
 > = (packagePolicyDoc) => {
   const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
 
-  updatedPackagePolicyDoc.attributes.policy_ids = [updatedPackagePolicyDoc.attributes.policy_id];
+  if (updatedPackagePolicyDoc.attributes.policy_id) {
+    updatedPackagePolicyDoc.attributes.policy_ids = [updatedPackagePolicyDoc.attributes.policy_id];
+  }
 
   return { attributes: updatedPackagePolicyDoc.attributes };
 };
