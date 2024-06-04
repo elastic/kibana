@@ -56,6 +56,7 @@ interface Props {
   fieldFormats: FieldFormatsStart;
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  setRefreshJobs: (refresh: () => void) => void;
 }
 
 export const JobsListPage: FC<Props> = ({
@@ -74,6 +75,7 @@ export const JobsListPage: FC<Props> = ({
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
+  const [refreshJobs, setRefreshJobs] = useState<(() => void) | null>(null);
 
   const mlServices = useMemo(
     () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
@@ -203,10 +205,14 @@ export const JobsListPage: FC<Props> = ({
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <ImportJobsFlyout isDisabled={false} />
+                        <ImportJobsFlyout isDisabled={false} refreshJobs={refreshJobs} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
+                    <SpaceManagement
+                      spacesApi={spacesApi}
+                      setCurrentTab={setCurrentTabId}
+                      setRefreshJobs={setRefreshJobs}
+                    />
                   </EuiPageTemplate.Section>
                 </Router>
               </EnabledFeaturesContextProvider>
