@@ -32,7 +32,7 @@ export const ControlRenderer = <
 }: {
   type: string;
   maybeId?: string;
-  getParentApi: () => ControlGroupApi<StateType>;
+  getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
   const component = useMemo(
@@ -61,7 +61,12 @@ export const ControlRenderer = <
 
         const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid);
 
-        const { api, Component } = factory.buildControl(initialState, buildApi, uuid, parentApi);
+        const { api, Component } = factory.buildControl(
+          initialState as unknown as StateType,
+          buildApi,
+          uuid,
+          parentApi
+        );
 
         return React.forwardRef<typeof api, { css: SerializedStyles }>((props, ref) => {
           // expose the api into the imperative handle

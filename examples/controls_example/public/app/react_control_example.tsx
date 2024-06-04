@@ -92,6 +92,9 @@ export const ReactControlExample = ({
       replacePanel: () => {
         return Promise.resolve('');
       },
+      getPanelCount: () => {
+        return 2;
+      },
       addNewPanel: () => {
         return Promise.resolve(undefined);
       },

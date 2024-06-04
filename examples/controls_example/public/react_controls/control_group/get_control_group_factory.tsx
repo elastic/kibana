@@ -155,6 +155,9 @@ export const getControlGroupEmbeddableFactory = (services: {
             }
           );
         },
+        getPanelCount: () => {
+          return (Object.keys(children$.getValue()) ?? []).length;
+        },
         addNewPanel: (panel) => {
           // TODO: Add a new child control
           return Promise.resolve(undefined);

@@ -39,20 +39,18 @@ export type ControlGroupUnsavedChanges = Omit<
   filters: Filter[] | undefined;
 };
 
-type ControlGroupChildState = DefaultControlState & { type: string; order: number };
+export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState> &
   PublishesFilters &
   PublishesDataViews &
-  HasSerializedChildState<ControlGroupChildState> &
+  HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
   PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
   Partial<HasParentApi<PublishesUnifiedSearch>>;
-
-export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
@@ -62,7 +60,7 @@ export interface ControlGroupRuntimeState {
   showApplySelections?: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
-  initialChildControlState: ControlPanelsState<ControlGroupChildState>;
+  initialChildControlState: ControlPanelsState<ControlPanelState>;
   /** TODO: Handle the editor config, which is used with the control group renderer component */
   editorConfig?: {
     hideDataViewSelector?: boolean;
