@@ -14,9 +14,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         for="generated-id"
         id="generated-id-label"
       >
-        <span>
-          Type
-        </span>
+        Type
       </label>
     </div>
     <div
@@ -78,9 +76,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         for="generated-id"
         id="generated-id-label"
       >
-        <span>
-          Open in a new tab
-        </span>
+        Open in a new tab
       </label>
     </div>
     <div
@@ -121,9 +117,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           class="euiSwitch__label"
           id="generated-id"
         >
-          <span>
-            Off
-          </span>
+          Off
         </span>
       </div>
     </div>
@@ -141,9 +135,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         for="generated-id"
         id="generated-id-label"
       >
-        <span>
-          URL template
-        </span>
+        URL template
       </label>
     </div>
     <div
@@ -175,9 +167,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           rel="noopener noreferrer"
           target="_blank"
         >
-          <span>
-            URL template help
-          </span>
+          URL template help
           <span
             class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
@@ -206,9 +196,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         for="generated-id"
         id="generated-id-label"
       >
-        <span>
-          Label template
-        </span>
+        Label template
       </label>
     </div>
     <div
@@ -240,9 +228,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           rel="noopener noreferrer"
           target="_blank"
         >
-          <span>
-            Label template help
-          </span>
+          Label template help
           <span
             class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
@@ -270,9 +256,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         for="generated-id"
         id="generated-id-label"
       >
-        <span>
-          Samples
-        </span>
+        Samples
       </label>
     </div>
     <div

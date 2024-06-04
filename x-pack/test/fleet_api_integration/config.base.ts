@@ -65,7 +65,10 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     servers: xPackAPITestsConfig.get('servers'),
     dockerServers,
     services: xPackAPITestsConfig.get('services'),
-    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackAPITestsConfig.get('esTestCluster'),
+      serverArgs: [...xPackAPITestsConfig.get('esTestCluster.serverArgs'), 'http.host=0.0.0.0'],
+    },
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
