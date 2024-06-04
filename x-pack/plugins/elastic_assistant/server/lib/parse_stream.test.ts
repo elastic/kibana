@@ -113,9 +113,11 @@ describe('handleStreamStorage', () => {
         candidates: [
           {
             content: {
-              parts: [{
-                text: 'Single.',
-              }]
+              parts: [
+                {
+                  text: 'Single.',
+                },
+              ],
             },
           },
         ],
@@ -164,4 +166,3 @@ function encodeBedrockResponse(completion: string) {
     ),
   });
 }
-
