@@ -2405,6 +2405,11 @@
       "warning": []
     },
     {
+      "query": "ROW a=1::LONG | LOOKUP t ON a",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index | keep ",
       "error": [
         "SyntaxError: missing ID_PATTERN at '<EOF>'"
@@ -2453,28 +2458,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project stringField, numberField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT stringField, numberField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, numberField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
