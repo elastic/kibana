@@ -111,7 +111,14 @@ export default ({ getService }: FtrProviderContext): void => {
               transform_id: 'risk_score_latest_transform_default',
             });
 
-            expect(transformStats.transforms[0].state).to.eql('started');
+            expect(transformStats.transforms.length).to.eql(1);
+            const latestTransform = transformStats.transforms[0];
+            if (latestTransform.state !== 'started') {
+              log.error('Transform state is not started, logging the transform');
+              log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
+            }
+
+            expect(latestTransform.state).to.eql('started');
           });
 
           describe('@skipInServerlessMKI disabling and re-enabling the risk engine', () => {
