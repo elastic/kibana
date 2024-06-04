@@ -58,6 +58,11 @@ export const getDocumentationLinkFromAutocomplete = (
   }
   return null;
 };
+/*
+ * Helper function that filters out suggestions without a name.
+ */
+const filterTermsWithoutName = (terms: ResultTerm[]): ResultTerm[] =>
+  terms.filter((term) => term.name !== undefined);
 
 /*
  * This function returns an array of completion items for the request method
@@ -140,9 +145,7 @@ export const getUrlPathCompletionItems = (
   };
   if (autoCompleteSet && autoCompleteSet.length > 0) {
     return (
-      autoCompleteSet
-        // filter autocomplete items without a name
-        .filter(({ name }) => Boolean(name))
+      filterTermsWithoutName(autoCompleteSet)
         // map autocomplete items to completion items
         .map((item) => {
           return {
@@ -202,9 +205,7 @@ export const getUrlParamsCompletionItems = (
       endColumn: position.column,
     };
     return (
-      context.autoCompleteSet
-        // filter autocomplete items without a name
-        .filter(({ name }) => Boolean(name))
+      filterTermsWithoutName(context.autoCompleteSet)
         // map autocomplete items to completion items
         .map((item) => {
           return {
@@ -310,9 +311,7 @@ const getSuggestions = (
     endColumn,
   };
   return (
-    autocompleteSet
-      // filter out items that don't have name
-      .filter(({ name }) => name !== undefined)
+    filterTermsWithoutName(autocompleteSet)
       // map autocomplete items to completion items
       .map((item) => {
         const suggestion = {
