@@ -26,6 +26,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_DATA_VIEW_FIELDS_DESCRIPTION,
 } from '../../../constants';
 
 interface UpdateFieldsArgs {
@@ -117,7 +118,7 @@ const fieldUpdateSchema = schema.object({
   format: schema.maybe(schema.nullable(serializedFieldFormatSchema)),
 });
 
-const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
+const updateFieldsActionRouteFactory = (path: string, serviceKey: string, description?: string) => {
   return (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -126,7 +127,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -200,7 +201,8 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
 
 export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH}/fields`,
-  SERVICE_KEY
+  SERVICE_KEY,
+  UPDATE_DATA_VIEW_FIELDS_DESCRIPTION
 );
 
 export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
