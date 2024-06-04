@@ -35,7 +35,7 @@ import { getFilters } from './filters';
 interface Props {
   spacesApi?: SpacesPluginStart;
   setCurrentTab: (tabId: MlSavedObjectType) => void;
-  setRefreshJobs: (refresh: (() => void) | null) => void;
+  setRefreshJobs: React.Dispatch<React.SetStateAction<(() => void) | null>>;
 }
 
 export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab, setRefreshJobs }) => {
