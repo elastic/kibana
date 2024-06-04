@@ -425,6 +425,7 @@ async function addPreconfiguredPolicyPackages(
           ...(simplifiedPackagePolicy as SimplifiedPackagePolicy),
           id,
           policy_id: agentPolicy.id,
+          policy_ids: [agentPolicy.id],
           namespace: packagePolicy.namespace || agentPolicy.namespace,
         },
         packageInfo,
