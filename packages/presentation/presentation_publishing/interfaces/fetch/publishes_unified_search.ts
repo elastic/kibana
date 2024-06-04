@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject } from '../../publishing_subject';
-import { PublishesFilters } from '../publishes_filters';
 
 export interface PublishesTimeslice {
   timeslice$?: PublishingSubject<[number, number] | undefined>;
@@ -24,6 +23,10 @@ export interface PublishesTimeRange extends PublishesTimeslice {
 export type PublishesWritableTimeRange = PublishesTimeRange & {
   setTimeRange: (timeRange: TimeRange | undefined) => void;
 };
+
+export interface PublishesFilters {
+  filters$: PublishingSubject<Filter[] | undefined>;
+}
 
 export type PublishesUnifiedSearch = PublishesTimeRange &
   PublishesFilters & {
@@ -41,6 +44,10 @@ export const apiPublishesTimeRange = (
   unknownApi: null | unknown
 ): unknownApi is PublishesTimeRange => {
   return Boolean(unknownApi && (unknownApi as PublishesTimeRange)?.timeRange$ !== undefined);
+};
+
+export const apiPublishesFilters = (unknownApi: unknown): unknownApi is PublishesFilters => {
+  return Boolean(unknownApi && (unknownApi as PublishesFilters)?.filters$ !== undefined);
 };
 
 export const apiPublishesUnifiedSearch = (

@@ -36,11 +36,13 @@ export {
 } from './interfaces/fetch/initialize_time_range';
 export {
   apiPublishesPartialUnifiedSearch,
+  apiPublishesFilters,
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   apiPublishesWritableUnifiedSearch,
   useSearchApi,
   type PublishesTimeRange,
+  type PublishesFilters,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
   type PublishesTimeslice,
@@ -93,7 +95,6 @@ export {
   apiPublishesDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
-export { apiPublishesFilters, type PublishesFilters } from './interfaces/publishes_filters';
 export {
   apiPublishesPhaseEvents,
   type PhaseEvent,
