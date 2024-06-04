@@ -1,5 +1,5 @@
 post:
-  summary: Import saved objects
+  summary: Import saved objects in default space
   operationId: importSavedObjectsDefaultSpace
   description: |
     Creates sets of Kibana saved objects from a file created by the export API.
