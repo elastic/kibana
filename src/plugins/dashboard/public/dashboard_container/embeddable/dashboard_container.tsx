@@ -786,19 +786,22 @@ export class DashboardContainer
     this.setScrollToPanelId(undefined);
 
     this.untilEmbeddableLoaded(id).then(() => {
-      const scrollPosition = localStorage.getItem(this.getScrollPositionStorageKey(id));
+      panelRef.scrollIntoView({ block: 'center' });
 
-      if (scrollPosition) {
-        // Scroll to the last scroll position after the transition ends to ensure the panel is in the right position before scrolling
-        // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
-        panelRef.ontransitionend = () => {
+      panelRef.ontransitionend = () => {
+        const scrollPosition = localStorage.getItem(this.getScrollPositionStorageKey(id));
+
+        if (scrollPosition) {
+          // Scroll to the last scroll position after the transition ends to ensure the panel is in the right position before scrolling
+          // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
           window.scrollTo({ top: parseInt(scrollPosition, 10) });
           localStorage.removeItem(this.getScrollPositionStorageKey(id));
-        };
-        return;
-      }
+          return;
+        }
 
-      panelRef.scrollIntoView({ block: 'center' });
+        // If there is no stored scroll position, we should attempt to scroll the panel into view again in case the panel has moved
+        panelRef.scrollIntoView({ block: 'center' });
+      };
     });
   };
 
