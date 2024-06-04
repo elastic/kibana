@@ -22,7 +22,7 @@ for (int i = 0; i < inputs.length; i++) {
   double current_score = inputs[i].score / Math.pow(i + 1, params.p);
 
   if (i < 10) {
-    inputs[i]["contribution"] = current_score / params.risk_cap;
+    inputs[i]['contribution'] = current_score / params.risk_cap;
     results['risk_inputs'].add(inputs[i]);
   }
 
