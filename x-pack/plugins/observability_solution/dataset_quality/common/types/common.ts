@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export * from './dataset_types';
-export * from './quality_types';
-export * from './common';
+export type SortDirection = 'asc' | 'desc';
+
+export type Maybe<T> = T | null | undefined;
+
+export interface Coordinate {
+  x: number;
+  y: Maybe<number>;
+}
