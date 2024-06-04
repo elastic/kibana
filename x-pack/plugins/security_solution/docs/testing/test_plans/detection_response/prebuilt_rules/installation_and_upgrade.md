@@ -825,116 +825,137 @@ TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
 #### **Scenario: Rule field doesn't have an update and has no custom value**
 
-**Automation** 1 integration test
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And the current version of <field> is unchanged from the base version
-And there is no update for <field> in this upgrade
-Then the merged output should be the current version of <field>
-And there should be no conflict
+And <field_name> field is not customized by the user (current version == base version)
+And <field_name> field is not updated by Elastic in this upgrade (target version == base version)
+Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
+And <field_name> field should not be returned from the `upgrade/_review` API endpoint
+And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| field      | base_version | current_version | target_version |
+| field_name | base_version | current_version | target_version |
 | name       | "A"          | "A"             | "A"            |
 | risk_score | 1            | 1               | 1              |
 ```
 
 #### **Scenario: Rule field doesn't have an update but has a custom value**
 
-**Automation** 1 integration test
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And the current version of <field> has changed from the base version
-And there is no update for <field> in this upgrade
-Then the merged output should be the current version of <field>
-And there should be no conflict
+And <field_name> field is customized by the user (current version != base version)
+And <field_name> field is not updated by Elastic in this upgrade (target version == base version)
+Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
+And <field_name> field should not be returned from the `upgrade/_review` API endpoint
+And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| field      | base_version | current_version | target_version |
+| field_name | base_version | current_version | target_version |
 | name       | "A"          | "B"             | "A"            |
 | risk_score | 1            | 2               | 1              |
 ```
 
 #### **Scenario: Rule field has an update and doesn't have a custom value**
 
-**Automation** 1 integration test
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And the current version of <field> is unchanged from the base version
-And there is a update for <field> in this upgrade
-Then the merged output should be the target version of <field>
-And there should be no conflict
+And <field_name> field is customized by the user (current version == base version)
+And <field_name> field is not updated by Elastic in this upgrade (target version != base version)
+Then for <field_name> field the diff algorithm should output the target version as the merged one without a conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| field      | base_version | current_version | target_version |
+| field_name | base_version | current_version | target_version |
 | name       | "A"          | "A"             | "B"            |
 | risk_score | 1            | 1               | 2              |
 ```
 
 #### **Scenario: Rule field has an update and a custom value that are the same**
 
-**Automation** 1 integration test
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And the current version of <field> has changed from the base version
-And there is a update for <field> in this upgrade
-And the current version and the update have the same value
-Then the merged output should be the current version of <field>
-And there should be no conflict
-
-CASE: should work the same if rule's base version exists or not
+And <field_name> field is customized by the user (current version != base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
+And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
+Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
+And <field_name> field should not be returned from the `upgrade/_review` API endpoint
+And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| field      | base_version | current_version | target_version |
+| field_name | base_version | current_version | target_version |
 | name       | "A"          | "B"             | "B"            |
 | risk_score | 1            | 2               | 2              |
 ```
 
 #### **Scenario: Rule field has an update and a custom value that are NOT the same**
 
-**Automation** 1 integration test
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And the current version of <field> has changed from the base version
-And there is a update for <field> in this upgrade
-And the current version and the update do not have the same value
-Then the merged output should be the current version of <field>
-And there should be a conflict
+And <field_name> field is customized by the user (current version != base version)
+And <field_name> field is not updated by Elastic in this upgrade (target version != base version)
+And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
+Then for <field_name> field the diff algorithm should output the current version as the merged one with a conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| field      | base_version | current_version | target_version |
+| field_name | base_version | current_version | target_version |
 | name       | "A"          | "B"             | "C"            |
 | risk_score | 1            | 2               | 3              |
 ```
 
 #### **Scenario: Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist**
 
-**Automation** 1 integration test
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
 And the base version of the rule cannot be determined
-And the current version of <field> has changed from the base version
-And there is a update for <field> in this upgrade
-And the current version and the update do not have the same value
-Then the merged output should be the target version of <field>
-And there should be a conflict
+And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
+Then for <field_name> field the diff algorithm should output the target version as the merged one with a conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| field      | base_version | current_version | target_version |
+| field_name | base_version | current_version | target_version |
 | name       | N/A          | "B"             | "C"            |
 | risk_score | N/A          | 2               | 3              |
+```
+
+#### **Scenario: Rule field has an update and a custom value that are the same and the rule base version doesn't exist**
+
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
+Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
+And <field_name> field should not be returned from the `upgrade/_review` API endpoint
+And <field_name> field should not be shown in the upgrade preview UI
+
+
+Examples:
+| field_name | base_version | current_version | target_version |
+| name       | N/A          | "A"             | "A"            |
+| risk_score | N/A          | 1               | 1              |
 ```
 
 ### Rule upgrade workflow: viewing rule changes in JSON diff view
