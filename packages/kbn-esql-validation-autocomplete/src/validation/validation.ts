@@ -10,6 +10,7 @@ import uniqBy from 'lodash/uniqBy';
 import type {
   AstProviderFn,
   ESQLAstItem,
+  ESQLAstMetricsCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandMode,
@@ -567,6 +568,35 @@ function validateSetting(
   return messages;
 }
 
+/**
+ * Validates grouping fields of the BY clause: `... BY <grouping>`.
+ */
+function validateByGrouping(
+  fields: ESQLAstItem[],
+  commandName: string,
+  referenceMaps: ReferenceMaps,
+  multipleParams: boolean,
+): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+  for (const field of fields) {
+    if (!Array.isArray(field)) {
+      if (!multipleParams) {
+        if (isColumnItem(field)) {
+          messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
+        }
+      } else {
+        if (isColumnItem(field)) {
+          messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
+        }
+        if (isFunctionItem(field)) {
+          messages.push(...validateFunction(field, commandName, 'by', referenceMaps));
+        }
+      }
+    }
+  }
+  return messages;
+}
+
 function validateOption(
   option: ESQLCommandOption,
   optionDef: CommandOptionsDefinition | undefined,
@@ -624,38 +654,40 @@ function validateSource(
   if (source.incomplete) {
     return messages;
   }
-  const commandDef = getCommandDefinition(commandName);
-  // give up on validate if CCS for now
+
   const hasCCS = hasCCSSource(source.name);
-  if (!hasCCS) {
-    const isWildcardAndNotSupported =
-      hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
-    if (isWildcardAndNotSupported) {
+  if (hasCCS) {
+    return messages;
+  }
+
+  const commandDef = getCommandDefinition(commandName);
+  const isWildcardAndNotSupported =
+    hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
+  if (isWildcardAndNotSupported) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'wildcardNotSupportedForCommand',
+        values: { command: commandName.toUpperCase(), value: source.name },
+        locations: source.location,
+      })
+    );
+  } else {
+    if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
       messages.push(
         getMessageFromId({
-          messageId: 'wildcardNotSupportedForCommand',
-          values: { command: commandName.toUpperCase(), value: source.name },
+          messageId: 'unknownIndex',
+          values: { name: source.name },
           locations: source.location,
         })
       );
-    } else {
-      if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownIndex',
-            values: { name: source.name },
-            locations: source.location,
-          })
-        );
-      } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownPolicy',
-            values: { name: source.name },
-            locations: source.location,
-          })
-        );
-      }
+    } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unknownPolicy',
+          values: { name: source.name },
+          locations: source.location,
+        })
+      );
     }
   }
 
@@ -746,6 +778,17 @@ function validateColumnForCommand(
   return messages;
 }
 
+export function validateSources(command: ESQLCommand, sources: ESQLSource[], references: ReferenceMaps): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+
+  for (const source of sources) {
+    const errors = validateSource(source, command.name, references);
+    if (errors && errors.length) messages.push(...errors);
+  }
+
+  return messages;
+}
+
 function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -758,62 +801,78 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
     messages.push(...commandDef.validate(command));
   }
 
-  // Now validate arguments
-  for (const commandArg of command.args) {
-    const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
-    for (const arg of wrappedArg) {
-      if (isFunctionItem(arg)) {
-        messages.push(...validateFunction(arg, command.name, undefined, references));
-      }
-
-      if (isSettingItem(arg)) {
-        messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
-      }
-
-      if (isOptionItem(arg)) {
-        messages.push(
-          ...validateOption(
-            arg,
-            commandDef.options.find(({ name }) => name === arg.name),
-            command,
-            references
-          )
-        );
-      }
-      if (isColumnItem(arg)) {
-        if (command.name === 'stats') {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownAggregateFunction',
-              values: {
-                value: (arg as ESQLSingleAstItem).name,
-                type: 'FieldAttribute',
-              },
-              locations: (arg as ESQLSingleAstItem).location,
-            })
-          );
-        } else {
-          messages.push(...validateColumnForCommand(arg, command.name, references));
+  switch (commandDef.name) {
+    case 'metrics': {
+      const metrics = command as ESQLAstMetricsCommand;
+      messages.push(...validateSources(metrics, metrics.indices, references));
+      if (metrics.aggregates) {
+        // TODO: validate aggregates
+        if (metrics.grouping) {
+          messages.push(...validateByGrouping(metrics.grouping, 'metrics', references, true));
         }
       }
-      if (isTimeIntervalItem(arg)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unsupportedTypeForCommand',
-            values: {
-              command: command.name.toUpperCase(),
-              type: 'date_period',
-              value: arg.name,
-            },
-            locations: arg.location,
-          })
-        );
-      }
-      if (isSourceItem(arg)) {
-        messages.push(...validateSource(arg, command.name, references));
+      break;
+    }
+    default: {
+      // Now validate arguments
+      for (const commandArg of command.args) {
+        const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
+        for (const arg of wrappedArg) {
+          if (isFunctionItem(arg)) {
+            messages.push(...validateFunction(arg, command.name, undefined, references));
+          }
+
+          if (isSettingItem(arg)) {
+            messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
+          }
+
+          if (isOptionItem(arg)) {
+            messages.push(
+              ...validateOption(
+                arg,
+                commandDef.options.find(({ name }) => name === arg.name),
+                command,
+                references
+              )
+            );
+          }
+          if (isColumnItem(arg)) {
+            if (command.name === 'stats') {
+              messages.push(
+                getMessageFromId({
+                  messageId: 'unknownAggregateFunction',
+                  values: {
+                    value: (arg as ESQLSingleAstItem).name,
+                    type: 'FieldAttribute',
+                  },
+                  locations: (arg as ESQLSingleAstItem).location,
+                })
+              );
+            } else {
+              messages.push(...validateColumnForCommand(arg, command.name, references));
+            }
+          }
+          if (isTimeIntervalItem(arg)) {
+            messages.push(
+              getMessageFromId({
+                messageId: 'unsupportedTypeForCommand',
+                values: {
+                  command: command.name.toUpperCase(),
+                  type: 'date_period',
+                  value: arg.name,
+                },
+                locations: arg.location,
+              })
+            );
+          }
+          if (isSourceItem(arg)) {
+            messages.push(...validateSource(arg, command.name, references));
+          }
+        }
       }
     }
   }
+
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
   return messages;
