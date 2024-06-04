@@ -384,9 +384,9 @@
     },
     "/api/saved_objects/_export": {
       "post": {
-        "summary": "Retrieve sets of saved objects that you want to import into Kibana.",
+        "summary": "Export saved objects",
         "operationId": "exportSavedObjectsDefaultSpace",
-        "description": "\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Retrieve sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -610,9 +610,9 @@
     },
     "/api/saved_objects/_import": {
       "post": {
-        "summary": "Create sets of Kibana saved objects from a file created by the export API.",
+        "summary": "Import saved objects",
         "operationId": "importSavedObjectsDefaultSpace",
-        "description": "Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Creates sets of Kibana saved objects from a file created by the export API.\nSaved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -1123,9 +1123,9 @@
     },
     "/s/{spaceId}/api/saved_objects/_export": {
       "post": {
-        "summary": "Retrieve sets of saved objects that you want to import into Kibana.",
+        "summary": "Export saved objects",
         "operationId": "exportSavedObjects",
-        "description": "\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Retrieves sets of saved objects that you want to import into Kibana.\nYou must include `type` or `objects` in the request body.\n\nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
@@ -1184,9 +1184,9 @@
     },
     "/s/{spaceId}/api/saved_objects/_import": {
       "post": {
-        "summary": "Create sets of Kibana saved objects from a file created by the export API.",
+        "summary": "Import saved objects",
         "operationId": "importSavedObjects",
-        "description": "Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "Creates sets of Kibana saved objects from a file created by the export API.\nSaved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "saved objects"
         ],
