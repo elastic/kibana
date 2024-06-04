@@ -10,6 +10,7 @@
 import pick from 'lodash/pick';
 import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
 
+// Use class/interface merging to define instance properties from FieldMetadataPlain.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldMetadata extends FieldMetadataPlain {}
 export class FieldMetadata {

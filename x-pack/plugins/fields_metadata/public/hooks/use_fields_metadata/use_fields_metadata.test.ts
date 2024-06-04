@@ -37,8 +37,11 @@ const useFieldsMetadata = createUseFieldsMetadataHook({ fieldsMetadataService })
 describe('useFieldsMetadata', () => {
   let fieldsMetadataClient: jest.Mocked<IFieldsMetadataClient>;
   beforeEach(async () => {
-    jest.clearAllMocks();
     fieldsMetadataClient = await fieldsMetadataService.getClient();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should return the fieldsMetadata value from the API', async () => {

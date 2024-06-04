@@ -36,7 +36,7 @@ const timestampField = await client.getByName('@timestamp')
 ```ts
 const fields = await client.find({
   fieldNames: ['@timestamp', 'onepassword.client.platform_version'], 
-  integration: '1password'
+  integration: '1password',
   dataset: '*'
 })
 /*
