@@ -263,7 +263,7 @@ function runEvaluations() {
               resolve();
             });
           }).finally(() => {
-            const score = results
+            const modelScore = results
               .flatMap((result) => result.scores)
               .reduce(
                 (prev, result) => {
@@ -275,7 +275,45 @@ function runEvaluations() {
               );
 
             log.write('-------------------------------------------');
-            log.write(`Scored ${score.score} out of ${score.total}`);
+            log.write(
+              `Model ${connector.id} scored ${modelScore.score} out of ${modelScore.total}`
+            );
+            log.write('-------------------------------------------');
+
+            const scoresByCategory: {
+              [key: string]: {
+                score: number;
+                total: number;
+              };
+            } = results.reduce(
+              (
+                acc: {
+                  [key: string]: {
+                    score: number;
+                    total: number;
+                  };
+                },
+                result
+              ) => {
+                const category = result.category;
+                if (!acc[category]) {
+                  acc[category] = { score: 0, total: 0 };
+                }
+                result.scores.forEach((score) => {
+                  acc[category].score += score.score;
+                  acc[category].total += 1;
+                });
+                return acc;
+              },
+              {}
+            );
+
+            log.write('-------------------------------------------');
+            log.write(`Model ${connector.id} Scores per Category`);
+            Object.entries(scoresByCategory).forEach(([category, { score, total }]) => {
+              log.write('-------------------------');
+              log.write(`Category: ${category} - Scored ${score} out of ${total}`);
+            });
             log.write('-------------------------------------------');
           });
         },
