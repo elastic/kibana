@@ -12,6 +12,7 @@ import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
   ElasticsearchClient,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
@@ -839,18 +840,48 @@ class AgentPolicyService {
     savedObjectsResults: Array<SavedObjectsFindResult<AgentPolicySOAttributes>>,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    const bumpedPolicies = savedObjectsResults.map((policy) => {
-      policy.attributes = {
-        ...policy.attributes,
-        revision: policy.attributes.revision + 1,
-        updated_at: new Date().toISOString(),
-        updated_by: options?.user ? options.user.username : 'system',
-      };
-      return policy;
-    });
-    const res = await internalSoClientWithoutSpaceExtension.bulkUpdate<AgentPolicySOAttributes>(
-      bumpedPolicies
+    const bumpedPolicies = savedObjectsResults.map(
+      (policy): SavedObjectsBulkUpdateObject<AgentPolicySOAttributes> => {
+        return {
+          id: policy.id,
+          type: policy.type,
+          attributes: {
+            ...policy.attributes,
+            revision: policy.attributes.revision + 1,
+            updated_at: new Date().toISOString(),
+            updated_by: options?.user ? options.user.username : 'system',
+          },
+          version: policy.version,
+          namespace: policy.namespaces?.[0],
+        };
+      }
     );
+
+    const bumpedPoliciesBySpaceId = groupBy(
+      bumpedPolicies,
+      (policy) => policy.namespace || DEFAULT_SPACE_ID
+    );
+
+    const res = (
+      await Promise.all(
+        Object.entries(bumpedPoliciesBySpaceId).map(([spaceId, policies]) =>
+          internalSoClientWithoutSpaceExtension.bulkUpdate<AgentPolicySOAttributes>(policies, {
+            namespace: spaceId,
+          })
+        )
+      )
+    ).reduce(
+      (acc, r) => {
+        if (r?.saved_objects) {
+          acc.saved_objects.push(...r.saved_objects);
+        }
+        return acc;
+      },
+      {
+        saved_objects: [],
+      }
+    );
+
     await pMap(
       savedObjectsResults,
       (policy) =>
@@ -1304,6 +1335,7 @@ class AgentPolicyService {
         search: escapeSearchQueryPhrase(fleetServerHostId),
         perPage: SO_SEARCH_LIMIT,
       });
+
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
       esClient,

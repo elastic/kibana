@@ -548,19 +548,22 @@ describe('Agent policy', () => {
       );
       await agentPolicyService.bumpAllAgentPolicies(esClient, undefined);
 
-      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
-        {
-          attributes: expect.objectContaining({
-            fleet_server_hosts: ['http://fleetserver:8220'],
-            revision: NaN,
-            updated_by: 'system',
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              fleet_server_hosts: ['http://fleetserver:8220'],
+              revision: NaN,
+              updated_by: 'system',
+            }),
+            id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+            type: 'ingest_manager_settings',
           }),
-          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-          references: [],
-          score: 1,
-          type: 'ingest_manager_settings',
-        },
-      ]);
+        ],
+        expect.objectContaining({
+          namespace: 'default',
+        })
+      );
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
