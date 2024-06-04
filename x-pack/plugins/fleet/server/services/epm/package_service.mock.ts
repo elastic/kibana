@@ -14,6 +14,7 @@ const createClientMock = (): jest.Mocked<PackageClient> => ({
   installCustomIntegration: jest.fn(),
   fetchFindLatestPackage: jest.fn(),
   readBundledPackage: jest.fn(),
+  getAgentPolicyInputs: jest.fn(),
   getPackage: jest.fn(),
   getPackageFieldsMetadata: jest.fn(),
   getPackages: jest.fn(),
