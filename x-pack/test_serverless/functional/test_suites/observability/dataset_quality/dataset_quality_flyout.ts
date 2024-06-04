@@ -546,7 +546,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-          const countColumn = table.Count;
+          const countColumn = table['Docs count'];
           const cellTexts = await countColumn.getCellTexts();
 
           await countColumn.sort('ascending');
@@ -585,7 +585,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-          const countColumn = table.Count;
+          const countColumn = table['Docs count'];
           const cellTexts = await countColumn.getCellTexts();
           const singleValuePreviously = parseInt(cellTexts[0], 10);
 

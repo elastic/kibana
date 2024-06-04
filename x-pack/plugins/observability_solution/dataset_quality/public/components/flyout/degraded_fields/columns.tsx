@@ -40,7 +40,7 @@ export const getDegradedFieldsColumns = ({
   {
     name: fieldColumnName,
     field: 'name',
-    render: (fieldName) => {
+    render: (fieldName: string) => {
       return <EuiText size="xs">{fieldName}</EuiText>;
     },
   },
