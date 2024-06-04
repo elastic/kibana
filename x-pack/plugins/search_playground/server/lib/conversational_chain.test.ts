@@ -8,8 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createAssist as Assist } from '../utils/assist';
 import { clipContext, ConversationalChain } from './conversational_chain';
-import { FakeListChatModel } from '@langchain/core/utils/testing';
-import { FakeListLLM } from 'langchain/llms/fake';
+import { FakeListChatModel, FakeListLLM } from '@langchain/core/utils/testing';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { experimental_StreamData, Message } from 'ai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';

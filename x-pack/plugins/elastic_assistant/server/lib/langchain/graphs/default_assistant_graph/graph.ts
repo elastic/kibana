@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ToolExecutor } from '@langchain/langgraph/prebuilt';
-import { RunnableConfig, RunnableLambda } from '@langchain/core/runnables';
+import { RunnableConfig } from '@langchain/core/runnables';
 import { END, START, StateGraph, StateGraphArgs } from '@langchain/langgraph';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
@@ -17,8 +16,10 @@ import type { Logger } from '@kbn/logging';
 import { BaseMessage } from '@langchain/core/messages';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { AgentState, NodeParamsBase } from './types';
-import { generateChatTitle } from './generate_chat_title';
 import { AssistantDataClients } from '../../executors/types';
+import { shouldContinue } from './nodes/should_continue';
+import { AGENT_NODE, runAgent } from './nodes/run_agent';
+import { executeTools, TOOLS_NODE } from './nodes/execute_tools';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -68,75 +69,55 @@ export const getDefaultAssistantGraph = ({
       },
     };
 
+    // Default node parameters
     const nodeParams: NodeParamsBase = {
       model: llm,
       logger,
     };
 
-    // Create a tool executor
-    const toolExecutor = new ToolExecutor({ tools });
-
-    // Define logic that will be used to determine which conditional edge to go down
-    const shouldContinue = (state: AgentState) => {
-      logger.debug(`graph:shouldContinue:state\n${JSON.stringify(state, null, 2)}`);
-      if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
-        return 'end';
-      }
-      return 'continue';
-    };
-
-    const runAgent = async (state: AgentState, config?: RunnableConfig) => {
-      logger.debug(`graph:runAgent:\nstate\n${JSON.stringify(state, null, 2)}`);
-
-      const agentOutcome = await agentRunnable.invoke(
-        {
-          ...state,
-          chat_history: messages,
-          knowledge_history: 'The users favorite color is blue', // TODO: Plumb through initial retrieval
-        },
-        config
-      );
-      return {
-        agentOutcome,
-      };
-    };
-
-    const executeTools = async (state: AgentState, config?: RunnableConfig) => {
-      logger.debug(`graph:executeTools:state\n${JSON.stringify(state, null, 2)}`);
-      const agentAction = state.agentOutcome;
-      if (!agentAction || 'returnValues' in agentAction) {
-        throw new Error('Agent has not been run yet');
-      }
-      const out = await toolExecutor.invoke(agentAction, config);
-      return {
-        steps: [{ action: agentAction, observation: JSON.stringify(out, null, 2) }],
-      };
-    };
-
-    // Create a new graph, with the default state from above
-    const workflow = new StateGraph<AgentState>({ channels: graphState });
-
-    // Define the nodes to cycle between
-    workflow.addNode('generateChatTitle', (state: AgentState) =>
-      generateChatTitle({
-        state,
-        conversationsDataClient: dataClients?.conversationsDataClient,
-        conversationId,
+    // Create nodes
+    // const generateChatTitleNode = (state: AgentState) =>
+    //   generateChatTitle({
+    //     ...nodeParams,
+    //     conversationId,
+    //     conversationsDataClient: dataClients?.conversationsDataClient,
+    //     logger: logger.get(GENERATE_CHAT_TITLE_NODE),
+    //     state,
+    //   });
+    const runAgentNode = (state: AgentState, config?: RunnableConfig) =>
+      runAgent({
         ...nodeParams,
-      })
-    );
-    workflow.addNode('agent', new RunnableLambda({ func: runAgent }));
-    workflow.addNode('action', new RunnableLambda({ func: executeTools }));
+        agentRunnable,
+        config,
+        dataClients,
+        logger: logger.get(AGENT_NODE),
+        state,
+      });
+    const executeToolsNode = (state: AgentState, config?: RunnableConfig) =>
+      executeTools({
+        ...nodeParams,
+        config,
+        logger: logger.get(TOOLS_NODE),
+        state,
+        tools,
+      });
+    const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
 
-    // Add conditional edge for determining if we shouldContinue
-    workflow.addConditionalEdges('agent', shouldContinue, { continue: 'action', end: END });
-
-    // Add edges for start, and between agent and action (action always followed by agent)
-    workflow.addEdge(START, 'generateChatTitle');
-    workflow.addEdge('generateChatTitle', 'agent');
-    workflow.addEdge('action', 'agent');
-
-    return workflow.compile();
+    // Put together a new graph using the nodes and default state from above
+    const graph = new StateGraph<AgentState>({ channels: graphState });
+    // Define the nodes to cycle between
+    // TODO: Re-enable title generation and wire remainder of persistence within graph after https://github.com/elastic/kibana/pull/184485
+    // graph.addNode('generateChatTitle', generateChatTitleNode);
+    graph.addNode(AGENT_NODE, runAgentNode);
+    graph.addNode(TOOLS_NODE, executeToolsNode);
+    // Add conditional edge for basic routing
+    graph.addConditionalEdges(AGENT_NODE, shouldContinueEdge, { continue: TOOLS_NODE, end: END });
+    // Add edges, starting with chat title generation, then alternate between agent and action until finished
+    graph.addEdge(START, AGENT_NODE);
+    // graph.addEdge('generateChatTitle', AGENT_NODE);
+    graph.addEdge(TOOLS_NODE, AGENT_NODE);
+    // Compile the graph
+    return graph.compile();
   } catch (e) {
     throw new Error(`Unable to compile DefaultAssistantGraph\n${e}`);
   }

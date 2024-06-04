@@ -7,8 +7,8 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { AgentState, NodeParamsBase } from './types';
-import { AIAssistantConversationsDataClient } from '../../../../ai_assistant_data_clients/conversations';
+import { AgentState, NodeParamsBase } from '../types';
+import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 
 export const GENERATE_CHAT_TITLE_PROMPT = ChatPromptTemplate.fromMessages([
   [
@@ -27,14 +27,16 @@ export interface GenerateChatTitleParams extends NodeParamsBase {
   conversationId?: string;
   state: AgentState;
 }
+
+export const GENERATE_CHAT_TITLE_NODE = 'generateChatTitle';
+
 export const generateChatTitle = async ({
   conversationsDataClient,
   logger,
   model,
   state,
 }: GenerateChatTitleParams) => {
-  logger.debug('node:generateChatTitle');
-  logger.debug(`state:\n ${JSON.stringify(state, null, 2)}`);
+  logger.debug(`Node state:\n ${JSON.stringify(state, null, 2)}`);
   if (state.messages.length !== 0) {
     logger.debug('No need to generate chat title, messages already exist');
     return;
