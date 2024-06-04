@@ -1275,6 +1275,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.artifacts.global.proxy_url',
     first_supported_version: '8.8',
     documentation: i18n.translate(
