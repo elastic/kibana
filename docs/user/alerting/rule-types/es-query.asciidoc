@@ -173,11 +173,6 @@ The following variables are specific to the {es} query rule:
 `context.date`::
 (string) The date, in ISO format, that the rule met the condition. For example: `2024-04-30T00:55:42.765Z`.
 
-`context.group`::
-(string) The name of the action group associated with the condition. 
-For example: `query matched`.
-//TBD: Is this still accurate? Missing from test output.
-
 `context.hits`::
 (array of objects) The most recent documents that matched the query.
 Using the https://mustache.github.io/[Mustache] template array syntax, you can iterate 
@@ -236,15 +231,15 @@ For example: +
 `Document count is 100 in the last 1h. Alert when greater than 50.`
 
 `context.sourceFields`::
-(array of strings)
-// TBD: When and what type of information is returned here?
+(object) If the rule was configured to copy source fields into alerts, for each source field there is an array of strings that contains its values.
+For example: `{'host.id': ['1'], 'host.name': ['host-1']}`.
 
 `context.title`::
 (string) A preconstructed title for the rule. Example: 
 `rule 'my-query-rule' matched query`.
 
 `context.value`::
-(integer) The value that met the rule threshold condition.
+(number) The value that met the rule threshold condition.
 
 `rule.params`::
 (object) The rule parameters, such as `searchType`, `timeWindowSize`, and `timeWindowUnit`.
