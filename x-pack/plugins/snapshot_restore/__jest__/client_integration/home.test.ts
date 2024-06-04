@@ -18,6 +18,8 @@ const { setup } = pageHelpers.home;
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
 jest.mock('@kbn/i18n-react', () => {
   const original = jest.requireActual('@kbn/i18n-react');
+  const { i18n } = jest.requireActual('@kbn/i18n');
+  i18n.init({ locale: 'en' });
 
   return {
     ...original,
