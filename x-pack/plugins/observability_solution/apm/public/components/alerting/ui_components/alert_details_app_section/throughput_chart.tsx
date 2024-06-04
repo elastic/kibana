@@ -30,6 +30,7 @@ import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
 import { getAlertStartAnnotation } from './get_alert_start_annotation';
+import { DEFAULT_DATE_FORMAT } from './constants';
 
 const INITIAL_STATE = {
   currentPeriod: [],
