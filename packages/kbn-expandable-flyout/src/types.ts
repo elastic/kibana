@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
 
 export interface ExpandableFlyoutApi {
   /**
@@ -50,11 +49,6 @@ export interface ExpandableFlyoutApi {
    * Close all panels and closes flyout
    */
   closeFlyout: () => void;
-  /**
-   * Observable that emits the id of the flyout when the flyout is closed
-   * The id is the urlKey if provided, otherwise default back to 'memory'
-   */
-  onClose$: Subject<string>;
 }
 
 export interface PanelPath {

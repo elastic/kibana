@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 /**
@@ -21,5 +20,4 @@ export const mockFlyoutApi: ExpandableFlyoutApi = {
   closePreviewPanel: jest.fn(),
   previousPreviewPanel: jest.fn(),
   closeFlyout: jest.fn(),
-  onClose$: new Subject(),
 };
