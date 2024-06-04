@@ -6,11 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 export const fetchInferenceEndpoints = async (
   client: ElasticsearchClient
 ): Promise<{
-  inferenceEndpoints: any;
+  inferenceEndpoints: InferenceAPIConfigResponse[];
 }> => {
   const { endpoints } = await client.transport.request<{
     endpoints: any;
