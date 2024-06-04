@@ -10,11 +10,9 @@ import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
@@ -111,12 +109,8 @@ const StatefulEventComponent: React.FC<Props> = ({
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
-
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
@@ -213,7 +207,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       },
     };
 
-    if (isSecurityFlyoutEnabled && expandableTimelineFlyoutEnabled) {
+    if (!expandableFlyoutDisabled) {
       openFlyout({
         right: {
           id: DocumentDetailsRightPanelKey,
@@ -238,8 +232,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     dispatch,
     eventId,
     event._index,
-    expandableTimelineFlyoutEnabled,
-    isSecurityFlyoutEnabled,
+    expandableFlyoutDisabled,
     openFlyout,
     refetch,
     tabType,
