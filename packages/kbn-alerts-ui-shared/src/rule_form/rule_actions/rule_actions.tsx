@@ -17,13 +17,15 @@ export interface RuleActionsProps {
 export const RuleActions = (props: RuleActionsProps) => {
   const { onClick } = props;
   return (
-    <>
-      <EuiButton iconType="push" iconSide="left" onClick={onClick}>
+    <div data-test-subj="ruleActions">
+      <EuiButton
+        iconType="push"
+        iconSide="left"
+        onClick={onClick}
+        data-test-subj="ruleActionsAddActionButton"
+      >
         {ADD_ACTION_TEXT}
       </EuiButton>
-      <div>
-        Action form is WIP. You can only create a rule without actions in this version of the form.
-      </div>
-    </>
+    </div>
   );
 };
