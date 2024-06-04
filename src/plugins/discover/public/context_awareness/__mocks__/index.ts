@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
+import { DiscoverStartPlugins } from '../../types';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import {
@@ -19,6 +21,7 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
+import { createProfileProviderServices } from '../profiles/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 
 export const createContextAwarenessMocks = () => {
@@ -74,6 +77,11 @@ export const createContextAwarenessMocks = () => {
     documentProfileServiceMock
   );
 
+  const profileProviderServices = createProfileProviderServices(
+    coreMock.createStart(),
+    {} as DiscoverStartPlugins
+  );
+
   return {
     rootProfileProviderMock,
     dataSourceProfileProviderMock,
@@ -81,5 +89,6 @@ export const createContextAwarenessMocks = () => {
     contextRecordMock,
     contextRecordMock2,
     profilesManagerMock,
+    profileProviderServices,
   };
 };

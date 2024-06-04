@@ -9,9 +9,13 @@
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 import { DataSourceCategory } from '../../profiles';
-import { logsDataSourceProfileProvider } from './profile';
+import { createContextAwarenessMocks } from '../../__mocks__';
+import { createLogsDataSourceProfileProvider } from './profile';
+
+const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logsDataSourceProfileProvider', () => {
+  const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(mockServices);
   const VALID_INDEX_PATTERN = 'logs-nginx.access-*';
   const MIXED_INDEX_PATTERN = 'logs-nginx.access-*,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';

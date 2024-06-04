@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { isDataViewSource, isEsqlSource } from '../../../../common/data_sources';
@@ -15,12 +14,11 @@ import {
   DataSourceProfileProvider,
   DataSourceProfileProviderParams,
 } from '../../profiles';
+import { ProfileProviderServices } from '../../profiles/profile_provider_services';
 
-export const ALLOWED_LOGS_DATA_SOURCES = [
-  createRegExpPatternFrom(['log', 'logs', 'logstash', 'auditbeat', 'filebeat', 'winlogbeat']),
-];
-
-export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
+export const createLogsDataSourceProfileProvider = (
+  services: ProfileProviderServices
+): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {},
   resolve: (params) => {
@@ -30,7 +28,7 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
       return { isMatch: false };
     }
 
-    if (testPatternAgainstAllowedList(ALLOWED_LOGS_DATA_SOURCES)(indexPattern)) {
+    if (services.contextAwareness.isLogsIndexPattern(indexPattern)) {
       return {
         isMatch: true,
         context: { category: DataSourceCategory.Logs },
@@ -39,7 +37,7 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
 
     return { isMatch: false };
   },
-};
+});
 
 const extractIndexPatternFrom = ({
   dataSource,
