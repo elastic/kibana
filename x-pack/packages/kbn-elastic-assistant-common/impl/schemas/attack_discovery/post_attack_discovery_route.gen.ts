@@ -16,6 +16,7 @@ import { z } from 'zod';
  *   version: 1
  */
 
+import { NonEmptyString } from '../common_attributes.gen';
 import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Replacements, TraceData } from '../conversations/common_attributes.gen';
 
@@ -48,6 +49,10 @@ export const AttackDiscovery = z.object({
    * A title for the attack discovery, in plain text
    */
   title: z.string(),
+  /**
+   * The time the attack discovery was generated
+   */
+  timestamp: NonEmptyString,
 });
 
 export type AttackDiscoveryPostRequestBody = z.infer<typeof AttackDiscoveryPostRequestBody>;

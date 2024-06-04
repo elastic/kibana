@@ -119,6 +119,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantKnowledgeBaseDataClient: (
     initializeKnowledgeBase: boolean
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
+  getAttackDiscoveryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
@@ -153,24 +154,28 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   indexTemplate: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   aliases: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   indexPatterns: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   pipelines: {
     knowledgeBase: string;

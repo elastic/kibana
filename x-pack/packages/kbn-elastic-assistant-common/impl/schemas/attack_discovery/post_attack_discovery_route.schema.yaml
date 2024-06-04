@@ -13,6 +13,7 @@ components:
         - 'detailsMarkdown'
         - 'entitySummaryMarkdown'
         - 'summaryMarkdown'
+        - 'timestamp'
         - 'title'
       properties:
         alertIds:
@@ -37,6 +38,9 @@ components:
         title:
           description: A title for the attack discovery, in plain text
           type: string
+        timestamp:
+          description: The time the attack discovery was generated
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
 
 
 paths:
