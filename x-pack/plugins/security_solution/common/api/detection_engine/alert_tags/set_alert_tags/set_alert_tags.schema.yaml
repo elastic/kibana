@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Manage alert tags API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/tags:
+    post:
+      operationId: ManageAlertTags
+      x-codegen-enabled: false
+      description: Manage alert tags for a single or multiple alerts
+      tags:
+        - Alerts API
+      requestBody:
+        description: A JSON object with the alert `ids` and `tags` fields
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManageAlertTagsRequestBody'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageAlertTagsResponse'
+
+components:
+  schemas:
+    ManageAlertTagsRequestBody:
+      type: object
+      properties:
+        ids:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
+        tags:
+          $ref: '#/components/schemas/ManageAlertTags'
+        required:
+          - ids
+          - tags
+
+    ManageAlertTagsResponse:
+      type: object
+      additionalProperties: true
+      description: Elasticsearch update by query response
+
+    ManageAlertTags:
+      type: object
+      properties:
+        tags_to_add:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertTags'
+        tags_to_remove:
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertTags'
+      required:
+        - tags_to_add
+        - tags_to_remove

@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Set alerts status API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/search:
+    post:
+      operationId: SetAlertsStatus
+      x-codegen-enabled: false
+      description: Sets the status of a single or multiple alert
+      tags:
+        - Alerts API
+      requestBody:
+        description: A JSON object with either a `query` or `signal_ids` field
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAlertsStatusRequestBody'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetAlertsStatusResponse'
+
+components:
+  schemas:
+    SetAlertsStatusRequestBody:
+      allOf:
+        - type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - open
+                - closed
+                - acknowledged
+                - in-progress
+            conflicts:
+              type: string
+              enum:
+                - abort
+                - proceed
+              default: abort
+          required: [status]
+        - oneOf:
+            - type: object
+              properties:
+                signal_ids:
+                  type: array
+                  items:
+                    $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                  minItems: 1
+              required: [signal_ids]
+            - type: object
+              properties:
+                query:
+                  type: object
+                  additionalProperties: true
+              required: [query]
+
+    SetAlertsStatusResponse:
+      type: object
+      additionalProperties: true
+      description: Elasticsearch update by query response
