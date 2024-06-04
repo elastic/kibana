@@ -549,7 +549,7 @@ describe('TableListView', () => {
         ['a-foo', yesterdayToString],
       ]);
 
-      expect(localStorage.getItem('tableSort:userContent')).toBe(
+      expect(localStorage.getItem('tableSort:test')).toBe(
         '{"field":"attributes.title","direction":"desc"}'
       );
 

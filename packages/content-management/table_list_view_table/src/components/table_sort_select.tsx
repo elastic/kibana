@@ -178,8 +178,8 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
   );
 }
 
-const sortStorageKey = (listingId: string) => `tableSort:${listingId}`;
-export function getInitialSorting(listingId: string): {
+const sortStorageKey = (tableId: string) => `tableSort:${tableId}`;
+export function getInitialSorting(tableId: string): {
   isDefault: boolean;
   tableSort: {
     field: SortColumnField;
@@ -187,7 +187,7 @@ export function getInitialSorting(listingId: string): {
   };
 } {
   try {
-    const storedSorting = localStorage.getItem(sortStorageKey(listingId));
+    const storedSorting = localStorage.getItem(sortStorageKey(tableId));
     if (storedSorting) {
       const tableSort = JSON.parse(storedSorting);
       return { isDefault: false, tableSort };
@@ -205,11 +205,11 @@ export function getInitialSorting(listingId: string): {
   };
 }
 export function saveSorting(
-  listingId: string,
+  tableId: string,
   tableSort: { field: SortColumnField; direction: Direction }
 ) {
   try {
-    localStorage.setItem(sortStorageKey(listingId), JSON.stringify(tableSort));
+    localStorage.setItem(sortStorageKey(tableId), JSON.stringify(tableSort));
   } catch (e) {
     /* empty */
   }
