@@ -4,7 +4,7 @@ steps:
     key: upload_runtime_info
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -24,7 +24,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -43,7 +43,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-detection-engine"
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -64,7 +64,7 @@ steps:
         key: exception_lists_items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -80,7 +80,7 @@ steps:
         key: exception_lists_items:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -96,7 +96,7 @@ steps:
         key: lists_items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -112,7 +112,7 @@ steps:
         key: lists_items:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -128,7 +128,7 @@ steps:
         key: user_roles:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -144,7 +144,7 @@ steps:
         key: user_roles:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -160,7 +160,7 @@ steps:
         key: telemetry:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -176,7 +176,7 @@ steps:
         key: telemetry:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -192,7 +192,7 @@ steps:
         key: exception_workflows:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -208,7 +208,7 @@ steps:
         key: exception_workflows:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -224,7 +224,7 @@ steps:
         key: exception_operators_date_numeric_types:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -240,7 +240,7 @@ steps:
         key: exception_operators_date_numeric_types:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -256,7 +256,7 @@ steps:
         key: exception_operators_keyword:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -272,7 +272,7 @@ steps:
         key: exception_operators_keyword:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -288,7 +288,7 @@ steps:
         key: exception_operators_ips:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -304,7 +304,7 @@ steps:
         key: exception_operators_ips:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -320,7 +320,7 @@ steps:
         key: exception_operators_long:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -336,7 +336,7 @@ steps:
         key: exception_operators_long:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -352,7 +352,7 @@ steps:
         key: exception_operators_text:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -368,7 +368,7 @@ steps:
         key: exception_operators_text:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -384,7 +384,7 @@ steps:
         key: actions:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -400,7 +400,7 @@ steps:
         key: actions:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -416,7 +416,7 @@ steps:
         key: alerts:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -432,7 +432,7 @@ steps:
         key: alerts:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -448,7 +448,7 @@ steps:
         key: alerts:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -464,7 +464,7 @@ steps:
         key: alerts:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -480,7 +480,7 @@ steps:
         key: rule_execution_logic:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
@@ -496,7 +496,7 @@ steps:
         key: rule_execution_logic:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           preemptible: true

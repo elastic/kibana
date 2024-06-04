@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+echo '--- Report disk usage'
+df -h
+
 echo '--- Log out of gcloud'
 ./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
 ./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"

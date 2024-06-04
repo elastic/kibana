@@ -4,7 +4,7 @@ steps:
     key: build_project_image
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
@@ -17,7 +17,7 @@ steps:
     label: 'Deploy Project'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
