@@ -17,7 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cspSecurity',
     'cloudPostureDashboard',
     'rule',
-    'header',
     'benchmark',
     'findings',
   ]);
