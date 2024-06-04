@@ -35,7 +35,7 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
+describe('Upgrade risk scores', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     deleteRiskEngineConfiguration();
