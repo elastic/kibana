@@ -804,7 +804,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
   switch (commandDef.name) {
     case 'metrics': {
       const metrics = command as ESQLAstMetricsCommand;
-      messages.push(...validateSources(metrics, metrics.indices, references));
+      messages.push(...validateSources(metrics, metrics.sources, references));
       if (metrics.aggregates) {
         // TODO: validate aggregates
         if (metrics.grouping) {

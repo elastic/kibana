@@ -40,7 +40,7 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
 }
 
 export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
-  indices: ESQLSource[];
+  sources: ESQLSource[];
   aggregates?: ESQLAstItem[];
   grouping?: ESQLAstItem[];
 }

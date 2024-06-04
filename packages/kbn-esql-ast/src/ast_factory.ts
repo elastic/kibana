@@ -153,7 +153,7 @@ export class AstListener implements ESQLParserListener {
       ...createAstBaseItem('metrics', ctx),
       type: 'command',
       args: [],
-      indices: ctx
+      sources: ctx
         .getTypedRuleContexts(IndexIdentifierContext)
         .map((sourceCtx) => createSource(sourceCtx)),
     };
@@ -166,7 +166,7 @@ export class AstListener implements ESQLParserListener {
     if (grouping && grouping.length) {
       node.grouping = grouping;
     }
-    node.args.push(...node.indices, ...aggregates, ...grouping);
+    node.args.push(...node.sources, ...aggregates, ...grouping);
   }
 
   /**
