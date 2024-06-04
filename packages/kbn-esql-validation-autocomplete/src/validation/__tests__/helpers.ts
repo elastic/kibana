@@ -24,23 +24,21 @@ export const setup = async () => {
   };
 
   const assertErrors = (errors: unknown[], expectedErrors: string[]) => {
-    errors.sort((a: unknown, b: unknown) => String(a).localeCompare(String(b)));
-    expect(errors.length).toBe(expectedErrors.length);
-    for (let i = 0; i < errors.length; i++) {
-      const error = errors[i];
+    const errorMessages: string[] = [];
+    for (const error of errors) {
       if (error && typeof error === 'object') {
         const message =
           typeof (error as ESQLMessage).text === 'string'
             ? (error as ESQLMessage).text
-            : (error as EditorError).message
+            : typeof (error as EditorError).message === 'string'
             ? (error as EditorError).message
             : String(error);
-
-        expect(message).toBe(expectedErrors[i]);
+        errorMessages.push(message);
       } else {
-        expect(String(error)).toBe(expectedErrors[i]);
+        errorMessages.push(String(error));
       }
     }
+    expect(errorMessages.sort()).toStrictEqual(expectedErrors.sort());
   };
 
   const expectErrors = async (
