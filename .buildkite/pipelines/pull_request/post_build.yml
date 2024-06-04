@@ -5,7 +5,8 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     agents:
-      image: family/kibana-ubuntu-2004
+      diskSizeGb: 50
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2

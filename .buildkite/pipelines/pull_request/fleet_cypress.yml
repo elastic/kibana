@@ -2,7 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/fleet_cypress.sh
     label: 'Fleet Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      diskSizeGb: 50
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
