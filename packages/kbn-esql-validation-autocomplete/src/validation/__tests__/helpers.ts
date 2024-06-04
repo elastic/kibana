@@ -23,17 +23,9 @@ export const setup = async () => {
     return await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
   };
 
-  const expectErrors = async (
-    query: string,
-    expectedErrors: string[],
-    opts: ValidationOptions = {},
-    cb: ESQLCallbacks = callbacks
-  ) => {
-    const { errors } = await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
+  const assertErrors = (errors: unknown[], expectedErrors: string[]) => {
     errors.sort((a: unknown, b: unknown) => String(a).localeCompare(String(b)));
-
     expect(errors.length).toBe(expectedErrors.length);
-
     for (let i = 0; i < errors.length; i++) {
       const error = errors[i];
       if (error && typeof error === 'object') {
@@ -48,6 +40,20 @@ export const setup = async () => {
       } else {
         expect(String(error)).toBe(expectedErrors[i]);
       }
+    }
+  };
+
+  const expectErrors = async (
+    query: string,
+    expectedErrors: string[],
+    expectedWarnings?: string[],
+    opts: ValidationOptions = {},
+    cb: ESQLCallbacks = callbacks
+  ) => {
+    const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
+    assertErrors(errors, expectedErrors);
+    if (expectedWarnings) {
+      assertErrors(warnings, expectedWarnings);
     }
   };
 

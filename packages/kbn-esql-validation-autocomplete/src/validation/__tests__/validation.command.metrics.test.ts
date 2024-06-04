@@ -11,17 +11,6 @@ import { setup } from './helpers';
 describe('validation', () => {
   describe('command', () => {
     describe('METRICS', () => {
-      test('no errors on valid index list', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors('metrics index', []);
-        await expectErrors('metrics index, other_index', []);
-        await expectErrors('metrics index, other_index,.secret_index', []);
-        await expectErrors('metrics .secret_index', []);
-        await expectErrors('METRICS .secret_index', []);
-        await expectErrors('mEtRiCs .secret_index', []);
-      });
-
       test('errors on invalid command start', async () => {
         const { expectErrors } = await setup();
 
@@ -33,10 +22,16 @@ describe('validation', () => {
         ]);
       });
 
-      describe('indices', () => {
+      describe('sources', () => {
         test('no errors on correct indices usage', async () => {
           const { expectErrors } = await setup();
 
+          await expectErrors('metrics index', []);
+          await expectErrors('metrics index, other_index', []);
+          await expectErrors('metrics index, other_index,.secret_index', []);
+          await expectErrors('metrics .secret_index', []);
+          await expectErrors('METRICS .secret_index', []);
+          await expectErrors('mEtRiCs .secret_index', []);
           await expectErrors('metrics ind*, other*', []);
           await expectErrors('metrics index*', []);
           await expectErrors('metrics *a_i*dex*', []);

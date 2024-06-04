@@ -18,7 +18,6 @@ import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
-import { METADATA_FIELDS } from '../shared/constants';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
 import {
   fields,
@@ -260,121 +259,6 @@ describe('validation logic', () => {
             `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
           ])
       );
-    });
-
-    describe('from', () => {
-      describe('indices', () => {
-        testErrorsAndWarnings('f', [
-          `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
-        ]);
-        testErrorsAndWarnings(`from `, ["SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"]);
-        testErrorsAndWarnings(`from index,`, [
-          "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
-        ]);
-        testErrorsAndWarnings(`from assignment = 1`, [
-          "SyntaxError: mismatched input '=' expecting <EOF>",
-          'Unknown index [assignment]',
-        ]);
-        testErrorsAndWarnings(`from index`, []);
-        testErrorsAndWarnings(`FROM index`, []);
-        testErrorsAndWarnings(`FrOm index`, []);
-        testErrorsAndWarnings('from `index`', [
-          "SyntaxError: token recognition error at: '`'",
-          "SyntaxError: token recognition error at: '`'",
-        ]);
-        testErrorsAndWarnings(`from index, other_index`, []);
-        testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
-        testErrorsAndWarnings(`from fn()`, ['Unknown index [fn()]']);
-        testErrorsAndWarnings(`from average()`, ['Unknown index [average()]']);
-        testErrorsAndWarnings(`from ind*, other*`, []);
-        testErrorsAndWarnings(`from index*`, []);
-        testErrorsAndWarnings(`from *a_i*dex*`, []);
-        testErrorsAndWarnings(`from in*ex*`, []);
-        testErrorsAndWarnings(`from *n*ex`, []);
-        testErrorsAndWarnings(`from *n*ex*`, []);
-        testErrorsAndWarnings(`from i*d*x*`, []);
-        testErrorsAndWarnings(`from i*d*x`, []);
-        testErrorsAndWarnings(`from i***x*`, []);
-        testErrorsAndWarnings(`from i****`, []);
-        testErrorsAndWarnings(`from i**`, []);
-        testErrorsAndWarnings(`from index**`, []);
-        testErrorsAndWarnings(`from *ex`, []);
-        testErrorsAndWarnings(`from *ex*`, []);
-        testErrorsAndWarnings(`from in*ex`, []);
-        testErrorsAndWarnings(`from ind*ex`, []);
-        testErrorsAndWarnings(`from *,-.*`, []);
-        testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
-        testErrorsAndWarnings(`from remote-*:indexes*`, []);
-        testErrorsAndWarnings(`from remote-*:indexes`, []);
-        testErrorsAndWarnings(`from remote-ccs:indexes`, []);
-        testErrorsAndWarnings(`from a_index, remote-ccs:indexes`, []);
-        testErrorsAndWarnings('from .secret_index', []);
-        testErrorsAndWarnings('from my-index', []);
-        testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
-        testErrorsAndWarnings('from policy', ['Unknown index [policy]']);
-      });
-
-      describe('metadata', () => {
-        testErrorsAndWarnings(`from index (metadata _id)`, [
-          "SyntaxError: mismatched input '(metadata' expecting <EOF>",
-        ]);
-
-        for (const isWrapped of [true, false]) {
-          function setWrapping(option: string) {
-            return isWrapped ? `[${option}]` : option;
-          }
-          function addBracketsWarning() {
-            return isWrapped
-              ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
-              : [];
-          }
-          testErrorsAndWarnings(
-            `from index ${setWrapping('METADATA _id')}`,
-            [],
-            addBracketsWarning()
-          );
-          testErrorsAndWarnings(
-            `from index ${setWrapping('metadata _id')}`,
-            [],
-            addBracketsWarning()
-          );
-  
-          testErrorsAndWarnings(
-            `from index ${setWrapping('METADATA _id, _source')}`,
-            [],
-            addBracketsWarning()
-          );
-          testErrorsAndWarnings(
-            `from index ${setWrapping('METADATA _id, _source2')}`,
-            [
-              `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
-                ', '
-              )}]`,
-            ],
-            addBracketsWarning()
-          );
-          testErrorsAndWarnings(
-            `from index ${setWrapping('metadata _id, _source')} ${setWrapping('METADATA _id2')}`,
-            [
-              isWrapped
-                ? "SyntaxError: mismatched input '[' expecting <EOF>"
-                : "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
-            ],
-            addBracketsWarning()
-          );
-  
-          testErrorsAndWarnings(
-            `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
-            [],
-            addBracketsWarning()
-          );
-          testErrorsAndWarnings(
-            `from *:indexes ${setWrapping('METADATA _id')}`,
-            [],
-            addBracketsWarning()
-          );
-        }
-      });
     });
 
     describe('row', () => {
