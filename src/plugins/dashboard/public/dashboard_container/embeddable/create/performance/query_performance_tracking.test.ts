@@ -152,7 +152,7 @@ describe('startQueryPerformanceTracking', () => {
     );
   });
 
-  it('reports subsequent loads', async () => {
+  it('reports initial and subsequent loads', async () => {
     const children = {
       panel1: {
         phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
@@ -185,8 +185,6 @@ describe('startQueryPerformanceTracking', () => {
       })
     );
   });
-
-  it('reports Dashboard first load', () => {});
 
   it('subscribes to newly added panels', async () => {
     const children: { [key: string]: unknown } = {
