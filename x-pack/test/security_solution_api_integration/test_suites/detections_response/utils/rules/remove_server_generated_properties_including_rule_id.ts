@@ -17,7 +17,6 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
   rule: RuleResponse
 ): Partial<RuleResponse> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
+  const { rule_id: _, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
   return additionalRuledIdRemoved;
 };
