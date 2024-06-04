@@ -566,6 +566,7 @@ export const ignoreTestFields = [
   'updated_at',
   'updated_by',
   'policy_id',
+  'policy_ids',
   'version',
   'revision',
 ];
