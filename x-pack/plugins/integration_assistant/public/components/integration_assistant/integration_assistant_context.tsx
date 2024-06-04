@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 
-import { IntegrationAssistantServices } from '../../types';
+import type { IntegrationAssistantServices } from '../../types';
 
 interface IntegrationAssistantProps {
   services: IntegrationAssistantServices;
@@ -62,3 +62,4 @@ export const IntegrationAssistantContext = React.memo<PropsWithChildren<Integrat
     );
   }
 );
+IntegrationAssistantContext.displayName = 'IntegrationAssistantContext';

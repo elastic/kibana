@@ -8,17 +8,14 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash/fp';
 import { useState, useEffect, useCallback } from 'react';
-import { Actions, AssistantState } from '../../hooks/use_assistant_state';
-import { runCategorizationGraph, runEcsGraph, runIntegrationBuilder, runRelatedGraph } from './api';
-
-interface PipelineGenerationProps {
-  integrationSettings: AssistantState['integrationSettings'];
-  connectorId: AssistantState['connectorId'];
-  isGenerating: AssistantState['isGenerating'];
-  skip: boolean;
-  setIsGenerating: Actions['setIsGenerating'];
-  setResult: Actions['setResult'];
-}
+import type { CheckPipelineApiRequest, Pipeline } from '../../../../../common';
+import type { Actions, State } from '../../state';
+import {
+  runCategorizationGraph,
+  runCheckPipelineResults,
+  runEcsGraph,
+  runRelatedGraph,
+} from './api';
 
 export type ProgressItem = 'ecs' | 'categorization' | 'related_graph' | 'integration_builder';
 
@@ -29,7 +26,15 @@ interface Parameters {
   connectorId?: string;
 }
 interface ParametersWithPipeline extends Parameters {
-  currentPipeline: object;
+  currentPipeline: Pipeline;
+}
+
+interface PipelineGenerationProps {
+  integrationSettings: State['integrationSettings'];
+  connectorId: State['connectorId'];
+  skip: boolean;
+  setIsGenerating: Actions['setIsGenerating'];
+  setResult: Actions['setResult'];
 }
 
 export const usePipelineGeneration = ({
@@ -94,10 +99,6 @@ export const usePipelineGeneration = ({
           // parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
           setResult(relatedGraphResult.results);
         }
-
-        // addProgress('integration_builder');
-        // const integrationBuilderResult = await runIntegrationBuilder(parametersWithPipeline, deps);
-        // if (abortController.signal.aborted) return;
       } catch (e) {
         if (abortController.signal.aborted) return;
         setError(`Error: ${e.message}`);
@@ -105,9 +106,7 @@ export const usePipelineGeneration = ({
         setIsGenerating(false);
       }
     })();
-
     return () => {
-      console.log('aborting');
       abortController.abort();
     };
   }, [
@@ -125,4 +124,76 @@ export const usePipelineGeneration = ({
     progress,
     error,
   };
+};
+
+interface CheckPipelineProps {
+  integrationSettings: State['integrationSettings'];
+  connectorId: State['connectorId'];
+  customPipeline: Pipeline | undefined;
+  setIsGenerating: Actions['setIsGenerating'];
+  setResult: Actions['setResult'];
+}
+
+export const useCheckPipeline = ({
+  integrationSettings,
+  connectorId,
+  customPipeline,
+  setIsGenerating,
+  setResult,
+}: CheckPipelineProps) => {
+  const { http, notifications } = useKibana().services;
+  const [error, setError] = useState<null | string>(null);
+
+  useEffect(() => {
+    if (
+      customPipeline == null ||
+      http == null ||
+      integrationSettings == null ||
+      notifications?.toasts == null
+    ) {
+      return;
+    }
+    const abortController = new AbortController();
+    const deps = { http, abortSignal: abortController.signal };
+
+    (async () => {
+      try {
+        const parameters: CheckPipelineApiRequest = {
+          pipeline: customPipeline,
+          rawSamples: integrationSettings.logsSampleParsed ?? [],
+        };
+        setIsGenerating(true);
+
+        const ecsGraphResult = await runCheckPipelineResults(parameters, deps);
+        if (abortController.signal.aborted) return;
+        if (isEmpty(ecsGraphResult?.pipelineResults) || ecsGraphResult?.errors?.length) {
+          setError('No results for the pipeline');
+          return;
+        }
+        setResult({
+          pipeline: customPipeline,
+          docs: ecsGraphResult.pipelineResults,
+        });
+      } catch (e) {
+        if (abortController.signal.aborted) return;
+        setError(`Error: ${e.message}`);
+      } finally {
+        setIsGenerating(false);
+      }
+    })();
+
+    return () => {
+      abortController.abort();
+    };
+  }, [
+    setIsGenerating,
+    connectorId,
+    http,
+    integrationSettings,
+    notifications?.toasts,
+    setResult,
+    customPipeline,
+  ]);
+
+  return { error };
 };

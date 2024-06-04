@@ -7,19 +7,22 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
+  CheckPipelineApiRequest,
+  CheckPipelineApiResponse,
+} from '../../../../../common/types';
+import type {
   EcsMappingApiRequest,
   EcsMappingApiResponse,
   CategorizationApiRequest,
   CategorizationApiResponse,
   RelatedApiRequest,
   RelatedApiResponse,
-  BuildIntegrationApiRequest,
 } from '../../../../../common';
 import {
   ECS_GRAPH_PATH,
   CATEGORIZATION_GRAPH_PATH,
   RELATED_GRAPH_PATH,
-  INTEGRATION_BUILDER_PATH,
+  CHECK_PIPELINE_PATH,
 } from '../../../../../common';
 
 export const runEcsGraph = async (
@@ -49,11 +52,11 @@ export const runRelatedGraph = async (
     signal: abortSignal,
   });
 
-export const runIntegrationBuilder = async (
-  body: BuildIntegrationApiRequest,
+export const runCheckPipelineResults = async (
+  body: CheckPipelineApiRequest,
   { http, abortSignal }: { http: HttpSetup; abortSignal: AbortSignal }
-): Promise<Buffer> =>
-  http.post<Buffer>(INTEGRATION_BUILDER_PATH, {
+): Promise<CheckPipelineApiResponse> =>
+  http.post<CheckPipelineApiResponse>(CHECK_PIPELINE_PATH, {
     body: JSON.stringify(body),
     signal: abortSignal,
   });

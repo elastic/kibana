@@ -16,7 +16,8 @@ import { IntegrationAssistantBottomBar } from './bottom_bar';
 import { ConnectorSetup, isConnectorSetupReady } from './steps/connector_setup';
 import { ConfigureIntegration, isConfigureIntegrationReady } from './steps/configure_integration';
 import { isLogsAnalysisReady, LogsAnalysis } from './steps/logs_analysis';
-import { isPipelineGenerationReady, PipelineGeneration } from './steps/pipeline_generation';
+import { isPipelineGenerationReady, PipelineGeneration } from './steps/pipeline_integration';
+import { DeployIntegration } from './steps/deploy_integration';
 
 const useContentCss = () => {
   const { euiTheme } = useEuiTheme();
@@ -29,7 +30,6 @@ const useContentCss = () => {
 
 export const IntegrationAssistant = React.memo(() => {
   const { state, actions } = useAssistantState();
-  // const spaceId = useSpaceId() ?? 'default';
   const contendCss = useContentCss();
 
   const {
@@ -103,6 +103,13 @@ export const IntegrationAssistant = React.memo(() => {
                 setIntegrationSettings={actions.setIntegrationSettings}
                 setIsGenerating={actions.setIsGenerating}
                 setResult={actions.setResult}
+              />
+            )}
+            {state.step === 5 && (
+              <DeployIntegration
+                integrationSettings={state.integrationSettings}
+                result={state.result}
+                connectorId={state.connectorId}
               />
             )}
           </EuiFlexItem>

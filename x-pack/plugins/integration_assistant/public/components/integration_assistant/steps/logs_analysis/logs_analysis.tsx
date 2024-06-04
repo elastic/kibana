@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFieldText,
   EuiFilePicker,
@@ -13,37 +13,64 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IntegrationSettings } from '../../types';
+import { isPlainObject } from 'lodash/fp';
+import type { InputType } from '../../../../../common/types';
+import type { IntegrationSettings, State } from '../../state';
 import * as i18n from './translations';
-import { AssistantState } from '../../hooks/use_assistant_state';
 
 const MAX_LOGS_SAMPLE_SIZE = 10;
 
-interface LogsAnalysisProps {
-  integrationSettings: AssistantState['integrationSettings'];
-  setIntegrationSettings: (param: IntegrationSettings) => void;
-}
+export const InputTypeOptions: Array<{ value: InputType; text: string }> = [
+  { value: 'aws_cloudwatch', text: 'AWS Cloudwatch' },
+  { value: 'aws_s3', text: 'AWS S3' },
+  { value: 'azure_blob_storage', text: 'Azure Blob Storage' },
+  { value: 'azure_eventhub', text: 'Azure Event Hub' },
+  { value: 'cloudfoundry', text: 'Cloud Foundry' },
+  { value: 'filestream', text: 'File Stream' },
+  { value: 'gcp_pubsub', text: 'GCP Pub/Sub' },
+  { value: 'gcs', text: 'Google Cloud Storage' },
+  { value: 'http_endpoint', text: 'HTTP Endpoint' },
+  { value: 'journald', text: 'Journald' },
+  { value: 'kafka', text: 'Kafka' },
+  { value: 'tcp', text: 'TCP' },
+  { value: 'udp', text: 'UDP' },
+];
 
-// TODO: unit test this, add support for ndjson
+const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);
+const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
+
+/**
+ * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
+ */
 const parseLogsContent = (
-  fileContent: string | undefined
+  fileContent: string | undefined,
+  fileType: string
 ): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[] } => {
   if (fileContent == null) {
     return { error: 'Failed to read the logs sample file' };
   }
   let parsedContent;
   try {
-    parsedContent = JSON.parse(fileContent);
+    if (fileType === 'application/json') {
+      parsedContent = JSON.parse(fileContent);
+    } else if (fileType === 'application/x-ndjson') {
+      parsedContent = fileContent
+        .split('\n')
+        .filter((line) => line.trim() !== '')
+        .map((line) => JSON.parse(line));
+    }
   } catch (_) {
-    return { error: 'The logs sample file is not a valid JSON file' };
+    return { error: `The logs sample file has not a valid ${fileType} format` };
   }
 
   if (!Array.isArray(parsedContent)) {
-    return { error: 'The logs sample file is not a JSON array' };
+    return { error: 'The logs sample file is not an array' };
   }
   if (parsedContent.length === 0) {
     return { error: 'The logs sample file is empty' };
@@ -55,7 +82,7 @@ const parseLogsContent = (
     isTruncated = true;
   }
 
-  if (parsedContent.some((log) => typeof log !== 'object')) {
+  if (parsedContent.some((log) => !isPlainObject(log))) {
     return { error: 'The logs sample file contains non-object entries' };
   }
 
@@ -63,14 +90,16 @@ const parseLogsContent = (
   return { isTruncated, logsSampleParsed };
 };
 
-const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);
-const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
-
+interface LogsAnalysisProps {
+  integrationSettings: State['integrationSettings'];
+  setIntegrationSettings: (param: IntegrationSettings) => void;
+}
 export const LogsAnalysis = React.memo<LogsAnalysisProps>(
   ({ integrationSettings, setIntegrationSettings }) => {
     const { notifications } = useKibana().services;
-    const [isParsing, setIsParsing] = React.useState(false);
-    const [invalidField, setInvalidField] = React.useState({ name: false, dataStreamName: false });
+    const [isParsing, setIsParsing] = useState(false);
+    const [sampleFileError, setSampleFileError] = useState<string>();
+    const [invalidField, setInvalidField] = useState({ name: false, dataStreamName: false });
 
     const setIntegrationValues = useCallback(
       (settings: Partial<IntegrationSettings>) =>
@@ -98,6 +127,9 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
           }
           setIntegrationValues({ dataStreamName: e.target.value });
         },
+        inputType: (e: React.ChangeEvent<HTMLSelectElement>) => {
+          setIntegrationValues({ inputType: e.target.value as InputType });
+        },
       };
     }, [setIntegrationValues, setInvalidField]);
 
@@ -117,6 +149,7 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
       (files: FileList | null) => {
         const logsSampleFile = files?.[0];
         if (logsSampleFile == null) {
+          setSampleFileError(undefined);
           setIntegrationSettings({
             ...integrationSettings,
             logsSampleFileName: undefined,
@@ -128,20 +161,20 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
         const reader = new FileReader();
         reader.onload = function (e) {
           const fileContent = e.target?.result as string | undefined; // we use readAsText so this should be a string
-          const { error, isTruncated, logsSampleParsed } = parseLogsContent(fileContent);
+          const { error, isTruncated, logsSampleParsed } = parseLogsContent(
+            fileContent,
+            logsSampleFile.type
+          );
           setIsParsing(false);
-
+          setSampleFileError(error);
           if (error) {
-            notifications?.toasts.addDanger(error);
             return;
           }
 
           if (isTruncated) {
-            notifications?.toasts.addSuccess(
-              `The logs sample has been parsed successfully and truncated to ${MAX_LOGS_SAMPLE_SIZE} rows.`
+            notifications?.toasts.addInfo(
+              `The logs sample has been truncated to ${MAX_LOGS_SAMPLE_SIZE} rows.`
             );
-          } else {
-            notifications?.toasts.addSuccess('The logs sample has been parsed successfully.');
           }
 
           setIntegrationSettings({
@@ -190,22 +223,30 @@ export const LogsAnalysis = React.memo<LogsAnalysisProps>(
                 isInvalid={invalidField.dataStreamName}
               />
             </EuiFormRow>
-            {/* <EuiFormRow label={i18n.FORMAT_LABEL}>
-              <EuiFieldText
-                name="format"
-                value="json/ndjson"
-                // onChange={onChangeFormat}
-                disabled
+            <EuiFormRow label={i18n.DATA_COLLECTION_METHOD_LABEL}>
+              <EuiSelect
+                name="dataCollectionMethod"
+                options={InputTypeOptions}
+                value={integrationSettings?.inputType ?? ''}
+                onChange={onChange.inputType}
               />
-            </EuiFormRow> */}
-            <EuiFormRow label={i18n.LOGS_SAMPLE_LABEL}>
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.LOGS_SAMPLE_LABEL}
+              helpText={
+                <EuiText color="danger" size="s">
+                  {sampleFileError}
+                </EuiText>
+              }
+              isInvalid={sampleFileError != null}
+            >
               <EuiFilePicker
                 id="logsSampleFilePicker"
-                initialPromptText="Select or drag and drop the logs sample file"
+                initialPromptText="json/ndjson format"
                 onChange={onChangeLogsSample}
                 display="large"
-                aria-label="Use aria labels when no actual label is in use"
-                accept="application/json"
+                aria-label="Upload logs sample file"
+                accept="application/json,application/x-ndjson"
                 isLoading={isParsing}
               />
             </EuiFormRow>

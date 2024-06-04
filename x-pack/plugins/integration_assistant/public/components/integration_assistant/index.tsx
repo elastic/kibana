@@ -7,7 +7,7 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { Suspense } from 'react';
-import { IntegrationAssistantServices } from '../../types';
+import type { IntegrationAssistantServices } from '../../types';
 
 const IntegrationAssistant = React.lazy(() =>
   import('./integration_assistant').then((module) => ({

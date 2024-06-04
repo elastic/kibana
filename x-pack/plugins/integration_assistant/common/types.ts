@@ -11,7 +11,7 @@ export interface ESProcessorOptions {
   ignore_missing?: boolean;
   if?: string;
   tag?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ESProcessorItem {
@@ -26,29 +26,28 @@ export interface Pipeline {
   on_failure?: ESProcessorItem[];
 }
 
-export enum InputTypes {
-  Cloudwatch = 'aws-cloudwatch',
-  S3 = 'aws-s3',
-  AzureBlobStorage = 'azure-blob-storage',
-  EventHub = 'azure-eventhub',
-  Cloudfoundry = 'cloudfoundry',
-  FileStream = 'filestream',
-  PubSub = 'gcp-pubsub',
-  GoogleCloudStorage = 'gcs',
-  HTTPListener = 'http_endpoint',
-  Journald = 'journald',
-  Kafka = 'kafka',
-  TCP = 'tcp',
-  UDP = 'udp',
-}
+export type InputType =
+  | 'aws_cloudwatch'
+  | 'aws_s3'
+  | 'azure_blob_storage'
+  | 'azure_eventhub'
+  | 'cloudfoundry'
+  | 'filestream'
+  | 'gcp_pubsub'
+  | 'gcs'
+  | 'http_endpoint'
+  | 'journald'
+  | 'kafka'
+  | 'tcp'
+  | 'udp';
 
 export interface DataStream {
   name: string;
   title: string;
   description: string;
-  inputTypes: InputTypes[];
+  inputTypes: InputType[];
   rawSamples: string[];
-  pipeline: object;
+  pipeline: Pipeline;
   docs: object[];
 }
 
@@ -78,7 +77,7 @@ export interface CategorizationApiRequest {
   packageName: string;
   dataStreamName: string;
   rawSamples: string[];
-  currentPipeline: object;
+  currentPipeline: Pipeline;
   connectorId?: string;
 }
 
@@ -86,27 +85,27 @@ export interface RelatedApiRequest {
   packageName: string;
   dataStreamName: string;
   rawSamples: string[];
-  currentPipeline: object;
+  currentPipeline: Pipeline;
   connectorId?: string;
 }
 
-export interface TestPipelineApiRequest {
+export interface CheckPipelineApiRequest {
   rawSamples: string[];
-  currentPipeline: Pipeline;
+  pipeline: Pipeline;
   connectorId?: string;
 }
 
 // Server Response Schemas
 export interface CategorizationApiResponse {
   results: {
-    pipeline: object;
+    pipeline: Pipeline;
     docs: object[];
   };
 }
 
 export interface RelatedApiResponse {
   results: {
-    pipeline: object;
+    pipeline: Pipeline;
     docs: object[];
   };
 }
@@ -114,11 +113,11 @@ export interface RelatedApiResponse {
 export interface EcsMappingApiResponse {
   results: {
     mapping: object;
-    pipeline: object;
+    pipeline: Pipeline;
   };
 }
 
-export interface TestPipelineApiResponse {
+export interface CheckPipelineApiResponse {
   pipelineResults: object[];
   errors?: object[];
 }

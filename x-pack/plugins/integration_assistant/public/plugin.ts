@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin, CoreSetup } from '@kbn/core/public';
-import {
+import type { CoreStart, Plugin, CoreSetup } from '@kbn/core/public';
+import type {
   IntegrationAssistantPluginSetup,
   IntegrationAssistantPluginStart,
   IntegrationAssistantPluginStartDependencies,

@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { AssistantState } from '../hooks/use_assistant_state';
+import type { State } from '../state';
 
 interface IntegrationAssistantBottomBarProps {
   currentStep: number;
   setStep: (step: number) => void;
-  result: AssistantState['result'];
+  result: State['result'];
   onGenerate: () => void;
   isNextStepEnabled?: boolean;
 }
@@ -23,6 +23,9 @@ export const IntegrationAssistantBottomBar = React.memo<IntegrationAssistantBott
   ({ currentStep, setStep, result, onGenerate, isNextStepEnabled = false }) => {
     const integrationsUrl = useKibana().services.application.getUrlForApp('integrations');
 
+    if (currentStep === 5) {
+      return null;
+    }
     return (
       <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="l">
         <EuiFlexItem grow={false}>
@@ -34,19 +37,6 @@ export const IntegrationAssistantBottomBar = React.memo<IntegrationAssistantBott
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {/* {currentStep === 3 && result == null ? (
-            <EuiButton
-              fill
-              color="primary"
-              onClick={() => onGenerate()}
-              isDisabled={!isNextStepEnabled}
-            >
-              <FormattedMessage
-                id="xpack.fleet.integrationsAssistant.generate"
-                defaultMessage="Generate"
-              />
-            </EuiButton>
-          ) : ( */}
           <EuiButton
             fill
             color="primary"
@@ -55,7 +45,6 @@ export const IntegrationAssistantBottomBar = React.memo<IntegrationAssistantBott
           >
             <FormattedMessage id="xpack.fleet.integrationsAssistant.next" defaultMessage="Next" />
           </EuiButton>
-          {/* )} */}
         </EuiFlexItem>
       </EuiFlexGroup>
     );

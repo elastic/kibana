@@ -18,16 +18,16 @@ export type {
   ESProcessorOptions,
   DataStream,
   Integration,
-  InputTypes,
-  TestPipelineApiRequest,
-  TestPipelineApiResponse,
+  InputType,
+  CheckPipelineApiRequest,
+  CheckPipelineApiResponse,
 } from './types';
 
 export {
   ECS_GRAPH_PATH,
   CATEGORIZATION_GRAPH_PATH,
   RELATED_GRAPH_PATH,
-  TEST_PIPELINE_PATH,
+  CHECK_PIPELINE_PATH,
   INTEGRATION_BUILDER_PATH,
   INTEGRATION_ASSISTANT_BASE_PATH,
 } from './constants';

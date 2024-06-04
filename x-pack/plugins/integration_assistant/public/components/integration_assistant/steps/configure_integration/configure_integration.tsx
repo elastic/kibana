@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { IntegrationSettings } from '../../types';
+import type { IntegrationSettings } from '../../state';
 
 import * as i18n from './translations';
 

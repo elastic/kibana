@@ -35,10 +35,10 @@ export const DATA_STREAM_NAME_LABEL = i18n.translate(
   }
 );
 
-export const FORMAT_LABEL = i18n.translate(
-  'xpack.integrationAssistant.integrationSettings.label.format',
+export const DATA_COLLECTION_METHOD_LABEL = i18n.translate(
+  'xpack.integrationAssistant.integrationSettings.label.dataCollectionMethod',
   {
-    defaultMessage: 'Format',
+    defaultMessage: 'Data collection method',
   }
 );
 

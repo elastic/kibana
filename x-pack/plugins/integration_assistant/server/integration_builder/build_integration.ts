@@ -27,7 +27,8 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   });
 
   const tmpDir = joinPath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
-  const packageDir = createDirectories(tmpDir, integration);
+  const packageDirectoryName = `${integration.name}-0.1.0`;
+  const packageDir = createDirectories(tmpDir, integration, packageDirectoryName);
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
 
   for (const dataStream of integration.dataStreams) {
@@ -40,14 +41,16 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);
   }
 
-  const tmpPackageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
-
-  const zipBuffer = await createZipArchive(tmpPackageDir);
+  const zipBuffer = await createZipArchive(tmpDir, packageDirectoryName);
   return zipBuffer;
 }
 
-function createDirectories(tmpDir: string, integration: Integration): string {
-  const packageDir = joinPath(tmpDir, `${integration.name}-0.1.0`);
+function createDirectories(
+  tmpDir: string,
+  integration: Integration,
+  packageDirectoryName: string
+): string {
+  const packageDir = joinPath(tmpDir, packageDirectoryName);
   ensureDirSync(tmpDir);
   ensureDirSync(packageDir);
   createPackage(packageDir, integration);
@@ -103,9 +106,10 @@ function createReadme(packageDir: string, integration: Integration) {
   createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
 }
 
-async function createZipArchive(tmpPackageDir: string): Promise<Buffer> {
+async function createZipArchive(tmpDir: string, packageDirectoryName: string): Promise<Buffer> {
+  const tmpPackageDir = joinPath(tmpDir, packageDirectoryName);
   const zip = new AdmZip();
-  zip.addLocalFolder(tmpPackageDir);
+  zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
   const buffer = zip.toBuffer();
   return buffer;
 }
@@ -133,7 +137,7 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
     package_name: integration.name,
     package_version: '0.1.0',
     package_description: integration.description,
-    package_owner: '@elastic/custom-integrations',
+    package_owner: `'@elastic/custom-integrations'`,
     min_version: '^8.13.0',
     inputs: uniqueInputsList,
   });

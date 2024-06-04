@@ -7,15 +7,15 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { TEST_PIPELINE_PATH } from '../../common';
+import { CHECK_PIPELINE_PATH } from '../../common';
 import { testPipeline } from '../util/pipeline';
-import { TestPipelineApiRequest, TestPipelineApiResponse } from '../../common/types';
+import { CheckPipelineApiRequest, CheckPipelineApiResponse } from '../../common/types';
 import { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.post(
     {
-      path: `${TEST_PIPELINE_PATH}`,
+      path: `${CHECK_PIPELINE_PATH}`,
       validate: {
         body: schema.object({
           pipeline: schema.any(),
@@ -24,16 +24,12 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
       },
     },
     async (context, req, res) => {
-      const { rawSamples, currentPipeline } = req.body as TestPipelineApiRequest;
+      const { rawSamples, pipeline } = req.body as CheckPipelineApiRequest;
       const services = await context.resolve(['core']);
       const { client } = services.core.elasticsearch;
-      let results: TestPipelineApiResponse = { pipelineResults: [], errors: [] };
+      let results: CheckPipelineApiResponse = { pipelineResults: [], errors: [] };
       try {
-        results = (await testPipeline(
-          rawSamples,
-          currentPipeline,
-          client
-        )) as TestPipelineApiResponse;
+        results = (await testPipeline(rawSamples, pipeline, client)) as CheckPipelineApiResponse;
         if (results?.errors && results.errors.length > 0) {
           return res.badRequest({ body: JSON.stringify(results.errors) });
         }
