@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+console.log('pointer compression enabled:', process.config.variables.v8_enable_pointer_compression);
 require('../setup_node_env/dist');
 require('./apm')();
 require('../setup_node_env/root');
