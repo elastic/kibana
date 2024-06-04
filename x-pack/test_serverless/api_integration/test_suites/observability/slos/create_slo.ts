@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedTransforms: ExpectedTransforms = {
           count: 2,
           results: {
-            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.2' },
+            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3.3' },
             transform1: {
               id: 'slo-summary-my-custom-id1-1',
               destIndex: '.slo-observability.summary-v3.3',
