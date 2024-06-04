@@ -6,12 +6,14 @@
  */
 
 import { RequestHandlerWrapper } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 
-export const errorHandler: RequestHandlerWrapper = (handler) => {
+export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) => (handler) => {
   return async (context, request, response) => {
     try {
       return await handler(context, request, response);
     } catch (e) {
+      logger.error(e);
       throw e;
     }
   };

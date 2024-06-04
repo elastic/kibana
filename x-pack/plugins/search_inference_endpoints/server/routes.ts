@@ -6,17 +6,18 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
 
-export function defineRoutes({ router }: { router: IRouter }) {
+export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
     {
       path: APIRoutes.GET_INFERENCE_ENDPOINTS,
       validate: {},
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const {
         client: { asCurrentUser },
       } = (await context.core).elasticsearch;

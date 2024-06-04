@@ -37,7 +37,7 @@ export class SearchInferenceEndpointsPlugin
     this.logger.debug('searchInferenceEndpoints: Setup');
     const router = core.http.createRouter();
 
-    defineRoutes({ router });
+    defineRoutes({ logger: this.logger, router });
 
     return {};
   }
