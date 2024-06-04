@@ -14,7 +14,7 @@ import { ArrayFromString } from '@kbn/zod-helpers';
  *
  * info:
  *   title: Find AnonymizationFields API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { AnonymizationFieldResponse } from './bulk_crud_anonymization_fields_route.gen';

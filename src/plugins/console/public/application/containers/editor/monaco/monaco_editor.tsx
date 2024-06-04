@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
+import { useSetInputEditor } from '../../../hooks';
 import { ConsoleMenu } from '../../../components';
 import {
   useServicesContext,
@@ -33,17 +34,11 @@ export interface EditorProps {
 }
 
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
+  const context = useServicesContext();
   const {
-    services: {
-      notifications,
-      esHostService,
-      trackUiMetric,
-      http,
-      settings: settingsService,
-      autocompleteInfo,
-    },
+    services: { notifications, esHostService, settings: settingsService, autocompleteInfo },
     docLinkVersion,
-  } = useServicesContext();
+  } = context;
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
 
@@ -55,6 +50,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
+  const setInputEditor = useSetInputEditor();
   const getCurlCallback = useCallback(async (): Promise<string> => {
     const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
     return curl ?? '';
@@ -69,12 +65,14 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   }, []);
 
   const sendRequestsCallback = useCallback(async () => {
-    await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
-  }, [dispatch, http, toasts, trackUiMetric]);
+    await actionsProvider.current?.sendRequests(dispatch, context);
+  }, [dispatch, context]);
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      setInputEditor(provider);
+      actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       registerKeyboardCommands({
         editor,
@@ -86,7 +84,13 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         moveToNextRequestEdge: async () => await actionsProvider.current?.moveToNextRequestEdge(),
       });
     },
-    [getDocumenationLink, registerKeyboardCommands, sendRequestsCallback, setupResizeChecker]
+    [
+      getDocumenationLink,
+      registerKeyboardCommands,
+      sendRequestsCallback,
+      setupResizeChecker,
+      setInputEditor,
+    ]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
