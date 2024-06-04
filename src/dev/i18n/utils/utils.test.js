@@ -110,8 +110,7 @@ describe('i18n utils', () => {
     expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).not.toThrow();
   });
 
-  // TODO: fix in i18n tooling upgrade https://github.com/elastic/kibana/pull/180617
-  test.skip('should throw if "values" has a value that is unused in the message', () => {
+  test('should throw if "values" has a value that is unused in the message', () => {
     const valuesKeys = ['username', 'url', 'password'];
     const defaultMessage = 'Test message with {username} and {password}.';
     const messageId = 'namespace.message.id';
@@ -121,8 +120,7 @@ describe('i18n utils', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  // TODO: fix in i18n tooling upgrade https://github.com/elastic/kibana/pull/180617
-  test.skip('should throw if some key is missing in "values"', () => {
+  test('should throw if some key is missing in "values"', () => {
     const valuesKeys = ['url', 'username'];
     const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
     const messageId = 'namespace.message.id';
@@ -132,8 +130,7 @@ describe('i18n utils', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  // TODO: fix in i18n tooling upgrade https://github.com/elastic/kibana/pull/180617
-  test.skip('should throw if "values" property is not provided and defaultMessage requires it', () => {
+  test('should throw if "values" property is not provided and defaultMessage requires it', () => {
     const valuesKeys = [];
     const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
     const messageId = 'namespace.message.id';
@@ -143,8 +140,7 @@ describe('i18n utils', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  // TODO: fix in i18n tooling upgrade https://github.com/elastic/kibana/pull/180617
-  test.skip(`should throw if "values" property is provided and defaultMessage doesn't include any references`, () => {
+  test(`should throw if "values" property is provided and defaultMessage doesn't include any references`, () => {
     const valuesKeys = ['url', 'username'];
     const defaultMessage = 'Test message';
     const messageId = 'namespace.message.id';
@@ -162,8 +158,7 @@ describe('i18n utils', () => {
     expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).not.toThrow();
   });
 
-  // TODO: fix in i18n tooling upgrade https://github.com/elastic/kibana/pull/180617
-  test.skip(`should throw on wrong nested ICU message`, () => {
+  test(`should throw on wrong nested ICU message`, () => {
     const valuesKeys = ['first', 'second', 'third'];
     const defaultMessage = 'Test message {first, plural, one {{second}} other {other}}';
     const messageId = 'namespace.message.id';

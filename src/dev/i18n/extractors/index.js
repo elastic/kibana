@@ -7,3 +7,4 @@
  */
 
 export { extractCodeMessages } from './code';
+export { MessageDescriptor, extractMessagesFromCallExpression } from './extract_message_descriptors';

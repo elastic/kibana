@@ -9,13 +9,13 @@
 import { OnErrorFn, IntlErrorCode } from '@formatjs/intl';
 
 export const handleIntlError: OnErrorFn = (error) => {
-  // Dont throw on missing translations.
+  /**
+   * throw on any intl error except missing translations
+   * we do not throw on missing translations because our process
+   * of translations happens after developers have commited their
+   * strings in english.
+   */
   if (error.code !== IntlErrorCode.MISSING_TRANSLATION) {
-    // eslint-disable-next-line no-console
-    console.error(
-      'Error Parsing translation string. This will start throwing an error once the i18n package tooling is upgraded.'
-    );
-    // eslint-disable-next-line no-console
-    console.error(error);
+    throw error;
   }
 };
