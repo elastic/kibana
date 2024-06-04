@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./bulk_delete'));
     loadTestFile(require.resolve('./scroll_count'));
+    loadTestFile(require.resolve('./relationships'));
   });
 }
