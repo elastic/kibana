@@ -124,11 +124,15 @@ export class SpacesGridPage extends Component<Props, State> {
         ) : undefined}
         <EuiInMemoryTable
           itemId={'id'}
+          data-test-subj={'spacesListTable'}
           items={this.state.spaces}
           tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
             defaultMessage: 'Kibana spaces',
           })}
           rowHeader="name"
+          rowProps={(item) => ({
+            'data-test-subj': `spacesListTableRow-${item.id}`,
+          })}
           columns={this.getColumnConfig()}
           pagination={true}
           sorting={true}
@@ -255,7 +259,10 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         render: (value: string, record: Space) => (
-          <EuiLink {...reactRouterNavigate(this.props.history, this.getViewSpacePath(record))}>
+          <EuiLink
+            {...reactRouterNavigate(this.props.history, this.getViewSpacePath(record))}
+            data-test-subj={`${record.id}-hyperlink`}
+          >
             {value}
           </EuiLink>
         ),
