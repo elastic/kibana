@@ -7,10 +7,9 @@ exports[`should render 1`] = `
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Custom icons"
           id="xpack.maps.mapSettingsPanel.customIconsTitle"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
@@ -25,10 +24,9 @@ exports[`should render 1`] = `
         <EuiTextColor
           color="subdued"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Add a custom icon that can be used in layers in this map."
             id="xpack.maps.mapSettingsPanel.customIcons.emptyState.description"
-            values={Object {}}
           />
         </EuiTextColor>
       </p>
@@ -42,10 +40,9 @@ exports[`should render 1`] = `
         onClick={[Function]}
         size="xs"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Add"
           id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
-          values={Object {}}
         />
       </EuiButtonEmpty>
     </EuiTextAlign>
@@ -60,10 +57,9 @@ exports[`should render with custom icons 1`] = `
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Custom icons"
           id="xpack.maps.mapSettingsPanel.customIconsTitle"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
@@ -113,10 +109,9 @@ exports[`should render with custom icons 1`] = `
         onClick={[Function]}
         size="xs"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Add"
           id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
-          values={Object {}}
         />
       </EuiButtonEmpty>
     </EuiTextAlign>

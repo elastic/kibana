@@ -34,6 +34,8 @@ export interface ISearchStartSearchSource
    * @param fields
    */
   create: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
+
+  createLazy: (fields?: SerializedSearchSourceFields) => Promise<ISearchSource>;
   /**
    * creates empty {@link SearchSource}
    */

@@ -375,8 +375,8 @@ export class KnowledgeBaseService {
       return customSearchConnectorIndex.split(',');
     }
 
-    const response = (await responsePromise) as { results: Array<{ index_name: string }> };
-    const connectorIndices = response.results.map((result) => result.index_name);
+    const response = (await responsePromise) as { results?: Array<{ index_name: string }> };
+    const connectorIndices = response.results?.map((result) => result.index_name);
 
     // preserve backwards compatibility with 8.14 (may not be needed in the future)
     if (isEmpty(connectorIndices)) {

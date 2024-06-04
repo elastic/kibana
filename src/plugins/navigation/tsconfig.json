@@ -21,13 +21,8 @@
     "@kbn/core-chrome-browser-internal",
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/cloud-plugin",
-    "@kbn/config-schema",
-    "@kbn/core-plugins-server",
-    "@kbn/i18n",
     "@kbn/config",
-    "@kbn/security-plugin",
     "@kbn/user-profile-components",
-    "@kbn/core-lifecycle-browser",
     "@kbn/cloud-experiments-plugin",
   ],
   "exclude": [

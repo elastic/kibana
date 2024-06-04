@@ -77,13 +77,15 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
   Filter,
+  fromKueryExpression,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
+  getKqlFieldNames,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -134,6 +136,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  dataViews: DataViewsContract;
   scriptedFieldsEnabled: boolean;
 }
 
@@ -712,7 +715,7 @@ export class SearchSource {
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
-    typeof fld === 'string' ? fld : (fld.field as string);
+    typeof fld === 'string' ? fld : (fld?.field as string);
 
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
@@ -771,6 +774,47 @@ export class SearchSource {
       field.format = 'strict_date_optional_time';
     }
     return field;
+  }
+
+  public async loadDataViewFields(dataView: DataViewLazy) {
+    const request = this.mergeProps(this, { body: {} });
+    let fields = dataView.timeFieldName ? [dataView.timeFieldName] : [];
+    const sort = this.getField('sort');
+    if (sort) {
+      const sortArr = Array.isArray(sort) ? sort : [sort];
+      for (const s of sortArr) {
+        const keys = Object.keys(s);
+        fields = fields.concat(keys);
+      }
+    }
+    for (const query of request.query) {
+      if (query.query) {
+        const nodes = fromKueryExpression(query.query);
+        const queryFields = getKqlFieldNames(nodes);
+        fields = fields.concat(queryFields);
+      }
+    }
+    const filters = request.filters;
+    if (filters) {
+      const filtersArr = Array.isArray(filters) ? filters : [filters];
+      for (const f of filtersArr) {
+        fields = fields.concat(f.meta.key);
+      }
+    }
+    fields = fields.filter((f) => Boolean(f));
+
+    if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
+      // if source filtering is enabled, we need to fetch all the fields
+      return (await dataView.getFields({ fieldName: ['*'] })).getFieldMapSorted();
+    } else if (fields.length) {
+      return (
+        await dataView.getFields({
+          fieldName: fields,
+        })
+      ).getFieldMapSorted();
+    }
+    // no fields needed to be loaded for query
+    return {};
   }
 
   private flatten() {

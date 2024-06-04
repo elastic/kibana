@@ -295,7 +295,22 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
-
+    /**
+     * FormatJS linter for i18n code.
+     * https://formatjs.io/docs/tooling/linter
+     */
+    {
+      files: [
+        'src/**/*.{js,mjs,ts,tsx}',
+        'x-pack/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: ['formatjs'],
+      rules: {
+        'formatjs/enforce-default-message': ['error', 'anything'],
+        'formatjs/enforce-description': 'off',
+      },
+    },
     /**
      * Files that require dual-license headers, settings
      * are overridden below for files that require Elastic

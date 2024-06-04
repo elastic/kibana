@@ -27,6 +27,8 @@ export {
   createExtract,
 } from './dashboard_container/persistable_state/dashboard_container_references';
 
+export { prefixReferencesFromPanel } from './dashboard_container/persistable_state/dashboard_container_references';
+
 export {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
