@@ -57,7 +57,7 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {
@@ -89,7 +89,7 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
 
           await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
-          const createdRule = await rulesManagementClient.createCustomRule({
+          const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,
           });
 

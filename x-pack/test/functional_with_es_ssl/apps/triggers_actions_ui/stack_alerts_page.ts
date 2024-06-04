@@ -64,7 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
           const solutionFilters = getSolutionNamesFromFilters(quickFilters);
           expect(solutionFilters).to.have.length(2);
-          expect(solutionFilters[0]).to.equal('Stack management');
+          expect(solutionFilters[0]).to.equal('Stack');
           // Observability is included because of multi-consumer rules
           expect(solutionFilters[1]).to.equal('Observability');
         });
