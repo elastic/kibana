@@ -352,6 +352,51 @@ describe('RiskEngineDataClient', () => {
           });
         });
       });
+
+      describe('tearDownRiskEngine', () => {
+        const mockTaskManagerStart = taskManagerMock.createStart();
+
+        it('should delete the risk engine object and task if it exists', async () => {
+          mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+          const riskScoreDataClient = riskScoreDataClientMock.create();
+          await riskEngineDataClient.tearDown({
+            taskManager: mockTaskManagerStart,
+            riskScoreDataClient,
+          });
+
+          expect(mockSavedObjectClient.delete).toHaveBeenCalledTimes(1);
+          expect(mockTaskManagerStart.remove).toHaveBeenCalledTimes(1);
+          expect(riskScoreDataClient.tearDown).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return errors when exception is thrown ', async () => {
+          const error = new Error('testError');
+          mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+          mockTaskManagerStart.remove.mockRejectedValueOnce(error);
+          mockSavedObjectClient.delete.mockRejectedValueOnce(error);
+
+          const errors = await riskEngineDataClient.tearDown({
+            taskManager: mockTaskManagerStart,
+            riskScoreDataClient: riskScoreDataClientMock.create(),
+          });
+
+          await expect(errors).toEqual([error, error]);
+        });
+
+        it('should return errors from riskScoreDataClient.tearDown ', async () => {
+          const error = new Error('testError');
+          mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+          const riskScoreDataClient = riskScoreDataClientMock.create();
+          riskScoreDataClient.tearDown.mockResolvedValueOnce([error]);
+
+          const errors = await riskEngineDataClient.tearDown({
+            taskManager: mockTaskManagerStart,
+            riskScoreDataClient,
+          });
+
+          await expect(errors).toEqual([error]);
+        });
+      });
     });
   }
 });

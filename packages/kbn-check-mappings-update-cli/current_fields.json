@@ -457,6 +457,11 @@
     "proxy_headers",
     "url"
   ],
+  "fleet-setup-lock": [
+    "started_at",
+    "status",
+    "uuid"
+  ],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"
@@ -500,6 +505,7 @@
     "description",
     "download_source_id",
     "fleet_server_host_id",
+    "global_data_tags",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -931,10 +937,12 @@
   ],
   "slo-settings": [],
   "space": [
+    "disabledFeatures",
     "name",
     "solution"
   ],
   "spaces-usage-stats": [],
+  "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
     "alert.status",
