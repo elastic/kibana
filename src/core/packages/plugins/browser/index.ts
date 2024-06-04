@@ -8,3 +8,10 @@
  */
 
 export type { Plugin, PluginInitializer, PluginInitializerContext } from './src';
+export {
+  ConfigService,
+  HttpSetupService,
+  HttpService,
+  LoggerService,
+  OpaqueIdToken,
+} from './src/services';
