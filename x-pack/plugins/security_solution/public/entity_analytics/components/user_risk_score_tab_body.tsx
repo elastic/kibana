@@ -26,6 +26,7 @@ import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { RiskScoreUpdatePanel } from './risk_score_update_panel';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
+import { useUpsellingComponent } from '../../common/hooks/use_upselling';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -96,6 +97,11 @@ export const UserRiskScoreQueryTabBody = ({
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
+
+  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
+  if (RiskScoreUpsell) {
+    return <RiskScoreUpsell />;
+  }
 
   if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
     return (

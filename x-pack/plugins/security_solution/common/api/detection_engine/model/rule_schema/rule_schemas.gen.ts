@@ -560,14 +560,19 @@ export const EsqlRuleRequiredFields = z.object({
   query: RuleQuery,
 });
 
+export type EsqlRuleOptionalFields = z.infer<typeof EsqlRuleOptionalFields>;
+export const EsqlRuleOptionalFields = z.object({
+  alert_suppression: AlertSuppression.optional(),
+});
+
 export type EsqlRulePatchFields = z.infer<typeof EsqlRulePatchFields>;
-export const EsqlRulePatchFields = EsqlRuleRequiredFields.partial();
+export const EsqlRulePatchFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields.partial());
 
 export type EsqlRuleResponseFields = z.infer<typeof EsqlRuleResponseFields>;
-export const EsqlRuleResponseFields = EsqlRuleRequiredFields;
+export const EsqlRuleResponseFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields);
 
 export type EsqlRuleCreateFields = z.infer<typeof EsqlRuleCreateFields>;
-export const EsqlRuleCreateFields = EsqlRuleRequiredFields;
+export const EsqlRuleCreateFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields);
 
 export type EsqlRule = z.infer<typeof EsqlRule>;
 export const EsqlRule = SharedResponseProps.merge(EsqlRuleResponseFields);

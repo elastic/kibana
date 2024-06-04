@@ -93,6 +93,8 @@ export class ProjectNavigationService {
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
+  constructor(private isServerless: boolean) {}
+
   public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
     this.application = application;
     this.navLinksService = navLinksService;
@@ -114,9 +116,7 @@ export class ProjectNavigationService {
     );
 
     return {
-      setProjectHome: (homeHref: string) => {
-        this.projectHome$.next(homeHref);
-      },
+      setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
         return this.projectHome$.asObservable();
       },
@@ -161,43 +161,18 @@ export class ProjectNavigationService {
           this.activeNodes$,
           chromeBreadcrumbs$,
           this.projectName$,
-          this.solutionNavDefinitions$,
-          this.activeSolutionNavDefinitionId$,
           this.cloudLinks$,
         ]).pipe(
-          map(
-            ([
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
+            return buildBreadcrumbs({
+              projectName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
-              projectName,
-              solutionNavDefinitions,
-              activeSolutionNavDefinitionId,
               cloudLinks,
-            ]) => {
-              const solutionNavigations =
-                Object.keys(solutionNavDefinitions).length > 0 &&
-                activeSolutionNavDefinitionId !== null
-                  ? {
-                      definitions: solutionNavDefinitions,
-                      activeId: activeSolutionNavDefinitionId,
-                      onChange: (id: string) => {
-                        this.goToSolutionHome(id);
-                        this.changeActiveSolutionNavigation(id);
-                      },
-                    }
-                  : undefined;
-
-              return buildBreadcrumbs({
-                projectName,
-                projectBreadcrumbs,
-                activeNodes,
-                chromeBreadcrumbs,
-                solutionNavigations,
-                cloudLinks,
-              });
-            }
-          )
+              isServerless: this.isServerless,
+            });
+          })
         );
       },
       /** In stateful Kibana, get the registered solution navigations */
@@ -406,12 +381,23 @@ export class ProjectNavigationService {
           return;
         }
 
-        const { sideNavComponent } = definition;
+        const { sideNavComponent, homePage = '' } = definition;
+        const homePageLink = this.navLinksService?.get(homePage);
+
         if (sideNavComponent) {
           this.setSideNavComponent(sideNavComponent);
         }
+
+        if (homePageLink) {
+          this.setProjectHome(homePageLink.href);
+        }
+
         this.initNavigation(nextId, definition.navigationTree$);
       });
+  }
+
+  private setProjectHome(homeHref: string) {
+    this.projectHome$.next(homeHref);
   }
 
   private goToSolutionHome(id: string) {

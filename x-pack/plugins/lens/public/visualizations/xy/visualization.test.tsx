@@ -846,6 +846,7 @@ describe('xy_visualization', () => {
           },
         },
         dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+        absDateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -3294,7 +3295,7 @@ describe('xy_visualization', () => {
               },
             ],
             "fixableInEditor": true,
-            "longMessage": <FormattedMessage
+            "longMessage": <Memo(MemoizedFormattedMessage)
               defaultMessage="{label} contains array values. Your visualization may not render as expected."
               id="xpack.lens.xyVisualization.arrayValues"
               values={

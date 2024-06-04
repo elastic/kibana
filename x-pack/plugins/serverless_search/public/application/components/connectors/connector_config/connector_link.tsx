@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
@@ -82,6 +90,18 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
         <EuiFlexItem>
           <ConnectionDetails connectorId={connectorId} serviceType={serviceType} status={status} />
         </EuiFlexItem>
+        <EuiSpacer />
+        {status === ConnectorStatus.CREATED ? (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate('xpack.serverlessSearch.connectors.waitingForConnection', {
+                defaultMessage: 'Waiting for connection',
+              })}
+              color="warning"
+              iconType="iInCircle"
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

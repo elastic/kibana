@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { useEffect, useMemo } from 'react';
 import { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesTimeRange {
@@ -68,3 +70,40 @@ export const apiPublishesWritableUnifiedSearch = (
     typeof (unknownApi as PublishesWritableUnifiedSearch).setQuery === 'function'
   );
 };
+
+/**
+ * React hook that converts search props into search observable API
+ */
+export function useSearchApi({
+  filters,
+  query,
+  timeRange,
+}: {
+  filters?: Filter[];
+  query?: Query | AggregateQuery;
+  timeRange?: TimeRange;
+}) {
+  const searchApi = useMemo(() => {
+    return {
+      filters$: new BehaviorSubject<Filter[] | undefined>(filters),
+      query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
+      timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+    };
+    // filters, query, timeRange only used as initial values. Changes do not effect memoized value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    searchApi.filters$.next(filters);
+  }, [filters, searchApi.filters$]);
+
+  useEffect(() => {
+    searchApi.query$.next(query);
+  }, [query, searchApi.query$]);
+
+  useEffect(() => {
+    searchApi.timeRange$.next(timeRange);
+  }, [timeRange, searchApi.timeRange$]);
+
+  return searchApi;
+}

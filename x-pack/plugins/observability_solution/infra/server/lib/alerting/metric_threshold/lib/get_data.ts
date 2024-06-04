@@ -9,11 +9,9 @@ import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/li
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import {
-  Aggregators,
-  Comparator,
-  MetricExpressionParams,
-} from '../../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import {
   AdditionalContext,
   doFieldsExist,
@@ -226,10 +224,16 @@ export const getData = async (
       // the value will end up being ZERO, for other metrics it will be null. In this case
       // we need to do the evaluation in Node.js
       if (aggs.all && params.aggType === Aggregators.COUNT && value === 0) {
-        const trigger = comparatorMap[params.comparator](value, params.threshold);
+        const trigger = comparatorMap[convertToBuiltInComparators(params.comparator)](
+          value,
+          params.threshold
+        );
         const warn =
           params.warningThreshold && params.warningComparator
-            ? comparatorMap[params.warningComparator](value, params.warningThreshold)
+            ? comparatorMap[convertToBuiltInComparators(params.warningComparator)](
+                value,
+                params.warningThreshold
+              )
             : false;
         return {
           [UNGROUPED_FACTORY_KEY]: {
@@ -286,13 +290,13 @@ export const getData = async (
 };
 
 const comparatorMap = {
-  [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>
+  [COMPARATORS.BETWEEN]: (value: number, [a, b]: number[]) =>
     value >= Math.min(a, b) && value <= Math.max(a, b),
   // `threshold` is always an array of numbers in case the BETWEEN comparator is
   // used; all other compartors will just destructure the first value in the array
-  [Comparator.GT]: (a: number, [b]: number[]) => a > b,
-  [Comparator.LT]: (a: number, [b]: number[]) => a < b,
-  [Comparator.OUTSIDE_RANGE]: (value: number, [a, b]: number[]) => value < a || value > b,
-  [Comparator.GT_OR_EQ]: (a: number, [b]: number[]) => a >= b,
-  [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
+  [COMPARATORS.GREATER_THAN]: (a: number, [b]: number[]) => a > b,
+  [COMPARATORS.LESS_THAN]: (a: number, [b]: number[]) => a < b,
+  [COMPARATORS.NOT_BETWEEN]: (value: number, [a, b]: number[]) => value < a || value > b,
+  [COMPARATORS.GREATER_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a >= b,
+  [COMPARATORS.LESS_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a <= b,
 };
