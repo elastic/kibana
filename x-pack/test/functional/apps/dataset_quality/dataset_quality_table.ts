@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   describe('Dataset quality table', () => {
     before(async () => {
-      await synthtrace.clean();
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
       // Ingest basic logs
