@@ -114,6 +114,18 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       crowdstrike: false,
     },
   },
+  scan: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+  },
 };
 
 /**

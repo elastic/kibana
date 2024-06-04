@@ -11,7 +11,7 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_IS_IMPROVING,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
@@ -47,7 +47,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
   // Omit fields that are overwrite-able with undefined value
-  const cleanedAlert = omit(alert, ALERT_IS_IMPROVING);
+  const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
 
   const alertUpdates = {
     // Set latest rule configuration

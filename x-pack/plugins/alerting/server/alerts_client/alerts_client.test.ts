@@ -22,7 +22,6 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
-  ALERT_IS_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
@@ -36,6 +35,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -226,7 +226,6 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
-  [ALERT_IS_IMPROVING]: false,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   [ALERT_RULE_CATEGORY]: 'My test rule',
   [ALERT_RULE_CONSUMER]: 'bar',
@@ -239,6 +238,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SEVERITY_IMPROVING]: false,
   [ALERT_START]: date,
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: date },
@@ -251,7 +251,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
 });
 
 const getOngoingIndexedAlertDoc = (overrides = {}) => ({
-  ...omit(getNewIndexedAlertDoc(), ALERT_IS_IMPROVING),
+  ...omit(getNewIndexedAlertDoc(), ALERT_SEVERITY_IMPROVING),
   [EVENT_ACTION]: 'active',
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING_HISTORY]: [true, false],
@@ -273,7 +273,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_STATUS]: 'recovered',
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
-  [ALERT_IS_IMPROVING]: true,
+  [ALERT_SEVERITY_IMPROVING]: true,
   ...overrides,
 });
 
@@ -320,7 +320,6 @@ describe('Alerts Client', () => {
           ruleRunMetricsStore,
           shouldLogAlerts: false,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          notifyOnActionGroupChange: true,
           maintenanceWindowIds: [],
           alertDelay: 0,
         };
@@ -1023,7 +1022,6 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
-                [ALERT_IS_IMPROVING]: true,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
@@ -1035,6 +1033,7 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SEVERITY_IMPROVING]: true,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
                 [ALERT_STATUS]: 'recovered',

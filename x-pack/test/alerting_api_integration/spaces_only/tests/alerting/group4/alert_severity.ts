@@ -10,7 +10,7 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_ACTION_GROUP,
-  ALERT_IS_IMPROVING,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -40,7 +40,7 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
       });
     });
 
-    it('should correctly set is_improving and previous_action_group data in alert document', async () => {
+    it('should correctly set severity_improving and previous_action_group data in alert document', async () => {
       const pattern = [
         'low',
         'low',
@@ -98,17 +98,17 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
         }
       }
 
-      // Verify is_improving is set correctly
-      expect(allAlertDocs[0][ALERT_IS_IMPROVING]).to.eql(false);
-      expect(allAlertDocs[1][ALERT_IS_IMPROVING]).to.be(undefined);
-      expect(allAlertDocs[2][ALERT_IS_IMPROVING]).to.eql(false);
-      expect(allAlertDocs[3][ALERT_IS_IMPROVING]).to.eql(false);
-      expect(allAlertDocs[4][ALERT_IS_IMPROVING]).to.be(undefined);
-      expect(allAlertDocs[5][ALERT_IS_IMPROVING]).to.eql(true);
-      expect(allAlertDocs[6][ALERT_IS_IMPROVING]).to.eql(false);
-      expect(allAlertDocs[7][ALERT_IS_IMPROVING]).to.eql(true);
-      expect(allAlertDocs[8][ALERT_IS_IMPROVING]).to.be(undefined);
-      expect(allAlertDocs[9][ALERT_IS_IMPROVING]).to.eql(true);
+      // Verify severity_improving is set correctly
+      expect(allAlertDocs[0][ALERT_SEVERITY_IMPROVING]).to.eql(false);
+      expect(allAlertDocs[1][ALERT_SEVERITY_IMPROVING]).to.be(undefined);
+      expect(allAlertDocs[2][ALERT_SEVERITY_IMPROVING]).to.eql(false);
+      expect(allAlertDocs[3][ALERT_SEVERITY_IMPROVING]).to.eql(false);
+      expect(allAlertDocs[4][ALERT_SEVERITY_IMPROVING]).to.be(undefined);
+      expect(allAlertDocs[5][ALERT_SEVERITY_IMPROVING]).to.eql(true);
+      expect(allAlertDocs[6][ALERT_SEVERITY_IMPROVING]).to.eql(false);
+      expect(allAlertDocs[7][ALERT_SEVERITY_IMPROVING]).to.eql(true);
+      expect(allAlertDocs[8][ALERT_SEVERITY_IMPROVING]).to.be(undefined);
+      expect(allAlertDocs[9][ALERT_SEVERITY_IMPROVING]).to.eql(true);
     });
   });
 

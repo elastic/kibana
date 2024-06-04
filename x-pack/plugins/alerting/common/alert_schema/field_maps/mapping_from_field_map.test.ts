@@ -240,9 +240,6 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
-                is_improving: {
-                  type: 'boolean',
-                },
                 last_detected: {
                   type: 'date',
                 },
@@ -298,6 +295,9 @@ describe('mappingFromFieldMap', () => {
                       type: 'keyword',
                     },
                   },
+                },
+                severity_improving: {
+                  type: 'boolean',
                 },
                 start: {
                   type: 'date',

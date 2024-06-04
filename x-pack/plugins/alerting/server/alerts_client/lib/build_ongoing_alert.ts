@@ -13,7 +13,7 @@ import {
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_IS_IMPROVING,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
@@ -84,7 +84,7 @@ export const buildOngoingAlert = <
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
   // Omit fields that are overwrite-able with undefined value
-  const cleanedAlert = omit(alert, ALERT_IS_IMPROVING);
+  const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -118,7 +118,7 @@ export const buildOngoingAlert = <
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
       : {}),
-    ...(isImproving != null ? { [ALERT_IS_IMPROVING]: isImproving } : {}),
+    ...(isImproving != null ? { [ALERT_SEVERITY_IMPROVING]: isImproving } : {}),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     [SPACE_IDS]: rule[SPACE_IDS],
     [VERSION]: kibanaVersion,

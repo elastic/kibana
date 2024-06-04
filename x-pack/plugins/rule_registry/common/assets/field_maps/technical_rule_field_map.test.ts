@@ -72,11 +72,6 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
-      "kibana.alert.is_improving": Object {
-        "array": false,
-        "required": false,
-        "type": "boolean",
-      },
       "kibana.alert.last_detected": Object {
         "array": false,
         "required": false,
@@ -254,6 +249,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.severity_improving": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
       },
       "kibana.alert.start": Object {
         "array": false,
