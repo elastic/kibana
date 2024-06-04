@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
@@ -23,7 +23,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
     fixable: 'code',
   },
   create(context) {
-    const { cwd, filename, getScope, sourceCode, report } = context;
+    const { cwd, filename, sourceCode, report } = context;
 
     return {
       JSXText: (node: TSESTree.JSXText) => {
@@ -41,7 +41,8 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
@@ -104,7 +105,8 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         if (intent === false) return;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
