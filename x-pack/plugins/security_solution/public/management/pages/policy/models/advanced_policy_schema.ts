@@ -1774,8 +1774,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events',
       {
-        defaultMessage:
-          "A value of 'false' disables network events deduplication. Default: true",
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
       }
     ),
   },
@@ -1785,8 +1784,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events',
       {
-        defaultMessage:
-          "A value of 'false' disables network events deduplication. Default: true",
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
       }
     ),
   },
@@ -1796,8 +1794,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events',
       {
-        defaultMessage:
-          "A value of 'false' disables network events deduplication. Default: true",
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
       }
     ),
   },
