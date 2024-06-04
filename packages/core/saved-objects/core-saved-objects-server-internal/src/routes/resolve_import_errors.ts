@@ -37,7 +37,6 @@ export const registerResolveImportErrorsRoute = (
     {
       path: '/_resolve_import_errors',
       options: {
-        access: 'public',
         description: `Resolve import errors`,
         body: {
           maxBytes: maxImportPayloadBytes,

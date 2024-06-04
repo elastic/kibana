@@ -32,7 +32,6 @@ export const registerBulkDeleteRoute = (
     {
       path: '/_bulk_delete',
       options: {
-        access: 'public',
         description: `Remove saved objects`,
       },
       validate: {

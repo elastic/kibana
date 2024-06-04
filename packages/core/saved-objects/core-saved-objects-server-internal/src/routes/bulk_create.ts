@@ -32,7 +32,6 @@ export const registerBulkCreateRoute = (
     {
       path: '/_bulk_create',
       options: {
-        access: 'public',
         description: `Create saved objects`,
       },
       validate: {

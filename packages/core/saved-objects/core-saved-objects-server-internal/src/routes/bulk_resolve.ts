@@ -32,7 +32,6 @@ export const registerBulkResolveRoute = (
     {
       path: '/_bulk_resolve',
       options: {
-        access: 'public',
         description: `Resolve saved objects`,
       },
       validate: {

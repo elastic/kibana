@@ -32,7 +32,6 @@ export const registerGetRoute = (
     {
       path: '/{type}/{id}',
       options: {
-        access: 'public',
         description: `Get a saved object`,
       },
       validate: {

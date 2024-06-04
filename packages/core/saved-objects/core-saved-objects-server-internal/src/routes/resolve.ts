@@ -28,7 +28,6 @@ export const registerResolveRoute = (
     {
       path: '/resolve/{type}/{id}',
       options: {
-        access: 'public',
         description: `Resolve a saved object`,
       },
       validate: {

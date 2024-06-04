@@ -35,7 +35,6 @@ export const registerFindRoute = (
     {
       path: '/_find',
       options: {
-        access: 'public',
         description: `Search for saved objects`,
       },
       validate: {

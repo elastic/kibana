@@ -40,7 +40,6 @@ export function defineKeyRotationRoutes({
       },
       options: {
         tags: ['access:rotateEncryptionKey'],
-        access: 'public',
         description: `Rotate a key for encrypted saved objects`,
       },
     },

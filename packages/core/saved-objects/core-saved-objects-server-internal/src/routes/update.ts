@@ -33,7 +33,6 @@ export const registerUpdateRoute = (
     {
       path: '/{type}/{id}',
       options: {
-        access: 'public',
         description: `Update a saved object`,
       },
       validate: {

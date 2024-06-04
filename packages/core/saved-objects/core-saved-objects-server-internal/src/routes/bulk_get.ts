@@ -32,7 +32,6 @@ export const registerBulkGetRoute = (
     {
       path: '/_bulk_get',
       options: {
-        access: 'public',
         description: `Get saved objects`,
       },
       validate: {

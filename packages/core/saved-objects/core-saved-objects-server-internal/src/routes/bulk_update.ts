@@ -32,7 +32,6 @@ export const registerBulkUpdateRoute = (
     {
       path: '/_bulk_update',
       options: {
-        access: 'public',
         description: `Update saved objects`,
       },
       validate: {

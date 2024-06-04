@@ -32,7 +32,6 @@ export const registerDeleteRoute = (
     {
       path: '/{type}/{id}',
       options: {
-        access: 'public',
         description: `Delete a saved object`,
       },
       validate: {

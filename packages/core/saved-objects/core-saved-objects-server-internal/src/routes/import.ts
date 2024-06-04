@@ -36,7 +36,6 @@ export const registerImportRoute = (
     {
       path: '/_import',
       options: {
-        access: 'public',
         description: `Import saved objects`,
         body: {
           maxBytes: maxImportPayloadBytes,
