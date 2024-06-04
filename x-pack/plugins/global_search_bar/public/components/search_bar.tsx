@@ -71,6 +71,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
   const [image, setImage] = useState<ReactElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (initialLoad) {
@@ -126,7 +127,9 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current = null;
         }
 
+        setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
+        setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
@@ -152,7 +155,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         // so the SearchOption won't highlight anything if only one call is fired
         // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
         setSearchTerm(rawParams.term ?? '');
-
+        setIsLoading(true);
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
@@ -169,11 +172,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             setOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: (err) => {
+            setIsLoading(false);
             // Not doing anything on error right now because it'll either just show the previous
             // results or empty results which is basically what we want anyways
             reportEvent.error({ message: err, searchValue });
           },
-          complete: () => {},
+          complete: () => {
+            setIsLoading(false);
+          },
         });
       }
     },
@@ -342,6 +348,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   return (
     <EuiSelectableTemplateSitewide
+      isLoading={isLoading}
       isPreFiltered
       onChange={onChange}
       options={options}
