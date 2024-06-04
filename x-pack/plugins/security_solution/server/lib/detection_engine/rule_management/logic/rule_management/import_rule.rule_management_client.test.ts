@@ -6,7 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { importRule } from './detection_rules_client';
+import { importRule } from './import_rule';
 import { readRules } from './read_rules';
 import { getCreateRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';

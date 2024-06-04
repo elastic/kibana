@@ -6,7 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { deleteRule } from './detection_rules_client';
+import { deleteRule } from './delete_rule';
 
 describe('DetectionRulesClient.deleteRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;

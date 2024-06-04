@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { createPrebuiltRule } from './detection_rules_client';
+import { createPrebuiltRule } from './create_prebuilt_rule';
 
 import {
   getCreateRulesSchemaMock,

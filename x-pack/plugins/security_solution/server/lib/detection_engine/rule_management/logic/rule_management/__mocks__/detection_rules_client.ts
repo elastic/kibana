@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  IDetectionRulesClient,
-  CreateRuleOptions,
-  _UpdateRuleProps,
-  _PatchRuleProps,
-} from '../detection_rules_client';
+import type { IDetectionRulesClient } from '../detection_rules_client';
+import type { CreateRuleOptions, _UpdateRuleProps, _PatchRuleProps } from '../utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleCreateProps,
