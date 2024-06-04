@@ -31,6 +31,7 @@ export interface IShareContext extends ShareContext {
   isEmbedded: boolean;
   theme: ThemeServiceSetup;
   i18n: I18nStart;
+  disableServerlessSettings?: boolean;
   anchorElement?: HTMLElement;
 }
 

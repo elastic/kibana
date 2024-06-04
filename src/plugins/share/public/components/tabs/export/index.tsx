@@ -15,7 +15,8 @@ import { useShareTabsContext, type ShareMenuItemV2 } from '../../context';
 type IExportTab = IModalTabDeclaration;
 
 const ExportTabContent = () => {
-  const { shareMenuItems, objectType, isDirty, onClose } = useShareTabsContext()!;
+  const { shareMenuItems, objectType, isDirty, onClose, disableServerlessSettings } =
+    useShareTabsContext()!;
 
   return (
     <ExportContent
@@ -24,6 +25,7 @@ const ExportTabContent = () => {
       onClose={onClose}
       // we are guaranteed that shareMenuItems will be a ShareMenuItem V2 variant
       aggregateReportTypes={shareMenuItems as unknown as ShareMenuItemV2[]}
+      disableServerlessSettings={disableServerlessSettings ?? false}
     />
   );
 };
