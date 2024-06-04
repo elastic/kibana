@@ -154,14 +154,15 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     });
 
     return capabilities.spaces.manage ? (
-      <EuiButtonEmpty
-        iconType="gear"
-        onClick={() => {
+      <a
+        href={href}
+        onClick={(event) => {
+          event.preventDefault();
           navigateToUrl(href);
         }}
       >
-        Settings
-      </EuiButtonEmpty>
+        <EuiButtonEmpty iconType="gear">Settings</EuiButtonEmpty>
+      </a>
     ) : null;
   };
 
@@ -184,6 +185,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   return (
     <ViewSpaceContextProvider
       spacesManager={spacesManager}
+      serverBasePath={props.serverBasePath}
       navigateToUrl={navigateToUrl}
       getUrlForApp={getUrlForApp}
     >

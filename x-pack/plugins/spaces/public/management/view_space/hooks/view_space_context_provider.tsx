@@ -13,6 +13,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SpacesManager } from '../../../spaces_manager';
 
 interface ViewSpaceServices {
+  serverBasePath: string;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   spacesManager: SpacesManager;

@@ -17,7 +17,7 @@ import type { SpaceContentTypeSummaryItem } from '../../types';
 
 export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
   const { id: spaceId } = space;
-  const { spacesManager, getUrlForApp, navigateToUrl } = useViewSpaceServices();
+  const { spacesManager, serverBasePath } = useViewSpaceServices();
   const [items, setItems] = useState<SpaceContentTypeSummaryItem[] | null>(null);
 
   const columns: Array<EuiBasicTableColumn<SpaceContentTypeSummaryItem>> = [
@@ -40,18 +40,13 @@ export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
       field: 'count',
       name: 'Count',
       render: (value: string, item: SpaceContentTypeSummaryItem) => {
-        const href = getUrlForApp('management', {
-          path: `/kibana/objects?type=${item.type}`,
-        });
-        return (
-          <EuiLink
-            onClick={() => {
-              navigateToUrl(href);
-            }}
-          >
-            {value}
-          </EuiLink>
+        const hrefToSelectedSavedObjects = addSpaceIdToPath(
+          serverBasePath,
+          space.id,
+          `${ENTER_SPACE_PATH}?next=/app/management/kibana/objects?initialQuery=type:(${item.type})`
         );
+
+        return <EuiLink href={hrefToSelectedSavedObjects}>{value}</EuiLink>;
       },
     },
   ];
