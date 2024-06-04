@@ -473,7 +473,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Until then, the below describe block is added to cover the tests for the
     // newly added degraded Fields Table. This must be merged under the above
     // describe block once the tech debt is fixed.
-    describe('Dataset quality flyout with degraded fields', () => {
+    //
+    // FLAKY: https://github.com/elastic/kibana/issues/184438
+    describe.skip('Dataset quality flyout with degraded fields', () => {
       const goodDatasetName = 'good';
       const degradedDatasetName = 'degraded';
       const today = new Date().toISOString();
