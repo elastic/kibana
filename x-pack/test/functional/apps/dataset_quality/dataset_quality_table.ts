@@ -18,8 +18,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     'datasetQuality',
   ]);
   const synthtrace = getService('logSynthtraceEsClient');
-  const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
