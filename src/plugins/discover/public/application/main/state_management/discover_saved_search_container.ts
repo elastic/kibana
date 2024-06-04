@@ -402,6 +402,10 @@ function getSavedSearchFieldForComparison(
     return visContext;
   }
 
+  if (fieldName === 'breakdownField') {
+    return savedSearch.breakdownField || undefined; // ignore the difference between an empty string and undefined
+  }
+
   return savedSearch[fieldName];
 }
 
