@@ -15,6 +15,7 @@ export default createTestConfig({
   kbnServerArgs: [
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
     `--xpack.fleet.packages.0.version=1.5.2`,
+    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([])}`,
   ],
   // load tests in the index file
   testFiles: [require.resolve('./ftr/cloud_security_posture')],
