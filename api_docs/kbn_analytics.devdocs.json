@@ -891,6 +891,26 @@
           },
           {
             "parentPluginId": "@kbn/analytics",
+            "id": "def-common.ReporterConfig.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "packages/kbn-analytics/src/reporter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics",
             "id": "def-common.ReporterConfig.storage",
             "type": "Object",
             "tags": [],
@@ -927,20 +947,6 @@
             "description": [],
             "signature": [
               "number | undefined"
-            ],
-            "path": "packages/kbn-analytics/src/reporter.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/analytics",
-            "id": "def-common.ReporterConfig.debug",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "debug",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
