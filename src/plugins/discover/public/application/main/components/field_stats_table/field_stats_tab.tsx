@@ -15,18 +15,22 @@ import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_fie
 export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query' | 'filters'>> =
   React.memo((props) => {
     const services = useDiscoverServices();
-    const querySubscriberResult = useQuerySubscriber({
+    const { query, filters } = useQuerySubscriber({
       data: services.data,
     });
     const additionalFieldGroups = useAdditionalFieldGroups();
 
     if (!services.dataVisualizer) return null;
-
     return (
       <FieldStatisticsTable
-        {...props}
-        query={querySubscriberResult.query}
-        filters={querySubscriberResult.filters}
+        dataView={props.dataView}
+        columns={props.columns}
+        stateContainer={props.stateContainer}
+        onAddFilter={props.onAddFilter}
+        trackUiMetric={props.trackUiMetric}
+        isEsqlMode={props.isEsqlMode}
+        query={query}
+        filters={filters}
         additionalFieldGroups={additionalFieldGroups}
       />
     );
