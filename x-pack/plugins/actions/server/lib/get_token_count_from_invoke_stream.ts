@@ -182,8 +182,8 @@ const parseGeminiUsageMetadata = (responseBody: string): UsageMetadata => {
       } => 'candidates' in line
     )
     .reduce((prev, line) => {
-      const parts = line.candidates[0].content.parts;
-      const chunkText = parts.map((part) => part.text).join('');
+      const parts = line.candidates[0].content?.parts;
+      const chunkText = parts?.map((part) => part.text).join('');
       return prev + chunkText;
     }, '');
 
