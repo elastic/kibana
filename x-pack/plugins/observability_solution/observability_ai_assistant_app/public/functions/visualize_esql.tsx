@@ -156,11 +156,20 @@ export function VisualizeESQL({
     []
   );
 
+  const dataView = useMemo(() => {
+    if (dataViewAsync.value) {
+      if (dataViewAsync.value.fields.getByName('@timestamp')?.type === 'date') {
+        dataViewAsync.value.timeFieldName = '@timestamp';
+      }
+      return dataViewAsync.value;
+    }
+  }, [dataViewAsync.value]);
+
   // initialization
   useEffect(() => {
-    if (lensHelpersAsync.value && dataViewAsync.value && !lensInput) {
+    if (lensHelpersAsync.value && dataView && !lensInput) {
       const context = {
-        dataViewSpec: dataViewAsync.value?.toSpec(),
+        dataViewSpec: dataView?.toSpec(),
         fieldName: '',
         textBasedColumns: columns,
         query: {
@@ -170,7 +179,7 @@ export function VisualizeESQL({
 
       const chartSuggestions = lensHelpersAsync.value.suggestions(
         context,
-        dataViewAsync.value,
+        dataView,
         [],
         preferredChartType
       );
@@ -184,7 +193,7 @@ export function VisualizeESQL({
             esql: query,
           },
           suggestion,
-          dataView: dataViewAsync.value,
+          dataView,
         }) as TypedLensByValueInput['attributes'];
 
         const lensEmbeddableInput = {
@@ -194,7 +203,7 @@ export function VisualizeESQL({
         setLensInput(lensEmbeddableInput);
       }
     }
-  }, [columns, dataViewAsync.value, lensHelpersAsync.value, lensInput, query, preferredChartType]);
+  }, [columns, dataView, lensHelpersAsync.value, lensInput, query, preferredChartType]);
 
   // trigger options to open the inline editing flyout correctly
   const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
@@ -242,7 +251,7 @@ export function VisualizeESQL({
     }
   }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
 
-  if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
+  if (!lensHelpersAsync.value || !dataView || !lensInput) {
     return <EuiLoadingSpinner />;
   }
   // if the Lens suggestions api suggests a table then we want to render a Discover table instead
@@ -370,7 +379,7 @@ export function VisualizeESQL({
               <ESQLDataGrid
                 rows={rows}
                 columns={columns}
-                dataView={dataViewAsync.value}
+                dataView={dataView}
                 query={{ esql: query }}
                 flyoutType="overlay"
                 isTableView
@@ -392,7 +401,7 @@ export function VisualizeESQL({
           <ESQLDataGrid
             rows={rows}
             columns={columns}
-            dataView={dataViewAsync.value}
+            dataView={dataView}
             query={{ esql: query }}
             flyoutType="overlay"
           />

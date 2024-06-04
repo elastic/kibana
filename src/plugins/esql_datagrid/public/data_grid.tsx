@@ -8,7 +8,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import { UnifiedDataTable, DataLoadingState, type SortOrder } from '@kbn/unified-data-table';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
 import type {
@@ -43,17 +43,18 @@ type DataTableColumnsMeta = Record<
   }
 >;
 
+const sortOrder: SortOrder[] = [];
+
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
-  const storage = new Storage(localStorage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
     props.isTableView ? props.columns.map((c) => c.name) : []
   );
   const [rowHeight, setRowHeight] = useState<number>(5);
 
-  if (props.dataView.fields.getByName('@timestamp')?.type === 'date') {
-    props.dataView.timeFieldName = '@timestamp';
-  }
+  const onSetColumns = useCallback((columns) => {
+    setActiveColumns(columns);
+  }, []);
 
   const renderDocumentView = useCallback(
     (
@@ -98,6 +99,25 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return props.rows.map((row) => zipObject(columnNames, row));
   }, [props.columns, props.rows]);
 
+  const services = useMemo(() => {
+    const storage = new Storage(localStorage);
+
+    return {
+      data: props.data,
+      theme: props.core.theme,
+      uiSettings: props.core.uiSettings,
+      toastNotifications: props.core.notifications.toasts,
+      fieldFormats: props.fieldFormats,
+      storage,
+    };
+  }, [
+    props.core.notifications.toasts,
+    props.core.theme,
+    props.core.uiSettings,
+    props.data,
+    props.fieldFormats,
+  ]);
+
   return (
     <UnifiedDataTable
       columns={activeColumns}
@@ -109,27 +129,20 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         } as unknown as DataTableRecord;
       })}
       columnsMeta={columnsMeta}
-      services={{
-        data: props.data,
-        theme: props.core.theme,
-        uiSettings: props.core.uiSettings,
-        toastNotifications: props.core.notifications.toasts,
-        fieldFormats: props.fieldFormats,
-        storage,
-      }}
+      services={services}
       isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}
       sampleSizeState={rows.length}
       rowsPerPageState={10}
-      onSetColumns={setActiveColumns}
+      onSetColumns={onSetColumns}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       showTimeCol
       useNewFieldsApi
       enableComparisonMode
-      sort={[]}
+      sort={sortOrder}
       ariaLabelledBy="esqlDataGrid"
       maxDocFieldsDisplayed={100}
       renderDocumentView={renderDocumentView}
