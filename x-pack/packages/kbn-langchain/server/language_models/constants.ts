@@ -11,11 +11,11 @@ export const getDefaultArguments = (llmType?: string, temperature?: number, stop
         temperature: temperature ?? DEFAULT_BEDROCK_TEMPERATURE,
         stopSequences: stop ?? DEFAULT_BEDROCK_STOP_SEQUENCES,
       }
-    : (llmType === 'gemini' 
-      ? {
-          temperature: temperature ?? DEFAULT_GEMINI_TEMPERATURE,
-        } 
-    : { n: 1, stop: stop ?? null, temperature: temperature ?? DEFAULT_OPEN_AI_TEMPERATURE });
+    : llmType === 'gemini'
+    ? {
+        temperature: temperature ?? DEFAULT_GEMINI_TEMPERATURE,
+      }
+    : { n: 1, stop: stop ?? null, temperature: temperature ?? DEFAULT_OPEN_AI_TEMPERATURE };
 
 export const DEFAULT_OPEN_AI_TEMPERATURE = 0.2;
 // this is a fallback for logging, connector will default to the connector model

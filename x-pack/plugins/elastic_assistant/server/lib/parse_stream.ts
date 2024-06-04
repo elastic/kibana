@@ -120,7 +120,10 @@ export const parseGeminiResponse = (responseBody: string) => {
     .split('\n')
     .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
     .map((line) => JSON.parse(line.replace('data: ', '')))
-    .filter((line): line is {
+    .filter(
+      (
+        line
+      ): line is {
         candidates: Array<{
           content: { role: string; parts: Array<{ text: string }> };
           finishReason: string;
@@ -131,17 +134,14 @@ export const parseGeminiResponse = (responseBody: string) => {
           candidatesTokenCount: number;
           totalTokenCount: number;
         };
-      } => 'candidates' in line)
+      } => 'candidates' in line
+    )
     .reduce((prev, line) => {
       if (line.candidates[0] && line.candidates[0].content) {
         const parts = line.candidates[0].content.parts;
-        const text = parts.map(part => part.text).join('');
+        const text = parts.map((part) => part.text).join('');
         return prev + text;
       }
       return prev;
     }, '');
 };
-
-
-
-

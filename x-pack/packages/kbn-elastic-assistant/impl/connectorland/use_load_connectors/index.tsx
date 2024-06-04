@@ -45,7 +45,9 @@ export const useLoadConnectors = ({
         (acc: AIConnector[], connector) => [
           ...acc,
           ...(!connector.isMissingSecrets &&
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(connector.actionTypeId)
+          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
+            connector.actionTypeId
+          )
             ? [
                 {
                   ...connector,
