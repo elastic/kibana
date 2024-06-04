@@ -8,19 +8,12 @@
  */
 
 import type { interfaces } from 'inversify';
-import type { CoreDiServiceSetup, CoreDiServiceStart } from './contracts';
+import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './contracts';
 
-/**
- * The service identifier for the global service references.
- */
-export const Global = Symbol.for('Global') as interfaces.ServiceIdentifier<
-  interfaces.ServiceIdentifier<unknown>
->;
+export const InternalDiSetupService = Symbol.for(
+  'InternalDiSetupService'
+) as interfaces.ServiceIdentifier<InternalCoreDiServiceSetup>;
 
-export const DiSetupService = Symbol.for(
-  'DiSetupService'
-) as interfaces.ServiceIdentifier<CoreDiServiceSetup>;
-
-export const DiService = Symbol.for(
-  'DiService'
-) as interfaces.ServiceIdentifier<CoreDiServiceStart>;
+export const InternalDiService = Symbol.for(
+  'InternalDiService'
+) as interfaces.ServiceIdentifier<InternalCoreDiServiceStart>;
