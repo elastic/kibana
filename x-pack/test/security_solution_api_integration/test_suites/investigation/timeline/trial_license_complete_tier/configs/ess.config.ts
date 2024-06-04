@@ -22,7 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     testFiles: [require.resolve('../ess')],
     junit: {
-      reportName: 'Timeline Integration Tests - ESS Env - Basic License',
+      reportName: 'Timeline Integration Tests - ESS Env - Trial License',
     },
   };
 }
