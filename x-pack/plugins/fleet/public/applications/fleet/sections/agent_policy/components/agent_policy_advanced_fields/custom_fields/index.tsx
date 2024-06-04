@@ -58,7 +58,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
   return (
     <EuiDescribedFormGroup
       title={
-        <h3 data-test-subj="globalDataTagHeader">
+        <h3>
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.globalDataTagHeader"
             defaultMessage="Custom fields"

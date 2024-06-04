@@ -304,12 +304,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <CustomFields
-        data-test-subj="customFields"
-        updateAgentPolicy={updateAgentPolicy}
-        agentPolicy={agentPolicy}
-      />
-      <div>HELLO THERE</div>
+      <CustomFields updateAgentPolicy={updateAgentPolicy} agentPolicy={agentPolicy} />
       <EuiDescribedFormGroup
         title={
           <h3>

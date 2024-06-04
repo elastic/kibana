@@ -27,14 +27,6 @@ import { AgentPolicyAdvancedOptionsContent } from '.';
 
 jest.mock('../../../../../../hooks/use_license');
 
-const mockedCustomFields = jest.fn((props: any) => (
-  <div data-test-subj="mocked-custom-fields">Mocked CustomFields Component</div>
-));
-
-jest.mock('./custom_fields', () => ({
-  CustomFields: (props: any) => mockedCustomFields(props),
-}));
-
 const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 
 describe('Agent policy advanced options content', () => {
@@ -86,20 +78,6 @@ describe('Agent policy advanced options content', () => {
     jest.resetAllMocks();
   });
 
-  describe('CustomFields component', () => {
-    it('should render the mocked custom fields component with correct props', () => {
-      usePlatinumLicense();
-      render();
-
-      expect(renderResult.queryByTestId('mocked-custom-fields')).toBeInTheDocument();
-      expect(mockedCustomFields).toHaveBeenCalledWith(
-        expect.objectContaining({
-          updateAgentPolicy: mockUpdateAgentPolicy,
-          agentPolicy: mockAgentPolicy,
-        })
-      );
-    });
-  });
   describe('Agent tamper protection toggle', () => {
     it('should be visible if license is at least platinum', () => {
       usePlatinumLicense();
@@ -184,6 +162,14 @@ describe('Agent policy advanced options content', () => {
         render({ newAgentPolicy: true });
         expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
       });
+    });
+  });
+  describe('Custom Fields', () => {
+    it('should render the CustomFields component with correct props', () => {
+      usePlatinumLicense();
+      render();
+      expect(renderResult.queryByText('Custom fields')).toBeInTheDocument();
+      expect(renderResult.queryByText('This policy has no custom fields')).toBeInTheDocument();
     });
   });
 });
