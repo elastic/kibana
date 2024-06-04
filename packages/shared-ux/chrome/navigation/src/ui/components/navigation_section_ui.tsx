@@ -23,8 +23,6 @@ import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
 import { useNavigation } from '../navigation';
-import { PanelContext, usePanel } from './panel';
-import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 import { useAccordionState } from '../hooks';
 import {
   DEFAULT_IS_COLLAPSIBLE,
@@ -32,24 +30,21 @@ import {
   DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS,
 } from '../constants';
 import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../types';
+import { PanelContext, usePanel } from './panel';
+import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
 
 const nodeHasChildren = (navNode: ChromeProjectNavigationNode) => Boolean(navNode.children?.length);
 
-/**
- * Predicate to determine if a node should be visible in the main side nav.
- * If it is not visible it will be filtered out and not rendered.
- */
+/** Predicate to determine if a node should be visible in the main side nav.*/
 const itemIsVisible = (item: ChromeProjectNavigationNode) => {
   if (item.sideNavStatus === 'hidden') return false;
 
   if (item.renderItem) return true;
 
-  if (nodeHasLink(item)) {
-    return true;
-  }
+  if (nodeHasLink(item)) return true;
 
   if (nodeHasChildren(item)) {
     return item.renderAs === 'item' ? true : item.children!.some(itemIsVisible);
@@ -73,17 +68,10 @@ const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): st
   });
 };
 
-const filterChildren = (
-  children?: ChromeProjectNavigationNode[]
-): ChromeProjectNavigationNode[] | undefined => {
-  if (!children) return undefined;
-  return children.filter(itemIsVisible);
-};
-
 const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
-    children: filterChildren(navNode.children),
+    children: navNode.children?.filter(itemIsVisible),
   };
 
   serialized.renderAs = getRenderAs(serialized);
@@ -92,7 +80,7 @@ const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
     navNode: serialized,
     hasChildren: nodeHasChildren(serialized),
     hasLink: nodeHasLink(serialized),
-    isItem: serialized.renderAs === 'item' || serialized.children === undefined,
+    isItem: serialized.renderAs === 'item',
   };
 };
 
@@ -154,6 +142,39 @@ const renderGroup = (
   return [itemPrepend, ...groupItems];
 };
 
+const renderPanelOpener = (
+  navGroup: ChromeProjectNavigationNode,
+  {
+    spaceBefore,
+    navigateToUrl,
+    activeNodes,
+  }: {
+    spaceBefore?: EuiThemeSize | null;
+    navigateToUrl: NavigateToUrlFn;
+    activeNodes: ChromeProjectNavigationNode[][];
+  }
+): Required<EuiCollapsibleNavItemProps>['items'] => {
+  const items: EuiCollapsibleNavSubItemPropsEnhanced[] = [
+    {
+      renderItem: () => (
+        <NavigationItemOpenPanel
+          item={navGroup}
+          navigateToUrl={navigateToUrl}
+          activeNodes={activeNodes}
+        />
+      ),
+    },
+  ];
+
+  if (spaceBefore) {
+    items.unshift({
+      renderItem: () => <EuiSpacer size={spaceBefore!} />,
+    });
+  }
+
+  return items;
+};
+
 // Generate the EuiCollapsible props for both the root component (EuiCollapsibleNavItem) and its
 // "items" props. Both are compatible with the exception of "renderItem" which is only used for
 // sub items.
@@ -189,15 +210,15 @@ const nodeToEuiCollapsibleNavProps = (
     onClick: customOnClick,
     isCollapsible = DEFAULT_IS_COLLAPSIBLE,
   } = navNode;
-  const isAccordion = isAccordionNode(navNode);
 
+  const isAccordion = isAccordionNode(navNode);
   // If the node is an accordion and it is not collapsible, we only want to mark it as active
   // if it is the highest match in the URL, not if one of its children is also active.
   const onlyIfHighestMatch = isAccordion && !isCollapsible;
   const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
   const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
-  let isSelected = isActive;
 
+  let isSelected = isActive;
   if (isAccordion && !getIsCollapsed(path)) {
     // For accordions that are collapsible, we don't want to mark the parent button as selected
     // when it is expanded. If the accordion is **not** collapsible then we do.
@@ -213,42 +234,21 @@ const nodeToEuiCollapsibleNavProps = (
     spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
   }
 
-  if (renderAs === 'panelOpener') {
-    const items: EuiCollapsibleNavSubItemPropsEnhanced[] = [
-      {
-        renderItem: () => (
-          <NavigationItemOpenPanel
-            item={navNode}
-            navigateToUrl={navigateToUrl}
-            activeNodes={activeNodes}
-          />
-        ),
-      },
-    ];
-    if (spaceBefore) {
-      items.unshift({
-        renderItem: () => <EuiSpacer size={spaceBefore!} />,
-      });
-    }
-    return { items, isVisible: true };
+  if (navNode.renderItem) {
+    // Leave the rendering to the consumer
+    return {
+      items: [{ renderItem: navNode.renderItem }],
+      isVisible: true,
+    };
   }
 
-  const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
-    if (customOnClick) {
-      customOnClick(e);
-      return;
-    }
-
-    // Do not navigate if it is a collapsible accordion, link will be used in the breadcrumb
-    if (isAccordion && isCollapsible) return;
-
-    if (href !== undefined) {
-      e.preventDefault();
-      navigateToUrl(href);
-      closePanel();
-      return;
-    }
-  };
+  if (renderAs === 'panelOpener') {
+    // Render as a panel opener (button to open a panel as a second navigation)
+    return {
+      items: [...renderPanelOpener(navNode, { spaceBefore, navigateToUrl, activeNodes })],
+      isVisible: true,
+    };
+  }
 
   const subItems: EuiCollapsibleNavItemProps['items'] | undefined = isItem
     ? undefined
@@ -271,6 +271,14 @@ const nodeToEuiCollapsibleNavProps = (
         })
         .flat();
 
+  if (renderAs === 'block' && treeDepth > 0 && subItems) {
+    // Render as a group block (bold title + list of links underneath)
+    return {
+      items: [...renderGroup(navNode, subItems, { spaceBefore: spaceBefore ?? null })],
+      isVisible: subItems.length > 0,
+    };
+  }
+
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
         href,
@@ -289,24 +297,23 @@ const nodeToEuiCollapsibleNavProps = (
       }
     : undefined;
 
-  if (renderAs === 'block' && treeDepth > 0 && subItems) {
-    // Render as a group block (bold title + list of links underneath)
-    return {
-      items: [...renderGroup(navNode, subItems, { spaceBefore: spaceBefore ?? null })],
-      isVisible: subItems.length > 0,
-    };
-  }
+  const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+    if (customOnClick) {
+      customOnClick(e);
+      return;
+    }
 
-  if (navNode.renderItem) {
-    return {
-      items: [
-        {
-          renderItem: navNode.renderItem,
-        },
-      ],
-      isVisible: true,
-    };
-  }
+    // Do not navigate if it is a collapsible accordion, if there is a "link" defined it
+    // will be used in the breadcrumb navigation.
+    if (isAccordion && isCollapsible) return;
+
+    if (href !== undefined) {
+      e.preventDefault();
+      navigateToUrl(href);
+      closePanel();
+      return;
+    }
+  };
 
   const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
     {
@@ -403,12 +410,12 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           return item;
         }
 
-        const itemsSerialized: EuiCollapsibleNavSubItemProps['items'] = serializeAccordionItems(
+        const subItems: EuiCollapsibleNavSubItemProps['items'] = serializeAccordionItems(
           item.items
         );
 
         const accordionProps =
-          itemsSerialized === undefined
+          subItems === undefined
             ? undefined
             : getAccordionProps(path ?? item.id!, {
                 onClick: item.onClick,
@@ -426,10 +433,10 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           ...rest
         } = item;
 
-        const parsed: EuiCollapsibleNavSubItemProps = itemsSerialized
+        const parsed: EuiCollapsibleNavSubItemProps = subItems
           ? {
               ...rest,
-              items: itemsSerialized,
+              items: subItems,
               accordionProps,
               isCollapsible,
             }
@@ -461,15 +468,15 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     return <EuiCollapsibleNavItem {...props} className={className} />;
   }
 
+  // Item type ExclusiveUnion - accordions should not contain links
+  const { href, linkProps, ...rest } = props;
+
   return (
     <EuiCollapsibleNavItem
-      {...props}
+      {...rest}
       className={className}
       items={items}
       accordionProps={getAccordionProps(navNode.path)}
-      // Item type ExclusiveUnion - accordions should not contain links
-      href={undefined}
-      linkProps={undefined}
     />
   );
 });
