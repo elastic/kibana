@@ -15,6 +15,7 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
 import { getGroupBy } from './common';
+import { getOneHourRange, getFiveMinuteRange, getOneDayRange } from './utils';
 
 export function generateSummaryTransformForOccurrences(
   slo: SLODefinition
@@ -118,9 +119,7 @@ export function generateSummaryTransformForOccurrences(
         fiveMinuteBurnRate: {
           filter: {
             range: {
-              '@timestamp': {
-                gte: `now-5m/m`,
-              },
+              '@timestamp': getFiveMinuteRange(slo),
             },
           },
           aggs: {
@@ -139,9 +138,7 @@ export function generateSummaryTransformForOccurrences(
         oneHourBurnRate: {
           filter: {
             range: {
-              '@timestamp': {
-                gte: `now-1h/m`,
-              },
+              '@timestamp': getOneHourRange(slo),
             },
           },
           aggs: {
@@ -160,9 +157,7 @@ export function generateSummaryTransformForOccurrences(
         oneDayBurnRate: {
           filter: {
             range: {
-              '@timestamp': {
-                gte: `now-1d/m`,
-              },
+              '@timestamp': getOneDayRange(slo),
             },
           },
           aggs: {

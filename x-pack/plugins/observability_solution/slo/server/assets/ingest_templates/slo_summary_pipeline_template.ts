@@ -194,6 +194,7 @@ export const getSLOSummaryPipelineTemplate = (
           ignore_failure: true,
         },
       },
+      // >= 8.15:
       {
         script: {
           description: 'Computes the last five minute burn rate value',
