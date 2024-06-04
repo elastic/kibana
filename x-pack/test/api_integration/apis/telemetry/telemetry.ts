@@ -44,12 +44,15 @@ function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
 
 function updateClusterUuidInLogstashStats(
   clusterUuid: string,
-  payload: Array<Record<string, unknown>>
+  payload: Array<Record<string, any>>
 ) {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   return payload.map(({ stack_stats, ...item }) => {
-    if (stack_stats?.logstash?.cluster_stats) {
-      stack_stats.logstash.cluster_stats.monitoringClusterUuid = clusterUuid;
+    const { logstash } = stack_stats;
+    if (logstash) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { cluster_stats } = logstash;
+      cluster_stats.monitoringClusterUuid = clusterUuid;
     }
     return { stack_stats, ...item };
   });
