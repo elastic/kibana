@@ -215,9 +215,9 @@ Object {
         "summary": "versioned route",
       },
     },
-    "/foo/{id}": Object {
+    "/foo/{id}/{path*}": Object {
       "get": Object {
-        "operationId": "/foo/{id}#0",
+        "operationId": "/foo/{id}/{path*}#0",
         "parameters": Array [
           Object {
             "description": "The version of the API to use",
@@ -235,6 +235,16 @@ Object {
             "description": "id",
             "in": "path",
             "name": "id",
+            "required": true,
+            "schema": Object {
+              "maxLength": 36,
+              "type": "string",
+            },
+          },
+          Object {
+            "description": "path",
+            "in": "path",
+            "name": "path",
             "required": true,
             "schema": Object {
               "maxLength": 36,

@@ -2764,7 +2764,7 @@ describe('terms', () => {
                 "id": "embeddableBadge",
               },
             ],
-            "message": <FormattedMessage
+            "message": <Memo(MemoizedFormattedMessage)
               defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
               id="xpack.lens.indexPattern.fieldsNotFound"
               values={

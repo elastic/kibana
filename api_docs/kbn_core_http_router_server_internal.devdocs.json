@@ -972,13 +972,58 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.resolvers.sort",
+            "type": "Function",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "(versions: string[], access: \"internal\" | \"public\") => string[]"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.sort.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "versions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.sort.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "access",
+                "description": [],
+                "signature": [
+                  "\"internal\" | \"public\""
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
             "id": "def-common.resolvers.oldest",
             "type": "Function",
             "tags": [],
             "label": "oldest",
             "description": [],
             "signature": [
-              "(versions: string[]) => string | undefined"
+              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
@@ -998,6 +1043,20 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.oldest.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "access",
+                "description": [],
+                "signature": [
+                  "\"internal\" | \"public\""
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1009,7 +1068,7 @@
             "label": "newest",
             "description": [],
             "signature": [
-              "(versions: string[]) => string | undefined"
+              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
@@ -1029,6 +1088,20 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.newest.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "access",
+                "description": [],
+                "signature": [
+                  "\"internal\" | \"public\""
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1040,7 +1113,7 @@
             "label": "none",
             "description": [],
             "signature": [
-              "(versions: string[]) => string | undefined"
+              "(versions: string[], access: \"internal\" | \"public\") => string | undefined"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
@@ -1056,6 +1129,20 @@
                 "description": [],
                 "signature": [
                   "string[]"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.none.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "access",
+                "description": [],
+                "signature": [
+                  "\"internal\" | \"public\""
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,

@@ -39,7 +39,6 @@
     "@kbn/data-views-plugin",
     "@kbn/share-plugin",
     "@kbn/safer-lodash-set",
-    "@kbn/alerting-state-types",
     "@kbn/alerting-types",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
@@ -70,7 +69,8 @@
     "@kbn/core-execution-context-server-mocks",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/core-security-server",
+    "@kbn/alerting-state-types",
+    "@kbn/core-security-server"
   ],
   "exclude": [
     "target/**/*"
