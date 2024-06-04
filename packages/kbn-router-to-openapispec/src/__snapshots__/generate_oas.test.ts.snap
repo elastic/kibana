@@ -103,7 +103,7 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [],
 }
 `;
 
@@ -522,7 +522,14 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [
+    Object {
+      "name": "bar",
+    },
+    Object {
+      "name": "versioned",
+    },
+  ],
 }
 `;
 
@@ -622,7 +629,7 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [],
 }
 `;
 
@@ -736,6 +743,6 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [],
 }
 `;
