@@ -69,7 +69,11 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
-    this.agentManager = new AgentManager(this.log.get('agent-manager'));
+    const dnsCacheTtlInSeconds =
+      coreContext.configService.atPathSync<ElasticsearchConfigType>(
+        'elasticsearch'
+      ).dnsCacheTtlInSeconds;
+    this.agentManager = new AgentManager(this.log.get('agent-manager'), { dnsCacheTtlInSeconds });
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {

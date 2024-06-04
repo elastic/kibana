@@ -23,6 +23,14 @@ export interface AgentFactoryProvider {
   getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory;
 }
 
+export interface AgentManagerOptions {
+  /**
+   * The maximum number of seconds to retain the DNS lookup resolutions.
+   * Set to 0 to disable the cache (default Node.js behavior)
+   */
+  dnsCacheTtlInSeconds: number;
+}
+
 /**
  * Exposes the APIs to fetch stats of the existing agents.
  */
@@ -48,9 +56,12 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private readonly agents: Set<HttpAgent>;
   private readonly cacheableLookup: CacheableLookup;
 
-  constructor(private readonly logger: Logger) {
+  constructor(private readonly logger: Logger, options: AgentManagerOptions) {
     this.agents = new Set();
-    this.cacheableLookup = new CacheableLookup(); // Use DNS caching to avoid too many repetitive (and CPU-blocking) dns.lookup calls
+    // Use DNS caching to avoid too many repetitive (and CPU-blocking) dns.lookup calls
+    this.cacheableLookup = new CacheableLookup({
+      maxTtl: options.dnsCacheTtlInSeconds,
+    });
   }
 
   public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
@@ -66,9 +77,9 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
           httpsAgent = new HttpsAgent(config);
           this.agents.add(httpsAgent);
           dereferenceOnDestroy(this.agents, httpsAgent);
+          this.cacheableLookup.install(httpsAgent);
         }
 
-        this.cacheableLookup.install(httpsAgent);
         return httpsAgent;
       }
 
@@ -76,9 +87,9 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         httpAgent = new HttpAgent(agentOptions);
         this.agents.add(httpAgent);
         dereferenceOnDestroy(this.agents, httpAgent);
+        this.cacheableLookup.install(httpAgent);
       }
 
-      this.cacheableLookup.install(httpAgent);
       return httpAgent;
     };
   }

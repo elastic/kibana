@@ -57,7 +57,7 @@ describe('ClusterClient', () => {
     logger = loggingSystemMock.createLogger();
     internalClient = createClient();
     scopedClient = createClient();
-    agentFactoryProvider = new AgentManager(logger);
+    agentFactoryProvider = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
 
     authHeaders = httpServiceMock.createAuthHeaderStorage();
     authHeaders.get.mockImplementation(() => ({

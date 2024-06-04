@@ -186,6 +186,7 @@ export const configSchema = schema.object({
     }),
     { defaultValue: [] }
   ),
+  dnsCacheTtlInSeconds: schema.number({ defaultValue: 0, min: 0, max: Infinity }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
