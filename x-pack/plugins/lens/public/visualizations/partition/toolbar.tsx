@@ -19,7 +19,10 @@ import {
 import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { LegendLayout, type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import {
+  LegendLayout,
+  type PartitionLegendValue,
+} from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
