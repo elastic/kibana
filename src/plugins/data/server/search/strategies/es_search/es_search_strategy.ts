@@ -14,7 +14,10 @@ import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
-import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
+import {
+  shimHitsTotal,
+  toKibanaSearchResponse,
+} from '../../../../common/search/strategies/es_search/response_utils';
 import { searchUsageObserver } from '../../collectors/search/usage';
 
 export const esSearchStrategyProvider = (

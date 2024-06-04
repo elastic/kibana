@@ -11,7 +11,7 @@ import { from } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
-import { sanitizeRequestParams } from '../../sanitize_request_params';
+import { sanitizeRequestParams } from '../../../../common/search/sanitize_request_params';
 
 export const esqlSearchStrategyProvider = (
   logger: Logger,

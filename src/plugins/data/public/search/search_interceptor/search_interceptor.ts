@@ -60,11 +60,14 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { AsyncSearchGetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
+  getTotalLoaded,
   IAsyncSearchOptions,
   isRunningResponse,
   pollSearch,
+  shimHitsTotal,
   UI_SETTINGS,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
@@ -453,6 +456,20 @@ export class SearchInterceptor {
             ...request,
             ...searchOptions,
           }),
+        })
+        .then(async (response: unknown) => {
+          switch (strategy) {
+            case ENHANCED_ES_SEARCH_STRATEGY:
+              const typedResponse = response as AsyncSearchGetResponse;
+              const shimmedResponse = shimHitsTotal(typedResponse.response);
+              return {
+                ...typedResponse,
+                rawResponse: shimmedResponse,
+                ...getTotalLoaded(shimmedResponse),
+              };
+            default:
+              return response;
+          }
         })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {

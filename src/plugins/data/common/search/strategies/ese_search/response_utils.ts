@@ -9,8 +9,8 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { IncomingHttpHeaders } from 'http';
 import type { AsyncSearchResponse } from './types';
-import { getTotalLoaded } from '../es_search';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { AsyncSearchStatusResponse } from './types';
 
@@ -35,16 +35,15 @@ export function toAsyncKibanaSearchStatusResponse(
  */
 export function toAsyncKibanaSearchResponse(
   response: AsyncSearchResponse,
-  warning?: string,
+  headers: IncomingHttpHeaders,
   requestParams?: ConnectionRequestParams
 ): IKibanaSearchResponse {
   return {
-    id: response.id,
-    rawResponse: response.response,
-    isPartial: response.is_partial,
-    isRunning: response.is_running,
-    ...(warning ? { warning } : {}),
+    id: headers['x-elasticsearch-async-id'] as string,
+    rawResponse: response,
+    isPartial: headers['x-elasticsearch-async-is-running'] === '?1',
+    isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
+    ...(headers.warning ? { warning: headers.warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
-    ...getTotalLoaded(response.response),
   };
 }

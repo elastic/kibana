@@ -12,7 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 import { KibanaResponseFactory } from '@kbn/core/server';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import type { SanitizedConnectionRequestParams } from '@kbn/search-types';
-import { sanitizeRequestParams } from './sanitize_request_params';
+import { sanitizeRequestParams } from '../../common/search/sanitize_request_params';
 
 // Why not use just use kibana-utils-plugin KbnServerError and reportServerError?
 //

@@ -10,7 +10,7 @@
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { sanitizeRequestParams } from '../../sanitize_request_params';
+import { sanitizeRequestParams } from '../../../../common/search/sanitize_request_params';
 
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).

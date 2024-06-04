@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
@@ -24,16 +24,15 @@ import {
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
-import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import {
-  getDefaultSearchParams,
-  getShardTimeout,
-  getTotalLoaded,
-  shimHitsTotal,
-} from '../es_search';
+  toAsyncKibanaSearchResponse,
+  toAsyncKibanaSearchStatusResponse,
+} from '../../../../common/search/strategies/ese_search/response_utils';
+import { SearchUsage, searchUsageObserver } from '../../collectors/search';
+import { getDefaultSearchParams, getShardTimeout } from '../es_search';
+import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
 import { SearchConfigSchema } from '../../../config';
-import { sanitizeRequestParams } from '../../sanitize_request_params';
+import { sanitizeRequestParams } from '../../../../common/search/sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
@@ -87,10 +86,15 @@ export const enhancedEsSearchStrategyProvider = (
     };
     const { body, headers } = await client.asyncSearch.get(
       { ...params, id: id! },
-      { ...options.transport, signal: options.abortSignal, meta: true }
+      {
+        ...options.transport,
+        signal: options.abortSignal,
+        meta: true,
+        asStream: true,
+      }
     );
-    const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+
+    return toAsyncKibanaSearchResponse(body, headers);
   }
 
   async function submitAsyncSearch(
@@ -107,13 +111,10 @@ export const enhancedEsSearchStrategyProvider = (
       ...options.transport,
       signal: options.abortSignal,
       meta: true,
+      asStream: true,
     });
-    const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse(
-      { ...body, response },
-      headers?.warning,
-      meta?.request?.params
-    );
+
+    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params);
   }
 
   function asyncSearch(
@@ -146,6 +147,9 @@ export const enhancedEsSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
+      map((response) => {
+        return response.rawResponse;
+      }),
       catchError((e) => {
         throw getKbnSearchError(e);
       })
