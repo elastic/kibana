@@ -144,98 +144,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
-      describe('Asset Details flyout for a container', () => {
-        let synthEsClient: InfraSynthtraceEsClient;
-        before(async () => {
-          await setInfrastructureContainerAssetViewUiSetting(true);
-          const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
-          await infraSynthtraceKibanaClient.installSystemPackage(version);
-          synthEsClient = await getInfraSynthtraceEsClient(esClient);
-          await synthEsClient.index(
-            generateDockerContainersData({
-              from: DATE_WITH_DOCKER_DATA_FROM,
-              to: DATE_WITH_DOCKER_DATA_TO,
-              count: 5,
-            })
-          );
-
-          await pageObjects.infraHome.goToContainer();
-          await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
-          await pageObjects.infraHome.clickOnFirstNode();
-        });
-
-        after(async () => {
-          await setInfrastructureContainerAssetViewUiSetting(false);
-          return await synthEsClient.clean();
-        });
-
-        describe('Overview Tab', () => {
-          before(async () => {
-            await pageObjects.assetDetails.clickOverviewTab();
-          });
-
-          [
-            { metric: 'cpuUsage', value: '2,500.0%' },
-            { metric: 'memoryUsage', value: '2,000.0%' },
-          ].forEach(({ metric, value }) => {
-            it(`${metric} tile should show ${value}`, async () => {
-              await retry.tryForTime(3 * 1000, async () => {
-                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                  metric
-                );
-                expect(tileValue).to.eql(value);
-              });
-            });
-          });
-
-          [
-            { metric: 'cpu', chartsCount: 1 },
-            { metric: 'memory', chartsCount: 1 },
-          ].forEach(({ metric, chartsCount }) => {
-            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
-              const hosts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(metric);
-              expect(hosts.length).to.equal(chartsCount);
-            });
-          });
-        });
-
-        describe('Metadata Tab', () => {
-          before(async () => {
-            await pageObjects.assetDetails.clickMetadataTab();
-          });
-
-          it('should show metadata table', async () => {
-            await pageObjects.assetDetails.metadataTableExists();
-          });
-        });
-
-        describe('APM Link Tab', () => {
-          before(async () => {
-            await pageObjects.infraHome.clickOnNode();
-            await pageObjects.assetDetails.clickApmTabLink();
-            await pageObjects.infraHome.waitForLoading();
-          });
-
-          it('should navigate to APM traces', async () => {
-            const url = parse(await browser.getCurrentUrl());
-            const query = decodeURIComponent(url.query ?? '');
-            const kuery = 'kuery=container.id:"container-id-4"';
-
-            await retry.try(async () => {
-              expect(url.pathname).to.eql('/app/apm/traces');
-              expect(query).to.contain(kuery);
-            });
-            await returnTo(INVENTORY_PATH);
-          });
-        });
-      });
-
       describe('Asset Details flyout for a host', () => {
         before(async () => {
           await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await pageObjects.infraHome.getWaffleMap();
           await pageObjects.infraHome.inputAddHostNameFilter('demo-stack-nginx-01');
           await pageObjects.infraHome.clickOnNode();
+        });
+
+        after(async () => {
+          await retry.try(async () => {
+            await pageObjects.infraHome.clickCloseFlyoutButton();
+          });
         });
 
         describe('Overview Tab', () => {
@@ -324,6 +244,99 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const url = parse(await browser.getCurrentUrl());
             const query = decodeURIComponent(url.query ?? '');
             const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
+
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
+            await returnTo(INVENTORY_PATH);
+          });
+        });
+
+        it('Should show auto-refresh option', async () => {
+          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
+          expect(kibanaRefreshConfig.interval).to.equal('5');
+          expect(kibanaRefreshConfig.units).to.equal('Seconds');
+          expect(kibanaRefreshConfig.isPaused).to.equal(true);
+        });
+      });
+
+      describe('Asset Details flyout for a container', () => {
+        let synthEsClient: InfraSynthtraceEsClient;
+        before(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(true);
+          const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
+          await infraSynthtraceKibanaClient.installSystemPackage(version);
+          synthEsClient = await getInfraSynthtraceEsClient(esClient);
+          await synthEsClient.index(
+            generateDockerContainersData({
+              from: DATE_WITH_DOCKER_DATA_FROM,
+              to: DATE_WITH_DOCKER_DATA_TO,
+              count: 5,
+            })
+          );
+
+          await pageObjects.infraHome.goToContainer();
+          await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
+          await pageObjects.infraHome.clickOnFirstNode();
+        });
+
+        after(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(false);
+          return await synthEsClient.clean();
+        });
+
+        describe('Overview Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOverviewTab();
+          });
+
+          [
+            { metric: 'cpuUsage', value: '2,500.0%' },
+            { metric: 'memoryUsage', value: '2,000.0%' },
+          ].forEach(({ metric, value }) => {
+            it(`${metric} tile should show ${value}`, async () => {
+              await retry.tryForTime(3 * 1000, async () => {
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
+                expect(tileValue).to.eql(value);
+              });
+            });
+          });
+
+          [
+            { metric: 'cpu', chartsCount: 1 },
+            { metric: 'memory', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const hosts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(metric);
+              expect(hosts.length).to.equal(chartsCount);
+            });
+          });
+        });
+
+        describe('Metadata Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetadataTab();
+          });
+
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('APM Link Tab', () => {
+          before(async () => {
+            await pageObjects.infraHome.clickOnNode();
+            await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
+          });
+
+          it('should navigate to APM traces', async () => {
+            const url = parse(await browser.getCurrentUrl());
+            const query = decodeURIComponent(url.query ?? '');
+            const kuery = 'kuery=container.id:"container-id-4"';
 
             await retry.try(async () => {
               expect(url.pathname).to.eql('/app/apm/traces');
