@@ -109,5 +109,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/test-jest-helpers",
+    "@kbn/core-saved-objects-utils-server",
   ]
 }
