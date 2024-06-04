@@ -25,9 +25,10 @@ export const updateGlobalPacksCreateCallback = async (
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
-  const agentPoliciesResult = await agentPolicyService?.getByIds(packsClient, [
-    packagePolicy.policy_id,
-  ]);
+  const agentPoliciesResult = await agentPolicyService?.getByIds(
+    packsClient,
+    packagePolicy.policy_ids
+  );
   const agentPolicyResultIds = map(agentPoliciesResult, 'id');
   const agentPolicies = agentPoliciesResult
     ? mapKeys(await agentPolicyService?.getByIds(packsClient, agentPolicyResultIds), 'id')
@@ -55,8 +56,8 @@ export const updateGlobalPacksCreateCallback = async (
             references: [
               ...(pack.references ?? []),
               {
-                id: packagePolicy.policy_id,
-                name: agentPolicies[packagePolicy.policy_id]?.name,
+                id: packagePolicy.policy_ids[0],
+                name: agentPolicies[packagePolicy.policy_ids[0]]?.name,
                 type: AGENT_POLICY_SAVED_OBJECT_TYPE,
               },
             ],

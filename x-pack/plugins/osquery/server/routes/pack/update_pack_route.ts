@@ -296,8 +296,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_id]
-                          ? policyShards[packagePolicy.policy_id]
+                        shard: policyShards[packagePolicy.policy_ids[0]]
+                          ? policyShards[packagePolicy.policy_ids[0]]
                           : 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
@@ -329,8 +329,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_id]
-                          ? policyShards[packagePolicy.policy_id]
+                        shard: policyShards[packagePolicy.policy_ids[0]]
+                          ? policyShards[packagePolicy.policy_ids[0]]
                           : 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }

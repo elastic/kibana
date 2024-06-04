@@ -113,7 +113,7 @@ const getInstalledPackagePolicies = (
         deployment_mode: packagePolicy.vars?.deployment?.value as string,
         package_version: packagePolicy.package?.version as string,
         created_at: packagePolicy.created_at,
-        agent_policy_id: packagePolicy.policy_id,
+        agent_policy_id: packagePolicy.policy_ids[0],
         agent_count: agentCounts,
         is_agentless: isAgentless,
         account_type: getAccountTypeField(packagePolicy),

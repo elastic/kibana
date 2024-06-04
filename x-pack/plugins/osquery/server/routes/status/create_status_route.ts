@@ -57,10 +57,12 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             const migrationObject = reduce(
               policyPackages?.items,
               (acc, policy) => {
-                if (acc.agentPolicyToPackage[policy.policy_id]) {
+                if (policy.policy_ids.every((policyId) => acc.agentPolicyToPackage[policyId])) {
                   acc.packagePoliciesToDelete.push(policy.id);
                 } else {
-                  acc.agentPolicyToPackage[policy.policy_id] = policy.id;
+                  for (const policyId of policy.policy_ids) {
+                    acc.agentPolicyToPackage[policyId] = policy.id;
+                  }
                 }
 
                 const packagePolicyName = policy.name;
@@ -76,7 +78,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 if (has(policy, 'inputs[0].streams[0]')) {
                   if (!acc.packs[packName]) {
                     acc.packs[packName] = {
-                      policy_ids: [policy.policy_id],
+                      policy_ids: policy.policy_ids,
                       enabled: !packName.startsWith(OSQUERY_INTEGRATION_NAME),
                       name: packName,
                       description: policy.description,
@@ -94,7 +96,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                       ),
                     };
                   } else {
-                    acc.packs[packName].policy_ids.push(policy.policy_id);
+                    acc.packs[packName].policy_ids.push(...policy.policy_ids);
                   }
                 }
 

@@ -102,7 +102,7 @@ export const parseAgentSelection = async (
           page,
         });
 
-        return { results: items.map((it) => it.policy_id), total };
+        return { results: items.flatMap((it) => it.policy_ids), total };
       },
       esClient,
       context
