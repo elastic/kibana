@@ -805,7 +805,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         sort,
       });
     },
-    [updateTableSortFilterAndPagination]
+    [entityName, updateTableSortFilterAndPagination]
   );
 
   const onFilterChange = useCallback(
