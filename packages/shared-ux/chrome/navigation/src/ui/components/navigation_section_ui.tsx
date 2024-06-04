@@ -202,9 +202,10 @@ const getEuiProps = (
   const onlyIfHighestMatch = isAccordion && !isCollapsible;
   const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
   const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
+  const isAccordionExpanded = !getIsCollapsed(path);
 
   let isSelected = isActive;
-  if (isAccordion && !getIsCollapsed(path)) {
+  if (isAccordion && isAccordionExpanded) {
     // For accordions that are collapsible, we don't want to mark the parent button as selected
     // when it is expanded. If the accordion is **not** collapsible then we do.
     isSelected = isCollapsible ? false : isActive;
