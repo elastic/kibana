@@ -22,25 +22,26 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestionStatus } from '@kbn/search-connectors';
+import { ConnectorStatus, IngestionStatus } from '@kbn/search-connectors';
 
-import { Status } from '../../../../../../../common/types/api';
-import { HttpLogic } from '../../../../../shared/http';
-import { KibanaLogic } from '../../../../../shared/kibana';
-import { CancelSyncsApiLogic } from '../../../../api/connector/cancel_syncs_api_logic';
-import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
-import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
-import { IndexViewLogic } from '../../index_view_logic';
+import { Status } from '../../../../../../common/types/api';
+import { HttpLogic } from '../../../../shared/http';
+import { KibanaLogic } from '../../../../shared/kibana';
+import { CancelSyncsApiLogic } from '../../../api/connector/cancel_syncs_api_logic';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+
+import { IndexViewLogic } from '../../search_index/index_view_logic';
+
+import { SyncsLogic } from './syncs_logic';
 
 export const SyncsContextMenu: React.FC = () => {
   const { config, productFeatures } = useValues(KibanaLogic);
-  const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
-    useValues(IndexViewLogic);
+  const { ingestionStatus, isCanceling, isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
   const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
     useValues(ConnectorViewLogic);
-  const { cancelSyncs } = useActions(CancelSyncsLogic);
   const { status } = useValues(CancelSyncsApiLogic);
-  const { startSync, startIncrementalSync, startAccessControlSync } = useActions(IndexViewLogic);
+  const { startSync, startIncrementalSync, startAccessControlSync, cancelSyncs } =
+    useActions(SyncsLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -56,7 +57,7 @@ export const SyncsContextMenu: React.FC = () => {
         }
       );
     }
-    if (isSyncing && ingestionStatus !== IngestionStatus.ERROR) {
+    if (isSyncing && connector?.status !== ConnectorStatus.ERROR) {
       return i18n.translate('xpack.enterpriseSearch.content.index.syncButton.syncing.label', {
         defaultMessage: 'Syncing',
       });
@@ -90,8 +91,8 @@ export const SyncsContextMenu: React.FC = () => {
           : [
               {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
-                'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
-                'data-test-subj': `entSearchContent-${ingestionMethod}-header-sync-startSync`,
+                'data-telemetry-id': `entSearchContent-connector-header-sync-startSync`,
+                'data-test-subj': `entSearchContent-connector-header-sync-startSync`,
                 disabled: isSyncsDisabled,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.fullSync', {
@@ -99,7 +100,7 @@ export const SyncsContextMenu: React.FC = () => {
                 }),
                 onClick: () => {
                   closePopover();
-                  startSync();
+                  startSync(connector);
                 },
               },
             ]),
@@ -107,10 +108,8 @@ export const SyncsContextMenu: React.FC = () => {
           ? [
               {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
-                'data-telemetry-id':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
-                'data-test-subj':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-incrementalSync',
+                'data-telemetry-id': `entSearchContent-connector-header-sync-more-incrementalSync`,
+                'data-test-subj': `entSearchContent-connector-header-sync-more-incrementalSync`,
                 disabled: isSyncsDisabled,
                 icon: 'play',
                 name: i18n.translate('xpack.enterpriseSearch.index.header.more.incrementalSync', {
@@ -118,7 +117,7 @@ export const SyncsContextMenu: React.FC = () => {
                 }),
                 onClick: () => {
                   closePopover();
-                  startIncrementalSync();
+                  startIncrementalSync(connector);
                 },
               },
             ]
@@ -127,10 +126,8 @@ export const SyncsContextMenu: React.FC = () => {
           ? [
               {
                 // @ts-ignore - data-* attributes are applied but doesn't exist on types
-                'data-telemetry-id':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
-                'data-test-subj':
-                  'entSearchContent-${ingestionMethod}-header-sync-more-accessControlSync',
+                'data-telemetry-id': `entSearchContent-connector-header-sync-more-accessControlSync`,
+                'data-test-subj': `entSearchContent-connector-header-sync-more-accessControlSync`,
                 disabled: Boolean(
                   isSyncsDisabled || !connector?.configuration.use_document_level_security?.value
                 ),
@@ -140,14 +137,14 @@ export const SyncsContextMenu: React.FC = () => {
                 }),
                 onClick: () => {
                   closePopover();
-                  startAccessControlSync();
+                  startAccessControlSync(connector);
                 },
               },
             ]
           : []),
         {
           // @ts-ignore - data-* attributes are applied but doesn't exist on types
-          'data-telemetry-id': `entSearchContent-${ingestionMethod}-header-sync-cancelSync`,
+          'data-telemetry-id': `entSearchContent-connector-header-sync-cancelSync`,
           disabled:
             (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING,
           icon: <EuiIcon type="cross" size="m" color="danger" />,
@@ -162,7 +159,7 @@ export const SyncsContextMenu: React.FC = () => {
           ),
           onClick: () => {
             closePopover();
-            cancelSyncs();
+            cancelSyncs(connector);
           },
         },
       ],
@@ -174,7 +171,8 @@ export const SyncsContextMenu: React.FC = () => {
     <EuiPopover
       button={
         <EuiButton
-          data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-openSyncMenu`}
+          data-test-subj="enterpriseSearchSyncsContextMenuButton"
+          data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"
           iconType="arrowDown"
           iconSide="right"
           onClick={togglePopover}
@@ -186,7 +184,7 @@ export const SyncsContextMenu: React.FC = () => {
                 <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
             )}
-            <EuiFlexItem data-test-subj={`entSearchContent-${ingestionMethod}-header-sync-menu`}>
+            <EuiFlexItem data-test-subj="entSearchContent-connector-header-sync-menu">
               {getSyncButtonText()}
             </EuiFlexItem>
           </EuiFlexGroup>
