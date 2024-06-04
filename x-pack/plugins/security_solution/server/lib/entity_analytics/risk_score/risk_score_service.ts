@@ -35,6 +35,7 @@ export interface RiskScoreService {
   ) => Promise<RiskEngineConfigurationWithDefaults | null>;
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
+  refreshIndex: () => Promise<void>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -84,4 +85,5 @@ export const riskScoreServiceFactory = ({
   },
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
   scheduleLatestTransformNow: () => scheduleLatestTransformNow({ namespace: spaceId, esClient }),
+  refreshIndex: async () => riskScoreDataClient.refreshIndex(),
 });

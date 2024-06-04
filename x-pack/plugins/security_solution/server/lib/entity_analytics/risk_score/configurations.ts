@@ -139,7 +139,6 @@ export const getTransformOptions = ({ dest, source }: { dest: string; source: st
   dest: {
     index: dest,
   },
-  frequency: '1h',
   latest: {
     sort: '@timestamp',
     unique_key: [`host.name`, `user.name`],
@@ -147,10 +146,16 @@ export const getTransformOptions = ({ dest, source }: { dest: string; source: st
   source: {
     index: source,
   },
+  // The risk engine starts the transforms executions after writing the documents to the risk score index.
+  // So the transform don't need to run on a schedule.
+  frequency: '1h', // 1h is the maximum value
   sync: {
     time: {
-      delay: '2s',
+      delay: '0s', // It doesn't have any delay because the risk engine writes the documents to the index and schedules the transform synchronously.
       field: '@timestamp',
     },
+  },
+  settings: {
+    unattended: true,
   },
 });

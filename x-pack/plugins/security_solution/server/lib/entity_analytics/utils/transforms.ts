@@ -14,11 +14,16 @@ import type {
   TransformPutTransformRequest,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../common/entity_analytics/risk_engine';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
   getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,
 } from '../../../../common/utils/risk_score_modules';
+import { getTransformOptions } from '../risk_score/configurations';
 
 export const getLegacyTransforms = async ({
   namespace,
@@ -107,28 +112,6 @@ const hasTransformStarted = (transformStats: TransformGetTransformStatsTransform
   return transformStats.state === 'indexing' || transformStats.state === 'started';
 };
 
-export const startTransform = async ({
-  esClient,
-  transformId,
-}: {
-  esClient: ElasticsearchClient;
-  transformId: string;
-}): Promise<TransformStartTransformResponse | void> => {
-  const transformStats = await esClient.transform.getTransformStats({
-    transform_id: transformId,
-  });
-  if (transformStats.count <= 0) {
-    throw new Error(
-      `Unable to find transform status for [${transformId}] while attempting to start`
-    );
-  }
-  if (hasTransformStarted(transformStats.transforms[0])) {
-    return;
-  }
-
-  return esClient.transform.startTransform({ transform_id: transformId });
-};
-
 export const scheduleTransformNow = async ({
   esClient,
   transformId,
@@ -145,13 +128,44 @@ export const scheduleTransformNow = async ({
     );
   }
 
-  if (hasTransformStarted(transformStats.transforms[0])) {
-    await esClient.transform.scheduleNowTransform({
+  if (!hasTransformStarted(transformStats.transforms[0])) {
+    await esClient.transform.startTransform({
       transform_id: transformId,
     });
   } else {
-    await esClient.transform.startTransform({
+    await esClient.transform.scheduleNowTransform({
       transform_id: transformId,
+    });
+  }
+};
+
+const upgradeLatestTransformIfNeeded = async ({
+  esClient,
+  namespace,
+}: {
+  esClient: ElasticsearchClient;
+  namespace: string;
+}): Promise<TransformStartTransformResponse | void> => {
+  const transformId = getLatestTransformId(namespace);
+  const latestIndex = getRiskScoreLatestIndex(namespace);
+  const timeSeriesIndex = getRiskScoreTimeSeriesIndex(namespace);
+
+  const response = await esClient.transform.getTransform({
+    transform_id: transformId,
+  });
+
+  if (
+    response.transforms[0].sync?.time?.delay === '2s' ||
+    response.transforms[0].settings?.unattended === undefined
+  ) {
+    const { latest: _unused, ...newConfig } = getTransformOptions({
+      dest: latestIndex,
+      source: [timeSeriesIndex],
+    });
+
+    await esClient.transform.updateTransform({
+      transform_id: transformId,
+      ...newConfig,
     });
   }
 };
@@ -164,5 +178,7 @@ export const scheduleLatestTransformNow = async ({
   esClient: ElasticsearchClient;
 }): Promise<void> => {
   const transformId = getLatestTransformId(namespace);
+
+  await upgradeLatestTransformIfNeeded({ esClient, namespace });
   await scheduleTransformNow({ esClient, transformId });
 };

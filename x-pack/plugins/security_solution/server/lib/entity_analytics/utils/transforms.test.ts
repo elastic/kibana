@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  TransformGetTransformResponse,
+  TransformGetTransformStatsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { scheduleTransformNow } from './transforms';
+import { scheduleLatestTransformNow, scheduleTransformNow } from './transforms';
 
 const transformId = 'test_transform_id';
 
@@ -31,6 +34,20 @@ const stoppedTransformsMock = {
   ],
 } as TransformGetTransformStatsResponse;
 
+const outdatedTransformsMock = {
+  count: 1,
+  transforms: [
+    {
+      id: 'test_transform_id_3',
+      sync: {
+        time: {
+          delay: '2s',
+        },
+      },
+    },
+  ],
+} as TransformGetTransformResponse;
+
 describe('transforms utils', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -53,6 +70,18 @@ describe('transforms utils', () => {
       await scheduleTransformNow({ esClient, transformId });
 
       expect(esClient.transform.scheduleNowTransform).toHaveBeenCalled();
+    });
+  });
+
+  describe('scheduleLatestTransformNow', () => {
+    it('calls update the latest transform when scheduleTransformNow is called and the transform is outdated', async () => {
+      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValueOnce(stoppedTransformsMock);
+      esClient.transform.getTransform.mockResolvedValueOnce(outdatedTransformsMock);
+
+      await scheduleLatestTransformNow({ esClient, namespace: 'tests' });
+
+      expect(esClient.transform.updateTransform).toHaveBeenCalled();
     });
   });
 });
