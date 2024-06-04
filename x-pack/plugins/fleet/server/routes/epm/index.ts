@@ -86,6 +86,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get package categories`,
     })
     .addVersion(
       {
@@ -99,6 +100,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get list of packages`,
     })
     .addVersion(
       {
@@ -125,6 +127,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get limited package list`,
     })
     .addVersion(
       {
@@ -287,6 +290,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get a package signature verification key ID`,
     })
     .addVersion(
       {
@@ -313,6 +317,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: EPM_API_ROUTES.BULK_ASSETS_PATTERN,
       fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+      description: `Get bulk assets`,
     })
     .addVersion(
       {
