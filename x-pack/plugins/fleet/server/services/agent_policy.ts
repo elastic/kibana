@@ -351,6 +351,7 @@ class AgentPolicyService {
     await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
+      spaceId: soClient.getCurrentNamespace(),
     });
     logger.debug(`Created new agent policy with id ${newSo.id}`);
     return { id: newSo.id, ...newSo.attributes };
@@ -852,7 +853,10 @@ class AgentPolicyService {
     );
     await pMap(
       savedObjectsResults,
-      (policy) => this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id),
+      (policy) =>
+        this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
+          spaceId: policy.namespaces?.[0],
+        }),
       { concurrency: 50 }
     );
 
@@ -870,7 +874,7 @@ class AgentPolicyService {
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
-        fields: ['revision', 'data_output_id', 'monitoring_output_id'],
+        fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
         searchFields: ['data_output_id', 'monitoring_output_id'],
         search: escapeSearchQueryPhrase(outputId),
         perPage: SO_SEARCH_LIMIT,
@@ -974,7 +978,9 @@ class AgentPolicyService {
     }
 
     await soClient.delete(SAVED_OBJECT_TYPE, id);
-    await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id);
+    await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
+      spaceId: soClient.getCurrentNamespace(),
+    });
 
     // cleanup .fleet-policies docs on delete
     await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
@@ -1268,7 +1274,7 @@ class AgentPolicyService {
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
-        fields: ['revision', 'download_source_id'],
+        fields: ['revision', 'download_source_id', 'namespaces'],
         searchFields: ['download_source_id'],
         search: escapeSearchQueryPhrase(downloadSourceId),
         perPage: SO_SEARCH_LIMIT,
@@ -1293,7 +1299,7 @@ class AgentPolicyService {
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
-        fields: ['revision', 'fleet_server_host_id'],
+        fields: ['revision', 'fleet_server_host_id', 'namespaces'],
         searchFields: ['fleet_server_host_id'],
         search: escapeSearchQueryPhrase(fleetServerHostId),
         perPage: SO_SEARCH_LIMIT,
