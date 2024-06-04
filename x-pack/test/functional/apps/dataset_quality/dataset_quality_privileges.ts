@@ -41,6 +41,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
 
         await createDatasetQualityUserWithRole(security, 'dataset_quality_no_read', []);
+
+        // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
         await PageObjects.security.login(
           'dataset_quality_no_read',
@@ -55,6 +57,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       after(async () => {
         await synthtrace.clean();
+
+        // Cleanup the user and role
+        await PageObjects.security.forceLogout();
         await deleteDatasetQualityUserWithRole(security, 'dataset_quality_no_read');
       });
 
@@ -74,6 +79,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           { names: ['logs-synth*'], privileges: ['read'] }, // No monitor privilege
           { names: ['logs-apache*'], privileges: ['monitor'] },
         ]);
+
+        // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
         await PageObjects.security.login(
           'dataset_quality_limited_user',
@@ -85,6 +92,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       after(async () => {
+        // Cleanup the user and role
+        await PageObjects.security.forceLogout();
         await deleteDatasetQualityUserWithRole(security, 'dataset_quality_limited_user');
       });
 
