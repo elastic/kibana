@@ -374,7 +374,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   const { navNode } = useMemo(
     () =>
       serializeNavNode({
-        renderAs: 'accordion', // Top level nodes are always rendered as accordion
+        renderAs: _navNode.children ? 'accordion' : 'item', // Top level nodes are either item or accordion
         ..._navNode,
       }),
     [_navNode]
