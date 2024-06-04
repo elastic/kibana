@@ -71,9 +71,12 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
   }
 
   return (
-    <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+    <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
       <ObservabilityAnnotations annotations={annotations} />
       <Settings
+        theme={{
+          chartMargins: { top: 30 },
+        }}
         baseTheme={baseTheme}
         showLegend={false}
         noResults={

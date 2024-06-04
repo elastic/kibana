@@ -17,16 +17,10 @@ import {
   EuiFieldText,
   EuiSelectProps,
   EuiSelect,
-  EuiDatePicker,
-  EuiDatePickerProps,
 } from '@elastic/eui';
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>((props, ref) => (
   <EuiFieldText data-test-subj="o11yFieldTextFieldText" {...props} inputRef={ref} />
-));
-
-export const DatePicker = React.forwardRef<HTMLInputElement, EuiDatePickerProps>((props, ref) => (
-  <EuiDatePicker {...props} />
 ));
 
 export const TextArea = React.forwardRef<HTMLTextAreaElement, EuiTextAreaProps>((props, ref) => (

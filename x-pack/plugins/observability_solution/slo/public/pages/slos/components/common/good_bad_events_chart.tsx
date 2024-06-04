@@ -99,9 +99,12 @@ export function GoodBadEventsChart({
       {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
 
       {!isLoading && (
-        <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+        <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
           <ObservabilityAnnotations annotations={annotations} />
           <Settings
+            theme={{
+              chartMargins: { top: 30 },
+            }}
             baseTheme={baseTheme}
             showLegend={true}
             legendPosition={Position.Left}

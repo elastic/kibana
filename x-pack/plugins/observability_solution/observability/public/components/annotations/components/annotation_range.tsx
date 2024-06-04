@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFormControlLayout, EuiFormLabel } from '@elastic/eui';
+import { EuiFormRow, EuiFormControlLayout, EuiFormLabel, EuiDatePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import React, { useEffect } from 'react';
-import { DatePicker } from './forward_refs';
 
 export function AnnotationRange() {
   const { control, watch, setValue } = useFormContext();
@@ -54,7 +53,7 @@ export function AnnotationRange() {
               }}
               render={({ field }) => {
                 return (
-                  <DatePicker
+                  <EuiDatePicker
                     showTimeSelect
                     selected={field.value}
                     compressed
@@ -87,7 +86,7 @@ export function AnnotationRange() {
               }}
               render={({ field }) => {
                 return (
-                  <DatePicker
+                  <EuiDatePicker
                     showTimeSelect
                     selected={field.value}
                     compressed
@@ -118,7 +117,7 @@ export function AnnotationRange() {
         }}
         render={({ field }) => {
           return (
-            <DatePicker
+            <EuiDatePicker
               showTimeSelect
               selected={field.value}
               compressed
