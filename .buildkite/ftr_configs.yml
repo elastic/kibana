@@ -311,7 +311,6 @@ enabled:
   - x-pack/test/functional/apps/ml/short_tests/config.ts
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
-  - x-pack/test/functional/apps/navigation/config.ts
   - x-pack/test/functional/apps/observability_logs_explorer/config.ts
   - x-pack/test/functional/apps/dataset_quality/config.ts
   - x-pack/test/functional/apps/painless_lab/config.ts
@@ -325,7 +324,6 @@ enabled:
   - x-pack/test/functional/apps/search_playground/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
-  - x-pack/test/functional/apps/spaces/in_solution_navigation/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
@@ -368,6 +366,7 @@ enabled:
   - x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/saved_object_api_integration/spaces_only/config.ts
+  - x-pack/test/saved_object_api_integration/user_profiles/config.ts
   - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
