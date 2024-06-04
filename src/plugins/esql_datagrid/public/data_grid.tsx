@@ -11,11 +11,7 @@ import { zipObject } from 'lodash';
 import { UnifiedDataTable, DataLoadingState, type SortOrder } from '@kbn/unified-data-table';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
-import type {
-  DatatableColumn,
-  DatatableColumnMeta,
-  DatatableRow,
-} from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -94,9 +90,17 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, {} as DataTableColumnsMeta);
   }, [props.columns]);
 
-  const rows: DatatableRow[] = useMemo(() => {
+  const rows: DataTableRecord[] = useMemo(() => {
     const columnNames = props.columns?.map(({ name }) => name);
-    return props.rows.map((row) => zipObject(columnNames, row));
+    return props.rows
+      .map((row) => zipObject(columnNames, row))
+      .map((row, idx: number) => {
+        return {
+          id: String(idx),
+          raw: row,
+          flattened: row,
+        } as unknown as DataTableRecord;
+      });
   }, [props.columns, props.rows]);
 
   const services = useMemo(() => {
@@ -121,13 +125,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   return (
     <UnifiedDataTable
       columns={activeColumns}
-      rows={rows.map((row: Record<string, string>, idx: number) => {
-        return {
-          id: String(idx),
-          raw: row,
-          flattened: row,
-        } as unknown as DataTableRecord;
-      })}
+      rows={rows}
       columnsMeta={columnsMeta}
       services={services}
       isPlainRecord
