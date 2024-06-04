@@ -8,6 +8,7 @@
 
 import { Agent as HttpAgent, type AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
+import CacheableLookup from 'cacheable-lookup';
 import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
@@ -45,9 +46,11 @@ export interface AgentStatsProvider {
  **/
 export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private readonly agents: Set<HttpAgent>;
+  private readonly cacheableLookup: CacheableLookup;
 
   constructor(private readonly logger: Logger) {
     this.agents = new Set();
+    this.cacheableLookup = new CacheableLookup(); // Use DNS caching to avoid too many repetitive (and CPU-blocking) dns.lookup calls
   }
 
   public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
@@ -65,6 +68,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
           dereferenceOnDestroy(this.agents, httpsAgent);
         }
 
+        this.cacheableLookup.install(httpsAgent);
         return httpsAgent;
       }
 
@@ -74,6 +78,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         dereferenceOnDestroy(this.agents, httpAgent);
       }
 
+      this.cacheableLookup.install(httpAgent);
       return httpAgent;
     };
   }
