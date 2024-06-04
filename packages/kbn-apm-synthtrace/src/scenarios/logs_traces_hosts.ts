@@ -34,7 +34,9 @@ const DEFAULT_SCENARIO_OPTS = {
   numCustomFields: 50, // Number of custom field (e.g. `log.custom.field-1: "abc"`) per document
   customFieldPrefix: 'field', // Prefix for custom fields (e.g. `log.custom.field-1: "abc"`)
   logsInterval: '1m',
-  logsRate: 10,
+  logsRate: 1,
+  ingestHosts: true,
+  ingestTraces: true,
 };
 
 const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOptions) => {
@@ -51,47 +53,67 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         customFieldPrefix,
         logsInterval,
         logsRate,
+        ingestHosts,
+        ingestTraces,
       } = { ...DEFAULT_SCENARIO_OPTS, ...(runOptions.scenarioOpts || {}) };
       const { logger } = runOptions;
 
       killIfUnknownScenarioOptions(logger, runOptions.scenarioOpts || {});
 
-      // Hosts
+      // Infra Hosts
       const infraHosts = Array(numHosts)
         .fill(0)
         .map((_, idx) => infra.host(getRotatedItem(idx, HOSTS, numHosts)));
 
       const hosts = range
         .interval('1m')
-        .rate(10)
-        .generator((timestamp) =>
-          infraHosts.flatMap((host) => [
-            host.cpu().timestamp(timestamp),
-            host.memory().timestamp(timestamp),
-            host.network().timestamp(timestamp),
-            host.load().timestamp(timestamp),
-            host.filesystem().timestamp(timestamp),
-            host.diskio().timestamp(timestamp),
-          ])
-        );
+        .rate(1)
+        .generator((timestamp) => {
+          const agent = getRotatedItem(timestamp, AGENTS, numAgents);
+          const service = getRotatedItem(timestamp, SERVICE_NAMES, numServices);
 
-      // Metrics
-      const instances = [...Array(numServices).keys()].map((index) =>
-        apm
+          return infraHosts.flatMap((host) =>
+            [
+              host.cpu().timestamp(timestamp),
+              host.memory().timestamp(timestamp),
+              host.network().timestamp(timestamp),
+              host.load().timestamp(timestamp),
+              host.filesystem().timestamp(timestamp),
+              host.diskio().timestamp(timestamp),
+            ].map((metric) =>
+              metric.defaults({
+                'host.name': host.fields['host.name'],
+                'host.hostname': host.fields['host.name'],
+                'agent.id': agent.id,
+                'service.name': service,
+                'system.memory.actual.free': 500 + Math.floor(Math.random() * 500),
+                'system.memory.total': 1000,
+                'system.cpu.total.norm.pct': 0.5 + Math.random() * 0.25,
+              })
+            )
+          );
+        });
+
+      // APM Traces
+      const instances = [...Array(numServices).keys()].map((index) => {
+        const agent = getRotatedItem(index, AGENTS, numAgents);
+
+        return apm
           .service({
             name: getRotatedItem(index, SERVICE_NAMES, numServices),
             environment: ENVIRONMENT,
-            agentName: getRotatedItem(index, AGENT_NAMES, numAgents),
+            agentName: agent.name,
           })
-          .instance(getRotatedItem(index, HOSTS, numHosts))
-      );
+          .instance(getRotatedItem(index, HOSTS, numHosts));
+      });
       const instanceSpans = (instance: Instance) => {
         const successfulTraceEvents = range
-          .interval('20s')
-          .rate(20)
+          .interval('1m')
+          .rate(1)
           .generator((timestamp) => {
             const isError = Math.random() < 0.5;
             const cloudRegion = getRotatedItem(timestamp, CLOUD_REGION, 3);
+            const agent = getRotatedItem(timestamp, AGENTS, numAgents);
 
             const transaction = instance
               .transaction({ transactionName: getRotatedItem(timestamp, TRANSACTION_NAMES, 3) })
@@ -99,9 +121,9 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
               .duration(1000)
               .defaults({
                 'trace.id': `trace-id-${getTimestampBlock(timestamp, 3 * 60 * 1000)}`,
-                'transaction.id': `transaction-id-${getTimestampBlock(timestamp, 60 * 1000)}`,
-                'span.id': `span-id-${getTimestampBlock(timestamp, 30 * 1000)}`,
-                'agent.name': getRotatedItem(timestamp, AGENT_NAMES, numAgents),
+                'transaction.id': `transaction-id-${getTimestampBlock(timestamp, 2 * 60 * 1000)}`,
+                'span.id': `span-id-${getTimestampBlock(timestamp, 60 * 1000)}`,
+                'agent.name': agent.name,
                 'cloud.region': cloudRegion,
                 'cloud.provider': getRotatedItem(timestamp, CLOUD_PROVIDERS, 3),
                 'cloud.project.id': generateShortId(),
@@ -142,26 +164,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
             return transaction;
           });
 
-        const metricSets = range
-          .interval('1m')
-          .rate(1)
-          .generator((timestamp) =>
-            instance
-              .appMetrics({
-                'system.memory.actual.free': 800,
-                'system.memory.total': 1000,
-                'system.cpu.total.norm.pct': 0.6,
-                'system.process.cpu.total.norm.pct': 0.7,
-              })
-              .timestamp(timestamp)
-              .defaults({
-                'host.name': getRotatedItem(timestamp, HOSTS, numHosts),
-                'agent.name': getRotatedItem(timestamp, AGENT_NAMES, numAgents),
-                'service.name': getRotatedItem(timestamp, SERVICE_NAMES, numServices),
-              })
-          );
-
-        return [successfulTraceEvents, metricSets];
+        return [successfulTraceEvents];
       };
 
       // Logs
@@ -175,6 +178,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
           const dataset = getRotatedItem(timestamp, DATASETS, numDatasets);
           const space = getRotatedItem(timestamp, NAMESPACES, numSpaces);
           const hostName = getRotatedItem(timestamp, HOSTS, numHosts);
+          const agent = getRotatedItem(timestamp, AGENTS, numAgents);
           const service = getRotatedItem(timestamp, SERVICE_NAMES, numServices);
           const logLevel = getRotatedItem(timestamp, LOG_LEVELS, LOG_LEVELS.length);
           const message = `Log message for logs-${dataset}-${space}. logLevel: ${logLevel}. isMalformed: ${isMalformed}. dataset: ${dataset}. space: ${space}. cloudRegion: ${cloudRegion}.`;
@@ -191,8 +195,9 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
             .containerId(`container.${Math.random() > 0.5 ? 1 : 2}.${hostName}`)
             .defaults({
               'trace.id': `trace-id-${getTimestampBlock(timestamp, 3 * 60 * 1000)}`,
-              'transaction.id': `transaction-id-${getTimestampBlock(timestamp, 60 * 1000)}`,
-              'agent.name': getRotatedItem(timestamp, AGENT_NAMES, numAgents),
+              'transaction.id': `transaction-id-${getTimestampBlock(timestamp, 2 * 60 * 1000)}`,
+              'agent.id': agent.id,
+              'agent.name': agent.name,
               'container.id': generateShortId(),
               'orchestrator.cluster.name': getRotatedItem(timestamp, CLUSTERS, 3).clusterName,
               'orchestrator.cluster.id': getRotatedItem(timestamp, CLUSTERS, 3).clusterId,
@@ -211,16 +216,24 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         });
 
       return [
-        withClient(
-          infraEsClient,
-          logger.perf('generating_infra_hosts', () => hosts)
-        ),
-        withClient(
-          apmEsClient,
-          logger.perf('generating_apm_events', () =>
-            instances.flatMap((instance) => instanceSpans(instance))
-          )
-        ),
+        ...(ingestHosts
+          ? [
+              withClient(
+                infraEsClient,
+                logger.perf('generating_infra_hosts', () => hosts)
+              ),
+            ]
+          : []),
+        ...(ingestTraces
+          ? [
+              withClient(
+                apmEsClient,
+                logger.perf('generating_apm_events', () =>
+                  instances.flatMap((instance) => instanceSpans(instance))
+                )
+              ),
+            ]
+          : []),
         withClient(
           logsEsClient,
           logger.perf('generating_logs', () => logs)
@@ -310,14 +323,14 @@ function killIfUnknownScenarioOptions(logger: Logger, options: Record<string, un
 const NAMESPACES = ['default', 'space-01', 'space-02', 'space-03'];
 
 const SERVICE_NAMES = [
-  'synth-java',
-  'synth-dotnet',
   'frontend-rum',
   'azure-functions',
   'frontend',
   'checkout-service',
   'synth-go',
   'synth-node',
+  'synth-dotnet',
+  'synth-java',
   'productcatalogservice',
   'synth-rum',
   'auditbeat',
@@ -376,12 +389,16 @@ const CLUSTERS = [
 ];
 const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
 const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
-const AGENT_NAMES = [
-  'synth-agent',
-  'opbeans-java',
-  'opbeans-node',
-  'opbeans-python',
-  'opbeans-ruby',
+const AGENTS = [
+  { id: 'go-id', name: 'go' },
+  { id: 'rum-js-id', name: 'rum-js' },
+  { id: 'nodejs-id', name: 'nodejs' },
+  { id: 'opbeans-java-id', name: 'opbeans-java' },
+  { id: 'opbeans-node-id', name: 'opbeans-node' },
+  { id: 'opbeans-python-id', name: 'opbeans-python' },
+  { id: 'opbeans-ruby-id', name: 'opbeans-ruby' },
+  { id: 'opbeans-dotnet-id', name: 'opbeans-dotnet' },
+  { id: 'synth-agent-id', name: 'synth-agent' },
 ];
 
 const TRANSACTION_NAMES = ['GET /synth/customers', 'GET /synth/orders', 'GET /synth/articles'];

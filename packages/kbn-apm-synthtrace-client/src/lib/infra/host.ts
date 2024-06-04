@@ -16,6 +16,7 @@ interface HostDocument extends Fields {
   'host.name': string;
   'metricset.name'?: string;
   'event.module'?: string;
+  'service.name'?: string;
 }
 
 class Host extends Entity<HostDocument> {
