@@ -37,6 +37,7 @@ import {
   DashboardContainerInput,
   DashboardPanelMap,
   DashboardPanelState,
+  prefixReferencesFromPanel,
 } from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
@@ -431,6 +432,11 @@ export const initializeDashboard = async ({
               i: embeddableId,
             },
           };
+          if (incomingEmbeddable.references) {
+            container.savedObjectReferences.push(
+              ...prefixReferencesFromPanel(embeddableId, incomingEmbeddable.references)
+            );
+          }
           container.updateInput({
             panels: {
               ...container.getInput().panels,
