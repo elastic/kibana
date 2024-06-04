@@ -31,6 +31,7 @@ import { getVisualizationInstance } from '../get_visualization_instance';
 import { redirectToSavedObjectPage } from '../utils';
 
 /**
+ * @deprecated
  * This effect is responsible for instantiating a saved vis or creating a new one
  * using url parameters, embedding and destroying it in DOM
  */

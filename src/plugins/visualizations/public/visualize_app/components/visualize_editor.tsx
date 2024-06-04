@@ -15,7 +15,6 @@ import './visualize_editor.scss';
 import { Query } from '@kbn/es-query';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeConstants } from '../../../common/constants';
-import { VisualizeEditorInput } from '../../react_embeddable/types';
 import { VisualizeAppProps } from '../app';
 import { VisualizeServices } from '../types';
 import {
@@ -24,11 +23,11 @@ import {
   useEditorUpdates,
   useEmbeddableApiHandler,
   useLinkedSearchUpdates,
-  useSavedVisInstance,
   useVisualizeAppState,
 } from '../utils';
 import { useInitialVisState } from '../utils/use/use_initial_vis_state';
 import { VisualizeEditorCommon } from './visualize_editor_common';
+import { useVisEditorBreadcrumbs } from '../utils/use/use_vis_editor_breadcrumbs';
 
 const DefaultEditor = React.lazy(async () => ({
   default: (await import('@kbn/vis-default-editor-plugin/public')).DefaultEditor,
@@ -39,7 +38,6 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
-  const [embeddableInput, setEmbeddableInput] = useState<VisualizeEditorInput>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
@@ -60,7 +58,6 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       searchSessionId,
       embeddableId,
       originatingPath: pathValue,
-      valueInput: valueInputValue,
     } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
     if (searchSessionId) {
@@ -68,20 +65,11 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     } else {
       data.search.session.start();
     }
-    setEmbeddableInput(valueInputValue as VisualizeEditorInput | undefined);
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
     setOriginatingPath(pathValue);
   }, [services]);
-  const { VisEditor } = useSavedVisInstance(
-    services,
-    eventEmitter,
-    isChromeVisible,
-    embeddableApiHandler,
-    originatingApp,
-    visualizationIdFromUrl,
-    embeddableInput
-  );
+
   const savedVisInstance = useMemo(() => {
     if (!getVis || !serializeStateFn) return;
     return {
@@ -102,6 +90,12 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     queryString,
   } = services.data.query;
 
+  useVisEditorBreadcrumbs({
+    services,
+    originatingApp,
+    visTitle: savedVisInstance?.vis.title,
+  });
+
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
@@ -112,10 +106,8 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     eventEmitter,
     setHasUnsavedChanges,
     appState,
-    savedVisInstance,
-    VisEditor
+    savedVisInstance
   );
-  console.log('App state', currentAppState);
   const [initialState, references] = useInitialVisState({ visualizationIdFromUrl, services });
 
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
