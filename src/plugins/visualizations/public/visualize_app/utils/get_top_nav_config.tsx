@@ -128,25 +128,7 @@ export const getTopNavConfig = (
     ...startServices
   }: VisualizeServices
 ) => {
-  const { vis } = visInstance;
-  const serializedVis = serializeStateFn?.().rawState.savedVis ?? null;
-  const savedVis = serializedVis
-    ? {
-        id: serializedVis.id,
-        title: serializedVis.title,
-        description: serializedVis.description,
-        visState: {
-          type: serializedVis.type,
-          params: serializedVis.params,
-          aggs: serializedVis.data.aggs,
-          title: serializedVis.title,
-        },
-        savedSearchId: serializedVis.data.savedSearchId,
-        savedSearchRefName: String(serializedVis.data.savedSearchRefName),
-        searchSourceFields: serializedVis.data.searchSource,
-        uiStateJSON: vis.uiState.toString(),
-      }
-    : visInstance.savedVis;
+  const { vis, savedVis } = visInstance;
 
   /**
    * Called when the user clicks "Save" button.
@@ -154,7 +136,7 @@ export const getTopNavConfig = (
   async function doSave(
     saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
   ) {
-    if (!savedVis) return;
+    if (!serializeStateFn) return;
     const newlyCreated = !Boolean(savedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
@@ -163,11 +145,26 @@ export const getTopNavConfig = (
 
     setHasUnsavedChanges(false);
 
-    console.log('SAVED VIS', savedVis);
+    const visSavedObjectAttributes = {
+      ...savedVis,
+      id: savedVis.id ?? visualizationIdFromUrl,
+      title: savedVis.title,
+      description: savedVis.description,
+      visState: {
+        type: savedVis.type,
+        params: savedVis.params,
+        aggs: savedVis.data.aggs,
+        title: savedVis.title,
+      },
+      savedSearchId: savedVis.data.savedSearchId,
+      savedSearchRefName: String(savedVis.data.savedSearchRefName),
+      searchSourceFields: savedVis.data.searchSource,
+      uiStateJSON: vis.uiState.toString(),
+    };
 
     try {
       const id = await saveVisualization(
-        savedVis,
+        visSavedObjectAttributes,
         saveOptions,
         {
           savedObjectsTagging,
@@ -183,14 +180,14 @@ export const getTopNavConfig = (
             {
               defaultMessage: `Saved '{visTitle}'`,
               values: {
-                visTitle: savedVis.title,
+                visTitle: visSavedObjectAttributes.title,
               },
             }
           ),
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
-        chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
+        chrome.recentlyAccessed.add(getFullPath(id), visSavedObjectAttributes.title, String(id));
 
         if ((originatingApp && saveOptions.returnToOrigin) || saveOptions.dashboardId) {
           if (!embeddableId) {
@@ -274,7 +271,7 @@ export const getTopNavConfig = (
 
     const state = {
       input: {
-        savedVis: vis.serialize(),
+        savedVis,
       } as VisualizeSerializedState,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
@@ -291,11 +288,11 @@ export const getTopNavConfig = (
   };
 
   const saveButtonLabel =
-    !savedVis.id && originatingApp
+    !visInstance.savedVis.id && originatingApp
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
-      : originatingApp && savedVis.id
+      : originatingApp && visInstance.savedVis.id
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
@@ -448,7 +445,7 @@ export const getTopNavConfig = (
         }
       },
       // disable the Share button if no action specified and fot byValue visualizations
-      disableButton: !share || Boolean(!savedVis.id && originatingApp),
+      disableButton: !share || Boolean(!visInstance.savedVis.id && originatingApp),
     },
     ...(originatingApp
       ? [

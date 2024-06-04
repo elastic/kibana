@@ -20,17 +20,20 @@ export type NavigateToLensFn = (
   timefilter: TimefilterContract
 ) => Promise<NavigateToLensContext | undefined | null> | undefined;
 export type SerializeStateFn = () => SerializedPanelState<VisualizeSavedVisInputState>;
+export type GetVisFn = () => Vis;
 
 export interface EmbeddableApiHandler {
   openInspector: ReturnType<typeof useState<OpenInspectorFn>>;
   navigateToLens: ReturnType<typeof useState<NavigateToLensFn>>;
   serializeState: ReturnType<typeof useState<SerializeStateFn>>;
+  getVis: ReturnType<typeof useState<GetVisFn>>;
 }
 
 export const useEmbeddableApiHandler = () => {
   const openInspector = useState();
   const navigateToLens = useState();
   const serializeState = useState();
+  const getVis = useState();
 
-  return { openInspector, navigateToLens, serializeState } as EmbeddableApiHandler;
+  return { openInspector, navigateToLens, serializeState, getVis } as EmbeddableApiHandler;
 };

@@ -17,12 +17,12 @@ import {
   EditorRenderProps,
   EmbeddableApiHandler,
   SerializedVis,
-  Vis,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
 
 import { Reference } from '@kbn/content-management-utils';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   VisualizeApi,
   VisualizeSerializedState,
@@ -30,13 +30,10 @@ import {
 import { SerializeStateFn } from '@kbn/visualizations-plugin/public/visualize_app/utils/use/use_embeddable_api_handler';
 import { BehaviorSubject } from 'rxjs';
 import { DefaultEditorSideBar } from './components/sidebar';
-import { getInitialWidth } from './editor_size';
-import { SerializedTitles } from '@kbn/presentation-publishing';
 
 function DefaultEditor({
   core,
   data,
-  vis,
   initialState,
   uiState,
   timeRange,
@@ -66,6 +63,7 @@ function DefaultEditor({
   const [onUpdateVis, setOnUpdateVis] = useState<(serializedVis: SerializedVis) => void>(
     () => () => {}
   );
+  const [vis, setVis] = useState<SerializedVis | undefined>(undefined);
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed((value) => !value);
@@ -92,7 +90,7 @@ function DefaultEditor({
     parentApi.dataView$.next(dataView);
   }, [parentApi, dataView]);
 
-  const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
+  const editorInitialWidth = 30; //getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
     <EuiErrorBoundary>
@@ -123,22 +121,28 @@ function DefaultEditor({
                   }),
                 })}
                 onApiAvailable={(api) => {
-                  console.log('ON API AVAILABLE');
+                  const {
+                    openInspector: [, setOpenInspector],
+                    navigateToLens: [, setNavigateToLens],
+                    serializeState: [, setSerializeState],
+                    getVis: [, setGetVis],
+                  } = embeddableApiHandler;
+                  setSerializeState(() => api.serializeState as SerializeStateFn);
+                  setGetVis(() => api.getVis);
+                  setOnUpdateVis(() => api.updateVis);
+                  setTitles(api.getTitles());
+
+                  setVis(api.getVis());
+
                   api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
                   api.subscribeToHasInspector((hasInspector) => {
                     if (!hasInspector) return;
-                    const [, setOpenInspector] = embeddableApiHandler.openInspector;
                     setOpenInspector(() => api.openInspector);
                   });
                   api.subscribeToNavigateToLens((navigateToLens) => {
                     if (!navigateToLens) return;
-                    const [, setNavigateToLens] = embeddableApiHandler.navigateToLens;
                     setNavigateToLens(() => navigateToLens);
                   });
-                  setOnUpdateVis(() => api.updateVis);
-                  const [, setSerializeState] = embeddableApiHandler.serializeState;
-                  setSerializeState(() => api.serializeState as SerializeStateFn);
-                  setTitles(api.getTitles());
                 }}
               />
             </EuiResizablePanel>
@@ -158,17 +162,19 @@ function DefaultEditor({
                 }`,
               }}
             >
-              <DefaultEditorSideBar
-                isCollapsed={isCollapsed}
-                onClickCollapse={onClickCollapse}
-                onUpdateVis={onUpdateVis}
-                vis={vis}
-                uiState={uiState}
-                isLinkedSearch={linked}
-                savedSearch={savedSearch}
-                timeRange={timeRange}
-                eventEmitter={eventEmitter}
-              />
+              {vis && (
+                <DefaultEditorSideBar
+                  isCollapsed={isCollapsed}
+                  onClickCollapse={onClickCollapse}
+                  onUpdateVis={onUpdateVis}
+                  vis={vis}
+                  uiState={uiState}
+                  isLinkedSearch={linked}
+                  savedSearch={savedSearch}
+                  timeRange={timeRange}
+                  eventEmitter={eventEmitter}
+                />
+              )}
             </EuiResizablePanel>
           </>
         )}

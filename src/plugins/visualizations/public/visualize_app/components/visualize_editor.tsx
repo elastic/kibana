@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import './visualize_editor.scss';
-import React, { Suspense, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
+import { EventEmitter } from 'events';
+import React, { Suspense, useEffect, useState, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import './visualize_editor.scss';
 
+import { Query } from '@kbn/es-query';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  useChromeVisibility,
-  useSavedVisInstance,
-  useVisualizeAppState,
-  useEditorUpdates,
-  useLinkedSearchUpdates,
-  useDataViewUpdates,
-  useEmbeddableApiHandler,
-} from '../utils';
-import { VisualizeServices } from '../types';
-import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeAppProps } from '../app';
 import { VisualizeConstants } from '../../../common/constants';
 import { VisualizeEditorInput } from '../../react_embeddable/types';
+import { VisualizeAppProps } from '../app';
+import { VisualizeServices } from '../types';
+import {
+  useChromeVisibility,
+  useDataViewUpdates,
+  useEditorUpdates,
+  useEmbeddableApiHandler,
+  useLinkedSearchUpdates,
+  useSavedVisInstance,
+  useVisualizeAppState,
+} from '../utils';
 import { useInitialVisState } from '../utils/use/use_initial_vis_state';
-import { Query } from '@kbn/es-query';
+import { VisualizeEditorCommon } from './visualize_editor_common';
 
 const DefaultEditor = React.lazy(async () => ({
   default: (await import('@kbn/vis-default-editor-plugin/public')).DefaultEditor,
@@ -45,9 +45,12 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
   const embeddableApiHandler = useEmbeddableApiHandler();
-  const [openInspectorFn] = embeddableApiHandler.openInspector;
-  const [navigateToLensFn] = embeddableApiHandler.navigateToLens;
-  const [serializeStateFn] = embeddableApiHandler.serializeState;
+  const {
+    openInspector: [openInspectorFn],
+    navigateToLens: [navigateToLensFn],
+    serializeState: [serializeStateFn],
+    getVis: [getVis],
+  } = embeddableApiHandler;
 
   const isChromeVisible = useChromeVisibility(services.chrome);
   useEffect(() => {
@@ -70,7 +73,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     setOriginatingApp(value);
     setOriginatingPath(pathValue);
   }, [services]);
-  const { savedVisInstance, visEditorRef, VisEditor } = useSavedVisInstance(
+  const { VisEditor } = useSavedVisInstance(
     services,
     eventEmitter,
     isChromeVisible,
@@ -79,6 +82,13 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     visualizationIdFromUrl,
     embeddableInput
   );
+  const savedVisInstance = useMemo(() => {
+    if (!getVis || !serializeStateFn) return;
+    return {
+      vis: getVis?.(),
+      savedVis: serializeStateFn?.(),
+    };
+  }, [getVis, serializeStateFn]);
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
   useExecutionContext(services.executionContext, {
     type: 'application',
@@ -139,36 +149,33 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       navigateToLensFn={navigateToLensFn}
       serializeStateFn={serializeStateFn}
     >
-      {savedVisInstance && (
-        <EuiErrorBoundary>
-          <Suspense
-            fallback={
-              <div
-                style={{
-                  display: 'flex',
-                  flex: '1 1 auto',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <EuiLoadingChart size="xl" mono />
-              </div>
-            }
-          >
-            <DefaultEditor
-              vis={savedVisInstance.vis}
-              initialState={initialState}
-              references={references}
-              embeddableApiHandler={embeddableApiHandler}
-              eventEmitter={eventEmitter}
-              timeRange={timefilter.getTime()}
-              filters={filterManager.getFilters()}
-              query={queryString.getQuery() as Query}
-              dataView={currentAppState?.dataView}
-            />
-          </Suspense>
-        </EuiErrorBoundary>
-      )}
+      <EuiErrorBoundary>
+        <Suspense
+          fallback={
+            <div
+              style={{
+                display: 'flex',
+                flex: '1 1 auto',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <EuiLoadingChart size="xl" mono />
+            </div>
+          }
+        >
+          <DefaultEditor
+            initialState={initialState}
+            references={references}
+            embeddableApiHandler={embeddableApiHandler}
+            eventEmitter={eventEmitter}
+            timeRange={timefilter.getTime()}
+            filters={filterManager.getFilters()}
+            query={queryString.getQuery() as Query}
+            dataView={currentAppState?.dataView}
+          />
+        </Suspense>
+      </EuiErrorBoundary>
     </VisualizeEditorCommon>
   );
 };

@@ -161,17 +161,17 @@ export const useSavedVisInstance = (
           VisEditor,
         });
       } catch (error) {
-        try {
-          redirectToSavedObjectPage(services, error, visualizationIdFromUrl);
-        } catch (e) {
-          toastNotifications.addWarning({
-            title: i18n.translate('visualizations.createVisualization.failedToLoadErrorMessage', {
-              defaultMessage: 'Failed to load the visualization',
-            }),
-            text: e.message,
-          });
-          history.replace(VisualizeConstants.LANDING_PAGE_PATH);
-        }
+        // try {
+        //   redirectToSavedObjectPage(services, error, visualizationIdFromUrl);
+        // } catch (e) {
+        //   toastNotifications.addWarning({
+        //     title: i18n.translate('visualizations.createVisualization.failedToLoadErrorMessage', {
+        //       defaultMessage: 'Failed to load the visualization',
+        //     }),
+        //     text: e.message,
+        //   });
+        //   history.replace(VisualizeConstants.LANDING_PAGE_PATH);
+        // }
       }
     };
 
