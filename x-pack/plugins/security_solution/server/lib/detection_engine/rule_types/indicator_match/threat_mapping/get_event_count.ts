@@ -39,7 +39,7 @@ export const getEventList = async ({
     `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
-  const queryFilter = getQueryFilter(
+  const queryFilter = await getQueryFilter(
     {
       query,
       language: language ?? 'kuery',
@@ -83,7 +83,7 @@ export const getEventCount = async ({
   secondaryTimestamp,
   exceptionFilter,
 }: EventCountOptions): Promise<number> => {
-  const queryFilter = getQueryFilter(
+  const queryFilter = await getQueryFilter(
     {
       query,
       language: language ?? 'kuery',

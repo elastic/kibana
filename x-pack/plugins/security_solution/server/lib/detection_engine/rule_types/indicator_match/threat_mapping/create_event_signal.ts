@@ -93,6 +93,7 @@ export const createEventSignal = async ({
       listClient,
       exceptionFilter,
       indexFields: threatIndexFields,
+      dataViews: services.dataViews,
     };
 
     let signalsQueryMap;

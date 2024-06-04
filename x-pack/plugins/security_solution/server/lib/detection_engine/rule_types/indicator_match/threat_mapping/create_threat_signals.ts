@@ -148,7 +148,7 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
     exceptionFilter,
-    indexFields: threatIndexFields,
+    dataViews: services.dataViews,
   });
 
   ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
@@ -388,7 +388,7 @@ export const createThreatSignals = async ({
           runtimeMappings,
           listClient,
           exceptionFilter,
-          indexFields: threatIndexFields,
+          dataViews: services.dataViews,
         }),
 
       createSignal: (slicedChunk) =>

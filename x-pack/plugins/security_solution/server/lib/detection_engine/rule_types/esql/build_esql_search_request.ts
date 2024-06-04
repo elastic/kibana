@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   RuleFilterArray,
   TimestampOverride,
@@ -23,9 +24,10 @@ export interface BuildEqlSearchRequestParams {
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverride | undefined;
   exceptionFilter: Filter | undefined;
+  dataViews: DataViewsContract;
 }
 
-export const buildEsqlSearchRequest = ({
+export const buildEsqlSearchRequest = async ({
   query,
   from,
   to,
@@ -34,14 +36,18 @@ export const buildEsqlSearchRequest = ({
   secondaryTimestamp,
   exceptionFilter,
   size,
+  dataViews,
 }: BuildEqlSearchRequestParams) => {
-  const esFilter = getQueryFilter({
-    query: '',
-    language: 'esql',
-    filters: filters || [],
-    index: undefined,
-    exceptionFilter,
-  });
+  const esFilter = await getQueryFilter(
+    {
+      query: '',
+      language: 'esql',
+      filters: filters || [],
+      index: undefined,
+      exceptionFilter,
+    },
+    dataViews
+  );
 
   const rangeFilter = buildTimeRangeFilter({
     to,

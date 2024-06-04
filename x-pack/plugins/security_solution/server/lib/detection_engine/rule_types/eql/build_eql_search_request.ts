@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   RuleFilterArray,
   TimestampOverride,
@@ -29,9 +30,10 @@ interface BuildEqlSearchRequestParams {
   timestampField?: string;
   tiebreakerField?: string;
   exceptionFilter: Filter | undefined;
+  dataViews: DataViewsContract;
 }
 
-export const buildEqlSearchRequest = ({
+export const buildEqlSearchRequest = async ({
   query,
   index,
   from,
@@ -45,7 +47,8 @@ export const buildEqlSearchRequest = ({
   timestampField,
   tiebreakerField,
   exceptionFilter,
-}: BuildEqlSearchRequestParams): estypes.EqlSearchRequest => {
+  dataViews,
+}: BuildEqlSearchRequestParams): Promise<estypes.EqlSearchRequest> => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
@@ -54,13 +57,16 @@ export const buildEqlSearchRequest = ({
     format: 'strict_date_optional_time',
   }));
 
-  const esFilter = getQueryFilter({
-    query: '',
-    language: 'eql',
-    filters: filters || [],
-    index,
-    exceptionFilter,
-  });
+  const esFilter = await getQueryFilter(
+    {
+      query: '',
+      language: 'eql',
+      filters: filters || [],
+      index,
+      exceptionFilter,
+    },
+    dataViews
+  );
 
   const rangeFilter = buildTimeRangeFilter({
     to,

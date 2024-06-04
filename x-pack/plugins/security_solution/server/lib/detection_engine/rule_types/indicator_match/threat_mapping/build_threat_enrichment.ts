@@ -58,6 +58,7 @@ export const buildThreatEnrichment = ({
       listClient,
       exceptionFilter,
       indexFields: threatIndexFields,
+      dataViews: services.dataViews,
     };
 
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({

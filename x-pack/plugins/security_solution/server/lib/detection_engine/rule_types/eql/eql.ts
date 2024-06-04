@@ -93,7 +93,7 @@ export const eqlExecutor = async ({
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
-    const request = buildEqlSearchRequest({
+    const request = await buildEqlSearchRequest({
       query: ruleParams.query,
       index: inputIndex,
       from: tuple.from.toISOString(),
@@ -107,6 +107,7 @@ export const eqlExecutor = async ({
       timestampField: ruleParams.timestampField,
       tiebreakerField: ruleParams.tiebreakerField,
       exceptionFilter,
+      dataViews: services.dataViews,
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);

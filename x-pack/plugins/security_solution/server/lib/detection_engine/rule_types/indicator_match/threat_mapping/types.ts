@@ -227,6 +227,7 @@ interface ThreatListConfig {
 
 export interface GetThreatListOptions {
   esClient: ElasticsearchClient;
+  dataViews: DataViewsContract;
   index: string[];
   language: ThreatLanguageOrUndefined;
   perPage?: number;
@@ -240,7 +241,6 @@ export interface GetThreatListOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   listClient: ListClient;
   exceptionFilter: Filter | undefined;
-  indexFields: DataViewFieldBase[];
 }
 
 export interface ThreatListCountOptions {
@@ -250,7 +250,7 @@ export interface ThreatListCountOptions {
   query: string;
   threatFilters: unknown[];
   exceptionFilter: Filter | undefined;
-  indexFields: DataViewFieldBase[];
+  dataViews: DataViewsContract;
 }
 
 export interface ThreatListDoc {

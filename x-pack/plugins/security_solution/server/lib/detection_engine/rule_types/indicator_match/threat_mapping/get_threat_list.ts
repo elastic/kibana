@@ -34,20 +34,22 @@ export const getThreatList = async ({
   runtimeMappings,
   listClient,
   exceptionFilter,
-  indexFields,
+  dataViews,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  const queryFilter = getQueryFilter({
-    query,
-    language: language ?? 'kuery',
-    filters: threatFilters,
-    index,
-    exceptionFilter,
-    fields: indexFields,
-  });
+  const queryFilter = await getQueryFilter(
+    {
+      query,
+      language: language ?? 'kuery',
+      filters: threatFilters,
+      index,
+      exceptionFilter,
+    },
+    dataViews
+  );
 
   ruleExecutionLogger.debug(
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
@@ -98,16 +100,18 @@ export const getThreatListCount = async ({
   threatFilters,
   index,
   exceptionFilter,
-  indexFields,
+  dataViews,
 }: ThreatListCountOptions): Promise<number> => {
-  const queryFilter = getQueryFilter({
-    query,
-    language: language ?? 'kuery',
-    filters: threatFilters,
-    index,
-    exceptionFilter,
-    fields: indexFields,
-  });
+  const queryFilter = await getQueryFilter(
+    {
+      query,
+      language: language ?? 'kuery',
+      filters: threatFilters,
+      index,
+      exceptionFilter,
+    },
+    dataViews
+  );
   const response = await esClient.count({
     body: {
       query: queryFilter,
