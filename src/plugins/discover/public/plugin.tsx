@@ -64,6 +64,7 @@ import {
 import { createProfileProviderServices } from './context_awareness/profiles/profile_provider_services';
 import { createLogsDataSourceProfileProvider } from './context_awareness/profile_providers/logs_data_source_profile/profile';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
+import { createLogDocumentProfileProvider } from './context_awareness/profile_providers/log_document_profile/profile';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -271,7 +272,7 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    this.registerProfiles(core, plugins);
+    this.registerProfiles();
 
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
 
@@ -305,15 +306,14 @@ export class DiscoverPlugin
     }
   }
 
-  private registerProfiles(core: CoreStart, plugins: DiscoverStartPlugins) {
-    const providerServices = createProfileProviderServices(core, plugins);
-
-    this.rootProfileService.registerProvider(o11yRootProfileProvider);
-    this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
-    this.documentProfileService.registerProvider(logDocumentProfileProvider);
+  private registerProfiles() {
+    const providerServices = createProfileProviderServices();
 
     this.dataSourceProfileService.registerProvider(
       createLogsDataSourceProfileProvider(providerServices)
+    );
+    this.documentProfileService.registerProvider(
+      createLogDocumentProfileProvider(providerServices)
     );
   }
 

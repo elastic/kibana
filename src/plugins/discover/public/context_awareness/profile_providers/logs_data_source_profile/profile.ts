@@ -24,18 +24,14 @@ export const createLogsDataSourceProfileProvider = (
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 
-    if (!indexPattern) {
+    if (!services.logsContextService.isLogsIndexPattern(indexPattern)) {
       return { isMatch: false };
     }
 
-    if (services.contextAwareness.isLogsIndexPattern(indexPattern)) {
-      return {
-        isMatch: true,
-        context: { category: DataSourceCategory.Logs },
-      };
-    }
-
-    return { isMatch: false };
+    return {
+      isMatch: true,
+      context: { category: DataSourceCategory.Logs },
+    };
   },
 });
 

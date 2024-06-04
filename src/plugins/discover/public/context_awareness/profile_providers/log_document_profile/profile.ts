@@ -6,22 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { createRegExpPatternFrom } from '@kbn/data-view-utils';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType } from '../../profiles';
+import { ProfileProviderServices } from '../../profiles/profile_provider_services';
 
-export const ALLOWED_LOG_DOCUMENT_INDICES = createRegExpPatternFrom([
-  'logs',
-  'auditbeat',
-  'filebeat',
-  'winlogbeat',
-]);
-
-export const logDocumentProfileProvider: DocumentProfileProvider = {
+export const createLogDocumentProfileProvider = (
+  services: ProfileProviderServices
+): DocumentProfileProvider => ({
   profileId: 'log-document-profile',
   profile: {},
   resolve: ({ record }) => {
-    const isLogRecord = getIsLogRecord(record);
+    const isLogRecord = getIsLogRecord(record, services.logsContextService.isLogsIndexPattern);
 
     if (!isLogRecord) {
       return { isMatch: false };
@@ -34,15 +29,16 @@ export const logDocumentProfileProvider: DocumentProfileProvider = {
       },
     };
   },
-};
+});
 
-const getIsLogRecord = (record: DataTableRecord) => {
+const getIsLogRecord = (
+  record: DataTableRecord,
+  isLogsIndexPattern: ProfileProviderServices['logsContextService']['isLogsIndexPattern']
+) => {
   return (
     getDataStreamType(record).includes('logs') ||
     hasFieldsWithPrefix('log.')(record) ||
-    getIndices(record).some(
-      (index) => typeof index === 'string' && ALLOWED_LOG_DOCUMENT_INDICES.test(index)
-    )
+    getIndices(record).some(isLogsIndexPattern)
   );
 };
 

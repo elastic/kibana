@@ -8,9 +8,13 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocumentType } from '../../profiles';
-import { logDocumentProfileProvider } from './profile';
+import { createContextAwarenessMocks } from '../../__mocks__';
+import { createLogDocumentProfileProvider } from './profile';
+
+const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
+  const logDocumentProfileProvider = createLogDocumentProfileProvider(mockServices);
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: {
