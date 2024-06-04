@@ -817,7 +817,6 @@ describe('Task Runner', () => {
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
-        notifyOnActionGroupChange: false,
         alertDelay: 0,
         flappingSettings: {
           enabled: true,
