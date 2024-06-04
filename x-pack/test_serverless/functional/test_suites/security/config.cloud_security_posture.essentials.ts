@@ -21,6 +21,6 @@ export default createTestConfig({
       { product_line: 'cloud', product_tier: 'essentials' },
     ])}`,
   ],
-  // load tests in the index file
+  // we should only resolve files which are ending with `.essentials.ts`
   testFiles: [require.resolve('./ftr/cloud_security_posture/csp_integrations_form.essentials.ts')],
 });

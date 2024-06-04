@@ -13,7 +13,6 @@ export default function (providerContext: FtrProviderContext) {
   const pageObjects = getPageObjects(['cisAddIntegration', 'header', 'svlCommonPage']);
 
   describe('[Essentials PLI] Test Cloud Security Posture Integrations on Serverless', function () {
-    this.tags(['essentials']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
@@ -27,9 +26,9 @@ export default function (providerContext: FtrProviderContext) {
 
     it('[Essentials PLI] Integration installation form should be available with Essentials or Complete PLI', async () => {
       pageObjects.header.waitUntilLoadingHasFinished();
-      const pliBlock = await cisIntegration.getIntegrationPliAuthBlock();
+      const pliBlockExists = await cisIntegration.checkIntegrationPliAuthBlockExists();
 
-      expect(pliBlock).to.be(false);
+      expect(pliBlockExists).to.be(false);
     });
   });
 }

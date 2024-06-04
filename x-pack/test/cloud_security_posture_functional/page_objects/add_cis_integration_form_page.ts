@@ -201,7 +201,7 @@ export function AddCisIntegrationFormPageProvider({
     return await testSubjects.find('confirmModalTitleText');
   };
 
-  const getIntegrationPliAuthBlock = async () => {
+  const checkIntegrationPliAuthBlockExists = async () => {
     return await testSubjects.exists('cloud-security-posture-integration-pli-auth-block');
   };
 
@@ -286,6 +286,6 @@ export function AddCisIntegrationFormPageProvider({
     selectValue,
     getValueInEditPage,
     isOptionChecked,
-    getIntegrationPliAuthBlock,
+    checkIntegrationPliAuthBlockExists,
   };
 }
