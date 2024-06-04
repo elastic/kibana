@@ -169,4 +169,8 @@ export interface FieldStatisticsTableProps {
    * Additional field groups (e.g. Smart Fields)
    */
   additionalFieldGroups?: AdditionalFieldGroups;
+  /**
+   * If table should query using ES|QL
+   */
+  isEsqlMode?: boolean;
 }
