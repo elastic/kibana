@@ -30,7 +30,7 @@ information. What sort of information is considered sensitive? Here is a non-inc
 
 - Credentials: usernames, passwords, API keys, access keys
 - Personally identifiable information (PII): social security numbers or equivalent, back routing numbers, credit card numbers
-- Other sensative information: private endpoints, secrets, etc.
+- Other sensitive information: private endpoints, secrets, etc.
 
 When in doubt, consult with the Kibana Security team (Application Experience/Platform Services/Security).
 
@@ -64,12 +64,13 @@ consumer. As the `dangerouslyExposeValue` name implies, the decision to expose d
 
 AAD, or Additional Authenticated Data, is part of an "Authenticated Encryption" schema. AAD is an unencrypted string that is used during encryption and decryption
 operations in addition to the supplied encryption key, to protect access to encrypted values. If AAD is used during encryption, it must be provided during decryption,
-and must be an exact match to the AAD value used during encryption, otherwise decryption will fail. Typically, AAD comprises data that could only be accessed by an
-authenticated user and either never changes, or would only potentially change when encrypted values change.
+and must be an exact match to the AAD value used during encryption, otherwise decryption will fail. In this way, AAD is bound to any encrypted data. Typically, AAD
+comprises data that could only be accessed by an authenticated user and either never changes, or only potentially changes when encrypted data changes.
 
 For ESOs, AAD is constructed of key-value pairs composed of the Saved Object Descriptor and any attributes included in `attributesToIncludeInAAD` when the ESO is
 registered. The Saved Object Descriptor consists of the object type, ID, and, if applicable, namespace (or space ID). The descriptor for space-agnostic types
-(`namespaceType: 'agnostic'`), and multi-namespace types (`namespaceType: 'multiple-isolated'` and `namespaceType: 'multiple'`), will not include a namespace.
+(`namespaceType: 'agnostic'`), and multi-namespace types (`namespaceType: 'multiple-isolated'` and `namespaceType: 'multiple'`), will not include a namespace. Thus,
+the Saved Object Descriptor for an Saved Object never changes.
 
 ```ts
   export interface SavedObjectDescriptor {
@@ -80,29 +81,31 @@ registered. The Saved Object Descriptor consists of the object type, ID, and, if
 ```
 
 Any time an ESO's AAD changes (when any attribute that is included in AAD changes), all encrypted attributes of that ESO must be re-encrypted to account for the new AAD.
+This is one reason why it is important to carefully consider whether an attribute should be included in AAD. More on this below in
+<DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="what-attributes-should-be-included-in-aad" text="What attributes should be included in AAD"/>
 
 #### Nested attributes
 
 When an attribute is included in AAD, all of its properties, or subfields, are inherently included in AAD. When AAD is constructed as key-value pairs, the nested
 properties of an attribute are all included in its value. In this way, AAD inclusion is hierarchical.
 
-#### What attributes should be included in AAD?
+#### What attributes should be included in AAD
 
 Determining which attributes to include in AAD is not an exact science, however there are some basic guidelines.
 
 Good candidates for attributes to INCLUDE in AAD are attributes that...
-- are always populated with a value
-- have a value that will never change once an object is created
-- have a value that only changes when one or more encrypted attributes change
+- have some association or relationship with an encrypted attribute (e.g. a configuration element of an ESO that reflects the shape of the encrypted data, the token type of a connector, the URL or TLS certificate for a monitor)
+- have a value that will never change once an object is created (e.g the created date or created by user, the type of action or connector)
 
 Good candidates for attributes to EXCLUDE from AAD are attributes that...
 
-- the value of can be changed by an end user, or other means, independently of any encrypted attributes
-- may or may not be present or populated
-- may be removed from the object or refactored in the future
+- the value of can be changed by an end user, and is meant to be updated seperately from encrypted data, and has no association to any of the encrypted or AAD attributes (e.g. the name or UI properties of an object, the email title for an action or alert)
+- may not be present or populated, or populated algorithmically (e.g. any optional attributes, or calculated attributes like statistics or last updated time)
+- may be removed from the object or refactored in the future (e.g. deprecated or soon-to-be deprecated attributes, experimental attributes)
+- contain a large amount of data that can significantly slow down encryption and decryption, especially during bulk operations (e.g. large geo shape, arbitrary HTML document or image data)
 
-There are additional considerations to make due to how version upgrades work in Serverless. These are covered in more detail in [ToDo: doc link here], but the
-basics are:
+There are additional considerations to make due to how version upgrades work in Serverless. These are covered in more detail in the
+<DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="serverless-considerations" text="Serverless Considerations"/> section, but the basics are:
 
 - An attribute cannot be removed from AAD once it is included, unless it can be altogether removed from the object type, or refactored with a new name.
 - An existing attribute cannot be added to AAD if it was not included in AAD when it was first defined and has already been populated.
@@ -181,6 +184,7 @@ the current and previous version of Kibana. Some of the advice here is applicabl
 | Modify an attribute (add or remove subfield) | Yes        | N/A     | Implement a Model Version and wrap it in a call to `createModelVersion`. Implement Model Version changes as needed. Even though AAD is unaffected, the objects will require decryption and re-encryption to be modified. If the previous version of Kibana will not be able to tolerate the attribute changes, this will require 2 Serverless release stages. `Release 1`: update all business logic to handle this type with the modified attribute. `Release 2`: implement a Model Version as described.                                                                                                                                                                                               |
 | Change an existing attribute to be encrypted | No->Yes    | No/Yes  | This is not currently supported. The previous version of Kibana will not decrypt this attribute, and any business logic that utilizes the attribute will fail.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Remove an attribute from the encrypted list  | Yes->No    | No      | This is not currently supported. The previous version of Kibana will always attempt to decrypt the attribute.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Remove an attribute from AAD inclusion       | No         | Yes->No | This is not currently supported. The previous version of Kibana will always use the attribute to construct AAD.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ## Making Changes
 
