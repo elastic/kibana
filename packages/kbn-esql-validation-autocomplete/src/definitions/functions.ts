@@ -667,7 +667,7 @@ const greatestDefinition: FunctionDefinition = {
   name: 'greatest',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.greatest', {
     defaultMessage:
-      'Returns the maximum value from multiple columns. This is similar to <<esql-mv_max>>\nexcept it is intended to run on multiple columns at once.',
+      'Returns the maximum value from multiple columns. This is similar to `MV_MAX`\nexcept it is intended to run on multiple columns at once.',
   }),
   alias: undefined,
   signatures: [
@@ -833,7 +833,7 @@ const leastDefinition: FunctionDefinition = {
   name: 'least',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.least', {
     defaultMessage:
-      'Returns the minimum value from multiple columns. This is similar to <<esql-mv_min>> except it is intended to run on multiple columns at once.',
+      'Returns the minimum value from multiple columns. This is similar to `MV_MIN` except it is intended to run on multiple columns at once.',
   }),
   alias: undefined,
   signatures: [
@@ -1670,7 +1670,7 @@ const mvFirstDefinition: FunctionDefinition = {
   name: 'mv_first',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_first', {
     defaultMessage:
-      "Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like <<esql-split>>.\n\nThe order that <<esql-multivalued-fields, multivalued fields>> are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the minimum value use <<esql-mv_min>> instead of\n`MV_FIRST`. `MV_MIN` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_FIRST`.",
+      "Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like `SPLIT`.\n\nThe order that  multivalued fields are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the minimum value use `MV_MIN` instead of\n`MV_FIRST`. `MV_MIN` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_FIRST`.",
   }),
   alias: undefined,
   signatures: [
@@ -1786,7 +1786,7 @@ const mvLastDefinition: FunctionDefinition = {
   name: 'mv_last',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_last', {
     defaultMessage:
-      "Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like <<esql-split>>.\n\nThe order that <<esql-multivalued-fields, multivalued fields>> are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the maximum value use <<esql-mv_max>> instead of\n`MV_LAST`. `MV_MAX` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_LAST`.",
+      "Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like `SPLIT`.\n\nThe order that  multivalued fields are read from\nunderlying storage is not guaranteed. It is *frequently* ascending, but don't\nrely on that. If you need the maximum value use `MV_MAX` instead of\n`MV_LAST`. `MV_MAX` has optimizations for sorted values so there isn't a\nperformance benefit to `MV_LAST`.",
   }),
   alias: undefined,
   signatures: [
@@ -2825,7 +2825,7 @@ const stContainsDefinition: FunctionDefinition = {
   name: 'st_contains',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_contains', {
     defaultMessage:
-      'Returns whether the first geometry contains the second geometry.\nThis is the inverse of the <<esql-st_within,ST_WITHIN>> function.',
+      'Returns whether the first geometry contains the second geometry.\nThis is the inverse of the `ST_WITHIN` function.',
   }),
   alias: undefined,
   signatures: [
@@ -2963,7 +2963,7 @@ const stDisjointDefinition: FunctionDefinition = {
   name: 'st_disjoint',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_disjoint', {
     defaultMessage:
-      'Returns whether the two geometries or geometry columns are disjoint.\nThis is the inverse of the <<esql-st_intersects,ST_INTERSECTS>> function.\nIn mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅',
+      'Returns whether the two geometries or geometry columns are disjoint.\nThis is the inverse of the `ST_INTERSECTS` function.\nIn mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅',
   }),
   alias: undefined,
   signatures: [
@@ -3101,7 +3101,7 @@ const stIntersectsDefinition: FunctionDefinition = {
   name: 'st_intersects',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_intersects', {
     defaultMessage:
-      'Returns true if two geometries intersect.\nThey intersect if they have any point in common, including their interior points\n(points along lines or within polygons).\nThis is the inverse of the <<esql-st_disjoint,ST_DISJOINT>> function.\nIn mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅',
+      'Returns true if two geometries intersect.\nThey intersect if they have any point in common, including their interior points\n(points along lines or within polygons).\nThis is the inverse of the `ST_DISJOINT` function.\nIn mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅',
   }),
   alias: undefined,
   signatures: [
@@ -3239,7 +3239,7 @@ const stWithinDefinition: FunctionDefinition = {
   name: 'st_within',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_within', {
     defaultMessage:
-      'Returns whether the first geometry is within the second geometry.\nThis is the inverse of the <<esql-st_contains,ST_CONTAINS>> function.',
+      'Returns whether the first geometry is within the second geometry.\nThis is the inverse of the `ST_CONTAINS` function.',
   }),
   alias: undefined,
   signatures: [
@@ -3756,7 +3756,7 @@ const toDatetimeDefinition: FunctionDefinition = {
   name: 'to_datetime',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_datetime', {
     defaultMessage:
-      "Converts an input value to a date value.\nA string will only be successfully converted if it's respecting the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.\nTo convert dates in other formats, use <<esql-date_parse>>.",
+      "Converts an input value to a date value.\nA string will only be successfully converted if it's respecting the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.\nTo convert dates in other formats, use `DATE_PARSE`.",
   }),
   alias: ['to_dt'],
   signatures: [
