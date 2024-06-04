@@ -41,8 +41,7 @@ describe('Gemini Connector', () => {
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {
       const config: Config = {
-        apiUrl:
-          'https://us-central1-aiplatform.googleapis.com/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent',
+        apiUrl: `https://us-central1-aiplatform.googleapis.com/v1/projects/test-gcpProject/locations/us-central-1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
         defaultModel: DEFAULT_GEMINI_MODEL,
         gcpRegion: 'us-central-1',
         gcpProjectID: 'test-gcpProject',
@@ -61,7 +60,7 @@ describe('Gemini Connector', () => {
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring Google Gemini action: Error: URL Error: Invalid URL: example.com/do-something"'
+        `"Error configuring Google Gemini action: Error: URL Error: Invalid URL: example.com/do-something"`
       );
     });
 

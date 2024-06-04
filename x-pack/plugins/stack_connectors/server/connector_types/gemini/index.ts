@@ -45,7 +45,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       i18n.translate('xpack.stackConnectors.gemini.configurationErrorApiProvider', {
         defaultMessage: 'Error configuring Google Gemini action: {err}',
         values: {
-          err,
+          err: err.toString(),
         },
       })
     );
