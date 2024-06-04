@@ -20,7 +20,7 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getHasLogs } from './get_has_logs';
 
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
-import { Integration, StepProgressPayloadRT } from '../types';
+import { ElasticAgentStepPayload, Integration, StepProgressPayloadRT } from '../types';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
@@ -162,7 +162,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
           type,
           state: savedObservabilityOnboardingState.state,
           esClient,
-          payload: progress['ea-status']?.payload,
+          payload: progress['ea-status']?.payload as ElasticAgentStepPayload,
         });
         if (hasLogs) {
           progress['logs-ingest'] = { status: 'complete' };
