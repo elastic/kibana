@@ -35,8 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Dataset quality table', function () {
-    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
-
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
@@ -68,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
     });
 
-    it('shows sort and show namespace', async () => {
+    it('shows sort by dataset name and show namespace', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('descending');
