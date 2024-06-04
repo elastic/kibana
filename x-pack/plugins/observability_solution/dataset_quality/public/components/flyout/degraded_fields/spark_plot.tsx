@@ -28,12 +28,7 @@ export function SparkPlot({
   series?: Coordinate[] | null;
 }) {
   return (
-    <EuiFlexGroup
-      justifyContent="flexStart"
-      gutterSize="xs"
-      responsive={false}
-      alignItems="flexEnd"
-    >
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="s" responsive={false} alignItems="center">
       <EuiFlexItem grow={false}>
         <SparkPlotItem isLoading={isLoading} series={series} />
       </EuiFlexItem>
@@ -52,7 +47,7 @@ function SparkPlotItem({
   const { euiTheme } = useEuiTheme();
   const chartSize = {
     height: euiTheme.size.l,
-    width: euiTheme.size.xxxxl,
+    width: '80px',
   };
 
   const commonStyle = {
