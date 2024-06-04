@@ -92,7 +92,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
-  const leadingControlColumns = useTimelineControlColumn(columns, TIMELINE_NO_SORTING);
+  const leadingControlColumns = useTimelineControlColumn(columns, TIMELINE_NO_SORTING, timelineId);
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'

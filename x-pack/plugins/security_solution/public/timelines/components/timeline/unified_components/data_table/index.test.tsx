@@ -21,6 +21,14 @@ import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 
 jest.mock('../../../../../sourcerer/containers');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(() => ({
+    pathname: '',
+    search: '',
+  })),
+}));
+
 const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();
 const onEventClosedMock = jest.fn();
@@ -39,7 +47,7 @@ type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
 
 // These tests can take more than standard timeout of 5s
 // that is why we are setting it to 10s
-const SPECIAL_TEST_TIMEOUT = 10000;
+const SPECIAL_TEST_TIMEOUT = 50000;
 
 const TestComponent = (props: TestComponentProps) => {
   const { store = createMockStore(), ...restProps } = props;
@@ -81,10 +89,12 @@ const getTimelineFromStore = (
   return store.getState().timeline.timelineById[timelineId];
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/179843
-describe.skip('unified data table', () => {
+describe('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it(

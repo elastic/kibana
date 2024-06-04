@@ -203,7 +203,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const leadingControlColumns = useTimelineControlColumn(columns, sort);
+  const leadingControlColumns = useTimelineControlColumn(columns, sort, timelineId);
 
   useEffect(() => {
     dispatch(

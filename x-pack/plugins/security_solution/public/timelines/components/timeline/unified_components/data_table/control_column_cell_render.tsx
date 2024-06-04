@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { eventIsPinned } from '../../body/helpers';
 import { Actions } from '../../../../../common/components/header_actions';
-import { TimelineId } from '../../../../../../common/types';
 import type { TimelineModel } from '../../../../store/model';
 import type { ActionProps } from '../../../../../../common/types';
 
@@ -20,8 +19,18 @@ export interface UnifiedActionProps extends ActionProps {
   pinnedEventIds: TimelineModel['pinnedEventIds'];
 }
 
-export const ControlColumnCellRender = memo(function RowCellRender(props: UnifiedActionProps) {
-  const { rowIndex, events, ecsData, pinnedEventIds, onToggleShowNotes, eventIdToNoteIds } = props;
+const ControlColumnCellRenderMemoized = memo(function RowCellRenderMemoized(
+  props: UnifiedActionProps
+) {
+  const {
+    rowIndex,
+    events,
+    ecsData,
+    pinnedEventIds,
+    onToggleShowNotes,
+    eventIdToNoteIds,
+    timelineId,
+  } = props;
   const event = useMemo(() => events && events[rowIndex], [events, rowIndex]);
   const isPinned = useMemo(
     () => eventIsPinned({ eventId: event?._id, pinnedEventIds }),
@@ -40,10 +49,16 @@ export const ControlColumnCellRender = memo(function RowCellRender(props: Unifie
       onEventDetailsPanelOpened={noOp}
       onRuleChange={noOp}
       showNotes={true}
-      timelineId={TimelineId.active}
+      timelineId={timelineId}
       toggleShowNotes={onToggleShowNotes}
       refetch={noOp}
       rowIndex={rowIndex}
     />
   );
 });
+
+// We have to do below because during tests, Eui throws a error when processing a memoized component
+// because `typeof ControlColumnCellRenderMemoized` is not a function
+export const ControlColumnCellRender = (props: UnifiedActionProps) => (
+  <ControlColumnCellRenderMemoized {...props} />
+);

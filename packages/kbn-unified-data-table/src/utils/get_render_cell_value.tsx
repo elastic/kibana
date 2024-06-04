@@ -50,7 +50,7 @@ export const getRenderCellValueFn = ({
   /**
    * memo is imperative here otherwise the cell will re-render on every hover on every cell
    */
-  return memo(function UnifiedDataTableRenderCellValue({
+  const UnifiedDataTableRenderCellValueMemoized = memo(function UnifiedDataTableRenderCellValue({
     rowIndex,
     columnId,
     isDetails,
@@ -150,6 +150,12 @@ export const getRenderCellValueFn = ({
       />
     );
   });
+
+  // We need pass a non-memoized version of the component otherwise EUI will throw an error
+  // complaining the passed component is not a function.
+  return (props: EuiDataGridCellValueElementProps) => (
+    <UnifiedDataTableRenderCellValueMemoized {...props} />
+  );
 };
 
 /**

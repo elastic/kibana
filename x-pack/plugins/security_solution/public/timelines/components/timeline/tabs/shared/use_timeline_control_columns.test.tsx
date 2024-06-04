@@ -10,6 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
+import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
 
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
@@ -39,18 +40,24 @@ describe('useTimelineColumns', () => {
 
   describe('leadingControlColumns', () => {
     it('should return the leading control columns', () => {
-      const { result } = renderHook(() => useTimelineControlColumn(mockColumns, []), {
-        wrapper: TestProviders,
-      });
+      const { result } = renderHook(
+        () => useTimelineControlColumn(mockColumns, [], TimelineId.test),
+        {
+          wrapper: TestProviders,
+        }
+      );
       expect(result.current).toMatchSnapshot();
     });
     it('should have a width of 124 for 5 actions', () => {
       useLicenseMock.mockReturnValue({
         isEnterprise: () => false,
       });
-      const { result } = renderHook(() => useTimelineControlColumn(mockColumns, []), {
-        wrapper: TestProviders,
-      });
+      const { result } = renderHook(
+        () => useTimelineControlColumn(mockColumns, [], TimelineId.test),
+        {
+          wrapper: TestProviders,
+        }
+      );
       const controlColumn = result.current[0] as EuiDataGridControlColumn;
       expect(controlColumn.width).toBe(124);
     });
@@ -58,9 +65,12 @@ describe('useTimelineColumns', () => {
       useLicenseMock.mockReturnValue({
         isEnterprise: () => true,
       });
-      const { result } = renderHook(() => useTimelineControlColumn(mockColumns, []), {
-        wrapper: TestProviders,
-      });
+      const { result } = renderHook(
+        () => useTimelineControlColumn(mockColumns, [], TimelineId.test),
+        {
+          wrapper: TestProviders,
+        }
+      );
       const controlColumn = result.current[0] as EuiDataGridControlColumn;
       expect(controlColumn.width).toBe(152);
     });

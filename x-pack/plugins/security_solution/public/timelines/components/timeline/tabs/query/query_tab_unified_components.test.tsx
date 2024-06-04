@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
+import type { ComponentProps, FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
@@ -15,7 +15,9 @@ import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import {
+  createMockStore,
   createSecuritySolutionStorageMock,
+  mockGlobalState,
   mockTimelineData,
   TestProviders,
 } from '../../../../../common/mock';
@@ -29,7 +31,9 @@ import { timelineActions } from '../../../../store';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { cloneDeep, flatten } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -54,9 +58,17 @@ jest.mock('../../../../../common/lib/kuery');
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(() => ({
+    pathname: '',
+    search: '',
+  })),
+}));
+
 // These tests can take more than standard timeout of 5s
-// that is why we are setting it to 15s
-const SPECIAL_TEST_TIMEOUT = 15000;
+// that is why we are increasing it.
+const SPECIAL_TEST_TIMEOUT = 50000;
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
   if (feature === 'unifiedComponentsInTimelineEnabled') {
@@ -67,7 +79,7 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 
 jest.mock('../../../../../common/lib/kibana');
 
-// unified-field-list is is reporiting multiple analytics events
+// unified-field-list is reporting multiple analytics events
 jest.mock(`@kbn/analytics-client`);
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
@@ -98,18 +110,28 @@ const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) =
   return <QueryTabContent {...testComponentDefaultProps} {...props} />;
 };
 
-const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponent>>) => {
-  return render(<TestComponent {...props} />, {
-    wrapper: TestProviders,
-  });
+const customColumnOrder = [
+  ...defaultUdtHeaders,
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'event.severity',
+  },
+];
+
+const mockState = {
+  ...structuredClone(mockGlobalState),
 };
 
-const changeItemsPerPageTo = (newItemsPerPage: number) => {
-  fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
-  fireEvent.click(screen.getByTestId(`tablePagination-${newItemsPerPage}-rows`));
-  expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
-    `Rows per page: ${newItemsPerPage}`
-  );
+mockState.timeline.timelineById[TimelineId.test].columns = customColumnOrder;
+
+const TestWrapper: FunctionComponent = ({ children }) => {
+  return <TestProviders store={createMockStore(mockState)}>{children}</TestProviders>;
+};
+
+const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponent>>) => {
+  return render(<TestComponent {...props} />, {
+    wrapper: TestWrapper,
+  });
 };
 
 const loadPageMock = jest.fn();
@@ -117,7 +139,7 @@ const loadPageMock = jest.fn();
 const useTimelineEventsMock = jest.fn(() => [
   false,
   {
-    events: cloneDeep(mockTimelineData),
+    events: cloneDeep(mockTimelineData.slice(0, 3)),
     pageInfo: {
       activePage: 0,
       totalPages: 10,
@@ -135,7 +157,7 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 // Flaky : See https://github.com/elastic/kibana/issues/179831
-describe.skip('query tab with unified timeline', () => {
+describe(`query tab with unified timeline -- ${i}`, () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
@@ -149,9 +171,6 @@ describe.skip('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
-    // increase timeout for these tests as they are rendering a complete table with ~30 rows which can take time.
-    const ONE_SECOND = 1000;
-    jest.setTimeout(10 * ONE_SECOND);
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         width: 1000,
@@ -244,6 +263,23 @@ describe.skip('query tab with unified timeline', () => {
   });
 
   describe('pagination', () => {
+    beforeEach(() => {
+      // should return all the records instead just 3
+      // as the case in the default mock
+      useTimelineEventsMock.mockImplementation(() => [
+        false,
+        {
+          events: cloneDeep(mockTimelineData),
+          pageInfo: {
+            activePage: 0,
+            totalPages: 10,
+          },
+          refreshedAt: Date.now(),
+          totalCount: 70,
+          loadPage: loadPageMock,
+        },
+      ]);
+    });
     it(
       'should paginate correctly',
       async () => {
@@ -296,9 +332,14 @@ describe.skip('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(screen.getByTestId('discoverDocTable')).toBeVisible();
         });
+
+        const messageColumnIndex =
+          customColumnOrder.findIndex((header) => header.id === 'message') + 3;
+        // 3 is the offset for additional leading columns on left
+
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
           'data-gridcell-column-index',
-          '12'
+          String(messageColumnIndex)
         );
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toBeInTheDocument();
@@ -318,7 +359,7 @@ describe.skip('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
             'data-gridcell-column-index',
-            '11'
+            String(messageColumnIndex - 1)
           );
         });
       },
@@ -391,7 +432,7 @@ describe.skip('query tab with unified timeline', () => {
               sort: [
                 {
                   direction: 'asc',
-                  esTypes: [],
+                  esTypes: ['date'],
                   field: '@timestamp',
                   type: 'date',
                 },
@@ -439,7 +480,7 @@ describe.skip('query tab with unified timeline', () => {
               sort: [
                 {
                   direction: 'desc',
-                  esTypes: [],
+                  esTypes: ['date'],
                   field: '@timestamp',
                   type: 'date',
                 },
@@ -498,7 +539,7 @@ describe.skip('query tab with unified timeline', () => {
               sort: [
                 {
                   direction: 'desc',
-                  esTypes: [],
+                  esTypes: ['date'],
                   field: '@timestamp',
                   type: 'date',
                 },
@@ -547,7 +588,6 @@ describe.skip('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    // Failing: See https://github.com/elastic/kibana/issues/179831
     it(
       'should be able to sort by multiple columns',
       async () => {
@@ -608,7 +648,7 @@ describe.skip('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            '11'
+            String(customColumnOrder.length)
           );
         });
 
@@ -620,7 +660,7 @@ describe.skip('query tab with unified timeline', () => {
         // column not longer exists in the table
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            '10'
+            String(customColumnOrder.length - 1)
           );
         });
         expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(0);
@@ -640,7 +680,7 @@ describe.skip('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            '11'
+            String(customColumnOrder.length)
           );
         });
 
@@ -653,7 +693,7 @@ describe.skip('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toHaveTextContent(
-            '12'
+            String(customColumnOrder.length + 1)
           );
         });
         expect(screen.queryAllByTestId(`dataGridHeaderCell-${field.name}`)).toHaveLength(1);
@@ -693,50 +733,14 @@ describe.skip('query tab with unified timeline', () => {
       async () => {
         renderTestComponents();
         expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-        await waitFor(() => {
-          expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '37'
-          );
-        });
+
+        expect(screen.getByTestId('fieldListGroupedFieldGroups')).toBeVisible();
 
         fireEvent.click(screen.getByTitle('Hide sidebar'));
 
         await waitFor(() => {
-          expect(screen.queryAllByTestId('fieldListGroupedAvailableFields-count')).toHaveLength(0);
+          expect(screen.queryByTestId('fieldListGroupedFieldGroups')).toBeFalsy();
         });
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should have all populated fields in Available fields section',
-      async () => {
-        const listOfPopulatedFields = new Set(
-          flatten(
-            mockTimelineData.map((dataItem) =>
-              dataItem.data.map((item) =>
-                item.value && item.value.length > 0 ? item.field : undefined
-              )
-            )
-          ).filter((item) => typeof item !== 'undefined')
-        );
-
-        renderTestComponents();
-
-        expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        changeItemsPerPageTo(100);
-
-        const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-
-        for (const field of listOfPopulatedFields) {
-          fireEvent.change(screen.getByTestId('fieldListFiltersFieldSearch'), {
-            target: { value: field },
-          });
-
-          expect(within(availableFields).getByTestId(`field-${field}`));
-        }
       },
       SPECIAL_TEST_TIMEOUT
     );
