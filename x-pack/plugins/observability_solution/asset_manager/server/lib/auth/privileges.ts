@@ -5,73 +5,59 @@
  * 2.0.
  */
 
-import {
-  IScopedClusterClient,
-} from '@kbn/core/server';
-import { ENTITY_BASE_PREFIX } from "@kbn/assetManager-plugin/common/constants_entities";
+import { IScopedClusterClient } from '@kbn/core/server';
+import { ENTITY_BASE_PREFIX } from '../../../common/constants_entities';
 
 export const requiredRunTimePrivileges = {
   // all of
   index: [
     {
       names: [`${ENTITY_BASE_PREFIX}*`],
-      privileges: [
-        'create_doc',
-        'auto_configure',
-        'read',
-      ],
+      privileges: ['create_index', 'index', 'create_doc', 'auto_configure', 'read'],
     },
     {
-      // how do we know ahead of time what we need to include here??
-      names: ['logs-*', 'filebeat*', 'metrics-*', 'apm-*'],
-      privileges: [
-        'read'
-      ],
-    }
+      names: ['apm-*', 'logs-*', 'metrics-*', 'filebeat*', 'metricbeat*'],
+      privileges: ['read', 'view_index_metadata'],
+    },
   ],
-  cluster: [
-    'manage_transform',
-    'monitor_transform',
-    'manage_ingest_pipelines',
-  ]
-}
+  cluster: ['manage_transform', 'monitor_transform', 'manage_ingest_pipelines', 'monitor'],
+  application: [
+    {
+      application: 'kibana-.kibana',
+      privileges: ['saved_object:entity-definition/create'],
+      resources: ['*'],
+    },
+  ],
+};
 
 export const requiredEnablementPrivileges = {
   // any one of
-  cluster: [
-    'manage_security',
-    'manage_api_key',
-    'manage_own_api_key',
-  ]
-}
+  cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
+};
 
-export const canRunEntityDiscovery = async (
-  client: IScopedClusterClient,
-) => {
-  const { has_all_requested } = await client.asCurrentUser.security.hasPrivileges({
+export const canRunEntityDiscovery = async (client: IScopedClusterClient) => {
+  const { has_all_requested: hasAllRequested } = await client.asCurrentUser.security.hasPrivileges({
     body: {
       cluster: requiredRunTimePrivileges.cluster,
       index: requiredRunTimePrivileges.index,
-    }
+      application: requiredRunTimePrivileges.application,
+    },
   });
 
-  return has_all_requested;
-}
+  return hasAllRequested;
+};
 
-export const canEnableEntityDiscovery = async (
-  client: IScopedClusterClient,
-) => {
-  const [
-    canRun,
-    { cluster: grantedClusterPrivileges }
-  ] = await Promise.all([
+export const canEnableEntityDiscovery = async (client: IScopedClusterClient) => {
+  const [canRun, { cluster: grantedClusterPrivileges }] = await Promise.all([
     canRunEntityDiscovery(client),
     client.asCurrentUser.security.hasPrivileges({
       body: {
         cluster: requiredEnablementPrivileges.cluster,
-      }
+      },
     }),
   ]);
 
-  return canRun && requiredEnablementPrivileges.cluster.some(k => grantedClusterPrivileges[k] === true);
-}
+  return (
+    canRun && requiredEnablementPrivileges.cluster.some((k) => grantedClusterPrivileges[k] === true)
+  );
+};
