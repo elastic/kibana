@@ -652,7 +652,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 }),
               ]),
             }),
-            undefined
+            {}
           );
         });
       });
@@ -717,7 +717,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 }),
               ]),
             }),
-            undefined
+            {}
           );
         });
       });
@@ -869,7 +869,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                 }),
               ]),
             }),
-            undefined
+            {}
           );
         });
       });
