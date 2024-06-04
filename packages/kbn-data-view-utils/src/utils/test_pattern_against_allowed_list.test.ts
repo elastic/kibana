@@ -12,13 +12,13 @@ describe('testPatternAgainstAllowedList', () => {
   const allowedList = ['foo-logs-bar', /^\b(logs)\b([^,\s]*)/i];
 
   it('should return true if the passed input matches any string or regexp of the passed list', () => {
-    expect(testPatternAgainstAllowedList('logs-*', allowedList)).toBeTruthy();
-    expect(testPatternAgainstAllowedList('logs-*-*', allowedList)).toBeTruthy();
-    expect(testPatternAgainstAllowedList('logs-system.syslog-*', allowedList)).toBeTruthy();
-    expect(testPatternAgainstAllowedList('foo-logs-bar', allowedList)).toBeTruthy();
+    expect(testPatternAgainstAllowedList(allowedList)('logs-*')).toBeTruthy();
+    expect(testPatternAgainstAllowedList(allowedList)('logs-*-*')).toBeTruthy();
+    expect(testPatternAgainstAllowedList(allowedList)('logs-system.syslog-*')).toBeTruthy();
+    expect(testPatternAgainstAllowedList(allowedList)('foo-logs-bar')).toBeTruthy();
 
-    expect(testPatternAgainstAllowedList('logss-*', allowedList)).toBeFalsy();
-    expect(testPatternAgainstAllowedList('metrics*', allowedList)).toBeFalsy();
-    expect(testPatternAgainstAllowedList('metrics-*', allowedList)).toBeFalsy();
+    expect(testPatternAgainstAllowedList(allowedList)('logss-*')).toBeFalsy();
+    expect(testPatternAgainstAllowedList(allowedList)('metrics*')).toBeFalsy();
+    expect(testPatternAgainstAllowedList(allowedList)('metrics-*')).toBeFalsy();
   });
 });

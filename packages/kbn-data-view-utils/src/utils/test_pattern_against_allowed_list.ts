@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 
-export const testPatternAgainstAllowedList = (
-  value: string,
-  allowedList: Array<string | RegExp>
-) => {
-  for (const allowedItem of allowedList) {
-    const isMatchingString = typeof allowedItem === 'string' && value === allowedItem;
-    const isMatchingRegExp = allowedItem instanceof RegExp && allowedItem.test(value);
+export const testPatternAgainstAllowedList =
+  (allowedList: Array<string | RegExp>) => (value: string) => {
+    for (const allowedItem of allowedList) {
+      const isMatchingString = typeof allowedItem === 'string' && value === allowedItem;
+      const isMatchingRegExp = allowedItem instanceof RegExp && allowedItem.test(value);
 
-    if (isMatchingString || isMatchingRegExp) {
-      return true;
+      if (isMatchingString || isMatchingRegExp) {
+        return true;
+      }
     }
-  }
 
-  // If no match is found in the allowedList, return false
-  return false;
-};
+    // If no match is found in the allowedList, return false
+    return false;
+  };
