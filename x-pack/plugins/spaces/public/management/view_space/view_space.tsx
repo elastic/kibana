@@ -198,7 +198,8 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
             <h1>{space.name}</h1>
             <p>
               <small>
-                Organize your saved objects and show related features for creating new content.
+                {space.description ??
+                  'Organize your saved objects and show related features for creating new content.'}
               </small>
             </p>
           </EuiFlexItem>
