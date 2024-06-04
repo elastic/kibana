@@ -35,13 +35,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({
         types: ['cloud-security-posture-settings'],
       });
-
-      await cspSecurity.createRoles();
-      await cspSecurity.createUsers();
-    });
-    after(async () => {
-      await cspSecurity.cleanRoles();
-      await cspSecurity.cleanUsers();
     });
 
     // Blocked by https://github.com/elastic/kibana/issues/184621
