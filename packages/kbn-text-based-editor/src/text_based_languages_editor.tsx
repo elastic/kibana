@@ -360,7 +360,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
     const fn = memoize(
-      (...args: [DataViewsPublicPluginStart]) => ({
+      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args),
       }),
@@ -374,7 +374,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, queryString);
-        const sources = await memoizedSources(dataViews).result;
+        const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -414,6 +414,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     memoizedSources,
     dataSourcesCache,
     dataViews,
+    core,
     esqlFieldsCache,
     memoizedFieldsFromESQL,
     expressions,

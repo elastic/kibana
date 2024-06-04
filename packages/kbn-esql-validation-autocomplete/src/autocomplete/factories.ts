@@ -143,11 +143,15 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
     sortText: 'D',
   }));
 
-export const buildSourcesDefinitions = (sources: string[]): SuggestionRawDefinition[] =>
-  sources.map((label) => ({
-    label,
-    text: getSafeInsertText(label, { dashSupported: true }),
-    kind: 'Reference',
+export const buildSourcesDefinitions = (
+  sources: Array<{ name: string; isIntegration: boolean; title?: string }>
+): SuggestionRawDefinition[] =>
+  sources.map(({ name, isIntegration, title }) => ({
+    label: title ?? name,
+    text: name,
+    isSnippet: isIntegration,
+    ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
+    kind: isIntegration ? 'Class' : 'Reference',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
       defaultMessage: `Index`,
     }),
