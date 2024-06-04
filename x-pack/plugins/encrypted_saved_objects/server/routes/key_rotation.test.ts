@@ -43,7 +43,10 @@ describe('Key rotation routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ tags: ['access:rotateEncryptionKey'] });
+      expect(routeConfig.options).toEqual({
+        tags: ['access:rotateEncryptionKey'],
+        description: `Rotate a key for encrypted saved objects`,
+      });
       expect(routeConfig.validate).toEqual({
         body: undefined,
         query: expect.any(Type),
