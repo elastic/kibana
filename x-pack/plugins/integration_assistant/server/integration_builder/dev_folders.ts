@@ -7,7 +7,7 @@
 
 import { join as joinPath } from 'path';
 import nunjucks from 'nunjucks';
-import { Integration } from '../../common';
+import type { Integration } from '../../common';
 import { ensureDirSync, createSync } from '../util';
 
 export function createPackageSystemTests(integrationDir: string, integration: Integration) {

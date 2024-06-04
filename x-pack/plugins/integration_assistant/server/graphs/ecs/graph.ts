@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
-import { BedrockChat } from '@kbn/langchain/server/language_models';
+import type { StateGraphArgs } from '@langchain/langgraph';
+import { StateGraph, END, START } from '@langchain/langgraph';
+import type { BedrockChat } from '@kbn/langchain/server/language_models';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { modifySamples, mergeSamples } from '../../util/samples';
 import { createPipeline } from './pipeline';
@@ -15,7 +16,7 @@ import { handleDuplicates } from './duplicates';
 import { handleMissingKeys } from './missing';
 import { handleInvalidEcs } from './invalid';
 import { handleValidateMappings } from './validate';
-import { EcsMappingState } from '../../types';
+import type { EcsMappingState } from '../../types';
 
 const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   ecs: {

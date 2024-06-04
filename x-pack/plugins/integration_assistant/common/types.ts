@@ -11,7 +11,7 @@ export interface ESProcessorOptions {
   ignore_missing?: boolean;
   if?: string;
   tag?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ESProcessorItem {

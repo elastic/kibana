@@ -7,7 +7,7 @@
 
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { handleErrors } from './errors';
-import { RelatedState } from '../../types';
+import type { RelatedState } from '../../types';
 import {
   relatedTestState,
   relatedMockProcessors,

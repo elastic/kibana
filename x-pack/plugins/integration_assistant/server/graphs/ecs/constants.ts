@@ -6,7 +6,7 @@
  */
 
 interface EcsFields {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const ECS_TYPES: EcsFields = {

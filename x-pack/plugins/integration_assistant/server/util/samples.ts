@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as yaml from 'js-yaml';
-import { CategorizationState, EcsMappingState, RelatedState } from '../types';
+import type { CategorizationState, EcsMappingState, RelatedState } from '../types';
 
 interface SampleObj {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface NewObj {
@@ -43,7 +44,7 @@ export function modifySamples(state: EcsMappingState | CategorizationState | Rel
   return modifiedSamples;
 }
 
-function isEmptyValue(value: any): boolean {
+function isEmptyValue(value: unknown): boolean {
   return (
     value === null ||
     value === undefined ||
@@ -52,7 +53,7 @@ function isEmptyValue(value: any): boolean {
   );
 }
 
-function merge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+function merge(target: Record<string, any>, source: Record<string, any>): Record<string, unknown> {
   for (const [key, sourceValue] of Object.entries(source)) {
     const targetValue = target[key];
     if (Array.isArray(sourceValue)) {
@@ -76,10 +77,10 @@ function merge(target: Record<string, any>, source: Record<string, any>): Record
 }
 
 export function mergeSamples(objects: any[]): string {
-  let result: Record<string, any> = {};
+  let result: Record<string, unknown> = {};
 
   for (const obj of objects) {
-    let sample: Record<string, any> = obj;
+    let sample: Record<string, unknown> = obj;
     if (typeof obj === 'string') {
       sample = JSON.parse(obj);
     }
@@ -90,7 +91,7 @@ export function mergeSamples(objects: any[]): string {
 }
 
 export function formatSamples(samples: string[]): string {
-  const formattedSamples: any[] = [];
+  const formattedSamples: unknown[] = [];
 
   for (const sample of samples) {
     const sampleObj = JSON.parse(sample);
@@ -100,7 +101,7 @@ export function formatSamples(samples: string[]): string {
   return JSON.stringify(formattedSamples, null, 2);
 }
 
-function determineType(value: any): string {
+function determineType(value: unknown): string {
   if (typeof value === 'object' && value !== null) {
     if (Array.isArray(value)) {
       return 'group';
@@ -119,7 +120,7 @@ function determineType(value: any): string {
   return 'keyword'; // Default type for null or other undetermined types
 }
 
-function recursiveParse(obj: any, path: string[]): Field {
+function recursiveParse(obj: unknown, path: string[]): Field {
   if (typeof obj === 'object' && obj !== null) {
     if (Array.isArray(obj)) {
       // Assume list elements are uniform and use the first element as representative

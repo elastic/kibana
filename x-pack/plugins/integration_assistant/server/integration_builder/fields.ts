@@ -7,10 +7,10 @@
 
 import nunjucks from 'nunjucks';
 
-import { generateFields, mergeSamples, createSync } from '../util';
+import { createSync, generateFields, mergeSamples } from '../util';
 
 interface Doc {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function createFieldMapping(
