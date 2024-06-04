@@ -28,7 +28,83 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
+    describe('scroll_count with more than 10k objects', () => {
+      const importVisualizations = async ({
+        startIdx = 1,
+        endIdx,
+      }: {
+        startIdx?: number;
+        endIdx: number;
+      }) => {
+        const fileChunks: string[] = [];
+        for (let i = startIdx; i <= endIdx; i++) {
+          const id = `test-vis-${i}`;
+          fileChunks.push(
+            JSON.stringify({
+              type: 'visualization',
+              id,
+              attributes: {
+                title: `My visualization (${i})`,
+                uiStateJSON: '{}',
+                visState: '{}',
+              },
+              references: [],
+            })
+          );
+        }
 
+        await supertest
+          .post(`/api/saved_objects/_import`)
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
+          .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
+          .expect(200);
+      };
+
+      const deleteVisualizations = async ({
+        startIdx = 1,
+        endIdx,
+      }: {
+        startIdx?: number;
+        endIdx: number;
+      }) => {
+        const objsToDelete: any[] = [];
+        for (let i = startIdx; i <= endIdx; i++) {
+          const id = `test-vis-${i}`;
+          objsToDelete.push({ type: 'visualization', id });
+        }
+        await kibanaServer.savedObjects.bulkDelete({ objects: objsToDelete });
+      };
+
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await importVisualizations({ startIdx: 1, endIdx: 6000 });
+        await importVisualizations({ startIdx: 6001, endIdx: 12000 });
+      });
+
+      after(async () => {
+        // kibanaServer.savedObjects.cleanStandardList({}); times out for 12000 items
+        await deleteVisualizations({ startIdx: 1, endIdx: 3000 });
+        await deleteVisualizations({ startIdx: 3001, endIdx: 6000 });
+        await deleteVisualizations({ startIdx: 6001, endIdx: 9000 });
+        await deleteVisualizations({ startIdx: 9001, endIdx: 12000 });
+      });
+
+      it('returns the correct count for each included types', async () => {
+        const { body } = await supertest
+          .post(apiUrl)
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
+          .send({
+            typesToInclude: ['visualization'],
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          visualization: 12000,
+        });
+      });
+    });
     describe('with less than 10k objects', () => {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
@@ -111,61 +187,6 @@ export default function ({ getService }: FtrProviderContext) {
           dashboard: 0,
           visualization: 0,
           search: 0,
-        });
-      });
-    });
-
-    describe('scroll_count with more than 10k objects', () => {
-      const importVisualizations = async ({
-        startIdx = 1,
-        endIdx,
-      }: {
-        startIdx?: number;
-        endIdx: number;
-      }) => {
-        const fileChunks: string[] = [];
-        for (let i = startIdx; i <= endIdx; i++) {
-          const id = `test-vis-${i}`;
-          fileChunks.push(
-            JSON.stringify({
-              type: 'visualization',
-              id,
-              attributes: {
-                title: `My visualization (${i})`,
-                uiStateJSON: '{}',
-                visState: '{}',
-              },
-              references: [],
-            })
-          );
-        }
-
-        await supertest
-          .post(`/api/saved_objects/_import`)
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set(roleAuthc.apiKeyHeader)
-          .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
-          .expect(200);
-      };
-
-      before(async () => {
-        await importVisualizations({ startIdx: 1, endIdx: 6000 });
-        await importVisualizations({ startIdx: 6001, endIdx: 12000 });
-      });
-      after(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
-      });
-
-      it('returns the correct count for each included types', async () => {
-        const { body } = await supertest
-          .post(apiUrl)
-          .send({
-            typesToInclude: ['visualization'],
-          })
-          .expect(200);
-
-        expect(body).to.eql({
-          visualization: 12000,
         });
       });
     });
