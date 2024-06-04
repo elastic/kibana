@@ -184,7 +184,7 @@ export class MonacoEditorActionsProvider {
   public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
     const {
       services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
-      startServices,
+      ...startServices
     } = context;
     const { toasts } = notifications;
     try {
