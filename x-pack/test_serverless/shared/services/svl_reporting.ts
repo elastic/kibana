@@ -81,6 +81,10 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
           if (response.status === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);
+
+            // add a delay before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+
             return false;
           }
 

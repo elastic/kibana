@@ -10410,7 +10410,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInfrastructureContainerAssetView":{
+        "observability:enableInfrastructureContainerAssetView": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
