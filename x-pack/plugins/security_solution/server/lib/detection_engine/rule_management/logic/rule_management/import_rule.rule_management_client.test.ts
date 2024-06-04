@@ -6,7 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import { importRule } from './rules_management_client';
+import { importRule } from './detection_rules_client';
 import { readRules } from './read_rules';
 import { getCreateRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
@@ -19,7 +19,7 @@ jest.mock('../../../../machine_learning/validation');
 
 jest.mock('./read_rules');
 
-describe('RuleManagementClient.importRule', () => {
+describe('DetectionRulesClient.importRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   const immutable = false as const; // Can only take value of false

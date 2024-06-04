@@ -18,6 +18,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
+import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
@@ -198,7 +199,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   );
 
   const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[]) => {
+    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
@@ -249,7 +250,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      navigateToUrl(url);
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
+        window.open(url, '_blank');
+      } else {
+        navigateToUrl(url);
+      }
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
