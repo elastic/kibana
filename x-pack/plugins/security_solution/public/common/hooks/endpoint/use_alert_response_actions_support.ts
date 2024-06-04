@@ -93,6 +93,8 @@ export const useAlertResponseActionsSupport = (
   }, [agentType]);
 
   const agentId: string = useMemo(() => {
+    // We only currently support response actions on SIEM alerts, so if this is not an Alert or we
+    // can't determine the `agentType`, just exit here with blank agent ID
     if (!isAlert || !agentType) {
       return '';
     }
@@ -160,7 +162,10 @@ export const useAlertResponseActionsSupport = (
 
   return useMemo<AlertResponseActionsSupport>(() => {
     return {
-      isSupported: Boolean(isFeatureEnabled && agentId && agentType),
+      isSupported: Boolean(isFeatureEnabled && isAlert && agentId && agentType),
+
+      // TODO:PT maybe also return an `unSupportedReason` property here?
+
       isAlert,
       details: {
         agentType: agentType || 'endpoint',

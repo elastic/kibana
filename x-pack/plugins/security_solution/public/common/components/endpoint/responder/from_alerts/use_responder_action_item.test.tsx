@@ -5,142 +5,86 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { useResponderActionItem } from './use_responder_action_item';
 import { useUserPrivileges } from '../../../user_privileges';
-// import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
-// import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
-import { useResponderActionData } from './use_responder_action_data';
-import { getAlertDetailsFieldValue } from '../../../../lib/endpoint/utils/get_event_details_field_values';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { AppContextTestRender } from '../../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../mock/endpoint';
+import { endpointAlertDataMock } from '../../../../mock/endpoint/endpoint_alert_data_mock';
 
 jest.mock('../../../user_privileges');
-// jest.mock('../../../common/utils/endpoint_alert_check');
-// jest.mock('../host_isolation/helpers');
-// jest.mock('../../../common/utils/crowdstrike_alert_check');
-// jest.mock('../../../common/utils/sentinelone_alert_check');
-jest.mock('./use_responder_action_data');
+
+// FIXME:PT implement tests
+// FIXME:PT move the tests under `x-pack/plugins/security_solution/public/detections/components/take_action_dropdown/index.test.tsx` here
 
 describe('useResponderActionItem', () => {
   const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
-
-  // FIXME:PT fix test once refactor done
-
-  // const mockIsTimelineEventItemAnAlert = isTimelineEventItemAnAlert as jest.Mock;
-  const mockGetFieldValue = getAlertDetailsFieldValue as jest.Mock;
-  // const mockIsAlertFromCrowdstrikeEvent = isAlertFromCrowdstrikeEvent as jest.Mock;
-  // const mockIsAlertFromSentinelOneEvent = isAlertFromSentinelOneEvent as jest.Mock;
-  const mockUseResponderActionData = useResponderActionData as jest.Mock;
+  let alertDetailItemData: TimelineEventsDetailsItem[];
+  let renderHook: AppContextTestRender['renderHook'];
 
   beforeEach(() => {
+    const appContextMock = createAppRootMockRenderer();
+
+    renderHook = appContextMock.renderHook;
+    alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
+
+    mockUseUserPrivileges.mockReturnValue({
+      endpointPrivileges: { loading: false, canAccessResponseConsole: true },
+    });
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
-    mockUseResponderActionData.mockImplementation(() => ({
-      handleResponseActionsClick: jest.fn(),
-      isDisabled: false,
-      tooltip: 'Tooltip text',
-    }));
   });
 
   it('should return an empty array if user privileges are loading', () => {
     mockUseUserPrivileges.mockReturnValue({
-      endpointPrivileges: {
-        loading: true,
-        canAccessResponseConsole: false,
-      },
+      endpointPrivileges: { loading: true, canAccessResponseConsole: false },
     });
+    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
 
-    const { result } = renderHook(() => useResponderActionItem(null, jest.fn()));
-    expect(result.current).toEqual([]);
+    expect(result.current).toHaveLength(0);
   });
 
   it('should return an empty array if user cannot access response console', () => {
     mockUseUserPrivileges.mockReturnValue({
-      endpointPrivileges: {
-        loading: false,
-        canAccessResponseConsole: false,
-      },
+      endpointPrivileges: { loading: false, canAccessResponseConsole: false },
     });
+    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
 
-    const { result } = renderHook(() => useResponderActionItem(null, jest.fn()));
-    expect(result.current).toEqual([]);
+    expect(result.current).toHaveLength(0);
   });
 
   it('should return an empty array if the event is not an alert', () => {
-    mockUseUserPrivileges.mockReturnValue({
-      endpointPrivileges: {
-        loading: false,
-        canAccessResponseConsole: true,
-      },
-    });
-    // mockIsTimelineEventItemAnAlert.mockReturnValue(false);
+    alertDetailItemData = alertDetailItemData.filter(
+      (item) => item.field !== 'kibana.alert.rule.uuid'
+    );
+    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
 
-    const { result } = renderHook(() => useResponderActionItem(null, jest.fn()));
-    expect(result.current).toEqual([]);
+    expect(result.current).toHaveLength(0);
   });
 
-  it('should return the response action item if all conditions are met for a generic endpoint', () => {
-    mockUseUserPrivileges.mockReturnValue({
-      endpointPrivileges: {
-        loading: false,
-        canAccessResponseConsole: true,
-      },
-    });
-    // mockIsTimelineEventItemAnAlert.mockReturnValue(true);
-    mockGetFieldValue.mockReturnValue('endpoint-id');
-    // mockIsAlertFromCrowdstrikeEvent.mockReturnValue(false);
-    // mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
+  it('should return the response action item if all conditions are met for an Elastic Endpoint', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useResponderActionItem(alertDetailItemData, jest.fn())
+    );
+    await waitForNextUpdate();
+    const menuItem = result.current.at(0)!;
 
-    renderHook(() => useResponderActionItem([], jest.fn()));
-
-    expect(mockUseResponderActionData).toHaveBeenCalledWith({
-      agentType: 'endpoint',
-      endpointId: 'endpoint-id',
-      eventData: null,
-      onClick: expect.any(Function),
-    });
+    expect(menuItem).not.toBeUndefined();
+    expect(menuItem.disabled).toBe(false);
+    expect(menuItem.toolTipContent).toEqual('Loading');
   });
 
   it('should return the response action item if all conditions are met for a Crowdstrike event', () => {
-    mockUseUserPrivileges.mockReturnValue({
-      endpointPrivileges: {
-        loading: false,
-        canAccessResponseConsole: true,
-      },
-    });
-    // mockIsTimelineEventItemAnAlert.mockReturnValue(true);
-    mockGetFieldValue.mockReturnValue('crowdstrike-id');
-    // mockIsAlertFromCrowdstrikeEvent.mockReturnValue(true);
-    // mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
+    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
 
-    renderHook(() => useResponderActionItem([], jest.fn()));
-
-    expect(mockUseResponderActionData).toHaveBeenCalledWith({
-      agentType: 'crowdstrike',
-      endpointId: 'crowdstrike-id',
-      eventData: [],
-      onClick: expect.any(Function),
-    });
+    expect(result.current).toEqual(['one']);
   });
 
   it('should return the response action item if all conditions are met for a SentinelOne event', () => {
-    mockUseUserPrivileges.mockReturnValue({
-      endpointPrivileges: {
-        loading: false,
-        canAccessResponseConsole: true,
-      },
-    });
+    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
 
-    // mockIsTimelineEventItemAnAlert.mockReturnValue(true);
-    mockGetFieldValue.mockReturnValue('sentinelone-id');
-    // mockIsAlertFromCrowdstrikeEvent.mockReturnValue(false);
-    // mockIsAlertFromSentinelOneEvent.mockReturnValue(true);
-
-    renderHook(() => useResponderActionItem([], jest.fn()));
-
-    expect(mockUseResponderActionData).toHaveBeenCalledWith({
-      agentType: 'sentinel_one',
-      endpointId: 'sentinelone-id',
-      eventData: [],
-      onClick: expect.any(Function),
-    });
+    expect(result.current).toEqual(['one']);
   });
 });
