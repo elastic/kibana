@@ -829,11 +829,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -1234,6 +1229,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,
@@ -1896,11 +1896,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -2301,6 +2296,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,
@@ -2963,11 +2963,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -3368,6 +3363,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,
@@ -4030,11 +4030,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -4435,6 +4430,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,
@@ -5097,11 +5097,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -5502,6 +5497,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,
@@ -6170,11 +6170,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -6575,6 +6570,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,
@@ -7237,11 +7237,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -7642,6 +7637,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,
@@ -8304,11 +8304,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.is_improving": Object {
-      "array": false,
-      "required": false,
-      "type": "boolean",
-    },
     "kibana.alert.last_detected": Object {
       "array": false,
       "required": false,
@@ -8709,6 +8704,11 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.severity_improving": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.start": Object {
       "array": false,

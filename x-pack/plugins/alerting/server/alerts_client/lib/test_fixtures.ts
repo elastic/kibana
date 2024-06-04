@@ -35,7 +35,7 @@ import {
   ALERT_START,
   ALERT_TIME_RANGE,
   ALERT_END,
-  ALERT_IS_IMPROVING,
+  ALERT_SEVERITY_IMPROVING,
 } from '@kbn/rule-data-utils';
 import { AlertRule } from '../types';
 import { expandFlattenedAlert } from './format_alert';
@@ -116,7 +116,7 @@ export const existingFlattenedRecoveredAlert = {
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
   [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_STATUS]: 'recovered',
-  [ALERT_IS_IMPROVING]: false,
+  [ALERT_SEVERITY_IMPROVING]: false,
 };
 
 export const existingExpandedNewAlert = expandFlattenedAlert(existingFlattenedNewAlert);

@@ -16,7 +16,6 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
-  ALERT_IS_IMPROVING,
   ALERT_LAST_DETECTED,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
@@ -31,6 +30,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -77,11 +77,6 @@ export const alertFieldMap = {
   [ALERT_FLAPPING_HISTORY]: {
     type: 'boolean',
     array: true,
-    required: false,
-  },
-  [ALERT_IS_IMPROVING]: {
-    type: 'boolean',
-    array: false,
     required: false,
   },
   [ALERT_MAINTENANCE_WINDOW_IDS]: {
@@ -176,6 +171,11 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_SEVERITY_IMPROVING]: {
+    type: 'boolean',
+    array: false,
+    required: false,
   },
   [ALERT_START]: {
     type: 'date',

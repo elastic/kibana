@@ -28,7 +28,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_IS_IMPROVING,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { alertRule, existingFlattenedNewAlert, existingExpandedNewAlert } from './test_fixtures';
@@ -64,7 +64,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_IS_IMPROVING]: true,
+        [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_DURATION]: 36000,
@@ -128,7 +128,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_IS_IMPROVING]: false,
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -251,7 +251,7 @@ for (const flattened of [true, false]) {
       const alert = flattened
         ? {
             ...existingAlert,
-            [ALERT_IS_IMPROVING]: true,
+            [ALERT_SEVERITY_IMPROVING]: true,
           }
         : {
             ...existingAlert,
@@ -261,7 +261,7 @@ for (const flattened of [true, false]) {
               alert: {
                 // @ts-expect-error
                 ...existingAlert.kibana.alert,
-                is_improving: true,
+                severity_improving: true,
               },
             },
           };
@@ -289,7 +289,7 @@ for (const flattened of [true, false]) {
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
-        [ALERT_IS_IMPROVING]: undefined,
+        [ALERT_SEVERITY_IMPROVING]: undefined,
         [ALERT_DURATION]: 36000,
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
         [SPACE_IDS]: ['default'],
@@ -379,7 +379,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_IS_IMPROVING]: true,
+        [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -439,7 +439,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_IS_IMPROVING]: false,
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_DURATION]: 36000,
@@ -644,7 +644,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_IS_IMPROVING]: true,
+        [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -729,7 +729,7 @@ for (const flattened of [true, false]) {
         [ALERT_CONSECUTIVE_MATCHES]: 0,
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
-        [ALERT_IS_IMPROVING]: false,
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
