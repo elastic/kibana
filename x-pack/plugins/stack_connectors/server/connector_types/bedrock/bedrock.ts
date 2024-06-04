@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
-import { SignatureV4 } from '@smithy/signature-v4';
-import { HttpRequest } from '@smithy/protocol-http';
-import { Sha256 } from '@aws-crypto/sha256-js';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { AxiosError, Method } from 'axios';
@@ -22,7 +18,6 @@ import {
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
-  RunRawActionParamsSchema,
 } from '../../../common/bedrock/schema';
 import {
   Config,
@@ -82,12 +77,6 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.TEST,
       method: 'runApi',
       schema: RunActionParamsSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.RUN_RAW,
-      method: 'runApiRaw',
-      schema: RunRawActionParamsSchema,
     });
 
     this.registerSubAction({
@@ -214,50 +203,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     };
   }
 
-  public async runApiRaw({
-    body,
-    bedrockMethod,
-    model,
-    signal,
-    timeout,
-    endpointHost,
-  }: RunActionParams): Promise<RunActionResponse> {
-    const url = new URL(`https://${endpointHost}/model/${model}/${bedrockMethod}`);
-
-    const request = new HttpRequest({
-      hostname: url.hostname,
-      path: url.pathname,
-      protocol: url.protocol,
-      method: 'POST', // method must be uppercase
-      body,
-      query: Object.fromEntries(url.searchParams.entries()),
-      headers: {
-        // host is required by AWS Signature V4: https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
-        host: url.host,
-        accept: 'application/json',
-        'content-type': 'application/json',
-      },
-    });
-
-    const signer = new SignatureV4({
-      credentials: {
-        secretAccessKey: this.secrets.secret,
-        accessKeyId: this.secrets.accessKey,
-      },
-      service: 'bedrock',
-      region: 'us-west-2', // this.region,
-      sha256: Sha256,
-    });
-
-    const signedRequest = await signer.sign(request);
-
-    return fetch(url, {
-      headers: signedRequest.headers,
-      body: signedRequest.body,
-      method: signedRequest.method,
-    });
-  }
-
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
@@ -361,11 +306,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     system,
     temperature,
+    maxTokens,
     signal,
     timeout,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
+      body: JSON.stringify(
+        formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
+      ),
       model,
       signal,
       timeout,
@@ -379,16 +327,18 @@ const formatBedrockBody = ({
   stopSequences,
   temperature = 0,
   system,
+  maxTokens = DEFAULT_TOKEN_LIMIT,
 }: {
   messages: Array<{ role: string; content: string }>;
   stopSequences?: string[];
   temperature?: number;
+  maxTokens?: number;
   // optional system message to be sent to the API
   system?: string;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
-  max_tokens: DEFAULT_TOKEN_LIMIT,
+  max_tokens: maxTokens,
   stop_sequences: stopSequences,
   temperature,
 });
@@ -407,6 +357,11 @@ const ensureMessageFormat = (
 
   const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
     const lastMessage = acc[acc.length - 1];
+    if (m.role === 'system') {
+      system = `${system.length ? `${system}\n` : ''}${m.content}`;
+      return acc;
+    }
+
     if (lastMessage && lastMessage.role === m.role) {
       // Bedrock only accepts assistant and user roles.
       // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
@@ -415,13 +370,12 @@ const ensureMessageFormat = (
         { content: `${lastMessage.content}\n${m.content}`, role: m.role },
       ];
     }
-    if (m.role === 'system') {
-      system = `${system.length ? `${system}\n` : ''}${m.content}`;
-      return acc;
-    }
 
     // force role outside of system to ensure it is either assistant or user
-    return [...acc, { content: m.content, role: m.role === 'assistant' ? 'assistant' : 'user' }];
+    return [
+      ...acc,
+      { content: m.content, role: ['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user' },
+    ];
   }, []);
   return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };

@@ -8,4 +8,3 @@
 export { ActionsClientChatOpenAI } from './chat_openai';
 export { ActionsClientLlm } from './llm';
 export { ActionsClientSimpleChatModel } from './simple_chat_model';
-export { BedrockChat } from './bedrock_chat_model';

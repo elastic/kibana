@@ -7,7 +7,11 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { BedrockChat } from '@kbn/langchain/server/language_models';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { RELATED_GRAPH_PATH } from '../../common';
 import { RelatedApiRequest, RelatedApiResponse } from '../../common/types';
 import { getRelatedGraph } from '../graphs/related';
@@ -42,7 +46,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
 
       const services = await context.resolve(['core']);
       const { client } = services.core.elasticsearch;
-      const { getStartServices } = await context.integrationAssistant;
+      const { getStartServices, logger } = await context.integrationAssistant;
       const [, { actions: actionsPlugin }] = await getStartServices();
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
       const connector = req.body.connectorId
@@ -51,19 +55,21 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
             (connectorItem) => connectorItem.actionTypeId === '.bedrock'
           )[0];
 
-      const model = new BedrockChat({
-        actionsClient,
+      const isOpenAI = connector.actionTypeId === '.gen-ai';
+      const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+      const abortSignal = getRequestAbortedSignal(req.events.aborted$);
+
+      const model = new llmClass({
+        actions: actionsPlugin,
         connectorId: connector.id,
+        request: req,
+        logger,
+        llmType: isOpenAI ? 'openai' : 'bedrock',
         model: req.body.model || connector.config?.defaultModel,
-        region: req.body.region || connector.config?.apiUrl.split('.')[1],
         temperature: 0.05,
         maxTokens: 4096,
-        modelKwargs: {
-          top_k: 200,
-          temperature: 0.05,
-          top_p: 0.4,
-          stop_sequences: ['Human:'],
-        },
+        signal: abortSignal,
+        streaming: false,
       });
 
       const graph = await getRelatedGraph(client, model);

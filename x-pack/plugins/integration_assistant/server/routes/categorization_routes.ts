@@ -7,7 +7,11 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { BedrockChat } from '@kbn/langchain/server/language_models';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { CATEGORIZATION_GRAPH_PATH } from '../../common';
 import type { CategorizationApiRequest, CategorizationApiResponse } from '../../common';
 import { getCategorizationGraph } from '../graphs/categorization';
@@ -43,7 +47,7 @@ export function registerCategorizationRoutes(
 
       const services = await context.resolve(['core']);
       const { client } = services.core.elasticsearch;
-      const { getStartServices } = await context.integrationAssistant;
+      const { getStartServices, logger } = await context.integrationAssistant;
       const [, { actions: actionsPlugin }] = await getStartServices();
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
       const connector = req.body.connectorId
@@ -52,19 +56,21 @@ export function registerCategorizationRoutes(
             (connectorItem) => connectorItem.actionTypeId === '.bedrock'
           )[0];
 
-      const model = new BedrockChat({
-        actionsClient,
+      const abortSignal = getRequestAbortedSignal(req.events.aborted$);
+      const isOpenAI = connector.actionTypeId === '.gen-ai';
+      const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+
+      const model = new llmClass({
+        actions: actionsPlugin,
         connectorId: connector.id,
+        request: req,
+        logger,
+        llmType: isOpenAI ? 'openai' : 'bedrock',
         model: req.body.model || connector.config?.defaultModel,
-        region: req.body.region || connector.config?.apiUrl.split('.')[1],
         temperature: 0.05,
         maxTokens: 4096,
-        modelKwargs: {
-          top_k: 200,
-          temperature: 0.05,
-          top_p: 0.4,
-          stop_sequences: ['Human:'],
-        },
+        signal: abortSignal,
+        streaming: false,
       });
 
       const graph = await getCategorizationGraph(client, model);

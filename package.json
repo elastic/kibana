@@ -95,9 +95,6 @@
   },
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",
-    "@aws-crypto/sha256-js": "^5.2.0",
-    "@aws-sdk/credential-provider-node": "^3.583.0",
-    "@aws-sdk/types": "^3.577.0",
     "@babel/runtime": "^7.24.4",
     "@cfworker/json-schema": "^1.12.7",
     "@dnd-kit/core": "^6.1.0",
@@ -950,8 +947,6 @@
     "@slack/webhook": "^7.0.1",
     "@smithy/eventstream-codec": "^3.0.0",
     "@smithy/eventstream-serde-node": "^3.0.0",
-    "@smithy/protocol-http": "^4.0.0",
-    "@smithy/signature-v4": "^3.0.0",
     "@smithy/types": "^3.0.0",
     "@smithy/util-utf8": "^3.0.0",
     "@tanstack/react-query": "^4.29.12",
