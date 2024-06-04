@@ -90,6 +90,10 @@ export interface ResponseActionExecuteOutputContent {
   output_file_stderr_truncated: boolean;
 }
 
+export interface ResponseActionScanOutputContent {
+  code: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -197,12 +201,17 @@ export interface ResponseActionsExecuteParameters {
   timeout?: number;
 }
 
+export interface ResponseActionsScanParameters {
+  path: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
   | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters
-  | ResponseActionUploadParameters;
+  | ResponseActionUploadParameters
+  | ResponseActionsScanParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -212,7 +221,8 @@ export type EndpointActionResponseDataOutput =
   | ResponseActionUploadOutputContent
   | GetProcessesActionOutputContent
   | SuspendProcessActionOutputContent
-  | KillProcessActionOutputContent;
+  | KillProcessActionOutputContent
+  | ResponseActionScanOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property

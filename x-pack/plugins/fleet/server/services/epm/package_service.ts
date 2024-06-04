@@ -28,6 +28,7 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
+  TemplateAgentPolicyInput,
 } from '../../types';
 
 import type { FleetAuthzRouteConfig } from '../security/types';
@@ -46,7 +47,13 @@ import * as Registry from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
-import { ensureInstalledPackage, getInstallation, getPackages, installPackage } from './packages';
+import {
+  ensureInstalledPackage,
+  getInstallation,
+  getPackages,
+  installPackage,
+  getTemplateInputs,
+} from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
 
@@ -101,6 +108,13 @@ export interface PackageClient {
     category?: CategoryId;
     prerelease?: false;
   }): Promise<PackageList>;
+
+  getAgentPolicyInputs(
+    pkgName: string,
+    pkgVersion?: string,
+    prerelease?: false,
+    ignoreUnverified?: boolean
+  ): Promise<TemplateAgentPolicyInput[]>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -261,6 +275,32 @@ class PackageClientImpl implements PackageClient {
     const archiveBuffer = await bundledPackage.getBuffer();
 
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
+  }
+
+  public async getAgentPolicyInputs(
+    pkgName: string,
+    pkgVersion?: string,
+    prerelease?: false,
+    ignoreUnverified?: boolean
+  ) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    // If pkgVersion isn't specified, find the latest package version
+    if (!pkgVersion) {
+      const pkg = await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease });
+      pkgVersion = pkg.version;
+    }
+
+    const { inputs } = await getTemplateInputs(
+      this.internalSoClient,
+      pkgName,
+      pkgVersion,
+      'json',
+      prerelease,
+      ignoreUnverified
+    );
+
+    return inputs;
   }
 
   public async getPackage(
