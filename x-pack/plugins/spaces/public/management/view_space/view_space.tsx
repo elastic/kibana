@@ -76,6 +76,9 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [space, setSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [isLoadingSpace, setIsLoadingSpace] = useState(true);
+  const [isLoadingFeatures, setIsLoadingFeatures] = useState(true);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const [tabs, selectedTabContent] = useTabs(space, features, roles, selectedTabId);
   const { capabilities, getUrlForApp, navigateToUrl } = props;
 
@@ -90,6 +93,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
         throw new Error(`Could not get resulting space by id ${spaceId}`);
       }
       setSpace(result);
+      setIsLoadingSpace(false);
     };
 
     getSpace().catch(handleApiError);
@@ -99,6 +103,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     const _getFeatures = async () => {
       const result = await getFeatures();
       setFeatures(result);
+      setIsLoadingFeatures(false);
     };
     _getFeatures().catch(handleApiError);
   }, [getFeatures]);
@@ -108,6 +113,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
       const getRoles = async () => {
         const result = await spacesManager.getRolesForSpace(spaceId);
         setRoles(result);
+        setIsLoadingRoles(false);
       };
 
       getRoles().catch(handleApiError);
@@ -120,6 +126,16 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
   if (onLoadSpace) {
     onLoadSpace(space);
+  }
+
+  if (isLoadingSpace || isLoadingFeatures || isLoadingRoles) {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xxl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const HeaderAvatar = () => {
