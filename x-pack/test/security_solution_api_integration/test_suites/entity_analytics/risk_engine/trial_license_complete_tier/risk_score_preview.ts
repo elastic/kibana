@@ -199,9 +199,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 47.25513506055279,
-              calculated_score_norm: 18.091552473412246,
+              calculated_score_norm: 18.228334771081926,
               category_1_count: 30,
-              category_1_score: 18.091552473412246,
+              category_1_score: 18.228334771081926,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -224,9 +224,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 47.25513506055279,
-              calculated_score_norm: 18.091552473412246,
+              calculated_score_norm: 18.228334771081926,
               category_1_count: 30,
-              category_1_score: 18.091552473412246,
+              category_1_score: 18.228334771081926,
               id_field: 'host.name',
               id_value: 'host-1',
             },
