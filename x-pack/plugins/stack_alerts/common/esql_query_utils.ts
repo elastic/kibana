@@ -7,6 +7,7 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
+import { intersectionBy } from 'lodash';
 
 type EsqlDocument = Record<string, string | null>;
 
@@ -39,6 +40,8 @@ export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): 
 };
 
 export const toEsQueryHits = (results: EsqlTable) => {
+  const sourceFields = getSourceFields(results.columns);
+
   const hits: EsqlHit[] = results.values.map((row) => {
     const document = rowToDocument(results.columns, row);
     return {
@@ -49,8 +52,11 @@ export const toEsQueryHits = (results: EsqlTable) => {
   });
 
   return {
-    hits,
-    total: hits.length,
+    hits: {
+      hits,
+      total: hits.length,
+    },
+    sourceFields,
   };
 };
 
@@ -63,12 +69,16 @@ export const transformDatatableToEsqlTable = (results: Datatable): EsqlTable => 
   return { columns, values };
 };
 
-export const getSourceFields = () => {
+const getSourceFields = (resultColumns: EsqlResultColumn[]) => {
+  const resultFields = resultColumns.map((c) => ({
+    label: c.name,
+    searchPath: c.name,
+  }));
   const alertFields = Object.keys(alertFieldMap);
-  return (
-    Object.keys(ecsFieldMap)
-      // exclude the alert fields that we don't want to override
-      .filter((key) => !alertFields.includes(key))
-      .map((key) => ({ label: key, searchPath: key }))
-  );
+  const ecsFields = Object.keys(ecsFieldMap)
+    // exclude the alert fields that we don't want to override
+    .filter((key) => !alertFields.includes(key))
+    .map((key) => ({ label: key, searchPath: key }));
+
+  return intersectionBy(resultFields, ecsFields, 'label');
 };
