@@ -92,6 +92,8 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
+export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
+
 export interface FullAgentPolicyAddFields {
   add_fields: {
     target: string;

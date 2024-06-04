@@ -15,13 +15,12 @@ import {
   EuiFormErrorText,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -603,7 +602,9 @@ export default function Expressions(props: Props) {
                 defaultMessage: 'Alert me if a group stops reporting data',
               }
             )}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
                 {
@@ -611,9 +612,7 @@ export default function Expressions(props: Props) {
                     'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                 }
               )}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         disabled={!hasGroupBy}
