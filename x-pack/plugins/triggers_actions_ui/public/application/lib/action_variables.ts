@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, pick } from 'lodash';
+import { pick } from 'lodash';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import {
   ActionContextVariablesFlatten,
@@ -112,7 +112,7 @@ type ActionVariablesWithoutName = Omit<ActionVariable, 'name'>;
 const AlertProvidedActionVariableDescriptions: Record<
   ActionContextVariablesFlatten,
   ActionVariablesWithoutName
-> = {
+> = Object.freeze({
   [LegacyAlertProvidedActionVariables.alertId]: {
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyAlertIdLabel', {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
@@ -280,12 +280,12 @@ const AlertProvidedActionVariableDescriptions: Record<
       }
     ),
   },
-};
+});
 
 const SummarizedAlertProvidedActionVariableDescriptions: Record<
   SummaryActionContextVariablesFlatten,
   Omit<ActionVariable, 'name'>
-> = {
+> = Object.freeze({
   ...AlertProvidedActionVariableDescriptions,
   [SummaryAlertProvidedActionVariables.allAlertsCount]: {
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.allAlertsCountLabel', {
@@ -333,7 +333,7 @@ const SummarizedAlertProvidedActionVariableDescriptions: Record<
       }
     ),
   },
-};
+});
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
   return actionVariables.map((actionVariable) => {
@@ -347,13 +347,9 @@ const transformContextVariables = (
   Object.entries(variables).map(([key, variable]) => ({ ...variable, name: key }));
 
 export const getAlwaysProvidedActionVariables = (): ActionVariable[] => {
-  const variables = cloneDeep(AlertProvidedActionVariableDescriptions);
-
-  return transformContextVariables(variables);
+  return transformContextVariables(AlertProvidedActionVariableDescriptions);
 };
 
 export const getSummaryAlertActionVariables = (): ActionVariable[] => {
-  const variables = cloneDeep(SummarizedAlertProvidedActionVariableDescriptions);
-
-  return transformContextVariables(variables);
+  return transformContextVariables(SummarizedAlertProvidedActionVariableDescriptions);
 };

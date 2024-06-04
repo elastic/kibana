@@ -119,7 +119,7 @@ export function transformActionParams({
     },
   };
 
-  const variablesWithADDFields: Record<string, unknown> = {
+  const variablesWithAADFields: Record<string, unknown> = {
     ...(aadAlert ? { ...aadAlert } : {}),
     // we do not want the AAD fields to overwrite the base fields
     ...variables,
@@ -129,7 +129,7 @@ export function transformActionParams({
     actionTypeId,
     actionId,
     actionParams,
-    variablesWithADDFields
+    variablesWithAADFields
   );
 }
 
