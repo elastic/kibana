@@ -269,7 +269,9 @@ describe('When the add exception modal is opened', () => {
         );
 
         wrapper.update();
-        expect(wrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()).toBeTruthy();
+        expect(
+          wrapper.find('[data-test-subj="wildcardWithWrongOperatorCallout"]').exists()
+        ).toBeTruthy();
       });
     });
 
