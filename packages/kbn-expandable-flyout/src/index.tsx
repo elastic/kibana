@@ -22,7 +22,7 @@ import { isPreviewBanner } from './components/preview_section';
 
 const flyoutInnerStyles = { height: '100%' };
 
-export interface ExpandableFlyoutProps extends EuiFlyoutProps {
+export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   /**
    * List of all registered panels available for render
    */
@@ -31,6 +31,10 @@ export interface ExpandableFlyoutProps extends EuiFlyoutProps {
    * Allows for custom styles to be passed to the EuiFlyout component
    */
   customStyles?: Interpolation<Theme>;
+  /**
+   * Callback function to let application's code the flyout is closed
+   */
+  onClose?: EuiFlyoutProps['onClose'];
 }
 
 /**
@@ -95,7 +99,9 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
       ownFocus={false}
       onClose={(e) => {
         closeFlyout();
-        flyoutProps.onClose(e);
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
       }}
       css={customStyles}
     >
