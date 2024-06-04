@@ -146,7 +146,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe.only('In a non default space', () => {
+    describe('In a non default space', () => {
       const SPACE_ID = 'test';
       before(async () => {
         await kibanaServer.spaces.create({
