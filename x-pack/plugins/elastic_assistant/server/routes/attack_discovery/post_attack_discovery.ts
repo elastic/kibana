@@ -11,22 +11,25 @@ import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 
-import { AttackDiscoveryTask } from '../../services/task_manager/attack_discovery_task';
 import { ATTACK_DISCOVERY } from '../../../common/constants';
+import { getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
+import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { getLlmType } from '../utils';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postAttackDiscoveryRoute = (
-  router: IRouter<ElasticAssistantRequestHandlerContext>,
-  attackDiscoveryTask: AttackDiscoveryTask
+  router: IRouter<ElasticAssistantRequestHandlerContext>
 ) => {
   router.versioned
     .post({
@@ -58,8 +61,9 @@ export const postAttackDiscoveryRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        const spaceId = assistantContext.getSpaceId();
         try {
+          // get the actions plugin start contract from the request context:
+          const actions = (await context.elasticAssistant).actions;
           const pluginName = getPluginNameFromRequest({
             request,
             defaultPluginName: DEFAULT_PLUGIN_NAME,
@@ -69,7 +73,6 @@ export const postAttackDiscoveryRoute = (
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
           const connectorId = decodeURIComponent(request.body.connectorId);
-
           const {
             actionTypeId,
             anonymizationFields,
@@ -78,28 +81,75 @@ export const postAttackDiscoveryRoute = (
             replacements,
             size,
           } = request.body;
-          const result = await attackDiscoveryTask.run({
-            alertsIndexPattern,
+
+          // get an Elasticsearch client for the authenticated user:
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+          // callback to accumulate the latest replacements:
+          let latestReplacements: Replacements = { ...replacements };
+          const onNewReplacements = (newReplacements: Replacements) => {
+            latestReplacements = { ...latestReplacements, ...newReplacements };
+          };
+
+          // get the attack discovery tool:
+          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
+          const assistantTool = assistantTools.find((tool) => tool.id === 'attack-discovery');
+          if (!assistantTool) {
+            return response.notFound(); // attack discovery tool not found
+          }
+
+          const traceOptions = {
+            projectName: langSmithProject,
+            tracers: [
+              ...getLangSmithTracer({
+                apiKey: langSmithApiKey,
+                projectName: langSmithProject,
+                logger,
+              }),
+            ],
+          };
+
+          const llm = new ActionsClientLlm({
+            actions,
             connectorId,
-            pluginName,
+            llmType: getLlmType(actionTypeId),
+            logger,
             request,
-            actionTypeId,
-            anonymizationFields,
-            langSmithApiKey,
-            langSmithProject,
-            replacements,
-            size,
-            spaceId,
-            connectorTimeout: CONNECTOR_TIMEOUT,
-            langChainTimeout: LANG_CHAIN_TIMEOUT,
+            temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+            timeout: CONNECTOR_TIMEOUT,
+            traceOptions,
           });
-          const { params, state, ...rest } = result;
-          console.log('stephh attackDiscovery run result', rest);
+
+          const assistantToolParams = getAssistantToolParams({
+            alertsIndexPattern,
+            anonymizationFields,
+            esClient,
+            latestReplacements,
+            langChainTimeout: LANG_CHAIN_TIMEOUT,
+            llm,
+            onNewReplacements,
+            request,
+            size,
+          });
+
+          // invoke the attack discovery tool:
+          const toolInstance = assistantTool.getTool(assistantToolParams);
+          const rawAttackDiscoveries = await toolInstance?.invoke('');
+          if (rawAttackDiscoveries == null) {
+            return response.customError({
+              body: { message: 'tool returned no attack discoveries' },
+              statusCode: 500,
+            });
+          }
+
+          const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
 
           return response.ok({
-            // TODO what to do?
             body: {
-              taskId: result.id,
+              alertsContextCount,
+              attackDiscoveries,
+              connector_id: connectorId,
+              replacements: latestReplacements,
             },
           });
         } catch (err) {

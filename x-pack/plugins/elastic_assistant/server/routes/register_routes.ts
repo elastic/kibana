@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import { AttackDiscoveryTask } from '../services/task_manager/attack_discovery_task';
 import { getAttackDiscoveryRoute } from './attack_discovery/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
 import { ElasticAssistantPluginRouter, GetElser } from '../types';
@@ -33,8 +32,7 @@ import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route'
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  getElserId: GetElser,
-  attackDiscoveryTask: AttackDiscoveryTask
+  getElserId: GetElser
 ) => {
   // Capabilities
   getCapabilitiesRoute(router);
@@ -73,6 +71,6 @@ export const registerRoutes = (
   findAnonymizationFieldsRoute(router, logger);
 
   // Attack Discovery
-  getAttackDiscoveryRoute(router, attackDiscoveryTask);
-  postAttackDiscoveryRoute(router, attackDiscoveryTask);
+  getAttackDiscoveryRoute(router);
+  postAttackDiscoveryRoute(router);
 };

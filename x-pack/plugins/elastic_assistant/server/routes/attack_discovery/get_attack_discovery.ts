@@ -13,15 +13,11 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { AttackDiscoveryTask } from '../../services/task_manager/attack_discovery_task';
 import { ATTACK_DISCOVERY } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
-export const getAttackDiscoveryRoute = (
-  router: IRouter<ElasticAssistantRequestHandlerContext>,
-  attackDiscoveryTask: AttackDiscoveryTask
-) => {
+export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .get({
       access: 'internal',
@@ -46,20 +42,9 @@ export const getAttackDiscoveryRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         try {
-          const statusCheck = await attackDiscoveryTask.statusCheck();
-          console.log('steph statusCheck result', statusCheck);
-          const staticId = await attackDiscoveryTask.getTaskById(
-            'd5b4d04c-cf11-4a1d-8310-cfe61501f91e'
-          );
-          console.log('steph staticId result', staticId);
-          statusCheck.forEach(async ({ id }) => {
-            const dynId = await attackDiscoveryTask.getTaskById(id);
-
-            console.log(`steph dynId result ${id}`, dynId);
-          });
           return response.ok({
             body: {
-              inProgressRequests: statusCheck.map(({ state }) => state.connectorId),
+              inProgressRequests: [],
             },
           });
         } catch (err) {
