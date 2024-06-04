@@ -15,7 +15,7 @@ export default createTestConfig({
   kbnServerArgs: [
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
     `--xpack.fleet.packages.0.version=1.5.2`,
-    // Configs the environment to run on the base product tier, which may include PLI block components or messages
+    // configs the environment to run on the basic product tier, which may include PLI block components or messages
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([])}`,
   ],
   // load tests in the index file

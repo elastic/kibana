@@ -12,7 +12,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects } = providerContext;
   const pageObjects = getPageObjects(['cisAddIntegration', 'header', 'svlCommonPage']);
 
-  describe('Test Cloud Security Posture Integrations on Serverless', () => {
+  describe('Test Cloud Security Posture Integrations on Serverless', function () {
+    this.tags(['skipMKI']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
@@ -25,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('Integration installation form should not be available without required PLI', async () => {
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const pliBlockExists = await cisIntegration.checkIntegrationPliAuthBlockExists();
 
       expect(pliBlockExists).to.be(true);
