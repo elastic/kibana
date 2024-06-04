@@ -126,11 +126,6 @@ export const allowedExperimentalValues = Object.freeze({
   /*
 
   /**
-   * Enables new Set of filters on the Alerts page.
-   */
-  alertsPageFiltersEnabled: true,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
