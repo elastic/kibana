@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiPageTemplate, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import backgroundImageUrl from './header/background.svg';
 import { Footer } from './footer/footer';
@@ -24,6 +24,7 @@ const queryClient = new QueryClient();
 export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
 
+  const theme = useEuiTheme();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
@@ -37,6 +38,9 @@ export function ObservabilityOnboardingFlow() {
             background-image: url(${backgroundImageUrl});
             background-position: right center;
             background-repeat: no-repeat;
+          }
+          & {
+            background-color: ${theme.euiTheme.colors.ghost};
           }
         `}
         grow={false}
@@ -61,9 +65,30 @@ export function ObservabilityOnboardingFlow() {
         </Routes>
         <EuiSpacer size="xl" />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
-        <Footer />
-        <EuiSpacer size="xl" />
+      <EuiPageTemplate.Section
+        contentProps={{ css: { paddingBlock: 0 } }}
+        css={css`
+          & > .euiPageSection__content-l {
+            padding-block: 0px;
+          }
+          & {
+            position: absolute;
+            bottom: 0;
+            padding-inline: 0px;
+          }
+        `}
+      >
+        <EuiPanel
+          hasBorder
+          css={css`
+            border-radius: 0px;
+            border-left: none;
+            border-bottom: none;
+          `}
+        >
+          <Footer />
+          <EuiSpacer size="xl" />
+        </EuiPanel>
       </EuiPageTemplate.Section>
     </QueryClientProvider>
   );
