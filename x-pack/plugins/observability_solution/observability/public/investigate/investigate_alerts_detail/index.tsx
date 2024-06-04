@@ -29,13 +29,14 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import moment from 'moment';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { asDuration } from '../../../common';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../hooks/use_kibana';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { TopAlert } from '../../typings/alerts';
 import { getDefaultAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { createInvestigateAlertsInventoryWidget } from '../investigate_alerts_inventory/create_investigate_alerts_inventory_widget';
@@ -145,32 +146,34 @@ function InvestigateAlertSummary({ rule, alert }: { rule: Rule; alert: TopAlert 
       : [];
 
   return (
-    <AlertSummaryWidget
-      featureIds={featureIds}
-      timeRange={getDefaultAlertSummaryTimeRange()}
-      fullSize
-      hideStats
-      filter={{
-        bool: {
-          must: [
-            {
-              term: {
-                [ALERT_RULE_UUID]: ruleUuid,
+    <EuiFlexGroup gutterSize="none" direction="column">
+      <AlertSummaryWidget
+        featureIds={featureIds}
+        timeRange={getDefaultAlertSummaryTimeRange()}
+        fullSize
+        hideStats
+        filter={{
+          bool: {
+            must: [
+              {
+                term: {
+                  [ALERT_RULE_UUID]: ruleUuid,
+                },
               },
-            },
-            ...(alertInstanceId && alertInstanceId !== '*'
-              ? [
-                  {
-                    term: {
-                      [ALERT_INSTANCE_ID]: alertInstanceId,
+              ...(alertInstanceId && alertInstanceId !== '*'
+                ? [
+                    {
+                      term: {
+                        [ALERT_INSTANCE_ID]: alertInstanceId,
+                      },
                     },
-                  },
-                ]
-              : []),
-          ],
-        },
-      }}
-    />
+                  ]
+                : []),
+            ],
+          },
+        }}
+      />
+    </EuiFlexGroup>
   );
 }
 
@@ -199,10 +202,10 @@ export function InvestigateAlertsDetail({
 
   onWidgetAddRef.current = onWidgetAdd;
 
-  const ruleName = parsedAlert?.fields[ALERT_RULE_NAME];
+  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   useEffect(() => {
-    if (!ruleName || !parsedAlert) {
+    if (!rule || !parsedAlert) {
       return;
     }
 
@@ -219,7 +222,7 @@ export function InvestigateAlertsDetail({
               title: i18n.translate('xpack.observability.investigateAlertsDetail.alertsRelatedTo', {
                 defaultMessage: 'Related alerts for {ruleName}',
                 values: {
-                  ruleName,
+                  ruleName: rule.name,
                 },
               }),
               parameters: {
@@ -230,7 +233,30 @@ export function InvestigateAlertsDetail({
         },
       },
     ]);
-  }, [blocks, ruleName, parsedAlert]);
+  }, [blocks, rule, parsedAlert, observabilityRuleTypeRegistry]);
+
+  const investigateDetailsAppSection = useMemo(() => {
+    if (!rule || !parsedAlert) {
+      return undefined;
+    }
+    const obsRuleTypeModel = observabilityRuleTypeRegistry.get(rule.ruleTypeId);
+
+    if (obsRuleTypeModel?.investigateDetailsAppSection) {
+      return obsRuleTypeModel.investigateDetailsAppSection({
+        alert: parsedAlert,
+        rule,
+        blocks,
+        onWidgetAdd: (create) => {
+          return onWidgetAddRef.current(create);
+        },
+        query,
+        timeRange,
+        filters,
+      });
+    }
+
+    return undefined;
+  }, [blocks, parsedAlert, rule, timeRange, query, filters, observabilityRuleTypeRegistry]);
 
   if (!parsedAlert && loading) {
     return <EuiLoadingSpinner />;
@@ -263,6 +289,9 @@ export function InvestigateAlertsDetail({
         <EuiFlexItem grow={false}>
           <InvestigateAlertSummary rule={rule} alert={parsedAlert} />
         </EuiFlexItem>
+      ) : null}
+      {investigateDetailsAppSection ? (
+        <EuiFlexItem grow={false}>{investigateDetailsAppSection}</EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
   );

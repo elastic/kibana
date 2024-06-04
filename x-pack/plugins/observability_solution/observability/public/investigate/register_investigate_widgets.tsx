@@ -8,6 +8,7 @@ import React from 'react';
 import type { CoreSetup } from '@kbn/core/public';
 import useAsync from 'react-use/lib/useAsync';
 import { ChromeOption } from '@kbn/investigate-plugin/public';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ObservabilityPublicPluginsStart, ObservabilityPublicPluginsSetup } from '../plugin';
 import { ALERTS_INVENTORY_WIDGET_NAME } from './investigate_alerts_inventory/constants';
 import { SharedProviders } from '../application/shared_providers';
@@ -16,6 +17,8 @@ import { ALERTS_DETAIL_WIDGET_NAME } from './investigate_alerts_detail/constants
 import { InvestigateAlertsDetail } from './investigate_alerts_detail';
 import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { ConfigSchema } from '../plugin';
+import { ALERT_LOG_RATE_ANALYSIS_WIDGET_NAME } from './investigate_alerts_log_rate_analysis/constants';
+import { InvestigateAlertsLogRateAnalysis } from './investigate_alerts_log_rate_analysis';
 
 interface RegisterInvestigateWidgetOptions {
   coreSetup: CoreSetup<ObservabilityPublicPluginsStart>;
@@ -65,6 +68,10 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
             type: 'string',
             description: 'If specified, the table will display related alerts to this alert',
           },
+          activeOnly: {
+            type: 'boolean',
+            description: 'If true, only active alerts will be shown, without recovered alerts',
+          },
         },
       },
     },
@@ -72,7 +79,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
       return {};
     },
     ({ widget, onWidgetAdd }) => {
-      const { filters, query, timeRange, relatedAlertUuid } = widget.parameters;
+      const { filters, query, timeRange, relatedAlertUuid, activeOnly } = widget.parameters;
 
       return (
         <WithContext>
@@ -82,6 +89,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
             query={query}
             timeRange={timeRange}
             relatedAlertUuid={relatedAlertUuid}
+            activeOnly={activeOnly}
           />
         </WithContext>
       );
@@ -119,6 +127,51 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
             alertUuid={alertUuid}
             blocks={blocks}
             onWidgetAdd={onWidgetAdd}
+          />
+        </WithContext>
+      );
+    }
+  );
+
+  options.pluginsSetup.investigate?.registerWidget(
+    {
+      type: ALERT_LOG_RATE_ANALYSIS_WIDGET_NAME,
+      description: 'Analyse metadata that could be related to triggering the alert',
+      chrome: ChromeOption.static,
+      schema: {
+        type: 'object',
+        properties: {
+          alertUuid: {
+            type: 'string',
+            description: 'The instance ID of the alert',
+          },
+          logRateQuery: {
+            type: 'object',
+            description:
+              'The Query DSL for analyzing log rates, e.g. { bool: { filter: [ ... ] } }',
+          },
+          indexPattern: {
+            type: 'string',
+            description: 'The index pattern to run the query against',
+          },
+        },
+        required: ['alertUuid', 'query', 'indexPattern'],
+      } as const,
+    },
+    async () => {
+      return {};
+    },
+    ({ widget, onWidgetAdd, blocks }) => {
+      const { alertUuid, logRateQuery, indexPattern } = widget.parameters;
+
+      return (
+        <WithContext>
+          <InvestigateAlertsLogRateAnalysis
+            alertUuid={alertUuid}
+            blocks={blocks}
+            onWidgetAdd={onWidgetAdd}
+            query={logRateQuery as QueryDslQueryContainer}
+            indexPattern={indexPattern}
           />
         </WithContext>
       );

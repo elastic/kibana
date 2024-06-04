@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import { pick, orderBy } from 'lodash';
-import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
-import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { ALERT_END } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { CustomThresholdRuleTypeParams } from '../../types';
+import { orderBy } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { TopAlert } from '../../../..';
-import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
+import { AlertLogRateAnalysis } from '../../../alert_log_rate_analysis';
+import { CustomThresholdRuleTypeParams } from '../../types';
 import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
-import { getInitialAnalysisStart, getTimeRangeEnd } from './helpers/get_initial_analysis_start';
 
 export interface AlertDetailsLogRateAnalysisProps {
   alert: TopAlert<Record<string, any>>;
@@ -52,36 +48,23 @@ export function LogRateAnalysis({
       getContextualInsightMessages,
     },
   } = services;
-  const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
+
+  const query = useMemo(() => {
+    return getLogRateAnalysisEQQuery(alert, rule.params);
+  }, [alert, rule.params]);
+
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
     | undefined
   >();
 
-  useEffect(() => {
-    const esSearchRequest = getLogRateAnalysisEQQuery(alert, rule.params);
-
-    if (esSearchRequest) {
-      setEsSearchQuery(esSearchRequest);
-    }
-  }, [alert, rule.params]);
-
-  // Identify `intervalFactor` to adjust time ranges based on alert settings.
-  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
-  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
-  const lookbackDuration =
+  const { lookbackSize, lookbackUnit } =
     rule.params.criteria[0]?.timeSize && rule.params.criteria[0]?.timeUnit
-      ? moment.duration(rule.params.criteria[0].timeSize, rule.params.criteria[0].timeUnit)
-      : moment.duration(1, 'm');
-  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
-
-  const alertStart = moment(alert.start);
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
-
-  const timeRange = {
-    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: getTimeRangeEnd({ alertStart, intervalFactor, alertEnd }),
-  };
+      ? {
+          lookbackSize: rule.params.criteria[0].timeSize,
+          lookbackUnit: rule.params.criteria[0].timeUnit,
+        }
+      : { lookbackSize: 1, lookbackUnit: 'm' as const };
 
   const logRateAnalysisTitle = i18n.translate(
     'xpack.observability.customThreshold.alertDetails.logRateAnalysisTitle',
@@ -167,7 +150,7 @@ export function LogRateAnalysis({
     });
   }, [logRateAnalysisParams, getContextualInsightMessages]);
 
-  if (!dataView || !esSearchQuery) return null;
+  if (!dataView || !query) return null;
 
   return (
     <EuiPanel hasBorder={true} data-test-subj="logRateAnalysisAlertDetails">
@@ -183,36 +166,14 @@ export function LogRateAnalysis({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <LogRateAnalysisContent
-            embeddingOrigin="observability_log_threshold_alert_details"
+          <AlertLogRateAnalysis
+            alert={alert}
             dataView={dataView}
-            timeRange={timeRange}
-            esSearchQuery={esSearchQuery}
-            initialAnalysisStart={getInitialAnalysisStart({
-              alertStart,
-              intervalFactor,
-              alertEnd,
-            })}
-            barColorOverride={colorTransformer(Color.color0)}
-            barHighlightColorOverride={colorTransformer(Color.color1)}
+            lookbackSize={lookbackSize}
+            lookbackUnit={lookbackUnit}
+            origin="observability_log_threshold_alert_details"
             onAnalysisCompleted={onAnalysisCompleted}
-            appDependencies={pick(services, [
-              'analytics',
-              'application',
-              'data',
-              'executionContext',
-              'charts',
-              'fieldFormats',
-              'http',
-              'notifications',
-              'share',
-              'storage',
-              'uiSettings',
-              'unifiedSearch',
-              'theme',
-              'lens',
-              'i18n',
-            ])}
+            query={query}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

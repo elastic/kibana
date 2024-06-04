@@ -81,6 +81,10 @@ export function MobileErrorsOverview() {
       groupId: undefined,
       environment,
       kuery: kueryWithMobileFilters,
+      start,
+      end,
+      comparisonEnabled,
+      offset,
     });
   const {
     data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,

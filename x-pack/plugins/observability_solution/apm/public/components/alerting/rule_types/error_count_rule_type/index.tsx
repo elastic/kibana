@@ -43,7 +43,7 @@ import {
 } from '../../ui_components/chart_preview/chart_preview_helper';
 import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
-export interface ErrorCountRuleParams {
+export interface ErrorCountRuleParams extends Record<string, unknown> {
   windowSize?: number;
   windowUnit?: TIME_UNITS;
   threshold?: number;

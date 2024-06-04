@@ -246,9 +246,21 @@ export function InvestigateView({}: {}) {
         },
         blocks: {
           publish: (blocksForItem) => {
-            setBlocks((prevBlocks) => ({ ...prevBlocks, [item.id]: blocksForItem }));
+            const nextPublishedBlockIds = blocksForItem.map((block) => block.id);
+
+            setBlocks((prevBlocks) => ({
+              ...prevBlocks,
+              [item.id]: (prevBlocks[item.id] ?? [])
+                .filter((block) => !nextPublishedBlockIds.includes(block.id))
+                .concat(blocksForItem),
+            }));
             return () => {
-              setBlocks((prevBlocks) => ({ ...prevBlocks, [item.id]: [] }));
+              setBlocks((prevBlocks) => ({
+                ...prevBlocks,
+                [item.id]: prevBlocks[item.id].filter((block) =>
+                  nextPublishedBlockIds.includes(block.id)
+                ),
+              }));
             };
           },
         },

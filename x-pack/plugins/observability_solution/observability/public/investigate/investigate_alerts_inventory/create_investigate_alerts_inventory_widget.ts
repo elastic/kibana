@@ -10,4 +10,5 @@ import { ALERTS_INVENTORY_WIDGET_NAME } from './constants';
 
 export const createInvestigateAlertsInventoryWidget = createWidgetFactory<{
   relatedAlertUuid?: string;
+  activeOnly?: boolean;
 }>(ALERTS_INVENTORY_WIDGET_NAME);

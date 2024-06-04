@@ -5,30 +5,27 @@
  * 2.0.
  */
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
-import { useAnyOfApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
-import { useTimeRange } from './use_time_range';
 
 export function useErrorGroupDistributionFetcher({
   serviceName,
   groupId,
   kuery,
   environment,
+  start,
+  end,
+  comparisonEnabled,
+  offset,
 }: {
   serviceName: string;
   groupId: string | undefined;
   kuery: string;
   environment: string;
+  start: string;
+  end: string;
+  comparisonEnabled: boolean;
+  offset: string | undefined;
 }) {
-  const {
-    query: { rangeFrom, rangeTo, offset, comparisonEnabled },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/errors',
-    '/mobile-services/{serviceName}/errors-and-crashes'
-  );
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {

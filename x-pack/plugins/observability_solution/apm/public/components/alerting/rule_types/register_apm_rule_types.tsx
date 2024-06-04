@@ -5,25 +5,46 @@
  * 2.0.
  */
 
+import { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { lazy } from 'react';
+import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
-import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
+import React, { lazy } from 'react';
 import {
   anomalyMessage,
   errorCountMessage,
   transactionDurationMessage,
   transactionErrorRateMessage,
 } from '../../../../common/rules/default_action_message';
-import { AlertParams } from './anomaly_rule_type';
+import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
+import { ApmPluginStartDeps } from '../../../plugin';
+import { InvestigateContextProvider } from '../../app/investigate_widgets/investigate_context_provider';
+import type { AlertParams } from './anomaly_rule_type';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
-export function registerApmRuleTypes(observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) {
+const LazyErrorRateInvestigateDetailsAppSection = lazy(() =>
+  import('./error_count_rule_type/investigate_details_app_section').then((m) => ({
+    default: m.ErrorRateInvestigateDetailsAppSection,
+  }))
+);
+
+const TransactionDurationInvestigateDetailsAppSection = lazy(() =>
+  import('./transaction_duration_rule_type/investigate_details_app_section').then((m) => ({
+    default: m.TransactionDurationInvestigateDetailsAppSection,
+  }))
+);
+
+export function registerApmRuleTypes({
+  observabilityRuleTypeRegistry,
+  coreSetup,
+}: {
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  coreSetup: CoreSetup<ApmPluginStartDeps>;
+}) {
   observabilityRuleTypeRegistry.register({
     id: ApmRuleType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
@@ -50,6 +71,16 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
     priority: 80,
+    investigateDetailsAppSection: (props) => (
+      <InvestigateContextProvider
+        filters={props.filters}
+        timeRange={props.timeRange}
+        query={props.query}
+        coreSetup={coreSetup}
+      >
+        <LazyErrorRateInvestigateDetailsAppSection {...props} />
+      </InvestigateContextProvider>
+    ),
   });
 
   observabilityRuleTypeRegistry.register({
@@ -81,6 +112,16 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
     priority: 60,
+    investigateDetailsAppSection: (props) => (
+      <InvestigateContextProvider
+        filters={props.filters}
+        timeRange={props.timeRange}
+        query={props.query}
+        coreSetup={coreSetup}
+      >
+        <TransactionDurationInvestigateDetailsAppSection {...props} />
+      </InvestigateContextProvider>
+    ),
   });
 
   observabilityRuleTypeRegistry.register({

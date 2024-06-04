@@ -5,44 +5,68 @@
  * 2.0.
  */
 
-import {
+import type { GlobalWidgetParameters, WidgetRenderAPI } from '@kbn/investigate-plugin/public';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import type {
+  Rule,
   RuleTypeModel,
-  RuleTypeParams,
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
-import { AsDuration, AsPercent } from '../../common/utils/formatters';
+import { omit, orderBy } from 'lodash';
+import type { AsDuration, AsPercent } from '../../common/utils/formatters';
+import type { TopAlert } from '../typings/alerts';
 
 export type ObservabilityRuleTypeFormatter = (options: {
-  fields: ParsedTechnicalFields & Record<string, any>;
+  fields: Record<string, any> & ParsedTechnicalFields;
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link?: string; hasBasePath?: boolean };
 
-export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = RuleTypeParams>
-  extends RuleTypeModel<Params> {
+export interface ObservabilityRuleTypeModel<
+  TParams extends Record<string, any> = Record<string, unknown>
+> extends RuleTypeModel<TParams> {
   format: ObservabilityRuleTypeFormatter;
+  investigateDetailsAppSection?: (
+    options: { alert: TopAlert; rule: Rule<TParams> } & GlobalWidgetParameters &
+      Pick<WidgetRenderAPI, 'blocks' | 'onWidgetAdd'>
+  ) => React.ReactElement;
   priority?: number;
 }
 
-export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRegistryContract) {
-  const formatters: Array<{
-    typeId: string;
-    priority: number;
-    fn: ObservabilityRuleTypeFormatter;
-  }> = [];
-
-  return {
-    register: (type: ObservabilityRuleTypeModel<any>) => {
-      const { format, priority, ...rest } = type;
-      formatters.push({ typeId: type.id, priority: priority || 0, fn: format });
-      ruleTypeRegistry.register(rest);
-    },
-    getFormatter: (typeId: string) => {
-      return formatters.find((formatter) => formatter.typeId === typeId)?.fn;
-    },
-    list: () =>
-      formatters.sort((a, b) => b.priority - a.priority).map((formatter) => formatter.typeId),
-  };
+export interface ObservabilityRuleTypeRegistry {
+  isObservabilityRuleTypeModel: (
+    ruleTypeModel: RuleTypeModel
+  ) => ruleTypeModel is ObservabilityRuleTypeModel<Record<string, unknown>>;
+  get: (ruleTypeId: string) => ObservabilityRuleTypeModel | undefined;
+  register<TParams extends Record<string, any> = never>(
+    type: ObservabilityRuleTypeModel<TParams>
+  ): void;
+  getFormatter: (typeId: string) => ObservabilityRuleTypeFormatter | undefined;
+  list: () => string[];
 }
 
-export type ObservabilityRuleTypeRegistry = ReturnType<typeof createObservabilityRuleTypeRegistry>;
+export function createObservabilityRuleTypeRegistry(
+  ruleTypeRegistry: RuleTypeRegistryContract
+): ObservabilityRuleTypeRegistry {
+  const registry: Map<string, ObservabilityRuleTypeModel> = new Map();
+
+  return {
+    isObservabilityRuleTypeModel: (
+      ruleTypeModel: RuleTypeModel
+    ): ruleTypeModel is ObservabilityRuleTypeModel => {
+      return registry.has(ruleTypeModel.id);
+    },
+    get: (ruleTypeId) => registry.get(ruleTypeId),
+    register: (type: ObservabilityRuleTypeModel<any>) => {
+      const { format, priority, ...rest } = type;
+      registry.set(type.id, type);
+      ruleTypeRegistry.register(omit(rest, 'format', 'priority', 'investigateDetailsAppSection'));
+    },
+    getFormatter: (typeId: string) => {
+      return registry.get(typeId)?.format;
+    },
+    list: () => {
+      const allTypes = orderBy(Array.from(registry.values()), 'priority', 'desc');
+      return allTypes.map((type) => type.id);
+    },
+  };
+}

@@ -99,6 +99,7 @@ export function ErrorGroupDetails() {
       osVersion,
       appVersion,
       netConnectionType,
+      offset,
     },
   } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}');
   const kueryWithMobileFilters = getKueryWithMobileFilters({
@@ -170,6 +171,10 @@ export function ErrorGroupDetails() {
       groupId,
       environment,
       kuery: kueryWithMobileFilters,
+      start,
+      end,
+      comparisonEnabled,
+      offset,
     });
 
   useEffect(() => {

@@ -70,6 +70,8 @@ export function Example() {
       fetchStatus={FETCH_STATUS.SUCCESS}
       distribution={distribution}
       title="Foo title"
+      previousPeriodLabel="yesterday"
+      comparisonEnabled
     />
   );
 }
@@ -84,6 +86,8 @@ export function EmptyState() {
         previousPeriod: [],
       }}
       title="Foo title"
+      previousPeriodLabel=""
+      comparisonEnabled={false}
     />
   );
 }

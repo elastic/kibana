@@ -5,21 +5,16 @@
  * 2.0.
  */
 import type { CoreSetup } from '@kbn/core/public';
-import React, { lazy } from 'react';
+import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { ChromeOption, GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import useAsync from 'react-use/lib/useAsync';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import React, { lazy } from 'react';
+import type { Environment } from '../../../../common/environment_rt';
 import {
   APM_SERVICE_DETAIL_WIDGET_NAME,
   APM_SERVICE_INVENTORY_WIDGET_NAME,
 } from '../../../../common/investigate';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../../plugin';
-import type { Environment } from '../../../../common/environment_rt';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
-import { ApmThemeProvider } from '../../routing/app_root';
-import { StartServices } from '../../../context/kibana_context/use_kibana';
+import { InvestigateContextProvider } from './investigate_context_provider';
 import { createInvestigateServiceDetailWidget } from './investigate_service_detail/create_investigate_service_detail_widget';
 
 interface RegisterInvestigateWidgetOptions {
@@ -28,52 +23,6 @@ interface RegisterInvestigateWidgetOptions {
 }
 
 export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOptions) {
-  function WithContext({
-    children,
-    filters,
-    query,
-    timeRange,
-  }: {
-    children: React.ReactNode;
-  } & GlobalWidgetParameters) {
-    const startServicesAsync = useAsync(async () => {
-      return await options.core.getStartServices();
-    }, [options.core]);
-
-    if (!startServicesAsync.value) {
-      return null;
-    }
-
-    const [coreStart, pluginsStart] = startServicesAsync.value;
-
-    const start = timeRange.from;
-    const end = timeRange.to;
-    const kuery = query.query;
-
-    const services = {
-      ...coreStart,
-      ...pluginsStart,
-    } as StartServices;
-
-    return (
-      <KibanaThemeProvider theme={{ theme$: coreStart.theme.theme$ }}>
-        <KibanaContextProvider services={services}>
-          <ApmThemeProvider>
-            <TimeRangeMetadataContextProvider
-              start={start}
-              end={end}
-              kuery={kuery}
-              uiSettings={options.core.uiSettings}
-              useSpanName={false}
-            >
-              {children}
-            </TimeRangeMetadataContextProvider>
-          </ApmThemeProvider>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    );
-  }
-
   const LazyInvestigateServiceInventory = withSuspense(
     lazy(() =>
       import('./investigate_service_inventory').then((m) => ({
@@ -115,7 +64,12 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
       const environment = (envFromParameters ?? 'ENVIRONMENT_ALL') as Environment;
 
       return (
-        <WithContext filters={filters} query={query} timeRange={timeRange}>
+        <InvestigateContextProvider
+          filters={filters}
+          query={query}
+          timeRange={timeRange}
+          coreSetup={options.core}
+        >
           <LazyInvestigateServiceInventory
             environment={environment}
             serviceGroup=""
@@ -137,7 +91,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
               );
             }}
           />
-        </WithContext>
+        </InvestigateContextProvider>
       );
     }
   );
@@ -174,7 +128,12 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
       const { environment, filters, query, timeRange, serviceName, transactionType } =
         widget.parameters;
       return (
-        <WithContext filters={filters} query={query} timeRange={timeRange}>
+        <InvestigateContextProvider
+          filters={filters}
+          query={query}
+          timeRange={timeRange}
+          coreSetup={options.core}
+        >
           <LazyInvestigateServiceDetail
             environment={(environment ?? 'ENVIRONMENT_ALL') as Environment}
             serviceName={serviceName}
@@ -184,7 +143,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
             transactionType={transactionType}
             blocks={blocks}
           />
-        </WithContext>
+        </InvestigateContextProvider>
       );
     }
   );

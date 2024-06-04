@@ -23,6 +23,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   ECS_VERSION,
   EVENT_ACTION,
@@ -58,7 +59,12 @@ export function InvestigateAlertsInventory({
   timeRange,
   onWidgetAdd,
   relatedAlertUuid,
-}: GlobalWidgetParameters & { onWidgetAdd: OnWidgetAdd; relatedAlertUuid?: string }) {
+  activeOnly,
+}: GlobalWidgetParameters & {
+  onWidgetAdd: OnWidgetAdd;
+  relatedAlertUuid?: string;
+  activeOnly?: boolean;
+}) {
   const {
     triggersActionsUi: { getAlertsStateTable: AlertsStateTable, alertsTableConfigurationRegistry },
     http,
@@ -75,7 +81,16 @@ export function InvestigateAlertsInventory({
     const esFilter = getEsFilterFromGlobalParameters({
       filters,
       query,
-      timeRange,
+      timeRange: undefined,
+    });
+
+    // make sure there is no upper limit for @timestamp
+    esFilter.bool.filter.push({
+      range: {
+        '@timestamp': {
+          gte: timeRange.from,
+        },
+      },
     });
 
     if (relatedAlertUuid) {
@@ -132,6 +147,14 @@ export function InvestigateAlertsInventory({
           },
         });
       }
+    }
+
+    if (activeOnly) {
+      esFilter.bool.filter.push({
+        term: {
+          [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+        },
+      });
     }
 
     return esFilter;

@@ -407,7 +407,10 @@ export class ApmPlugin
       },
     });
 
-    registerApmRuleTypes(observabilityRuleTypeRegistry);
+    registerApmRuleTypes({
+      observabilityRuleTypeRegistry,
+      coreSetup: core,
+    });
 
     registerInvestigateWidgets({
       core,
