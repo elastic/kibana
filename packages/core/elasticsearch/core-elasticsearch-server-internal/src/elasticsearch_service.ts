@@ -61,7 +61,7 @@ export class ElasticsearchService
   private client?: ClusterClient;
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
-  private agentManager: AgentManager;
+  private agentManager?: AgentManager;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -69,11 +69,6 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
-    const dnsCacheTtlInSeconds =
-      coreContext.configService.atPathSync<ElasticsearchConfigType>(
-        'elasticsearch'
-      ).dnsCacheTtlInSeconds;
-    this.agentManager = new AgentManager(this.log.get('agent-manager'), { dnsCacheTtlInSeconds });
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -96,6 +91,8 @@ export class ElasticsearchService
     this.log.debug('Setting up elasticsearch service');
 
     const config = await firstValueFrom(this.config$);
+
+    const agentManager = this.getAgentManager(config);
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
@@ -129,7 +126,7 @@ export class ElasticsearchService
         this.unauthorizedErrorHandler = handler;
       },
       agentStatsProvider: {
-        getAgentsStats: this.agentManager.getAgentsStats.bind(this.agentManager),
+        getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
     };
   }
@@ -222,8 +219,15 @@ export class ElasticsearchService
       authHeaders: this.authHeaders,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
-      agentFactoryProvider: this.agentManager,
+      agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
     });
+  }
+
+  private getAgentManager({ dnsCacheTtlInSeconds }: ElasticsearchClientConfig): AgentManager {
+    if (!this.agentManager) {
+      this.agentManager = new AgentManager(this.log.get('agent-manager'), { dnsCacheTtlInSeconds });
+    }
+    return this.agentManager;
   }
 }
