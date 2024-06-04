@@ -1768,4 +1768,70 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'mac.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage:
+          "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage:
+          "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage:
+          "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
 ];
