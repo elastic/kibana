@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../config/ess/config.base.trial')
+    require.resolve('../../../../../config/ess/config.base.basic')
   );
 
   return {
@@ -20,9 +20,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
       ],
     },
-    testFiles: [require.resolve('../ess')],
+    testFiles: [require.resolve('../ess/basic')],
     junit: {
-      reportName: 'Timeline Integration Tests - ESS Env - Trial License',
+      reportName: 'Timeline Integration Tests - ESS Env - Basic License',
     },
   };
 }
