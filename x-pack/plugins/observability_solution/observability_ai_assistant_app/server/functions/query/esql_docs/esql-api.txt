@@ -11,7 +11,6 @@ FROM library
     | SORT year
     | LIMIT 5
   """,
-  "version": "2024.04.01"
 ```
 
 }
@@ -49,9 +48,6 @@ For syntax, refer to Returning localized results.
 Passing parameters to a query.
 `query`
 (Required, string) ES|QL query to run. For syntax, refer to Syntax reference.
-`version`
-(Required, string) ES|QL language version. Can be sent in short or long form, e.g.
-`2024.04.01` or `2024.04.01.🚀`. See Language versions for details.
 Response bodyedit
 `columns`
 (array of objects)

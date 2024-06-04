@@ -90,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         settings: {
           frequency: '1m',
           syncDelay: '1m',
+          preventInitialBackfill: false,
         },
         tags: ['test'],
         timeWindow: {
