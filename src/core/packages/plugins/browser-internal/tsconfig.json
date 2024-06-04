@@ -39,6 +39,8 @@
     "@kbn/core-plugins-contracts-browser",
     "@kbn/core-security-browser-mocks",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-di-common",
+    "@kbn/core-di-common-internal",
   ],
   "exclude": [
     "target/**/*",
