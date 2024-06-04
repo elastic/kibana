@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createAssist as Assist } from '../utils/assist';
 import { clipContext, ConversationalChain } from './conversational_chain';
-import { FakeListChatModel, FakeListLLM } from '@langchain/core/utils/testing';
+import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { experimental_StreamData, Message } from 'ai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
@@ -75,7 +75,7 @@ describe('conversational chain', () => {
       ? new FakeListChatModel({
           responses,
         })
-      : new FakeListLLM({ responses });
+      : new FakeStreamingLLM({ responses });
 
     const aiClient = Assist({
       es_client: mockElasticsearchClient as unknown as Client,

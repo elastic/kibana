@@ -10,7 +10,6 @@ import { END, START, StateGraph, StateGraphArgs } from '@langchain/langgraph';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { StructuredTool } from '@langchain/core/tools';
-import type { CompiledStateGraph } from '@langchain/langgraph/dist/graph/state';
 import type { Logger } from '@kbn/logging';
 
 import { BaseMessage } from '@langchain/core/messages';
@@ -33,6 +32,8 @@ interface GetDefaultAssistantGraphParams {
   tools: StructuredTool[];
 }
 
+export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
+
 /**
  * Returns a compiled default assistant graph
  */
@@ -44,7 +45,7 @@ export const getDefaultAssistantGraph = ({
   logger,
   messages,
   tools,
-}: GetDefaultAssistantGraphParams): CompiledStateGraph => {
+}: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
     const graphState: StateGraphArgs<AgentState>['channels'] = {
@@ -96,7 +97,9 @@ export const getDefaultAssistantGraph = ({
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
 
     // Put together a new graph using the nodes and default state from above
-    const graph = new StateGraph<AgentState>({ channels: graphState });
+    const graph = new StateGraph<AgentState, Partial<AgentState>, '__start__' | 'agent' | 'tools'>({
+      channels: graphState,
+    });
     // Define the nodes to cycle between
     graph.addNode(AGENT_NODE, runAgentNode);
     graph.addNode(TOOLS_NODE, executeToolsNode);

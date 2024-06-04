@@ -11,15 +11,14 @@ import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-strea
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
-import { CompiledStateGraph } from '@langchain/langgraph/dist/graph/state';
-import { DEFAULT_ASSISTANT_GRAPH_ID } from './graph';
+import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 import type { APMTracer } from '../../tracers/apm_tracer';
 import { withAssistantSpan } from '../../tracers/with_assistant_span';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
-  assistantGraph: CompiledStateGraph;
+  assistantGraph: DefaultAssistantGraph;
   inputs: { input: string };
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -100,6 +99,7 @@ export const streamGraph = async ({
           const msg = chunk.message;
 
           if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
+            /* empty */
           } else if (!didEnd) {
             if (msg.response_metadata.finish_reason === 'stop') {
               handleStreamEnd(finalMessage);
@@ -111,7 +111,7 @@ export const streamGraph = async ({
         }
       }
 
-      processEvent();
+      await processEvent();
     } catch (err) {
       // if I throw an error here, it crashes the server. Not sure how to get around that.
       // If I put await on this function the error works properly, but when there is not an error
@@ -129,14 +129,14 @@ export const streamGraph = async ({
   };
 
   // Start processing events, do not await! Return `responseWithHeaders` immediately
-  processEvent();
+  await processEvent();
 
   return responseWithHeaders;
 };
 
 interface InvokeGraphParams {
   apmTracer: APMTracer;
-  assistantGraph: CompiledStateGraph;
+  assistantGraph: DefaultAssistantGraph;
   inputs: { input: string };
   onLlmResponse?: OnLlmResponse;
   traceOptions?: TraceOptions;
