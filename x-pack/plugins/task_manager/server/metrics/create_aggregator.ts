@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, filter, interval, map, merge, Observable, startWith } from 'rxjs';
+import { filter, interval, map, merge, Observable } from 'rxjs';
 import { JsonValue } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
@@ -32,11 +32,12 @@ export function createAggregator<T extends JsonValue>({
   eventFilter,
   metricsAggregator,
 }: CreateMetricsAggregatorOpts<T>): AggregatedStatProvider<T> {
+  let taskResetEvent$: Observable<T> | undefined;
   if (reset$) {
     let lastResetTime: Date = new Date();
     // Resets the aggregators either when the reset interval has passed or
     // a reset$ event is received
-    merge(
+    taskResetEvent$ = merge(
       interval(config.metrics_reset_interval).pipe(
         map(() => {
           if (intervalHasPassedSince(lastResetTime, config.metrics_reset_interval)) {
@@ -62,11 +63,13 @@ export function createAggregator<T extends JsonValue>({
           return true;
         })
       )
-    ).subscribe((shouldReset: boolean) => {
-      if (shouldReset) {
+    ).pipe(
+      filter((shouldReset: boolean) => shouldReset),
+      map(() => {
         metricsAggregator.reset();
-      }
-    });
+        return metricsAggregator.collect();
+      })
+    );
   }
 
   const taskEvents$: Observable<T> = events$.pipe(
@@ -77,8 +80,13 @@ export function createAggregator<T extends JsonValue>({
     })
   );
 
-  return combineLatest([taskEvents$.pipe(startWith(metricsAggregator.initialMetric()))]).pipe(
-    map(([value]: [T]) => {
+  const observablesToMerge: Array<Observable<T>> = [taskEvents$];
+  if (taskResetEvent$) {
+    observablesToMerge.push(taskResetEvent$);
+  }
+
+  return merge(...observablesToMerge).pipe(
+    map((value: T) => {
       return {
         key,
         value,

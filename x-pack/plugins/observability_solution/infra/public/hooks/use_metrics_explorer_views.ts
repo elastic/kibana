@@ -52,7 +52,7 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
   const queryClient = useQueryClient();
-  const { source, updateSourceConfiguration } = useSourceContext();
+  const { source, persistSourceConfiguration } = useSourceContext();
 
   const defaultViewId = source?.configuration.metricsExplorerDefaultView ?? '0';
 
@@ -98,7 +98,7 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     string,
     MutationContext<MetricsExplorerView>
   >({
-    mutationFn: (id) => updateSourceConfiguration({ metricsExplorerDefaultView: id }),
+    mutationFn: (id) => persistSourceConfiguration({ metricsExplorerDefaultView: id }),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when updating the default view.

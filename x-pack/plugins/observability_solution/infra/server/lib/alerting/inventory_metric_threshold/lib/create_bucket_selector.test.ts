@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Comparator, InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { createBucketSelector } from './create_bucket_selector';
 
 describe('createBucketSelector', () => {
@@ -15,9 +15,9 @@ describe('createBucketSelector', () => {
       timeSize: 5,
       timeUnit: 'm',
       threshold: [8],
-      comparator: Comparator.GT_OR_EQ,
+      comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
       warningThreshold: [16],
-      warningComparator: Comparator.LT_OR_EQ,
+      warningComparator: COMPARATORS.LESS_THAN_OR_EQUALS,
     };
     expect(createBucketSelector('tx', inventoryMetricConditions)).toEqual({
       selectedBucket: {
