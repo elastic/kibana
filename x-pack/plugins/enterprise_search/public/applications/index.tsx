@@ -101,7 +101,7 @@ export const renderApp = (
   const store = getContext().store;
   let user: AuthenticatedUser | null = null;
   try {
-    security?.authc
+    core.security?.authc
       .getCurrentUser()
       .then((newUser) => {
         user = newUser;
