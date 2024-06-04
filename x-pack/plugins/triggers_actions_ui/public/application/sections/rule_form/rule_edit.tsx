@@ -207,7 +207,7 @@ export const RuleEdit = <
         const newRule = await updateRule({ http, rule, id: rule.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{ruleName}'",
+            defaultMessage: "Updated ''{ruleName}''",
             values: {
               ruleName: newRule.name,
             },
