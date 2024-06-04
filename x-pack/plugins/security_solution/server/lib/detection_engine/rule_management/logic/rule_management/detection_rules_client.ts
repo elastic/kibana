@@ -36,6 +36,7 @@ import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { getIdError } from '../../utils/utils';
 import { throwAuthzError } from '../../../../machine_learning/validation';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
 
 class ClientError extends Error {
   public readonly statusCode: number;
@@ -169,172 +170,179 @@ export const createCustomRule = async (
   rulesClient: RulesClient,
   createCustomRulePayload: CreateCustomRuleProps,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
-  const { params } = createCustomRulePayload;
-  await _validateMlAuth(mlAuthz, params.type);
+): Promise<RuleAlertType> =>
+  withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
+    const { params } = createCustomRulePayload;
+    await _validateMlAuth(mlAuthz, params.type);
 
-  const rule = await _createRule(rulesClient, params, { immutable: false });
-  return rule;
-};
+    const rule = await _createRule(rulesClient, params, { immutable: false });
+    return rule;
+  });
 
 export const createPrebuiltRule = async (
   rulesClient: RulesClient,
   createPrebuiltRulePayload: CreatePrebuiltRuleProps,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
-  const { ruleAsset } = createPrebuiltRulePayload;
+): Promise<RuleAlertType> =>
+  withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
+    const { ruleAsset } = createPrebuiltRulePayload;
 
-  await _validateMlAuth(mlAuthz, ruleAsset.type);
+    await _validateMlAuth(mlAuthz, ruleAsset.type);
 
-  const rule = await _createRule(rulesClient, ruleAsset, {
-    immutable: true,
-    defaultEnabled: false,
+    const rule = await _createRule(rulesClient, ruleAsset, {
+      immutable: true,
+      defaultEnabled: false,
+    });
+
+    return rule;
   });
-
-  return rule;
-};
 
 export const updateRule = async (
   rulesClient: RulesClient,
   updateRulePayload: UpdateRuleProps,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
-  const { ruleUpdate } = updateRulePayload;
-  const { rule_id: ruleId, id } = ruleUpdate;
+): Promise<RuleAlertType> =>
+  withSecuritySpan('DetectionRulesClient.updateRule', async () => {
+    const { ruleUpdate } = updateRulePayload;
+    const { rule_id: ruleId, id } = ruleUpdate;
 
-  await _validateMlAuth(mlAuthz, ruleUpdate.type);
+    await _validateMlAuth(mlAuthz, ruleUpdate.type);
 
-  const existingRule = await readRules({
-    rulesClient,
-    ruleId,
-    id,
+    const existingRule = await readRules({
+      rulesClient,
+      ruleId,
+      id,
+    });
+
+    if (existingRule == null) {
+      const error = getIdError({ id, ruleId });
+      throw new ClientError(error.message, error.statusCode);
+    }
+
+    const update = await _updateRule(rulesClient, { ruleUpdate, existingRule });
+
+    await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleUpdate.enabled);
+
+    return { ...update, enabled: ruleUpdate.enabled ?? existingRule.enabled };
   });
-
-  if (existingRule == null) {
-    const error = getIdError({ id, ruleId });
-    throw new ClientError(error.message, error.statusCode);
-  }
-
-  const update = await _updateRule(rulesClient, { ruleUpdate, existingRule });
-
-  await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleUpdate.enabled);
-
-  return { ...update, enabled: ruleUpdate.enabled ?? existingRule.enabled };
-};
 
 export const patchRule = async (
   rulesClient: RulesClient,
   patchRulePayload: PatchRuleProps,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
-  const { nextParams } = patchRulePayload;
-  const { rule_id: ruleId, id } = nextParams;
+): Promise<RuleAlertType> =>
+  withSecuritySpan('DetectionRulesClient.patchRule', async () => {
+    const { nextParams } = patchRulePayload;
+    const { rule_id: ruleId, id } = nextParams;
 
-  const existingRule = await readRules({
-    rulesClient,
-    ruleId,
-    id,
+    const existingRule = await readRules({
+      rulesClient,
+      ruleId,
+      id,
+    });
+
+    if (existingRule == null) {
+      const error = getIdError({ id, ruleId });
+      throw new ClientError(error.message, error.statusCode);
+    }
+
+    await _validateMlAuth(mlAuthz, nextParams.type ?? existingRule.params.type);
+
+    const update = await _patchRule(rulesClient, { existingRule, nextParams });
+
+    await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled);
+
+    if (nextParams.enabled != null) {
+      return { ...update, enabled: nextParams.enabled };
+    } else {
+      return update;
+    }
   });
-
-  if (existingRule == null) {
-    const error = getIdError({ id, ruleId });
-    throw new ClientError(error.message, error.statusCode);
-  }
-
-  await _validateMlAuth(mlAuthz, nextParams.type ?? existingRule.params.type);
-
-  const update = await _patchRule(rulesClient, { existingRule, nextParams });
-
-  await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled);
-
-  if (nextParams.enabled != null) {
-    return { ...update, enabled: nextParams.enabled };
-  } else {
-    return update;
-  }
-};
 
 export const deleteRule = async (
   rulesClient: RulesClient,
   deleteRulePayload: DeleteRuleProps
-): Promise<void> => {
-  const { ruleId } = deleteRulePayload;
-  await rulesClient.delete({ id: ruleId });
-};
+): Promise<void> =>
+  withSecuritySpan('DetectionRulesClient.deleteRule', async () => {
+    const { ruleId } = deleteRulePayload;
+    await rulesClient.delete({ id: ruleId });
+  });
 
 export const upgradePrebuiltRule = async (
   rulesClient: RulesClient,
   upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
-  const { ruleAsset } = upgradePrebuiltRulePayload;
+): Promise<RuleAlertType> =>
+  withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
+    const { ruleAsset } = upgradePrebuiltRulePayload;
 
-  await _validateMlAuth(mlAuthz, ruleAsset.type);
+    await _validateMlAuth(mlAuthz, ruleAsset.type);
 
-  const existingRule = await readRules({
-    rulesClient,
-    ruleId: ruleAsset.rule_id,
-    id: undefined,
+    const existingRule = await readRules({
+      rulesClient,
+      ruleId: ruleAsset.rule_id,
+      id: undefined,
+    });
+
+    if (!existingRule) {
+      throw new ClientError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
+    }
+
+    // If rule has change its type during upgrade, delete and recreate it
+    if (ruleAsset.type !== existingRule.params.type) {
+      return _upgradePrebuiltRuleWithTypeChange(rulesClient, ruleAsset, existingRule);
+    }
+
+    // Else, simply patch it.
+    await _patchRule(rulesClient, { existingRule, nextParams: ruleAsset });
+
+    const updatedRule = await readRules({
+      rulesClient,
+      ruleId: ruleAsset.rule_id,
+      id: undefined,
+    });
+
+    if (!updatedRule) {
+      throw new ClientError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
+    }
+
+    return updatedRule;
   });
-
-  if (!existingRule) {
-    throw new ClientError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
-  }
-
-  // If rule has change its type during upgrade, delete and recreate it
-  if (ruleAsset.type !== existingRule.params.type) {
-    return _upgradePrebuiltRuleWithTypeChange(rulesClient, ruleAsset, existingRule);
-  }
-
-  // Else, simply patch it.
-  await _patchRule(rulesClient, { existingRule, nextParams: ruleAsset });
-
-  const updatedRule = await readRules({
-    rulesClient,
-    ruleId: ruleAsset.rule_id,
-    id: undefined,
-  });
-
-  if (!updatedRule) {
-    throw new ClientError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
-  }
-
-  return updatedRule;
-};
 
 export const importRule = async (
   rulesClient: RulesClient,
   importRulePayload: ImportRuleProps,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
-  const { ruleToImport, overwriteRules, options } = importRulePayload;
+): Promise<RuleAlertType> =>
+  withSecuritySpan('DetectionRulesClient.importRule', async () => {
+    const { ruleToImport, overwriteRules, options } = importRulePayload;
 
-  await _validateMlAuth(mlAuthz, ruleToImport.type);
+    await _validateMlAuth(mlAuthz, ruleToImport.type);
 
-  const existingRule = await readRules({
-    rulesClient,
-    ruleId: ruleToImport.rule_id,
-    id: undefined,
+    const existingRule = await readRules({
+      rulesClient,
+      ruleId: ruleToImport.rule_id,
+      id: undefined,
+    });
+
+    if (!existingRule) {
+      return _createRule(rulesClient, ruleToImport, {
+        immutable: false,
+        allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
+      });
+    } else if (existingRule && overwriteRules) {
+      return _updateRule(rulesClient, {
+        existingRule,
+        ruleUpdate: ruleToImport,
+      });
+    } else {
+      throw createBulkErrorObject({
+        ruleId: existingRule.params.ruleId,
+        statusCode: 409,
+        message: `rule_id: "${existingRule.params.ruleId}" already exists`,
+      });
+    }
   });
-
-  if (!existingRule) {
-    return _createRule(rulesClient, ruleToImport, {
-      immutable: false,
-      allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
-    });
-  } else if (existingRule && overwriteRules) {
-    return _updateRule(rulesClient, {
-      existingRule,
-      ruleUpdate: ruleToImport,
-    });
-  } else {
-    throw createBulkErrorObject({
-      ruleId: existingRule.params.ruleId,
-      statusCode: 409,
-      message: `rule_id: "${existingRule.params.ruleId}" already exists`,
-    });
-  }
-};
 
 /* -------- Internal Methods -------- */
 const _createRule = async (
