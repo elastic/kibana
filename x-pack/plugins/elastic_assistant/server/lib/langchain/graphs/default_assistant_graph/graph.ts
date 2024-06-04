@@ -76,14 +76,6 @@ export const getDefaultAssistantGraph = ({
     };
 
     // Create nodes
-    // const generateChatTitleNode = (state: AgentState) =>
-    //   generateChatTitle({
-    //     ...nodeParams,
-    //     conversationId,
-    //     conversationsDataClient: dataClients?.conversationsDataClient,
-    //     logger: logger.get(GENERATE_CHAT_TITLE_NODE),
-    //     state,
-    //   });
     const runAgentNode = (state: AgentState, config?: RunnableConfig) =>
       runAgent({
         ...nodeParams,
@@ -106,15 +98,12 @@ export const getDefaultAssistantGraph = ({
     // Put together a new graph using the nodes and default state from above
     const graph = new StateGraph<AgentState>({ channels: graphState });
     // Define the nodes to cycle between
-    // TODO: Re-enable title generation and wire remainder of persistence within graph after https://github.com/elastic/kibana/pull/184485
-    // graph.addNode('generateChatTitle', generateChatTitleNode);
     graph.addNode(AGENT_NODE, runAgentNode);
     graph.addNode(TOOLS_NODE, executeToolsNode);
     // Add conditional edge for basic routing
     graph.addConditionalEdges(AGENT_NODE, shouldContinueEdge, { continue: TOOLS_NODE, end: END });
-    // Add edges, starting with chat title generation, then alternate between agent and action until finished
+    // Add edges, alternating between agent and action until finished
     graph.addEdge(START, AGENT_NODE);
-    // graph.addEdge('generateChatTitle', AGENT_NODE);
     graph.addEdge(TOOLS_NODE, AGENT_NODE);
     // Compile the graph
     return graph.compile();
