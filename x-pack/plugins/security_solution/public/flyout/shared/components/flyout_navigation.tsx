@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, SyntheticEvent } from 'react';
+import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutHeader,
@@ -18,6 +18,7 @@ import { css } from '@emotion/react';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useWhichFlyoutIsOpen } from '../../document_details/shared/hooks/use_which_flyout';
 import {
   HEADER_ACTIONS_TEST_ID,
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
@@ -27,13 +28,18 @@ import {
 
 export interface FlyoutNavigationProps {
   /**
-   * If true, the expand detail button will be displayed
+   * If true and expandDetails is provided, the expand detail button will be displayed
    */
   flyoutIsExpandable: boolean;
   /**
-   * If flyoutIsExpandable is true, pass a callback to open left panel
+   * If flyoutIsExpandable is true, pass a callback to run when the left panel is opened
+   * This value should always be passed if you want the expand button to be displayed!
    */
-  expandDetails?: (e: SyntheticEvent) => void;
+  expandDetails?: () => void;
+  /**
+   * If flyoutIsExpandable is true, pass a callback to run when the left panel is closed
+   */
+  collapseDetails?: (flyoutId: string) => void;
   /**
    * Optional actions to be placed on the right hand side of navigation
    */
@@ -45,19 +51,30 @@ export interface FlyoutNavigationProps {
  * pass in a list of actions to be displayed on top.
  */
 export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
-  ({ flyoutIsExpandable = false, expandDetails, actions }) => {
+  ({ flyoutIsExpandable = false, expandDetails, collapseDetails, actions }) => {
     const { euiTheme } = useEuiTheme();
     const { closeLeftPanel } = useExpandableFlyoutApi();
     const panels = useExpandableFlyoutState();
+    const flyout = useWhichFlyoutIsOpen();
 
     const isExpanded: boolean = !!panels.left;
-    const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
+
+    const expand = useCallback(() => {
+      if (expandDetails) expandDetails();
+    }, [expandDetails]);
+
+    const collapse = useCallback(() => {
+      if (collapseDetails) {
+        collapseDetails(flyout);
+      }
+      closeLeftPanel();
+    }, [closeLeftPanel, collapseDetails, flyout]);
 
     const collapseButton = useMemo(
       () => (
         <EuiButtonEmpty
           iconSide="left"
-          onClick={collapseDetails}
+          onClick={collapse}
           iconType="arrowEnd"
           size="s"
           data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
@@ -74,14 +91,14 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
           />
         </EuiButtonEmpty>
       ),
-      [collapseDetails]
+      [collapse]
     );
 
     const expandButton = useMemo(
       () => (
         <EuiButtonEmpty
           iconSide="left"
-          onClick={expandDetails}
+          onClick={expand}
           iconType="arrowStart"
           size="s"
           data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
@@ -98,7 +115,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
           />
         </EuiButtonEmpty>
       ),
-      [expandDetails]
+      [expand]
     );
 
     return flyoutIsExpandable || actions ? (
