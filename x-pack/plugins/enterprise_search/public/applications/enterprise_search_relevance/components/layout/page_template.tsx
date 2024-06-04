@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { INFERENCE_ENDPOINTS_PLUGIN } from '../../../../../common/constants';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { SetEnterpriseSearchRelevanceChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -24,7 +24,7 @@ export const EnterpriseSearchRelevancePageTemplate: React.FC<PageTemplateProps> 
       {...pageTemplateProps}
       solutionNav={{
         items: useEnterpriseSearchNav(),
-        name: INFERENCE_ENDPOINTS_PLUGIN.NAME,
+        name: SEARCH_PRODUCT_NAME,
       }}
       setPageChrome={pageChrome && <SetEnterpriseSearchRelevanceChrome trail={pageChrome} />}
     >

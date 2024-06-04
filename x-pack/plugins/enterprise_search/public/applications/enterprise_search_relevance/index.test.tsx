@@ -13,18 +13,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { EnterpriseSearchRelevance, EnterpriseSearchRelevanceConfigured } from '.';
 
 describe('EnterpriseSearchRelevance', () => {
-  it('always renders the Setup Guide', () => {
-    const wrapper = shallow(<EnterpriseSearchRelevance />);
-
-    expect(wrapper.find(SetupGuide)).toHaveLength(1);
-  });
-
   it('renders VersionMismatchPage when there are mismatching versions', () => {
     setMockValues({ config: { canDeployEntSearch: true, host: 'host' } });
     const wrapper = shallow(
