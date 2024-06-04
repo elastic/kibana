@@ -8,15 +8,13 @@
 import React, { memo } from 'react';
 import { EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProductFeatureKey } from '@kbn/security-solution-features/src/product_features_keys';
-import { getProductTypeByPLI } from '../../hooks/use_product_type_by_pli';
 
 /**
- * Component displayed when a given product tier is not allowed to use endpoint policy protections.
+ * Component displayed when a given product tier is not allowed to use Cloud Security Posture Integrations installation forms.
  */
-export const CloudSecurityPosturePLIBlock = memo(() => {
-  const requiredPLI =
-    getProductTypeByPLI(ProductFeatureKey.cloudSecurityPosture) || 'Cloud Protection Essentials';
+export const CloudSecurityPostureIntegrationPliBlock = memo(() => {
+  // TODO: prefer to use getProductTypeByPLI(ProductFeatureKey.cloudSecurityPosture) after we change returned text to include "Protection"
+  const requiredPLI = 'Cloud Protection Essentials';
 
   return (
     <>
@@ -27,19 +25,18 @@ export const CloudSecurityPosturePLIBlock = memo(() => {
         description={false}
         icon={<EuiIcon size="xl" type="lock" />}
         betaBadgeProps={{
-          'data-test-subj': 'cloud-security-posture-protectionUpdatesLockedCard-badge',
           label: i18n.translate(
-            'xpack.securitySolutionServerless.cloudSecurityPosturePliBlock.badgeText',
+            'xpack.securitySolutionServerless.cloudSecurityPostureIntegrationPliBlock.badgeText',
             {
               defaultMessage: 'Cloud Protection Essentials',
             }
           ),
         }}
         title={
-          <h3 data-test-subj="cloud-security-posture-protectionUpdatesLockedCard-title">
+          <h3>
             <strong>
               {i18n.translate(
-                'xpack.securitySolutionServerless.cloudSecurityPosturePliBlock.cardTitle',
+                'xpack.securitySolutionServerless.cloudSecurityPostureIntegrationPliBlock.cardTitle',
                 {
                   defaultMessage: 'Protection updates',
                 }
@@ -50,7 +47,7 @@ export const CloudSecurityPosturePLIBlock = memo(() => {
       >
         <div>
           {i18n.translate(
-            'xpack.securitySolutionServerless.cloudSecurityPosturePliBlock.cardMessage',
+            'xpack.securitySolutionServerless.cloudSecurityPostureIntegrationPliBlock.cardMessage',
             {
               defaultMessage:
                 'To turn on CSPM, KSPM or CNVM, view your Cloud Posture Dashboards and generate findings of misconfiguration or vulnerabilities in your cloud environment, you must add {requiredPLI} under Manage --> Project features.',
@@ -64,4 +61,4 @@ export const CloudSecurityPosturePLIBlock = memo(() => {
     </>
   );
 });
-CloudSecurityPosturePLIBlock.displayName = 'CloudSecurityPosturePLIBlock';
+CloudSecurityPostureIntegrationPliBlock.displayName = 'CloudSecurityPostureIntegrationPliBlock';

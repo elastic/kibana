@@ -20,7 +20,7 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
-import { CloudSecurityPosturePLIBlockLazy } from './sections/cloud_security_posture';
+import { CloudSecurityPostureIntegrationPliBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
   EndpointPolicyProtectionsLazy,
@@ -164,7 +164,7 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'cloud_security_posture_integration_installation',
     pli: ProductFeatureKey.cloudSecurityPosture,
-    component: CloudSecurityPosturePLIBlockLazy,
+    component: CloudSecurityPostureIntegrationPliBlockLazy,
   },
   {
     id: 'entity_analytics_panel',
