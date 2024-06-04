@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import '../../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -20,7 +20,7 @@ import {
 import { IngestionStatus, IngestionMethod } from '@kbn/search-connectors';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { Status } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../common/types/api';
 
 import { SyncsContextMenu } from './syncs_context_menu';
 
