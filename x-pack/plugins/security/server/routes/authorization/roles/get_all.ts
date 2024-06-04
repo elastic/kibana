@@ -19,7 +19,13 @@ export function defineGetAllRolesRoutes({
   config,
 }: RouteDefinitionParams) {
   router.get(
-    { path: '/api/security/role', validate: false },
+    {
+      path: '/api/security/role',
+      options: {
+        description: `Get all roles`,
+      },
+      validate: false,
+    },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const hideReservedRoles = buildFlavor === 'serverless';

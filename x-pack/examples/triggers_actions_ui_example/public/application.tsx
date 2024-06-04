@@ -8,13 +8,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { QueryClient } from '@tanstack/react-query';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { QueryClientProvider } from '@tanstack/react-query';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
@@ -32,16 +38,26 @@ import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 
+import { RuleDefinitionSandbox } from './components/rule_form/rule_definition_sandbox';
+
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
   basename: string;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  charts: ChartsPluginSetup;
+  dataViews: DataViewsPublicPluginStart;
+  dataViewsEditor: DataViewEditorStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 const TriggersActionsUiExampleApp = ({
   basename,
   triggersActionsUi,
+  data,
+  charts,
+  dataViews,
+  unifiedSearch,
 }: TriggersActionsUiExampleComponentParams) => {
   return (
     <Router basename={basename}>
@@ -144,10 +160,26 @@ const TriggersActionsUiExampleApp = ({
             </Page>
           )}
         />
+        <Route
+          path="/rule_definition"
+          render={() => (
+            <Page title="Rule Definition">
+              <RuleDefinitionSandbox
+                triggersActionsUi={triggersActionsUi}
+                data={data}
+                charts={charts}
+                dataViews={dataViews}
+                unifiedSearch={unifiedSearch}
+              />
+            </Page>
+          )}
+        />
       </EuiPage>
     </Router>
   );
 };
+
+export const queryClient = new QueryClient();
 
 export const renderApp = (
   core: CoreStart,
@@ -168,12 +200,18 @@ export const renderApp = (
         }}
       >
         <IntlProvider locale="en">
-          <TriggersActionsUiExampleApp
-            basename={appBasePath}
-            http={http}
-            triggersActionsUi={deps.triggersActionsUi}
-            data={deps.data}
-          />
+          <QueryClientProvider client={queryClient}>
+            <TriggersActionsUiExampleApp
+              basename={appBasePath}
+              http={http}
+              triggersActionsUi={deps.triggersActionsUi}
+              data={deps.data}
+              charts={deps.charts}
+              dataViews={deps.dataViews}
+              dataViewsEditor={deps.dataViewsEditor}
+              unifiedSearch={deps.unifiedSearch}
+            />
+          </QueryClientProvider>
         </IntlProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,

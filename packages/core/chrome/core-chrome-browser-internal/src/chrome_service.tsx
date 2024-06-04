@@ -83,13 +83,16 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
-  private readonly projectNavigation = new ProjectNavigationService();
+  private readonly projectNavigation: ProjectNavigationService;
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
   private logger: Logger;
+  private isServerless = false;
 
   constructor(private readonly params: ConstructorParams) {
     this.logger = params.coreContext.logger.get('chrome-browser');
+    this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
+    this.projectNavigation = new ProjectNavigationService(this.isServerless);
   }
 
   /**
