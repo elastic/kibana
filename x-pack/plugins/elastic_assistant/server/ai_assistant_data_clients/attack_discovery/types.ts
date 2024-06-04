@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Provider } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryStatus, Provider } from '@kbn/elastic-assistant-common';
 import { EsReplacementSchema } from '../conversations/types';
 
 export interface EsAttackDiscoverySchema {
@@ -22,14 +22,16 @@ export interface EsAttackDiscoverySchema {
     mitre_attack_tactics?: string[];
     summary_markdown: string;
   }>;
-  api_config?: {
+  api_config: {
     connector_id: string;
     action_type_id: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
   };
+  alerts_context_count?: number;
   replacements?: EsReplacementSchema[];
+  status: AttackDiscoveryStatus;
   updated_at?: string;
   users?: Array<{
     id?: string;
@@ -50,14 +52,16 @@ export interface CreateAttackDiscoverySchema {
     mitre_attack_tactics?: string[];
     summary_markdown: string;
   }>;
-  api_config?: {
+  api_config: {
     action_type_id: string;
     connector_id: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
   };
+  alerts_context_count?: number;
   replacements?: EsReplacementSchema[];
+  status: AttackDiscoveryStatus;
   users: Array<{
     id?: string;
     name?: string;

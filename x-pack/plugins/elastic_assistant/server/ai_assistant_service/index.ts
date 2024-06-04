@@ -12,6 +12,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
+import { attackDiscoveryFieldMap } from '../ai_assistant_data_clients/attack_discovery/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
@@ -105,7 +106,7 @@ export class AIAssistantService {
     this.attackDiscoveryDataStream = this.createDataStream({
       resource: 'attackDiscovery',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: assistantPromptsFieldMap,
+      fieldMap: attackDiscoveryFieldMap,
     });
 
     this.initPromise = this.initializeResources();

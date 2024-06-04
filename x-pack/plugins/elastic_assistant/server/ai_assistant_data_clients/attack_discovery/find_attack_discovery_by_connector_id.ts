@@ -11,21 +11,21 @@ import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { EsAttackDiscoverySchema } from './types';
 import { transformESSearchToAttackDiscovery } from './transforms';
 
-export interface GetAttackDiscoveryParams {
+export interface FindAttackDiscoveryParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   attackDiscoveryIndex: string;
-  id: string;
+  connectorId: string;
   user: AuthenticatedUser;
 }
 
-export const getAttackDiscovery = async ({
+export const findAttackDiscoveryByConnectorId = async ({
   esClient,
   logger,
   attackDiscoveryIndex,
-  id,
+  connectorId,
   user,
-}: GetAttackDiscoveryParams): Promise<AttackDiscoveryResponse | null> => {
+}: FindAttackDiscoveryParams): Promise<AttackDiscoveryResponse | null> => {
   const filterByUser = [
     {
       nested: {
@@ -45,6 +45,27 @@ export const getAttackDiscovery = async ({
     },
   ];
   try {
+    console.log(
+      'stephhhh query',
+      JSON.stringify({
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'api_config.connector_id': connectorId,
+                    },
+                  },
+                ],
+              },
+            },
+            ...filterByUser,
+          ],
+        },
+      })
+    );
     const response = await esClient.search<EsAttackDiscoverySchema>({
       query: {
         bool: {
@@ -54,7 +75,7 @@ export const getAttackDiscovery = async ({
                 should: [
                   {
                     term: {
-                      _id: id,
+                      'api_config.connector_id': connectorId,
                     },
                   },
                 ],
@@ -70,10 +91,9 @@ export const getAttackDiscovery = async ({
       seq_no_primary_term: true,
     });
     const attackDiscovery = transformESSearchToAttackDiscovery(response);
-    console.log('stephhh exact response', JSON.stringify(response));
     return attackDiscovery[0] ?? null;
   } catch (err) {
-    logger.error(`Error fetching attack discovery: ${err} with id: ${id}`);
+    logger.error(`Error fetching attack discovery: ${err} with connectorId: ${connectorId}`);
     throw err;
   }
 };

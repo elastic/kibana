@@ -10,6 +10,7 @@ import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
+  AttackDiscoveryResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   Replacements,
 } from '@kbn/elastic-assistant-common';
@@ -17,7 +18,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import { ATTACK_DISCOVERY } from '../../../common/constants';
-import { getAssistantToolParams } from './helpers';
+import { attackDiscoveryStatus, getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
@@ -64,6 +65,14 @@ export const postAttackDiscoveryRoute = (
         try {
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
+          const dataClient = await assistantContext.getAttackDiscoveryDataClient();
+          const authenticatedUser = assistantContext.getCurrentUser();
+          if (authenticatedUser == null) {
+            return resp.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
           const pluginName = getPluginNameFromRequest({
             request,
             defaultPluginName: DEFAULT_PLUGIN_NAME,
@@ -134,23 +143,103 @@ export const postAttackDiscoveryRoute = (
 
           // invoke the attack discovery tool:
           const toolInstance = assistantTool.getTool(assistantToolParams);
-          const rawAttackDiscoveries = await toolInstance?.invoke('');
-          if (rawAttackDiscoveries == null) {
-            return response.customError({
-              body: { message: 'tool returned no attack discoveries' },
-              statusCode: 500,
-            });
-          }
 
-          const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
+          const foundAttackDiscovery = await dataClient?.findAttackDiscoveryByConnectorId({
+            connectorId,
+            authenticatedUser,
+          });
+          let currentAd: AttackDiscoveryResponse;
+          let attackDiscoveryId: string;
+          if (foundAttackDiscovery == null) {
+            const ad = await dataClient?.createAttackDiscovery({
+              attackDiscoveryCreate: {
+                attackDiscoveries: [],
+                apiConfig: {
+                  connectorId,
+                  // TODO connect this
+                  actionTypeId: 'todo',
+                },
+                status: attackDiscoveryStatus.running,
+                replacements: latestReplacements,
+              },
+              authenticatedUser,
+            });
+            if (ad == null) {
+              throw new Error(`Could not create attack discovery for connectorId: ${connectorId}`);
+            } else {
+              currentAd = ad;
+            }
+            attackDiscoveryId = currentAd.id;
+          } else {
+            attackDiscoveryId = foundAttackDiscovery.id;
+
+            const ad = await dataClient?.updateAttackDiscovery({
+              attackDiscoveryUpdateProps: {
+                id: attackDiscoveryId,
+                status: attackDiscoveryStatus.running,
+                backingIndex: foundAttackDiscovery.backingIndex,
+              },
+              authenticatedUser,
+            });
+            if (ad == null) {
+              throw new Error(`Could not update attack discovery for connectorId: ${connectorId}`);
+            } else {
+              currentAd = ad;
+            }
+          }
+          console.log('stephhh currentAD', currentAd);
+          toolInstance
+            ?.invoke('')
+            .then(async (rawAttackDiscoveries) => {
+              const getDataFromJSON = () => {
+                const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
+                return { alertsContextCount, attackDiscoveries };
+              };
+
+              const dependentProps =
+                rawAttackDiscoveries == null
+                  ? {
+                      attackDiscoveries: [],
+                      status: attackDiscoveryStatus.failed,
+                    }
+                  : {
+                      attackDiscoveries: getDataFromJSON().attackDiscoveries,
+                      alertsContextCount: getDataFromJSON().alertsContextCount,
+                      status: attackDiscoveryStatus.succeeded,
+                    };
+
+              console.log('stephhh updateResult attempt', {
+                ...dependentProps,
+                id: attackDiscoveryId,
+                replacements: latestReplacements,
+              });
+              const updateResult = await dataClient?.updateAttackDiscovery({
+                attackDiscoveryUpdateProps: {
+                  ...dependentProps,
+                  id: attackDiscoveryId,
+                  replacements: latestReplacements,
+                  backingIndex: currentAd.backingIndex,
+                },
+                authenticatedUser,
+              });
+              console.log('stephhh updateResult success', updateResult);
+            })
+            .catch(async (e) => {
+              console.log('stephhh errd', e);
+              await dataClient?.updateAttackDiscovery({
+                attackDiscoveryUpdateProps: {
+                  attackDiscoveries: [],
+                  status: attackDiscoveryStatus.failed,
+                  id: attackDiscoveryId,
+                  replacements: latestReplacements,
+                  backingIndex: currentAd.backingIndex,
+                },
+                authenticatedUser,
+              });
+            });
 
           return response.ok({
-            body: {
-              alertsContextCount,
-              attackDiscoveries,
-              connector_id: connectorId,
-              replacements: latestReplacements,
-            },
+            body: currentAd,
           });
         } catch (err) {
           logger.error(err);

@@ -42,6 +42,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
+import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -119,7 +120,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantKnowledgeBaseDataClient: (
     initializeKnowledgeBase: boolean
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
-  getAttackDiscoveryDataClient: () => Promise<AIAssistantDataClient | null>;
+  getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;

@@ -8,6 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryResponse,
+  AttackDiscoveryStatus,
   AttackDiscoveryUpdateProps,
   Provider,
   UUID,
@@ -28,14 +29,16 @@ export interface UpdateAttackDiscoverySchema {
     mitre_attack_tactics?: string[];
     summary_markdown: string;
   }>;
-  api_config?: {
+  api_config: {
     action_type_id?: string;
     connector_id?: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
   };
+  alerts_context_count?: number;
   replacements?: EsReplacementSchema[];
+  status: AttackDiscoveryStatus;
   updated_at?: string;
 }
 
@@ -53,30 +56,24 @@ export const updateAttackDiscovery = async ({
   logger,
   attackDiscoveryIndex,
   attackDiscoveryUpdateProps,
-  isPatch,
   user,
 }: UpdateAttackDiscoveryParams): Promise<AttackDiscoveryResponse | null> => {
   const updatedAt = new Date().toISOString();
   const params = transformToUpdateScheme(updatedAt, attackDiscoveryUpdateProps);
   try {
-    const response = await esClient.updateByQuery({
-      conflicts: 'proceed',
+    console.log('stephhh bout to update', attackDiscoveryIndex);
+    const response = await esClient.update({
+      refresh: 'wait_for',
       index: attackDiscoveryIndex,
-      query: {
-        ids: {
-          values: [params.id],
-        },
-      },
-      refresh: true,
-      // script: getUpdateScript({ attackDiscovery: params, isPatch }),
+      id: params.id,
+      doc: params,
     });
-
-    if (response.failures && response.failures.length > 0) {
-      logger.warn(
-        `Error updating attack discovery: ${response.failures.map((f) => f.id)} by ID: ${params.id}`
-      );
-      return null;
-    }
+    console.log('stephhh update response', response);
+    //
+    // if (response.result.status === 'failure') {
+    //   logger.warn(`Error updating attack discovery: ${response.result.error} by ID: ${params.id}`);
+    //   return null;
+    // }
 
     const updatedAttackDiscovery = await getAttackDiscovery({
       esClient,
@@ -85,6 +82,7 @@ export const updateAttackDiscovery = async ({
       logger,
       user,
     });
+    console.log('stephhh update updatedAttackDiscovery', updatedAttackDiscovery);
     return updatedAttackDiscovery;
   } catch (err) {
     logger.warn(`Error updating attackDiscovery: ${err} by ID: ${params.id}`);
@@ -94,7 +92,14 @@ export const updateAttackDiscovery = async ({
 
 export const transformToUpdateScheme = (
   updatedAt: string,
-  { apiConfig, attackDiscoveries, replacements, id }: AttackDiscoveryUpdateProps
+  {
+    apiConfig,
+    attackDiscoveries,
+    replacements,
+    id,
+    status,
+    alertsContextCount,
+  }: AttackDiscoveryUpdateProps
 ): UpdateAttackDiscoverySchema => {
   return {
     id,
@@ -112,6 +117,8 @@ export const transformToUpdateScheme = (
           value: replacements[key],
         }))
       : undefined,
+    status,
+    alerts_context_count: alertsContextCount,
     attack_discoveries:
       attackDiscoveries?.map((attackDiscovery) => ({
         alert_ids: attackDiscovery.alertIds,

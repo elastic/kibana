@@ -19,7 +19,7 @@ export interface CreateAttackDiscoveryParams {
   attackDiscoveryIndex: string;
   spaceId: string;
   user: AuthenticatedUser;
-  attackDiscoveries: AttackDiscoveryCreateProps;
+  attackDiscoveryCreate: AttackDiscoveryCreateProps;
 }
 
 export const createAttackDiscovery = async ({
@@ -27,12 +27,12 @@ export const createAttackDiscovery = async ({
   attackDiscoveryIndex,
   spaceId,
   user,
-  attackDiscoveries,
+  attackDiscoveryCreate,
   logger,
 }: CreateAttackDiscoveryParams): Promise<AttackDiscoveryResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateScheme(createdAt, spaceId, user, attackDiscoveries);
-  const id = attackDiscoveries?.id || uuidv4();
+  const body = transformToCreateScheme(createdAt, spaceId, user, attackDiscoveryCreate);
+  const id = attackDiscoveryCreate?.id || uuidv4();
   try {
     const response = await esClient.create({
       body,
@@ -59,7 +59,13 @@ export const transformToCreateScheme = (
   createdAt: string,
   spaceId: string,
   user: AuthenticatedUser,
-  { attackDiscoveries, apiConfig, replacements }: AttackDiscoveryCreateProps
+  {
+    attackDiscoveries,
+    apiConfig,
+    alertsContextCount,
+    replacements,
+    status,
+  }: AttackDiscoveryCreateProps
 ): CreateAttackDiscoverySchema => {
   return {
     '@timestamp': createdAt,
@@ -70,15 +76,15 @@ export const transformToCreateScheme = (
         name: user.username,
       },
     ],
-    api_config: apiConfig
-      ? {
-          action_type_id: apiConfig.actionTypeId,
-          connector_id: apiConfig.connectorId,
-          default_system_prompt_id: apiConfig.defaultSystemPromptId,
-          model: apiConfig.model,
-          provider: apiConfig.provider,
-        }
-      : undefined,
+    status,
+    api_config: {
+      action_type_id: apiConfig.actionTypeId,
+      connector_id: apiConfig.connectorId,
+      default_system_prompt_id: apiConfig.defaultSystemPromptId,
+      model: apiConfig.model,
+      provider: apiConfig.provider,
+    },
+    alerts_context_count: alertsContextCount,
     attack_discoveries: attackDiscoveries?.map((attackDiscovery) => ({
       alert_ids: attackDiscovery.alertIds,
       title: attackDiscovery.title,
@@ -86,7 +92,7 @@ export const transformToCreateScheme = (
       entity_summary_markdown: attackDiscovery.entitySummaryMarkdown,
       mitre_attack_tactics: attackDiscovery.mitreAttackTactics,
       summary_markdown: attackDiscovery.summaryMarkdown,
-      timestamp: attackDiscovery.timestamp,
+      timestamp: attackDiscovery.timestamp ?? createdAt,
     })),
     updated_at: createdAt,
     replacements: replacements

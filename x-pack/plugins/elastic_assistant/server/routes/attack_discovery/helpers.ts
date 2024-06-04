@@ -9,6 +9,7 @@ import { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AttackDiscoveryPostRequestBody,
+  AttackDiscoveryStatus,
   ExecuteConnectorRequestBody,
   Replacements,
 } from '@kbn/elastic-assistant-common';
@@ -71,3 +72,9 @@ export const getAssistantToolParams = ({
   request,
   size,
 });
+
+export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
+  failed: 'failed',
+  running: 'running',
+  succeeded: 'succeeded',
+};

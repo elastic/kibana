@@ -26,6 +26,14 @@ import { Replacements, ApiConfig } from '../conversations/common_attributes.gen'
 export type AttackDiscoveries = z.infer<typeof AttackDiscoveries>;
 export const AttackDiscoveries = z.array(AttackDiscovery);
 
+/**
+ * The status of the attack discovery.
+ */
+export type AttackDiscoveryStatus = z.infer<typeof AttackDiscoveryStatus>;
+export const AttackDiscoveryStatus = z.enum(['running', 'succeeded', 'failed']);
+export type AttackDiscoveryStatusEnum = typeof AttackDiscoveryStatus.enum;
+export const AttackDiscoveryStatusEnum = AttackDiscoveryStatus.enum;
+
 export type AttackDiscoveryResponse = z.infer<typeof AttackDiscoveryResponse>;
 export const AttackDiscoveryResponse = z.object({
   id: NonEmptyString,
@@ -35,11 +43,19 @@ export const AttackDiscoveryResponse = z.object({
    */
   updatedAt: z.string().optional(),
   /**
+   * The number of alerts in the context.
+   */
+  alertsContextCount: z.number().int().optional(),
+  /**
    * The time attack discovery was created.
    */
   createdAt: z.string(),
   replacements: Replacements.optional(),
   users: z.array(User),
+  /**
+   * The status of the attack discovery.
+   */
+  status: AttackDiscoveryStatus,
   /**
    * The attack discoveries.
    */
@@ -47,11 +63,15 @@ export const AttackDiscoveryResponse = z.object({
   /**
    * LLM API configuration.
    */
-  apiConfig: ApiConfig.optional(),
+  apiConfig: ApiConfig,
   /**
    * Kibana space
    */
   namespace: z.string(),
+  /**
+   * The backing index required for update requests.
+   */
+  backingIndex: z.string(),
 });
 
 export type AttackDiscoveryUpdateProps = z.infer<typeof AttackDiscoveryUpdateProps>;
@@ -62,10 +82,22 @@ export const AttackDiscoveryUpdateProps = z.object({
    */
   apiConfig: ApiConfig.optional(),
   /**
+   * The number of alerts in the context.
+   */
+  alertsContextCount: z.number().int().optional(),
+  /**
    * The attack discoveries.
    */
   attackDiscoveries: AttackDiscoveries.optional(),
+  /**
+   * The status of the attack discovery.
+   */
+  status: AttackDiscoveryStatus,
   replacements: Replacements.optional(),
+  /**
+   * The backing index required for update requests.
+   */
+  backingIndex: z.string(),
 });
 
 export type AttackDiscoveryCreateProps = z.infer<typeof AttackDiscoveryCreateProps>;
@@ -74,6 +106,14 @@ export const AttackDiscoveryCreateProps = z.object({
    * The attack discovery id.
    */
   id: z.string().optional(),
+  /**
+   * The status of the attack discovery.
+   */
+  status: AttackDiscoveryStatus,
+  /**
+   * The number of alerts in the context.
+   */
+  alertsContextCount: z.number().int().optional(),
   /**
    * The attack discoveries.
    */

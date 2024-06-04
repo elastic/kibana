@@ -20,6 +20,7 @@ export const transformESSearchToAttackDiscovery = (
       const ad: AttackDiscoveryResponse = {
         timestamp: adSchema['@timestamp'],
         id: hit._id,
+        backingIndex: hit._index,
         createdAt: adSchema.created_at,
         updatedAt: adSchema.updated_at,
         users:
@@ -28,17 +29,15 @@ export const transformESSearchToAttackDiscovery = (
             name: user.name,
           })) ?? [],
         namespace: adSchema.namespace,
-        ...(adSchema.api_config
-          ? {
-              apiConfig: {
-                connectorId: adSchema.api_config.connector_id,
-                actionTypeId: adSchema.api_config.action_type_id,
-                defaultSystemPromptId: adSchema.api_config.default_system_prompt_id,
-                model: adSchema.api_config.model,
-                provider: adSchema.api_config.provider,
-              },
-            }
-          : {}),
+        status: adSchema.status,
+        alertsContextCount: adSchema.alerts_context_count,
+        apiConfig: {
+          connectorId: adSchema.api_config.connector_id,
+          actionTypeId: adSchema.api_config.action_type_id,
+          defaultSystemPromptId: adSchema.api_config.default_system_prompt_id,
+          model: adSchema.api_config.model,
+          provider: adSchema.api_config.provider,
+        },
         attackDiscoveries: adSchema.attack_discoveries.map((attackDiscovery) => ({
           alertIds: attackDiscovery.alert_ids,
           title: attackDiscovery.title,
@@ -73,17 +72,15 @@ export const transformESToAttackDiscovery = (
           name: user.name,
         })) ?? [],
       namespace: adSchema.namespace,
-      ...(adSchema.api_config
-        ? {
-            apiConfig: {
-              actionTypeId: adSchema.api_config.action_type_id,
-              connectorId: adSchema.api_config.connector_id,
-              defaultSystemPromptId: adSchema.api_config.default_system_prompt_id,
-              model: adSchema.api_config.model,
-              provider: adSchema.api_config.provider,
-            },
-          }
-        : {}),
+      status: adSchema.status,
+      alertsContextCount: adSchema.alerts_context_count,
+      apiConfig: {
+        actionTypeId: adSchema.api_config.action_type_id,
+        connectorId: adSchema.api_config.connector_id,
+        defaultSystemPromptId: adSchema.api_config.default_system_prompt_id,
+        model: adSchema.api_config.model,
+        provider: adSchema.api_config.provider,
+      },
       replacements: adSchema.replacements?.reduce((acc: Record<string, string>, r) => {
         acc[r.uuid] = r.value;
         return acc;
