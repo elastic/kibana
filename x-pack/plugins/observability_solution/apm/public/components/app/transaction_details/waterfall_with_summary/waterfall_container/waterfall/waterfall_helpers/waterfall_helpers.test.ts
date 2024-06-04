@@ -806,7 +806,7 @@ describe('waterfall_helpers', () => {
       },
       children: [
         {
-          id: 'bXlUcmFuc2FjdGlvbklkMS1teVNwYW5JZEQtMA==',
+          id: 'mySpanIdD-0',
           item: {
             docType: 'span',
             doc: {
@@ -833,48 +833,17 @@ describe('waterfall_helpers', () => {
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
-          children: [
-            {
-              id: 'YlhsVWNtRnVjMkZqZEdsdmJrbGtNUzF0ZVZOd1lXNUpaRVF0TUE9PS1teVRyYW5zYWN0aW9uSWQyLTA=',
-              item: {
-                docType: 'transaction',
-                doc: {
-                  agent: { name: 'nodejs' },
-                  parent: { id: 'mySpanIdD' },
-                  processor: { event: 'transaction' },
-                  trace: { id: 'myTraceId' },
-                  service: { name: 'opbeans-ruby' },
-                  transaction: {
-                    duration: { us: 8634 },
-                    name: 'Api::ProductsController#index',
-                    id: 'myTransactionId2',
-                    type: 'request',
-                  },
-                  timestamp: { us: 1549324795823304 },
-                },
-                id: 'myTransactionId2',
-                parentId: 'mySpanIdD',
-                duration: 8634,
-                offset: 39298,
-                skew: 0,
-                legendValues: { serviceName: 'opbeans-ruby', spanType: '' },
-                color: '',
-                spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
-              },
-              children: [],
-              childrenToLoad: 0,
-              level: 2,
-              expanded: true,
-            },
-          ],
+          children: [],
           childrenToLoad: 1,
           level: 1,
           expanded: false,
+          hasInitializedChildren: false,
         },
       ],
       level: 0,
       childrenToLoad: 1,
       expanded: true,
+      hasInitializedChildren: true,
     };
 
     describe('buildTraceTree', () => {
@@ -894,6 +863,7 @@ describe('waterfall_helpers', () => {
             item: expect.objectContaining({ id: 'myTransactionId1' }),
             level: 0,
             expanded: true,
+            hasInitializedChildren: true,
           })
         );
 
@@ -904,6 +874,7 @@ describe('waterfall_helpers', () => {
             expanded: false,
             childrenToLoad: 1,
             children: [],
+            hasInitializedChildren: false,
           })
         );
       });
@@ -919,11 +890,15 @@ describe('waterfall_helpers', () => {
               item: expect.objectContaining({ id: 'myTransactionId1' }),
               level: 0,
               expanded: true,
+              hasInitializedChildren: true,
+              childrenToLoad: 1,
             }),
             expect.objectContaining({
               item: expect.objectContaining({ id: 'mySpanIdD' }),
               level: 1,
               expanded: false,
+              hasInitializedChildren: false,
+              childrenToLoad: 1,
             }),
           ])
         );
@@ -931,9 +906,9 @@ describe('waterfall_helpers', () => {
     });
 
     describe('updateTraceTreeNode', () => {
-      it('should update the trace tree node correctly setting "expanded" to false', () => {
+      it('should update the "mySpanIdD" node setting "expanded" to true', () => {
         const updatedNode: IWaterfallNodeFlatten = {
-          id: 'bXlUcmFuc2FjdGlvbklkMS1teVNwYW5JZEQtMA==',
+          id: 'mySpanIdD-0',
           item: {
             docType: 'span',
             doc: {
@@ -963,6 +938,7 @@ describe('waterfall_helpers', () => {
           childrenToLoad: 1,
           level: 1,
           expanded: true,
+          hasInitializedChildren: false,
         };
 
         const result = updateTraceTreeNode({
@@ -980,6 +956,7 @@ describe('waterfall_helpers', () => {
             item: expect.objectContaining({ id: 'myTransactionId1' }),
             level: 0,
             expanded: true,
+            hasInitializedChildren: true,
           })
         );
 
@@ -988,6 +965,7 @@ describe('waterfall_helpers', () => {
             item: expect.objectContaining({ id: 'mySpanIdD' }),
             level: 1,
             expanded: true,
+            hasInitializedChildren: true,
           })
         );
 
@@ -995,7 +973,8 @@ describe('waterfall_helpers', () => {
           expect.objectContaining({
             item: expect.objectContaining({ id: 'myTransactionId2' }),
             level: 2,
-            expanded: true,
+            expanded: false,
+            hasInitializedChildren: false,
           })
         );
       });
