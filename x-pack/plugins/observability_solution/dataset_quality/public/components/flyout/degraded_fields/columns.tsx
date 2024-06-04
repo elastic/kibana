@@ -26,7 +26,7 @@ const countColumnName = i18n.translate('xpack.datasetQuality.flyout.degradedFiel
 const lastOccurrenceColumnName = i18n.translate(
   'xpack.datasetQuality.flyout.degradedField.lastOccurrence',
   {
-    defaultMessage: 'Last Occurrence',
+    defaultMessage: 'Last occurrence',
   }
 );
 
