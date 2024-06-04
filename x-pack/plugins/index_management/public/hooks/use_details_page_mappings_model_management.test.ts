@@ -104,13 +104,11 @@ const inferenceToModelIdMap = {
     trainedModelId: '.elser_model_2',
     isDeployed: true,
     isDeployable: true,
-    defaultInferenceEndpoint: false,
   },
   e5: {
     trainedModelId: '.multilingual-e5-small',
     isDeployed: true,
     isDeployable: true,
-    defaultInferenceEndpoint: false,
   },
 } as InferenceToModelIdMap;
 
@@ -127,13 +125,11 @@ describe('useDetailsPageMappingsModelManagement', () => {
       value: {
         inferenceToModelIdMap: {
           e5: {
-            defaultInferenceEndpoint: false,
             isDeployed: false,
             isDeployable: true,
             trainedModelId: '.multilingual-e5-small',
           },
           elser_model_2: {
-            defaultInferenceEndpoint: true,
             isDeployed: true,
             isDeployable: true,
             trainedModelId: '.elser_model_2',

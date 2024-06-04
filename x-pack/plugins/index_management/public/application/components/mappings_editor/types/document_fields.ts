@@ -7,6 +7,8 @@
 
 import { ReactNode } from 'react';
 
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { ModelConfig } from '@kbn/inference_integration_flyout';
 import { GenericObject } from './mappings_editor';
 
 import { PARAMETERS_DEFINITION } from '../constants';
@@ -253,4 +255,8 @@ export enum DefaultInferenceModels {
 export enum DeploymentState {
   'DEPLOYED' = 'deployed',
   'NOT_DEPLOYED' = 'not_deployed',
+}
+export interface CustomInferenceEndpointConfig {
+  taskType: InferenceTaskType;
+  modelConfig: ModelConfig;
 }
