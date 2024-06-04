@@ -71,7 +71,6 @@ export const createThreatSignals = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
   licensing,
   experimentalFeatures,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
@@ -112,6 +111,7 @@ export const createThreatSignals = async ({
 
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
+    dataViews: services.dataViews,
     index: inputIndex,
     tuple,
     query,
@@ -120,7 +120,6 @@ export const createThreatSignals = async ({
     primaryTimestamp,
     secondaryTimestamp,
     exceptionFilter,
-    indexFields: inputIndexFields,
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
@@ -323,7 +322,6 @@ export const createThreatSignals = async ({
           secondaryTimestamp,
           exceptionFilter,
           eventListConfig,
-          indexFields: inputIndexFields,
           sortOrder,
         }),
 
@@ -364,7 +362,6 @@ export const createThreatSignals = async ({
           unprocessedExceptions,
           allowedFieldsForTermsQuery,
           threatMatchedFields,
-          inputIndexFields,
           threatIndexFields,
           runOpts,
           sortOrder,
@@ -430,7 +427,6 @@ export const createThreatSignals = async ({
           threatQuery,
           reassignThreatPitId,
           allowedFieldsForTermsQuery,
-          inputIndexFields,
           threatIndexFields,
           runOpts,
           sortOrder,

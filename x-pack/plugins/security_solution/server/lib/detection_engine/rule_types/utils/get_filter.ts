@@ -58,18 +58,19 @@ export const getFilter = async ({
   type,
   query,
   exceptionFilter,
-  fields = [],
 }: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
-      return getQueryFilter({
-        query,
-        language,
-        filters: filters || [],
-        index,
-        exceptionFilter,
-        fields,
-      });
+      return getQueryFilter(
+        {
+          query,
+          language,
+          filters: filters || [],
+          index,
+          exceptionFilter,
+        },
+        services.dataViews
+      );
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
     }
@@ -82,26 +83,30 @@ export const getFilter = async ({
         const savedObject = await withSecuritySpan('getSavedFilter', () =>
           services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
-        return getQueryFilter({
-          query: savedObject.attributes.query.query,
-          language: savedObject.attributes.query.language,
-          filters: savedObject.attributes.filters,
-          index,
-          exceptionFilter,
-          fields,
-        });
+        return getQueryFilter(
+          {
+            query: savedObject.attributes.query.query,
+            language: savedObject.attributes.query.language,
+            filters: savedObject.attributes.filters,
+            index,
+            exceptionFilter,
+          },
+          services.dataViews
+        );
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
         // any additional language, query, filters, etc...
         if (query != null && language != null && index != null) {
-          return getQueryFilter({
-            query,
-            language,
-            filters: filters || [],
-            index,
-            exceptionFilter,
-            fields,
-          });
+          return getQueryFilter(
+            {
+              query,
+              language,
+              filters: filters || [],
+              index,
+              exceptionFilter,
+            },
+            services.dataViews
+          );
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring

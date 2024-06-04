@@ -58,7 +58,6 @@ export const queryExecutor = async ({
       services,
       index: runOpts.inputIndex,
       exceptionFilter: runOpts.exceptionFilter,
-      fields: runOpts.inputIndexFields,
     });
 
     const license = await firstValueFrom(licensing.license$);

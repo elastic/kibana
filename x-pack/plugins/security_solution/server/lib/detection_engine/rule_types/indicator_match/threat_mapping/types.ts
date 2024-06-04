@@ -22,6 +22,7 @@ import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ListClient } from '@kbn/lists-plugin/server';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -77,7 +78,6 @@ export interface CreateThreatSignalsOptions {
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
   experimentalFeatures: ExperimentalFeatures;
@@ -119,7 +119,7 @@ export interface CreateThreatSignalOptions {
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
-  inputIndexFields: DataViewFieldBase[];
+  // todo
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
@@ -164,7 +164,7 @@ export interface CreateEventSignalOptions {
   unprocessedExceptions: ExceptionListItemSchema[];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   threatMatchedFields: ThreatMatchedFields;
-  inputIndexFields: DataViewFieldBase[];
+  // todo
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
@@ -317,7 +317,6 @@ export interface EventsOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   exceptionFilter: Filter | undefined;
   eventListConfig?: OverrideBodyQuery;
-  indexFields: DataViewFieldBase[];
   sortOrder?: SortOrderOrUndefined;
 }
 
@@ -328,6 +327,7 @@ export interface EventDoc {
 export type EventItem = estypes.SearchHit<EventDoc>;
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
+  dataViews: DataViewsContract;
   index: string[];
   language: ThreatLanguageOrUndefined;
   query: string;
@@ -336,7 +336,6 @@ export interface EventCountOptions {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
-  indexFields: DataViewFieldBase[];
 }
 
 export interface SignalMatch {
