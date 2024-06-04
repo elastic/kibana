@@ -299,7 +299,7 @@ function nodeToEuiCollapsibleNavProps(
 } {
   const { navNode, subItems, dataTestSubj, isSelected, isItem, spaceBefore, linkProps, onClick } =
     getEuiProps(_navNode, deps);
-  const { id, path, href, renderAs } = navNode;
+  const { id, path, href, renderAs, isCollapsible } = navNode;
 
   if (navNode.renderItem) {
     // Leave the rendering to the consumer
@@ -340,7 +340,7 @@ function nodeToEuiCollapsibleNavProps(
       // Render as an accordion or a link (handled by EUI) depending if
       // "items" is undefined or not. If it is undefined --> a link, otherwise an
       // accordion is rendered.
-      ...(subItems ? { items: subItems } : { href, linkProps }),
+      ...(subItems ? { items: subItems, isCollapsible } : { href, linkProps }),
     },
   ];
 
