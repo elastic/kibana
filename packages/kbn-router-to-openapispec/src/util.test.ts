@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { prepareRoutes } from './util';
+import { OpenAPIV3 } from 'openapi-types';
+import { buildGlobalTags, prepareRoutes } from './util';
 import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
@@ -19,6 +20,83 @@ describe('extractTags', () => {
     ],
   ])('given %s returns %s', (input, output) => {
     expect(extractTags(input)).toEqual(output);
+  });
+});
+
+describe('buildGlobalTags', () => {
+  test.each([
+    {
+      name: 'base case',
+      paths: {},
+      additionalTags: [],
+      output: [],
+    },
+    {
+      name: 'all methods',
+      paths: {
+        '/foo': {
+          get: { tags: ['get'] },
+          put: { tags: ['put'] },
+          post: { tags: ['post'] },
+          patch: { tags: ['patch'] },
+          delete: { tags: ['delete'] },
+          options: { tags: ['options'] },
+          head: { tags: ['head'] },
+          trace: { tags: ['trace'] },
+        },
+      },
+      additionalTags: [],
+      output: [
+        { name: 'delete' },
+        { name: 'get' },
+        { name: 'head' },
+        { name: 'options' },
+        { name: 'patch' },
+        { name: 'post' },
+        { name: 'put' },
+        { name: 'trace' },
+      ],
+    },
+    {
+      name: 'unknown method',
+      paths: {
+        '/foo': {
+          unknown: { tags: ['not-included'] },
+        },
+        '/bar': {
+          post: { tags: ['bar'] },
+        },
+      },
+      additionalTags: [],
+      output: [{ name: 'bar' }],
+    },
+    {
+      name: 'dedup',
+      paths: {
+        '/foo': {
+          get: { tags: ['foo'] },
+          patch: { tags: ['foo'] },
+        },
+        '/bar': {
+          get: { tags: ['foo'] },
+          post: { tags: ['foo'] },
+        },
+      },
+      additionalTags: [],
+      output: [{ name: 'foo' }],
+    },
+    {
+      name: 'dedups with additional tags',
+      paths: {
+        '/foo': { get: { tags: ['foo'] } },
+        '/baz': { patch: { tags: ['foo'] } },
+        '/bar': { patch: { tags: ['bar'] } },
+      },
+      additionalTags: ['foo', 'bar', 'baz'],
+      output: [{ name: 'bar' }, { name: 'baz' }, { name: 'foo' }],
+    },
+  ])('$name', ({ paths, additionalTags, output }) => {
+    expect(buildGlobalTags(paths as OpenAPIV3.PathsObject, additionalTags)).toEqual(output);
   });
 });
 
