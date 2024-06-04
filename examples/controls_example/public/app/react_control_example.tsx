@@ -98,6 +98,7 @@ export const ReactControlExample = ({
     });
   });
 
+  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
     loading,
     value: dataViews,

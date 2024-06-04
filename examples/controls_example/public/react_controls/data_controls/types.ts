@@ -42,7 +42,9 @@ export interface DataControlFactory<
   }>;
 }
 
-export const isDataControlFactory = (factory: unknown): factory is DataControlFactory => {
+export const isDataControlFactory = (
+  factory: ControlFactory<object, any>
+): factory is DataControlFactory<any, any> => {
   return typeof (factory as DataControlFactory).isFieldCompatible === 'function';
 };
 

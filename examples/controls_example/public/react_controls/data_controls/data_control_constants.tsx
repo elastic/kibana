@@ -36,9 +36,17 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.dataViewTitle', {
           defaultMessage: 'Data view',
         }),
+      getDataViewListErrorTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.dataViewListErrorTitle', {
+          defaultMessage: 'Error loading data views',
+        }),
       getFieldTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
           defaultMessage: 'Field',
+        }),
+      getFieldListErrorTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.fieldListErrorTitle', {
+          defaultMessage: 'Error loading the field list',
         }),
       getControlTypeTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.controlTypesTitle', {

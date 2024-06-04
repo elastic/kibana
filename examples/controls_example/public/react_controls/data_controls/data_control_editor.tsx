@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -103,16 +104,23 @@ export const DataControlEditor = ({
   /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
   // const editorConfig = controlGroup.getEditorConfig();
 
-  const { loading: dataViewListLoading, value: dataViewListItems = [] } = useAsync(() => {
+  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
+  const {
+    loading: dataViewListLoading,
+    value: dataViewListItems = [],
+    error: dataViewListError,
+  } = useAsync(() => {
     return dataViewService.getIdsWithTitle();
   });
 
+  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
     loading: dataViewLoading,
     value: { selectedDataView, fieldRegistry } = {
       selectedDataView: undefined,
       fieldRegistry: undefined,
     },
+    error: fieldListError,
   } = useAsync(async () => {
     if (!selectedDataViewId) {
       return;
@@ -232,41 +240,62 @@ export const DataControlEditor = ({
             <EuiFormRow
               label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
             >
-              <DataViewPicker
-                dataViews={dataViewListItems}
-                selectedDataViewId={selectedDataViewId}
-                onChangeDataViewId={(newDataViewId) => {
-                  stateManager.dataViewId.next(newDataViewId);
-                }}
-                trigger={{
-                  label:
-                    selectedDataView?.getName() ??
-                    DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
-                }}
-                selectableProps={{ isLoading: dataViewListLoading }}
-              />
+              {dataViewListError ? (
+                <EuiCallOut
+                  color="danger"
+                  iconType="error"
+                  title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
+                >
+                  <p>{dataViewListError.message}</p>
+                </EuiCallOut>
+              ) : (
+                <DataViewPicker
+                  dataViews={dataViewListItems}
+                  selectedDataViewId={selectedDataViewId}
+                  onChangeDataViewId={(newDataViewId) => {
+                    stateManager.dataViewId.next(newDataViewId);
+                  }}
+                  trigger={{
+                    label:
+                      selectedDataView?.getName() ??
+                      DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
+                  }}
+                  selectableProps={{ isLoading: dataViewListLoading }}
+                />
+              )}
             </EuiFormRow>
             {/* )} */}
+
             <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
-              <FieldPicker
-                filterPredicate={(field: DataViewField) => {
-                  /** TODO: Make `fieldFilterPredicate` work when refactoring the `ControlGroupRenderer` */
-                  // const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
-                  return Boolean(fieldRegistry?.[field.name]);
-                }}
-                selectedFieldName={selectedFieldName}
-                dataView={selectedDataView}
-                onSelectField={(field) => {
-                  setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
-                  const newDefaultTitle = field.displayName ?? field.name;
-                  stateManager.fieldName.next(field.name);
-                  setSelectedFieldDisplayName(newDefaultTitle);
-                  if (!currentTitle || currentTitle === selectedFieldDisplayName) {
-                    stateManager.title.next(newDefaultTitle);
-                  }
-                }}
-                selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
-              />
+              {fieldListError ? (
+                <EuiCallOut
+                  color="danger"
+                  iconType="error"
+                  title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}
+                >
+                  <p>{fieldListError.message}</p>
+                </EuiCallOut>
+              ) : (
+                <FieldPicker
+                  filterPredicate={(field: DataViewField) => {
+                    /** TODO: Make `fieldFilterPredicate` work when refactoring the `ControlGroupRenderer` */
+                    // const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
+                    return Boolean(fieldRegistry?.[field.name]);
+                  }}
+                  selectedFieldName={selectedFieldName}
+                  dataView={selectedDataView}
+                  onSelectField={(field) => {
+                    setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
+                    const newDefaultTitle = field.displayName ?? field.name;
+                    stateManager.fieldName.next(field.name);
+                    setSelectedFieldDisplayName(newDefaultTitle);
+                    if (!currentTitle || currentTitle === selectedFieldDisplayName) {
+                      stateManager.title.next(newDefaultTitle);
+                    }
+                  }}
+                  selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+                />
+              )}
             </EuiFormRow>
             <EuiFormRow
               label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
