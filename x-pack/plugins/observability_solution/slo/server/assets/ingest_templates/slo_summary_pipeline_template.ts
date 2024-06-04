@@ -202,7 +202,7 @@ export const getSLOSummaryPipelineTemplate = (
           params: {
             isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
             totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-              ? 5 / slo.objective.timesliceWindow!.asMinutes()
+              ? Math.floor(5 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
           source: `
@@ -235,12 +235,12 @@ export const getSLOSummaryPipelineTemplate = (
           params: {
             isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
             totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-              ? 60 / slo.objective.timesliceWindow!.asMinutes()
+              ? Math.floor(60 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
           source: ` 
-            def totalEvents = ctx["fiveMinuteBurnRate"]["totalEvents"];
-            def goodEvents = ctx["fiveMinuteBurnRate"]["goodEvents"];
+            def totalEvents = ctx["oneHourBurnRate"]["totalEvents"];
+            def goodEvents = ctx["oneHourBurnRate"]["goodEvents"];
             def errorBudgetInitial = ctx["errorBudgetInitial"];
 
             if (totalEvents == null || totalEvents == 0) {
@@ -268,12 +268,12 @@ export const getSLOSummaryPipelineTemplate = (
           params: {
             isTimeslice: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod),
             totalSlicesInRange: timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-              ? 1440 / slo.objective.timesliceWindow!.asMinutes()
+              ? Math.floor(1440 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
           source: ` 
-            def totalEvents = ctx["fiveMinuteBurnRate"]["totalEvents"];
-            def goodEvents = ctx["fiveMinuteBurnRate"]["goodEvents"];
+            def totalEvents = ctx["oneDayBurnRate"]["totalEvents"];
+            def goodEvents = ctx["oneDayBurnRate"]["goodEvents"];
             def errorBudgetInitial = ctx["errorBudgetInitial"];
 
             if (totalEvents == null || totalEvents == 0) {
