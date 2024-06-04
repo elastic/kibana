@@ -2405,6 +2405,11 @@
       "warning": []
     },
     {
+      "query": "ROW a=1::LONG | LOOKUP t ON a",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index | keep ",
       "error": [
         "SyntaxError: missing ID_PATTERN at '<EOF>'"
@@ -2453,28 +2458,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project stringField, numberField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT stringField, numberField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, numberField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}"
       ],
       "warning": []
     },
@@ -9045,6 +9050,19 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_diff(\"year\", \"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [string]",
+        "Argument of [date_diff] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = abs(5)",
       "error": [],
       "warning": []
@@ -10733,6 +10751,18 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [date_extract] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = date_format(\"a\", now())",
       "error": [],
       "warning": []
@@ -10805,6 +10835,18 @@
     {
       "query": "row nullVar = null | eval date_format(nullVar, nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_format(stringField, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_format(stringField, concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [date_format] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
       "warning": []
     },
     {
@@ -11010,6 +11052,31 @@
     {
       "query": "row nullVar = null | eval date_trunc(nullVar, nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(1 year, \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(1 year, concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(\"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_trunc(concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [date_trunc] must be [time_literal], found value [concat(\"20\", \"22\")] type [string]",
+        "Argument of [date_trunc] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
       "warning": []
     },
     {
@@ -23702,6 +23769,18 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats max(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [max] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = min(numberField)",
       "error": [],
       "warning": []
@@ -23960,6 +24039,18 @@
     {
       "query": "row nullVar = null | stats min(nullVar)",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(\"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [min] must be [number], found value [concat(\"20\", \"22\")] type [string]"
+      ],
       "warning": []
     },
     {
@@ -24505,6 +24596,73 @@
         "Argument of [bucket] must be a constant, received [nullVar]",
         "Argument of [bucket] must be a constant, received [nullVar]",
         "Argument of [bucket] must be a constant, received [nullVar]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 1 year)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 1 year)",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats by bucket(concat(\"20\", \"22\"), 1 year)",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, \"a\", \"a\")",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"2022\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, concat(\"20\", \"22\"), concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"a\", \"2022\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, \"a\", concat(\"20\", \"22\"))",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(\"2022\", 5, \"2022\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats bucket(concat(\"20\", \"22\"), 5, concat(\"20\", \"22\"), \"a\")",
+      "error": [
+        "Argument of [bucket] must be [date], found value [concat(\"20\", \"22\")] type [string]"
       ],
       "warning": []
     },
