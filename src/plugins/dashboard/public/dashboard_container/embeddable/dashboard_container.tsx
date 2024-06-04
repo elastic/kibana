@@ -52,6 +52,7 @@ import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
+import { c } from 'tar';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
@@ -601,10 +602,17 @@ export class DashboardContainer
   public expandPanel = (panelId?: string, previousPanelId?: string) => {
     this.setExpandedPanelId(panelId);
 
+    if (panelId) {
+      localStorage.setItem(this.getScrollPositionStorageKey(), String(window.scrollY));
+      return;
+    }
+
     if (!panelId && previousPanelId) {
       this.setScrollToPanelId(previousPanelId);
     }
   };
+
+  public getScrollPositionStorageKey = () => `dashboard.scrollPosition_${this.id}`;
 
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
@@ -777,13 +785,19 @@ export class DashboardContainer
     this.setScrollToPanelId(undefined);
 
     this.untilEmbeddableLoaded(id).then(() => {
-      panelRef.scrollIntoView({ block: 'center' });
+      const scrollPosition = localStorage.getItem(this.getScrollPositionStorageKey());
 
-      // Scroll to the panel again after the transition ends to ensure the panel is in the right position before scrolling
-      // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
-      panelRef.ontransitionend = () => {
-        panelRef.scrollIntoView({ block: 'center' });
-      };
+      if (scrollPosition) {
+        // Scroll to the last scroll position after the transition ends to ensure the panel is in the right position before scrolling
+        // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
+        panelRef.ontransitionend = () => {
+          window.scrollTo({ top: parseInt(scrollPosition, 10) });
+          localStorage.removeItem(this.getScrollPositionStorageKey());
+        };
+        return;
+      }
+
+      panelRef.scrollIntoView({ block: 'center' });
     });
   };
 
