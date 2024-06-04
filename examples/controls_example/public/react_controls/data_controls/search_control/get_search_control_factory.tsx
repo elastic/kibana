@@ -44,7 +44,7 @@ const allSearchOptions = [
 
 const DEFAULT_SEARCH_TECHNIQUE = 'match';
 
-export const getSearchEmbeddableFactory = ({
+export const getSearchControlFactory = ({
   core,
   dataViewsService,
 }: {

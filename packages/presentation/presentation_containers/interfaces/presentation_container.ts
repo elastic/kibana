@@ -74,7 +74,7 @@ export const listenForCompatibleApi = <ApiType extends unknown>(
   };
 };
 
-export const combineCompatibleApis = <ApiType extends unknown, PublishingSubjectType>(
+export const combineCompatibleChildrenApis = <ApiType extends unknown, PublishingSubjectType>(
   api: unknown,
   observableKey: keyof ApiType,
   isCompatible: (api: unknown) => api is ApiType,

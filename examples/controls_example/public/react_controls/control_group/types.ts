@@ -11,11 +11,7 @@ import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import {
-  HasSerializableState,
-  HasSerializedChildState,
-  PresentationContainer,
-} from '@kbn/presentation-containers';
+import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -30,7 +26,7 @@ import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
-  controlStyle: PublishingSubject<ControlStyle>;
+  labelPosition: PublishingSubject<ControlStyle>;
 };
 export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
   [panelId: string]: ControlState;
@@ -46,7 +42,6 @@ export type ControlGroupUnsavedChanges = Omit<
 export type ControlGroupApi<ChildStateType extends DefaultControlState = DefaultControlState> =
   PresentationContainer &
     DefaultEmbeddableApi<ControlGroupSerializedState> &
-    HasSerializableState &
     PublishesFilters &
     PublishesDataViews &
     HasSerializedChildState<ChildStateType> &
@@ -64,7 +59,7 @@ export interface ControlGroupRuntimeState<
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
-  controlStyle: ControlStyle;
+  labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
   showApplySelections?: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
@@ -79,11 +74,12 @@ export interface ControlGroupRuntimeState<
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
-  'chainingSystem' | 'controlStyle' | 'showApplySelections' | 'ignoreParentSettings'
+  'chainingSystem' | 'labelPosition' | 'showApplySelections' | 'ignoreParentSettings'
 >;
 
 export type ControlGroupSerializedState = Omit<
   ControlGroupRuntimeState,
+  | 'labelPosition'
   | 'ignoreParentSettings'
   | 'defaultControlGrow'
   | 'defaultControlWidth'
@@ -92,4 +88,7 @@ export type ControlGroupSerializedState = Omit<
 > & {
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
+  // In runtime state, we refer to this property as `labelPosition`; however, to avoid migrations, we will
+  // continue to refer to this property as the legacy `controlStyle` in the serialized state
+  controlStyle: ControlStyle;
 };

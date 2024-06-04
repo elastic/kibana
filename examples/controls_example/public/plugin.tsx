@@ -49,10 +49,11 @@ export class ControlsExamplePlugin
     });
 
     registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
-      const [{ getSearchEmbeddableFactory }, [coreStart, depsStart]] = await Promise.all([
-        import('./react_controls/data_controls/search_control/get_search_control_factory'),
-        core.getStartServices(),
-      ]);
+      const [{ getSearchControlFactory: getSearchEmbeddableFactory }, [coreStart, depsStart]] =
+        await Promise.all([
+          import('./react_controls/data_controls/search_control/get_search_control_factory'),
+          core.getStartServices(),
+        ]);
 
       return getSearchEmbeddableFactory({
         core: coreStart,

@@ -199,7 +199,7 @@ export const ReactControlExample = ({
               {
                 name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:searchControlDataView',
                 type: 'index-pattern',
-                id: dataViews?.[0].id ?? 'The error check above prevents this :)',
+                id: dataViews?.[0].id!,
               },
             ],
           }),

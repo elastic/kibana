@@ -9,7 +9,7 @@
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { combineCompatibleApis } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { apiPublishesDataLoading, PublishesDataLoading } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isEqual } from 'lodash';
@@ -97,7 +97,7 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
 
   // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
   this.integrationSubscriptions.add(
-    combineCompatibleApis<PublishesDataLoading, boolean>(
+    combineCompatibleChildrenApis<PublishesDataLoading, boolean>(
       this,
       'dataLoading',
       apiPublishesDataLoading,

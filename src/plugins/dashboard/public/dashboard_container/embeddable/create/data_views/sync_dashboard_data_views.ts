@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { combineCompatibleApis } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, PublishesDataViews } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
 import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
@@ -33,7 +33,7 @@ export function startSyncingDashboardDataViews(this: DashboardContainer) {
       )
     : of([]);
 
-  const childDataViewsPipe = combineCompatibleApis<PublishesDataViews, DataView[]>(
+  const childDataViewsPipe = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
     this,
     'dataViews',
     apiPublishesDataViews,

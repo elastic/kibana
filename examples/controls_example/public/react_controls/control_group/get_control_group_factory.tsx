@@ -24,7 +24,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { combineCompatibleApis } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   apiPublishesFilters,
@@ -65,7 +65,7 @@ export const getControlGroupEmbeddableFactory = <
         initialChildControlState: childControlState,
         defaultControlGrow,
         defaultControlWidth,
-        controlStyle,
+        labelPosition,
         chainingSystem,
         showApplySelections: initialShowApply,
         ignoreParentSettings: initialParentSettings,
@@ -85,8 +85,8 @@ export const getControlGroupEmbeddableFactory = <
       const width = new BehaviorSubject<ControlWidth | undefined>(
         defaultControlWidth ?? DEFAULT_CONTROL_WIDTH
       );
-      const controlStyle$ = new BehaviorSubject<ControlStyle>(
-        controlStyle ?? DEFAULT_CONTROL_STYLE
+      const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
+        labelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
 
       /** TODO: Handle loading; loading should be true if any child is loading */
@@ -115,8 +115,11 @@ export const getControlGroupEmbeddableFactory = <
       );
       const api = setApi({
         unsavedChanges,
-        resetUnsavedChanges: () => {},
+        resetUnsavedChanges: () => {
+          // TODO: Implement this
+        },
         snapshotRuntimeState: () => {
+          // TODO: Remove this if it ends up being unnecessary
           return {} as unknown as ControlGroupSerializedState;
         },
         dataLoading: dataLoading$,
@@ -128,7 +131,7 @@ export const getControlGroupEmbeddableFactory = <
             api,
             {
               chainingSystem: chainingSystem$,
-              controlStyle: controlStyle$,
+              labelPosition: labelPosition$,
               showApplySelections,
               ignoreParentSettings,
             },
@@ -148,7 +151,7 @@ export const getControlGroupEmbeddableFactory = <
             children$.getValue(),
             controlOrder.getValue().map(({ id }) => id),
             {
-              controlStyle: controlStyle$.getValue(),
+              labelPosition: labelPosition$.getValue(),
               chainingSystem: chainingSystem$.getValue(),
               showApplySelections: showApplySelections.getValue(),
               ignoreParentSettings: ignoreParentSettings.getValue(),
@@ -170,17 +173,21 @@ export const getControlGroupEmbeddableFactory = <
         width,
         filters$,
         dataViews,
-        controlStyle: controlStyle$,
+        labelPosition: labelPosition$,
       });
 
       /**
        * Subscribe to all children's output filters, combine them, and output them
        * TODO: If `showApplySelections` is true, publish to "unpublishedFilters" instead
        * and only output to filters$ when the apply button is clicked.
+       *       OR
+       *       Always publish to "unpublishedFilters" and publish them manually on click
+       *       (when `showApplySelections` is true) or after a small debounce (when false)
+       *       See: https://github.com/elastic/kibana/pull/182842#discussion_r1624929511
        * - Note: Unsaved changes of control group **should** take into consideration the
        *         output filters,  but not the "unpublishedFilters"
        */
-      const outputFiltersSubscription = combineCompatibleApis<PublishesFilters, Filter[]>(
+      const outputFiltersSubscription = combineCompatibleChildrenApis<PublishesFilters, Filter[]>(
         api,
         'filters$',
         apiPublishesFilters,
@@ -188,12 +195,12 @@ export const getControlGroupEmbeddableFactory = <
       ).subscribe((newFilters) => filters$.next(newFilters));
 
       /** Subscribe to all children's output data views, combine them, and output them */
-      const childDataViewsSubscription = combineCompatibleApis<PublishesDataViews, DataView[]>(
-        api,
-        'dataViews',
-        apiPublishesDataViews,
-        []
-      ).subscribe((newDataViews) => dataViews.next(newDataViews));
+      const childDataViewsSubscription = combineCompatibleChildrenApis<
+        PublishesDataViews,
+        DataView[]
+      >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
+        dataViews.next(newDataViews)
+      );
 
       return {
         api,

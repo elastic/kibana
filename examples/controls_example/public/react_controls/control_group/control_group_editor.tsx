@@ -53,14 +53,14 @@ export const ControlGroupEditor = ({
 }: EditControlGroupProps) => {
   const [
     children,
+    selectedLabelPosition,
     selectedChainingSystem,
-    selectedControlStyle,
     selectedShowApplySelections,
     selectedIgnoreParentSettings,
   ] = useBatchedPublishingSubjects(
     api.children$,
+    stateManager.labelPosition,
     stateManager.chainingSystem,
-    stateManager.controlStyle,
     stateManager.showApplySelections,
     stateManager.ignoreParentSettings
   );
@@ -93,11 +93,10 @@ export const ControlGroupEditor = ({
               color="primary"
               options={CONTROL_LAYOUT_OPTIONS}
               data-test-subj="control-group-layout-options"
-              idSelected={selectedControlStyle}
+              idSelected={selectedLabelPosition}
               legend={ControlGroupEditorStrings.management.labelPosition.getLabelPositionLegend()}
-              onChange={(newControlStyle: string) => {
-                // The UI copy calls this setting labelPosition, but to avoid an unnecessary migration it will be left as controlStyle in the state.
-                stateManager.controlStyle.next(newControlStyle as ControlStyle);
+              onChange={(newPosition: string) => {
+                stateManager.labelPosition.next(newPosition as ControlStyle);
               }}
             />
           </EuiFormRow>

@@ -45,6 +45,7 @@ export const deserializeControlGroup = <
     ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
     initialChildControlState: flattenedPanels,
     ignoreParentSettings,
+    labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
     defaultControlGrow: DEFAULT_CONTROL_GROW,
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
   };
@@ -90,7 +91,8 @@ export const serializeControlGroup = (
 
   return {
     rawState: {
-      ...omit(state, ['ignoreParentSettings']),
+      ...omit(state, ['ignoreParentSettings', 'labelPosition']),
+      controlStyle: state.labelPosition, // Rename "labelPosition" to "controlStyle"
       ignoreParentSettingsJSON: JSON.stringify(state.ignoreParentSettings),
       panelsJSON: JSON.stringify(explicitInputPanels),
     },
