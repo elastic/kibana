@@ -152,7 +152,8 @@ describe('threshold expression', () => {
       .last()
       .simulate('change', { target: { value: 'between' } });
     wrapper.update();
-    expect(wrapper.find('input[data-test-subj="alertThresholdInput0"]').length).toEqual(2);
+    expect(wrapper.find('input[data-test-subj="alertThresholdInput0"]').length).toEqual(1);
+    expect(wrapper.find('input[data-test-subj="alertThresholdInput1"]').length).toEqual(1);
 
     wrapper
       .find('[data-test-subj="comparatorOptionsComboBox"]')
