@@ -13,7 +13,7 @@ import { DatasetFilter } from './filter_dataset';
 
 const renderComponent = (props: React.ComponentProps<typeof DatasetFilter>) => {
   return render(
-    <IntlProvider timeZone="UTC" locale="en">
+    <IntlProvider locale="en">
       <DatasetFilter {...props} />
     </IntlProvider>
   );

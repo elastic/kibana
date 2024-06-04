@@ -11,10 +11,9 @@ exports[`FeedItem render 1`] = `
     <h2
       id="kbnOverviewNews__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="What's new"
         id="kibanaOverview.news.title"
-        values={Object {}}
       />
     </h2>
   </EuiTitle>
