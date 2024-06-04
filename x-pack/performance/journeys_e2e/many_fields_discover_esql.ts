@@ -15,17 +15,21 @@ export const journey = new Journey({
   .step('Go to Discover Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(
       kbnUrl.get(
-        `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(),filters:!(),dataSource:(type:esql),interval:auto,query:(esql:'from%20indices-stats*%20%7C%20limit%2010'),sort:!())`
+        `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(),filters:!(),dataSource:(type:esql),hideChart:!t,interval:auto,query:(esql:'from%20indices-stats*%20%7C%20limit%2010'),sort:!())`
       )
     );
     await kibanaPage.waitForHeader();
     await page.waitForSelector('[data-test-subj="discoverDocTable"][data-render-complete="true"]');
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
-  .step('Expand the first document', async ({ page }) => {
+  .step('Expand the first document', async ({ page, kbnUrl }) => {
     const expandButtons = page.locator(subj('docTableExpandToggleColumn'));
     await expandButtons.first().click();
-    await page.waitForSelector(subj('docTableRowAction'));
-    await page.click(subj('docTableRowAction'));
+    await page.waitForSelector(subj('kbnDocViewer'));
+    await page.goto(
+      kbnUrl.get(
+        `/app/discover#/doc/35796250-bb09-11ec-a8e4-a9868e049a39/indices-stats?id=Bh6t-H8BbBF9z83A6xeC`
+      )
+    );
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   });
