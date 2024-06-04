@@ -784,12 +784,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        css={{ margin: '0 0 1px 0' }}
-        ref={containerRef}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
             <EuiOutsideClickDetector
