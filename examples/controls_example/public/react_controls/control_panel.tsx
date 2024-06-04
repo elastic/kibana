@@ -61,7 +61,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     defaultPanelTitle,
     grow,
     width,
-    controlStyle,
+    labelPosition,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
@@ -70,10 +70,10 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     api?.defaultPanelTitle,
     api?.grow,
     api?.width,
-    api?.parentApi?.controlStyle,
+    api?.parentApi?.labelPosition,
     viewModeSubject
   );
-  const usingTwoLineLayout = controlStyle === 'twoLine';
+  const usingTwoLineLayout = labelPosition === 'twoLine';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
