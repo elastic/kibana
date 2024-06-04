@@ -115,13 +115,12 @@ const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
-    soClient: SavedObjectsClientContract, // Unused remove
     esClient: ElasticsearchClient,
     action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string,
     options?: { skipDeploy?: boolean; spaceId?: string }
   ) => {
-    return agentPolicyUpdateEventHandler(soClient, esClient, action, agentPolicyId, options);
+    return agentPolicyUpdateEventHandler(esClient, action, agentPolicyId, options);
   };
 
   private async _update(
@@ -182,7 +181,7 @@ class AgentPolicyService {
     });
 
     if (options.bumpRevision || options.removeProtection) {
-      await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id, {
+      await this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', id, {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
@@ -350,7 +349,7 @@ class AgentPolicyService {
     );
 
     await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
-    await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id, {
+    await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
     });
     logger.debug(`Created new agent policy with id ${newSo.id}`);
@@ -853,13 +852,7 @@ class AgentPolicyService {
     );
     await pMap(
       savedObjectsResults,
-      (policy) =>
-        this.triggerAgentPolicyUpdatedEvent(
-          internalSoClientWithoutSpaceExtension,
-          esClient,
-          'updated',
-          policy.id
-        ),
+      (policy) => this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id),
       { concurrency: 50 }
     );
 
@@ -981,7 +974,7 @@ class AgentPolicyService {
     }
 
     await soClient.delete(SAVED_OBJECT_TYPE, id);
-    await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
+    await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id);
 
     // cleanup .fleet-policies docs on delete
     await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
