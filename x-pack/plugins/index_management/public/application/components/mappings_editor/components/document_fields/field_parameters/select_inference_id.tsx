@@ -45,7 +45,11 @@ import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_m
 import { InferenceToModelIdMap } from '../fields';
 import { NotificationToasts } from './notification_toasts';
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
-import { DefaultInferenceModels, DeploymentState } from '../../../types';
+import {
+  CustomInferenceEndpointConfig,
+  DefaultInferenceModels,
+  DeploymentState,
+} from '../../../types';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
   {
@@ -57,7 +61,10 @@ interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
   setValue: (value: string) => void;
-  setNewInferenceEndpoint: (newInferenceEndpoint: InferenceToModelIdMap) => void;
+  setNewInferenceEndpoint: (
+    newInferenceEndpoint: InferenceToModelIdMap,
+    customInferenceEndpointConfig: CustomInferenceEndpointConfig
+  ) => void;
 }
 export const SelectInferenceId = ({
   onChange,
@@ -116,24 +123,24 @@ export const SelectInferenceId = ({
         label: i18n.translate(
           'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.Elser',
           {
-            defaultMessage: DefaultInferenceModels.elser_model_2,
+            defaultMessage: 'elser_model_2',
           }
         ),
-        'data-test-subj': `default-inference_${DefaultInferenceModels.elser_model_2}`,
+        'data-test-subj': 'default-inference_elser_model_2',
       },
       {
         label: i18n.translate(
           'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.E5',
           {
-            defaultMessage: DefaultInferenceModels.e5,
+            defaultMessage: 'e5',
           }
         ),
-        'data-test-subj': `default-inference_${DefaultInferenceModels.e5}`,
+        'data-test-subj': 'default-inference_e5',
       },
     ];
   }, []);
 
-  const { isLoading, data: models, resendRequest } = useLoadInferenceModels();
+  const { isLoading, data: models } = useLoadInferenceModels();
 
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
@@ -185,15 +192,12 @@ export const SelectInferenceId = ({
           isDeployable,
           isDeployed:
             getTrainedModelStats(trainedModelStats)[defaultEndpointId] === DeploymentState.DEPLOYED,
-          defaultInferenceEndpoint: false,
         };
-        setNewInferenceEndpoint(newModelId);
-        // await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-        //   inferenceId,
-        //   taskType,
-        //   modelConfig
-        // );
-        // resendRequest();
+        const customInferenceEndpointConfig: CustomInferenceEndpointConfig = {
+          taskType,
+          modelConfig,
+        };
+        setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
       } catch (error) {
         NotificationToasts({ toasts, error });
         // reset options

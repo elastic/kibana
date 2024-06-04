@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { Field } from '../../../../../types';
+import { CustomInferenceEndpointConfig, Field } from '../../../../../types';
 import { useSemanticText } from './use_semantic_text';
 import { act } from 'react-dom/test-utils';
 
@@ -32,19 +32,59 @@ const mockFieldData = {
   inferenceId: 'elser_model_2',
 } as Field;
 
+const mockFieldForThirdPartyModel = {
+  name: 'name',
+  type: 'semantic_text',
+  inferenceId: 'openai',
+} as Field;
+
+const mockFieldForElserEndpointFromInferenceFlyout = {
+  name: 'name',
+  type: 'semantic_text',
+  inferenceId: 'my_elser_endpoint',
+} as Field;
+
+const mockOpenaiConfig: CustomInferenceEndpointConfig = {
+  taskType: 'text_embedding',
+  modelConfig: {
+    service: 'openai',
+    service_settings: {
+      api_key: 'test',
+      model_id: 'text-embedding-ada-002',
+    },
+  },
+};
+const mockElserConfig: CustomInferenceEndpointConfig = {
+  taskType: 'sparse_embedding',
+  modelConfig: {
+    service: 'elser',
+    service_settings: {
+      num_allocations: 1,
+      num_threads: 1,
+    },
+  },
+};
 const mockDispatch = jest.fn();
 
 jest.mock('../../../../../mappings_state_context', () => ({
   useMappingsState: jest.fn().mockReturnValue({
     inferenceToModelIdMap: {
       e5: {
-        defaultInferenceEndpoint: false,
         isDeployed: false,
         isDeployable: true,
         trainedModelId: '.multilingual-e5-small',
       },
       elser_model_2: {
-        defaultInferenceEndpoint: true,
+        isDeployed: false,
+        isDeployable: true,
+        trainedModelId: '.elser_model_2',
+      },
+      openai: {
+        isDeployed: false,
+        isDeployable: false,
+        trainedModelId: '',
+      },
+      my_elser_endpoint: {
         isDeployed: false,
         isDeployable: true,
         trainedModelId: '.elser_model_2',
@@ -65,7 +105,8 @@ jest.mock('../../../../../../component_templates/component_templates_context', (
 
 describe('useSemanticText', () => {
   let form: any;
-
+  let formForThirdPartyModel: any;
+  let formForEndpointCreatedFromInferenceFlyout: any;
   beforeEach(() => {
     jest.clearAllMocks();
     form = {
@@ -76,8 +117,76 @@ describe('useSemanticText', () => {
         inferenceId: { value: 'e5' },
       }),
     };
-  });
 
+    formForThirdPartyModel = {
+      getFields: jest.fn().mockReturnValue({
+        referenceField: { value: 'title' },
+        name: { value: 'semantic_text_openai_endpoint' },
+        type: { value: [{ value: 'semantic_text' }] },
+        inferenceId: { value: 'openai' },
+      }),
+    };
+
+    formForEndpointCreatedFromInferenceFlyout = {
+      getFields: jest.fn().mockReturnValue({
+        referenceField: { value: 'title' },
+        name: { value: 'semantic_text_elserServiceType_endpoint' },
+        type: { value: [{ value: 'semantic_text' }] },
+        inferenceId: { value: 'my_elser_endpoint' },
+      }),
+    };
+  });
+  it('should handle semantic text with third party model correctly', async () => {
+    const { result } = renderHook(() =>
+      useSemanticText({
+        form: formForThirdPartyModel,
+        setErrorsInTrainedModelDeployment: jest.fn(),
+        ml: mlMock,
+      })
+    );
+    await act(async () => {
+      result.current.setInferenceValue('openai');
+      result.current.handleSemanticText(mockFieldForThirdPartyModel, mockOpenaiConfig);
+    });
+    expect(mlMock.mlApi.trainedModels.startModelAllocation).not.toHaveBeenCalledWith('openai');
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'field.addSemanticText',
+      value: mockFieldForThirdPartyModel,
+    });
+    expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
+      'openai',
+      'text_embedding',
+      mockOpenaiConfig.modelConfig
+    );
+  });
+  it('should handle semantic text with inference endpoint created from flyout correctly', async () => {
+    const { result } = renderHook(() =>
+      useSemanticText({
+        form: formForEndpointCreatedFromInferenceFlyout,
+        setErrorsInTrainedModelDeployment: jest.fn(),
+        ml: mlMock,
+      })
+    );
+    await act(async () => {
+      result.current.setInferenceValue('my_elser_endpoint');
+      result.current.handleSemanticText(
+        mockFieldForElserEndpointFromInferenceFlyout,
+        mockElserConfig
+      );
+    });
+    expect(mlMock.mlApi.trainedModels.startModelAllocation).not.toHaveBeenCalledWith(
+      'my_elser_endpoint'
+    );
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'field.addSemanticText',
+      value: mockFieldForElserEndpointFromInferenceFlyout,
+    });
+    expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
+      'my_elser_endpoint',
+      'sparse_embedding',
+      mockElserConfig.modelConfig
+    );
+  });
   it('should populate the values from the form', () => {
     const { result } = renderHook(() =>
       useSemanticText({ form, setErrorsInTrainedModelDeployment: jest.fn(), ml: mlMock })
@@ -105,9 +214,9 @@ describe('useSemanticText', () => {
     });
     expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
       'elser_model_2',
-      'text_embedding',
+      'sparse_embedding',
       {
-        service: 'elasticsearch',
+        service: 'elser',
         service_settings: {
           num_allocations: 1,
           num_threads: 1,
@@ -154,8 +263,8 @@ describe('useSemanticText', () => {
     ).toHaveBeenCalledWith('.elser_model_2');
     expect(
       mlMockWithModelNotDownloaded.mlApi.inferenceModels.createInferenceEndpoint
-    ).toHaveBeenCalledWith('elser_model_2', 'text_embedding', {
-      service: 'elasticsearch',
+    ).toHaveBeenCalledWith('elser_model_2', 'sparse_embedding', {
+      service: 'elser',
       service_settings: {
         num_allocations: 1,
         num_threads: 1,
