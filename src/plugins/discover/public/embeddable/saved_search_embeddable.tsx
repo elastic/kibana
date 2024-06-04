@@ -13,6 +13,7 @@ import {
   Query,
   TimeRange,
   FilterStateStore,
+  isOfAggregateQueryType,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
@@ -66,8 +67,7 @@ import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_compon
 import { handleSourceColumnState } from '../utils/state_helpers';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { fetchTextBased } from '../application/main/data_fetching/fetch_text_based';
-import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
+import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
@@ -229,9 +229,9 @@ export class SavedSearchEmbeddable
     return true;
   }
 
-  private isTextBasedSearch = (savedSearch: SavedSearch): boolean => {
+  private isEsqlMode = (savedSearch: SavedSearch): boolean => {
     const query = savedSearch.searchSource.getField('query');
-    return isTextBasedQuery(query);
+    return isOfAggregateQueryType(query);
   };
 
   private getFetchedSampleSize = (searchProps: SearchProps): number => {
@@ -302,12 +302,12 @@ export class SavedSearchEmbeddable
 
     const query = savedSearch.searchSource.getField('query');
     const dataView = savedSearch.searchSource.getField('index')!;
-    const useTextBased = this.isTextBasedSearch(savedSearch);
+    const isEsqlMode = this.isEsqlMode(savedSearch);
 
     try {
-      // Request text based data
-      if (useTextBased && query) {
-        const result = await fetchTextBased(
+      // Request ES|QL data
+      if (isEsqlMode && query) {
+        const result = await fetchEsql(
           savedSearch.searchSource.getField('query')!,
           dataView,
           this.services.data,
@@ -323,8 +323,8 @@ export class SavedSearchEmbeddable
           loading: false,
         });
 
-        searchProps.columnsMeta = result.textBasedQueryColumns
-          ? getTextBasedColumnsMeta(result.textBasedQueryColumns)
+        searchProps.columnsMeta = result.esqlQueryColumns
+          ? getTextBasedColumnsMeta(result.esqlQueryColumns)
           : undefined;
         searchProps.rows = result.records;
         searchProps.totalHitCount = result.records.length;
@@ -392,9 +392,9 @@ export class SavedSearchEmbeddable
   private getSort(
     sort: SortPair[] | undefined,
     dataView: DataView | undefined,
-    isTextBasedQueryMode: boolean
+    isEsqlMode: boolean
   ) {
-    return getSortForEmbeddable(sort, dataView, this.services.uiSettings, isTextBasedQueryMode);
+    return getSortForEmbeddable(sort, dataView, this.services.uiSettings, isEsqlMode);
   }
 
   private initializeSearchEmbeddableProps() {
@@ -421,7 +421,7 @@ export class SavedSearchEmbeddable
       filters: savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
-      sort: this.getSort(savedSearch.sort, dataView, this.isTextBasedSearch(savedSearch)),
+      sort: this.getSort(savedSearch.sort, dataView, this.isEsqlMode(savedSearch)),
       rows: [],
       searchDescription: savedSearch.description,
       description: savedSearch.description,
@@ -460,7 +460,7 @@ export class SavedSearchEmbeddable
         this.updateInput({ sort: sortOrderArr });
       },
       // I don't want to create filters when is embedded
-      ...(!this.isTextBasedSearch(savedSearch) && {
+      ...(!this.isEsqlMode(savedSearch) && {
         onFilter: async (field, value, operator) => {
           let filters = generateFilters(
             this.services.filterManager,
@@ -583,7 +583,7 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.getSort(
       this.input.sort || savedSearch.sort,
       searchProps?.dataView,
-      this.isTextBasedSearch(savedSearch)
+      this.isEsqlMode(savedSearch)
     );
     searchProps.sharedItemTitle = this.panelTitleInternal;
     searchProps.searchTitle = this.panelTitleInternal;
@@ -640,10 +640,10 @@ export class SavedSearchEmbeddable
       return;
     }
 
-    const isTextBasedQueryMode = this.isTextBasedSearch(savedSearch);
+    const isEsqlMode = this.isEsqlMode(savedSearch);
     const viewMode = getValidViewMode({
       viewMode: savedSearch.viewMode,
-      isTextBasedQueryMode,
+      isEsqlMode,
     });
 
     if (
@@ -664,6 +664,7 @@ export class SavedSearchEmbeddable
               query={this.input.query}
               onAddFilter={searchProps.onFilter}
               searchSessionId={this.input.searchSessionId}
+              isEsqlMode={isEsqlMode}
             />
           </KibanaContextProvider>
         </KibanaRenderContextProvider>,
@@ -680,7 +681,7 @@ export class SavedSearchEmbeddable
 
     const useLegacyTable = isLegacyTableEnabled({
       uiSettings: this.services.uiSettings,
-      isTextBasedQueryMode,
+      isEsqlMode,
     });
     const query = savedSearch.searchSource.getField('query');
     const props = {

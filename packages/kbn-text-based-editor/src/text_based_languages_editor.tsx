@@ -50,9 +50,8 @@ import {
   type MonacoMessage,
   getWrappedInPipesCode,
   parseErrors,
-  getIndicesList,
-  getRemoteIndicesList,
   clearCacheWhenOld,
+  getESQLSources,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -359,14 +358,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
-  const esqlCallbacks: ESQLCallbacks = useMemo(
-    () => ({
+  const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
+    const fn = memoize(
+      (...args: [DataViewsPublicPluginStart]) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      }),
+      ({ esql }) => esql
+    );
+
+    return { cache: fn.cache, memoizedSources: fn };
+  }, []);
+
+  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        const [remoteIndices, localIndices] = await Promise.all([
-          getRemoteIndicesList(dataViews),
-          getIndicesList(dataViews),
-        ]);
-        return [...localIndices, ...remoteIndices];
+        clearCacheWhenOld(dataSourcesCache, queryString);
+        const sources = await memoizedSources(dataViews).result;
+        return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
@@ -390,7 +399,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
-      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -399,16 +407,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
-    }),
-    [
-      dataViews,
-      expressions,
-      indexManagementApiService,
-      esqlFieldsCache,
-      memoizedFieldsFromESQL,
-      abortController,
-    ]
-  );
+    };
+    return callbacks;
+  }, [
+    queryString,
+    memoizedSources,
+    dataSourcesCache,
+    dataViews,
+    esqlFieldsCache,
+    memoizedFieldsFromESQL,
+    expressions,
+    abortController,
+    indexManagementApiService,
+  ]);
 
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {

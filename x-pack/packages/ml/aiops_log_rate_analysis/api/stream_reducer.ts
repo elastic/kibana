@@ -34,12 +34,8 @@ export const initialState: StreamState = {
 
 export function streamReducer(
   state: StreamState,
-  action: AiopsLogRateAnalysisApiAction | AiopsLogRateAnalysisApiAction[]
+  action: AiopsLogRateAnalysisApiAction
 ): StreamState {
-  if (Array.isArray(action)) {
-    return action.reduce(streamReducer, state);
-  }
-
   switch (action.type) {
     case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS:
       return { ...state, significantItems: [...state.significantItems, ...action.payload] };
