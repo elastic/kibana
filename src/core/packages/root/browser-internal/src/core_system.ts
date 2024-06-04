@@ -349,6 +349,7 @@ export class CoreSystem {
       const customBranding = this.customBranding.start();
       const application = await this.application.start({
         http,
+        injection,
         theme,
         overlays,
         customBranding,

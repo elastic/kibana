@@ -12,6 +12,7 @@ import { chain } from 'lodash';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { Global } from '@kbn/core-di-common';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './contracts';
+import { InternalDiSetupService, InternalDiService } from './services';
 
 /** @internal */
 export class CoreInjectionService {
@@ -118,12 +119,24 @@ export class CoreInjectionService {
   }
 
   public setup(): InternalCoreDiServiceSetup {
-    return {
+    const contract = {
       load: this.load,
     };
+    this.root.bind(InternalDiSetupService).toConstantValue(contract);
+
+    return contract;
   }
 
   public start(): InternalCoreDiServiceStart {
+    const contract = {
+      dispose: this.dispose,
+      fork: this.fork,
+      getContainer: this.getContainer,
+      root: this.root,
+    };
+
+    this.root.bind(InternalDiService).toConstantValue(contract);
+
     this.root
       .bind(CoreInjectionService.Context)
       .toDynamicValue(({ container }) => container)
@@ -135,11 +148,6 @@ export class CoreInjectionService {
         .forEach((scope) => CoreInjectionService.bindGlobals(this.root, scope));
     }
 
-    return {
-      dispose: this.dispose,
-      fork: this.fork,
-      getContainer: this.getContainer,
-      root: this.root,
-    };
+    return contract;
   }
 }
