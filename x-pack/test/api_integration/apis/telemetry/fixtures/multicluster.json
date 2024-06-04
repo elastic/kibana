@@ -978,7 +978,7 @@
       "logstash": {
         "count": 1,
         "cluster_stats": {
-          "monitoringClusterUuid": "TkHOX_-1TzWwbROwQJU5IA",
+          "monitoringClusterUuid": "integrationTestClusterUuid",
           "collection_types": {
             "internal_collection": 1
           },
