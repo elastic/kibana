@@ -271,7 +271,7 @@ const CODES = Object.freeze({
   ),
 
   // -----------------------------------------------------------------
-  // SCAN CODES
+  // SCAN ERROR CODES
   // -----------------------------------------------------------------
 
   'ra_scan_error_scan-invalid-input': i18n.translate(
@@ -291,13 +291,6 @@ const CODES = Object.freeze({
   'ra_scan_error_scan-queue-quota': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.queueQuota',
     { defaultMessage: 'Scan failed. Too many scans are queued.' }
-  ),
-
-  // Dev:
-  // scan success/competed
-  ra_scan_success_done: i18n.translate(
-    'xpack.securitySolution.endpointActionResponseCodes.scan.success',
-    { defaultMessage: 'Success. Scan completed.' }
   ),
 });
 
