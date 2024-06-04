@@ -16,7 +16,7 @@ import type { RuleToImport } from '../../../../../../common/api/detection_engine
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
-import type { IRulesManagementClient } from '../rule_management/rules_management_client';
+import type { IDetectionRulesClient } from '../rule_management/detection_rules_client';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -34,7 +34,7 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
- * @param rulesManagementClient {object}
+ * @param detectionRulesClient {object}
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -43,14 +43,14 @@ export const importRules = async ({
   ruleChunks,
   rulesResponseAcc,
   overwriteRules,
-  rulesManagementClient,
+  detectionRulesClient,
   existingLists,
   allowMissingConnectorSecrets,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
-  rulesManagementClient: IRulesManagementClient;
+  detectionRulesClient: IDetectionRulesClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {
@@ -88,7 +88,7 @@ export const importRules = async ({
 
               importRuleResponse = [...importRuleResponse, ...exceptionErrors];
 
-              const importedRule = await rulesManagementClient.importRule({
+              const importedRule = await detectionRulesClient.importRule({
                 ruleToImport: {
                   ...parsedRule,
                   exceptions_list: [...exceptions],

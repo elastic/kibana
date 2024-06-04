@@ -17,9 +17,9 @@ import useObservable from 'react-use/lib/useObservable';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { SamplingOption } from '../../../../../common/types/field_stats';
+import { buildEsQuery } from '@kbn/es-query';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
@@ -44,18 +44,14 @@ import type {
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
 import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
 
+type AnyQuery = Query | AggregateQuery;
+
 const defaultSearchQuery = {
   match_all: {},
 };
 
 const FALLBACK_ESQL_QUERY: ESQLQuery = { esql: '' };
-const DEFAULT_SAMPLING_OPTION: SamplingOption = {
-  mode: 'random_sampling',
-  seed: '',
-  probability: 0,
-};
 const DEFAULT_LIMIT_SIZE = '10000';
-
 const defaults = getDefaultPageState();
 
 export const getDefaultESQLDataVisualizerListState = (
@@ -82,8 +78,7 @@ export const getDefaultESQLDataVisualizerListState = (
 });
 export const useESQLDataVisualizerData = (
   input: ESQLDataVisualizerGridEmbeddableState,
-  dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState,
-  setQuery?: React.Dispatch<React.SetStateAction<ESQLQuery>>
+  dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
@@ -112,20 +107,31 @@ export const useESQLDataVisualizerData = (
     autoRefreshSelector: true,
   });
 
-  const { currentDataView, query, visibleFieldNames, indexPattern } = useMemo(
-    () => ({
-      currentSavedSearch: input?.savedSearch,
-      currentDataView: input.dataView,
-      query: input?.query ?? FALLBACK_ESQL_QUERY,
-      visibleFieldNames: input?.visibleFieldNames ?? [],
-      currentFilters: input?.filters,
-      fieldsToFetch: input?.fieldsToFetch,
-      /** By default, use random sampling **/
-      samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
-      indexPattern: input?.indexPattern,
-    }),
-    [input]
-  );
+  const { currentDataView, parentQuery, parentFilters, query, visibleFieldNames, indexPattern } =
+    useMemo(() => {
+      let q = FALLBACK_ESQL_QUERY;
+
+      if (input?.query && isESQLQuery(input?.query)) q = input.query;
+      if (input?.savedSearch && isESQLQuery(input.savedSearch.searchSource.getField('query'))) {
+        q = input.savedSearch.searchSource.getField('query') as ESQLQuery;
+      }
+      return {
+        currentDataView: input.dataView,
+        query: q ?? FALLBACK_ESQL_QUERY,
+        // It's possible that in a dashboard setting, we will have additional filters and queries
+        parentQuery: input?.query,
+        parentFilters: input?.filters,
+        visibleFieldNames: input?.visibleFieldNames ?? [],
+        indexPattern: input?.indexPattern,
+      };
+    }, [
+      input.query,
+      input.savedSearch,
+      input.dataView,
+      input?.filters,
+      input?.visibleFieldNames,
+      input?.indexPattern,
+    ]);
 
   const restorableDefaults = useMemo(
     () => getDefaultESQLDataVisualizerListState(dataVisualizerListState),
@@ -170,8 +176,25 @@ export const useESQLDataVisualizerData = (
 
       const aggInterval = buckets.getInterval();
 
-      const filter = currentDataView?.timeFieldName
-        ? ({
+      let filter: QueryDslQueryContainer = buildEsQuery(
+        input.dataView,
+        (Array.isArray(parentQuery) ? parentQuery : [parentQuery]) as AnyQuery | AnyQuery[],
+        parentFilters ?? []
+      );
+
+      if (currentDataView?.timeFieldName) {
+        if (Array.isArray(filter?.bool?.filter)) {
+          filter.bool!.filter!.push({
+            range: {
+              [currentDataView.timeFieldName]: {
+                format: 'strict_date_optional_time',
+                gte: timefilter.getTime().from,
+                lte: timefilter.getTime().to,
+              },
+            },
+          });
+        } else {
+          filter = {
             bool: {
               must: [],
               filter: [
@@ -188,8 +211,9 @@ export const useESQLDataVisualizerData = (
               should: [],
               must_not: [],
             },
-          } as QueryDslQueryContainer)
-        : undefined;
+          } as QueryDslQueryContainer;
+        }
+      }
       return {
         earliest,
         latest,
@@ -211,7 +235,7 @@ export const useESQLDataVisualizerData = (
       timefilter,
       currentDataView?.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(query),
+      JSON.stringify({ query, parentQuery, parentFilters }),
       indexPattern,
       lastRefresh,
       limitSize,
@@ -591,8 +615,8 @@ export const useESQLDataVisualizerData = (
     [totalCount, overallStatsProgress.loaded, fieldStatsProgress.loaded]
   );
 
-  const onQueryUpdate = useCallback(
-    async (q?: AggregateQuery) => {
+  const resetData = useCallback(
+    (q?: AggregateQuery) => {
       // When user submits a new query
       // resets all current requests and other data
       if (cancelOverallStatsRequest) {
@@ -605,11 +629,8 @@ export const useESQLDataVisualizerData = (
       setFieldStatFieldsToFetch(undefined);
       setMetricConfigs(defaults.metricConfigs);
       setNonMetricConfigs(defaults.nonMetricConfigs);
-      if (isESQLQuery(q) && setQuery) {
-        setQuery(q);
-      }
     },
-    [cancelFieldStatsRequest, cancelOverallStatsRequest, setQuery]
+    [cancelFieldStatsRequest, cancelOverallStatsRequest]
   );
 
   return {
@@ -628,7 +649,7 @@ export const useESQLDataVisualizerData = (
     getItemIdToExpandedRowMap,
     cancelOverallStatsRequest,
     cancelFieldStatsRequest,
-    onQueryUpdate,
+    resetData,
     limitSize,
     showEmptyFields,
     fieldsCountStats,

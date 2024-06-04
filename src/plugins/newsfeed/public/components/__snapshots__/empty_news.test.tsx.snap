@@ -4,10 +4,9 @@ exports[`empty_news rendering renders the default Empty News 1`] = `
 <EuiEmptyPrompt
   body={
     <p>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="If your Kibana instance doesn’t have internet access, ask your administrator to disable this feature. Otherwise, we’ll keep trying to fetch the news."
         id="newsfeed.emptyPrompt.noNewsText"
-        values={Object {}}
       />
     </p>
   }
@@ -15,10 +14,9 @@ exports[`empty_news rendering renders the default Empty News 1`] = `
   iconType="documents"
   title={
     <h2>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="No news?"
         id="newsfeed.emptyPrompt.noNewsTitle"
-        values={Object {}}
       />
     </h2>
   }
