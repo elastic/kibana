@@ -1,0 +1,5 @@
+type: object
+properties:
+  file:
+    description: |
+      A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.

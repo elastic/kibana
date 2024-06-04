@@ -1,6 +1,6 @@
 post:
   summary: Retrieve sets of saved objects that you want to import into Kibana.
-  operationId: exportSavedObjectsDefaultSpace
+  operationId: exportSavedObjects
   description: |
 
     You must include `type` or `objects` in the request body.
@@ -12,6 +12,7 @@ post:
     - saved objects
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
     content:
