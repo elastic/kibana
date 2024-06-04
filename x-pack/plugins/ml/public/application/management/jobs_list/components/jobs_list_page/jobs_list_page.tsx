@@ -56,7 +56,6 @@ interface Props {
   fieldFormats: FieldFormatsStart;
   isServerless: boolean;
   mlFeatures: MlFeatures;
-  setRefreshJobs: (refresh: () => void) => void;
 }
 
 export const JobsListPage: FC<Props> = ({
