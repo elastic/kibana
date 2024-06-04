@@ -14,7 +14,6 @@ import type { TimelineModel } from '../../../../store/model';
 import type { ActionProps } from '../../../../../../common/types';
 
 const noOp = () => {};
-const emptyLoadingEventIds: string[] = [];
 export interface UnifiedActionProps extends ActionProps {
   onToggleShowNotes: (eventId?: string) => void;
   events: TimelineItem[];
@@ -31,24 +30,20 @@ export const ControlColumnCellRender = memo(function RowCellRender(props: Unifie
   return (
     <Actions
       {...props}
-      ecsData={ecsData ?? event.ecs}
       ariaRowindex={rowIndex}
-      rowIndex={rowIndex}
-      checked={false}
       columnValues="columnValues"
+      ecsData={ecsData ?? event.ecs}
       eventId={event?._id}
       eventIdToNoteIds={eventIdToNoteIds}
       isEventPinned={isPinned}
       isEventViewer={false}
-      loadingEventIds={emptyLoadingEventIds}
       onEventDetailsPanelOpened={noOp}
-      onRowSelected={noOp}
       onRuleChange={noOp}
-      showCheckboxes={false}
       showNotes={true}
       timelineId={TimelineId.active}
       toggleShowNotes={onToggleShowNotes}
       refetch={noOp}
+      rowIndex={rowIndex}
     />
   );
 });

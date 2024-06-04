@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiButton, EuiDescribedFormGroup, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAppContext } from '../../../hooks/use_app_context';
+import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
 
 export function SettingsTab() {
   const {
     application: { navigateToApp },
-  } = useAppContext();
+  } = useKibana().services;
 
   const handleNavigateToConnectors = () => {
     navigateToApp('management', {
