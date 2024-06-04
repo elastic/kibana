@@ -12,7 +12,7 @@ import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { isFilterPinned } from '@kbn/es-query';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../constants';
-import type { DiscoverSetupPlugins } from '../plugin';
+import type { DiscoverSetupPlugins } from '../types';
 
 /**
  * It creates the kbn url tracker for Discover to listens to history changes and optionally to global state
