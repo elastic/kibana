@@ -19,7 +19,6 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/space',
       options: {
-        access: 'public',
         description: `Get all spaces`,
       },
       validate: {

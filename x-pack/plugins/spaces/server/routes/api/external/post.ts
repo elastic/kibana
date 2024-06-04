@@ -21,7 +21,6 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/space',
       options: {
-        access: 'public',
         description: `Create a space`,
       },
       validate: {

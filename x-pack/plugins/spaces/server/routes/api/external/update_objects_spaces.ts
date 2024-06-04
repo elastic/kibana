@@ -37,7 +37,6 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/_update_objects_spaces',
       options: {
-        access: 'public',
         description: `Update saved objects in spaces`,
       },
       validate: {

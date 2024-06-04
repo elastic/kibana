@@ -18,7 +18,6 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
     {
       path: '/api/spaces/_get_shareable_references',
       options: {
-        access: 'public',
         description: `Get shareable references`,
       },
       validate: {

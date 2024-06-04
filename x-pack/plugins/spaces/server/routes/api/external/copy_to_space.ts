@@ -32,7 +32,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/_copy_saved_objects',
       options: {
         tags: ['access:copySavedObjectsToSpaces'],
-        access: 'public',
         description: `Copy saved objects to spaces`,
       },
       validate: {
@@ -150,7 +149,6 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/_resolve_copy_saved_objects_errors',
       options: {
         tags: ['access:copySavedObjectsToSpaces'],
-        access: 'public',
         description: `Resolve conflicts copying saved objects`,
       },
       validate: {
