@@ -175,10 +175,7 @@ const renderPanelOpener = (
   return items;
 };
 
-// Generate the EuiCollapsible props for both the root component (EuiCollapsibleNavItem) and its
-// "items" props. Both are compatible with the exception of "renderItem" which is only used for
-// sub items.
-const nodeToEuiCollapsibleNavProps = (
+const getEuiProps = (
   _navNode: ChromeProjectNavigationNode,
   {
     navigateToUrl,
@@ -198,18 +195,15 @@ const nodeToEuiCollapsibleNavProps = (
     activeNodes: ChromeProjectNavigationNode[][];
   }
 ): {
-  items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced>;
-  isVisible: boolean;
-} => {
+  navNode: ChromeProjectNavigationNode;
+  subItems: EuiCollapsibleNavItemProps['items'];
+  isSelected: boolean;
+  isItem: boolean;
+  dataTestSubj: string;
+  spaceBefore?: EuiThemeSize | null;
+} & Pick<EuiCollapsibleNavItemProps, 'linkProps' | 'onClick'> => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
-  const {
-    id,
-    path,
-    href,
-    renderAs,
-    onClick: customOnClick,
-    isCollapsible = DEFAULT_IS_COLLAPSIBLE,
-  } = navNode;
+  const { path, href, onClick: customOnClick, isCollapsible = DEFAULT_IS_COLLAPSIBLE } = navNode;
 
   const isAccordion = isAccordionNode(navNode);
   // If the node is an accordion and it is not collapsible, we only want to mark it as active
@@ -234,26 +228,11 @@ const nodeToEuiCollapsibleNavProps = (
     spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
   }
 
-  if (navNode.renderItem) {
-    // Leave the rendering to the consumer
-    return {
-      items: [{ renderItem: navNode.renderItem }],
-      isVisible: true,
-    };
-  }
-
-  if (renderAs === 'panelOpener') {
-    // Render as a panel opener (button to open a panel as a second navigation)
-    return {
-      items: [...renderPanelOpener(navNode, { spaceBefore, navigateToUrl, activeNodes })],
-      isVisible: true,
-    };
-  }
-
   const subItems: EuiCollapsibleNavItemProps['items'] | undefined = isItem
     ? undefined
     : navNode.children
         ?.map((child) =>
+          // Recursively convert the children to EuiCollapsibleNavSubItemProps
           nodeToEuiCollapsibleNavProps(child, {
             navigateToUrl,
             openPanel,
@@ -270,14 +249,6 @@ const nodeToEuiCollapsibleNavProps = (
           return itemsFlattened;
         })
         .flat();
-
-  if (renderAs === 'block' && treeDepth > 0 && subItems) {
-    // Render as a group block (bold title + list of links underneath)
-    return {
-      items: [...renderGroup(navNode, subItems, { spaceBefore: spaceBefore ?? null })],
-      isVisible: subItems.length > 0,
-    };
-  }
 
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
@@ -315,6 +286,65 @@ const nodeToEuiCollapsibleNavProps = (
     }
   };
 
+  return {
+    navNode,
+    subItems,
+    isSelected,
+    isItem,
+    spaceBefore,
+    dataTestSubj,
+    linkProps,
+    onClick,
+  };
+};
+
+// Generate the EuiCollapsible props for the root component (EuiCollapsibleNavItem) and its
+// "items" props (recursively). Both are compatible with the exception of `renderItem` which
+// can only be used for sub items (not top level).
+function nodeToEuiCollapsibleNavProps(
+  _navNode: ChromeProjectNavigationNode,
+  deps: {
+    navigateToUrl: NavigateToUrlFn;
+    openPanel: PanelContext['open'];
+    closePanel: PanelContext['close'];
+    isSideNavCollapsed: boolean;
+    treeDepth: number;
+    getIsCollapsed: (path: string) => boolean;
+    activeNodes: ChromeProjectNavigationNode[][];
+  }
+): {
+  items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced>;
+  isVisible: boolean;
+} {
+  const { navNode, subItems, dataTestSubj, isSelected, isItem, spaceBefore, linkProps, onClick } =
+    getEuiProps(_navNode, deps);
+  const { id, path, href, renderAs } = navNode;
+
+  if (navNode.renderItem) {
+    // Leave the rendering to the consumer
+    return {
+      items: [{ renderItem: navNode.renderItem }],
+      isVisible: true,
+    };
+  }
+
+  if (renderAs === 'panelOpener') {
+    // Render as a panel opener (button to open a panel as a second navigation)
+    return {
+      items: [...renderPanelOpener(navNode, deps)],
+      isVisible: true,
+    };
+  }
+
+  if (renderAs === 'block' && deps.treeDepth > 0 && subItems) {
+    // Render as a group block (bold title + list of links underneath)
+    return {
+      items: [...renderGroup(navNode, subItems, { spaceBefore: spaceBefore ?? null })],
+      isVisible: subItems.length > 0,
+    };
+  }
+
+  // Render as a link or an accordion
   const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
     {
       id,
@@ -324,7 +354,7 @@ const nodeToEuiCollapsibleNavProps = (
       icon: navNode.icon,
       title: navNode.title,
       ['data-test-subj']: dataTestSubj,
-      iconProps: { size: treeDepth === 0 ? 'm' : 's' },
+      iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
       // Render as an accordion or a link (handled by EUI) depending if
       // "items" is undefined or not. If it is undefined --> a link, otherwise an
@@ -343,7 +373,7 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   return { items, isVisible };
-};
+}
 
 const className = css`
   .euiAccordion__childWrapper {
