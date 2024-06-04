@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -28,9 +29,10 @@ export function ViewInAPMButton({
   to: string;
   kuery?: string;
 }) {
+  // this component is rendered in the Observability Plugin, so we can use the ObservabilityPublicPluginsStart type
   const {
     services: { share },
-  } = useKibana();
+  } = useKibana<ObservabilityPublicPluginsStart>();
 
   const serviceNavigator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
 

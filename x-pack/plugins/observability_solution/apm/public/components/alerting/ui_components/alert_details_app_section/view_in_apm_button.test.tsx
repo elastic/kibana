@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 
 import { ViewInAPMButton } from './view_in_apm_button';
@@ -16,6 +15,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     services: {},
   }),
 }));
+
+const { useKibana } = jest.requireMock('@kbn/kibana-react-plugin/public');
 
 describe('ViewInApmButton', () => {
   const config = {
