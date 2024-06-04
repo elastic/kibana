@@ -304,21 +304,53 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 }
 
 function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) {
+  /**
+   * Deals with asciidoc internal cross-references in the function descriptions
+   *
+   * Examples:
+   * <<esql-mv_max>> -> `MV_MAX`
+   * <<esql-st_intersects,ST_INTERSECTS>> -> `ST_INTERSECTS`
+   * <<esql-multivalued-fields, multivalued fields>> -> multivalued fields
+   */
+  const removeAsciiDocInternalCrossReferences = (
+    asciidocString: string,
+    functionNames: string[]
+  ) => {
+    const internalCrossReferenceRegex = /<<(.+?)(,.+?)?>>/g;
+
+    const extractPossibleFunctionName = (id: string) => id.replace('esql-', '');
+
+    return asciidocString.replace(internalCrossReferenceRegex, (_match, anchorId, linkText) => {
+      const ret = linkText ? linkText.slice(1) : anchorId;
+
+      const matchingFunction = functionNames.find(
+        (name) =>
+          extractPossibleFunctionName(ret) === name.toLowerCase() ||
+          extractPossibleFunctionName(ret) === name.toUpperCase()
+      );
+      return matchingFunction ? `\`${matchingFunction.toUpperCase()}\`` : ret;
+    });
+  };
+
   const removeInlineAsciiDocLinks = (asciidocString: string) => {
     const inlineLinkRegex = /\{.+?\}\/.+?\[(.+?)\]/g;
+
     return asciidocString.replace(inlineLinkRegex, '$1');
   };
 
   const getDefinitionName = (name: string) => _.camelCase(`${name}Definition`);
 
-  const printFunctionDefinition = (functionDefinition: FunctionDefinition) => {
+  const printFunctionDefinition = (
+    functionDefinition: FunctionDefinition,
+    functionNames: string[]
+  ) => {
     const { type, name, description, alias, signatures } = functionDefinition;
 
     return `const ${getDefinitionName(name)}: FunctionDefinition = {
     type: '${type}',
     name: '${name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-      removeInlineAsciiDocLinks(description)
+      removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
     )} }),
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
@@ -340,7 +372,14 @@ import type { FunctionDefinition } from './types';
 
 `;
 
-  const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join('\n\n');
+  const functionDefinitionsString = functionDefinitions
+    .map((def) =>
+      printFunctionDefinition(
+        def,
+        functionDefinitions.map(({ name }) => name)
+      )
+    )
+    .join('\n\n');
 
   const fileContents = `${fileHeader}${functionDefinitionsString}
   export const evalFunctionDefinitions = [${functionDefinitions
