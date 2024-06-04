@@ -602,8 +602,8 @@ export class DashboardContainer
   public expandPanel = (panelId?: string, previousPanelId?: string) => {
     this.setExpandedPanelId(panelId);
 
-    if (panelId) {
-      localStorage.setItem(this.getScrollPositionStorageKey(), String(window.scrollY));
+    if (panelId && window.scrollY > 0) {
+      localStorage.setItem(this.getScrollPositionStorageKey(panelId), String(window.scrollY));
       return;
     }
 
@@ -612,7 +612,8 @@ export class DashboardContainer
     }
   };
 
-  public getScrollPositionStorageKey = () => `dashboard.scrollPosition_${this.id}`;
+  public getScrollPositionStorageKey = (suffix: string) =>
+    `dashboard.scrollPosition_${this.id}_${suffix}`;
 
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
@@ -785,14 +786,14 @@ export class DashboardContainer
     this.setScrollToPanelId(undefined);
 
     this.untilEmbeddableLoaded(id).then(() => {
-      const scrollPosition = localStorage.getItem(this.getScrollPositionStorageKey());
+      const scrollPosition = localStorage.getItem(this.getScrollPositionStorageKey(id));
 
       if (scrollPosition) {
         // Scroll to the last scroll position after the transition ends to ensure the panel is in the right position before scrolling
         // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
         panelRef.ontransitionend = () => {
           window.scrollTo({ top: parseInt(scrollPosition, 10) });
-          localStorage.removeItem(this.getScrollPositionStorageKey());
+          localStorage.removeItem(this.getScrollPositionStorageKey(id));
         };
         return;
       }
