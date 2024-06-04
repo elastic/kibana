@@ -89,20 +89,18 @@ export function WaterfallContextProvider({
   );
 
   useEffect(() => {
-    if (!tree) {
-      const root = buildTraceTree({
-        waterfall,
-        maxLevelOpen,
-        isOpen,
-        path: {
-          criticalPathSegmentsById,
-          showCriticalPath,
-        },
-      });
+    const root = buildTraceTree({
+      waterfall,
+      maxLevelOpen,
+      isOpen,
+      path: {
+        criticalPathSegmentsById,
+        showCriticalPath,
+      },
+    });
 
-      setTree(root);
-    }
-  }, [criticalPathSegmentsById, isOpen, maxLevelOpen, showCriticalPath, tree, waterfall]);
+    setTree(root);
+  }, [criticalPathSegmentsById, isOpen, maxLevelOpen, showCriticalPath, waterfall]);
 
   return (
     <WaterfallContext.Provider

@@ -143,6 +143,7 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
           data-test-subj="apmWaterfallButton"
           css={css`
             position: absolute;
+            z-index: ${theme.eui.euiZLevel2};
           `}
           iconType={isAccordionOpen ? 'fold' : 'unfold'}
           onClick={() => {
