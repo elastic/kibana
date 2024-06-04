@@ -1,4 +1,4 @@
-# Developing Kibana and Fleet Server simulatanously
+# Developing Kibana and Fleet Server simultaneously
 
 Many times, a contributor to Fleet will only need to make changes to [Fleet Server](https://github.com/elastic/fleet-server) or [Kibana](https://github.com/elastic/kibana) - not both. But, there are times when end-to-end changes across both componenents are necessary. To facilitate this, we've created a guide to help you get up and running with a local development environment that includes both Kibana and Fleet Server. This is a more involved process than setting up either component on its own.
 

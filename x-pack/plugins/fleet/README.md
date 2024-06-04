@@ -120,7 +120,7 @@ If you are still encountering errors after `yarn kbn clean`, you can try a more 
 
 This means that developing with enrolled agents requires at least two Elastic Agent instances: a Fleet Server and data shipping agents. As only one instance is allowed per host, the usual method is to run these instances in virtual machines or Docker containers. The [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) guide details this.
 
-Note: if you need to do simultaneous Kibana and Fleet Server development, refer to the [Developing Kibana and Fleet Server simulatanously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) guide
+Note: if you need to do simultaneous Kibana and Fleet Server development, refer to the [Developing Kibana and Fleet Server simultaneously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) guide
 
 ### Tests
 
