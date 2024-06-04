@@ -33,3 +33,10 @@ export type {
   NavigateToUrlOptions,
 } from './src/contracts';
 export type { ScopedHistory } from './src/scoped_history';
+export {
+  AppMountParametersToken,
+  Application,
+  type ApplicationDefinition,
+  ApplicationService,
+  type IAppMount,
+} from './src/services';
