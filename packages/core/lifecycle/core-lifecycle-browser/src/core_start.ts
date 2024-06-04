@@ -50,12 +50,12 @@ export interface CoreStart {
   executionContext: ExecutionContextStart;
   /** {@link HttpStart} */
   http: HttpStart;
+  /** {@link CoreDiServiceStart} */
+  injection: CoreDiServiceStart;
   /**
    * {@link SavedObjectsStart}
    * @deprecated See https://github.com/elastic/kibana/issues/149098
    */
-  /** {@link CoreDiServiceStart} */
-  injection: CoreDiServiceStart;
   savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;

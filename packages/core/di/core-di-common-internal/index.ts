@@ -8,3 +8,4 @@
 
 export { CoreInjectionService } from './src/service';
 export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
+export { InternalDiService, InternalDiSetupService } from './src/services';

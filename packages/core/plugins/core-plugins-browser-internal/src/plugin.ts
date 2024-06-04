@@ -15,6 +15,11 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
 import { type PluginDefinition, read } from './plugin_reader';
+import {
+  createPluginInitializerModule,
+  createPluginSetupModule,
+  createPluginStartModule,
+} from './plugin_module';
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -67,6 +72,8 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       setupContext.injection.load(this.definition.module);
+      setupContext.injection.load(createPluginInitializerModule(this.initializerContext));
+      setupContext.injection.load(createPluginSetupModule(setupContext));
     }
 
     return this.instance?.setup(setupContext, plugins);
@@ -83,6 +90,8 @@ export class PluginWrapper<
     if (this.definition === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
+
+    startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
 
     if (!this.instance) {
       return;
