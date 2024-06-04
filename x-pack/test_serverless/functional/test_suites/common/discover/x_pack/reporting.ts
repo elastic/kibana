@@ -115,7 +115,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      // this test does not pass because of discover using short urls - investigate in separate PR
       it('generates a report with single timefilter', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
@@ -143,13 +142,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(timeFiltersNumberInReportURL).to.be(1);
         expect(
           reportURL.includes(
-            `query:(range:(order_date:(format:strict_date_optional_time,gte:'${moment()
-              .add(-1, 'days')
-              .format('YYYY-MM-DDT')}`
+            `query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))`
           )
         ).to.be(true);
-
-        expect(reportURL.includes(`lte:'${moment().format('YYYY-MM-DDT')}`)).to.be(true);
 
         // return keyboard state
         await browser.getActions().keyUp(Key.CONTROL).perform();

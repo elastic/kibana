@@ -131,13 +131,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(
           reportURL.includes(
-            `query:(range:(order_date:(format:strict_date_optional_time,gte:'${moment()
-              .add(-1, 'days')
-              .format('YYYY-MM-DDT')}`
+            `query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))`
           )
         ).to.be(true);
-
-        expect(reportURL.includes(`lte:'${moment().format('YYYY-MM-DDT')}`)).to.be(true);
 
         // return keyboard state
         await browser.getActions().keyUp(Key.CONTROL).perform();
