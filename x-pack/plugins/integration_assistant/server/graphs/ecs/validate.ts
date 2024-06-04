@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ECS_FULL } from '../../../common/ecs';
-import { EcsMappingState } from '../../types';
+import type { EcsMappingState } from '../../types';
 
 const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
 type AnyObject = Record<string, any>;
@@ -84,7 +85,7 @@ function processMapping(path: string[], value: any, output: Record<string, strin
   }
 }
 
-function getValueFromPath(obj: AnyObject, path: string[]): any {
+function getValueFromPath(obj: AnyObject, path: string[]): unknown {
   return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj);
 }
 
@@ -133,7 +134,7 @@ function findInvalidEcsFields(ecsMapping: AnyObject): string[] {
   );
 
   for (const [ecsValue, paths] of Object.entries(filteredOutput)) {
-    if (!ecsDict.hasOwnProperty(ecsValue)) {
+    if (!Object.prototype.hasOwnProperty.call(ecsDict, ecsValue)) {
       const field = paths.map((p) => p.join('.'));
       results.push(`Invalid ECS field mapping identified for ${ecsValue} : ${field.join(', ')}`);
     }

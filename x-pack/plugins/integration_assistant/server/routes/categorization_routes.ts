@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   ActionsClientChatOpenAI,
@@ -16,7 +16,7 @@ import { CATEGORIZATION_GRAPH_PATH } from '../../common';
 import type { CategorizationApiRequest, CategorizationApiResponse } from '../../common';
 import { getCategorizationGraph } from '../graphs/categorization';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
-import { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
 export function registerCategorizationRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>

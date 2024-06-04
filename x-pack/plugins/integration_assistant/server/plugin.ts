@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   PluginInitializerContext,
   CoreSetup,
@@ -13,9 +13,9 @@ import {
   Logger,
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
+import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { registerRoutes } from './routes';
-import { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
+import type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {

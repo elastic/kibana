@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import {
@@ -13,10 +13,10 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { RELATED_GRAPH_PATH } from '../../common';
-import { RelatedApiRequest, RelatedApiResponse } from '../../common/types';
+import type { RelatedApiRequest, RelatedApiResponse } from '../../common/types';
 import { getRelatedGraph } from '../graphs/related';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
-import { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
 export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.post(

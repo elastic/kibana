@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { TEST_PIPELINE_PATH } from '../../common';
 import { testPipeline } from '../util/pipeline';
-import { TestPipelineApiRequest, TestPipelineApiResponse } from '../../common/types';
-import { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { TestPipelineApiRequest, TestPipelineApiResponse } from '../../common/types';
+import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.post(

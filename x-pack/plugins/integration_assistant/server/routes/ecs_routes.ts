@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   ActionsClientChatOpenAI,
@@ -13,10 +13,10 @@ import {
 } from '@kbn/langchain/server/language_models';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { ECS_GRAPH_PATH } from '../../common';
-import { EcsMappingApiRequest, EcsMappingApiResponse } from '../../common/types';
+import type { EcsMappingApiRequest, EcsMappingApiResponse } from '../../common/types';
 import { getEcsGraph } from '../graphs/ecs';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
-import { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.post(

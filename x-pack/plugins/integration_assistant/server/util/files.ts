@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readdirSync, writeFileSync, mkdirSync, statSync, readFileSync, cpSync } from 'fs';
+import { cpSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 
 export function existsSync(path: string): boolean {
@@ -33,13 +33,9 @@ export function createSync(path: string, content: string | Buffer): void {
 }
 
 export function copySync(source: string, destination: string): void {
-  try {
-    // Ensure the destination directory exists
-    mkdirSync(dirname(destination), { recursive: true });
-    cpSync(source, destination, { recursive: true });
-  } catch (error) {
-    throw error;
-  }
+  // Ensure the destination directory exists
+  mkdirSync(dirname(destination), { recursive: true });
+  cpSync(source, destination, { recursive: true });
 }
 
 export function listDirSync(path: string): string[] {

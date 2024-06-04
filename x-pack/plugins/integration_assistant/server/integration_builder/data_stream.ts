@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { join as joinPath } from 'path';
 import nunjucks from 'nunjucks';
-import { DataStream } from '../../common';
-import { copySync, ensureDirSync, createSync, listDirSync } from '../util';
+import { join as joinPath } from 'path';
+import type { DataStream } from '../../common';
+import { copySync, createSync, ensureDirSync, listDirSync } from '../util';
 
 export function createDatastream(
   packageName: string,
@@ -62,19 +62,15 @@ export function createDatastream(
 
 function createDataStreamFolders(specificDataStreamDir: string, pipelineDir: string): void {
   const dataStreamTemplatesDir = joinPath(__dirname, '../templates/data_stream');
-  try {
-    const items = listDirSync(dataStreamTemplatesDir);
+  const items = listDirSync(dataStreamTemplatesDir);
 
-    for (const item of items) {
-      const s = joinPath(dataStreamTemplatesDir, item);
-      const d = joinPath(specificDataStreamDir, item);
-      copySync(s, d);
-    }
-
-    ensureDirSync(pipelineDir);
-  } catch (error) {
-    throw error;
+  for (const item of items) {
+    const s = joinPath(dataStreamTemplatesDir, item);
+    const d = joinPath(specificDataStreamDir, item);
+    copySync(s, d);
   }
+
+  ensureDirSync(pipelineDir);
 }
 
 function createPipelineTests(

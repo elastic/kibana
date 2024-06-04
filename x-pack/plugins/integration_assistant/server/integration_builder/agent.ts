@@ -6,7 +6,7 @@
  */
 
 import { join as joinPath } from 'path';
-import { InputTypes } from '../../common';
+import type { InputTypes } from '../../common';
 import { ensureDirSync, createSync, readSync } from '../util';
 
 export function createAgentInput(specificDataStreamDir: string, inputTypes: InputTypes[]): void {

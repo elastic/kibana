@@ -7,25 +7,9 @@
     "id": "integrationAssistant",
     "server": true,
     "browser": false,
-    "configPath": [
-      "xpack",
-      "integration_assistant"
-    ],
-    "requiredPlugins": [
-      "actions",
-      "licensing",
-      "management",
-      "features",
-      "share",
-      "fileUpload"
-    ],
-    "optionalPlugins": [
-      "security",
-      "usageCollection",
-      "console"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "configPath": ["xpack", "integration_assistant"],
+    "requiredPlugins": ["actions", "licensing", "management", "features", "share", "fileUpload"],
+    "optionalPlugins": ["security", "usageCollection", "console"],
+    "extraPublicDirs": ["common"]
   }
 }

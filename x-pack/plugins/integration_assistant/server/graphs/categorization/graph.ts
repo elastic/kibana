@@ -5,9 +5,10 @@
  * 2.0.
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
-import { BedrockChat } from '@kbn/langchain/server/language_models';
-import { CategorizationState } from '../../types';
+import type { StateGraphArgs } from '@langchain/langgraph';
+import { StateGraph, END, START } from '@langchain/langgraph';
+import type { BedrockChat } from '@kbn/langchain/server/language_models';
+import type { CategorizationState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
 import { handleValidatePipeline } from '../../util/graph';

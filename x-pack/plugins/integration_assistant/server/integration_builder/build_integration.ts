@@ -9,7 +9,7 @@ import { join as joinPath } from 'path';
 import { tmpdir } from 'os';
 import nunjucks from 'nunjucks';
 import AdmZip from 'adm-zip';
-import { Integration, DataStream } from '../../common';
+import type { Integration, DataStream } from '../../common';
 import { createPackageSystemTests } from './dev_folders';
 import { createDatastream } from './data_stream';
 import { createAgentInput } from './agent';

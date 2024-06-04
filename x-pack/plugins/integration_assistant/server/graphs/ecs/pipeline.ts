@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
-import { EcsMappingState } from '../../types';
+import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
 
 interface IngestPipeline {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface ECSField {
@@ -25,7 +26,7 @@ function generateProcessor(
   currentPath: string,
   ecsField: ECSField,
   expectedEcsType: string,
-  sampleValue: any
+  sampleValue: unknown
 ): object {
   if (needsTypeConversion(sampleValue, expectedEcsType)) {
     return {
@@ -58,20 +59,16 @@ function generateProcessor(
   };
 }
 
-function getSampleValue(key: string, samples: Record<string, any>): any {
-  try {
-    const keyList = key.split('.');
-    let value: any = samples;
-    for (const k of keyList) {
-      if (value === undefined || value === null) {
-        return null;
-      }
-      value = value[k];
+function getSampleValue(key: string, samples: Record<string, any>): unknown {
+  const keyList = key.split('.');
+  let value: any = samples;
+  for (const k of keyList) {
+    if (value === undefined || value === null) {
+      return null;
     }
-    return value;
-  } catch (e) {
-    throw e;
+    value = value[k];
   }
+  return value;
 }
 
 function getEcsType(ecsField: ECSField, ecsTypes: Record<string, string>): string {
@@ -95,7 +92,7 @@ function getConvertProcessorType(expectedEcsType: string): string {
   return 'string';
 }
 
-function needsTypeConversion(sample: any, expected: string): boolean {
+function needsTypeConversion(sample: unknown, expected: string): boolean {
   if (sample === null || sample === undefined) {
     return false;
   }
@@ -155,7 +152,9 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
 
   const processors = generateProcessors(state.currentMapping, samples);
   // Retrieve all source field names from convert processors to populate single remove processor:
-  const fieldsToRemove = processors.map((p: any) => p.convert?.field).filter((f: any) => f != null);
+  const fieldsToRemove = processors
+    .map((p: any) => p.convert?.field)
+    .filter((f: unknown) => f != null);
   const mappedValues = {
     processors,
     ecs_version: state.ecsVersion,
@@ -164,19 +163,15 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     log_format: state.logFormat,
     fields_to_remove: fieldsToRemove,
   };
-  try {
-    const templatesPath = joinPath(__dirname, '../../templates');
-    const env = new Environment(new FileSystemLoader(templatesPath), {
-      autoescape: false,
-    });
-    env.addFilter('startswith', function (str, prefix) {
-      return str.startsWith(prefix);
-    });
-    const template = env.getTemplate('pipeline.yml.njk');
-    const renderedTemplate = template.render(mappedValues);
-    const ingestPipeline = load(renderedTemplate) as IngestPipeline;
-    return ingestPipeline;
-  } catch (e) {
-    throw e;
-  }
+  const templatesPath = joinPath(__dirname, '../../templates');
+  const env = new Environment(new FileSystemLoader(templatesPath), {
+    autoescape: false,
+  });
+  env.addFilter('startswith', function (str, prefix) {
+    return str.startsWith(prefix);
+  });
+  const template = env.getTemplate('pipeline.yml.njk');
+  const renderedTemplate = template.render(mappedValues);
+  const ingestPipeline = load(renderedTemplate) as IngestPipeline;
+  return ingestPipeline;
 }

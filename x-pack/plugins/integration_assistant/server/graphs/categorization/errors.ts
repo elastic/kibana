@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { BedrockChat } from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { BedrockChat } from '@kbn/langchain/server/language_models';
-import { CATEGORIZATION_ERROR_PROMPT } from './prompts';
-import { CategorizationState } from '../../types';
+import type { ESProcessorItem, Pipeline } from '../../../common';
+import type { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
-import { Pipeline } from '../../../common';
+import { CATEGORIZATION_ERROR_PROMPT } from './prompts';
 
 export async function handleErrors(state: CategorizationState, model: BedrockChat) {
   const categorizationErrorPrompt = CATEGORIZATION_ERROR_PROMPT;
@@ -23,7 +23,7 @@ export async function handleErrors(state: CategorizationState, model: BedrockCha
     errors: JSON.stringify(state.errors, null, 2),
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
-  })) as any[];
+  })) as ESProcessorItem[];
 
   const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
 
