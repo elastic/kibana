@@ -78,21 +78,21 @@ export const esqlAsyncSearchStrategyProvider = (
             {
               method: 'GET',
               path: `/_query/async/${id}`,
-              querystring: { ...params },
+              querystring: { ...params, format: 'cbor' },
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
             {
               method: 'POST',
               path: `/_query/async`,
               body: params,
-              querystring: dropNullColumns ? 'drop_null_columns' : '',
+              querystring: dropNullColumns ? 'format=cbor&drop_null_columns' : 'format=cbor',
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
           );
 
-      const finalResponse = toAsyncKibanaSearchResponse(
+      const finalResponse = await toAsyncKibanaSearchResponse(
         body,
         headers?.warning,
         // do not return requestParams on polling calls

@@ -14,6 +14,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
+import { decode } from 'cbor';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
@@ -214,6 +215,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               }
 
               return throwError(() => error);
+            }),
+            map((response) => {
+              const buffer = Buffer.from((response.rawResponse as any).data);
+              const decoded = decode(buffer);
+              return { ...response, rawResponse: decoded };
             }),
             tap({
               next({ rawResponse, requestParams }) {
