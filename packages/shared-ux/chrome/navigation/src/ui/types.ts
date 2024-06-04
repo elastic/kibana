@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 import type { ReactNode } from 'react';
+import { type EuiCollapsibleNavSubItemProps } from '@elastic/eui';
 
 import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
+
+export type EuiCollapsibleNavSubItemPropsEnhanced = EuiCollapsibleNavSubItemProps & {
+  path?: string;
+};
 
 /**
  * @public
