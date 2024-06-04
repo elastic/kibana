@@ -20,24 +20,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const synthtrace = getService('svlLogsSynthtraceClient');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality table', function () {
     this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
 
     before(async () => {
-      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await PageObjects.datasetQuality.navigateTo();
     });
 
-    after(async () => {
+    afterEach(async () => {
       await synthtrace.clean();
-      await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
     it('shows the right number of rows in correct order', async () => {
+      // Ingest Data and refresh the table
+      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+      await PageObjects.datasetQuality.refreshTable();
+
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('descending');
@@ -62,117 +63,71 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows degraded docs percentage', async () => {
+      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+      await PageObjects.datasetQuality.refreshTable();
+      const existingDegradedDocsPercentage = ['0%', '0%', '0%'];
+
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
-      await datasetNameCol.sort('ascending');
 
       const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
-      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
+      expect(degradedDocsColCellTexts).to.eql(existingDegradedDocsPercentage);
 
       // Index malformed document with current timestamp
       await synthtrace.index(
         getLogsForDataset({
-          to: Date.now(),
+          to: new Date().toISOString(),
           count: 1,
           dataset: datasetNames[2],
           isMalformed: true,
         })
       );
 
-      // Set time range to Last 5 minute
-      const filtersContainer = await testSubjects.find(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFiltersContainer
-      );
-      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 5, 'm');
+      await PageObjects.datasetQuality.refreshTable();
 
       const updatedDegradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
-      expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
-    });
-
-    // https://github.com/elastic/kibana/issues/178954
-    it.skip('shows the updated size of the index', async () => {
-      const testDatasetIndex = 2;
-      const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
-      await datasetNameCol.sort('ascending');
-      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-
-      const datasetToUpdateRowIndex = datasetNameColCellTexts.findIndex(
-        (dName: string) => dName === datasetNames[testDatasetIndex]
-      );
-
-      const sizeColCellTexts = await cols.Size.getCellTexts();
-      const beforeSize = sizeColCellTexts[datasetToUpdateRowIndex];
-
-      // Index documents with current timestamp
-      await synthtrace.index(
-        getLogsForDataset({
-          to: Date.now(),
-          count: 4,
-          dataset: datasetNames[testDatasetIndex],
-          isMalformed: false,
-        })
-      );
-
-      const colsAfterUpdate = await PageObjects.datasetQuality.parseDatasetTable();
-
-      // Assert that size has changed
-      await retry.tryForTime(15000, async () => {
-        // Refresh the table
-        await PageObjects.datasetQuality.refreshTable();
-        const updatedSizeColCellTexts = await colsAfterUpdate.Size.getCellTexts();
-        expect(updatedSizeColCellTexts[datasetToUpdateRowIndex]).to.not.eql(beforeSize);
-      });
-    });
-
-    it('sorts by dataset name', async () => {
-      // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
-      const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
-
-      // Sort ascending
-      await datasetNameCol.sort('ascending');
-      const cellTexts = await datasetNameCol.getCellTexts();
-
-      const datasetNamesAsc = [...datasetNames].sort();
-
-      expect(cellTexts).to.eql(datasetNamesAsc);
+      expect(updatedDegradedDocsColCellTexts).to.not.eql(existingDegradedDocsPercentage);
     });
 
     it('shows dataset from integration', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
+      const pkg = {
+        name: 'apache',
+        version: '1.14.0',
+      };
 
-      await PageObjects.observabilityLogsExplorer.navigateTo();
-
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+      // Install Apache package
+      await PageObjects.observabilityLogsExplorer.installPackage(pkg);
 
       // Index 10 logs for `logs-apache.access` dataset
       await synthtrace.index(
         getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
       );
 
+      // Navigation to Logs Explorer is required to setup the human name for Dataset
+      await PageObjects.observabilityLogsExplorer.navigateTo();
       await PageObjects.datasetQuality.navigateTo();
 
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
 
-      // Sort ascending
-      await datasetNameCol.sort('ascending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
       const datasetNamesAsc = [...datasetNames, apacheAccessDatasetHumanName].sort();
 
-      // Assert there are 4 rows
-      expect(datasetNameColCellTexts.length).to.eql(4);
+      // Assert there is 1 row for Apache access logs dataset
+      expect(datasetNameColCellTexts.length).to.eql(1);
 
-      expect(datasetNameColCellTexts).to.eql(datasetNamesAsc);
+      expect(datasetNameColCellTexts[0]).to.eql(apacheAccessDatasetHumanName);
+
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
     });
 
     it('goes to log explorer page when opened', async () => {
-      const rowIndexToOpen = 1;
+      await synthtrace.index(getLogsForDataset({ to, count: 10, dataset: datasetNames[0] }));
+      await PageObjects.datasetQuality.refreshTable();
+      const rowIndexToOpen = 0;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
       const actionsCol = cols.Actions;
@@ -184,10 +139,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetSelectorText =
         await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
       expect(datasetSelectorText).to.eql(datasetName);
+      await PageObjects.datasetQuality.navigateTo();
     });
 
     it('shows the last activity when in time range', async () => {
-      await PageObjects.datasetQuality.navigateTo();
+      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+      await PageObjects.datasetQuality.refreshTable();
+
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];
       const datasetNameCol = cols['Dataset Name'];
@@ -197,10 +155,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFiltersContainer
       );
 
-      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 1, 's');
+      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 1, 'h');
       const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
       expect(lastActivityColCellTexts).to.eql([
-        PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
@@ -210,23 +167,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await synthtrace.index(
         getLogsForDataset({ to: new Date().toISOString(), count: 1, dataset: datasetToUpdate })
       );
-      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      const datasetToUpdateRowIndex = datasetNameColCellTexts.findIndex(
-        (dName: string) => dName === datasetToUpdate
+
+      await PageObjects.datasetQuality.refreshTable();
+
+      const updatedLastActivityColCellTexts = await lastActivityCol.getCellTexts();
+      expect(updatedLastActivityColCellTexts[0]).to.not.eql(
+        PageObjects.datasetQuality.texts.noActivityText
       );
-
-      await PageObjects.datasetQuality.setDatePickerLastXUnits(filtersContainer, 1, 'h');
-
-      await retry.tryForTime(5000, async () => {
-        const updatedLastActivityColCellTexts = await lastActivityCol.getCellTexts();
-        expect(updatedLastActivityColCellTexts[datasetToUpdateRowIndex]).to.not.eql(
-          PageObjects.datasetQuality.texts.noActivityText
-        );
-      });
     });
 
     it('hides inactive datasets', async () => {
-      await PageObjects.datasetQuality.waitUntilTableLoaded();
+      // Load inactive Datasets
+      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+      // Make 1 dataset active
+      await synthtrace.index(
+        getLogsForDataset({ to: new Date().toISOString(), count: 1, dataset: datasetNames[0] })
+      );
+      await PageObjects.datasetQuality.refreshTable();
 
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();

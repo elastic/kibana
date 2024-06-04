@@ -473,12 +473,7 @@ async function parseDatasetTable(tableWrapper: WebElementWrapper, columnNamesOrI
         cellContentElements: cellContentWrappers,
         getSortDirection,
         sort: async (sortDirection: 'ascending' | 'descending') => {
-          if ((await getSortDirection()) !== sortDirection) {
-            await headerElement.click();
-          }
-
-          // Sorting twice if the sort was in neutral state
-          if ((await getSortDirection()) !== sortDirection) {
+          while ((await getSortDirection()) !== sortDirection) {
             await headerElement.click();
           }
         },
