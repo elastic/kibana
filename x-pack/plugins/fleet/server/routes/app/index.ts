@@ -158,6 +158,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      description: `Create a service token`,
     })
     .addVersion(
       {
@@ -175,6 +176,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      description: `Create a service token`,
     })
     .addVersion(
       {
