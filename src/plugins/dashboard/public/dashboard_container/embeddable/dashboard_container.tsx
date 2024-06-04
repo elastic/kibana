@@ -598,11 +598,11 @@ export class DashboardContainer
     return panel;
   };
 
-  public expandPanel = (panelId?: string) => {
+  public expandPanel = (panelId?: string, previousPanelId?: string) => {
     this.setExpandedPanelId(panelId);
 
-    if (!panelId) {
-      this.setScrollToPanelId(panelId);
+    if (!panelId && previousPanelId) {
+      this.setScrollToPanelId(previousPanelId);
     }
   };
 
@@ -774,10 +774,16 @@ export class DashboardContainer
   public scrollToPanel = async (panelRef: HTMLDivElement) => {
     const id = this.getState().componentState.scrollToPanelId;
     if (!id) return;
+    this.setScrollToPanelId(undefined);
 
     this.untilEmbeddableLoaded(id).then(() => {
-      this.setScrollToPanelId(undefined);
       panelRef.scrollIntoView({ block: 'center' });
+
+      // Scroll to the panel again after the transition ends to ensure the panel is in the right position before scrolling
+      // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
+      panelRef.ontransitionend = () => {
+        panelRef.scrollIntoView({ block: 'center' });
+      };
     });
   };
 

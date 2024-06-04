@@ -41,8 +41,7 @@
  */
 .dshDashboardGrid__item--hidden {
   position: absolute;
-  top: -9999px;
-  left: -9999px;
+  transform: translate(-9999px, -9999px) !important;
 }
 
 /**

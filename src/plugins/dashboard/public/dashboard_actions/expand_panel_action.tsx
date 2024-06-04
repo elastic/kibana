@@ -51,7 +51,8 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     embeddable.parentApi.expandPanel(
-      embeddable.parentApi.expandedPanelId.value ? undefined : embeddable.uuid
+      embeddable.parentApi.expandedPanelId.value ? undefined : embeddable.uuid,
+      embeddable.parentApi.expandedPanelId.value
     );
   }
 }
