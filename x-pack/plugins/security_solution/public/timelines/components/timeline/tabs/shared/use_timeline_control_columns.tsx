@@ -14,7 +14,7 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { getDefaultControlColumn } from '../../body/control_columns';
 import type { UnifiedActionProps } from '../../unified_components/data_table/control_column_cell_render';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import { ControlColumnCellRender } from '../../unified_components/data_table/control_column_cell_render';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
@@ -24,7 +24,8 @@ const noSelectAll = ({ isSelected }: { isSelected: boolean }) => {};
 export const useTimelineControlColumn = (
   columns: ColumnHeaderOptions[],
   sort: SortColumnTable[],
-  timelineId: string
+  timelineId: string,
+  activeTab: TimelineTabs
 ) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
@@ -56,7 +57,7 @@ export const useTimelineControlColumn = (
               showSelectAllCheckbox={false}
               showFullScreenToggle={false}
               sort={sort}
-              tabType={TimelineTabs.pinned}
+              tabType={activeTab}
               {...props}
               timelineId={timelineId}
             />
@@ -78,5 +79,6 @@ export const useTimelineControlColumn = (
     sort,
     unifiedComponentsInTimelineEnabled,
     timelineId,
+    activeTab,
   ]);
 };

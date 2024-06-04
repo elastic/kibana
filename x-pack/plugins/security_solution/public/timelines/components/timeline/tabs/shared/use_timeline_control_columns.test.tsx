@@ -11,6 +11,7 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
+import { TimelineTabs } from '../../../../../../common/types';
 
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
@@ -41,7 +42,7 @@ describe('useTimelineColumns', () => {
   describe('leadingControlColumns', () => {
     it('should return the leading control columns', () => {
       const { result } = renderHook(
-        () => useTimelineControlColumn(mockColumns, [], TimelineId.test),
+        () => useTimelineControlColumn(mockColumns, [], TimelineId.test, TimelineTabs.query),
         {
           wrapper: TestProviders,
         }
@@ -53,7 +54,7 @@ describe('useTimelineColumns', () => {
         isEnterprise: () => false,
       });
       const { result } = renderHook(
-        () => useTimelineControlColumn(mockColumns, [], TimelineId.test),
+        () => useTimelineControlColumn(mockColumns, [], TimelineId.test, TimelineTabs.query),
         {
           wrapper: TestProviders,
         }
@@ -66,7 +67,7 @@ describe('useTimelineColumns', () => {
         isEnterprise: () => true,
       });
       const { result } = renderHook(
-        () => useTimelineControlColumn(mockColumns, [], TimelineId.test),
+        () => useTimelineControlColumn(mockColumns, [], TimelineId.test, TimelineTabs.query),
         {
           wrapper: TestProviders,
         }

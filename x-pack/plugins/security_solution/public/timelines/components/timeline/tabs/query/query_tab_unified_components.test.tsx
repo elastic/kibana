@@ -156,8 +156,7 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-// Flaky : See https://github.com/elastic/kibana/issues/179831
-describe(`query tab with unified timeline -- ${i}`, () => {
+describe('query tab with unified timeline', () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
