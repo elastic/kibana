@@ -12,7 +12,8 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 import type { EffectedPolicySelection } from '../../../../public/management/components/effected_policy_select';
 import type { PolicyData } from '../../types';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';
+
+export type TagFilter = (tag: string) => boolean;
 
 const POLICY_ID_START_POSITION = BY_POLICY_ARTIFACT_TAG_PREFIX.length;
 

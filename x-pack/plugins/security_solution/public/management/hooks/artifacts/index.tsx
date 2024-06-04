@@ -13,3 +13,4 @@ export { useDeleteArtifact } from './use_delete_artifact';
 export { useSummaryArtifact } from './use_summary_artifact';
 export { useBulkUpdateArtifact } from './use_bulk_update_artifact';
 export { useBulkDeleteArtifact } from './use_bulk_delete_artifact';
+export { useGetUpdatedTags } from './use_get_updated_tags';
