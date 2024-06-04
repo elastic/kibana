@@ -384,11 +384,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   }
 
   keepPolicyIdInSync(packagePolicy: NewPackagePolicy): void {
-    if (!packagePolicy.policy_id) {
-      packagePolicy.policy_id = packagePolicy.policy_ids[0];
-    }
-    if (!packagePolicy.policy_ids || packagePolicy.policy_ids.length === 0) {
+    if (packagePolicy.policy_id && !packagePolicy.policy_ids?.[0]) {
       packagePolicy.policy_ids = [packagePolicy.policy_id];
+    } else if (!packagePolicy.policy_id) {
+      packagePolicy.policy_id = packagePolicy.policy_ids[0];
     }
   }
 
