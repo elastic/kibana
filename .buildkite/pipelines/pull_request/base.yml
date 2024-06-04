@@ -3,8 +3,8 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      diskSizeGB: 50
-      image: family/kibana-ubuntu-2004
+      diskSizeGb: 50
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -14,8 +14,8 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      diskSizeGB: 50
-      image: family/kibana-ubuntu-2004
+      diskSizeGb: 50
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
@@ -31,8 +31,8 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      diskSizeGB: 50
-      image: family/kibana-ubuntu-2004
+      diskSizeGb: 50
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -49,7 +49,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      image: family/kibana-ubuntu-2004
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -65,7 +65,7 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      image: family/kibana-ubuntu-2004
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -82,7 +82,7 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      image: family/kibana-ubuntu-2004
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
@@ -97,7 +97,7 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
-      image: family/kibana-ubuntu-2004
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
@@ -112,7 +112,7 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      image: family/kibana-ubuntu-2004
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
@@ -128,7 +128,7 @@ steps:
     label: 'Checks'
     key: checks
     agents:
-      image: family/kibana-ubuntu-2004
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -142,7 +142,7 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
-      image: family/kibana-ubuntu-2004
+      imagePrefix: kibana-ubuntu-2004-1717495844
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
