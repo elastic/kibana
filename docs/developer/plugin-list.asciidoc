@@ -587,7 +587,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
-|Fleet needs to have Elasticsearch API keys enabled.
+|Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
