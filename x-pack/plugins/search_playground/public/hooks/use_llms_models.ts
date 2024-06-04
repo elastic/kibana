@@ -11,6 +11,7 @@ import { ComponentType, useMemo } from 'react';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
+import { MODELS } from '../../common/models';
 
 const mapLlmToModels: Record<
   LLMs,
@@ -25,17 +26,10 @@ const mapLlmToModels: Record<
   [LLMs.openai]: {
     icon: OpenAILogo,
     getModels: (connectorName, includeName) =>
-      [
-        {
-          model: 'gpt-3.5-turbo',
-          limit: 16385,
-        },
-        { model: 'gpt-4o', limit: 128000 },
-        { model: 'gpt-4-turbo', limit: 128000 },
-      ].map((model) => ({
-        label: `${model.model} ${includeName ? `(${connectorName})` : ''}`,
+      MODELS.filter(({ provider }) => provider === LLMs.openai).map((model) => ({
+        label: `${model.name} ${includeName ? `(${connectorName})` : ''}`,
         value: model.model,
-        promptTokenLimit: model.limit,
+        promptTokenLimit: model.promptTokenLimit,
       })),
   },
   [LLMs.openai_azure]: {
@@ -51,18 +45,12 @@ const mapLlmToModels: Record<
   },
   [LLMs.bedrock]: {
     icon: BedrockLogo,
-    getModels: () => [
-      {
-        label: 'Claude 3 Haiku',
-        value: 'anthropic.claude-3-haiku-20240307-v1:0',
-        promptTokenLimit: 200000,
-      },
-      {
-        label: 'Claude 3 Sonnet',
-        value: 'anthropic.claude-3-haiku-20240307-v1:0',
-        promptTokenLimit: 200000,
-      },
-    ],
+    getModels: () =>
+      MODELS.filter(({ provider }) => provider === LLMs.bedrock).map((model) => ({
+        label: model.name,
+        value: model.model,
+        promptTokenLimit: model.promptTokenLimit,
+      })),
   },
 };
 

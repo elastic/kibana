@@ -1622,6 +1622,14 @@
           "name": "prerelease",
           "description": "Specify if version is prerelease",
           "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
+          "in": "query"
         }
       ]
     },
@@ -3814,6 +3822,10 @@
                 "properties": {
                   "agentPolicyId": {
                     "type": "string"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "bypass validation checks that can prevent agent policy deletion"
                   }
                 },
                 "required": [
