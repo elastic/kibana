@@ -16,7 +16,6 @@ export interface PanelPackage<SerializedState extends object = object> {
 }
 
 export interface PresentationContainer extends CanAddNewPanel {
-    CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */
