@@ -169,8 +169,8 @@ export default ({ getService }: FtrProviderContext) => {
         // create rule with connector/action
         const rule: ReturnType<typeof getSimpleRule> = {
           ...getSimpleRule('rule-1'),
-          throttle: '1h', // <-- throttle makes this a scheduled action
-          interval: '50m', // has to be less than "throttle"
+          throttle: '24h', // <-- throttle makes this a scheduled action
+          interval: '24h', // "interval" has to be equal to or less than "throttle"
           actions: [action],
         };
 
@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         const expectedRule = updateUsername(
-          { ...getSimpleRuleOutput(), interval: '50m' },
+          { ...getSimpleRuleOutput(), interval: '24h' },
           ELASTICSEARCH_USERNAME
         );
 
@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               ...action,
               uuid: bodyToCompare.actions[0].uuid,
-              frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+              frequency: { summary: true, throttle: '24h', notifyWhen: 'onThrottleInterval' },
             },
           ],
         };
