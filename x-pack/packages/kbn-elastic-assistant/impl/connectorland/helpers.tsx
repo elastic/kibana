@@ -8,6 +8,8 @@
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 enum OpenAiProviderType {
@@ -54,3 +56,27 @@ const getAzureApiVersionParameter = (url: string): string | undefined => {
   const urlSearchParams = new URLSearchParams(new URL(url).search);
   return urlSearchParams.get('api-version') ?? undefined;
 };
+
+export async function deleteActions({
+  ids,
+  http,
+}: {
+  ids: string[];
+  http: HttpSetup;
+}): Promise<{ successes: string[]; errors: string[] }> {
+  const successes: string[] = [];
+  const errors: string[] = [];
+  await Promise.all(
+    ids.map((id) =>
+      http.delete<string>(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`)
+    )
+  ).then(
+    function (fulfilled) {
+      successes.push(...fulfilled);
+    },
+    function (rejected) {
+      errors.push(...rejected);
+    }
+  );
+  return { successes, errors };
+}

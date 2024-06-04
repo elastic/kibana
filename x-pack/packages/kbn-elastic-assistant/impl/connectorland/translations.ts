@@ -184,3 +184,45 @@ export const MISSING_READ_CONNECTORS_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'Missing Read Connectors Privileges',
   }
 );
+
+export const CONNECTORS_TABLE_COLUMN_NAME = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.table.column.Name',
+  {
+    defaultMessage: 'Connector name',
+  }
+);
+
+export const CONNECTORS_TABLE_COLUMN_ACTION_TYPE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.table.column.type',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const CONNECTORS_TABLE_COLUMN_COMPATIBILITY = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.table.column.compatibility',
+  {
+    defaultMessage: 'Compatibility',
+  }
+);
+
+export const CONNECTORS_TABLE_COLUMN_ACTIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.table.column.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const DELETE_CONNECTOR_CONFIRMATION_SINGLE_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.deleteConnectorConfirmation.singleTitle',
+  {
+    defaultMessage: 'connector',
+  }
+);
+
+export const DELETE_CONNECTOR_CONFIRMATION_MULTIPLE_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.deleteConnectorConfirmation.multipleTitle',
+  {
+    defaultMessage: 'connectors',
+  }
+);

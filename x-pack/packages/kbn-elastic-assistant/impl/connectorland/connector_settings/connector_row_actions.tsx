@@ -7,16 +7,21 @@
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { AIConnector } from '../connector_selector';
+import { ActionConnectorTableItem } from './types';
 
 import { DELETE_CONNECTOR_BUTTON, EDIT_CONNECTOR_BUTTON } from '../translations';
 
 interface Props {
-  connector: AIConnector;
-  onClickEditConnector: (connector: AIConnector) => void;
+  connector: ActionConnectorTableItem;
+  onClickEditConnector: (connector: ActionConnectorTableItem) => void;
+  onClickDeleteConnector: (connector: ActionConnectorTableItem) => void;
 }
 
-const ConnectorRowActionsComponent: React.FC<Props> = ({ connector, onClickEditConnector }) => {
+const ConnectorRowActionsComponent: React.FC<Props> = ({
+  connector,
+  onClickEditConnector,
+  onClickDeleteConnector,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -24,6 +29,11 @@ const ConnectorRowActionsComponent: React.FC<Props> = ({ connector, onClickEditC
     closePopover();
     onClickEditConnector(connector);
   }, [closePopover, onClickEditConnector, connector]);
+
+  const handleDeleteConnector = useCallback(() => {
+    closePopover();
+    onClickDeleteConnector(connector);
+  }, [closePopover, onClickDeleteConnector, connector]);
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((prevState) => !prevState), []);
   return (
@@ -47,7 +57,9 @@ const ConnectorRowActionsComponent: React.FC<Props> = ({ connector, onClickEditC
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="trash">{DELETE_CONNECTOR_BUTTON}</EuiButtonEmpty>
+          <EuiButtonEmpty iconType="trash" onClick={handleDeleteConnector}>
+            {DELETE_CONNECTOR_BUTTON}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>

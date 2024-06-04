@@ -72,6 +72,7 @@ export interface AssistantProviderProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getAddConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getAddConnectorFlyout'];
+  getDeleteConnectorModalConfirmation: TriggersAndActionsUIPublicPluginStart['getDeleteConnectorModalConfirmation'];
   getEditConnectorFlyout: TriggersAndActionsUIPublicPluginStart['getEditConnectorFlyout'];
   getComments: (commentArgs: {
     abortStream: () => void;
@@ -130,6 +131,7 @@ export interface UseAssistantContext {
     setIsStreaming: (isStreaming: boolean) => void;
     isFlyoutMode: boolean;
   }) => EuiCommentProps[];
+  getDeleteConnectorModalConfirmation: TriggersAndActionsUIPublicPluginStart['getDeleteConnectorModalConfirmation'];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
@@ -171,6 +173,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
   children,
   getAddConnectorFlyout,
+  getDeleteConnectorModalConfirmation,
   getEditConnectorFlyout,
   getComments,
   http,
@@ -303,6 +306,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getAddConnectorFlyout,
       getEditConnectorFlyout,
+      getDeleteConnectorModalConfirmation,
       getComments,
       http,
       knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
@@ -344,6 +348,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getAddConnectorFlyout,
       getEditConnectorFlyout,
+      getDeleteConnectorModalConfirmation,
       getComments,
       http,
       localStorageKnowledgeBase,
