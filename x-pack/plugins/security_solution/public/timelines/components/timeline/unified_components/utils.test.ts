@@ -8,7 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import { mockTimelineData } from '../../../../common/mock';
 import { transformTimelineItemToUnifiedRows } from './utils';
 

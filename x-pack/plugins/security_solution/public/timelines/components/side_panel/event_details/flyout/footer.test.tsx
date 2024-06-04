@@ -96,6 +96,7 @@ jest.mock(
   }
 );
 jest.mock('../../../../../detections/components/alerts_table/actions');
+jest.mock('../../../../../common/components/guided_onboarding_tour/tour_step');
 
 const defaultProps = {
   scopeId: TimelineId.test,
