@@ -98,9 +98,15 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
  * Flyout used for the Security Solution application
  * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
  */
-export const SecuritySolutionFlyout = memo(() => (
-  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
-));
+export const SecuritySolutionFlyout = memo(() => {
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      onClose={() => {}}
+    />
+  );
+});
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
@@ -116,6 +122,7 @@ export const TimelineFlyout = memo(() => {
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
       customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+      onClose={() => {}}
     />
   );
 });
