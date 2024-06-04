@@ -1,4 +1,4 @@
-# Developing Kibana and Fleet Server simulatanously
+# Developing Kibana and Fleet Server simultaneously
 
 Many times, a contributor to Fleet will only need to make changes to [Fleet Server](https://github.com/elastic/fleet-server) or [Kibana](https://github.com/elastic/kibana) - not both. But, there are times when end-to-end changes across both componenents are necessary. To facilitate this, we've created a guide to help you get up and running with a local development environment that includes both Kibana and Fleet Server. This is a more involved process than setting up either component on its own.
 
@@ -296,109 +296,9 @@ docker run  --add-host host.docker.internal:host-gateway  \
   docker.elastic.co/beats/elastic-agent:8.13.0-SNAPSHOT # <-- Update this version as needed
 ```
 
-You can also create a `run-dockerized-agent.sh` file as below to make this process easier. This script will run a Docker container with Elastic Agent and enroll it to your local Fleet Server. You can also use it to run a Dockerized Fleet Server container if you don't need to develop Fleet Server locally.
+You can also use the [run_dockerized_agent.sh](./run_dockerized_elastic_agent.sh) script to make this process easier. This script will run a Docker container with Elastic Agent and enroll it to your local Fleet Server. You can also use it to run a Dockerized Fleet Server container if you don't need to develop Fleet Server locally.
 
-```bash
-#!/usr/bin/env bash
-
-# Name this file `run-dockerized-agent.sh` and place it somewhere convenient. Make sure to run `chmod +x` on it to make it executable.
-
-# This script is used to run a instance of Elastic Agent in a Docker container.
-# Ref.: https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html
-
-# To run a Fleet server: ./run_dockerized_agent.sh fleet_server
-# To run an agent: ./run_dockerized_agent agent -e <enrollment token> -v <version> -t <tags>
-
-# NB: this script assumes a Fleet server policy with id "fleet-server-policy" is already created.
-
-CMD=$1
-
-while [ $# -gt 0 ]; do
-  case $1 in
-    -e | --enrollment-token) ENROLLMENT_TOKEN=$2 ;;
-    -v | --version) ELASTIC_AGENT_VERSION=$2 ;;
-    -t | --tags) TAGS=$2 ;;
-  esac
-  shift
-done
-
-DEFAULT_ELASTIC_AGENT_VERSION=8.13.0-SNAPSHOT # update as needed
-
-# Needed for Fleet Server
-ELASTICSEARCH_HOST=http://host.docker.internal:9200 # should match Fleet settings or xpack.fleet.agents.elasticsearch.hosts in kibana.dev.yml
-KIBANA_HOST=http://host.docker.internal:5601
-KIBANA_BASE_PATH=kyle # should match server.basePath in kibana.dev.yml
-FLEET_SERVER_POLICY_ID=fleet-server-policy # as defined in kibana.dev.yml
-
-# Needed for agent
-FLEET_SERVER_URL=https://host.docker.internal:8220
-
-printArgs() {
-  if [[ $ELASTIC_AGENT_VERSION == "" ]]; then
-    ELASTIC_AGENT_VERSION=$DEFAULT_ELASTIC_AGENT_VERSION
-    echo "No Elastic Agent version specified, setting to $ELASTIC_AGENT_VERSION (default)"
-  else
-    echo "Received Elastic Agent version $ELASTIC_AGENT_VERSION"
-  fi
-
-  if [[ $ENROLLMENT_TOKEN == "" ]]; then
-    echo "Warning: no enrollment token provided!"
-  else
-    echo "Received enrollment token: ${ENROLLMENT_TOKEN}"
-  fi
-
-  if [[ $TAGS != "" ]]; then
-    echo "Received tags: ${TAGS}"
-  fi
-}
-
-echo "--- Elastic Agent Container Runner ---"
-
-if [[ $CMD == "fleet_server" ]]; then
-  echo "Starting Fleet Server container..."
-
-  printArgs
-
-  docker run \
-    -e ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST} \
-    -e KIBANA_HOST=${KIBANA_HOST}/${KIBANA_BASE_PATH} \
-    -e KIBANA_USERNAME=elastic \
-    -e KIBANA_PASSWORD=changeme \
-    -e KIBANA_FLEET_SETUP=1 \
-    -e FLEET_INSECURE=1 \
-    -e FLEET_SERVER_ENABLE=1 \
-    -e FLEET_SERVER_POLICY_ID=${FLEET_SERVER_POLICY_ID} \
-    -e ELASTIC_AGENT_TAGS=${TAGS} \
-    -p 8220:8220 \
-    --rm docker.elastic.co/beats/elastic-agent:${ELASTIC_AGENT_VERSION}
-
-elif [[ $CMD == "agent" ]]; then
-  echo "Starting Elastic Agent container..."
-
-  printArgs
-
-  docker run \
-    -e FLEET_URL=${FLEET_SERVER_URL} \
-    -e FLEET_ENROLL=1 \
-    -e FLEET_ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN} \
-    -e FLEET_INSECURE=1 \
-    -e ELASTIC_AGENT_TAGS=${TAGS} \
-    --rm docker.elastic.co/beats/elastic-agent:${ELASTIC_AGENT_VERSION}
-
-elif [[ $CMD == "help" ]]; then
-  echo "Usage: ./run_elastic_agent.sh <agent/fleet_server> -e <enrollment token> -v <version> -t <tags>"
-
-elif [[ $CMD == "" ]]; then
-  echo "Command missing. Available commands: agent, fleet_server, help"
-
-else
-  echo "Invalid command: $CMD"
-fi
-```
-
-Another option is to use a lightweight virtualization provider like https://multipass.run/ and enrolling agents using an enrollment token generated via Fleet UI. You will need to add a Fleet Server Host entry + Output to your Fleet settings that corresponds with your Multipass bridge network interface, similar to how we've set up Docker above.
-
-_To do: add specific docs for enrolling Multipass agents and link here_
+Another option is to use a lightweight virtualization provider like https://multipass.run/ and enroll agents using an enrollment token generated via Fleet UI. You will need to update your Fleet Settings with a Fleet Server Host entry + Output that corresponds with your Multipass bridge network interface, similar to how we've set up Docker above. Refer to [Running a local Fleet Server and enrolling Elastic Agents](./enrolling_agents.md) for details about how to use Multipass.
 
 ## Running in serverless mode
 
