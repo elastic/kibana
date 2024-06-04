@@ -108,7 +108,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(alertDoc['host.name']).to.eql(['host-1']);
       expect(alertDoc['host.hostname']).to.eql(['host-1']);
       expect(alertDoc['host.id']).to.eql(['1']);
-      expect(alertDoc.c[0]).greaterThan(0);
     });
 
     it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
@@ -250,7 +249,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(alertDoc['host.name']).to.eql(['host-1']);
       expect(alertDoc['host.hostname']).to.eql(['host-1']);
       expect(alertDoc['host.id']).to.eql(['1']);
-      expect(alertDoc.c[0]).greaterThan(0);
     });
 
     it('throws an error if the thresholdComparator is not >', async () => {

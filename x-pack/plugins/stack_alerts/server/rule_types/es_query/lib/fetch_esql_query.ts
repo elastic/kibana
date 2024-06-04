@@ -9,7 +9,7 @@ import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common'
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { OnlyEsqlQueryRuleParams } from '../types';
-import { EsqlTable, toEsQueryHits } from '../../../../common';
+import { EsqlTable, toEsQueryHits, getSourceFields } from '../../../../common';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -47,7 +47,6 @@ export async function fetchEsqlQuery({
     path: '/_query',
     body: query,
   });
-  const { hits, sourceFields } = toEsQueryHits(response);
 
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
 
@@ -61,10 +60,10 @@ export async function fetchEsqlQuery({
         took: 0,
         timed_out: false,
         _shards: { failed: 0, successful: 0, total: 0 },
-        hits,
+        hits: toEsQueryHits(response),
       },
       resultLimit: alertLimit,
-      sourceFieldsParams: sourceFields,
+      sourceFieldsParams: getSourceFields(),
       generateSourceFieldsFromHits: true,
     }),
     index: null,

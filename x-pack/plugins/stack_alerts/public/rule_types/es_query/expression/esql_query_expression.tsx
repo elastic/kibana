@@ -123,7 +123,7 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const { hits } = toEsQueryHits(esqlTable);
+      const hits = toEsQueryHits(esqlTable);
       setIsLoading(false);
       return {
         testResults: parseAggregationResults({

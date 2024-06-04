@@ -6,6 +6,7 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
+import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 
 type EsqlDocument = Record<string, string | null>;
 
@@ -38,11 +39,6 @@ export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): 
 };
 
 export const toEsQueryHits = (results: EsqlTable) => {
-  const sourceFields = results.columns.map((col) => ({
-    label: col.name,
-    searchPath: col.name,
-  }));
-
   const hits: EsqlHit[] = results.values.map((row) => {
     const document = rowToDocument(results.columns, row);
     return {
@@ -53,11 +49,8 @@ export const toEsQueryHits = (results: EsqlTable) => {
   });
 
   return {
-    hits: {
-      hits,
-      total: hits.length,
-    },
-    sourceFields,
+    hits,
+    total: hits.length,
   };
 };
 
@@ -68,4 +61,14 @@ export const transformDatatableToEsqlTable = (results: Datatable): EsqlTable => 
   }));
   const values: EsqlResultRow[] = results.rows.map((r) => Object.values(r));
   return { columns, values };
+};
+
+export const getSourceFields = () => {
+  const alertFields = Object.keys(alertFieldMap);
+  return (
+    Object.keys(ecsFieldMap)
+      // exclude the alert fields that we don't want to override
+      .filter((key) => !alertFields.includes(key))
+      .map((key) => ({ label: key, searchPath: key }))
+  );
 };
