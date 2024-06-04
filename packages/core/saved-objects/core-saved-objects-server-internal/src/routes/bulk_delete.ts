@@ -33,6 +33,7 @@ export const registerBulkDeleteRoute = (
       path: '/_bulk_delete',
       options: {
         description: `Remove saved objects`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         body: schema.arrayOf(

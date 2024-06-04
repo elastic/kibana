@@ -38,6 +38,7 @@ export const registerResolveImportErrorsRoute = (
       path: '/_resolve_import_errors',
       options: {
         description: `Resolve import errors`,
+        tags: ['oas-tag:saved objects'],
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',

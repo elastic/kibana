@@ -33,6 +33,7 @@ export const registerBulkCreateRoute = (
       path: '/_bulk_create',
       options: {
         description: `Create saved objects`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         query: schema.object({

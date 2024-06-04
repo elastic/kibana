@@ -33,6 +33,7 @@ export const registerBulkGetRoute = (
       path: '/_bulk_get',
       options: {
         description: `Get saved objects`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         body: schema.arrayOf(

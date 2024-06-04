@@ -33,6 +33,7 @@ export const registerBulkUpdateRoute = (
       path: '/_bulk_update',
       options: {
         description: `Update saved objects`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         body: schema.arrayOf(

@@ -145,6 +145,7 @@ export const registerExportRoute = (
       path: '/_export',
       options: {
         description: `Export saved objects`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         body: schema.object({

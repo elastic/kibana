@@ -34,6 +34,7 @@ export const registerUpdateRoute = (
       path: '/{type}/{id}',
       options: {
         description: `Update a saved object`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         params: schema.object({

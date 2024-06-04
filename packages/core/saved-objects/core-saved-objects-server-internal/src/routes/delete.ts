@@ -33,6 +33,7 @@ export const registerDeleteRoute = (
       path: '/{type}/{id}',
       options: {
         description: `Delete a saved object`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         params: schema.object({

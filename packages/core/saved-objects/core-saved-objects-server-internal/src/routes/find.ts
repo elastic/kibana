@@ -36,6 +36,7 @@ export const registerFindRoute = (
       path: '/_find',
       options: {
         description: `Search for saved objects`,
+        tags: ['oas-tag:saved objects'],
       },
       validate: {
         query: schema.object({
