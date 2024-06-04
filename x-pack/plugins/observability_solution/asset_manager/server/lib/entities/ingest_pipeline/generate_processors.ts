@@ -43,12 +43,18 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
-export function generateProcessors(definition: EntityDefinition) {
+export function generateProcessors(definition: EntityDefinition, spaceId: string) {
   return [
     {
       set: {
         field: 'event.ingested',
         value: '{{{_ingest.timestamp}}}',
+      },
+    },
+    {
+      set: {
+        field: 'entity.spaceId',
+        value: spaceId,
       },
     },
     {
