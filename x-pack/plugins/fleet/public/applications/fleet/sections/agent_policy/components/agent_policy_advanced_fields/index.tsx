@@ -59,6 +59,8 @@ import {
   useFleetServerHostsOptions,
 } from './hooks';
 
+import { CustomFields } from './custom_fields';
+
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
@@ -303,6 +305,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      <CustomFields updateAgentPolicy={updateAgentPolicy} agentPolicy={agentPolicy} />
       <EuiDescribedFormGroup
         title={
           <h3>
