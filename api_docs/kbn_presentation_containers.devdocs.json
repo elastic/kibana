@@ -361,7 +361,7 @@
             "text": "TrackContentfulRender"
           }
         ],
-        "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+        "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -375,7 +375,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1206,7 +1206,9 @@
             "type": "Function",
             "tags": [],
             "label": "removePanel",
-            "description": [],
+            "description": [
+              "\nRemoves a panel from the container."
+            ],
             "signature": [
               "(panelId: string) => void"
             ],
@@ -1238,7 +1240,9 @@
             "type": "Function",
             "tags": [],
             "label": "canRemovePanels",
-            "description": [],
+            "description": [
+              "\nDetermines whether or not a container is capable of removing panels."
+            ],
             "signature": [
               "(() => boolean) | undefined"
             ],
@@ -1254,7 +1258,9 @@
             "type": "Function",
             "tags": [],
             "label": "replacePanel",
-            "description": [],
+            "description": [
+              "\nReplaces a panel in the container with a new panel."
+            ],
             "signature": [
               "<SerializedState extends object = object>(idToRemove: string, newPanel: ",
               {
@@ -1312,11 +1318,31 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.PresentationContainer.getPanelCount",
+            "type": "Function",
+            "tags": [],
+            "label": "getPanelCount",
+            "description": [
+              "\nReturns the number of panels in the container."
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
             "id": "def-common.PresentationContainer.children$",
             "type": "Object",
             "tags": [],
             "label": "children$",
-            "description": [],
+            "description": [
+              "\nA publishing subject containing the child APIs of the container. Note that\nchildren are created asynchronously. This means that the children$ observable might\ncontain fewer children than the actual number of panels in the container."
+            ],
             "signature": [
               "{ source: ",
               "Observable",
@@ -1545,7 +1571,7 @@
         "tags": [],
         "label": "TrackContentfulRender",
         "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+        "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1561,7 +1587,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1657,6 +1683,73 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-common.TracksQueryPerformance",
+        "type": "Interface",
+        "tags": [],
+        "label": "TracksQueryPerformance",
+        "description": [],
+        "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.TracksQueryPerformance.firstLoad",
+            "type": "boolean",
+            "tags": [],
+            "label": "firstLoad",
+            "description": [],
+            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.TracksQueryPerformance.creationStartTime",
+            "type": "number",
+            "tags": [],
+            "label": "creationStartTime",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.TracksQueryPerformance.creationEndTime",
+            "type": "number",
+            "tags": [],
+            "label": "creationEndTime",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.TracksQueryPerformance.lastLoadStartTime",
+            "type": "number",
+            "tags": [],
+            "label": "lastLoadStartTime",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/performance_trackers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
