@@ -170,7 +170,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'filetest-2',
+          name: 'filetest-6',
           description: '',
           namespace: 'default',
           policy_ids: [agentPolicyId, agentPolicyId2],

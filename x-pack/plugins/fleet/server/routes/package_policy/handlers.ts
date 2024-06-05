@@ -242,6 +242,10 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   }
   const spaceId = fleetContext.spaceId;
   try {
+    if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
+      throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
+    }
+
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {

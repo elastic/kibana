@@ -15,11 +15,14 @@ import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { PackagePolicyClient, FleetRequestHandlerContext } from '../..';
-import type { UpdatePackagePolicyRequestSchema } from '../../types/rest_spec';
+import type {
+  CreatePackagePolicyRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+} from '../../types/rest_spec';
 import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
-import { getPackagePoliciesHandler } from './handlers';
+import { createPackagePolicyHandler, getPackagePoliciesHandler } from './handlers';
 
 import { registerRoutes } from '.';
 
@@ -109,6 +112,7 @@ jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
     getPackageInfo: jest.fn(() => Promise.resolve()),
+    getInstallation: jest.fn(),
   };
 });
 
@@ -134,6 +138,58 @@ describe('When calling package policy', () => {
   afterEach(() => {
     jest.clearAllMocks();
     appContextService.stop();
+  });
+
+  describe('create api handler', () => {
+    const getCreateKibanaRequest = (
+      newData?: typeof CreatePackagePolicyRequestSchema.body
+    ): KibanaRequest<
+      undefined,
+      typeof CreatePackagePolicyRequestSchema.query,
+      typeof CreatePackagePolicyRequestSchema.body
+    > => {
+      return httpServerMock.createKibanaRequest<
+        undefined,
+        typeof CreatePackagePolicyRequestSchema.query,
+        typeof CreatePackagePolicyRequestSchema.body
+      >({
+        path: routeConfig.path,
+        method: 'post',
+        body: newData || {},
+        query: { format: 'simplified' },
+      });
+    };
+
+    const newPolicy = {
+      name: 'endpoint-1',
+      description: 'desc',
+      enabled: true,
+      policy_ids: [],
+      inputs: [],
+      namespace: 'default',
+      package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.5.0' },
+    };
+
+    beforeEach(() => {
+      // @ts-ignore
+      const postMock = routerMock.versioned.post.mock;
+      // @ts-ignore
+      routeConfig = postMock.calls.find(([{ path }]) =>
+        path.startsWith(PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN)
+      )!;
+      routeHandler = postMock.results[0].value.addVersion.mock.calls[0][1];
+    });
+
+    it('should throw if no policy_id or policy_ids is provided', async () => {
+      const request = getCreateKibanaRequest(newPolicy as any);
+      await createPackagePolicyHandler(context, request as any, response);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          message: 'Either policy_id or policy_ids must be provided',
+        },
+      });
+    });
   });
 
   describe('update api handler', () => {
