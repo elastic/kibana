@@ -74,7 +74,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     if (!getVis || !serializeStateFn) return;
     return {
       vis: getVis?.(),
-      savedVis: serializeStateFn?.(),
+      savedVis: serializeStateFn?.().rawState.savedVis,
     };
   }, [getVis, serializeStateFn]);
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';

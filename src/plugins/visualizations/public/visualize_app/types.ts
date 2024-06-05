@@ -46,7 +46,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { Vis, VisSavedObject, PersistedState, VisParams } from '..';
 
-import type { ListingViewRegistry, SavedVisState } from '../types';
+import type { ListingViewRegistry, SavedVisState, SerializedVis } from '../types';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 import { EmbeddableApiHandler } from './utils/use/use_embeddable_api_handler';
 
@@ -119,7 +119,7 @@ export interface VisualizeServices extends CoreStart {
 
 export interface VisInstance {
   vis: Vis;
-  savedVis: VisSavedObject;
+  savedVis: SerializedVis;
   savedSearch?: SavedSearch;
   panelTitle?: string;
   panelDescription?: string;

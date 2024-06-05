@@ -12,11 +12,14 @@ import './index.scss';
 import { EuiErrorBoundary, EuiResizableContainer } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import React, { useCallback, useEffect, useState } from 'react';
+import { DeepPartial } from '@kbn/utility-types';
 
 import {
   EditorRenderProps,
   EmbeddableApiHandler,
   SerializedVis,
+  Vis,
+  VisParams,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
 
@@ -60,10 +63,10 @@ function DefaultEditor({
     dataView$: new BehaviorSubject(dataView),
   });
   const [titles, setTitles] = useState<SerializedTitles>({ title: '', description: '' });
-  const [onUpdateVis, setOnUpdateVis] = useState<(serializedVis: SerializedVis) => void>(
-    () => () => {}
-  );
-  const [vis, setVis] = useState<SerializedVis | undefined>(undefined);
+  const [onUpdateVis, setOnUpdateVis] = useState<
+    (serializedVis: DeepPartial<SerializedVis>) => void
+  >(() => () => {});
+  const [vis, setVis] = useState<Vis<VisParams> | undefined>(undefined);
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed((value) => !value);
