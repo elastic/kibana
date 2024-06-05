@@ -11,6 +11,7 @@ export type StaticPage =
   | 'base'
   | 'overview'
   | 'integrations'
+  | 'integration_create'
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
@@ -27,7 +28,6 @@ export type DynamicPage =
   | 'integrations_all'
   | 'integrations_installed'
   | 'integrations_installed_updates_available'
-  | 'integrations_assistant'
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
@@ -98,7 +98,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integrations_all: '/browse/:category?/:subcategory?',
   integrations_installed: '/installed/:category?',
   integrations_installed_updates_available: '/installed/updates_available/:category?',
-  integrations_assistant: '/assistant',
+  integrations_create: '/create',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
@@ -154,7 +154,7 @@ export const pagePathGetters: {
     const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/installed/updates_available${categoryPath}${queryParams}`];
   },
-  integrations_assistant: () => [INTEGRATIONS_BASE_PATH, `/assistant`],
+  integration_create: () => [INTEGRATIONS_BASE_PATH, `/create`],
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,

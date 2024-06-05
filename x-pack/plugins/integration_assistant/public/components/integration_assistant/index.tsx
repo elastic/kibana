@@ -20,10 +20,13 @@ const IntegrationAssistantContext = React.lazy(() =>
   }))
 );
 
-export const getIntegrationAssistantLazy = (services: IntegrationAssistantServices) => (
-  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-    <IntegrationAssistantContext services={services}>
-      <IntegrationAssistant />
-    </IntegrationAssistantContext>
-  </Suspense>
-);
+export const getIntegrationAssistantLazy = (services: IntegrationAssistantServices) =>
+  React.memo(function IntegrationAssistantLazy() {
+    return (
+      <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+        <IntegrationAssistantContext services={services}>
+          <IntegrationAssistant />
+        </IntegrationAssistantContext>
+      </Suspense>
+    );
+  });

@@ -29,7 +29,20 @@ export const runInstallPackage = async (
       'Content-Type': 'application/zip',
       'Elastic-Api-Version': '2023-10-31',
     },
-    // query: { prerelease: false },
     body: zipFile,
+    signal: abortSignal,
+  });
+
+export const getInstalledPackage = async ({
+  http,
+  abortSignal,
+}: {
+  http: HttpSetup;
+  abortSignal: AbortSignal;
+}): Promise<object> =>
+  http.get<object>(FLEET_PACKAGES_PATH, {
+    headers: {
+      'Elastic-Api-Version': '2023-10-31',
+    },
     signal: abortSignal,
   });

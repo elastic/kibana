@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type Section = 'manage' | 'browse';
+import type { CreateIntegrationCardButtonProps } from './create_integration_card_button';
+
+export type CreateIntegrationCardButtonComponent =
+  React.ComponentType<CreateIntegrationCardButtonProps>;

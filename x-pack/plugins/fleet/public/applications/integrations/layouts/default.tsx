@@ -82,12 +82,9 @@ export const DefaultLayout: React.FC<Props> = memo(
             </EuiFlexGroup>
             {integrationAssistant && (
               <EuiFlexItem grow={false}>
-                <EuiButton fill color="primary" href={getHref('integrations_assistant')}>
-                  <FormattedMessage
-                    id="xpack.fleet.epm.addIntegrationButton"
-                    defaultMessage="Add integration"
-                  />
-                </EuiButton>
+                <integrationAssistant.CreateIntegrationCardButton
+                  href={getHref('integration_create')}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

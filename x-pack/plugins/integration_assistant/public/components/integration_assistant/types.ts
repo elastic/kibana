@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type Section = 'manage' | 'browse';
+export type IntegrationAssistantComponent = React.ComponentType;

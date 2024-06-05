@@ -42,11 +42,11 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  integrations_assistant: () => [
+  integration_create: () => [
     BASE_BREADCRUMB,
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.integrationsAssistantPageTitle', {
-        defaultMessage: 'Assistant',
+      text: i18n.translate('xpack.fleet.breadcrumbs.createIntegrationPageTitle', {
+        defaultMessage: 'Create integration',
       }),
     },
   ],
