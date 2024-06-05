@@ -70,6 +70,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const timelineState = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
+
   const { timelineType } = timelineState;
   const { startTransaction } = useStartTransaction();
 

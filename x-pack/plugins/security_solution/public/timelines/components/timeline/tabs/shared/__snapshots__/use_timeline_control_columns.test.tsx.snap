@@ -5,11 +5,7 @@ Array [
   Object {
     "headerCellRender": [Function],
     "id": "default-timeline-control-column",
-    "rowCellRender": Object {
-      "$$typeof": Symbol(react.memo),
-      "compare": null,
-      "type": [Function],
-    },
+    "rowCellRender": [Function],
     "width": 152,
   },
 ]

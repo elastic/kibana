@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -47,10 +47,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
 }) => {
-  /**
-   * memo is imperative here otherwise the cell will re-render on every hover on every cell
-   */
-  const UnifiedDataTableRenderCellValueMemoized = memo(function UnifiedDataTableRenderCellValue({
+  return function UnifiedDataTableRenderCellValue({
     rowIndex,
     columnId,
     isDetails,
@@ -149,13 +146,7 @@ export const getRenderCellValueFn = ({
         }}
       />
     );
-  });
-
-  // We need pass a non-memoized version of the component otherwise EUI will throw an error
-  // complaining the passed component is not a function.
-  return (props: EuiDataGridCellValueElementProps) => (
-    <UnifiedDataTableRenderCellValueMemoized {...props} />
-  );
+  };
 };
 
 /**
