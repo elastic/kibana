@@ -9,7 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { isArray } from 'lodash';
+import { isAggregateError, NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
@@ -207,8 +207,9 @@ export class CrowdstrikeConnector extends SubActionConnector<
       return errorData.message;
     }
 
-    // @ts-expect-error TODO: Can't find a way to make the types work here
-    const cause = isArray(error.cause?.errors) ? error.cause.errors[0] : error.cause;
+    const cause: NodeSystemError = isAggregateError(error.cause)
+      ? error.cause.errors[0]
+      : error.cause;
     if (cause) {
       // ENOTFOUND is the error code for when the host is unreachable eg. api.crowdstrike.com111
       if (cause.code === 'ENOTFOUND') {
