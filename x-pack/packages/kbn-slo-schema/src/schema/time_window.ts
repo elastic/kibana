@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { schema } from '@kbn/config-schema';
 import { durationType } from './duration';
 
 const rollingTimeWindowTypeSchema = t.literal('rolling');
@@ -25,6 +26,18 @@ const timeWindowTypeSchema = t.union([
   calendarAlignedTimeWindowTypeSchema,
 ]);
 const timeWindowSchema = t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]);
+const timeWindowConfigSchema = schema.oneOf([
+  schema.object({
+    // TODO Change to durationType
+    duration: schema.duration(),
+    type: schema.literal('rolling'),
+  }),
+  schema.object({
+    // TODO Change to durationType
+    duration: schema.duration(),
+    type: schema.literal('calendarAligned'),
+  }),
+]);
 
 export {
   rollingTimeWindowSchema,
@@ -32,5 +45,6 @@ export {
   calendarAlignedTimeWindowSchema,
   calendarAlignedTimeWindowTypeSchema,
   timeWindowSchema,
+  timeWindowConfigSchema,
   timeWindowTypeSchema,
 };

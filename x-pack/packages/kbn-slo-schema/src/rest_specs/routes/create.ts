@@ -4,15 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import * as t from 'io-ts';
-import { indicatorSchema, timeWindowSchema } from '../../schema';
+import { schema } from '@kbn/config-schema';
+import {
+  allOrAnyStringOrArrayConfigSchema,
+  indicatorSchema,
+  indicatorConfigSchema,
+  timeWindowConfigSchema,
+  timeWindowSchema,
+} from '../../schema';
 import { allOrAnyStringOrArray } from '../../schema/common';
 import {
   budgetingMethodSchema,
+  budgetingMethodConfigSchema,
   objectiveSchema,
+  objectiveConfigSchema,
   optionalSettingsSchema,
+  optionalSettingsConfigSchema,
   sloIdSchema,
+  sloIdConfigSchema,
   tagsSchema,
+  tagsConfigSchema,
 } from '../../schema/slo';
 
 const createSLOParamsSchema = t.type({
@@ -35,13 +48,43 @@ const createSLOParamsSchema = t.type({
   ]),
 });
 
+const createSLOParamsConfigSchema = {
+  body: schema.oneOf([
+    schema.object({
+      name: schema.string(),
+      description: schema.string(),
+      indicator: indicatorConfigSchema,
+      timeWindow: timeWindowConfigSchema,
+      budgetingMethod: budgetingMethodConfigSchema,
+      objective: objectiveConfigSchema,
+    }),
+    // TODO Change to partial
+    schema.object({
+      id: sloIdConfigSchema,
+      settings: optionalSettingsConfigSchema,
+      tags: tagsConfigSchema,
+      groupBy: allOrAnyStringOrArrayConfigSchema,
+      revision: schema.number(),
+    }),
+  ]),
+};
+
 const createSLOResponseSchema = t.type({
   id: sloIdSchema,
 });
+
+const createSLOResponseConfigSchema = {
+  id: sloIdConfigSchema,
+};
 
 type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
-export { createSLOParamsSchema, createSLOResponseSchema };
+export {
+  createSLOParamsSchema,
+  createSLOParamsConfigSchema,
+  createSLOResponseSchema,
+  createSLOResponseConfigSchema,
+};
 export type { CreateSLOInput, CreateSLOParams, CreateSLOResponse };

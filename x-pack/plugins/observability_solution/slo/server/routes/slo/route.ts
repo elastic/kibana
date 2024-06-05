@@ -8,8 +8,10 @@
 import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import {
+  createSLOParamsConfigSchema,
   createSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
+  deleteSLOParamsConfigSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
@@ -97,6 +99,7 @@ const createSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: createSLOParamsSchema,
+  validation: createSLOParamsConfigSchema,
   handler: async ({ context, params, logger, dependencies, request }) => {
     await assertPlatinumLicense(context);
 
@@ -230,6 +233,7 @@ const deleteSLORoute = createSloServerRoute({
     access: 'public',
   },
   params: deleteSLOParamsSchema,
+  validation: deleteSLOParamsConfigSchema,
   handler: async ({ request, context, params, logger, dependencies }) => {
     await assertPlatinumLicense(context);
 
