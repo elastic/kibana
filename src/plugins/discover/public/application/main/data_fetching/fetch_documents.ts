@@ -68,10 +68,7 @@ export const fetchDocuments = (
       filter((res) => !isRunningResponse(res)),
       map((res) => {
         return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView, {
-          processRecord: (record) => {
-            services.profilesManager.resolveDocumentProfile({ record });
-            return record;
-          },
+          processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
         });
       })
     );

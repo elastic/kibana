@@ -78,9 +78,7 @@ export function fetchEsql(
                 flattened: row,
               };
 
-              profilesManager.resolveDocumentProfile({ record });
-
-              return record;
+              return profilesManager.resolveDocumentProfile({ record });
             });
           }
         });
