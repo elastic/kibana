@@ -8,7 +8,7 @@
 import { produce } from 'immer';
 import { satisfies } from 'semver';
 import { set } from '@kbn/safer-lodash-set';
-import { filter, reduce, mapKeys, each, unset, uniq, map, has } from 'lodash';
+import { filter, reduce, mapKeys, each, unset, uniq, map, has, flatMap } from 'lodash';
 import type { PackagePolicyInputStream } from '@kbn/fleet-plugin/common';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -122,7 +122,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               pkgName: OSQUERY_INTEGRATION_NAME,
             });
 
-            const agentPolicyIds = uniq(map(policyPackages?.items, 'policy_id'));
+            const agentPolicyIds = uniq(flatMap(policyPackages?.items, 'policy_ids'));
             const agentPolicies = mapKeys(
               await agentPolicyService?.getByIds(internalSavedObjectsClient, agentPolicyIds),
               'id'
