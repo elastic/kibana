@@ -25,33 +25,26 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should create a case', async () => {
-      const postedCase = await svlCases.api.createCase(
-        svlCases.api.getPostCaseRequest('securitySolution', {
-          connector: {
-            id: '123',
-            name: 'Jira',
-            type: ConnectorTypes.jira,
-            fields: { issueType: 'Task', priority: 'High', parent: null },
-          },
-        }),
-        roleAuthc
-      );
-      const data = svlCases.omit.removeServerGeneratedPropertiesFromCase(postedCase);
+      const payload = svlCases.api.getPostCaseRequest('securitySolution', {
+        connector: {
+          id: '123',
+          name: 'Jira',
+          type: ConnectorTypes.jira,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
+      });
+      const postedCase = await svlCases.api.createCase(payload, roleAuthc);
 
-      expect(data).to.eql(
-        svlCases.api.postCaseResp(
-          'securitySolution',
-          null,
-          svlCases.api.getPostCaseRequest('securitySolution', {
-            connector: {
-              id: '123',
-              name: 'Jira',
-              type: ConnectorTypes.jira,
-              fields: { issueType: 'Task', priority: 'High', parent: null },
-            },
-          })
-        )
+      const { created_by: createdBy, ...data } =
+        svlCases.omit.removeServerGeneratedPropertiesFromCase(postedCase);
+      const { created_by: _, ...expected } = svlCases.api.postCaseResp(
+        'securitySolution',
+        null,
+        payload
       );
+
+      expect(data).to.eql(expected);
+      expect(createdBy).to.have.keys('full_name', 'email', 'username');
     });
 
     it('should throw 403 when trying to create a case with observability as owner', async () => {
