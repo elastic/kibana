@@ -9,11 +9,6 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 
-const a = schema.object({ a: schema.string() });
-const bKeys = { b: schema.string() };
-const b = schema.object(bKeys);
-const c = a.extends(bKeys);
-
 /** Intended to cover a wide set of schema configurations */
 export const testSchema = schema.object({
   string: schema.string({ maxLength: 10, minLength: 1 }),
