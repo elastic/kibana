@@ -82,7 +82,7 @@ export class UnifiedDocViewerPublicPlugin
 
         const LazyDocView = isLegacyTableEnabled({
           uiSettings,
-          isTextBasedQueryMode: Array.isArray(textBasedHits),
+          isEsqlMode: Array.isArray(textBasedHits),
         })
           ? LazyDocViewerLegacyTable
           : LazyDocViewerTable;

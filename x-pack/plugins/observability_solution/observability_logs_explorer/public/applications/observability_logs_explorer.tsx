@@ -11,7 +11,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DatasetQualityRoute, ObservabilityLogsExplorerMainRoute } from '../routes/main';
+import { ObservabilityLogsExplorerMainRoute } from '../routes/main';
 import { NotFoundPage } from '../routes/not_found';
 import {
   ObservabilityLogsExplorerAppMountParameters,
@@ -78,11 +78,6 @@ export const ObservabilityLogsExplorerApp = ({
                   path="/"
                   exact={true}
                   render={() => <ObservabilityLogsExplorerMainRoute />}
-                />
-                <Route
-                  path="/dataset-quality"
-                  exact={true}
-                  render={() => <DatasetQualityRoute />}
                 />
                 <Route render={() => <NotFoundPage />} />
               </Routes>

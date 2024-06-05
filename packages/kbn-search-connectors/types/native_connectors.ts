@@ -3583,11 +3583,33 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.outlookTooltip.name', {
+            defaultMessage: 'Outlook',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: false },
         basic: { enabled: true },
+      },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
       },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
@@ -4023,13 +4045,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 4,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.salesforce.name', {
+            defaultMessage: 'Salesforce',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
       use_text_extraction_service: {
         default_value: null,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,

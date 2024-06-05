@@ -134,7 +134,8 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
     });
   });
 
-  describe('with exception items', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/179582
+  describe.skip('with exception items', () => {
     beforeEach(() => {
       createEndpointExceptionList().then((response) => {
         createEndpointExceptionListItem({
