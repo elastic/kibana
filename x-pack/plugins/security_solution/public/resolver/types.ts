@@ -944,7 +944,6 @@ export type PanelViewAndParameters =
          * The nodeID (e.g. `process.entity_id`) for the node that will be shown in detail
          */
         nodeID: string;
-        agentId: string;
       };
     }
   | {
