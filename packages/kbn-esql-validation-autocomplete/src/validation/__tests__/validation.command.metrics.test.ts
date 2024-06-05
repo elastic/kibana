@@ -157,7 +157,7 @@ describe('validation', () => {
           }
         });
 
-        test.skip('errors on agg and non-agg mix', async () => {
+        test('errors on agg and non-agg mix', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('METRICS a_index sum( numberField ) + abs( numberField ) ', [

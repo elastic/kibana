@@ -174,6 +174,13 @@ export interface ValidationErrors {
       expression: string;
     };
   };
+  expressionNotAggClosed: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

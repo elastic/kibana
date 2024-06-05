@@ -382,6 +382,21 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         }),
         type: 'error',
       };
+    case 'expressionNotAggClosed':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.expressionNotAggClosed',
+          {
+            defaultMessage:
+              'Cannot combine aggregation and non-aggregation values in [{command}], found [{expression}]',
+            values: {
+              command: out.commandName.toUpperCase(),
+              expression: out.expression,
+            },
+          }
+        ),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -444,6 +459,12 @@ export const errors = {
 
   noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
     errors.byId('noAggFunction', fn.location, {
+      commandName: cmd.name,
+      expression: fn.text,
+    }),
+
+  expressionNotAggClosed: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
+    errors.byId('expressionNotAggClosed', fn.location, {
       commandName: cmd.name,
       expression: fn.text,
     }),
