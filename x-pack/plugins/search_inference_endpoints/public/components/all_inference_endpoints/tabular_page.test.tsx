@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -14,7 +14,7 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 const setIsInferenceFlyoutVisibleMock = jest.fn();
 const inferenceEndpoints = [
   {
-    model_id: 'my-elser-model-04',
+    model_id: 'my-elser-model-05',
     task_type: 'sparse_embedding',
     service: 'elser',
     service_settings: {
@@ -25,7 +25,7 @@ const inferenceEndpoints = [
     task_settings: {},
   },
   {
-    model_id: 'my-elser-model-05',
+    model_id: 'my-elser-model-04',
     task_type: 'sparse_embedding',
     service: 'elser',
     service_settings: {
@@ -39,25 +39,12 @@ const inferenceEndpoints = [
 
 describe('When the tabular page is loaded', () => {
   beforeEach(() => {
-    render(
-      <TabularPage
-        addEndpointLabel="Add endpoint"
-        setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisibleMock}
-        inferenceEndpoints={inferenceEndpoints}
-      />
-    );
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
   });
 
-  it('should display the description for creation of the first inference endpoint', () => {
-    expect(
-      screen.getByText(
-        'Manage your Elastic and third-party endpoints generated from the Inference API.'
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('calls setIsInferenceFlyoutVisible when the addInferenceEndpoint button is clicked', async () => {
-    fireEvent.click(screen.getByTestId('addEndpointButtonForAllInferenceEndpoints'));
-    expect(setIsInferenceFlyoutVisibleMock).toHaveBeenCalled();
+  it('should display all model_ids in the table', () => {
+    const rows = screen.getAllByRole('row');
+    expect(rows[1]).toHaveTextContent('my-elser-model-04');
+    expect(rows[2]).toHaveTextContent('my-elser-model-05');
   });
 });

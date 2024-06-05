@@ -19,7 +19,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: DEFAULT_TABLE_ACTIVE_PAGE,
   perPage: DEFAULT_TABLE_LIMIT,
   sortField: SortFieldInferenceEndpoint.endpoint,
-  sortOrder: SortOrder.desc,
+  sortOrder: SortOrder.asc,
 };
 
 export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AlInferenceEndpointsTableState = {
