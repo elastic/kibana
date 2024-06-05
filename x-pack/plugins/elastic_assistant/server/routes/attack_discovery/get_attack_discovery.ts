@@ -14,7 +14,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ATTACK_DISCOVERY } from '../../../common/constants';
+import { ATTACK_DISCOVERY_BY_CONNECTOR_ID } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
@@ -22,7 +22,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
   router.versioned
     .get({
       access: 'internal',
-      path: ATTACK_DISCOVERY,
+      path: ATTACK_DISCOVERY_BY_CONNECTOR_ID,
       options: {
         tags: ['access:elasticAssistant'],
       },
