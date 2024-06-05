@@ -4821,6 +4821,11 @@ components:
               - enabled
         policy_id:
           type: string
+          deprecated: true
+        policy_ids:
+          type: array
+          items:
+            type: string
         name:
           type: string
         description:

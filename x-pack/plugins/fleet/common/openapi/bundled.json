@@ -7510,7 +7510,14 @@
             }
           },
           "policy_id": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true
+          },
+          "policy_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "name": {
             "type": "string"

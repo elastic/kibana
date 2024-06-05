@@ -261,6 +261,26 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
+    it('should work with multiple policy ids', async function () {
+      const response = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'updated_namespace',
+          policy_ids: [agentPolicyId, managedAgentPolicyId],
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
+      expect(response.body.item.policy_ids).to.eql([agentPolicyId, managedAgentPolicyId]);
+    });
+
     it('should trim whitespace from name on update', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)
