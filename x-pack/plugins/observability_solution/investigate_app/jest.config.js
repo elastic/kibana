@@ -9,16 +9,15 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
   roots: [
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/public',
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/common',
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/server',
+    '<rootDir>/x-pack/plugins/observability_solution/investigate_app/public',
+    '<rootDir>/x-pack/plugins/observability_solution/investigate_app/server',
   ],
   setupFiles: [
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/.storybook/jest_setup.js',
+    '<rootDir>/x-pack/plugins/observability_solution/investigate_app/.storybook/jest_setup.js',
   ],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/observability_solution/investigate_app/{public,server}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],
