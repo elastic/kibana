@@ -163,7 +163,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(429);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":429,"error":"Too Many Requests","message":"Too many requests. Please wait 00m10s before uploading again."}'
+        '{"statusCode":429,"error":"Too Many Requests","message":"Too many requests. Please wait 10s before uploading again."}'
       );
     });
 

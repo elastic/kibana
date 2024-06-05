@@ -9,6 +9,7 @@ import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
+import moment from 'moment';
 import type {
   ElasticsearchClient,
   SavedObject,
@@ -53,6 +54,7 @@ import {
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
   PackageNotFoundError,
+  FleetTooManyRequestsError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
@@ -89,7 +91,9 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
+import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 
+export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 
 export async function isPackageInstalled(options: {
@@ -888,10 +892,31 @@ async function installPackageByUpload({
   skipDataStreamRollover,
   isBundledPackage,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
+  const logger = appContextService.getLogger();
+
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
   const installSource = isBundledPackage ? 'bundled' : 'upload';
+
+  const timeToWaitString = moment
+    .utc(moment.duration(UPLOAD_RETRY_AFTER_MS).asMilliseconds())
+    .format('s[s]');
+
   try {
+    // Check cached timestamp for rate limiting
+    const lastInstalledBy = getLastUploadInstallCache();
+
+    if (lastInstalledBy) {
+      const msSinceLastFetched = Date.now() - (lastInstalledBy || 0);
+      if (msSinceLastFetched < UPLOAD_RETRY_AFTER_MS) {
+        logger.error(
+          `Install by Upload - Too many requests. Wait ${timeToWaitString} before uploading again.`
+        );
+        throw new FleetTooManyRequestsError(
+          `Too many requests. Please wait ${timeToWaitString} before uploading again.`
+        );
+      }
+    }
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
     const pkgName = packageInfo.name;
 
@@ -928,6 +953,8 @@ async function installPackageByUpload({
       assetsMap,
       paths,
     };
+    // update the timestamp of latest installation
+    setLastUploadInstallCache();
 
     return await installPackageCommon({
       packageInstallContext,
