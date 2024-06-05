@@ -24,7 +24,7 @@ export const requiredRunTimePrivileges = {
   application: [
     {
       application: 'kibana-.kibana',
-      privileges: ['saved_object:entity-definition/create'],
+      privileges: ['saved_object:entity-definition/*'],
       resources: ['*'],
     },
   ],
