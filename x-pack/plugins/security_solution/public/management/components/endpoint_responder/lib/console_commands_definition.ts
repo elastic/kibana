@@ -504,6 +504,8 @@ export const getEndpointConsoleCommands = ({
   switch (agentType) {
     case 'sentinel_one':
       return adjustCommandsForSentinelOne({ commandList: consoleCommands });
+    case 'crowdstrike':
+      return adjustCommandsForCrowdstrike({ commandList: consoleCommands });
     default:
       // agentType === endpoint: just returns the defined command list
       return consoleCommands;
@@ -543,6 +545,47 @@ const adjustCommandsForSentinelOne = ({
     if (
       !agentSupportsResponseAction ||
       (command.name === 'get-file' && !isGetFileFeatureEnabled) ||
+      (command.name === 'isolate' && !isHostIsolationEnabled) ||
+      (command.name === 'release' && !isHostIsolationEnabled)
+    ) {
+      disableCommand(command);
+    }
+
+    return command;
+  });
+};
+
+/** @private */
+const adjustCommandsForCrowdstrike = ({
+  commandList,
+}: {
+  commandList: CommandDefinition[];
+}): CommandDefinition[] => {
+  const featureFlags = ExperimentalFeaturesService.get();
+  const isHostIsolationEnabled = featureFlags.responseActionsCrowdstrikeManualHostIsolationEnabled;
+
+  const disableCommand = (command: CommandDefinition) => {
+    command.helpDisabled = true;
+    command.helpHidden = true;
+    command.validate = () =>
+      UPGRADE_AGENT_FOR_RESPONDER('crowdstrike', command.name as ConsoleResponseActionCommands);
+  };
+
+  return commandList.map((command) => {
+    const agentSupportsResponseAction =
+      command.name === 'status'
+        ? false
+        : isActionSupportedByAgentType(
+            'crowdstrike',
+            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
+              command.name as ConsoleResponseActionCommands
+            ],
+            'manual'
+          );
+
+    // If command is not supported by Crowdstrike - disable it
+    if (
+      !agentSupportsResponseAction ||
       (command.name === 'isolate' && !isHostIsolationEnabled) ||
       (command.name === 'release' && !isHostIsolationEnabled)
     ) {

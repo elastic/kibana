@@ -24,7 +24,10 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { getScopeFromPath, showSourcererByPath } from '../../../sourcerer/containers';
+import {
+  getScopeFromPath,
+  showSourcererByPath,
+} from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { AssistantHeaderLink } from '../../../assistant/header_link';
 

@@ -44,6 +44,10 @@ import {
 import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
 import {
+  hasDocumentLevelSecurityFeature,
+  hasIncrementalSyncFeature,
+} from '../../utils/connector_helpers';
+import {
   getIngestionMethod,
   getIngestionStatus,
   getLastUpdated,
@@ -288,8 +292,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     hasDocumentLevelSecurityFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false,
+      (connector?: Connector) => hasDocumentLevelSecurityFeature(connector),
     ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
@@ -297,8 +300,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     hasIncrementalSyncFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.INCREMENTAL_SYNC]?.enabled || false,
+      (connector?: Connector) => hasIncrementalSyncFeature(connector),
     ],
     htmlExtraction: [
       () => [selectors.connector],
