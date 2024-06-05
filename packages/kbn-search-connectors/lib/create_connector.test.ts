@@ -163,7 +163,7 @@ describe('createConnector lib', () => {
     expect(mockClient.transport.request).toHaveBeenCalledWith({
       method: 'PUT',
       path: `/_connector/${connectorId}/_features`,
-      body: mockFeatures,
+      body: { features: mockFeatures },
     });
     expect(mockClient.transport.request).toHaveBeenCalledWith({
       method: 'GET',
