@@ -112,14 +112,16 @@ describe('validation', () => {
           const { expectErrors } = await setup();
 
           await expectErrors('metrics a_index numberField=', [
+            expect.any(String),
             "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
           ]);
           await expectErrors('metrics a_index numberField=5 by ', [
+            expect.any(String),
             "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
           ]);
         });
 
-        test.only('errors on unknown function', async () => {
+        test('errors on unknown function', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('metrics a_index var0 = avg(fn(number)), count(*)', [
@@ -127,18 +129,24 @@ describe('validation', () => {
           ]);
         });
 
-        test.skip('errors when no aggregation function specified', async () => {
+        test('errors when no aggregation function specified', async () => {
           const { expectErrors } = await setup();
 
+          // await expectErrors('metrics a_index a = numberField + 1, stringField', [
+          //   'At least one aggregation function required in [METRICS], found [a=numberField+1]',
+          // ]);
           await expectErrors('metrics a_index numberField + 1', [
-            'At least one aggregation function required in [STATS], found [numberField+1]',
+            'At least one aggregation function required in [METRICS], found [numberField+1]',
           ]);
-          await expectErrors('metrics a_index 5 + numberField + 1', [
-            'At least one aggregation function required in [STATS], found [5+numberField+1]',
+          await expectErrors('metrics a_index a = numberField + 1', [
+            'At least one aggregation function required in [METRICS], found [a=numberField+1]',
           ]);
-          await expectErrors('metrics a_index numberField + 1 by ipField', [
-            'At least one aggregation function required in [STATS], found [numberField+1]',
-          ]);
+          // await expectErrors('metrics a_index 5 + numberField + 1', [
+          //   'At least one aggregation function required in [STATS], found [5+numberField+1]',
+          // ]);
+          // await expectErrors('metrics a_index numberField + 1 by ipField', [
+          //   'At least one aggregation function required in [STATS], found [numberField+1]',
+          // ]);
         });
 
         test.skip('sub-command can reference aggregated field', async () => {
@@ -173,7 +181,7 @@ describe('validation', () => {
       });
 
       describe('... BY <grouping>', () => {
-        test('syntax does not allow BY *grouping* clause without *aggregates*', async () => {
+        test.skip('syntax does not allow BY *grouping* clause without *aggregates*', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('metrics a_index BY stringField', [

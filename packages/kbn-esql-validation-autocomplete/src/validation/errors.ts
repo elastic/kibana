@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLLocation, ESQLMessage } from '@kbn/esql-ast';
+import type { ESQLCommand, ESQLFunction, ESQLLocation, ESQLMessage } from '@kbn/esql-ast';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
@@ -370,6 +370,18 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         ),
         type: 'error',
       };
+    case 'noAggFunction':
+      return {
+        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.noAggFunction', {
+          defaultMessage:
+            'At least one aggregation function required in [{command}], found [{expression}]',
+          values: {
+            command: out.commandName.toUpperCase(),
+            expression: out.expression,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -415,6 +427,26 @@ export const errors = {
   ): ESQLMessage => {
     return createError('unexpected', location, message);
   },
+
+  byId: <K extends ErrorTypes>(
+    id: K,
+    location: ESQLLocation,
+    values: ErrorValues<K>
+  ): ESQLMessage =>
+    getMessageFromId({
+      messageId: id,
+      values,
+      locations: location,
+    }),
+
+  unknownFunction: (fn: ESQLFunction): ESQLMessage =>
+    errors.byId('unknownFunction', fn.location, fn),
+
+  noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
+    errors.byId('noAggFunction', fn.location, {
+      commandName: cmd.name,
+      expression: fn.text,
+    }),
 
   missingAggregates: (command: string, location: ESQLLocation): ESQLMessage => {
     return createError(

@@ -167,6 +167,13 @@ export interface ValidationErrors {
     message: string;
     type: { value: string | number };
   };
+  noAggFunction: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

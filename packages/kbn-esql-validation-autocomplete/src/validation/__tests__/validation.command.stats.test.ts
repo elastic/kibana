@@ -73,6 +73,32 @@ describe('validation', () => {
           ]);
         });
 
+        test('errors on each aggregation field, which does not contain at least one agg function', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('from a_index | stats numberField + 1', [
+            'At least one aggregation function required in [STATS], found [numberField+1]',
+          ]);
+          await expectErrors('from a_index | stats numberField + 1, stringField', [
+            'At least one aggregation function required in [STATS], found [numberField+1]',
+            'Expected an aggregate function or group but got [stringField] of type [FieldAttribute]',
+          ]);
+          await expectErrors('from a_index | stats numberField + 1, numberField + 2, count()', [
+            'At least one aggregation function required in [STATS], found [numberField+1]',
+            'At least one aggregation function required in [STATS], found [numberField+2]',
+          ]);
+          await expectErrors(
+            'from a_index | stats numberField + 1, numberField + count(), count()',
+            ['At least one aggregation function required in [STATS], found [numberField+1]']
+          );
+          await expectErrors('from a_index | stats 5 + numberField + 1', [
+            'At least one aggregation function required in [STATS], found [5+numberField+1]',
+          ]);
+          await expectErrors('from a_index | stats numberField + 1 by ipField', [
+            'At least one aggregation function required in [STATS], found [numberField+1]',
+          ]);
+        });
+
         test('various errors', async () => {
           const { expectErrors } = await setup();
 
@@ -93,15 +119,6 @@ describe('validation', () => {
           ]);
           await expectErrors('from a_index | stats avg(numberField) by var0 = wrongField + 1', [
             'Unknown column [wrongField]',
-          ]);
-          await expectErrors('from a_index | stats numberField + 1', [
-            'At least one aggregation function required in [STATS], found [numberField+1]',
-          ]);
-          await expectErrors('from a_index | stats 5 + numberField + 1', [
-            'At least one aggregation function required in [STATS], found [5+numberField+1]',
-          ]);
-          await expectErrors('from a_index | stats numberField + 1 by ipField', [
-            'At least one aggregation function required in [STATS], found [numberField+1]',
           ]);
           await expectErrors('from a_index | stats var0 = avg(fn(number)), count(*)', [
             'Unknown function [fn]',

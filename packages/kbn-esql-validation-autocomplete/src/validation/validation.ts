@@ -75,7 +75,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
-import { i18n } from '@kbn/i18n';
+import type {ESQLAstField} from '@kbn/esql-ast/src/types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -579,7 +579,7 @@ function validateSetting(
 /**
  * Validates aggregates fields: `... <aggregates> ...`.
  */
-const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstItem[]) => {
+const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[]) => {
   const messages: ESQLMessage[] = [];
 
   // Should never happen.
@@ -588,16 +588,30 @@ const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstItem[]) => 
     return messages;
   }
 
-  walk(aggregates, {
-    visitFunction: (fn) => {
-      const definition = getFunctionDefinition(fn.name);
-      if (!definition) {
-        console.log('unknown function', fn.name)
-        return;
+  for (const aggregate of aggregates) {
+    if (isFunctionItem(aggregate)) {
+      let hasAggregationFunction = false;
+
+      walk(aggregate, {
+        visitFunction: (fn) => {
+          const definition = getFunctionDefinition(fn.name);
+          if (!definition) {
+            messages.push(errors.unknownFunction(fn));
+            return;
+          }
+          if (definition.type === 'agg') hasAggregationFunction = true;
+        },
+      });
+  
+      if (!hasAggregationFunction) {
+        messages.push(errors.noAggFunction(command, aggregate));
       }
-      // console.log('fn', fn.name);
-    },
-  });
+    } else if (isColumnItem(aggregate)) {
+
+    } else {
+      // Should never happen.
+    }
+  }
 
     // // now that all functions are supported, there's a specific check to perform
     // // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
