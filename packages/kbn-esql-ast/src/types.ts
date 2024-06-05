@@ -10,6 +10,8 @@ export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
 
+export type ESQLAstNode = ESQLAstCommand | ESQLAstItem;
+
 export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
