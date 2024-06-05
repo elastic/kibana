@@ -17,7 +17,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
