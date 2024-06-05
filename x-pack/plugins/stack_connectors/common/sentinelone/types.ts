@@ -24,6 +24,7 @@ import {
   SentinelOneGetActivitiesParamsSchema,
   SentinelOneGetActivitiesResponseSchema,
   SentinelOneExecuteScriptResponseSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
 } from './schema';
 
 export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;
@@ -41,6 +42,10 @@ export type SentinelOneExecuteScriptResponse = TypeOf<
 
 export type SentinelOneGetRemoteScriptStatusParams = TypeOf<
   typeof SentinelOneGetRemoteScriptsStatusParams
+>;
+
+export type SentinelOneGetRemoteScriptResultsParams = TypeOf<
+  typeof SentinelOneGetRemoteScriptResultsParamsSchema
 >;
 
 export type SentinelOneGetRemoteScriptsParams = TypeOf<

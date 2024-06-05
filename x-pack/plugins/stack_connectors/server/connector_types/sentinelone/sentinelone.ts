@@ -37,12 +37,15 @@ import {
   SentinelOneDownloadAgentFileResponseSchema,
   SentinelOneGetActivitiesParamsSchema,
   SentinelOneGetActivitiesResponseSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
+  SentinelOneGetRemoteScriptResultsResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import {
   SentinelOneFetchAgentFilesParams,
   SentinelOneDownloadAgentFileParams,
   SentinelOneGetActivitiesParams,
+  SentinelOneGetRemoteScriptResultsParams,
 } from '../../../common/sentinelone/types';
 
 export const API_MAX_RESULTS = 1000;
@@ -59,6 +62,7 @@ export class SentinelOneConnector extends SubActionConnector<
     remoteScripts: string;
     remoteScriptStatus: string;
     remoteScriptsExecute: string;
+    remoteScriptsResults: string;
     activities: string;
   };
 
@@ -71,6 +75,7 @@ export class SentinelOneConnector extends SubActionConnector<
       remoteScripts: `${this.config.url}${API_PATH}/remote-scripts`,
       remoteScriptStatus: `${this.config.url}${API_PATH}/remote-scripts/status`,
       remoteScriptsExecute: `${this.config.url}${API_PATH}/remote-scripts/execute`,
+      remoteScriptsResults: `${this.config.url}${API_PATH}/remote-scripts/fetch-files`,
       agents: `${this.config.url}${API_PATH}/agents`,
       activities: `${this.config.url}${API_PATH}/activities`,
     };
@@ -107,6 +112,18 @@ export class SentinelOneConnector extends SubActionConnector<
       name: SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
       method: 'getRemoteScriptStatus',
       schema: SentinelOneGetRemoteScriptStatusParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
+      method: 'getRemoteScriptResults',
+      schema: SentinelOneGetRemoteScriptResultsParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.DOWNLAOD_REMOTE_SCRIPT_RESULTS,
+      method: 'downloadRemoteScriptResults',
+      schema: SentinelOneGetRemoteScriptResultsParamsSchema, // FIXME:PT create schema
     });
 
     this.registerSubAction({
@@ -277,6 +294,35 @@ export class SentinelOneConnector extends SubActionConnector<
       },
       responseSchema: SentinelOneGetRemoteScriptStatusResponseSchema,
     });
+  }
+
+  public async getRemoteScriptResults(payload: SentinelOneGetRemoteScriptResultsParams) {
+    return this.sentinelOneApiRequest({
+      url: this.urls.remoteScriptsResults,
+      method: 'post',
+      data: {
+        data: {
+          taskIds: [payload.taskId],
+        },
+      },
+      responseSchema: SentinelOneGetRemoteScriptResultsResponseSchema,
+    });
+  }
+
+  // FIXME:PT property code this and add types
+  public async downloadRemoteScriptResults({ taskId }: { taskId: string }) {
+    const scriptResultsInfo = await this.getRemoteScriptResults({ taskId });
+
+    this.logger.debug(`Results info for taskId [${taskId}]: ${JSON.stringify(scriptResultsInfo)}`);
+
+    const downloadConnection = await this.request({
+      url: scriptResultsInfo.data.download_links.at(0).downloadUrl,
+      method: 'get',
+      responseType: 'stream',
+      responseSchema: SentinelOneDownloadAgentFileResponseSchema, // FIXME:PT create schema for this
+    });
+
+    return downloadConnection.data;
   }
 
   private async sentinelOneApiRequest<R extends SentinelOneBaseApiResponse>(

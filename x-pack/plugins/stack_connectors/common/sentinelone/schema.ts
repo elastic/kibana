@@ -372,6 +372,22 @@ export const SentinelOneExecuteScriptResponseSchema = schema.object({
   ),
 });
 
+export const SentinelOneGetRemoteScriptResultsParamsSchema = schema.object(
+  {
+    taskId: schema.string(),
+  },
+  { unknowns: 'allow' }
+);
+
+export const SentinelOneGetRemoteScriptResultsResponseSchema = schema.object(
+  {
+    errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
+    // FIXME:PT add types for data (maybe)
+    data: schema.any(),
+  },
+  { unknowns: 'allow' }
+);
+
 export const SentinelOneGetRemoteScriptStatusParamsSchema = schema.object(
   {
     parentTaskId: schema.string(),
