@@ -20,8 +20,11 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
-import { prefixReferencesFromPanel } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import {
+  DashboardContainerInput,
+  DashboardPanelMap,
+  prefixReferencesFromPanel,
+} from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
