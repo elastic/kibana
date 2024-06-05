@@ -23,10 +23,7 @@ export interface HasSerializableState<State extends object = object> {
    * Serializes all state into a format that can be saved into
    * some external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}
    */
-  serializeState: (
-    updateByReference?: boolean,
-    forceByValue?: boolean
-  ) => MaybePromise<SerializedPanelState<State>>;
+  serializeState: (forceByValue?: boolean) => MaybePromise<SerializedPanelState<State>>;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {

@@ -55,6 +55,8 @@ export interface HasInPlaceLibraryTransforms
    * after unlinking, the getByValueState method should be used instead.
    */
   unlinkFromLibrary: () => void;
+
+  updateLibraryItem: () => Promise<void>;
 }
 
 export const apiHasInPlaceLibraryTransforms = (
@@ -64,7 +66,8 @@ export const apiHasInPlaceLibraryTransforms = (
     unknownApi &&
       Boolean((unknownApi as HasInPlaceLibraryTransforms)?.libraryId$) &&
       typeof (unknownApi as HasInPlaceLibraryTransforms).saveToLibrary === 'function' &&
-      typeof (unknownApi as HasInPlaceLibraryTransforms).unlinkFromLibrary === 'function'
+      typeof (unknownApi as HasInPlaceLibraryTransforms).unlinkFromLibrary === 'function' &&
+      typeof (unknownApi as HasInPlaceLibraryTransforms).updateLibraryItem === 'function'
   );
 };
 

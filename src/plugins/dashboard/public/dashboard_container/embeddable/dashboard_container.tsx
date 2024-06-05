@@ -569,7 +569,7 @@ export class DashboardContainer
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
       const serialized = apiHasSerializableState(child)
-        ? await child.serializeState(false, forceByValue)
+        ? await child.serializeState(forceByValue)
         : { rawState: {} };
       return {
         type: panel.type,

@@ -82,7 +82,11 @@ export const getSearchEmbeddableFactory = ({
           serializedState.references ?? []
         ) as SavedSearchUnwrapResult
       );
-      return { ...savedSearch, savedObjectId };
+      return {
+        ...savedSearch,
+        title: serializedState?.rawState.title, // panel title
+        description: serializedState?.rawState.description, // panel description
+      };
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       console.log('initialState', initialState);
@@ -125,25 +129,14 @@ export const getSearchEmbeddableFactory = ({
       };
 
       const serializeState = async (
-        updateByReference: boolean = false,
         forceByValue: boolean = false
       ): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
         const savedObjectId = savedObjectId$.getValue();
 
         if (savedObjectId && !forceByValue) {
-          let id = savedObjectId;
-          if (updateByReference) {
-            id =
-              (await save({
-                ...searchEmbeddableApi.getSavedSearch(),
-                id: savedObjectId,
-                title: defaultPanelTitle$.getValue(),
-                description: defaultPanelDescription$.getValue(),
-              })) ?? savedObjectId;
-          }
-          return { rawState: { savedObjectId: id, ...serializeTitles() }, references: [] };
+          return { rawState: { savedObjectId, ...serializeTitles() }, references: [] };
         } else {
-          console.log('getByValueState', getByValueState);
+          console.log('getByValueState', getByValueState());
           return getByValueState();
         }
       };
@@ -193,7 +186,17 @@ export const getSearchEmbeddableFactory = ({
             savedObjectId$.next(savedObjectId!);
             return savedObjectId!;
           },
-          // getByValueState,
+          updateLibraryItem: async () => {
+            const savedObjectId = savedObjectId$.getValue();
+            if (!savedObjectId) return;
+
+            await save({
+              ...searchEmbeddableApi.getSavedSearch(),
+              id: savedObjectId,
+              title: defaultPanelTitle$.getValue(),
+              description: defaultPanelDescription$.getValue(),
+            });
+          },
           checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
             checkForDuplicateTitle({
               newTitle,
@@ -211,8 +214,7 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState: (saveByReference, forceByValue) =>
-            serializeState(saveByReference, forceByValue),
+          serializeState,
         },
         {
           ...titleComparators,
@@ -285,6 +287,7 @@ export const getSearchEmbeddableFactory = ({
           }, []);
 
           const viewMode = useMemo(() => {
+            if (!searchSource) return;
             return getValidViewMode({
               viewMode: savedSearchViewMode,
               isEsqlMode: isEsqlMode({ searchSource }),

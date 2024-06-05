@@ -14,12 +14,13 @@ import {
   isReferenceOrValueEmbeddable,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
+import { apiHasInPlaceLibraryTransforms } from '@kbn/presentation-publishing';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import {
   DashboardContainerInput,
   DashboardPanelMap,
@@ -55,7 +56,10 @@ const serializeAllPanelState = async (
     if (api && apiHasSerializableState(api)) {
       serializePromises.push(
         (async () => {
-          const serialized = await api.serializeState(true);
+          const serialized = await api.serializeState();
+          if (apiHasInPlaceLibraryTransforms(api)) {
+            api.updateLibraryItem();
+          }
           return { uuid, serialized };
         })()
       );

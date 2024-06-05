@@ -99,7 +99,7 @@ export async function duplicateDashboardPanel(this: DashboardContainer, idToDupl
       i: duplicatedPanelState.explicitInput.id,
     },
   };
-
+  console.log('newPanel', newPanel);
   this.updateInput({
     panels: {
       ...otherPanels,

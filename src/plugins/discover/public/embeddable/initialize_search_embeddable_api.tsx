@@ -43,8 +43,8 @@ export const initializeSearchEmbeddableApi = async (
   searchEmbeddableComparators: StateComparators<SearchEmbeddableAttributes>;
 }> => {
   const parentSearchSource = await discoverServices.data.search.searchSource.create();
-  initialState.searchSource.setParent(parentSearchSource);
-  const dataView = initialState.searchSource.getField('index');
+  initialState.searchSource?.setParent(parentSearchSource);
+  const dataView = initialState.searchSource?.getField('index');
 
   const searchSource$ = new BehaviorSubject(initialState.searchSource);
   const managed$ = new BehaviorSubject(initialState.managed);
