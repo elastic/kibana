@@ -21,10 +21,7 @@ import { defaultFleetErrorHandler } from '../../errors';
 import { agentPolicyService, downloadSourceService } from '../../services';
 import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
 import { getFleetProxy } from '../../services/fleet_proxies';
-import {
-  getFleetServerPolicies,
-  hasActiveFleetServersForPolicies,
-} from '../../services/fleet_server';
+import { getFleetServerPolicies, hasFleetServersForPolicies } from '../../services/fleet_server';
 
 export const getEnrollmentSettingsHandler: FleetRequestHandler<
   undefined,
@@ -54,10 +51,11 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
     // Check if there is any active fleet server enrolled into the fleet server policies policies
     if (fleetServerPolicies) {
       settingsResponse.fleet_server.policies = fleetServerPolicies;
-      settingsResponse.fleet_server.has_active = await hasActiveFleetServersForPolicies(
+      settingsResponse.fleet_server.has_active = await hasFleetServersForPolicies(
         esClient,
         soClient,
-        fleetServerPolicies.map((p) => p.id)
+        fleetServerPolicies.map((p) => p.id),
+        true
       );
     }
 

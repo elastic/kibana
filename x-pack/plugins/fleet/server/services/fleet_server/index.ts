@@ -44,13 +44,15 @@ export const getFleetServerPolicies = async (
 };
 
 /**
- * Check if there is at least one active agent enrolled into the given agent policies
- * Assumes that `agentPolicyIds` contains list of Fleet Server agent policies
+ * Check if there is at least one agent enrolled into the given agent policies.
+ * Assumes that `agentPolicyIds` contains list of Fleet Server agent policies.
+ * `activeOnly` flag can be used to filter only active agents.
  */
-export const hasActiveFleetServersForPolicies = async (
+export const hasFleetServersForPolicies = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentPolicyIds: string[]
+  agentPolicyIds: string[],
+  activeOnly: boolean = false
 ): Promise<boolean> => {
   if (agentPolicyIds.length > 0) {
     const agentStatusesRes = await getAgentStatusForAgentPolicy(
@@ -60,19 +62,21 @@ export const hasActiveFleetServersForPolicies = async (
       agentPolicyIds.map((id) => `policy_id:${id}`).join(' or ')
     );
 
-    return agentStatusesRes.online > 0 || agentStatusesRes.updating > 0;
+    return activeOnly
+      ? agentStatusesRes.online > 0 || agentStatusesRes.updating > 0
+      : agentStatusesRes.total > 0;
   }
   return false;
 };
 
 /**
- * Check if at least one fleet server is connected
+ * Check if at least one fleet server agent exists, regardless of its online status
  */
 export async function hasFleetServers(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ) {
-  return await hasActiveFleetServersForPolicies(
+  return await hasFleetServersForPolicies(
     esClient,
     soClient,
     (await getFleetServerPolicies(soClient)).map((policy) => policy.id)

@@ -19,7 +19,7 @@ import { getAgentsByKuery, getAgentStatusById, getAgentStatusForAgentPolicy } fr
 
 import {
   checkFleetServerVersionsForSecretsStorage,
-  hasActiveFleetServersForPolicies,
+  hasFleetServersForPolicies,
   getFleetServerPolicies,
 } from '.';
 
@@ -194,67 +194,98 @@ describe('hasActiveFleetServersForPolicies', () => {
   const mockEsClient = elasticsearchServiceMock.createInternalClient();
 
   it('returns false when no agent IDs are provided', async () => {
-    const hasActive = await hasActiveFleetServersForPolicies(mockEsClient, mockSoClient, []);
-    expect(hasActive).toBe(false);
+    const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, []);
+    expect(hasFs).toBe(false);
   });
 
-  it('returns true when at least one agent is online', async () => {
-    (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
-      other: 0,
-      events: 0,
-      total: 1,
-      all: 1,
-      active: 0,
-      updating: 0,
-      offline: 0,
-      inactive: 0,
-      unenrolled: 0,
-      online: 1,
-      error: 0,
+  describe('activeOnly is true', () => {
+    it('returns true when at least one agent is online', async () => {
+      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+        other: 0,
+        events: 0,
+        total: 1,
+        all: 1,
+        active: 0,
+        updating: 0,
+        offline: 0,
+        inactive: 0,
+        unenrolled: 0,
+        online: 1,
+        error: 0,
+      });
+      const hasFs = await hasFleetServersForPolicies(
+        mockEsClient,
+        mockSoClient,
+        ['policy-1'],
+        true
+      );
+      expect(hasFs).toBe(true);
     });
-    const hasActive = await hasActiveFleetServersForPolicies(mockEsClient, mockSoClient, [
-      'policy-1',
-    ]);
-    expect(hasActive).toBe(true);
+
+    it('returns true when at least one agent is updating', async () => {
+      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+        other: 0,
+        events: 0,
+        total: 1,
+        all: 1,
+        active: 0,
+        updating: 1,
+        offline: 0,
+        inactive: 0,
+        unenrolled: 0,
+        online: 0,
+        error: 0,
+      });
+      const hasFs = await hasFleetServersForPolicies(
+        mockEsClient,
+        mockSoClient,
+        ['policy-1'],
+        true
+      );
+      expect(hasFs).toBe(true);
+    });
+
+    it('returns false when no agents are updating or online', async () => {
+      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+        other: 0,
+        events: 0,
+        total: 3,
+        all: 3,
+        active: 1,
+        updating: 0,
+        offline: 1,
+        inactive: 1,
+        unenrolled: 1,
+        online: 0,
+        error: 1,
+      });
+      const hasFs = await hasFleetServersForPolicies(
+        mockEsClient,
+        mockSoClient,
+        ['policy-1'],
+        true
+      );
+      expect(hasFs).toBe(false);
+    });
   });
 
-  it('returns true when at least one agent is updating', async () => {
-    (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
-      other: 0,
-      events: 0,
-      total: 1,
-      all: 1,
-      active: 0,
-      updating: 1,
-      offline: 0,
-      inactive: 0,
-      unenrolled: 0,
-      online: 0,
-      error: 0,
+  describe('activeOnly is false', () => {
+    it('returns true when at least one agent is found regardless of its status', async () => {
+      (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
+        other: 0,
+        events: 0,
+        total: 1,
+        all: 1,
+        active: 0,
+        updating: 0,
+        offline: 1,
+        inactive: 0,
+        unenrolled: 0,
+        online: 0,
+        error: 0,
+      });
+      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, ['policy-1']);
+      expect(hasFs).toBe(true);
     });
-    const hasActive = await hasActiveFleetServersForPolicies(mockEsClient, mockSoClient, [
-      'policy-1',
-    ]);
-    expect(hasActive).toBe(true);
-  });
-
-  it('returns false when no agents are updating or online', async () => {
-    (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
-      other: 0,
-      events: 0,
-      total: 3,
-      all: 3,
-      active: 1,
-      updating: 0,
-      offline: 1,
-      inactive: 1,
-      unenrolled: 1,
-      online: 0,
-      error: 1,
-    });
-    const hasActive = await hasActiveFleetServersForPolicies(mockEsClient, mockSoClient, [
-      'policy-1',
-    ]);
-    expect(hasActive).toBe(false);
   });
 });
