@@ -5,11 +5,22 @@
  * 2.0.
  */
 
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { InferenceEndpoints } from './inference_endpoints';
 
-export const App: React.FC = () => {
+interface AppProps {
+  inferenceEndpoints: InferenceAPIConfigResponse[];
+  setIsInferenceFlyoutVisible: (visible: boolean) => void;
+  addEndpointLabel: string;
+}
+
+export const App: React.FC<AppProps> = ({
+  inferenceEndpoints,
+  setIsInferenceFlyoutVisible,
+  addEndpointLabel,
+}) => {
   return (
     <KibanaPageTemplate.Section
       alignment="top"
@@ -22,7 +33,11 @@ export const App: React.FC = () => {
       paddingSize="none"
       className="eui-fullHeight"
     >
-      <InferenceEndpoints />
+      <InferenceEndpoints
+        inferenceEndpoints={inferenceEndpoints}
+        setIsInferenceFlyoutVisible={setIsInferenceFlyoutVisible}
+        addEndpointLabel={addEndpointLabel}
+      />
     </KibanaPageTemplate.Section>
   );
 };

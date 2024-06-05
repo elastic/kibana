@@ -32,4 +32,5 @@ export interface AppPluginStartDependencies {
 export interface AppServicesContext {
   http: HttpStart;
   ml?: MlPluginStart;
+  console?: ConsolePluginStart;
 }

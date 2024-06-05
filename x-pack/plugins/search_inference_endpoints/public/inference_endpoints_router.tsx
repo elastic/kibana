@@ -8,9 +8,9 @@
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
+import { InferenceEndpointsOverview } from './inference_endpoints_overview';
 
-import { InferenceEndpoints } from './components/inference_endpoints';
+import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
 import { ROOT_PATH, SEARCH_INFERENCE_ENDPOINTS_PATH } from './routes';
 
 export const InferenceEndpointsRouter: React.FC = () => {
@@ -19,7 +19,7 @@ export const InferenceEndpointsRouter: React.FC = () => {
       <Redirect exact from={ROOT_PATH} to={SEARCH_INFERENCE_ENDPOINTS_PATH} />
       <Route path={SEARCH_INFERENCE_ENDPOINTS_PATH}>
         <InferenceEndpointsProvider>
-          <InferenceEndpoints />
+          <InferenceEndpointsOverview />
         </InferenceEndpointsProvider>
       </Route>
     </Routes>

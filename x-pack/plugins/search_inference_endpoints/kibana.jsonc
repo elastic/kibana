@@ -14,7 +14,11 @@
       "actions",
       "share",
     ],
-    "optionalPlugins": ["cloud", "console", "ml"],
+    "optionalPlugins": [
+      "cloud", 
+      "console", 
+      "ml"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]
