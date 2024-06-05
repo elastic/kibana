@@ -168,7 +168,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * router.get({
    *  path: '/api/foo/{id}',
    *  access: 'public',
-   *  summary: `Retrieve foo resources given an ID`,
+   *  summary: `Get foo resources for an ID`,
    * })
    * ```
    */
