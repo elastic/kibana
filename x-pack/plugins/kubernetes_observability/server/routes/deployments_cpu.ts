@@ -144,14 +144,16 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             deployments.push(deployment)
           } else {
               const message = `Deployment ${deploy} has no pods or it does not exist`
-              const deployment = {
-                'name': deploy,
-                'pods': [],
-                'message': message,
-                'reason': 'No pods found',
-              };
-    
-              deployments.push(deployment)
+              return response.ok({
+                  body: {
+                    time: time,
+                    message: message,
+                    name: request.query.name,
+                    namespace: request.query.namespace,
+                    reason: "Not found or has no pods",
+                    deployments: [],
+                  },
+                });
           }
         }
         return response.ok({

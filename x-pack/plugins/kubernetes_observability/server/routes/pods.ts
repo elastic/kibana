@@ -28,6 +28,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
             query: schema.object({
               name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
+              deployment: schema.maybe(schema.string()),
             }),
           },
         },
@@ -47,11 +48,20 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
           )
           if (request.query.namespace !== undefined) {
             podmusts.push(
-                {
-                    term: {
-                        'resource.attributes.k8s.namespace.name': request.query.namespace,
-                    },
-                },
+              {
+                  term: {
+                      'resource.attributes.k8s.namespace.name': request.query.namespace,
+                  },
+              },
+            )
+          };
+          if (request.query.deployment !== undefined) {
+            podmusts.push(
+              {
+                  term: {
+                      'resource.attributes.k8s.deployment.name': request.query.deployment,
+                  },
+              },
             )
           };
           const dslPods: estypes.SearchRequest = {

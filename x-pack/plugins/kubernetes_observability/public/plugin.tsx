@@ -72,6 +72,7 @@ export class kubernetesObservability implements Plugin {
 export type Query = {
   namespace: string;
   name: string;
+  deployment: string;
 };
 
 export const NAMESPACE_OPTIONS = [
@@ -124,14 +125,20 @@ export class PublicKubernetesObservabilityClient {
       return results;
     }
 
-    async getPodsStatus(pod: any, namespace: any) {
+    async getPodsStatus(pod: any, namespace: any, deployment: any) {
       console.log("CALLED TO GET PODS STATUS")
+      console.log(pod);
+      console.log(namespace);
+      console.log(deployment);
       var query = {} as Query;
       if (pod !== undefined) {
         query['name'] = pod
       }
       if (namespace !== undefined) {
         query['namespace'] = namespace
+      }
+      if (deployment !== undefined) {
+        query['deployment'] = deployment
       }
       const results = await this.http.get('/api/kubernetes/pods/status', {version: '1', query});
       console.log(results);
@@ -207,6 +214,7 @@ export class PublicKubernetesObservabilityClient {
         query['namespace'] = namespace
       }
       const results = await this.http.get('/api/kubernetes/daemonsets/memory', {version: '1', query});
+      console.log("DAEMONS MEMORY");
       console.log(results);
       return results;
     }
@@ -221,11 +229,12 @@ export class PublicKubernetesObservabilityClient {
         query['namespace'] = namespace
       }
       const results = await this.http.get('/api/kubernetes/daemonsets/cpu', {version: '1', query});
+      console.log("DAEMONS CPU");
       console.log(results);
       return results;
     }
 
-    async getPodsCpu(pod: any, namespace: any) {
+    async getPodsCpu(pod: any, namespace: any, deployment: any) {
       console.log("CALLED TO GET PODS CPU")
       var query = {} as Query;
       if (pod !== undefined) {
@@ -234,12 +243,15 @@ export class PublicKubernetesObservabilityClient {
       if (namespace !== undefined) {
         query['namespace'] = namespace
       }
+      if (deployment !== undefined) {
+        query['deployment'] = deployment
+      }
       const results = await this.http.get('/api/kubernetes/pods/cpu', {version: '1', query});
       console.log(results);
       return results;
     }
 
-    async getPodsMemory(pod: any, namespace: any) {
+    async getPodsMemory(pod: any, namespace: any, deployment: any) {
       console.log("CALLED TO GET PODS MEMORY")
       var query = {} as Query;
       if (pod !== undefined) {
@@ -247,6 +259,9 @@ export class PublicKubernetesObservabilityClient {
       }
       if (namespace !== undefined) {
         query['namespace'] = namespace
+      }
+      if (deployment !== undefined) {
+        query['deployment'] = deployment
       }
       const results = await this.http.get('/api/kubernetes/pods/memory', {version: '1', query});
       console.log(results);
@@ -285,23 +300,15 @@ const  KubernetesObservabilityComp = ({
   const [hasTimeElapsed, setHasTimeElapsed] = useState(true);
   const [services, setServices] = useState(['all']);
   const [service, setService] = useState('all');
-  useEffect(() => {
-    const timer = setInterval(() => {
-      console.log('This will run after 10 second!')
-      setHasTimeElapsed(true)
-      setHasTimeElapsed(false)
-    }, 300000);
-    return () => clearInterval(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     console.log('This will run after 10 second!')
+  //     setHasTimeElapsed(true)
+  //     setHasTimeElapsed(false)
+  //   }, 300000);
+  //   return () => clearInterval(timer);
+  // }, []);
   
-  useEffect(() => {
-    console.log("NAMESPACE CHANGED TO " + namespace);
-  }, [namespace]); // *** Note the dependency
-  
-  useEffect(() => {
-    console.log("SERVICE CHANGED TO " + service);
-  }, [service]); // *** Note the dependency
-
   useEffect(() => {
     if (hasTimeElapsed) {
       client.getNodesMemory().then(data => {
@@ -367,8 +374,9 @@ const  KubernetesObservabilityComp = ({
   useEffect(() => {
     console.log("CALLED DUE TO CHANGE");
     const ns = namespace === 'all' ? undefined : namespace;
+    const svc = service === 'all' ? undefined : service;
     console.log("NAMESPACE " + ns);
-    client.getDaemonsetsStatus(undefined, ns).then(data => {
+    client.getDaemonsetsStatus(svc, ns).then(data => {
       console.log(data);
       setDaemonsStatusTime(data.time);
       const daemonsArray = data.daemonsets;
@@ -389,11 +397,12 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    client.getDeploymentsMemory(undefined, ns).then(data => {
+    const svc = service === 'all' ? undefined : service;
+    client.getDeploymentsMemory(svc, ns).then(data => {
       console.log(data);
       setDeploysMemTime(data.time);
       const deployArray = data.deployments;
@@ -405,11 +414,12 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    client.getDeploymentsCpu(undefined, ns).then(data => {
+    const svc = service === 'all' ? undefined : service;
+    client.getDeploymentsCpu(svc, ns).then(data => {
       console.log(data);
       setDeploysCpuTime(data.time);
       const deployArray = data.deployments;
@@ -421,11 +431,12 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    client.getDaemonsetsMemory(undefined, ns).then(data => {
+    const svc = service === 'all' ? undefined : service;
+    client.getDaemonsetsMemory(svc, ns).then(data => {
       console.log(data);
       setDaemonsMemTime(data.time);
       const daemonArray = data.daemonsets;
@@ -437,11 +448,12 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    client.getDaemonsetsCpu(undefined, ns).then(data => {
+    const svc = service === 'all' ? undefined : service;
+    client.getDaemonsetsCpu(svc, ns).then(data => {
       console.log(data);
       setDaemonsCpuTime(data.time);
       const daemonArray = data.daemonsets;
@@ -453,11 +465,12 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    client.getPodsMemory(undefined, ns).then(data => {
+    const svc = service === 'all' ? undefined : service;
+    client.getPodsMemory(undefined, ns, svc).then(data => {
       console.log(data);
       setPodsMemTime(data.time);
       const podsArray = data.pods;
@@ -469,11 +482,12 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    client.getPodsCpu(undefined, ns).then(data => {
+    const svc = service === 'all' ? undefined : service;
+    client.getPodsCpu(undefined, ns, svc).then(data => {
       console.log(data);
       setPodsCpuTime(data.time);
       const podsArray = data.pods;
@@ -485,11 +499,12 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    client.getPodsStatus(undefined, ns).then(data => {
+    const svc = service === 'all' ? undefined : service;
+    client.getPodsStatus(undefined, ns, svc).then(data => {
       console.log(data);
       setPodsStatusTime(data.time);
       const podsArray = data.pods;
@@ -508,7 +523,7 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   const nodeMemcolumns: Array<EuiBasicTableColumn<any>> = [
     {

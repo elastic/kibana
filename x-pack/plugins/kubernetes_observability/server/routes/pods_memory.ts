@@ -26,7 +26,8 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
             query: schema.object({
               name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
-              period: schema.maybe(schema.string())
+              period: schema.maybe(schema.string()),
+              deployment: schema.maybe(schema.string())
             }),
           },
         },
@@ -36,7 +37,7 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
         var period = checkDefaultPeriod(request.query.period);
         try {
           const client = (await context.core).elasticsearch.client.asCurrentUser;
-          const podObjects = await getPodsMemory(client, period, request.query.name, request.query.namespace, undefined, undefined);
+          const podObjects = await getPodsMemory(client, period, request.query.name, request.query.namespace, request.query.deployment, undefined);
           if (podObjects === null) {
             var message = '';
             message = `Pod ${namespace}/${request.query.name} not found`
