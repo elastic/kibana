@@ -33,6 +33,7 @@ import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,
 } from '../../utils/connector_helpers';
+import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
 
 import {
   ConnectorNameAndDescriptionLogic,
@@ -57,7 +58,6 @@ export interface ConnectorViewActions {
 }
 
 export interface ConnectorViewValues {
-  updateConnectorConfigurationStatus: Status;
   connector: Connector | undefined;
   connectorData: CachedFetchConnectorByIdApiLogicValues['connectorData'];
   connectorError: string | undefined;
@@ -84,6 +84,7 @@ export interface ConnectorViewValues {
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
+  updateConnectorConfigurationStatus: Status;
 }
 
 export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, ConnectorViewActions>>({
@@ -170,13 +171,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         connector?.error ||
         connector?.last_sync_error ||
         connector?.last_access_control_sync_error ||
+        (connector && isLastSeenOld(connector) && getConnectorLastSeenError(connector)) ||
         null,
-    ],
-    indexName: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => {
-        return connector?.index_name || undefined;
-      },
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
@@ -210,6 +206,12 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       () => [selectors.connector],
       (connector: Connector | undefined) =>
         connector?.configuration.extract_full_html?.value ?? undefined,
+    ],
+    indexName: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => {
+        return connector?.index_name || undefined;
+      },
     ],
     isLoading: [
       () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus, selectors.index],

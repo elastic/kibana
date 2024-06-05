@@ -76,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
         });
 
