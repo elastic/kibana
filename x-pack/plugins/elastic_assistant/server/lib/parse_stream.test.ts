@@ -109,7 +109,7 @@ describe('handleStreamStorage', () => {
   describe('Gemini stream', () => {
     beforeEach(() => {
       stream = createStreamMock();
-      const chunk = {
+      const payload = {
         candidates: [
           {
             content: {
@@ -122,7 +122,7 @@ describe('handleStreamStorage', () => {
           },
         ],
       };
-      stream.write(`data: ${JSON.stringify(chunk)}`);
+      stream.write(`data: ${JSON.stringify(payload)}`);
       defaultProps = {
         responseStream: stream.transform,
         actionTypeId: '.gemini',
