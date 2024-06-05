@@ -12,7 +12,8 @@ import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 describe('DataViewEditorService', () => {
   it('should check for rollup indices when rolls are enabled', () => {
-    const http = { get: jest.fn() } as unknown as HttpSetup;
+    const get = jest.fn();
+    const http = { get } as unknown as HttpSetup;
     new DataViewEditorService({
       services: {
         http,
@@ -24,7 +25,8 @@ describe('DataViewEditorService', () => {
       initialValues: {},
     });
 
-    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(get.mock.calls[0][0]).toEqual('/api/rollup/indices');
   });
   it('should skip check for rollup indices when rollups are disabled', () => {
     const http = { get: jest.fn() } as unknown as HttpSetup;
