@@ -27,8 +27,10 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
     },
     async (context, req, res) => {
       try {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const soClient = (await context.core).savedObjects.client;
         const definitions = await findEntityDefinitions({
+          esClient,
           soClient,
           page: req.query.page ?? 1,
           perPage: req.query.perPage ?? 10,
