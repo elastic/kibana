@@ -78,7 +78,7 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     testRunId?: string,
     runOnce?: boolean
-  ): Promise<(NewPackagePolicy & { policy_id: string }) | null> {
+  ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
     const newPolicy = cloneDeep(newPolicyTemplate);

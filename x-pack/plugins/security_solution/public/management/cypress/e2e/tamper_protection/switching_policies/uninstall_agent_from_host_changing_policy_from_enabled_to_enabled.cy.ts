@@ -59,9 +59,11 @@ describe(
     beforeEach(() => {
       login();
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_id).then((host) => {
-        createdHost = host as CreateAndEnrollEndpointHostResponse;
-      });
+      return createEndpointHost(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
+        (host) => {
+          createdHost = host as CreateAndEnrollEndpointHostResponse;
+        }
+      );
     });
 
     after(() => {
@@ -87,12 +89,12 @@ describe(
       // Change agent policy and wait for action to be completed
       reAssignFleetAgentToPolicy(
         createdHost.agentId,
-        secondPolicyWithAgentTamperProtectionEnabled.policy_id
+        secondPolicyWithAgentTamperProtectionEnabled.policy_ids[0]
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
 
         // Get the uninstall token from old agent policy
-        getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_id).then(
+        getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
           (oldUninstallToken) => {
             // Try to uninstall agent from host using old retrieved uninstall token
             uninstallAgentFromHost(createdHost.hostname, oldUninstallToken.body.item.token).then(
@@ -107,28 +109,28 @@ describe(
                     expect(isUninstalledWithOldToken).to.eql(false);
 
                     // Get the uninstall token from new agent policy
-                    getUninstallToken(secondPolicyWithAgentTamperProtectionEnabled.policy_id).then(
-                      (newUninstallToken) => {
-                        // Try to uninstall agent from host using new retrieved uninstall token
-                        uninstallAgentFromHost(
-                          createdHost.hostname,
-                          newUninstallToken.body.item.token
-                        ).then((responseWithNewToken) => {
-                          expect(responseWithNewToken).to.not.match(
-                            /(.*)Invalid uninstall token(.*)/
-                          );
-                          expect(responseWithNewToken).to.match(
-                            /(.*)Elastic Agent has been uninstalled(.*)/
-                          );
+                    getUninstallToken(
+                      secondPolicyWithAgentTamperProtectionEnabled.policy_ids[0]
+                    ).then((newUninstallToken) => {
+                      // Try to uninstall agent from host using new retrieved uninstall token
+                      uninstallAgentFromHost(
+                        createdHost.hostname,
+                        newUninstallToken.body.item.token
+                      ).then((responseWithNewToken) => {
+                        expect(responseWithNewToken).to.not.match(
+                          /(.*)Invalid uninstall token(.*)/
+                        );
+                        expect(responseWithNewToken).to.match(
+                          /(.*)Elastic Agent has been uninstalled(.*)/
+                        );
 
-                          isAgentAndEndpointUninstalledFromHost(createdHost.hostname).then(
-                            (isUninstalledWithNewToken) => {
-                              expect(isUninstalledWithNewToken).to.eql(true);
-                            }
-                          );
-                        });
-                      }
-                    );
+                        isAgentAndEndpointUninstalledFromHost(createdHost.hostname).then(
+                          (isUninstalledWithNewToken) => {
+                            expect(isUninstalledWithNewToken).to.eql(true);
+                          }
+                        );
+                      });
+                    });
                   }
                 );
               }
