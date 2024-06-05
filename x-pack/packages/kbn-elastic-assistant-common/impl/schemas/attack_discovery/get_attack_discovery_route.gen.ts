@@ -16,7 +16,19 @@ import { z } from 'zod';
  *   version: 1
  */
 
+import { AttackDiscoveryResponse } from './common_attributes.gen';
+
+export type AttackDiscoveryGetRequestQuery = z.infer<typeof AttackDiscoveryGetRequestQuery>;
+export const AttackDiscoveryGetRequestQuery = z.object({
+  connectorId: z.string(),
+});
+export type AttackDiscoveryGetRequestQueryInput = z.input<typeof AttackDiscoveryGetRequestQuery>;
+
 export type AttackDiscoveryGetResponse = z.infer<typeof AttackDiscoveryGetResponse>;
 export const AttackDiscoveryGetResponse = z.object({
-  inProgressRequests: z.array(z.string()),
+  data: AttackDiscoveryResponse.optional(),
+  /**
+   * Indicates if an attack discovery exists for the given connectorId
+   */
+  entryExists: z.boolean(),
 });

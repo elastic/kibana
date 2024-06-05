@@ -301,10 +301,16 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           rest.model ??
           ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
       };
+      console.log('stephhh requestBody', requestBody);
+      console.log(
+        'stephhh this.openAI.chat.completions.create',
+        this.openAI.chat.completions.create
+      );
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
         timeout, // do not default if not provided
       });
+      console.log('stephhh stream', stream);
       // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();
       return { consumerStream: teed[0], tokenCountStream: teed[1] };

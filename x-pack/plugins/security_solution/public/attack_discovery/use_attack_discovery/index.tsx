@@ -23,6 +23,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import * as uuid from 'uuid';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
+import { usePollApi } from '../hooks/use_poll_api';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useKibana } from '../../common/lib/kibana';
 import { replaceNewlineLiterals } from '../helpers';
@@ -79,6 +80,8 @@ export const useAttackDiscovery = ({
   const { data: aiConnectors } = useLoadConnectors({
     http,
   });
+
+  const pollApi = usePollApi({ http });
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -236,8 +239,15 @@ export const useAttackDiscovery = ({
       });
 
       const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
+      console.log('stephhh parsedResponse', {
+        parsedResponse,
+        rawResponse,
+      });
       if (!parsedResponse.success) {
         throw new Error('Failed to parse the response');
+      }
+      if (parsedResponse.data.status === 'running') {
+        await pollApi.pollApi(body.connectorId);
       }
 
       const endTime = moment();
@@ -343,6 +353,7 @@ export const useAttackDiscovery = ({
     http,
     knowledgeBase,
     localStorageKey,
+    pollApi,
     replacements,
     reportAttackDiscoveriesGenerated,
     sessionStorageKey,

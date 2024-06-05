@@ -21,6 +21,26 @@ components:
         - succeeded
         - failed
 
+    GenerationInterval:
+      type: object
+      description: Run durations for the attack discovery
+      required:
+        - 'timestamp'
+        - 'durationMs'
+        - 'entitySummaryMarkdown'
+        - 'summaryMarkdown'
+        - 'timestamp'
+        - 'title'
+      properties:
+        alertIds:
+          description: The time the attack discovery was generated
+          items:
+            type: string
+        durationMs:
+          description: The duration of the attack discovery generation
+          type: integer
+
+
     AttackDiscoveryResponse:
       type: object
       required:
@@ -32,6 +52,8 @@ components:
         - attackDiscoveries
         - status
         - backingIndex
+        - generationIntervals
+        - averageIntervalMs
       properties:
         id:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
@@ -67,6 +89,14 @@ components:
         backingIndex:
           type: string
           description: The backing index required for update requests.
+        generationIntervals:
+          type: array
+          description: The most 5 recent generation intervals
+          items:
+            $ref: '#/components/schemas/AttackDiscoveryStatus'
+        averageIntervalMs:
+            type: integer
+            description: The average generation interval in milliseconds
 
     AttackDiscoveryUpdateProps:
       type: object

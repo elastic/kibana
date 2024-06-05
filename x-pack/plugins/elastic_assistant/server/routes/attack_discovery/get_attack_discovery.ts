@@ -10,6 +10,7 @@ import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryGetResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  AttackDiscoveryGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -30,6 +31,9 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
       {
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
+          request: {
+            query: buildRouteValidationWithZod(AttackDiscoveryGetRequestQuery),
+          },
           response: {
             200: {
               body: { custom: buildRouteValidationWithZod(AttackDiscoveryGetResponse) },
@@ -41,11 +45,31 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
+        const dataClient = await assistantContext.getAttackDiscoveryDataClient();
+        const authenticatedUser = assistantContext.getCurrentUser();
+        const connectorId = decodeURIComponent(request.query.connectorId);
+        if (authenticatedUser == null) {
+          return resp.error({
+            body: `Authenticated user not found`,
+            statusCode: 401,
+          });
+        }
         try {
+          const attackDiscovery = await dataClient?.findAttackDiscoveryByConnectorId({
+            connectorId,
+            authenticatedUser,
+          });
+
           return response.ok({
-            body: {
-              inProgressRequests: [],
-            },
+            body:
+              attackDiscovery != null
+                ? {
+                    data: attackDiscovery ?? {},
+                    entryExists: true,
+                  }
+                : {
+                    entryExists: false,
+                  },
           });
         } catch (err) {
           logger.error(err);
