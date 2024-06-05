@@ -23,7 +23,6 @@ export const createConnector = async (
     name?: string;
     pipeline?: IngestPipelineParams;
     serviceType?: string | null;
-    instant_response?: boolean;
   }
 ): Promise<Connector> => {
   const { id: connectorId } = await client.transport.request<{ id: string }>({
