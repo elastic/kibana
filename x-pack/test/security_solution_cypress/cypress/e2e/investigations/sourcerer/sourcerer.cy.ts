@@ -7,10 +7,10 @@
 
 import { DEFAULT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/constants';
 
-import { login } from '../../../../tasks/login';
-import { visitWithTimeRange } from '../../../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
-import { hostsUrl } from '../../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import {
   addIndexToDefault,
   deselectSourcererOptions,
@@ -25,9 +25,9 @@ import {
   openSourcerer,
   resetSourcerer,
   saveSourcerer,
-} from '../../../../tasks/sourcerer';
-import { postDataView } from '../../../../tasks/api_calls/common';
-import { SOURCERER } from '../../../../screens/sourcerer';
+} from '../../../tasks/sourcerer';
+import { postDataView } from '../../../tasks/api_calls/common';
+import { SOURCERER } from '../../../screens/sourcerer';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
