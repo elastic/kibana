@@ -4,7 +4,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 19146
   aiops: 10000
   alerting: 106936
-  apm: 64385
+  apm: 2885487
   assetManager: 25000
   banners: 17946
   bfetch: 22837
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   dataQuality: 19384
   datasetQuality: 50624
   dataViewEditor: 28082
-  dataViewFieldEditor: 27000
+  dataViewFieldEditor: 42021
   dataViewManagement: 5300
   dataViews: 65000
   dataVisualizer: 27530
@@ -82,6 +82,8 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 148711
   interactiveSetup: 80000
+  investigate: 17970
+  investigateApp: 91898
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -105,7 +107,7 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 167673
+  observability: 204713
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityAiAssistantManagement: 19279
