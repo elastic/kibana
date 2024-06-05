@@ -13,19 +13,24 @@ import { EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncJobsTable } from '@kbn/search-connectors';
+import { Connector, SyncJobsTable } from '@kbn/search-connectors';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { IndexViewLogic } from '../index_view_logic';
+import { hasDocumentLevelSecurityFeature } from '../../../utils/connector_helpers';
 
 import { SyncJobsViewLogic } from './sync_jobs_view_logic';
 
-export const SyncJobs: React.FC = () => {
-  const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
+export interface SyncJobsProps {
+  connector: Connector;
+}
+
+export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
   const { productFeatures } = useValues(KibanaLogic);
   const shouldShowAccessSyncs =
-    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
+    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature(connector);
+  const errorOnAccessSync = Boolean(connector.last_access_control_sync_error);
+  const errorOnContentSync = Boolean(connector.last_sync_error);
   const {
     connectorId,
     syncJobsPagination: pagination,
@@ -35,8 +40,17 @@ export const SyncJobs: React.FC = () => {
     selectedSyncJobCategory,
     syncTriggeredLocally,
   } = useValues(SyncJobsViewLogic);
-  const { fetchSyncJobs, cancelSyncJob, setCancelSyncJob, setSelectedSyncJobCategory } =
-    useActions(SyncJobsViewLogic);
+  const {
+    setConnectorId,
+    fetchSyncJobs,
+    cancelSyncJob,
+    setCancelSyncJob,
+    setSelectedSyncJobCategory,
+  } = useActions(SyncJobsViewLogic);
+
+  useEffect(() => {
+    setConnectorId(connector.id);
+  }, [connector]);
 
   useEffect(() => {
     if (connectorId) {
@@ -74,6 +88,7 @@ export const SyncJobs: React.FC = () => {
                 'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.content.label',
                 { defaultMessage: 'Content syncs' }
               ),
+              ...(errorOnContentSync ? { iconSide: 'right', iconType: 'warning' } : {}),
             },
 
             {
@@ -82,6 +97,7 @@ export const SyncJobs: React.FC = () => {
                 'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.accessControl.label',
                 { defaultMessage: 'Access control syncs' }
               ),
+              ...(errorOnAccessSync ? { iconSide: 'right', iconType: 'warning' } : {}),
             },
           ]}
         />
