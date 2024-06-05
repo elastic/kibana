@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AppPluginStartDependencies } from './types';
 
 export const InferenceEndpoints = dynamic(async () => ({
-  default: (await import('./inference_endpoints_overview')).InferenceEndpointsOverview,
+  default: (await import('./components/app')).App,
 }));
 
 export const InferenceEndpointsProvider = dynamic(async () => ({
