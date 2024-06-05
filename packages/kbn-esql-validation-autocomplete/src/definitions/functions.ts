@@ -235,312 +235,6 @@ const cidrMatchDefinition: FunctionDefinition = {
   ],
 };
 
-const coalesceDefinition: FunctionDefinition = {
-  type: 'eval',
-  name: 'coalesce',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.coalesce', {
-    defaultMessage:
-      'Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.',
-  }),
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'number',
-          optional: false,
-        },
-      ],
-      returnType: 'number',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'number',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'number',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'cartesian_point',
-          optional: true,
-        },
-      ],
-      returnType: 'date',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'date',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'string',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'date',
-          optional: true,
-        },
-      ],
-      returnType: 'string',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'string',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'string',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'boolean',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'geo_shape',
-          optional: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'boolean',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'ip',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'number',
-          optional: true,
-        },
-      ],
-      returnType: 'ip',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'ip',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'ip',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'cartesian_point',
-          optional: false,
-        },
-      ],
-      returnType: 'cartesian_point',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'cartesian_point',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'cartesian_point',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'cartesian_shape',
-          optional: false,
-        },
-      ],
-      returnType: 'cartesian_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'cartesian_shape',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'cartesian_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_point',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_point',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_point',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'geo_point',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_shape',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'geo_shape',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'geo_shape',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'version',
-          optional: false,
-        },
-      ],
-      returnType: 'version',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'version',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'boolean',
-          optional: true,
-        },
-      ],
-      returnType: 'version',
-      minParams: 1,
-    },
-  ],
-  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
-  validate: undefined,
-  examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
-};
-
 const concatDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'concat',
@@ -4768,6 +4462,292 @@ const caseDefinition: FunctionDefinition = {
     'from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")',
   ],
 };
+
+const coalesceDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'coalesce',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.coalesce', {
+    defaultMessage:
+      'Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.',
+  }),
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'number',
+          optional: false,
+        },
+      ],
+      returnType: 'number',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'number',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'number',
+          optional: true,
+        },
+      ],
+      returnType: 'number',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'date',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'string',
+          optional: false,
+        },
+      ],
+      returnType: 'string',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'string',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'string',
+          optional: true,
+        },
+      ],
+      returnType: 'string',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'boolean',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'ip',
+          optional: false,
+        },
+      ],
+      returnType: 'ip',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'ip',
+          optional: true,
+        },
+      ],
+      returnType: 'ip',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'cartesian_point',
+          optional: false,
+        },
+      ],
+      returnType: 'cartesian_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'cartesian_point',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'cartesian_point',
+          optional: true,
+        },
+      ],
+      returnType: 'cartesian_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'cartesian_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'cartesian_shape',
+          optional: true,
+        },
+      ],
+      returnType: 'cartesian_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'geo_point',
+          optional: true,
+        },
+      ],
+      returnType: 'geo_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_shape',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'geo_shape',
+          optional: true,
+        },
+      ],
+      returnType: 'geo_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'version',
+          optional: false,
+        },
+      ],
+      returnType: 'version',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'version',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'version',
+          optional: true,
+        },
+      ],
+      returnType: 'version',
+      minParams: 1,
+    },
+  ],
+  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
+};
 export const evalFunctionDefinitions = [
   absDefinition,
   acosDefinition,
@@ -4777,7 +4757,6 @@ export const evalFunctionDefinitions = [
   cbrtDefinition,
   ceilDefinition,
   cidrMatchDefinition,
-  coalesceDefinition,
   concatDefinition,
   cosDefinition,
   coshDefinition,
@@ -4856,4 +4835,5 @@ export const evalFunctionDefinitions = [
   toVersionDefinition,
   trimDefinition,
   caseDefinition,
+  coalesceDefinition,
 ];

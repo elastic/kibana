@@ -61,20 +61,20 @@ describe('UserToolTip', () => {
             </EuiFlexItem>
             <EuiFlexItem
               grow={true}
+              style={
+                Object {
+                  "minWidth": 0,
+                }
+              }
             >
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="none"
+              <div>
+                Delighted Nightingale
+              </div>
+              <EuiText
+                size="xs"
               >
-                <EuiFlexItem>
-                  <strong>
-                    Delighted Nightingale
-                  </strong>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  delighted_nightingale@elastic.co
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                delighted_nightingale@elastic.co
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

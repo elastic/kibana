@@ -29,7 +29,9 @@ const evalSupportedCommandsAndOptions = {
   supportedOptions: ['by'],
 };
 
-const excludedFunctions = new Set(['bucket', 'case']);
+// coalesce can be removed when a test is added for version type
+// (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
+const excludedFunctions = new Set(['bucket', 'case', 'coalesce']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
@@ -51,6 +53,48 @@ const extraFunctions: FunctionDefinition[] = [
     examples: [
       `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
     ],
+  },
+  {
+    type: 'eval',
+    name: 'coalesce',
+    description:
+      'Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.',
+    alias: undefined,
+    signatures: supportedFieldTypes
+      .map<FunctionDefinition['signatures']>((type) => [
+        {
+          params: [
+            {
+              name: 'first',
+              type,
+              optional: false,
+            },
+          ],
+          returnType: type,
+          minParams: 1,
+        },
+        {
+          params: [
+            {
+              name: 'first',
+              type,
+              optional: false,
+            },
+            {
+              name: 'rest',
+              type,
+              optional: true,
+            },
+          ],
+          returnType: type,
+          minParams: 1,
+        },
+      ])
+      .flat(),
+    supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+    supportedOptions: ['by'],
+    validate: undefined,
+    examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
   },
 ];
 
@@ -212,40 +256,6 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     signatures: new Array(6).fill({
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
-  },
-  // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
-  coalesce: {
-    signatures: supportedFieldTypes
-      .map<FunctionDefinition['signatures']>((type) => [
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-            {
-              name: 'rest',
-              type: 'boolean',
-              optional: true,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-      ])
-      .flat(),
   },
   // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
   mv_dedupe: {
