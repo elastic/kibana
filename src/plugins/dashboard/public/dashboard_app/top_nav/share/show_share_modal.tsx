@@ -148,6 +148,7 @@ export function ShowShareModal({
     : {};
 
   const allPanels: DashboardPanelMap = {
+    ...(latestPanels ?? {}),
     ...(unsavedDashboardState?.panels ?? {}),
     ...unsavedPanelsMap,
   };
