@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { HostsLocatorParams } from '@kbn/observability-shared-plugin/public/locators/infra/hosts_locator';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -59,12 +60,16 @@ export const OtelLogsPanel: React.FC = () => {
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
 
-  const [{ value: allDatasetsUrl }, getDeeplinks] = useAsyncFn(async () => {
-    return allDatasetsLocator!.getRedirectUrl({
-      type: 'logs',
-    });
+  const hostsLocator = share.url.locators.get<HostsLocatorParams>('HOSTS_LOCATOR');
+
+  const [{ value: deeplinks }, getDeeplinks] = useAsyncFn(async () => {
+    return {
+      logs: allDatasetsLocator!.getRedirectUrl({
+        type: 'logs',
+      }),
+      metrics: hostsLocator!.getRedirectUrl({}),
+    };
   }, [allDatasetsLocator]);
-  const hostsUrl = http?.basePath.prepend('/app/metrics/hosts');
 
   useEffect(() => {
     getDeeplinks();
@@ -367,7 +372,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && 
                           <EuiFlexItem grow={false}>
                             <EuiLink
                               data-test-subj="obltOnboardingExploreLogs"
-                              href={allDatasetsUrl}
+                              href={deeplinks?.logs}
                             >
                               {i18n.translate(
                                 'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
@@ -387,7 +392,10 @@ rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && 
                             </EuiText>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiLink data-test-subj="obltOnboardingExploreMetrics" href={hostsUrl}>
+                            <EuiLink
+                              data-test-subj="obltOnboardingExploreMetrics"
+                              href={deeplinks?.metrics}
+                            >
                               {i18n.translate(
                                 'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
                                 {
