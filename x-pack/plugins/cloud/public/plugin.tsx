@@ -11,6 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
+import type { OnBoardingDefaultSolution } from '../common/types';
 import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import type { CloudSetup, CloudStart } from './types';
@@ -31,6 +32,9 @@ export interface CloudConfigType {
   performance_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  onboarding?: {
+    default_solution?: OnBoardingDefaultSolution;
+  };
   serverless?: {
     project_id: string;
     project_name?: string;
@@ -95,6 +99,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      onboarding: {
+        defaultSolution: this.config.onboarding?.default_solution,
+      },
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
         projectId: this.config.serverless?.project_id,

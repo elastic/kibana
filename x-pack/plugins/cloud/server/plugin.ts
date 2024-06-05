@@ -11,6 +11,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
+import type { OnBoardingDefaultSolution } from '../common';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
@@ -87,6 +88,15 @@ export interface CloudSetup {
   apm: {
     url?: string;
     secretToken?: string;
+  };
+  /**
+   * Onboarding configuration.
+   */
+  onboarding: {
+    /**
+     * The default solution selected during onboarding.
+     */
+    defaultSolution?: OnBoardingDefaultSolution;
   };
   /**
    * `true` when running on Serverless Elastic Cloud
@@ -187,6 +197,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
+      },
+      onboarding: {
+        defaultSolution: this.config.onboarding?.default_solution,
       },
       isServerlessEnabled,
       serverless: {
