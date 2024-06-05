@@ -19,27 +19,27 @@ const spaceId = 'custom-space';
 
 describe('KQL Custom Transform Generator', () => {
   describe('validation', () => {
-    it('throws when the KQL numerator is invalid', () => {
+    it('throws when the KQL numerator is invalid', async () => {
       const anSLO = createSLO({
         indicator: createKQLCustomIndicator({ good: '{ kql.query: invalid' }),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL/
       );
     });
-    it('throws when the KQL denominator is invalid', () => {
+    it('throws when the KQL denominator is invalid', async () => {
       const anSLO = createSLO({
         indicator: createKQLCustomIndicator({ total: '{ kql.query: invalid' }),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL/
       );
     });
-    it('throws when the KQL query_filter is invalid', () => {
+    it('throws when the KQL query_filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createKQLCustomIndicator({ filter: '{ kql.query: invalid' }),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL/
       );
     });

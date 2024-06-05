@@ -31,40 +31,40 @@ const everythingIndicator = createTimesliceMetricIndicator(
 
 describe('Timeslice Metric Transform Generator', () => {
   describe('validation', () => {
-    it('throws when the budgeting method is occurrences', () => {
+    it('throws when the budgeting method is occurrences', async () => {
       const anSLO = createSLO({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field' }],
           '(A / 200) + A'
         ),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         'The sli.metric.timeslice indicator MUST have a timeslice budgeting method.'
       );
     });
-    it('throws when the metric equation is invalid', () => {
+    it('throws when the metric equation is invalid', async () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field' }],
           '(a / 200) + A'
         ),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid equation/
       );
     });
-    it('throws when the metric filter is invalid', () => {
+    it('throws when the metric filter is invalid', async () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field', filter: 'test:' }],
           '(A / 200) + A'
         ),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL: test:/
       );
     });
-    it('throws when the query_filter is invalid', () => {
+    it('throws when the query_filter is invalid', async () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field', filter: 'test.category: "test"' }],
@@ -72,7 +72,7 @@ describe('Timeslice Metric Transform Generator', () => {
           'test:'
         ),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL/
       );
     });

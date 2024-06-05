@@ -19,7 +19,7 @@ const spaceId = 'custom-space';
 
 describe('Histogram Transform Generator', () => {
   describe('validation', () => {
-    it('throws when the good filter is invalid', () => {
+    it('throws when the good filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({
           good: {
@@ -32,7 +32,7 @@ describe('Histogram Transform Generator', () => {
         }),
       });
 
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL: foo:/
       );
     });
@@ -48,16 +48,16 @@ describe('Histogram Transform Generator', () => {
         }),
       });
 
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL: foo:/
       );
     });
 
-    it('throws when the query_filter is invalid', () => {
+    it('throws when the query_filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({ filter: '{ kql.query: invalid' }),
       });
-      expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
+      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL/
       );
     });
