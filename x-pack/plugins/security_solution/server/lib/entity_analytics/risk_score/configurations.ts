@@ -156,6 +156,7 @@ export const getTransformOptions = ({ dest, source }: { dest: string; source: st
     },
   },
   settings: {
+    // In unattended mode, the transform retries indefinitely in case of an error
     unattended: true,
   },
 });

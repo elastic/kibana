@@ -315,12 +315,14 @@ export const runTask = async ({
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
+    if (scoresWritten > 0) {
+      log('refreshing risk score index and scheduling transform');
+      await riskScoreService.refreshRiskScoreIndex();
+      await riskScoreService.scheduleLatestTransformNow();
+    }
+
     log('task run completed');
     log(JSON.stringify({ ...telemetryEvent, runs }));
-
-    await riskScoreService.refreshIndex();
-
-    await riskScoreService.scheduleLatestTransformNow();
 
     return {
       state: updatedState,

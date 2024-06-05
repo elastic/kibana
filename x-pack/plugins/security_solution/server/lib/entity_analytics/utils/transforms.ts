@@ -142,9 +142,11 @@ export const scheduleTransformNow = async ({
 const upgradeLatestTransformIfNeeded = async ({
   esClient,
   namespace,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   namespace: string;
+  logger: Logger;
 }): Promise<TransformStartTransformResponse | void> => {
   const transformId = getLatestTransformId(namespace);
   const latestIndex = getRiskScoreLatestIndex(namespace);
@@ -158,6 +160,8 @@ const upgradeLatestTransformIfNeeded = async ({
     response.transforms[0].sync?.time?.delay === '2s' ||
     response.transforms[0].settings?.unattended === undefined
   ) {
+    logger.info(`Upgrading transform ${transformId}`);
+
     const { latest: _unused, ...newConfig } = getTransformOptions({
       dest: latestIndex,
       source: [timeSeriesIndex],
@@ -173,12 +177,21 @@ const upgradeLatestTransformIfNeeded = async ({
 export const scheduleLatestTransformNow = async ({
   namespace,
   esClient,
+  logger,
 }: {
   namespace: string;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }): Promise<void> => {
   const transformId = getLatestTransformId(namespace);
 
-  await upgradeLatestTransformIfNeeded({ esClient, namespace });
+  try {
+    await upgradeLatestTransformIfNeeded({ esClient, namespace, logger });
+  } catch (err) {
+    logger.error(
+      `There was an error upgrading the transform ${transformId}. Continuing with transform scheduling. ${err.message}`
+    );
+  }
+
   await scheduleTransformNow({ esClient, transformId });
 };

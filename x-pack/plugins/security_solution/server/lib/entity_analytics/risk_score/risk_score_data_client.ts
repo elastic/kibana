@@ -62,12 +62,6 @@ export class RiskScoreDataClient {
     return this.writerCache.get(namespace) as Writer;
   }
 
-  public refreshIndex = async () => {
-    this.options.esClient.indices.refresh({
-      index: getRiskScoreTimeSeriesIndex(this.options.namespace),
-    });
-  };
-
   private async initializeWriter(namespace: string, index: string): Promise<Writer> {
     const writer = new RiskEngineDataWriter({
       esClient: this.options.esClient,
@@ -79,6 +73,12 @@ export class RiskScoreDataClient {
     this.writerCache.set(namespace, writer);
     return writer;
   }
+
+  public refreshRiskScoreIndex = async () => {
+    await this.options.esClient.indices.refresh({
+      index: getRiskScoreTimeSeriesIndex(this.options.namespace),
+    });
+  };
 
   public getRiskInputsIndex = ({ dataViewId }: { dataViewId: string }) =>
     getRiskInputsIndex({
