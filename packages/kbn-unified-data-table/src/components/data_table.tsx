@@ -46,6 +46,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -266,7 +267,7 @@ export interface UnifiedDataTableProps {
     theme: ThemeServiceStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
-    dataViewFieldEditor: DataViewFieldEditorStart;
+    dataViewFieldEditor?: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
     storage: Storage;
     data: DataPublicPluginStart;
@@ -338,6 +339,10 @@ export interface UnifiedDataTableProps {
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
   externalCustomRenderers?: CustomCellRenderer;
+  /**
+   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
+   */
+  additionalFieldGroups?: AdditionalFieldGroups;
   /**
    * An optional settings for customising the column
    */
@@ -441,6 +446,7 @@ export const UnifiedDataTable = ({
   rowsPerPageOptions,
   visibleCellActions,
   externalCustomRenderers,
+  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -605,7 +611,7 @@ export const UnifiedDataTable = ({
         useNewFieldsApi,
         shouldShowFieldHandler,
         closePopover: () => dataGridRef.current?.closeCellPopover(),
-        fieldFormats: services.fieldFormats,
+        fieldFormats,
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
@@ -616,7 +622,7 @@ export const UnifiedDataTable = ({
       useNewFieldsApi,
       shouldShowFieldHandler,
       maxDocFieldsDisplayed,
-      services.fieldFormats,
+      fieldFormats,
       externalCustomRenderers,
       isPlainRecord,
     ]
@@ -645,18 +651,20 @@ export const UnifiedDataTable = ({
     () =>
       onFieldEdited
         ? (fieldName: string) => {
-            closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
-              ctx: {
-                dataView,
-              },
-              fieldName,
-              onSave: async () => {
-                await onFieldEdited();
-              },
-            });
+            closeFieldEditor.current =
+              onFieldEdited &&
+              services?.dataViewFieldEditor?.openEditor({
+                ctx: {
+                  dataView,
+                },
+                fieldName,
+                onSave: async () => {
+                  await onFieldEdited();
+                },
+              });
           }
         : undefined,
-    [dataView, onFieldEdited, services.dataViewFieldEditor]
+    [dataView, onFieldEdited, services?.dataViewFieldEditor]
   );
 
   const timeFieldName = dataView.timeFieldName;
@@ -750,7 +758,8 @@ export const UnifiedDataTable = ({
           uiSettings,
           toastNotifications,
         },
-        hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
+        hasEditDataViewPermission: () =>
+          Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
         valueToStringConverter,
         onFilter,
         editField,
@@ -1043,6 +1052,7 @@ export const UnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
+              additionalFieldGroups={additionalFieldGroups}
               selectedDocs={selectedDocs}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}

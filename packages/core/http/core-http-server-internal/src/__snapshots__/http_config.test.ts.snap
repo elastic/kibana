@@ -70,6 +70,9 @@ Object {
     },
   },
   "host": "localhost",
+  "http2": Object {
+    "allowUnsecure": false,
+  },
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
     "valueInBytes": 1048576,
@@ -80,6 +83,7 @@ Object {
   },
   "payloadTimeout": 20000,
   "port": 5601,
+  "protocol": "http1",
   "requestId": Object {
     "allowFromAnyIp": false,
     "ipAllowlist": Array [],

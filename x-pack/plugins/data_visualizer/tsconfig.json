@@ -81,7 +81,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-publishing",
     "@kbn/shared-ux-utility",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/unified-field-list"
   ],
   "exclude": [
     "target/**/*",

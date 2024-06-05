@@ -11,8 +11,15 @@ import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
-import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  merge,
+  skip,
+  Subject,
+  Subscription,
+} from 'rxjs';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -477,6 +484,11 @@ export class ControlGroupContainer extends Container<
       } as ControlPanelState<TEmbeddableInput>,
       otherPanels,
     };
+  }
+
+  public removePanel(id: string): void {
+    /** TODO: This is a temporary wrapper until the control group refactor is complete */
+    super.removeEmbeddable(id);
   }
 
   protected onRemoveEmbeddable(idToRemove: string) {
