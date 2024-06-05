@@ -54,7 +54,7 @@ export const OtelLogsPanel: React.FC = () => {
     services: { share, http },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
-  const AGENT_CDN_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent/';
+  const AGENT_CDN_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent';
 
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
