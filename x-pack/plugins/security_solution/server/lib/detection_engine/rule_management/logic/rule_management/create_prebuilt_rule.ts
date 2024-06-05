@@ -8,10 +8,11 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import type { RuleAlertType } from '../../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
+import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import { _validateMlAuth, _createRule } from './utils';
+import { _validateMlAuth } from './utils';
 
 export interface CreatePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
@@ -27,9 +28,13 @@ export const createPrebuiltRule = async (
 
     await _validateMlAuth(mlAuthz, ruleAsset.type);
 
-    const rule = await _createRule(rulesClient, ruleAsset, {
+    const internalRule = convertCreateAPIToInternalSchema(ruleAsset, {
       immutable: true,
       defaultEnabled: false,
+    });
+
+    const rule = await rulesClient.create<RuleParams>({
+      data: internalRule,
     });
 
     return rule;

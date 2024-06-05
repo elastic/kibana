@@ -7,12 +7,13 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import type { RuleAlertType } from '../../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { createBulkErrorObject } from '../../../routes/utils';
+import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import { _validateMlAuth, _createRule, _updateRule } from './utils';
+import { _validateMlAuth, _updateRule } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -43,10 +44,16 @@ export const importRule = async (
     });
 
     if (!existingRule) {
-      return _createRule(rulesClient, ruleToImport, {
+      const internalRule = convertCreateAPIToInternalSchema(ruleToImport, {
         immutable: false,
-        allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
       });
+
+      const rule = await rulesClient.create<RuleParams>({
+        data: internalRule,
+        allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
+      });
+
+      return rule;
     } else if (existingRule && overwriteRules) {
       return _updateRule(rulesClient, {
         existingRule,

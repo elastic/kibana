@@ -6,12 +6,9 @@
  */
 
 import type { IDetectionRulesClient } from '../detection_rules_client';
-import type { CreateRuleOptions, _UpdateRuleProps, _PatchRuleProps } from '../utils';
+import type { _UpdateRuleProps, _PatchRuleProps } from '../utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type {
-  RuleCreateProps,
-  RuleObjectId,
-} from '../../../../../../../common/api/detection_engine';
+import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { RuleAlertType } from '../../../../rule_schema';
 
@@ -37,14 +34,6 @@ export const detectionRulesClientMock: {
 };
 
 /* Mocks for internal methods */
-export const _createRule: jest.Mock<
-  (
-    rulesClient: RulesClient,
-    params: RuleCreateProps,
-    options: CreateRuleOptions
-  ) => Promise<RuleAlertType>
-> = jest.fn();
-
 export const _updateRule: jest.Mock<
   (rulesClient: RulesClient, updateRulePayload: _UpdateRuleProps) => Promise<RuleAlertType>
 > = jest.fn();

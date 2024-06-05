@@ -10,7 +10,6 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type {
-  RuleCreateProps,
   PatchRuleRequestBody,
   RuleUpdateProps,
 } from '../../../../../../common/api/detection_engine';
@@ -25,32 +24,6 @@ import {
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-
-export interface CreateRuleOptions {
-  /* Optionally pass an ID to use for the rule document. If not provided, an ID will be generated. */
-  /* This is the ES document ID, NOT the rule_id */
-  id?: string;
-  immutable?: boolean;
-  defaultEnabled?: boolean;
-  allowMissingConnectorSecrets?: boolean;
-}
-
-export const _createRule = async (
-  rulesClient: RulesClient,
-  params: RuleCreateProps,
-  options: CreateRuleOptions
-) => {
-  const rulesClientCreateRuleOptions = options.id ? { id: options.id } : {};
-
-  const internalRule = convertCreateAPIToInternalSchema(params, options);
-  const rule = await rulesClient.create<RuleParams>({
-    data: internalRule,
-    options: rulesClientCreateRuleOptions,
-    allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
-  });
-
-  return rule;
-};
 
 export const _updateRule = async (
   rulesClient: RulesClient,
@@ -97,8 +70,7 @@ export const _upgradePrebuiltRuleWithTypeChange = async (
   // and exception lists from the old rule
   await rulesClient.delete({ id: existingRule.id });
 
-  return _createRule(
-    rulesClient,
+  const internalRule = convertCreateAPIToInternalSchema(
     {
       ...ruleAsset,
       enabled: existingRule.enabled,
@@ -107,8 +79,15 @@ export const _upgradePrebuiltRuleWithTypeChange = async (
       timeline_id: existingRule.params.timelineId,
       timeline_title: existingRule.params.timelineTitle,
     },
-    { immutable: true, defaultEnabled: existingRule.enabled, id: existingRule.id }
+    { immutable: true, defaultEnabled: existingRule.enabled }
   );
+
+  const rule = await rulesClient.create<RuleParams>({
+    data: internalRule,
+    options: { id: existingRule.id },
+  });
+
+  return rule;
 };
 
 export const _toggleRuleEnabledOnUpdate = async (
