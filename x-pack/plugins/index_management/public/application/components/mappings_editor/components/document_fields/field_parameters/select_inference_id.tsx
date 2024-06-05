@@ -120,21 +120,11 @@ export const SelectInferenceId = ({
     return [
       {
         checked: 'on',
-        label: i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.Elser',
-          {
-            defaultMessage: 'elser_model_2',
-          }
-        ),
+        label: 'elser_model_2',
         'data-test-subj': 'default-inference_elser_model_2',
       },
       {
-        label: i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultModel.E5',
-          {
-            defaultMessage: 'e5',
-          }
-        ),
+        label: 'e5',
         'data-test-subj': 'default-inference_e5',
       },
     ];
