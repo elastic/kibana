@@ -220,7 +220,7 @@ backup_elastic_agent_config() {
       if [ "$?" -eq 0 ]; then
         printf "\n\e[1;32m✓\e[0m \e[1m%s\e[0m\n" "Backup saved to $backup_path"
       else
-        updateStepProgress "ea-config" "warning" "Failed to backup existing configuration"
+        update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
         fail "Failed to backup existing config file - Try manually creating a backup or delete your existing config file before re-running this script"
       fi
     else
