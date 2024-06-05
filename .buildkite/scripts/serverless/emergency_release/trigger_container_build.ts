@@ -16,7 +16,7 @@ async function main() {
   const commitSha = process.env.OVERRIDE_COMMIT || process.env.BUILDKITE_COMMIT;
 
   if (!isCurrentHeadInMain(commitSha!)) {
-    if (!DRY_RUN) {
+    if (DRY_RUN) {
       console.log(
         `DRY_RUN: Commit ${commitSha} isn't in main, triggering container build :green_heart:`
       );
@@ -25,7 +25,7 @@ async function main() {
       uploadTriggerBuildStep();
     }
   } else {
-    if (!DRY_RUN) {
+    if (DRY_RUN) {
       console.log(`DRY_RUN: Commit ${commitSha} is in main, no build necessary :yellow_heart:`);
     } else {
       console.log(`Commit ${commitSha} is in main, no trigger necessary :yellow_heart:`);
