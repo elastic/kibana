@@ -300,8 +300,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     if (!image) {
       return loadNoResult();
     }
-    return <PopoverPlaceholder placeholderImage={image} />;
-  }, [image, loadNoResult]);
+    return <PopoverPlaceholder basePath={props.basePathUrl} />;
+  }, [image, loadNoResult, props.basePathUrl]);
 
   if (chromeStyle === 'project' && !isVisible) {
     return (
