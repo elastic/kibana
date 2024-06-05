@@ -22,34 +22,34 @@ const timeRange = {
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
   const fetchMetadata = async (
     body: InfraMetadataRequest,
-    options: { roleCredentials: RoleCredentials }
+    roleAuthc: RoleCredentials
   ): Promise<InfraMetadata | undefined> => {
-    const response = await supertest
+    const response = await supertestWithoutAuth
       .post('/api/infra/metadata')
       .set(svlCommonApi.getInternalRequestHeader())
-      .set(options.roleCredentials.apiKeyHeader)
+      .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);
     return response.body;
   };
 
   describe('API /infra/metadata', () => {
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
     describe('works', () => {
       describe('Host asset type', () => {
         before(async () => {
-          roleCredentials = await svlUserManager.createApiKeyForRole('admin');
-          return esArchiver.load(ARCHIVE_NAME);
+          roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+          await esArchiver.load(ARCHIVE_NAME);
         });
         after(async () => {
-          await svlUserManager.invalidateApiKeyForRole(roleCredentials);
-          return esArchiver.unload(ARCHIVE_NAME);
+          await esArchiver.unload(ARCHIVE_NAME);
+          await svlUserManager.invalidateApiKeyForRole(roleAuthc);
         });
         it('with serverless existing host', async () => {
           const metadata = await fetchMetadata(
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
               nodeType: 'host',
               timeRange,
             },
-            { roleCredentials }
+            roleAuthc
           );
 
           if (metadata) {

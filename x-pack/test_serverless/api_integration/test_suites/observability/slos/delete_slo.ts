@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
     let sloId: string;
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
       await sloApi.deleteAllSLOs();
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
       await sloApi.deleteAllSLOs();
       await esDeleteAllIndices([infraDataIndex]);
       await cleanup({ esClient, logger });
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('non partition by SLO', () => {
@@ -106,10 +106,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             groupBy: ALL_VALUE,
           },
-          { roleCredentials }
+          roleAuthc
         );
         sloId = createdSlo.id;
-        await sloApi.waitForSloCreated({ sloId, options: { roleCredentials } });
+        await sloApi.waitForSloCreated({ sloId, roleAuthc });
 
         // Saved Object
         const savedObject = await kibanaServer.savedObjects.find({
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
         // Delete the SLO
         const response = await sloApi.waitForSloToBeDeleted({
           sloId,
-          options: { roleCredentials },
+          roleAuthc,
         });
         expect(response.status).to.be(204);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { unset } from 'lodash';
 import {
   ALERT_ACTION_GROUP,
@@ -63,15 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
-    let roleCredentials: RoleCredentials;
-
-    before(async () => {
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
-    });
-
-    after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
-    });
 
     before(async () => {
       roleAdmin = await svlUserManager.createApiKeyForRole('admin');

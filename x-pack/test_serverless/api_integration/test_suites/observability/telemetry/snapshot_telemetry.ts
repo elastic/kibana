@@ -22,18 +22,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Snapshot telemetry', function () {
     let stats: UsageStatsPayloadTestFriendly;
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       const [unencryptedPayload] = await usageApi.getTelemetryStats(
         { unencrypted: true },
-        { authHeader: roleCredentials.apiKeyHeader }
+        { authHeader: roleAuthc.apiKeyHeader }
       );
       stats = unencryptedPayload.stats;
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('should pass the schema validation (ensures BWC with Classic offering)', () => {
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('includes the serverless info in the body', async () => {
       const [unencryptedPayload] = await usageApi.getTelemetryStats(
         { unencrypted: true },
-        { authHeader: roleCredentials.apiKeyHeader }
+        { authHeader: roleAuthc.apiKeyHeader }
       );
 
       expect(

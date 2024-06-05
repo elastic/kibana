@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
       infraDataIndex = await generate({
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ esClient, logger });
       await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
       await transform.api.cleanTransformIndices();
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('non partition by SLO', () => {
@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             groupBy: ALL_VALUE,
           },
-          { roleCredentials }
+          roleAuthc
         );
       });
 
@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .set('x-elastic-internal-origin', 'foo')
           .set('elastic-api-version', '1')
-          .set(roleCredentials.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
         assertTransformsResponseBody(body, expectedTransforms);
@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('finds the created SLO', async () => {
         const createdSlo = await sloApi.waitForSloCreated({
           sloId,
-          options: { roleCredentials },
+          roleAuthc,
         });
         expect(createdSlo.id).to.be(sloId);
         expect(createdSlo.groupBy).to.be(ALL_VALUE);
@@ -225,12 +225,12 @@ export default function ({ getService }: FtrProviderContext) {
             },
             groupBy: '*',
           },
-          { roleCredentials }
+          roleAuthc
         );
 
         const createdSlo = await sloApi.waitForSloCreated({
           sloId,
-          options: { roleCredentials },
+          roleAuthc,
         });
         expect(createdSlo.id).to.be(sloId);
       });
@@ -264,11 +264,11 @@ export default function ({ getService }: FtrProviderContext) {
             },
             groupBy: '*',
           },
-          { roleCredentials }
+          roleAuthc
         );
         const createdSlo = await sloApi.waitForSloCreated({
           sloId,
-          options: { roleCredentials },
+          roleAuthc,
         });
         expect(createdSlo.id).to.be(sloId);
       });
@@ -301,11 +301,11 @@ export default function ({ getService }: FtrProviderContext) {
             },
             groupBy: 'host.name',
           },
-          { roleCredentials }
+          roleAuthc
         );
         const createdSlo = await sloApi.waitForSloCreated({
           sloId,
-          options: { roleCredentials },
+          roleAuthc,
         });
         expect(createdSlo.id).to.be(sloId);
         expect(createdSlo.groupBy).not.to.be(ALL_VALUE);
@@ -347,7 +347,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .set('x-elastic-internal-origin', 'foo')
           .set('elastic-api-version', '1')
-          .set(roleCredentials.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
         assertTransformsResponseBody(body, expectedTransforms);

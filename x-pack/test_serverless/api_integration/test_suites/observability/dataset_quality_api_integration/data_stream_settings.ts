@@ -7,7 +7,7 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import type { RoleCredentials } from '../../../../shared/services';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 import { expectToReject, getDataStreamSettingsOfEarliestIndex, rolloverDataStream } from './utils';
 import {
   DatasetQualityApiClient,
@@ -29,7 +29,11 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const serviceName = 'my-service';
   const hostName = 'synth-host';
 
-  async function callApi(dataStream: string, authHeader: { Authorization: string }) {
+  async function callApi(
+    dataStream: string,
+    roleAuthc: RoleCredentials,
+    internalReqHeader: InternalRequestHeader
+  ) {
     return await datasetQualityApiClient.slsUser({
       endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
       params: {
@@ -37,14 +41,17 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
           dataStream,
         },
       },
-      authHeader,
+      roleAuthc,
+      internalReqHeader,
     });
   }
 
   describe('gets the data stream settings', () => {
     let roleAuthc: RoleCredentials;
+    let internalReqHeader: InternalRequestHeader;
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       return synthtrace.index([
         timerange(start, end)
           .interval('1m')
@@ -72,10 +79,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     it('returns error when dataStream param is not provided', async () => {
       const expectedMessage = 'Data Stream name cannot be empty';
       const err = await expectToReject<DatasetQualityApiError>(() =>
-        callApi(encodeURIComponent(' '), {
-          ...svlCommonApi.getInternalRequestHeader(),
-          ...roleAuthc.apiKeyHeader,
-        })
+        callApi(encodeURIComponent(' '), roleAuthc, internalReqHeader)
       );
       expect(err.res.status).to.be(400);
       expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
@@ -84,7 +88,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     it('returns {} if matching data stream is not available', async () => {
       const nonExistentDataSet = 'Non-existent';
       const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
-      const resp = await callApi(nonExistentDataStream, roleAuthc.apiKeyHeader);
+      const resp = await callApi(nonExistentDataStream, roleAuthc, internalReqHeader);
       expect(resp.body).empty();
     });
 
@@ -93,9 +97,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
         esClient,
         `${type}-${dataset}-${namespace}`
       );
-      const resp = await callApi(`${type}-${dataset}-${namespace}`, {
-        ...roleAuthc.apiKeyHeader,
-      });
+      const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
     });
 
@@ -105,10 +107,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
         esClient,
         `${type}-${dataset}-${namespace}`
       );
-      const resp = await callApi(`${type}-${dataset}-${namespace}`, {
-        ...svlCommonApi.getInternalRequestHeader(),
-        ...roleAuthc.apiKeyHeader,
-      });
+      const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
     });
 

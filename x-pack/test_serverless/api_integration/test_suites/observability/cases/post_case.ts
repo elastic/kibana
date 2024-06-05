@@ -15,14 +15,14 @@ export default ({ getService }: FtrProviderContext): void => {
   const svlUserManager = getService('svlUserManager');
 
   describe('post_case', () => {
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     afterEach(async () => {
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
               fields: { issueType: 'Task', priority: 'High', parent: null },
             },
           }),
-          { roleCredentials },
+          roleAuthc,
           200
         )
       );
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
           svlCases.api.getPostCaseRequest('observability', {
             owner: 'securitySolution',
           }),
-          { roleCredentials },
+          roleAuthc,
           403
         )
       );
@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
           svlCases.api.getPostCaseRequest('observability', {
             owner: 'cases',
           }),
-          { roleCredentials },
+          roleAuthc,
           403
         )
       );

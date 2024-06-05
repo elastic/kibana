@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const SLO_ID = 'slo-fake-1';
   describe('fetch historical summary', () => {
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
       const now = moment().startOf('minute');
@@ -59,12 +59,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await esClient.indices.refresh({ index: SLO_DESTINATION_INDEX_NAME });
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
       await esDeleteAllIndices(SLO_DESTINATION_INDEX_PATTERN);
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('computes the historical summary for a rolling occurrences SLO', async () => {
@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
         },
-        { roleCredentials }
+        roleAuthc
       );
       expect(response[0].sloId).to.eql(SLO_ID);
       expect(response[0].instanceId).to.eql(ALL_VALUE);
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
         },
-        { roleCredentials }
+        roleAuthc
       );
       expect(response[0].sloId).to.eql(SLO_ID);
       expect(response[0].instanceId).to.eql(ALL_VALUE);

@@ -14,14 +14,14 @@ export default ({ getService }: FtrProviderContext): void => {
   const svlUserManager = getService('svlUserManager');
 
   describe('get_case', () => {
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     afterEach(async () => {
@@ -31,18 +31,21 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return a case', async () => {
       const postedCase = await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest('observability'),
-        { roleCredentials }
+        roleAuthc
       );
       const theCase = await svlCases.api.getCase(
         {
           caseId: postedCase.id,
           includeComments: true,
         },
-        { roleCredentials }
+        roleAuthc
       );
 
-      const data = svlCases.omit.removeServerGeneratedPropertiesFromCase(theCase);
-      expect(data).to.eql(svlCases.api.postCaseResp('observability'));
+      const { created_by: createdBy, ...data } =
+        svlCases.omit.removeServerGeneratedPropertiesFromCase(theCase);
+      const { created_by: _, ...expectedData } = svlCases.api.postCaseResp('observability');
+      expect(data).to.eql(expectedData);
+      expect(createdBy).to.have.keys('full_name', 'email', 'username');
       expect(data.comments?.length).to.eql(0);
     });
   });

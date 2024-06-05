@@ -18,15 +18,15 @@ export default ({ getService }: FtrProviderContext): void => {
   let postCaseReq: CasePostRequest;
 
   describe('find_cases', () => {
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
     before(async () => {
       findCasesResp = svlCases.api.getFindCasesResp();
       postCaseReq = svlCases.api.getPostCaseReq('observability');
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     afterEach(async () => {
@@ -34,16 +34,16 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return empty response', async () => {
-      const cases = await svlCases.api.findCases({}, { roleCredentials });
+      const cases = await svlCases.api.findCases({}, roleAuthc);
       expect(cases).to.eql(findCasesResp);
     });
 
     it('should return cases', async () => {
-      const a = await svlCases.api.createCase(postCaseReq, { roleCredentials });
-      const b = await svlCases.api.createCase(postCaseReq, { roleCredentials });
-      const c = await svlCases.api.createCase(postCaseReq, { roleCredentials });
+      const a = await svlCases.api.createCase(postCaseReq, roleAuthc);
+      const b = await svlCases.api.createCase(postCaseReq, roleAuthc);
+      const c = await svlCases.api.createCase(postCaseReq, roleAuthc);
 
-      const cases = await svlCases.api.findCases({}, { roleCredentials });
+      const cases = await svlCases.api.findCases({}, roleAuthc);
 
       expect(cases).to.eql({
         ...findCasesResp,
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           query: { owner: 'cases' },
         },
-        { roleCredentials }
+        roleAuthc
       );
       expect(cases).to.eql(findCasesResp);
     });
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           query: { owner: 'securitySolution' },
         },
-        { roleCredentials }
+        roleAuthc
       );
       expect(cases).to.eql(findCasesResp);
     });

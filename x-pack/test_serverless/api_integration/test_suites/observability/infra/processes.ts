@@ -18,26 +18,26 @@ import { DATES, ARCHIVE_NAME } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
   describe('API /metrics/process_list', () => {
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
     before(async () => {
-      roleCredentials = await svlUserManager.createApiKeyForRole('admin');
-      return esArchiver.load(ARCHIVE_NAME);
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      await esArchiver.load(ARCHIVE_NAME);
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleCredentials);
-      return esArchiver.unload(ARCHIVE_NAME);
+      await esArchiver.unload(ARCHIVE_NAME);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('works', async () => {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .post('/api/metrics/process_list')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleCredentials.apiKeyHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send(
           ProcessListAPIRequestRT.encode({
             hostTerm: {

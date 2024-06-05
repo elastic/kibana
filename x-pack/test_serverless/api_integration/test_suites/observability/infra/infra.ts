@@ -22,33 +22,33 @@ const timeRange = {
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
   const fetchInfraHosts = async (
     body: GetInfraMetricsRequestBodyPayload,
-    options: { roleCredentials: RoleCredentials }
+    roleAuthc: RoleCredentials
   ): Promise<GetInfraMetricsResponsePayload | undefined> => {
-    const response = await supertest
+    const response = await supertestWithoutAuth
       .post('/api/metrics/infra')
       .set(svlCommonApi.getInternalRequestHeader())
-      .set(options.roleCredentials.apiKeyHeader)
+      .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);
     return response.body;
   };
 
   describe('API /metrics/infra', () => {
-    let roleCredentials: RoleCredentials;
+    let roleAuthc: RoleCredentials;
     describe('works', () => {
       describe('with host asset', () => {
         before(async () => {
-          roleCredentials = await svlUserManager.createApiKeyForRole('admin');
+          roleAuthc = await svlUserManager.createApiKeyForRole('admin');
           return esArchiver.load(ARCHIVE_NAME);
         });
         after(async () => {
-          await svlUserManager.invalidateApiKeyForRole(roleCredentials);
+          await svlUserManager.invalidateApiKeyForRole(roleAuthc);
           return esArchiver.unload(ARCHIVE_NAME);
         });
 
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               sourceId: 'default',
             },
-            { roleCredentials }
+            roleAuthc
           );
 
           if (infraHosts) {

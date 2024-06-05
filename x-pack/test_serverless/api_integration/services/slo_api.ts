@@ -77,38 +77,32 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
   const retryTimeout = 180 * 1000;
 
   return {
-    async create(slo: SloParams, { roleCredentials }: { roleCredentials: RoleCredentials }) {
+    async create(slo: SloParams, roleAuthc: RoleCredentials) {
       const { body } = await supertest
         .post(`/api/observability/slos`)
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleCredentials.apiKeyHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send(slo);
 
       return body;
     },
 
-    async delete({
-      sloId,
-      options,
-    }: {
-      sloId: string;
-      options: { roleCredentials: RoleCredentials };
-    }) {
+    async delete({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
       const response = await supertest
         .delete(`/api/observability/slos/${sloId}`)
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(options.roleCredentials.apiKeyHeader);
+        .set(roleAuthc.apiKeyHeader);
       return response;
     },
 
     async fetchHistoricalSummary(
       params: FetchHistoricalSummaryParams,
-      { roleCredentials }: { roleCredentials: RoleCredentials }
+      roleAuthc: RoleCredentials
     ): Promise<FetchHistoricalSummaryResponse> {
       const { body } = await supertest
         .post(`/internal/observability/slos/_historical_summary`)
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleCredentials.apiKeyHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send(params);
 
       return body;
@@ -116,10 +110,10 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
 
     async waitForSloToBeDeleted({
       sloId,
-      options,
+      roleAuthc,
     }: {
       sloId: string;
-      options: { roleCredentials: RoleCredentials };
+      roleAuthc: RoleCredentials;
     }) {
       if (!sloId) {
         throw new Error(`sloId is undefined`);
@@ -128,7 +122,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         const response = await supertest
           .delete(`/api/observability/slos/${sloId}`)
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(options.roleCredentials.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         if (!response.ok) {
           throw new Error(`slodId [${sloId}] was not deleted`);
@@ -137,13 +131,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async waitForSloCreated({
-      sloId,
-      options,
-    }: {
-      sloId: string;
-      options: { roleCredentials: RoleCredentials };
-    }) {
+    async waitForSloCreated({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
       if (!sloId) {
         throw new Error(`'sloId is undefined`);
       }
@@ -151,7 +139,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         const response = await supertest
           .get(`/api/observability/slos/${sloId}`)
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(options.roleCredentials.apiKeyHeader)
+          .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         if (response.body.id === undefined) {
           throw new Error(`No slo with id ${sloId} found`);

@@ -7,13 +7,19 @@
 
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const svlCases = getService('svlCases');
+  const svlUserManager = getService('svlUserManager');
 
   describe('post_case', () => {
+    let roleAuthc: RoleCredentials;
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+    });
+
     afterEach(async () => {
       await svlCases.api.deleteCases();
     });
@@ -27,7 +33,8 @@ export default ({ getService }: FtrProviderContext): void => {
             type: ConnectorTypes.jira,
             fields: { issueType: 'Task', priority: 'High', parent: null },
           },
-        })
+        }),
+        roleAuthc
       );
       const data = svlCases.omit.removeServerGeneratedPropertiesFromCase(postedCase);
 
@@ -53,6 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
           svlCases.api.getPostCaseRequest('securitySolution', {
             owner: 'observability',
           }),
+          roleAuthc,
           403
         )
       );
@@ -64,6 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
           svlCases.api.getPostCaseRequest('securitySolution', {
             owner: 'cases',
           }),
+          roleAuthc,
           403
         )
       );

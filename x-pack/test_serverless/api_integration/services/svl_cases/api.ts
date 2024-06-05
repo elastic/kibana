@@ -23,7 +23,7 @@ export interface User {
 
 export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
 
   const defaultUser = {
@@ -118,14 +118,14 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
 
     async createCase(
       params: CasePostRequest,
-      { roleCredentials }: { roleCredentials: RoleCredentials },
+      roleAuthc: RoleCredentials,
       expectedHttpCode: number = 200
     ): Promise<Case> {
-      const apiCall = supertest.post(`${CASES_URL}`);
+      const apiCall = supertestWithoutAuth.post(`${CASES_URL}`);
 
       const response = await apiCall
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleCredentials.apiKeyHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send(params)
         .expect(expectedHttpCode);
 
@@ -142,12 +142,12 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         expectedHttpCode?: number;
         space?: string;
       },
-      { roleCredentials }: { roleCredentials: RoleCredentials }
+      roleAuthc: RoleCredentials
     ): Promise<CasesFindResponse> {
-      const { body: res } = await supertest
+      const { body: res } = await supertestWithoutAuth
         .get(`${this.getSpaceUrlPrefix(space)}${CASES_URL}/_find`)
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleCredentials.apiKeyHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ sortOrder: 'asc', ...query })
         .send()
         .expect(expectedHttpCode);
@@ -167,16 +167,16 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         includeComments?: boolean;
         expectedHttpCode?: number;
       },
-      { roleCredentials }: { roleCredentials: RoleCredentials }
+      roleAuthc: RoleCredentials
     ): Promise<Case> {
-      const { body: theCase } = await supertest
+      const { body: theCase } = await supertestWithoutAuth
         .get(
           `${this.getSpaceUrlPrefix(
             space
           )}${CASES_URL}/${caseId}?includeComments=${includeComments}`
         )
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleCredentials.apiKeyHeader)
+        .set(roleAuthc.apiKeyHeader)
         .expect(expectedHttpCode);
 
       return theCase;

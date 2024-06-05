@@ -8,7 +8,7 @@
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { omit } from 'lodash';
@@ -17,7 +17,7 @@ import { kbnTestConfig } from '@kbn/test';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
 import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
-import { RoleCredentials } from '../../../../shared/services';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Custom Threshold rule - P99 - PCT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -54,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
@@ -79,12 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set(svlCommonApi.getInternalRequestHeader());
-      await supertest
-        .delete(`/api/actions/connector/${actionId}`)
-        .set(svlCommonApi.getInternalRequestHeader());
+      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
+      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
