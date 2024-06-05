@@ -189,16 +189,16 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
           .send({ query: { match_all: {} } });
       });
     },
-    // async deleteAllReportsUsingRole(role: RoleCredentials) {
-    //   log.debug('ReportingAPI.deleteAllReports');
-    //
-    //   // ignores 409 errs and keeps retrying
-    //   await retry.tryForTime(5000, async () => {
-    //     await supertestWithoutAuth
-    //       .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
-    //       .set(role.apiKeyHeader)
-    //       .send({ query: { match_all: {} } });
-    //   });
-    // },
+    async deleteAllReportsUsingRole(role: RoleCredentials) {
+      log.debug('ReportingAPI.deleteAllReports');
+
+      // ignores 409 errs and keeps retrying
+      await retry.tryForTime(5000, async () => {
+        await supertestWithoutAuth
+          .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
+          .set(role.apiKeyHeader)
+          .send({ query: { match_all: {} } });
+      });
+    },
   };
 }

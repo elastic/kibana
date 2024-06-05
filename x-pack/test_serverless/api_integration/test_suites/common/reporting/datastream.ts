@@ -7,12 +7,16 @@
 
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
-  const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  let role: RoleCredentials;
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
@@ -23,35 +27,42 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Data Stream', () => {
     before(async () => {
+      role = await svlUserManager.createApiKeyForRole('admin');
+
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
       // for this test, we don't need to wait for the job to finish or verify the result
-      await reportingAPI.createReportJobInternal('csv_searchsource', {
-        browserTimezone: 'UTC',
-        objectType: 'search',
-        searchSource: {
-          index: '5193f870-d861-11e9-a311-0fa548c5f953',
-          query: { language: 'kuery', query: '' },
-          version: true,
+      await reportingAPI.createReportJobInternalUsingRole(
+        'csv_searchsource',
+        {
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          searchSource: {
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            query: { language: 'kuery', query: '' },
+            version: true,
+          },
+          title: 'Ecommerce Data',
+          version: '8.15.0',
         },
-        title: 'Ecommerce Data',
-        version: '8.15.0',
-      });
+        role
+      );
     });
 
     after(async () => {
-      await reportingAPI.deleteAllReports();
+      await reportingAPI.deleteAllReportsUsingRole(role);
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
+      await svlUserManager.invalidateApiKeyForRole(role);
     });
 
     it('uses the datastream configuration with set ILM policy', async () => {
-      const { body } = await supertest
+      const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
-        .expect(200);
+        .set(role.apiKeyHeader);
+
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       expect(body).toEqual({
         _meta: {
