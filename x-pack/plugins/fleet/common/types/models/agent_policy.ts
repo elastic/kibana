@@ -53,6 +53,7 @@ export interface GlobalDataTag {
 // SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
+  space_id?: string | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
@@ -120,6 +121,7 @@ export interface FullAgentPolicyMonitoring {
 
 export interface FullAgentPolicy {
   id: string;
+  namespaces?: string[];
   outputs: {
     [key: string]: FullAgentPolicyOutput;
   };
