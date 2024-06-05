@@ -177,26 +177,28 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   <EuiText color="subdued" size="s">
                     {option.description}
                   </EuiText>
-                  <EuiSpacer size="m" />
                   {(option.logos || option.showIntegrationsBadge) && (
-                    <EuiFlexGroup gutterSize="s">
-                      {option.logos?.map((logo) => (
-                        <EuiFlexItem key={logo} grow={false}>
-                          <LogoIcon logo={logo} />
-                        </EuiFlexItem>
-                      ))}
-                      {option.showIntegrationsBadge && (
-                        <EuiBadge color="hollow">
-                          <FormattedMessage
-                            defaultMessage="+ Integrations"
-                            id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
-                            description={
-                              'A badge indicating that the user can add additional observability integrations to their deployment via this option'
-                            }
-                          />
-                        </EuiBadge>
-                      )}
-                    </EuiFlexGroup>
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiFlexGroup gutterSize="s">
+                        {option.logos?.map((logo) => (
+                          <EuiFlexItem key={logo} grow={false}>
+                            <LogoIcon logo={logo} />
+                          </EuiFlexItem>
+                        ))}
+                        {option.showIntegrationsBadge && (
+                          <EuiBadge color="hollow">
+                            <FormattedMessage
+                              defaultMessage="+ Integrations"
+                              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
+                              description={
+                                'A badge indicating that the user can add additional observability integrations to their deployment via this option'
+                              }
+                            />
+                          </EuiBadge>
+                        )}
+                      </EuiFlexGroup>
+                    </>
                   )}
                 </>
               }
