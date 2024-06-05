@@ -142,9 +142,7 @@ describe('VisualizeESQL', () => {
       }),
     };
     renderComponent({}, lensService, undefined, ['There is an error mate']);
-    await waitFor(() =>
-      expect(screen.getByTestId('observabilityAiAssistantErrorsList')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.findByTestId('observabilityAiAssistantErrorsList')));
   });
 
   it('should not display the table on first render', async () => {
@@ -158,9 +156,7 @@ describe('VisualizeESQL', () => {
     renderComponent({}, lensService);
     // the button to render a table should be present
     await waitFor(() =>
-      expect(
-        screen.getByTestId('observabilityAiAssistantLensESQLDisplayTableButton')
-      ).toBeInTheDocument()
+      expect(screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton'))
     );
 
     await waitFor(() =>
@@ -179,7 +175,7 @@ describe('VisualizeESQL', () => {
     renderComponent({}, lensService);
     await waitFor(() => {
       userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLDisplayTableButton'));
-      expect(screen.queryByTestId('observabilityAiAssistantESQLDataGrid')).toBeInTheDocument();
+      expect(screen.findByTestId('observabilityAiAssistantESQLDataGrid'));
     });
   });
 
@@ -200,7 +196,7 @@ describe('VisualizeESQL', () => {
       lensService
     );
     await waitFor(() => {
-      expect(screen.getByTestId('observabilityAiAssistantESQLDataGrid')).toBeInTheDocument();
+      expect(screen.findByTestId('observabilityAiAssistantESQLDataGrid'));
     });
   });
 });

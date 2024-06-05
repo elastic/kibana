@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import { UnifiedDataTable, DataLoadingState, type SortOrder } from '@kbn/unified-data-table';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLRow } from '@kbn/es-types';
-import type {
-  DatatableColumn,
-  DatatableColumnMeta,
-  DatatableRow,
-} from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -44,17 +40,18 @@ type DataTableColumnsMeta = Record<
   }
 >;
 
+const sortOrder: SortOrder[] = [];
+
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
-  const storage = new Storage(localStorage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
   );
   const [rowHeight, setRowHeight] = useState<number>(5);
 
-  if (props.dataView.fields.getByName('@timestamp')?.type === 'date') {
-    props.dataView.timeFieldName = '@timestamp';
-  }
+  const onSetColumns = useCallback((columns) => {
+    setActiveColumns(columns);
+  }, []);
 
   const renderDocumentView = useCallback(
     (
@@ -84,51 +81,67 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [activeColumns, props.core.notifications, props.dataView, props.flyoutType]
   );
 
-  const columnsMeta = props.columns.reduce((acc, column) => {
-    acc[column.id] = {
-      type: column.meta?.type,
-      esType: column.meta?.esType ?? column.meta?.type,
-    };
-    return acc;
-  }, {} as DataTableColumnsMeta);
+  const columnsMeta = useMemo(() => {
+    return props.columns.reduce((acc, column) => {
+      acc[column.id] = {
+        type: column.meta?.type,
+        esType: column.meta?.esType ?? column.meta?.type,
+      };
+      return acc;
+    }, {} as DataTableColumnsMeta);
+  }, [props.columns]);
 
-  const columnNames = props.columns?.map(({ name }) => name);
-  const rows: DatatableRow[] = props.rows.map((row) => zipObject(columnNames, row));
-
-  return (
-    <UnifiedDataTable
-      columns={activeColumns}
-      rows={rows.map((row: Record<string, string>, idx: number) => {
+  const rows: DataTableRecord[] = useMemo(() => {
+    const columnNames = props.columns?.map(({ name }) => name);
+    return props.rows
+      .map((row) => zipObject(columnNames, row))
+      .map((row, idx: number) => {
         return {
           id: String(idx),
           raw: row,
           flattened: row,
         } as unknown as DataTableRecord;
-      })}
+      });
+  }, [props.columns, props.rows]);
+
+  const services = useMemo(() => {
+    const storage = new Storage(localStorage);
+
+    return {
+      data: props.data,
+      theme: props.core.theme,
+      uiSettings: props.core.uiSettings,
+      toastNotifications: props.core.notifications.toasts,
+      fieldFormats: props.fieldFormats,
+      storage,
+    };
+  }, [
+    props.core.notifications.toasts,
+    props.core.theme,
+    props.core.uiSettings,
+    props.data,
+    props.fieldFormats,
+  ]);
+
+  return (
+    <UnifiedDataTable
+      columns={activeColumns}
+      rows={rows}
       columnsMeta={columnsMeta}
-      services={{
-        data: props.data,
-        theme: props.core.theme,
-        uiSettings: props.core.uiSettings,
-        toastNotifications: props.core.notifications.toasts,
-        fieldFormats: props.fieldFormats,
-        storage,
-      }}
+      services={services}
       isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
       dataView={props.dataView}
-      sampleSizeState={500}
+      sampleSizeState={rows.length}
       rowsPerPageState={10}
-      onSetColumns={(columns) => {
-        setActiveColumns(columns);
-      }}
+      onSetColumns={onSetColumns}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       showTimeCol
       useNewFieldsApi
       enableComparisonMode
-      sort={[]}
+      sort={sortOrder}
       ariaLabelledBy="esqlDataGrid"
       maxDocFieldsDisplayed={100}
       renderDocumentView={renderDocumentView}
