@@ -8192,7 +8192,18 @@
           "policy_id": {
             "type": "string",
             "description": "Agent policy ID where that package policy will be added",
-            "example": "agent-policy-id"
+            "example": "agent-policy-id",
+            "deprecated": true
+          },
+          "policy_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Agent policy IDs where that package policy will be added",
+            "example": [
+              "agent-policy-id"
+            ]
           },
           "package": {
             "type": "object",
@@ -8288,7 +8299,6 @@
         },
         "required": [
           "name",
-          "policy_id",
           "package"
         ]
       },

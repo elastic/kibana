@@ -1856,7 +1856,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   context,
                   request
                 );
-                updatedNewData = PackagePolicySchema.validate(result);
+                updatedNewData = PackagePolicySchema.validate(result) as NewPackagePolicy;
               } else {
                 result = await (callback as PostPackagePolicyCreateCallback)(
                   updatedNewData as NewPackagePolicy,
@@ -1884,7 +1884,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                   inputs: result.inputs.map((input) => omit(input, ['compiled_input'])),
                 };
 
-                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                updatedNewData = UpdatePackagePolicySchema.validate(omitted) as PackagePolicy;
               }
             }
 
