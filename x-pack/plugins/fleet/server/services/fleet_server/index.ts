@@ -64,7 +64,7 @@ export const hasFleetServersForPolicies = async (
 
     return activeOnly
       ? agentStatusesRes.online > 0 || agentStatusesRes.updating > 0
-      : agentStatusesRes.total > 0;
+      : agentStatusesRes.all > 0;
   }
   return false;
 };

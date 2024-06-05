@@ -274,7 +274,7 @@ describe('hasActiveFleetServersForPolicies', () => {
       (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
         other: 0,
         events: 0,
-        total: 1,
+        total: 0,
         all: 1,
         active: 0,
         updating: 0,
