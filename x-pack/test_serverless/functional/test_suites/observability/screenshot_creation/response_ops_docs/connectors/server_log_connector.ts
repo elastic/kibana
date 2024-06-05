@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('server log connector', function () {
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
     after(async () => {
