@@ -22,10 +22,9 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
-import { ESQLSearchResponse } from '@kbn/es-types';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
-import { validateEsqlQuery } from './validate_esql_query';
+import { runAndValidateEsqlQuery } from './validate_esql_query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -108,7 +107,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
     },
     async ({ arguments: { query } }) => {
       const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
-      const { error, errorMessages } = await validateEsqlQuery({
+      const { error, errorMessages, rows, columns } = await runAndValidateEsqlQuery({
         query,
         client,
       });
@@ -122,16 +121,12 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
           },
         };
       }
-      const response = (await client.transport.request({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query,
-        },
-      })) as ESQLSearchResponse;
 
       return {
-        content: response,
+        content: {
+          columns,
+          rows,
+        },
       };
     }
   );
