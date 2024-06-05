@@ -31,7 +31,7 @@ export const App: React.FC<AppProps> = ({
       }}
       contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
       paddingSize="none"
-      className="eui-fullHeight"
+      className="eui-yScroll"
     >
       <InferenceEndpoints
         inferenceEndpoints={inferenceEndpoints}
