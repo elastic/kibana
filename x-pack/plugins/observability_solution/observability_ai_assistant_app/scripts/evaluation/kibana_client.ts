@@ -565,18 +565,8 @@ export class KibanaClient {
           }
         ).criteria;
 
-<<<<<<< HEAD
         const scores = scoredCriteria
           .map(({ index, score, reasoning }) => {
-=======
-        const result: EvaluationResult = {
-          name: currentTitle,
-          category: firstSuiteName,
-          conversationId,
-          messages,
-          passed: scoredCriteria.every(({ score }) => score >= 1),
-          scores: scoredCriteria.map(({ index, score, reasoning }) => {
->>>>>>> 0a0853bef9afaf2790fbd553ea6c92c053e568e5
             return {
               criterion: criteria[index],
               score,
@@ -593,11 +583,12 @@ export class KibanaClient {
 
         const result: EvaluationResult = {
           name: currentTitle,
+          category: firstSuiteName,
           conversationId,
           messages,
-          errors,
-          passed: scores.every(({ score }) => score >= 1),
+          passed: scoredCriteria.every(({ score }) => score >= 1),
           scores,
+          errors,
         };
 
         results.push(result);
