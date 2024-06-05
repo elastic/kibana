@@ -17,6 +17,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc, i) => {
@@ -31,6 +32,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc) => {
@@ -42,6 +44,7 @@ describe('addRequiredKbResourceMetadata', () => {
     const transformedDocs = addRequiredKbResourceMetadata({
       docs: mockExampleQueryDocsFromDirectoryLoader,
       kbResource,
+      required: true,
     });
 
     transformedDocs.forEach((doc) => {

@@ -47,14 +47,27 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       true
     );
 
-    const docs = await docsLoader.load();
-    const languageDocs = await languageLoader.load();
+    const rawDocs = await docsLoader.load();
+    const rawLanguageDocs = await languageLoader.load();
     const rawExampleQueries = await exampleQueriesLoader.load();
+
+    // Add additional metadata to set kbResource as esql
+    const docs = addRequiredKbResourceMetadata({
+      docs: rawDocs,
+      kbResource: ESQL_RESOURCE,
+      required: false,
+    });
+    const languageDocs = addRequiredKbResourceMetadata({
+      docs: rawLanguageDocs,
+      kbResource: ESQL_RESOURCE,
+      required: false,
+    });
 
     // Add additional metadata to the example queries that indicates they are required KB documents:
     const requiredExampleQueries = addRequiredKbResourceMetadata({
       docs: rawExampleQueries,
       kbResource: ESQL_RESOURCE,
+      required: true,
     });
 
     logger.info(

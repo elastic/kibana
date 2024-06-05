@@ -26,8 +26,12 @@ import { GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
 import { EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
-import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
+import {
+  ESQL_DOCS_LOADED_QUERY,
+  SECURITY_LABS_RESOURCE,
+} from '../../routes/knowledge_base/constants';
 import { getKBVectorSearchQuery, isModelAlreadyExistsError } from './helpers';
+import { loadSecurityLabs } from '../../lib/langchain/content_loaders/security_labs_loader';
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
@@ -204,13 +208,21 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.debug(`ELSER model '${elserId}' is already deployed`);
       }
 
-      this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
-      const kbDocsLoaded = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
-      if (!kbDocsLoaded) {
-        this.options.logger.debug(`Loading KB docs...`);
+      this.options.logger.debug(`Checking if ESQL Knowledge Base docs have been loaded...`);
+      const esqlDocsLoaded = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
+      if (!esqlDocsLoaded) {
+        this.options.logger.debug(`Loading ESQL KB docs...`);
         await loadESQL(esStore, this.options.logger);
       } else {
-        this.options.logger.debug(`Knowledge Base docs already loaded!`);
+        this.options.logger.debug(`ESQL Knowledge Base docs already loaded!`);
+      }
+
+      const labsDocsLoaded = await esStore.kbResourceExists(SECURITY_LABS_RESOURCE);
+      if (!labsDocsLoaded) {
+        this.options.logger.debug(`Loading Security Labs KB docs...`);
+        await loadSecurityLabs(esStore, this.options.logger);
+      } else {
+        this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
       }
     } catch (e) {
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
@@ -242,7 +254,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
           // TODO: Update the LangChain Document Metadata type extension
           metadata: {
-            kbResource: doc.metadata.kbResourcer ?? 'unknown',
+            kbResource: doc.metadata.kbResource ?? 'unknown',
             required: doc.metadata.required ?? false,
             source: doc.metadata.source ?? 'unknown',
           },

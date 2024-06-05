@@ -14,3 +14,5 @@ export const KNOWLEDGE_BASE_INGEST_PIPELINE = '.kibana-elastic-ai-assistant-kb-i
 export const ESQL_DOCS_LOADED_QUERY =
   'You can chain processing commands, separated by a pipe character: `|`.';
 export const ESQL_RESOURCE = 'esql';
+export const SECURITY_LABS_RESOURCE = 'security_labs';
+export const SECURITY_LABS_DOCS_LOADED_QUERY = 'RemoteLoad.dotm';

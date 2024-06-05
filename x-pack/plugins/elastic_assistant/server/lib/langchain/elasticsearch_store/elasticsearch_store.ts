@@ -71,7 +71,7 @@ export class ElasticsearchStore extends VectorStore {
   private readonly logger: Logger;
   private readonly telemetry: AnalyticsServiceSetup;
   private readonly model: string;
-  private readonly kbResource: string;
+  private kbResource: string;
 
   _vectorstoreType(): string {
     return 'elasticsearch';
@@ -94,6 +94,10 @@ export class ElasticsearchStore extends VectorStore {
     this.model = model ?? '.elser_model_2';
     this.kbResource = kbResource ?? ESQL_RESOURCE;
     this.kbDataClient = kbDataClient;
+  }
+
+  setKbResource(kbResource: string) {
+    this.kbResource = kbResource;
   }
 
   /**
@@ -284,6 +288,28 @@ export class ElasticsearchStore extends VectorStore {
       });
       this.logger.error(e);
       return [];
+    }
+  };
+
+  /**
+   * Checks if a kbResource document exists in the Knowledge Base
+   *
+   * @param kbResource
+   */
+  kbResourceExists = async (kbResource: string): Promise<boolean> => {
+    try {
+      const response = await this.esClient.count({
+        index: this.index,
+        query: {
+          term: {
+            'metadata.kbResource': kbResource,
+          },
+        },
+      });
+      return response.count > 0;
+    } catch (e) {
+      this.logger.error(`Error checking if kbResource exists: ${e}`);
+      return false;
     }
   };
 
