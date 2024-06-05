@@ -17,7 +17,6 @@ import {
 
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
-  ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
 } from '../../../../common/constants';
