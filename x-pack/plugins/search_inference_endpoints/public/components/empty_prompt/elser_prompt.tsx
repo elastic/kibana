@@ -20,7 +20,8 @@ export const ElserPrompt: React.FC<ElserPromptProps> = ({
   setIsInferenceFlyoutVisible,
 }) => (
   <EuiCard
-    display="primary"
+    display="plain"
+    hasBorder
     textAlign="left"
     data-test-subj="elserPromptForEmptyState"
     description={i18n.translate(

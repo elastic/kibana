@@ -21,7 +21,8 @@ export const MultilingualE5Prompt: React.FC<MultilingualE5PromptProps> = ({
   setIsInferenceFlyoutVisible,
 }) => (
   <EuiCard
-    display="primary"
+    display="plain"
+    hasBorder
     textAlign="left"
     data-test-subj="multilingualE5PromptForEmptyState"
     description={i18n.translate(
