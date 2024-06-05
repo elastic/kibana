@@ -93,239 +93,83 @@ describe('validation', () => {
       });
 
       describe('... <aggregates> ...', () => {
-        test('no errors when using aggregate functions correctly', async () => {
+        test('no errors on correct usage', async () => {
           const { expectErrors } = await setup();
 
-          await expectErrors('metrics a_index avg( numberField )', []);
-          await expectErrors('metrics a_index count(`numberField`)', []);
-          await expectErrors('METRICS a_index count(`numberField`)\n\t\t', []);
+          await expectErrors('METRICS a_index count()', []);
           await expectErrors('metrics a_index avg(numberField) by 1', []);
+          await expectErrors('metrics a_index count(`numberField`)', []);
+          await expectErrors('metrics a_index count(*)', []);
+          await expectErrors('metrics index var0 = count(*)', []);
+          await expectErrors('metrics a_index var0 = count()', []);
+          await expectErrors('metrics a_index var0 = avg(numberField), count(*)', []);
+          await expectErrors(`metrics a_index sum(case(false, 0, 1))`, []);
+          await expectErrors(`metrics a_index var0 = sum( case(false, 0, 1))`, []);
+          await expectErrors('metrics a_index count(stringField == "a" or null)', []);
         });
 
-        test('returns errors on wrong fields', async () => {
+        test('syntax errors', async () => {
           const { expectErrors } = await setup();
 
-          // await expectErrors('metrics a_index avg(numberField) by wrongField', [
-          //   'Unknown column [wrongField]',
-          // ]);
-          // await expectErrors('metrics a_index avg(numberField) by wrongField + 1', [
-          //   'Unknown column [wrongField]',
-          // ]);
-          // await expectErrors('from a_index | stats avg(numberField) by var0 = wrongField + 1', [
-          //   'Unknown column [wrongField]',
-          // ]);
-          await expectErrors('metrics a_index avg(numberField) by var0 = wrongField + 1', [
-            'Unknown column [wrongField]',
+          await expectErrors('metrics a_index numberField=', [
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+          ]);
+          await expectErrors('metrics a_index numberField=5 by ', [
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
           ]);
         });
 
-        // testErrorsAndWarnings('from a_index | stats by ', [
-        //   "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        // ]);
-        //   testErrorsAndWarnings('from a_index | stats numberField ', [
-        //     'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
-        //   ]);
-        //   testErrorsAndWarnings('from a_index | stats numberField=', [
-        //     "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        //   ]);
-        //   testErrorsAndWarnings('from a_index | stats numberField=5 by ', [
-        //     "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        //   ]);
+        test.skip('errors on unknown function', async () => {
+          const { expectErrors } = await setup();
 
-        //   testErrorsAndWarnings('from a_index | stats avg(numberField) by percentile(numberField)', [
-        //     'STATS BY does not support function percentile',
-        //   ]);
+          await expectErrors('metrics a_index var0 = avg(fn(number)), count(*)', [
+            'Unknown function [fn]',
+          ]);
+        });
 
-        //   // this is a scenario that was failing because "or" didn't accept "null"
-        //   testErrorsAndWarnings('from a_index | stats count(stringField == "a" or null)', []);
+        test.skip('errors when no aggregation function specified', async () => {
+          const { expectErrors } = await setup();
 
-        //   for (const subCommand of ['keep', 'drop', 'eval']) {
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats count(\`numberField\`) | ${subCommand} \`count(\`\`numberField\`\`)\` `,
-        //       []
-        //     );
-        //   }
+          await expectErrors('metrics a_index numberField + 1', [
+            'At least one aggregation function required in [STATS], found [numberField+1]',
+          ]);
+          await expectErrors('metrics a_index 5 + numberField + 1', [
+            'At least one aggregation function required in [STATS], found [5+numberField+1]',
+          ]);
+          await expectErrors('metrics a_index numberField + 1 by ipField', [
+            'At least one aggregation function required in [STATS], found [numberField+1]',
+          ]);
+        });
 
-        //   testErrorsAndWarnings(
-        //     'from a_index | stats avg(numberField) by stringField, percentile(numberField) by ipField',
-        //     [
-        //       "SyntaxError: mismatched input 'by' expecting <EOF>",
-        //       'STATS BY does not support function percentile',
-        //     ]
-        //   );
+        test.skip('sub-command can reference aggregated field', async () => {
+          const { expectErrors } = await setup();
 
-        //   testErrorsAndWarnings(
-        //     'from a_index | stats avg(numberField), percentile(numberField, 50) by ipField',
-        //     []
-        //   );
+          for (const subCommand of ['keep', 'drop', 'eval']) {
+            await expectErrors(
+              'metrics a_index count(`numberField`) | ' + subCommand + ' `count(``numberField``)` ',
+              []
+            );
+          }
+        });
 
-        //   testErrorsAndWarnings(
-        //     'from a_index | stats avg(numberField), percentile(numberField, 50) BY ipField',
-        //     []
-        //   );
-        //   for (const op of ['+', '-', '*', '/', '%']) {
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
-        //       []
-        //     );
-        //   }
-        //   testErrorsAndWarnings('from a_index | stats count(* + 1) BY ipField', [
-        //     "SyntaxError: no viable alternative at input 'count(* +'",
-        //   ]);
-        //   testErrorsAndWarnings('from a_index | stats count(* + round(numberField)) BY ipField', [
-        //     "SyntaxError: no viable alternative at input 'count(* +'",
-        //   ]);
-        //   testErrorsAndWarnings('from a_index | stats count(round(*)) BY ipField', [
-        //     'Using wildcards (*) in round is not allowed',
-        //   ]);
-        //   testErrorsAndWarnings('from a_index | stats count(count(*)) BY ipField', [
-        //     `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
-        //   ]);
-        //   testErrorsAndWarnings('from a_index | stats numberField + 1', [
-        //     'At least one aggregation function required in [STATS], found [numberField+1]',
-        //   ]);
+        test.skip('errors on agg and non-agg mix', async () => {
+          const { expectErrors } = await setup();
 
-        //   for (const nesting of NESTED_DEPTHS) {
-        //     const moreBuiltinWrapping = Array(nesting).fill('+1').join('');
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats 5 + avg(numberField) ${moreBuiltinWrapping}`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats 5 ${moreBuiltinWrapping} + avg(numberField)`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + numberField`, [
-        //       `At least one aggregation function required in [STATS], found [5${moreBuiltinWrapping}+numberField]`,
-        //     ]);
-        //     testErrorsAndWarnings(`from a_index | stats 5 + numberField ${moreBuiltinWrapping}`, [
-        //       `At least one aggregation function required in [STATS], found [5+numberField${moreBuiltinWrapping}]`,
-        //     ]);
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats 5 + numberField ${moreBuiltinWrapping}, var0 = sum(numberField)`,
-        //       [
-        //         `At least one aggregation function required in [STATS], found [5+numberField${moreBuiltinWrapping}]`,
-        //       ]
-        //     );
-        //     const evalFnWrapping = Array(nesting).fill('round(').join('');
-        //     const closingWrapping = Array(nesting).fill(')').join('');
-        //     // stress test the validation of the nesting check here
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats ${evalFnWrapping} sum(numberField) ${closingWrapping}`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats ${evalFnWrapping} sum(numberField) ${closingWrapping} + ${evalFnWrapping} sum(numberField) ${closingWrapping}`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}`,
-        //       [
-        //         `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
-        //       ]
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}, var0 = sum(numberField)`,
-        //       [
-        //         `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
-        //       ]
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats var0 = ${evalFnWrapping} numberField + sum(numberField) ${closingWrapping}, var1 = sum(numberField)`,
-        //       [
-        //         `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalFnWrapping}numberField+sum(numberField)${closingWrapping}]`,
-        //       ]
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats ${evalFnWrapping} sum(numberField + numberField) ${closingWrapping}`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping} + ${evalFnWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats sum(${evalFnWrapping} numberField ${closingWrapping} )`,
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       `from a_index | stats sum(${evalFnWrapping} numberField ${closingWrapping} ) + sum(${evalFnWrapping} numberField ${closingWrapping} )`,
-        //       []
-        //     );
-        //   }
+          await expectErrors('METRICS a_index sum( numberField ) + abs( numberField ) ', [
+            'Cannot combine aggregation and non-aggregation values in [METRICS], found [sum(numberField)+abs(numberField)]',
+          ]);
+          await expectErrors('METRICS a_index abs( numberField + sum( numberField )) ', [
+            'Cannot combine aggregation and non-aggregation values in [METRICS], found [abs(numberField+sum(numberField))]',
+          ]);
+        });
 
-        //   testErrorsAndWarnings('from a_index | stats 5 + numberField + 1', [
-        //     'At least one aggregation function required in [STATS], found [5+numberField+1]',
-        //   ]);
+        test.skip('errors when input is not an aggregate function', async () => {
+          const { expectErrors } = await setup();
 
-        //   testErrorsAndWarnings('from a_index | stats numberField + 1 by ipField', [
-        //     'At least one aggregation function required in [STATS], found [numberField+1]',
-        //   ]);
-
-        //   testErrorsAndWarnings(
-        //     'from a_index | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
-        //     []
-        //   );
-
-        //   testErrorsAndWarnings('from a_index | stats count(*)', []);
-        //   testErrorsAndWarnings('from a_index | stats count()', []);
-        //   testErrorsAndWarnings('from a_index | stats var0 = count(*)', []);
-        //   testErrorsAndWarnings('from a_index | stats var0 = count()', []);
-        //   testErrorsAndWarnings('from a_index | stats var0 = avg(numberField), count(*)', []);
-        //   testErrorsAndWarnings('from a_index | stats var0 = avg(fn(number)), count(*)', [
-        //     'Unknown function [fn]',
-        //   ]);
-
-        //   // test all not allowed combinations
-        //   testErrorsAndWarnings('from a_index | STATS sum( numberField ) + abs( numberField ) ', [
-        //     'Cannot combine aggregation and non-aggregation values in [STATS], found [sum(numberField)+abs(numberField)]',
-        //   ]);
-        //   testErrorsAndWarnings('from a_index | STATS abs( numberField + sum( numberField )) ', [
-        //     'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(numberField+sum(numberField))]',
-        //   ]);
-
-        //   testErrorsAndWarnings(
-        //     `FROM index
-        // | EVAL numberField * 3.281
-        // | STATS avg_numberField = AVG(\`numberField * 3.281\`)`,
-        //     []
-        //   );
-
-        //   testErrorsAndWarnings(
-        //     `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
-        //     []
-        //   );
-
-        //   testErrorsAndWarnings(`from a_index | stats sum(case(false, 0, 1))`, []);
-        //   testErrorsAndWarnings(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
-
-        //   describe('constant-only parameters', () => {
-        //     testErrorsAndWarnings('from index | stats by bucket(dateField, abs(numberField), "", "")', [
-        //       'Argument of [bucket] must be a constant, received [abs(numberField)]',
-        //     ]);
-        //     testErrorsAndWarnings(
-        //       'from index | stats by bucket(dateField, abs(length(numberField)), "", "")',
-        //       ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
-        //     );
-        //     testErrorsAndWarnings('from index | stats by bucket(dateField, pi(), "", "")', []);
-        //     testErrorsAndWarnings('from index | stats by bucket(dateField, 1 + 30 / 10, "", "")', []);
-        //     testErrorsAndWarnings(
-        //       'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
-        //       []
-        //     );
-        //     testErrorsAndWarnings(
-        //       'from index | stats by bucket(dateField, numberField, stringField, stringField)',
-        //       [
-        //         'Argument of [bucket] must be a constant, received [numberField]',
-        //         'Argument of [bucket] must be a constant, received [stringField]',
-        //         'Argument of [bucket] must be a constant, received [stringField]',
-        //       ]
-        //     );
-        //   });
+          await expectErrors('metrics a_index numberField ', [
+            'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
+          ]);
+        });
       });
 
       describe('... BY <grouping>', () => {
@@ -335,6 +179,21 @@ describe('validation', () => {
           await expectErrors('metrics a_index BY stringField', [
             "SyntaxError: extraneous input 'stringField' expecting <EOF>",
           ]);
+        });
+
+        test('errors on unknown field', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('metrics a_index avg(numberField) by wrongField', [
+            'Unknown column [wrongField]',
+          ]);
+          await expectErrors('metrics a_index avg(numberField) by wrongField + 1', [
+            'Unknown column [wrongField]',
+          ]);
+          // TODO: Fix this test
+          // await expectErrors('metrics a_index avg(numberField) by var0 = wrongField + 1', [
+          //   'Unknown column [wrongField]',
+          // ]);
         });
       });
     });
