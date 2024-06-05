@@ -570,12 +570,6 @@ function validateSetting(
   return messages;
 }
 
-// const isAggFunction = (fn: ESQLFunction): boolean =>
-//   getFunctionDefinition(fn.name)?.type === 'agg';
-
-// const isAggFunction = (fn: ESQLFunction): boolean =>
-//   getFunctionDefinition(fn.name)?.type === 'agg';
-
 /**
  * Validates aggregates fields: `... <aggregates> ...`.
  */

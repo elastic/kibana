@@ -447,19 +447,6 @@ export const errors = {
       commandName: cmd.name,
       expression: fn.text,
     }),
-
-  missingAggregates: (command: string, location: ESQLLocation): ESQLMessage => {
-    return createError(
-      'missingAggregates',
-      location,
-      i18n.translate('kbn-esql-validation-autocomplete.esql.validation.missingAggregates', {
-        defaultMessage: 'At least one aggregation or grouping expression required in [{command}]',
-        values: {
-          command: command.toUpperCase(),
-        },
-      })
-    );
-  },
 };
 
 export function getUnknownTypeLabel() {
