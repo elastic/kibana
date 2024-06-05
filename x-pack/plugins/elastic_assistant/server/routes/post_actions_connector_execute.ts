@@ -181,7 +181,7 @@ export const postActionsConnectorExecuteRoute = (
                       model: request.body.model,
                       messages: [
                         {
-                          role: 'assistant',
+                          role: 'system',
                           content: i18n.translate(
                             'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
                             {
