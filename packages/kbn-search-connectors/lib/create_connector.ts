@@ -50,7 +50,7 @@ export const createConnector = async (
     await client.transport.request({
       method: 'PUT',
       path: `/_connector/${connectorId}/_features`,
-      body: input.features,
+      body: { features: input.features },
     });
   }
 
