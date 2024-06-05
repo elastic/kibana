@@ -148,4 +148,24 @@ export const attackDiscoveryFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  average_interval_ms: {
+    type: 'integer',
+    array: false,
+    required: false,
+  },
+  generation_intervals: {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'generation_intervals.date': {
+    type: 'date',
+    array: false,
+    required: true,
+  },
+  'generation_intervals.duration_ms': {
+    type: 'integer',
+    array: false,
+    required: true,
+  },
 } as const;

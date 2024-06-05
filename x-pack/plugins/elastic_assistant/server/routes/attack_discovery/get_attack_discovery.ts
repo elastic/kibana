@@ -10,7 +10,7 @@ import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryGetResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-  AttackDiscoveryGetRequestQuery,
+  AttackDiscoveryGetRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -32,7 +32,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(AttackDiscoveryGetRequestQuery),
+            params: buildRouteValidationWithZod(AttackDiscoveryGetRequestParams),
           },
           response: {
             200: {
@@ -47,7 +47,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         const logger: Logger = assistantContext.logger;
         const dataClient = await assistantContext.getAttackDiscoveryDataClient();
         const authenticatedUser = assistantContext.getCurrentUser();
-        const connectorId = decodeURIComponent(request.query.connectorId);
+        const connectorId = decodeURIComponent(request.params.connectorId);
         if (authenticatedUser == null) {
           return resp.error({
             body: `Authenticated user not found`,

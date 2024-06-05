@@ -6,12 +6,47 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-
+    AttackDiscovery:
+      type: object
+      description: An attack discovery generated from one or more alerts
+      required:
+        - 'alertIds'
+        - 'detailsMarkdown'
+        - 'entitySummaryMarkdown'
+        - 'summaryMarkdown'
+        - 'timestamp'
+        - 'title'
+      properties:
+        alertIds:
+          description: The alert IDs that the attack discovery is based on
+          items:
+            type: string
+          type: array
+        detailsMarkdown:
+          description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+          type: string
+        entitySummaryMarkdown:
+          description: A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+          type: string
+        mitreAttackTactics:
+          description: An array of MITRE ATT&CK tactic for the attack discovery
+          items:
+            type: string
+          type: array
+        summaryMarkdown:
+          description: A markdown summary of attack discovery, using the same syntax
+          type: string
+        title:
+          description: A title for the attack discovery, in plain text
+          type: string
+        timestamp:
+          description: The time the attack discovery was generated
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
     AttackDiscoveries:
       type: array
       description: Array of attack discoveries
       items:
-        $ref: './post_attack_discovery_route.schema.yaml#/components/schemas/AttackDiscovery'
+        $ref: '#/components/schemas/AttackDiscovery'
 
     AttackDiscoveryStatus:
       type: string
@@ -25,17 +60,12 @@ components:
       type: object
       description: Run durations for the attack discovery
       required:
-        - 'timestamp'
+        - 'date'
         - 'durationMs'
-        - 'entitySummaryMarkdown'
-        - 'summaryMarkdown'
-        - 'timestamp'
-        - 'title'
       properties:
-        alertIds:
+        date:
           description: The time the attack discovery was generated
-          items:
-            type: string
+          type: string
         durationMs:
           description: The duration of the attack discovery generation
           type: integer
@@ -93,7 +123,7 @@ components:
           type: array
           description: The most 5 recent generation intervals
           items:
-            $ref: '#/components/schemas/AttackDiscoveryStatus'
+            $ref: '#/components/schemas/GenerationInterval'
         averageIntervalMs:
             type: integer
             description: The average generation interval in milliseconds
@@ -121,6 +151,11 @@ components:
           description: The status of the attack discovery.
         replacements:
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        generationIntervals:
+          type: array
+          description: The most 5 recent generation intervals
+          items:
+            $ref: '#/components/schemas/GenerationInterval'
         backingIndex:
           type: string
           description: The backing index required for update requests.

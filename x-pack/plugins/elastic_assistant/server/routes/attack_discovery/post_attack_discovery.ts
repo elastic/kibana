@@ -17,8 +17,9 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
+import moment from 'moment/moment';
 import { ATTACK_DISCOVERY } from '../../../common/constants';
-import { attackDiscoveryStatus, getAssistantToolParams } from './helpers';
+import { addGenerationInterval, attackDiscoveryStatus, getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
@@ -58,6 +59,7 @@ export const postAttackDiscoveryRoute = (
         },
       },
       async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryPostResponse>> => {
+        const startTime = moment(); // start timing the generation
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
@@ -213,12 +215,18 @@ export const postAttackDiscoveryRoute = (
                 id: attackDiscoveryId,
                 replacements: latestReplacements,
               });
+              const endTime = moment();
+              const durationMs = endTime.diff(startTime);
               const updateResult = await dataClient?.updateAttackDiscovery({
                 attackDiscoveryUpdateProps: {
                   ...dependentProps,
                   id: attackDiscoveryId,
                   replacements: latestReplacements,
                   backingIndex: currentAd.backingIndex,
+                  generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
+                    durationMs,
+                    date: new Date().toISOString(),
+                  }),
                 },
                 authenticatedUser,
               });

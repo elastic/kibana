@@ -11,6 +11,7 @@ import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryStatus,
   ExecuteConnectorRequestBody,
+  GenerationInterval,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
@@ -77,4 +78,18 @@ export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
   failed: 'failed',
   running: 'running',
   succeeded: 'succeeded',
+};
+const MAX_GENERATION_INTERVALS = 5;
+
+export const addGenerationInterval = (
+  generationIntervals: GenerationInterval[],
+  generationInterval: GenerationInterval
+): GenerationInterval[] => {
+  const newGenerationIntervals = [generationInterval, ...generationIntervals];
+
+  if (newGenerationIntervals.length > MAX_GENERATION_INTERVALS) {
+    return newGenerationIntervals.slice(0, MAX_GENERATION_INTERVALS); // Return the first MAX_GENERATION_INTERVALS items
+  }
+
+  return newGenerationIntervals;
 };

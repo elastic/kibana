@@ -3,7 +3,7 @@ info:
   title: Get Attack Discovery API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/attack_discovery:
+  /internal/elastic_assistant/attack_discovery/{connectorId}:
     get:
       operationId: AttackDiscoveryGet
       x-codegen-enabled: true
@@ -13,10 +13,11 @@ paths:
         - attack_discovery
       parameters:
         - name: 'connectorId'
-          in: query
+          in: path
           required: true
+          description: The connector id for which to get the attack discovery
           schema:
-            type: string
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         '200':
           description: Successful response

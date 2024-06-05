@@ -37,6 +37,8 @@ export interface UpdateAttackDiscoverySchema {
     model?: string;
   };
   alerts_context_count?: number;
+  average_interval_ms?: number;
+  generation_intervals?: Array<{ date: string; duration_ms: number }>;
   replacements?: EsReplacementSchema[];
   status: AttackDiscoveryStatus;
   updated_at?: string;
@@ -99,8 +101,22 @@ export const transformToUpdateScheme = (
     id,
     status,
     alertsContextCount,
+    generationIntervals,
   }: AttackDiscoveryUpdateProps
 ): UpdateAttackDiscoverySchema => {
+  const averageIntervalMsObj =
+    generationIntervals && generationIntervals.length > 0
+      ? {
+          average_interval_ms: Math.trunc(
+            generationIntervals.reduce((acc, interval) => acc + interval.durationMs, 0) /
+              generationIntervals.length
+          ),
+          generation_intervals: generationIntervals.map((interval) => ({
+            date: interval.date,
+            duration_ms: interval.durationMs,
+          })),
+        }
+      : {};
   return {
     id,
     updated_at: updatedAt,
@@ -129,5 +145,6 @@ export const transformToUpdateScheme = (
         summary_markdown: attackDiscovery.summaryMarkdown,
         timestamp: attackDiscovery.timestamp,
       })) ?? [],
+    ...averageIntervalMsObj,
   };
 };

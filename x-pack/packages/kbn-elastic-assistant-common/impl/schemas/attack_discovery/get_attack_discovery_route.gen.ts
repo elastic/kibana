@@ -16,13 +16,17 @@ import { z } from 'zod';
  *   version: 1
  */
 
+import { NonEmptyString } from '../common_attributes.gen';
 import { AttackDiscoveryResponse } from './common_attributes.gen';
 
-export type AttackDiscoveryGetRequestQuery = z.infer<typeof AttackDiscoveryGetRequestQuery>;
-export const AttackDiscoveryGetRequestQuery = z.object({
-  connectorId: z.string(),
+export type AttackDiscoveryGetRequestParams = z.infer<typeof AttackDiscoveryGetRequestParams>;
+export const AttackDiscoveryGetRequestParams = z.object({
+  /**
+   * The connector id for which to get the attack discovery
+   */
+  connectorId: NonEmptyString,
 });
-export type AttackDiscoveryGetRequestQueryInput = z.input<typeof AttackDiscoveryGetRequestQuery>;
+export type AttackDiscoveryGetRequestParamsInput = z.input<typeof AttackDiscoveryGetRequestParams>;
 
 export type AttackDiscoveryGetResponse = z.infer<typeof AttackDiscoveryGetResponse>;
 export const AttackDiscoveryGetResponse = z.object({

@@ -13,7 +13,7 @@ import {
   useAssistantContext,
   useLoadConnectors,
 } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
 import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'react-use';
@@ -37,7 +37,6 @@ import { PageTitle } from './page_title';
 import { Summary } from './summary';
 import { Upgrade } from './upgrade';
 import { useAttackDiscovery } from '../use_attack_discovery';
-import type { AttackDiscovery } from '../types';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const spaceId = useSpaceId() ?? 'default';
@@ -72,7 +71,6 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
-    cachedAttackDiscoveries,
     fetchAttackDiscoveries,
     generationIntervals,
     isLoading,
@@ -80,23 +78,23 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     replacements,
   } = useAttackDiscovery({
     connectorId,
-    setConnectorId,
+    // TODO make sure this is cool
+    // setConnectorId,
     setLoadingConnectorId,
   });
 
   // get last updated from the cached attack discoveries if it exists:
   const [selectedConnectorLastUpdated, setSelectedConnectorLastUpdated] = useState<Date | null>(
-    cachedAttackDiscoveries[connectorId ?? '']?.updated ?? null
+    lastUpdated ?? null
   );
 
   // get cached attack discoveries if they exist:
-  const [selectedConnectorAttackDiscoveries, setSelectedConnectorAttackDiscoveries] = useState<
-    AttackDiscovery[]
-  >(cachedAttackDiscoveries[connectorId ?? '']?.attackDiscoveries ?? []);
+  const [selectedConnectorAttackDiscoveries, setSelectedConnectorAttackDiscoveries] =
+    useState<AttackDiscoveries>(attackDiscoveries ?? []);
 
   // get replacements from the cached attack discoveries if they exist:
   const [selectedConnectorReplacements, setSelectedConnectorReplacements] = useState<Replacements>(
-    cachedAttackDiscoveries[connectorId ?? '']?.replacements ?? {}
+    replacements ?? {}
   );
 
   // the number of unique alerts in the attack discoveries:
@@ -115,26 +113,23 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       setConnectorId(selectedConnectorId);
       setLocalStorageAttackDiscoveryConnectorId(selectedConnectorId);
 
-      // get the cached attack discoveries for the selected connector:
-      const cached = cachedAttackDiscoveries[selectedConnectorId];
-      if (cached != null) {
-        setSelectedConnectorReplacements(cached.replacements ?? {});
-        setSelectedConnectorAttackDiscoveries(cached.attackDiscoveries ?? []);
-        setSelectedConnectorLastUpdated(cached.updated ?? null);
-      } else {
-        setSelectedConnectorReplacements({});
-        setSelectedConnectorAttackDiscoveries([]);
-        setSelectedConnectorLastUpdated(null);
-      }
+      // TODO i think i can trash this all
+      // const cached = cachedAttackDiscoveries[selectedConnectorId];
+      // if (cached != null) {
+      //   setSelectedConnectorReplacements(cached.replacements ?? {});
+      //   setSelectedConnectorAttackDiscoveries(cached.attackDiscoveries ?? []);
+      //   setSelectedConnectorLastUpdated(cached.updated ?? null);
+      // } else {
+      //   setSelectedConnectorReplacements({});
+      //   setSelectedConnectorAttackDiscoveries([]);
+      //   setSelectedConnectorLastUpdated(null);
+      // }
     },
-    [cachedAttackDiscoveries, setLocalStorageAttackDiscoveryConnectorId]
+    [setLocalStorageAttackDiscoveryConnectorId]
   );
 
   // get connector intervals from generation intervals:
-  const connectorIntervals = useMemo(
-    () => generationIntervals?.[connectorId ?? ''] ?? [],
-    [connectorId, generationIntervals]
-  );
+  const connectorIntervals = useMemo(() => generationIntervals ?? [], [generationIntervals]);
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 

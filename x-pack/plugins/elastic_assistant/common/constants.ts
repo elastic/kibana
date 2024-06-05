@@ -13,7 +13,7 @@ export const BASE_PATH = '/internal/elastic_assistant';
 export const POST_ACTIONS_CONNECTOR_EXECUTE = `${BASE_PATH}/actions/connector/{connectorId}/_execute`;
 
 // Attack discovery
-export const ATTACK_DISCOVERY = `${BASE_PATH}/attack_discovery`;
+export const ATTACK_DISCOVERY = `${BASE_PATH}/attack_discovery/{connectorId}`;
 
 // Model Evaluation
 export const EVALUATE = `${BASE_PATH}/evaluate`;

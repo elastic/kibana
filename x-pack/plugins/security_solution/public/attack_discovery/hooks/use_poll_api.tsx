@@ -22,7 +22,7 @@ export const usePollApi = ({
   http,
 }: Props): {
   status: AttackDiscoveryStatus | null;
-  data: AttackDiscoveryGetResponse | null;
+  data: AttackDiscoveryResponse | null;
   error: string | null;
   pollApi: (connectorId: string) => void;
 } => {
@@ -32,6 +32,7 @@ export const usePollApi = ({
   const pollApi = useCallback(
     async (connectorId: string) => {
       try {
+        console.log('stephhh useCallback (actually) pollApi');
         // call the internal API to generate attack discoveries:
         const rawResponse = await http.fetch(
           `/internal/elastic_assistant/attack_discovery/${connectorId}`,
@@ -42,6 +43,7 @@ export const usePollApi = ({
         );
 
         const parsedResponse = AttackDiscoveryGetResponse.safeParse(rawResponse);
+        console.log('stephhh useCallback (actually) pollApi after', parsedResponse);
         if (!parsedResponse.success) {
           throw new Error('Failed to parse the response');
         }
@@ -61,6 +63,7 @@ export const usePollApi = ({
           setError('Unexpected status');
         }
       } catch (err) {
+        console.log('stephhh useCallback (actually) pollApi err', err);
         setError(err);
       }
     },

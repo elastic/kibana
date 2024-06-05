@@ -51,51 +51,63 @@ export const transformESSearchToAttackDiscovery = (
           acc[r.uuid] = r.value;
           return acc;
         }, {}),
+        generationIntervals:
+          adSchema.generation_intervals?.map((interval) => ({
+            date: interval.date,
+            durationMs: interval.duration_ms,
+          })) ?? [],
+        averageIntervalMs: adSchema.average_interval_ms ?? 0,
       };
 
       return ad;
     });
 };
-
-export const transformESToAttackDiscovery = (
-  response: EsAttackDiscoverySchema[]
-): AttackDiscoveryResponse[] => {
-  return response.map((adSchema) => {
-    const ad: AttackDiscoveryResponse = {
-      timestamp: adSchema['@timestamp'],
-      id: adSchema.id,
-      createdAt: adSchema.created_at,
-      updatedAt: adSchema.updated_at,
-      users:
-        adSchema.users?.map((user) => ({
-          id: user.id,
-          name: user.name,
-        })) ?? [],
-      namespace: adSchema.namespace,
-      status: adSchema.status,
-      alertsContextCount: adSchema.alerts_context_count,
-      apiConfig: {
-        actionTypeId: adSchema.api_config.action_type_id,
-        connectorId: adSchema.api_config.connector_id,
-        defaultSystemPromptId: adSchema.api_config.default_system_prompt_id,
-        model: adSchema.api_config.model,
-        provider: adSchema.api_config.provider,
-      },
-      replacements: adSchema.replacements?.reduce((acc: Record<string, string>, r) => {
-        acc[r.uuid] = r.value;
-        return acc;
-      }, {}),
-      attackDiscoveries: adSchema.attack_discoveries.map((attackDiscovery) => ({
-        alertIds: attackDiscovery.alert_ids,
-        title: attackDiscovery.title,
-        detailsMarkdown: attackDiscovery.details_markdown,
-        entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,
-        mitreAttackTactics: attackDiscovery.mitre_attack_tactics,
-        summaryMarkdown: attackDiscovery.summary_markdown,
-        timestamp: attackDiscovery.timestamp,
-      })),
-    };
-
-    return ad;
-  });
-};
+//
+// export const transformESToAttackDiscovery = (
+//   response: EsAttackDiscoverySchema[]
+// ): AttackDiscoveryResponse[] => {
+//   return response.map((adSchema) => {
+//     const ad: AttackDiscoveryResponse = {
+//       timestamp: adSchema['@timestamp'],
+//       id: adSchema.id,
+//       createdAt: adSchema.created_at,
+//       updatedAt: adSchema.updated_at,
+//       users:
+//         adSchema.users?.map((user) => ({
+//           id: user.id,
+//           name: user.name,
+//         })) ?? [],
+//       namespace: adSchema.namespace,
+//       status: adSchema.status,
+//       alertsContextCount: adSchema.alerts_context_count,
+//       apiConfig: {
+//         actionTypeId: adSchema.api_config.action_type_id,
+//         connectorId: adSchema.api_config.connector_id,
+//         defaultSystemPromptId: adSchema.api_config.default_system_prompt_id,
+//         model: adSchema.api_config.model,
+//         provider: adSchema.api_config.provider,
+//       },
+//       replacements: adSchema.replacements?.reduce((acc: Record<string, string>, r) => {
+//         acc[r.uuid] = r.value;
+//         return acc;
+//       }, {}),
+//       attackDiscoveries: adSchema.attack_discoveries.map((attackDiscovery) => ({
+//         alertIds: attackDiscovery.alert_ids,
+//         title: attackDiscovery.title,
+//         detailsMarkdown: attackDiscovery.details_markdown,
+//         entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,
+//         mitreAttackTactics: attackDiscovery.mitre_attack_tactics,
+//         summaryMarkdown: attackDiscovery.summary_markdown,
+//         timestamp: attackDiscovery.timestamp,
+//       })),
+//       generationIntervals:
+//         adSchema.generation_intervals?.map((interval) => ({
+//           date: interval.date,
+//           durationMs: interval.duration_ms,
+//         })) ?? [],
+//       averageIntervalMs: adSchema.average_interval_ms ?? 0,
+//     };
+//
+//     return ad;
+//   });
+// };

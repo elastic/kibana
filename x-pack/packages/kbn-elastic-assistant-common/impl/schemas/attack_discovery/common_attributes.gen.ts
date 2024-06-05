@@ -16,9 +16,43 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-import { AttackDiscovery } from './post_attack_discovery_route.gen';
 import { NonEmptyString, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
+
+/**
+ * An attack discovery generated from one or more alerts
+ */
+export type AttackDiscovery = z.infer<typeof AttackDiscovery>;
+export const AttackDiscovery = z.object({
+  /**
+   * The alert IDs that the attack discovery is based on
+   */
+  alertIds: z.array(z.string()),
+  /**
+   * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
+   */
+  detailsMarkdown: z.string(),
+  /**
+   * A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
+   */
+  entitySummaryMarkdown: z.string(),
+  /**
+   * An array of MITRE ATT&CK tactic for the attack discovery
+   */
+  mitreAttackTactics: z.array(z.string()).optional(),
+  /**
+   * A markdown summary of attack discovery, using the same syntax
+   */
+  summaryMarkdown: z.string(),
+  /**
+   * A title for the attack discovery, in plain text
+   */
+  title: z.string(),
+  /**
+   * The time the attack discovery was generated
+   */
+  timestamp: NonEmptyString,
+});
 
 /**
  * Array of attack discoveries
@@ -33,6 +67,21 @@ export type AttackDiscoveryStatus = z.infer<typeof AttackDiscoveryStatus>;
 export const AttackDiscoveryStatus = z.enum(['running', 'succeeded', 'failed']);
 export type AttackDiscoveryStatusEnum = typeof AttackDiscoveryStatus.enum;
 export const AttackDiscoveryStatusEnum = AttackDiscoveryStatus.enum;
+
+/**
+ * Run durations for the attack discovery
+ */
+export type GenerationInterval = z.infer<typeof GenerationInterval>;
+export const GenerationInterval = z.object({
+  /**
+   * The time the attack discovery was generated
+   */
+  date: z.string(),
+  /**
+   * The duration of the attack discovery generation
+   */
+  durationMs: z.number().int(),
+});
 
 export type AttackDiscoveryResponse = z.infer<typeof AttackDiscoveryResponse>;
 export const AttackDiscoveryResponse = z.object({
@@ -72,6 +121,14 @@ export const AttackDiscoveryResponse = z.object({
    * The backing index required for update requests.
    */
   backingIndex: z.string(),
+  /**
+   * The most 5 recent generation intervals
+   */
+  generationIntervals: z.array(GenerationInterval),
+  /**
+   * The average generation interval in milliseconds
+   */
+  averageIntervalMs: z.number().int(),
 });
 
 export type AttackDiscoveryUpdateProps = z.infer<typeof AttackDiscoveryUpdateProps>;
@@ -94,6 +151,10 @@ export const AttackDiscoveryUpdateProps = z.object({
    */
   status: AttackDiscoveryStatus,
   replacements: Replacements.optional(),
+  /**
+   * The most 5 recent generation intervals
+   */
+  generationIntervals: z.array(GenerationInterval).optional(),
   /**
    * The backing index required for update requests.
    */

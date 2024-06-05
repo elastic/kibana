@@ -37,6 +37,8 @@ export interface EsAttackDiscoverySchema {
     id?: string;
     name?: string;
   }>;
+  average_interval_ms?: number;
+  generation_intervals?: Array<{ date: string; duration_ms: number }>;
 }
 
 export interface CreateAttackDiscoverySchema {
