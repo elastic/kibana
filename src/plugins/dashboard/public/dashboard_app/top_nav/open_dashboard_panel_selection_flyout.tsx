@@ -70,6 +70,7 @@ export function openDashboardPanelSelectionFlyout({
 
   flyoutRef = overlays.openFlyout(mount, {
     size: 'm',
+    maxWidth: 500,
     paddingSize: flyoutPanelPaddingSize,
     'aria-labelledby': 'addPanelsFlyout',
     'data-test-subj': 'dashboardPanelSelectionFlyout',
@@ -133,7 +134,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
           <h1 id="addPanelsFlyout">
             <FormattedMessage
               id="dashboard.solutionToolbar.addPanelFlyout.headingText"
-              defaultMessage="Add Panel"
+              defaultMessage="Add panel"
             />
           </h1>
         </EuiTitle>
@@ -146,6 +147,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
               position: 'sticky',
               top: euiTheme.size[paddingSize],
               zIndex: 1,
+              boxShadow: `0 -${euiTheme.size[paddingSize]} 0 4px ${euiTheme.colors.emptyShade}`,
             }}
           >
             <EuiForm component="form" fullWidth>
@@ -157,6 +159,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
                     setSearchTerm(e.target.value);
                   }}
                   aria-label="search field for panels"
+                  className="nsPanelSelectionFlyout__searchInput"
                 />
               </EuiFormRow>
             </EuiForm>

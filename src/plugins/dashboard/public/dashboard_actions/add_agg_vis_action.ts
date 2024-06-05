@@ -7,13 +7,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, apiHasType, type HasType } from '@kbn/presentation-publishing';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_APP_ID } from '../dashboard_constants';
 import { pluginServices } from '../services/plugin_services';
 
 const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
+
+type AddAggVisualizationPanelActionApi = HasType;
+
+const isApiCompatible = (api: unknown | null): api is AddAggVisualizationPanelActionApi => {
+  return apiHasType(api) && api.type === 'dashboard';
+};
 
 export class AddAggVisualizationPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ADD_AGG_VIS_ACTION_ID;
@@ -38,12 +44,16 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
     });
   }
 
-  public async isCompatible() {
-    return true;
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable);
   }
 
-  public execute(): Promise<void> {
-    return new Promise((resolve) => {
+  public execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!isApiCompatible(embeddable)) {
+        return reject(new IncompatibleActionError());
+      }
+
       this.showNewVisModal({
         originatingApp: DASHBOARD_APP_ID,
         outsideVisualizeApp: true,

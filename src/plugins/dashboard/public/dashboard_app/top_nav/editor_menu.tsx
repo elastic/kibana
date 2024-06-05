@@ -25,6 +25,8 @@ import {
   type GroupedAddPanelActionsIncPriority,
 } from './add_panel_action_menu_items';
 import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
+import type { DashboardServices } from '../../services/types';
+
 export interface FactoryGroup extends Pick<GroupedAddPanelActionsIncPriority, 'placementPriority'> {
   id: string;
   appName: string;
@@ -123,12 +125,14 @@ interface EditorMenuProps {
 
 export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
   const isMounted = useRef(false);
+  const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
 
   useEffect(() => {
     isMounted.current = true;
 
     return () => {
       isMounted.current = false;
+      flyoutRef.current?.close();
     };
   }, []);
 
@@ -329,11 +333,11 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
-      onClick={() =>
-        openDashboardPanelSelectionFlyout({
+      onClick={() => {
+        flyoutRef.current = openDashboardPanelSelectionFlyout({
           getPanels: getEditorMenuPanels,
-        })
-      }
+        });
+      }}
       size="s"
     />
   );
