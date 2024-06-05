@@ -22,6 +22,8 @@ import type {
   EndpointActionData,
   LogsEndpointActionResponse,
   UploadedFileInfo,
+  ResponseActionScanOutputContent,
+  ResponseActionsScanParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -30,6 +32,7 @@ import type {
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
   BaseActionRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -140,4 +143,14 @@ export interface ResponseActionsClient {
    * @param fileId
    */
   getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo>;
+
+  /**
+   * Scan a file path/folder
+   * @param actionRequest
+   * @param options
+   */
+  scan: (
+    actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>>;
 }
