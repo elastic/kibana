@@ -87,12 +87,17 @@ export interface KnowledgeBaseEntry {
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
+  user?: {
+    name: string;
+  };
 }
 
 export interface UserInstruction {
   doc_id: string;
   text: string;
 }
+
+export type UserInstructionOrPlainText = string | UserInstruction;
 
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;

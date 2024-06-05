@@ -10,7 +10,7 @@ import Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
-import { deleteField, stripBadDefault } from './utils';
+import { deleteField, stripBadDefault, processDeprecated } from './utils';
 import { IContext } from '../context';
 
 const {
@@ -30,6 +30,10 @@ export const processString = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
+export const processStream = (schema: OpenAPIV3.SchemaObject): void => {
+  schema.type = 'object';
+};
+
 const processAdditionalProperties = (ctx: IContext, schema: OpenAPIV3.SchemaObject) => {
   if (META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES in schema) {
     const fn = schema[META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES] as () => Joi.Schema<unknown>;
@@ -44,25 +48,23 @@ const processAdditionalProperties = (ctx: IContext, schema: OpenAPIV3.SchemaObje
 export const processRecord = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   schema.type = 'object';
   processAdditionalProperties(ctx, schema);
-  if (schema.additionalProperties) {
-    schema.additionalProperties = ctx.processRef(
-      schema.additionalProperties as OpenAPIV3.SchemaObject
-    );
-  }
 };
 
 export const processMap = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   schema.type = 'object';
   processAdditionalProperties(ctx, schema);
-  if (schema.additionalProperties) {
-    schema.additionalProperties = ctx.processRef(
-      schema.additionalProperties as OpenAPIV3.SchemaObject
-    );
-  }
 };
 
-export const processAny = (schema: OpenAPIV3.SchemaObject): void => {
+export const processAllTypes = (schema: OpenAPIV3.SchemaObject): void => {
+  processDeprecated(schema);
   stripBadDefault(schema);
+};
+
+export const processAnyType = (schema: OpenAPIV3.SchemaObject): void => {
+  // Map schema to an empty object: `{}`
+  for (const key of Object.keys(schema)) {
+    deleteField(schema as Record<any, unknown>, key);
+  }
 };
 
 export { processObject } from './object';

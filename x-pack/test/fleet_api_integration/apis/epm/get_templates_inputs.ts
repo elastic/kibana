@@ -52,6 +52,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     const expectedYml = `inputs:
   - id: logfile-apache
+    type: logfile
     streams:
       - id: logfile-apache.access
         data_stream:
@@ -84,6 +85,7 @@ export default function (providerContext: FtrProviderContext) {
               fields:
                 ecs.version: 1.5.0
   - id: apache/metrics-apache
+    type: apache/metrics
     streams:
       - id: apache/metrics-apache.status
         data_stream:
@@ -99,6 +101,7 @@ export default function (providerContext: FtrProviderContext) {
     const expectedJson = [
       {
         id: 'logfile-apache',
+        type: 'logfile',
         streams: [
           {
             id: 'logfile-apache.access',
@@ -149,6 +152,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         id: 'apache/metrics-apache',
+        type: 'apache/metrics',
         streams: [
           {
             data_stream: {

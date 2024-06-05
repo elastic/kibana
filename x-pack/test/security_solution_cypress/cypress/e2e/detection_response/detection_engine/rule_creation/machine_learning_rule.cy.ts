@@ -37,6 +37,7 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
 import { getDetails } from '../../../../tasks/rule_details';
@@ -114,12 +115,16 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningJobsArray.join(''));
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should('have.text', `${mlRule.interval}`);
+      getDetails(RUNS_EVERY_DETAILS)
+        .find(INTERVAL_ABBR_VALUE)
+        .should('have.text', `${mlRule.interval}`);
       const humanizedDuration = getHumanizedDuration(
         mlRule.from ?? 'now-6m',
         mlRule.interval ?? '5m'
       );
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+        .find(INTERVAL_ABBR_VALUE)
+        .should('have.text', `${humanizedDuration}`);
     });
   });
 });

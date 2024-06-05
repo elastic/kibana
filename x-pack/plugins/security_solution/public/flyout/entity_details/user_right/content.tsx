@@ -29,9 +29,11 @@ interface UserPanelContentProps {
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
   riskScoreState: RiskScoreState<RiskScoreEntity.user>;
+  recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
+  onAssetCriticalityChange: () => void;
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
@@ -40,10 +42,12 @@ export const UserPanelContent = ({
   observedUser,
   managedUser,
   riskScoreState,
+  recalculatingScore,
   contextID,
   scopeId,
   isDraggable,
   openDetailsPanel,
+  onAssetCriticalityChange,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
@@ -54,13 +58,17 @@ export const UserPanelContent = ({
         <>
           <RiskSummary
             riskScoreData={riskScoreState}
+            recalculatingScore={recalculatingScore}
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
           />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion entity={{ name: userName, type: 'user' }} />
+      <AssetCriticalityAccordion
+        entity={{ name: userName, type: 'user' }}
+        onChange={onAssetCriticalityChange}
+      />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}

@@ -21,7 +21,7 @@ import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
 
       options: {
@@ -30,7 +30,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationCreateProps),
@@ -55,6 +55,19 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
             return assistantResponse.error({
               body: `Authenticated user not found`,
               statusCode: 401,
+            });
+          }
+
+          const result = await dataClient?.findDocuments({
+            perPage: 100,
+            page: 1,
+            filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND title:${request.body.title}`,
+            fields: ['title'],
+          });
+          if (result?.data != null && result.total > 0) {
+            return assistantResponse.error({
+              statusCode: 409,
+              body: `conversation title: "${request.body.title}" already exists`,
             });
           }
 

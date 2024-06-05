@@ -34,11 +34,14 @@ import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constant
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
 import { createMockStore } from './create_store';
+import type { StartServices } from '../../types';
+
 interface Props {
   children?: React.ReactNode;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
   cellActions?: Action[];
+  startServices?: StartServices;
 }
 
 export const kibanaMock = createStartServicesMock();
@@ -53,6 +56,7 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
   store = createMockStore(),
+  startServices,
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
@@ -71,7 +75,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
 
   return (
     <I18nProvider>
-      <MockKibanaContextProvider>
+      <MockKibanaContextProvider startServices={startServices}>
         <UpsellingProviderMock>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -112,6 +116,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
   store = createMockStore(),
   onDragEnd = jest.fn(),
+  startServices,
   cellActions = [],
 }) => {
   const queryClient = new QueryClient({
@@ -123,7 +128,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   });
   return (
     <I18nProvider>
-      <MockKibanaContextProvider>
+      <MockKibanaContextProvider startServices={startServices}>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <QueryClientProvider client={queryClient}>

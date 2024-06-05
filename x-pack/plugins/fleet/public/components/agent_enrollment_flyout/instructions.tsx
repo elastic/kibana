@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useFleetServerStandalone, sendGetAllFleetServerAgents } from '../../hooks';
+import { useFleetStatus, useFleetServerStandalone, useGetEnrollmentSettings } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
-import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 import { Loading } from '..';
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
@@ -23,7 +22,7 @@ import { DefaultMissingRequirements } from './default_missing_requirements';
 export const Instructions = (props: InstructionProps) => {
   const {
     isFleetServerPolicySelected,
-    fleetServerHosts,
+    fleetServerHost,
     isLoadingAgentPolicies,
     selectionType,
     setSelectionType,
@@ -32,43 +31,21 @@ export const Instructions = (props: InstructionProps) => {
     isIntegrationFlow,
   } = props;
   const fleetStatus = useFleetStatus();
-  const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
-    useFleetServerUnhealthy();
-
   const { isFleetServerStandalone } = useFleetServerStandalone();
-  const [fleetServerAgentsCount, setFleetServerAgentsCount] = useState<number>(0);
-  const [isLoadingAgents, setIsLoadingAgents] = useState<boolean>(true);
+  const { isLoading: isLoadingEnrollmentSettings, data: enrollmentSettings } =
+    useGetEnrollmentSettings();
 
-  useEffect(() => {
-    const fetchFleetServerAgents = async () => {
-      try {
-        const { fleetServerAgentsCount: count } = await sendGetAllFleetServerAgents(true);
-        setFleetServerAgentsCount(count ?? 0);
-        setIsLoadingAgents(false);
-      } catch (error) {
-        return;
-      }
-    };
-
-    setIsLoadingAgents(true);
-    fetchFleetServerAgents();
-  }, []);
-
-  const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
+  const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
   const showAgentEnrollment =
     isFleetServerPolicySelected ||
     isFleetServerStandalone ||
-    (fleetStatus.isReady &&
-      !isFleetServerUnhealthy &&
-      fleetServerAgentsCount > 0 &&
-      (fleetServerHosts?.length ?? 0) > 0);
+    (fleetStatus.isReady && enrollmentSettings?.fleet_server.has_active && fleetServerHost);
 
   const showFleetServerEnrollment =
     !isFleetServerStandalone &&
     !isFleetServerPolicySelected &&
-    (fleetServerAgentsCount === 0 ||
-      isFleetServerUnhealthy ||
+    (!enrollmentSettings?.fleet_server.has_active ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   useEffect(() => {
@@ -86,8 +63,7 @@ export const Instructions = (props: InstructionProps) => {
     }
   }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
 
-  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
-    return <Loading size="l" />;
+  if (isLoadingEnrollmentSettings || isLoadingAgentPolicies) return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;

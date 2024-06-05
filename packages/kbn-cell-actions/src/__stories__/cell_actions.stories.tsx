@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { ComponentStory } from '@storybook/react';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
 import { CellActions } from '../components/cell_actions';
@@ -50,7 +50,7 @@ export default {
 };
 
 const CellActionsTemplate: ComponentStory<React.FC<CellActionsProps>> = (args) => (
-  <CellActions {...args}>Field value</CellActions>
+  <CellActions {...args}>{'Field value'}</CellActions>
 );
 
 export const DefaultWithControls = CellActionsTemplate.bind({});
@@ -78,7 +78,7 @@ DefaultWithControls.args = {
   visibleCellActions: 3,
 };
 
-export const CellActionInline = ({}: {}) => (
+export const CellActionInline = () => (
   <CellActions
     mode={CellActionsMode.INLINE}
     triggerId={TRIGGER_ID}
@@ -89,11 +89,11 @@ export const CellActionInline = ({}: {}) => (
       },
     ]}
   >
-    Field value
+    {'Field value'}
   </CellActions>
 );
 
-export const CellActionHoverPopoverDown = ({}: {}) => (
+export const CellActionHoverPopoverDown = () => (
   <CellActions
     mode={CellActionsMode.HOVER_DOWN}
     triggerId={TRIGGER_ID}
@@ -104,11 +104,11 @@ export const CellActionHoverPopoverDown = ({}: {}) => (
       },
     ]}
   >
-    Hover me
+    {'Hover me'}
   </CellActions>
 );
 
-export const CellActionHoverPopoverRight = ({}: {}) => (
+export const CellActionHoverPopoverRight = () => (
   <CellActions
     mode={CellActionsMode.HOVER_RIGHT}
     triggerId={TRIGGER_ID}
@@ -119,6 +119,6 @@ export const CellActionHoverPopoverRight = ({}: {}) => (
       },
     ]}
   >
-    Hover me
+    {'Hover me'}
   </CellActions>
 );

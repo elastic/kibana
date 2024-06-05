@@ -103,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
             'filesManagement',
             'filesSharedImage',
             'advancedSettings',
+            'aiAssistantManagementSelection',
             'indexPatterns',
             'graph',
             'guidedOnboardingFeature',

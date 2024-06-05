@@ -163,7 +163,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        `Rule '{{rule.name}}' is active for group '{{context.group}}':
+        `Rule {{rule.name}} is active for group {{context.group}}:
 
 - Value: {{context.value}}
 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
@@ -339,6 +339,54 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('testQueryError');
 
       await discardNewRuleCreation();
+    });
+
+    it('should not do a type override when adding a second action', async () => {
+      // create a new rule
+      const ruleName = generateUniqueKey();
+      await rules.common.defineIndexThresholdAlert(ruleName);
+
+      // add server log action
+      await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="Serverlog#xyz"]'
+        )
+      ).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="webhook-test"]'
+        )
+      ).to.eql(false);
+
+      // click on add new action
+      await testSubjects.click('addAlertActionButton');
+      await find.existsByCssSelector('[data-test-subj="Serverlog#xyz"]');
+
+      // create webhook connector
+      await testSubjects.click('.webhook-alerting-ActionTypeSelectOption');
+      await testSubjects.click('createActionConnectorButton-1');
+      await testSubjects.setValue('nameInput', 'webhook-test');
+      await testSubjects.setValue('webhookUrlText', 'https://test.test');
+      await testSubjects.setValue('webhookUserInput', 'fakeuser');
+      await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
+      await testSubjects.click('saveActionButtonModal');
+
+      // checking the new one first to avoid flakiness. If the value is checked before the new one is added
+      // it might return a false positive
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="webhook-test"]'
+        )
+      ).to.eql(true);
+      // If it was overridden, the value would change to be empty
+      expect(
+        await find.existsByCssSelector(
+          '[data-test-subj="comboBoxSearchInput"][value="Serverlog#xyz"]'
+        )
+      ).to.eql(true);
+
+      await deleteConnectorByName('webhook-test');
     });
   });
 };

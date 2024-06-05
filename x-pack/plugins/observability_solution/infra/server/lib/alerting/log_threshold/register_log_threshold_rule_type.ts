@@ -102,7 +102,7 @@ const viewInAppUrlActionVariableDescription = i18n.translate(
   }
 );
 
-export async function registerLogThresholdRuleType(
+export function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs,
   { featureFlags }: InfraConfig

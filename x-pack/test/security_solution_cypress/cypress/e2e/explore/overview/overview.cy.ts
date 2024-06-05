@@ -66,7 +66,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   });
 });
 
-describe('Overview page with no data', { tags: '@skipInServerless' }, () => {
+describe('Overview page with no data', { tags: '@skipInServerlessMKI' }, () => {
   it('Splash screen should be here', () => {
     login();
     visitWithTimeRange(OVERVIEW_URL);

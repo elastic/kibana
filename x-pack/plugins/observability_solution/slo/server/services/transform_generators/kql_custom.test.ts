@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { twoMinute } from '../fixtures/duration';
 import {
   createKQLCustomIndicator,
   createSLO,
@@ -47,6 +48,21 @@ describe('KQL Custom Transform Generator', () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo using timesliceTarget = 0', async () => {
+    const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createKQLCustomIndicator(),
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0,
+        timesliceWindow: twoMinute(),
+      },
     });
     const transform = generator.getTransformParams(anSLO);
 
@@ -104,5 +120,29 @@ describe('KQL Custom Transform Generator', () => {
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createKQLCustomIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        log_timestamp: {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
+      },
+    });
   });
 });

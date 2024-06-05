@@ -16,12 +16,15 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
+import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const DROP_PROPS = {
   value: {
@@ -38,7 +41,6 @@ const DROP_PROPS = {
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  isPlainRecord: boolean;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
@@ -51,7 +53,6 @@ export interface DiscoverMainContentProps {
 
 export const DiscoverMainContent = ({
   dataView,
-  isPlainRecord,
   viewMode,
   onAddFilter,
   onFieldEdited,
@@ -62,14 +63,17 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
+  const isEsqlMode = useIsEsqlMode();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
-      stateContainer.appState.update({ viewMode: mode });
+      stateContainer.appState.update({ viewMode: mode }, true);
 
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
           trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
+        } else if (mode === VIEW_MODE.PATTERN_LEVEL) {
+          trackUiMetric(METRIC_TYPE.CLICK, PATTERN_ANALYSIS_VIEW_CLICK);
         } else {
           trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
         }
@@ -80,28 +84,36 @@ export const DiscoverMainContent = ({
 
   const isDropAllowed = Boolean(onDropFieldToTable);
 
-  const viewModeToggle = useMemo(() => {
-    return (
-      <DocumentViewModeToggle
-        viewMode={viewMode}
-        isTextBasedQuery={isPlainRecord}
-        stateContainer={stateContainer}
-        setDiscoverViewMode={setDiscoverViewMode}
-        prepend={
-          React.isValidElement(panelsToggle)
-            ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
-            : undefined
-        }
-      />
-    );
-  }, [
-    viewMode,
-    setDiscoverViewMode,
-    isPlainRecord,
-    stateContainer,
-    panelsToggle,
-    isChartAvailable,
-  ]);
+  const renderViewModeToggle = useCallback(
+    (patternCount?: number) => {
+      return (
+        <DocumentViewModeToggle
+          viewMode={viewMode}
+          isEsqlMode={isEsqlMode}
+          stateContainer={stateContainer}
+          setDiscoverViewMode={setDiscoverViewMode}
+          patternCount={patternCount}
+          dataView={dataView}
+          prepend={
+            React.isValidElement(panelsToggle)
+              ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
+              : undefined
+          }
+        />
+      );
+    },
+    [
+      viewMode,
+      isEsqlMode,
+      stateContainer,
+      setDiscoverViewMode,
+      dataView,
+      panelsToggle,
+      isChartAvailable,
+    ]
+  );
+
+  const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
@@ -125,22 +137,33 @@ export const DiscoverMainContent = ({
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              onAddFilter={onAddFilter}
               stateContainer={stateContainer}
-              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
-          ) : (
+          ) : null}
+          {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>
               <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}
                 stateContainer={stateContainer}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
+                isEsqlMode={isEsqlMode}
               />
             </>
-          )}
+          ) : null}
+          {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
+            <PatternAnalysisTab
+              dataView={dataView}
+              stateContainer={stateContainer}
+              switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+              trackUiMetric={trackUiMetric}
+              renderViewModeToggle={renderViewModeToggle}
+            />
+          ) : null}
         </EuiFlexGroup>
       </DropOverlayWrapper>
     </Droppable>

@@ -28,6 +28,7 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/rule_management/detection_rules_client';
 
 export interface IRequestContextFactory {
   create(
@@ -66,6 +67,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
     const coreContext = await context.core;
+    const licensing = await context.licensing;
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -76,6 +78,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       kibanaVersion: options.kibanaVersion,
       kibanaBranch: options.kibanaBranch,
     });
+
+    const getAuditLogger = () => security?.audit.asScoped(request);
 
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
@@ -106,6 +110,17 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
       getRacClient: startPlugins.ruleRegistry.getRacClientWithRequest,
+
+      getAuditLogger,
+
+      getDetectionRulesClient: () =>
+        createDetectionRulesClient(
+          startPlugins.alerting.getRulesClientWithRequest(request),
+          request,
+          coreContext.savedObjects.client,
+          licensing,
+          plugins.ml
+        ),
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
@@ -141,6 +156,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             soClient: coreContext.savedObjects.client,
             namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
           })
       ),
       getRiskScoreDataClient: memoize(
@@ -159,6 +175,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             logger: options.logger,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
           })
       ),
     };

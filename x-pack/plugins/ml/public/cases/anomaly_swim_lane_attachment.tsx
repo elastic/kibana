@@ -23,7 +23,7 @@ import type {
 export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
   return React.memo(
     (props: PersistableStateAttachmentViewProps) => {
-      const { persistableStateAttachmentState } = props;
+      const { persistableStateAttachmentState, caseData } = props;
 
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,
@@ -86,9 +86,16 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
           <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
             maybeId={inputProps.id}
             type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
-            state={{
-              rawState: inputProps,
-            }}
+            getParentApi={() => ({
+              getSerializedStateForChild: () => ({
+                rawState: inputProps,
+              }),
+              executionContext: {
+                type: 'cases',
+                description: caseData.title,
+                id: caseData.id,
+              },
+            })}
           />
         </>
       );

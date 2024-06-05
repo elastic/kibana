@@ -15,8 +15,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-
-import type { IEsSearchResponse, ISearchOptions, ISearchSource } from '../../../public';
+import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
+import type { ISearchSource } from '../../../public';
 import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import type { IAggType } from './agg_type';

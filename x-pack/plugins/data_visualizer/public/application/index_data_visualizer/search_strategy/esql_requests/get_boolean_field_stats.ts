@@ -7,9 +7,9 @@
 
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { appendToESQLQuery } from '@kbn/esql-utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
@@ -35,18 +35,20 @@ export const getESQLBooleanFieldStats = async ({
   const booleanFields = columns
     .filter((f) => f.secondaryType === 'boolean')
     .map((field) => {
-      const query = `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
-        field.name
-      )}) BY ${getSafeESQLName(field.name)}
-        | LIMIT 3`;
+      const query = appendToESQLQuery(
+        esqlBaseQuery,
+        `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
+          field.name
+        )}) BY ${getSafeESQLName(field.name)}
+        | LIMIT 3`
+      );
 
       return {
         field,
         request: {
           params: {
-            query: esqlBaseQuery + query,
+            query,
             ...(filter ? { filter } : {}),
-            version: ESQL_LATEST_VERSION,
           },
         },
       };
@@ -55,7 +57,7 @@ export const getESQLBooleanFieldStats = async ({
   if (booleanFields.length > 0) {
     const booleanTopTermsResp = await Promise.allSettled(
       booleanFields.map(({ request }) =>
-        limiter(() => runRequest(request, { strategy: ESQL_SEARCH_STRATEGY }))
+        limiter(() => runRequest(request, { strategy: ESQL_ASYNC_SEARCH_STRATEGY }))
       )
     );
     if (booleanTopTermsResp) {

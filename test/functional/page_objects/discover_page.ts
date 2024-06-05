@@ -509,7 +509,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public showsErrorCallout() {
-    return this.testSubjects.existOrFail('discoverErrorCalloutTitle');
+    this.retry.try(async () => {
+      await this.testSubjects.existOrFail('discoverErrorCalloutTitle');
+    });
   }
 
   public getDiscoverErrorMessage() {
@@ -701,11 +703,11 @@ export class DiscoverPageObject extends FtrService {
    */
   public async validateDataViewReffsEquality() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const matches = currentUrl.matchAll(/index:[^,]*/g);
+    const matches = currentUrl.matchAll(/dataViewId:[^,]*/g);
     const indexes = [];
     for (const matchEntry of matches) {
       const [index] = matchEntry;
-      indexes.push(decodeURIComponent(index).replace('index:', '').replaceAll("'", ''));
+      indexes.push(decodeURIComponent(index).replace('dataViewId:', '').replaceAll("'", ''));
     }
 
     const first = indexes[0];

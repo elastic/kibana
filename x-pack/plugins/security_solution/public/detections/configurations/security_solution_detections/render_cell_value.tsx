@@ -15,7 +15,7 @@ import type { TableId } from '@kbn/securitysolution-data-table';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
@@ -23,7 +23,7 @@ import {
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
@@ -37,7 +37,7 @@ import { eventRenderedViewColumns, getColumns } from './columns';
  * from the TGrid
  */
 
-export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = memo(
+export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellContext']>> = memo(
   function RenderCellValue(props) {
     const {
       columnId,
@@ -151,27 +151,27 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
         </GuidedOnboardingTourStep>
       );
     }, [
-      isTourAnchor,
-      finalData,
-      browserFieldsByName,
       header,
       columnId,
+      browserFieldsByName,
+      columnHeaders,
       ecsData,
-      linkValues,
-      rowRenderers,
-      isDetails,
-      isExpandable,
-      isDraggable,
-      isExpanded,
-      colIndex,
+      isTourAnchor,
+      browserFields,
+      finalData,
       eventId,
+      isDetails,
+      isDraggable,
+      isExpandable,
+      isExpanded,
+      linkValues,
+      rowIndex,
+      colIndex,
+      rowRenderers,
       setCellProps,
+      tableId,
       truncate,
       context,
-      tableId,
-      browserFields,
-      rowIndex,
-      columnHeaders,
     ]);
 
     return columnId === SIGNAL_RULE_NAME_FIELD_NAME && actualSuppressionCount ? (

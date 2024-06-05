@@ -1000,7 +1000,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
-      mode?: AntivirusRegistrationModes;
+      mode: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {
@@ -1123,7 +1123,7 @@ export interface BlocklistFields {
 }
 
 export interface OnWriteScanFields {
-  on_write_scan?: boolean;
+  on_write_scan: boolean;
 }
 
 /** Policy protection mode options */

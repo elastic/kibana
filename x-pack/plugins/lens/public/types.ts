@@ -66,6 +66,16 @@ import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
 
+export type StartServices = Pick<
+  CoreStart,
+  // used extensively in lens
+  | 'overlays'
+  // used for react rendering utilities
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
+
 export interface IndexPatternRef {
   id: string;
   title: string;
@@ -289,15 +299,13 @@ type UserMessageDisplayLocation =
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface UserMessage {
-  uniqueId?: string;
+  uniqueId: string;
   severity: 'error' | 'warning' | 'info';
   shortMessage: string;
   longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
 }
-
-export type RemovableUserMessage = UserMessage & { uniqueId: string };
 
 export interface UserMessageFilters {
   severity?: UserMessage['severity'];
@@ -309,11 +317,7 @@ export type UserMessagesGetter = (
   filters?: UserMessageFilters
 ) => UserMessage[];
 
-export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
-
-export function isMessageRemovable(message: UserMessage): message is RemovableUserMessage {
-  return Boolean(message.uniqueId);
-}
+export type AddUserMessages = (messages: UserMessage[]) => () => void;
 
 /**
  * Interface for the datasource registry
@@ -648,7 +652,14 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   >;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'docLinks'
+    | 'http'
+    | 'notifications'
+    | 'uiSettings'
+    | 'overlays'
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    | 'docLinks'
   >;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -938,6 +949,7 @@ export interface FramePublicAPI {
   filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
+  absDateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.

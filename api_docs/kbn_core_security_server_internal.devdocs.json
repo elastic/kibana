@@ -69,6 +69,27 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server-internal",
+            "id": "def-common.CoreSecurityRouteHandlerContext.audit",
+            "type": "Object",
+            "tags": [],
+            "label": "#audit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditRequestHandlerContext",
+                "text": "AuditRequestHandlerContext"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server-internal",
             "id": "def-common.CoreSecurityRouteHandlerContext.Unnamed",
             "type": "Function",
             "tags": [],
@@ -141,6 +162,26 @@
                 "docId": "kibKbnCoreSecurityServerPluginApi",
                 "section": "def-common.AuthcRequestHandlerContext",
                 "text": "AuthcRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server-internal",
+            "id": "def-common.CoreSecurityRouteHandlerContext.audit",
+            "type": "Object",
+            "tags": [],
+            "label": "audit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.AuditRequestHandlerContext",
+                "text": "AuditRequestHandlerContext"
               }
             ],
             "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",

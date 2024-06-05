@@ -49,12 +49,14 @@ import {
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
+  recalculatingScore: boolean;
   queryId: string;
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
 const RiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
+  recalculatingScore,
   queryId,
   openDetailsPanel,
 }: RiskSummaryProps<T>) => {
@@ -108,7 +110,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
         'xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel',
         {
           defaultMessage:
-            'Risk score for {entityType, select, host {host} user {user}} {entityName}',
+            'Risk score for {entityType, select, user {user} other {host}} {entityName}',
           values: {
             entityName: entityData?.name,
             entityType: isUserRiskData(riskData) ? 'user' : 'host',
@@ -119,11 +121,13 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
     [entityData?.name, riskData]
   );
 
+  const riskDataTimestamp = riskData?.['@timestamp'];
   const timerange = useMemo(() => {
     const from = dateMath.parse(LAST_30_DAYS.from)?.toISOString() ?? LAST_30_DAYS.from;
     const to = dateMath.parse(LAST_30_DAYS.to)?.toISOString() ?? LAST_30_DAYS.to;
     return { from, to };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riskDataTimestamp]); // Update the timerange whenever the risk score timestamp changes to include new entries
 
   return (
     <EuiAccordion
@@ -182,15 +186,17 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
               defaultMessage="View risk contributions"
             />
           ),
-          link: {
-            callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
-                defaultMessage="Show all risk inputs"
-              />
-            ),
-          },
+          link: riskScoreData.loading
+            ? undefined
+            : {
+                callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+                tooltip: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
+                    defaultMessage="Show all risk inputs"
+                  />
+                ),
+              },
           iconType: 'arrowStart',
         }}
         expand={{
@@ -265,6 +271,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   columns={columns}
                   items={rows}
                   compressed
+                  loading={riskScoreData.loading || recalculatingScore}
                 />
               </div>
             </InspectButtonContainer>

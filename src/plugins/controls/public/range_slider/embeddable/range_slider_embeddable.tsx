@@ -25,7 +25,7 @@ import {
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import {
   ControlGroupContainer,
@@ -38,7 +38,7 @@ import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data/types';
 import { ControlsDataViewsService } from '../../services/data_views/types';
-import { IClearableControl } from '../../types';
+import { CanClearSelections } from '../../types';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
@@ -79,7 +79,7 @@ type RangeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class RangeSliderEmbeddable
   extends Embeddable<RangeSliderEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements CanClearSelections
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
@@ -444,13 +444,13 @@ export class RangeSliderEmbeddable
     this.node = node;
     const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
+      <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <ControlsServicesProvider>
           <RangeSliderControlContext.Provider value={this}>
             <RangeSliderControl />
           </RangeSliderControlContext.Provider>
         </ControlsServicesProvider>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       node
     );
   };

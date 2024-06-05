@@ -9,8 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonEmpty, useEuiTheme, euiCanAnimate } from '@elastic/eui';
 import { cx, css } from '@emotion/css';
-
-import { useBoolean } from '../../../../../hooks/use_boolean';
+import { useBoolean } from '@kbn/react-hooks';
 
 const selectedHostsLabel = (selectedHostsCount: number) => {
   return i18n.translate('xpack.infra.hostsViewPage.table.selectedHostsButton', {

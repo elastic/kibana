@@ -25,7 +25,7 @@ export interface EsDocument {
     [key: string]: unknown;
   };
   fields: {
-    [key: string]: unknown;
+    [key: string]: unknown[];
   };
   [key: string]: unknown;
 }
@@ -68,6 +68,7 @@ export interface PreviewState {
   initialPreviewComplete: boolean;
   isPreviewAvailable: boolean;
   isPanelVisible: boolean;
+  isSaving: boolean;
 }
 
 export interface FetchDocError {

@@ -159,6 +159,7 @@ In other use cases the message field can be used to concatenate different values
   }
   end="2018-03-24T03:33:52.253Z"
   eqlOptions={Object {}}
+  eventIdToNoteIds={Object {}}
   expandedDetail={Object {}}
   isLive={false}
   itemsPerPage={5}
@@ -170,6 +171,7 @@ In other use cases the message field can be used to concatenate different values
     ]
   }
   onEventClosed={[MockFunction]}
+  pinnedEventIds={Object {}}
   renderCellValue={[Function]}
   rowRenderers={
     Array [

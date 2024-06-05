@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { testEmbeddedConsole } from '../../dev_tools/embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'embeddedConsole']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
@@ -67,6 +68,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           sectionId: 'ingest',
           sectionLinks: ['ingest_pipelines'],
         });
+      });
+    });
+
+    describe('ingest user with dev tools', () => {
+      before(async () => {
+        await security.testUser.setRoles(['global_devtools_read', 'ingest_pipelines_user']);
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('should have the embedded console', async () => {
+        await PageObjects.common.navigateToApp('ingestPipelines');
+        await testEmbeddedConsole(PageObjects);
       });
     });
   });

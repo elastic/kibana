@@ -7,6 +7,7 @@
 
 import { z, ZodFirstPartyTypeKind } from 'zod';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
@@ -34,7 +35,8 @@ export const SettingsFieldWrapper: React.FC<{
   settingsConfig: SettingsConfig;
   typeName: keyof typeof ZodFirstPartyTypeKind;
   renderItem: Function;
-}> = ({ settingsConfig, typeName, renderItem }) => {
+  disabled?: boolean;
+}> = ({ settingsConfig, typeName, renderItem, disabled }) => {
   const [error, setError] = useState('');
   const agentPolicyFormContext = useAgentPolicyFormContext();
 
@@ -75,16 +77,19 @@ export const SettingsFieldWrapper: React.FC<{
       title={<h4>{settingsConfig.title}</h4>}
       description={
         <>
-          {settingsConfig.description}.{' '}
+          {settingsConfig.description}{' '}
           {settingsConfig.learnMoreLink && (
             <EuiLink href={settingsConfig.learnMoreLink} external>
-              Learn more.
+              <FormattedMessage
+                id="xpack.fleet.configuredSettings.learnMoreLinkText"
+                defaultMessage="Learn more."
+              />
             </EuiLink>
           )}
         </>
       }
     >
-      <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
+      <EuiFormRow isDisabled={disabled} fullWidth key={fieldKey} error={error} isInvalid={!!error}>
         {renderItem({ fieldValue, handleChange, isInvalid: !!error, fieldKey, coercedSchema })}
       </EuiFormRow>
     </EuiDescribedFormGroup>

@@ -7,7 +7,8 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
-import { take, bufferCount, skip } from 'rxjs';
+import { take, bufferCount } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   isTaskManagerMetricEvent,
   isTaskManagerStatEvent,
@@ -31,6 +32,7 @@ import { metricsAggregatorMock } from './metrics_aggregator.mock';
 import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.test';
 import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 
+const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {
   allow_reading_invalid_state: false,
@@ -107,19 +109,14 @@ describe('createAggregator', () => {
 
       return new Promise<void>((resolve) => {
         taskClaimAggregator
-          .pipe(
-            // skip initial metric which is just initialized data which
-            // ensures we don't stall on combineLatest
-            skip(1),
-            take(events.length),
-            bufferCount(events.length)
-          )
+          .pipe(take(events.length), bufferCount(events.length))
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_claim',
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -129,6 +126,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 2,
+                total_errors: 0,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -138,6 +136,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 3,
+                total_errors: 0,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -147,6 +146,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 4,
+                total_errors: 0,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -156,6 +156,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 5,
+                total_errors: 1,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -165,6 +166,7 @@ describe('createAggregator', () => {
               value: {
                 success: 5,
                 total: 6,
+                total_errors: 1,
                 duration: { counts: [5], values: [100] },
                 duration_values: [10, 10, 10, 10, 10],
               },
@@ -174,6 +176,7 @@ describe('createAggregator', () => {
               value: {
                 success: 6,
                 total: 7,
+                total_errors: 1,
                 duration: { counts: [6], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10],
               },
@@ -183,6 +186,7 @@ describe('createAggregator', () => {
               value: {
                 success: 7,
                 total: 8,
+                total_errors: 1,
                 duration: { counts: [7], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10],
               },
@@ -192,6 +196,7 @@ describe('createAggregator', () => {
               value: {
                 success: 8,
                 total: 9,
+                total_errors: 1,
                 duration: { counts: [8], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10, 10],
               },
@@ -201,6 +206,7 @@ describe('createAggregator', () => {
               value: {
                 success: 8,
                 total: 10,
+                total_errors: 2,
                 duration: { counts: [8], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10, 10],
               },
@@ -210,6 +216,7 @@ describe('createAggregator', () => {
               value: {
                 success: 9,
                 total: 11,
+                total_errors: 2,
                 duration: { counts: [9], values: [100] },
                 duration_values: [10, 10, 10, 10, 10, 10, 10, 10, 10],
               },
@@ -255,11 +262,8 @@ describe('createAggregator', () => {
       return new Promise<void>((resolve) => {
         taskClaimAggregator
           .pipe(
-            // skip initial metric which is just initialized data which
-            // ensures we don't stall on combineLatest
-            skip(1),
-            take(events1.length + events2.length),
-            bufferCount(events1.length + events2.length)
+            take(events1.length + events2.length + 1),
+            bufferCount(events1.length + events2.length + 1)
           )
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
@@ -267,6 +271,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -276,6 +281,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 2,
+                total_errors: 0,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -285,6 +291,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 3,
+                total_errors: 0,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -294,6 +301,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 4,
+                total_errors: 0,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -303,6 +311,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 5,
+                total_errors: 1,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -312,6 +321,7 @@ describe('createAggregator', () => {
               value: {
                 success: 5,
                 total: 6,
+                total_errors: 1,
                 duration: { counts: [5], values: [100] },
                 duration_values: [10, 10, 10, 10, 10],
               },
@@ -320,17 +330,19 @@ describe('createAggregator', () => {
             expect(metrics[6]).toEqual({
               key: 'task_claim',
               value: {
-                success: 1,
-                total: 1,
-                duration: { counts: [1], values: [100] },
-                duration_values: [10],
+                success: 0,
+                total: 0,
+                total_errors: 0,
+                duration: { counts: [], values: [] },
+                duration_values: [],
               },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
               value: {
                 success: 1,
-                total: 2,
+                total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -339,7 +351,8 @@ describe('createAggregator', () => {
               key: 'task_claim',
               value: {
                 success: 1,
-                total: 3,
+                total: 2,
+                total_errors: 1,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -347,17 +360,29 @@ describe('createAggregator', () => {
             expect(metrics[9]).toEqual({
               key: 'task_claim',
               value: {
-                success: 2,
-                total: 4,
-                duration: { counts: [2], values: [100] },
-                duration_values: [10, 10],
+                success: 1,
+                total: 3,
+                total_errors: 2,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
               },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
               value: {
+                success: 2,
+                total: 4,
+                total_errors: 2,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_claim',
+              value: {
                 success: 3,
                 total: 5,
+                total_errors: 2,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -411,11 +436,8 @@ describe('createAggregator', () => {
       return new Promise<void>((resolve) => {
         taskClaimAggregator
           .pipe(
-            // skip initial metric which is just initialized data which
-            // ensures we don't stall on combineLatest
-            skip(1),
-            take(events1.length + events2.length),
-            bufferCount(events1.length + events2.length)
+            take(events1.length + events2.length + 1),
+            bufferCount(events1.length + events2.length + 1)
           )
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
@@ -423,6 +445,7 @@ describe('createAggregator', () => {
               value: {
                 success: 1,
                 total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -432,6 +455,7 @@ describe('createAggregator', () => {
               value: {
                 success: 2,
                 total: 2,
+                total_errors: 0,
                 duration: { counts: [2], values: [100] },
                 duration_values: [10, 10],
               },
@@ -441,6 +465,7 @@ describe('createAggregator', () => {
               value: {
                 success: 3,
                 total: 3,
+                total_errors: 0,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -450,6 +475,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 4,
+                total_errors: 0,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -459,6 +485,7 @@ describe('createAggregator', () => {
               value: {
                 success: 4,
                 total: 5,
+                total_errors: 1,
                 duration: { counts: [4], values: [100] },
                 duration_values: [10, 10, 10, 10],
               },
@@ -468,6 +495,7 @@ describe('createAggregator', () => {
               value: {
                 success: 5,
                 total: 6,
+                total_errors: 1,
                 duration: { counts: [5], values: [100] },
                 duration_values: [10, 10, 10, 10, 10],
               },
@@ -476,17 +504,19 @@ describe('createAggregator', () => {
             expect(metrics[6]).toEqual({
               key: 'task_claim',
               value: {
-                success: 1,
-                total: 1,
-                duration: { counts: [1], values: [100] },
-                duration_values: [10],
+                success: 0,
+                total: 0,
+                total_errors: 0,
+                duration: { counts: [], values: [] },
+                duration_values: [],
               },
             });
             expect(metrics[7]).toEqual({
               key: 'task_claim',
               value: {
                 success: 1,
-                total: 2,
+                total: 1,
+                total_errors: 0,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -495,7 +525,8 @@ describe('createAggregator', () => {
               key: 'task_claim',
               value: {
                 success: 1,
-                total: 3,
+                total: 2,
+                total_errors: 1,
                 duration: { counts: [1], values: [100] },
                 duration_values: [10],
               },
@@ -503,17 +534,29 @@ describe('createAggregator', () => {
             expect(metrics[9]).toEqual({
               key: 'task_claim',
               value: {
-                success: 2,
-                total: 4,
-                duration: { counts: [2], values: [100] },
-                duration_values: [10, 10],
+                success: 1,
+                total: 3,
+                total_errors: 2,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
               },
             });
             expect(metrics[10]).toEqual({
               key: 'task_claim',
               value: {
+                success: 2,
+                total: 4,
+                total_errors: 2,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_claim',
+              value: {
                 success: 3,
                 total: 5,
+                total_errors: 2,
                 duration: { counts: [3], values: [100] },
                 duration_values: [10, 10, 10],
               },
@@ -528,6 +571,212 @@ describe('createAggregator', () => {
         for (const event of events2) {
           events$.next(event);
         }
+
+        clock.restore();
+      });
+    });
+
+    test('does not reset count when configured metrics reset interval expires if metrics have been reset via reset$ event', async () => {
+      const reset$ = new Subject<boolean>();
+      const clock = sinon.useFakeTimers();
+      clock.tick(0);
+      const events1 = [
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+      ];
+
+      const events2 = [
+        taskClaimSuccessEvent,
+        taskClaimFailureEvent,
+        taskClaimFailureEvent,
+        taskClaimSuccessEvent,
+        taskClaimSuccessEvent,
+      ];
+      const events$ = new Subject<TaskLifecycleEvent>();
+
+      const taskClaimAggregator = createAggregator({
+        key: 'task_claim',
+        events$,
+        config: {
+          ...config,
+          metrics_reset_interval: 50,
+        },
+        reset$,
+        eventFilter: (event: TaskLifecycleEvent) => isTaskPollingCycleEvent(event),
+        metricsAggregator: new TaskClaimMetricsAggregator(),
+      });
+
+      return new Promise<void>((resolve) => {
+        taskClaimAggregator
+          .pipe(
+            take(events1.length + events2.length + 3),
+            bufferCount(events1.length + events2.length + 3)
+          )
+          .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
+            // reset event
+            expect(metrics[0]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 0,
+                total: 0,
+                total_errors: 0,
+                duration: { counts: [], values: [] },
+                duration_values: [],
+              },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 1,
+                total: 1,
+                total_errors: 0,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
+            });
+            expect(metrics[2]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 2,
+                total: 2,
+                total_errors: 0,
+                duration: { counts: [2], values: [100] },
+                duration_values: [10, 10],
+              },
+            });
+            expect(metrics[3]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 3,
+                total: 3,
+                total_errors: 0,
+                duration: { counts: [3], values: [100] },
+                duration_values: [10, 10, 10],
+              },
+            });
+            expect(metrics[4]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 4,
+                total: 4,
+                total_errors: 0,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
+            });
+            expect(metrics[5]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 4,
+                total: 5,
+                total_errors: 1,
+                duration: { counts: [4], values: [100] },
+                duration_values: [10, 10, 10, 10],
+              },
+            });
+            expect(metrics[6]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 5,
+                total: 6,
+                total_errors: 1,
+                duration: { counts: [5], values: [100] },
+                duration_values: [10, 10, 10, 10, 10],
+              },
+            });
+            // reset interval fired here but stats should not clear
+            expect(metrics[7]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 6,
+                total: 7,
+                total_errors: 1,
+                duration: { counts: [6], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10],
+              },
+            });
+            expect(metrics[8]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 6,
+                total: 8,
+                total_errors: 2,
+                duration: { counts: [6], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10],
+              },
+            });
+            expect(metrics[9]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 6,
+                total: 9,
+                total_errors: 3,
+                duration: { counts: [6], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10],
+              },
+            });
+            expect(metrics[10]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 7,
+                total: 10,
+                total_errors: 3,
+                duration: { counts: [7], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10, 10],
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 8,
+                total: 11,
+                total_errors: 3,
+                duration: { counts: [8], values: [100] },
+                duration_values: [10, 10, 10, 10, 10, 10, 10, 10],
+              },
+            });
+            // reset interval fired here and stats should have cleared
+            expect(metrics[12]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 0,
+                total: 0,
+                total_errors: 0,
+                duration: { counts: [], values: [] },
+                duration_values: [],
+              },
+            });
+            expect(metrics[13]).toEqual({
+              key: 'task_claim',
+              value: {
+                success: 1,
+                total: 1,
+                total_errors: 0,
+                duration: { counts: [1], values: [100] },
+                duration_values: [10],
+              },
+            });
+            resolve();
+          });
+
+        // reset$ event at 10 seconds
+        clock.tick(10);
+        reset$.next(true);
+        for (const event of events1) {
+          events$.next(event);
+        }
+        // metrics reset event but counts should not reset
+        clock.tick(40);
+        for (const event of events2) {
+          events$.next(event);
+        }
+        // metric reset event should clear
+        clock.tick(50);
+        events$.next(taskClaimSuccessEvent);
 
         clock.restore();
       });
@@ -567,18 +816,12 @@ describe('createAggregator', () => {
         reset$: new Subject<boolean>(),
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
-        metricsAggregator: new TaskRunMetricsAggregator(),
+        metricsAggregator: new TaskRunMetricsAggregator(logger),
       });
 
       return new Promise<void>((resolve) => {
         taskRunAggregator
-          .pipe(
-            // skip initial metric which is just initialized data which
-            // ensures we don't stall on combineLatest
-            skip(1),
-            take(taskRunEvents.length),
-            bufferCount(taskRunEvents.length)
-          )
+          .pipe(take(taskRunEvents.length), bufferCount(taskRunEvents.length))
           .subscribe((metrics: Array<AggregatedStat<TaskRunMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_run',
@@ -1595,17 +1838,14 @@ describe('createAggregator', () => {
         reset$,
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
-        metricsAggregator: new TaskRunMetricsAggregator(),
+        metricsAggregator: new TaskRunMetricsAggregator(logger),
       });
 
       return new Promise<void>((resolve) => {
         taskRunAggregator
           .pipe(
-            // skip initial metric which is just initialized data which
-            // ensures we don't stall on combineLatest
-            skip(1),
-            take(taskRunEvents1.length + taskRunEvents2.length),
-            bufferCount(taskRunEvents1.length + taskRunEvents2.length)
+            take(taskRunEvents1.length + taskRunEvents2.length + 1),
+            bufferCount(taskRunEvents1.length + taskRunEvents2.length + 1)
           )
           .subscribe((metrics: Array<AggregatedStat<TaskRunMetric>>) => {
             expect(metrics[0]).toEqual({
@@ -2008,6 +2248,55 @@ describe('createAggregator', () => {
                   success: 0,
                   not_timed_out: 0,
                   total: 0,
+                  delay: { counts: [], values: [] },
+                  delay_values: [],
+                  framework_errors: 0,
+                  user_errors: 0,
+                  total_errors: 0,
+                },
+                by_type: {
+                  alerting: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                },
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 0,
+                  not_timed_out: 0,
+                  total: 0,
                   delay: { counts: [1], values: [10] },
                   delay_values: [5],
                   framework_errors: 0,
@@ -2050,7 +2339,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[11]).toEqual({
+            expect(metrics[12]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2099,7 +2388,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[12]).toEqual({
+            expect(metrics[13]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2148,7 +2437,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[13]).toEqual({
+            expect(metrics[14]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2197,7 +2486,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[14]).toEqual({
+            expect(metrics[15]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2246,7 +2535,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[15]).toEqual({
+            expect(metrics[16]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2295,7 +2584,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[16]).toEqual({
+            expect(metrics[17]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2344,7 +2633,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[17]).toEqual({
+            expect(metrics[18]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2393,7 +2682,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[18]).toEqual({
+            expect(metrics[19]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2442,7 +2731,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[19]).toEqual({
+            expect(metrics[20]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -2560,17 +2849,14 @@ describe('createAggregator', () => {
         reset$: new Subject<boolean>(),
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
-        metricsAggregator: new TaskRunMetricsAggregator(),
+        metricsAggregator: new TaskRunMetricsAggregator(logger),
       });
 
       return new Promise<void>((resolve) => {
         taskRunAggregator
           .pipe(
-            // skip initial metric which is just initialized data which
-            // ensures we don't stall on combineLatest
-            skip(1),
-            take(taskRunEvents1.length + taskRunEvents2.length),
-            bufferCount(taskRunEvents1.length + taskRunEvents2.length)
+            take(taskRunEvents1.length + taskRunEvents2.length + 1),
+            bufferCount(taskRunEvents1.length + taskRunEvents2.length + 1)
           )
           .subscribe((metrics: Array<AggregatedStat<TaskRunMetric>>) => {
             expect(metrics[0]).toEqual({
@@ -2973,6 +3259,55 @@ describe('createAggregator', () => {
                   success: 0,
                   not_timed_out: 0,
                   total: 0,
+                  delay: { counts: [], values: [] },
+                  delay_values: [],
+                  framework_errors: 0,
+                  user_errors: 0,
+                  total_errors: 0,
+                },
+                by_type: {
+                  alerting: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                    total_errors: 0,
+                  },
+                },
+              },
+            });
+            expect(metrics[11]).toEqual({
+              key: 'task_run',
+              value: {
+                overall: {
+                  success: 0,
+                  not_timed_out: 0,
+                  total: 0,
                   delay: { counts: [1], values: [10] },
                   delay_values: [5],
                   framework_errors: 0,
@@ -3015,7 +3350,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[11]).toEqual({
+            expect(metrics[12]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3064,7 +3399,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[12]).toEqual({
+            expect(metrics[13]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3113,7 +3448,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[13]).toEqual({
+            expect(metrics[14]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3162,7 +3497,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[14]).toEqual({
+            expect(metrics[15]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3211,7 +3546,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[15]).toEqual({
+            expect(metrics[16]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3260,7 +3595,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[16]).toEqual({
+            expect(metrics[17]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3309,7 +3644,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[17]).toEqual({
+            expect(metrics[18]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3358,7 +3693,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[18]).toEqual({
+            expect(metrics[19]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3407,7 +3742,7 @@ describe('createAggregator', () => {
                 },
               },
             });
-            expect(metrics[19]).toEqual({
+            expect(metrics[20]).toEqual({
               key: 'task_run',
               value: {
                 overall: {
@@ -3548,13 +3883,7 @@ describe('createAggregator', () => {
 
       return new Promise<void>((resolve) => {
         taskOverdueAggregator
-          .pipe(
-            // skip initial metric which is just initialized data which
-            // ensures we don't stall on combineLatest
-            skip(1),
-            take(events.length),
-            bufferCount(events.length)
-          )
+          .pipe(take(events.length), bufferCount(events.length))
           .subscribe((metrics: Array<AggregatedStat<TaskOverdueMetric>>) => {
             expect(metrics[0]).toEqual({
               key: 'task_overdue',
@@ -3710,17 +4039,9 @@ describe('createAggregator', () => {
     });
 
     return new Promise<void>((resolve) => {
-      aggregator
-        .pipe(
-          // skip initial metric which is just initialized data which
-          // ensures we don't stall on combineLatest
-          skip(1),
-          take(events.length),
-          bufferCount(events.length)
-        )
-        .subscribe(() => {
-          resolve();
-        });
+      aggregator.pipe(take(events.length), bufferCount(events.length)).subscribe(() => {
+        resolve();
+      });
 
       for (const event of events) {
         events$.next(event);
@@ -3761,17 +4082,9 @@ describe('createAggregator', () => {
     });
 
     return new Promise<void>((resolve) => {
-      aggregator
-        .pipe(
-          // skip initial metric which is just initialized data which
-          // ensures we don't stall on combineLatest
-          skip(1),
-          take(events.length),
-          bufferCount(events.length)
-        )
-        .subscribe(() => {
-          resolve();
-        });
+      aggregator.pipe(take(events.length), bufferCount(events.length)).subscribe(() => {
+        resolve();
+      });
 
       for (const event of events) {
         events$.next(event);
@@ -3817,17 +4130,9 @@ describe('createAggregator', () => {
     });
 
     return new Promise<void>((resolve) => {
-      aggregator
-        .pipe(
-          // skip initial metric which is just initialized data which
-          // ensures we don't stall on combineLatest
-          skip(1),
-          take(events.length),
-          bufferCount(events.length)
-        )
-        .subscribe(() => {
-          resolve();
-        });
+      aggregator.pipe(take(events.length + 1), bufferCount(events.length + 1)).subscribe(() => {
+        resolve();
+      });
 
       for (const event of events) {
         events$.next(event);

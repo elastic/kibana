@@ -32,11 +32,19 @@ export const ViewDetailsPopover = (props: Props) => {
 
   if (props.warnings.length === 1) {
     return props.displayAsLink ? (
-      <EuiLink color="primary" onClick={props.warnings[0].openInInspector}>
+      <EuiLink
+        color="primary"
+        onClick={props.warnings[0].openInInspector}
+        data-test-subj="searchResponseWarningsViewDetails"
+      >
         {viewDetailsLabel}
       </EuiLink>
     ) : (
-      <EuiButton color="primary" onClick={props.warnings[0].openInInspector}>
+      <EuiButton
+        color="primary"
+        onClick={props.warnings[0].openInInspector}
+        data-test-subj="searchResponseWarningsViewDetails"
+      >
         {viewDetailsLabel}
       </EuiButton>
     );
@@ -69,7 +77,11 @@ export const ViewDetailsPopover = (props: Props) => {
       id="ViewDetailsPopover"
       button={
         props.displayAsLink ? (
-          <EuiLink color="primary" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          <EuiLink
+            color="primary"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            data-test-subj="searchResponseWarningsViewDetails"
+          >
             <>
               {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
             </>
@@ -80,6 +92,7 @@ export const ViewDetailsPopover = (props: Props) => {
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             iconSide="right"
             iconType="arrowRight"
+            data-test-subj="searchResponseWarningsViewDetails"
           >
             {viewDetailsLabel}
           </EuiButton>
@@ -90,7 +103,7 @@ export const ViewDetailsPopover = (props: Props) => {
       panelPaddingSize="none"
       anchorPosition="downCenter"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="viewDetailsContextMenu" />
     </EuiPopover>
   );
 };

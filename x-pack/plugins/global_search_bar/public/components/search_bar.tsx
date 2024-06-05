@@ -18,6 +18,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
+import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
@@ -108,7 +109,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           resultToOption(
             option,
             searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
-            taggingApi?.ui.getTag
+            taggingApi?.ui.getTagList
           )
         ),
       ]);
@@ -125,20 +126,22 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current = null;
         }
 
-        const suggestions = loadSuggestions(searchValue);
+        const suggestions = loadSuggestions(searchValue.toLowerCase());
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
           reportEvent.searchRequest();
         }
 
-        const rawParams = parseSearchParams(searchValue);
-        const tagIds =
-          taggingApi && rawParams.filters.tags
-            ? rawParams.filters.tags.map(
-                (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
-              )
-            : undefined;
+        const rawParams = parseSearchParams(searchValue.toLowerCase());
+        let tagIds: string[] | undefined;
+        if (taggingApi && rawParams.filters.tags) {
+          tagIds = rawParams.filters.tags.map(
+            (tagName) => taggingApi.ui.getTagIdFromName(tagName.toLowerCase()) ?? UNKNOWN_TAG_ID
+          );
+        } else {
+          tagIds = undefined;
+        }
         const searchParams: GlobalSearchFindParams = {
           term: rawParams.term,
           types: rawParams.filters.types,
@@ -196,7 +199,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   );
 
   const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[]) => {
+    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
@@ -247,7 +250,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      navigateToUrl(url);
+      if (event.shiftKey) {
+        window.open(url);
+      } else if (event.ctrlKey || event.metaKey) {
+        window.open(url, '_blank');
+      } else {
+        navigateToUrl(url);
+      }
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {

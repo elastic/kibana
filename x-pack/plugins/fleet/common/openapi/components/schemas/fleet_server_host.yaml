@@ -11,6 +11,8 @@ properties:
     type: boolean
   is_preconfigured:
     type: boolean
+  proxy_id:
+    type: string
   host_urls:
     type: array
     items:

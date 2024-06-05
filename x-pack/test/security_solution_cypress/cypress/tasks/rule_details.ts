@@ -34,6 +34,14 @@ import {
   EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   RULE_NAME_HEADER,
+  INVESTIGATION_FIELDS_DETAILS,
+  ABOUT_DETAILS,
+  EXECUTIONS_TAB,
+  EXECUTION_TABLE,
+  EXECUTION_LOG_CONTAINER,
+  EXECUTION_RUN_TYPE_FILTER,
+  EXECUTION_RUN_TYPE_FILTER_ITEM,
+  RULE_BACKFILLS_TABLE,
 } from '../screens/rule_details';
 import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
@@ -44,6 +52,7 @@ import {
 } from './exceptions';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 import { visit } from './navigation';
+import { LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -120,6 +129,10 @@ export const goToExceptionsTab = () => {
   cy.get(EXCEPTIONS_TAB).click();
 };
 
+export const goToExecutionLogTab = () => {
+  cy.get(EXECUTIONS_TAB).click();
+};
+
 export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
@@ -179,6 +192,24 @@ export const hasIndexPatterns = (indexPatterns: string) => {
   });
 };
 
+export const hasInvestigationFields = (fields: string) => {
+  cy.get(ABOUT_DETAILS).within(() => {
+    getDetails(INVESTIGATION_FIELDS_DETAILS).should('have.text', fields);
+  });
+};
+
 export const goToRuleEditSettings = () => {
   cy.get(EDIT_RULE_SETTINGS_LINK).click();
 };
+
+export const getExecutionLogTableRow = () => cy.get(EXECUTION_TABLE).find('tbody tr');
+
+export const refreshRuleExecutionTable = () =>
+  cy.get(`${EXECUTION_LOG_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
+
+export const filterByRunType = (ruleType: string) => {
+  cy.get(EXECUTION_RUN_TYPE_FILTER).click();
+  cy.get(EXECUTION_RUN_TYPE_FILTER_ITEM).contains(ruleType).click();
+};
+
+export const getBackfillsTableRows = () => cy.get(RULE_BACKFILLS_TABLE).find('tbody tr');

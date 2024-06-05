@@ -4,7 +4,7 @@
   "owner": "@elastic/kibana-esql",
   "plugin": {
     "id": "textBasedLanguages",
-    "server": false,
+    "server": true,
     "browser": true,
     "optionalPlugins": [
       "indexManagement"

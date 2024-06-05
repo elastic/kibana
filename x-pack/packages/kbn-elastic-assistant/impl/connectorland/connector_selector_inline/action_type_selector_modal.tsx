@@ -29,6 +29,8 @@ interface Props {
   actionTypeSelectorInline: boolean;
 }
 const itemClassName = css`
+  inline-size: 240px;
+
   .euiKeyPadMenuItem__label {
     white-space: nowrap;
     overflow: hidden;

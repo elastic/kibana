@@ -14,6 +14,7 @@ import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
+
 import {
   createFleetServerHost,
   deleteFleetServerHost,
@@ -166,11 +167,7 @@ export const putFleetServerHostHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerHostsHandler: RequestHandler<
-  TypeOf<typeof PutFleetServerHostRequestSchema.params>,
-  undefined,
-  TypeOf<typeof PutFleetServerHostRequestSchema.body>
-> = async (context, request, response) => {
+export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
   try {
     const res = await listFleetServerHosts(soClient);

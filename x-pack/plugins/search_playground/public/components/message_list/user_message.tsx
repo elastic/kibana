@@ -13,12 +13,17 @@ import { EuiComment, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAvatar } from '@kbn/user-profile-components';
 
+import { css } from '@emotion/react';
 import { useUserProfile } from '../../hooks/use_user_profile';
 import type { Message as MessageType } from '../../types';
 
 import { CopyActionButton } from './copy_action_button';
 
 type UserMessageProps = Pick<MessageType, 'content' | 'createdAt'>;
+
+const UserMessageCSS = css`
+  white-space: break-spaces;
+`;
 
 export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) => {
   const currentUserProfile = useUserProfile();
@@ -52,8 +57,9 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
           })}
         />
       }
+      data-test-subj="userMessage"
     >
-      <EuiText size="s">
+      <EuiText size="s" css={UserMessageCSS}>
         <p>{content}</p>
       </EuiText>
     </EuiComment>

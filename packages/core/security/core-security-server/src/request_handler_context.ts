@@ -7,11 +7,17 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { AuditLogger } from './audit_logging/audit_logger';
 
 export interface SecurityRequestHandlerContext {
   authc: AuthcRequestHandlerContext;
+  audit: AuditRequestHandlerContext;
 }
 
 export interface AuthcRequestHandlerContext {
   getCurrentUser(): AuthenticatedUser | null;
+}
+
+export interface AuditRequestHandlerContext {
+  logger: AuditLogger;
 }

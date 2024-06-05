@@ -88,7 +88,7 @@ export const noDataRetryLabel = i18n.translate(
 );
 
 export const tryEsql = i18n.translate('xpack.logsExplorer.dataSourceSelector.TryEsql', {
-  defaultMessage: 'Try ES|QL',
+  defaultMessage: 'Language: ES|QL',
 });
 
 export const technicalPreview = i18n.translate('xpack.logsExplorer.TechPreview', {

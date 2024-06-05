@@ -71,6 +71,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(title).to.eql(expected.title);
         expect(description).to.eql(expected.description);
       });
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('Search bar Prepend Filters exists and should apply filter properly', async () => {

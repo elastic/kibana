@@ -52,10 +52,10 @@ export interface Props {
   kibanaVersion: SemVer;
 }
 
-// The default FormWrapper is the <EuiForm />, which wrapps the form with
+// The default FormWrapper is the <EuiForm />, which wraps the form with
 // a <div>. We can't have a div as first child of the Flyout as it breaks
-// the height calculaction and does not render the footer position correctly.
-const FormWrapper: React.FC = ({ children }) => <>{children}</>;
+// the height calculation and does not render the footer position correctly.
+const FormWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => <>{children}</>;
 
 export const EditField = React.memo(
   ({ form, field, allFields, exitEdit, updateField, kibanaVersion }: Props) => {
@@ -83,13 +83,13 @@ export const EditField = React.memo(
                   <h2 data-test-subj="flyoutTitle">
                     {isMultiField
                       ? i18n.translate('xpack.idxMgmt.mappingsEditor.editMultiFieldTitle', {
-                          defaultMessage: "Edit multi-field '{fieldName}'",
+                          defaultMessage: "Edit multi-field ''{fieldName}''",
                           values: {
                             fieldName: limitStringLength(field.source.name),
                           },
                         })
                       : i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
-                          defaultMessage: "Edit field '{fieldName}'",
+                          defaultMessage: "Edit field ''{fieldName}''",
                           values: {
                             fieldName: limitStringLength(field.source.name),
                           },

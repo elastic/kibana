@@ -6,23 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { IntlProvider } from 'react-intl';
-import { i18n } from '@kbn/i18n';
+import React, { FC, PropsWithChildren } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 
-const emptyMessages = {};
-
-export const I18nProviderMock: React.FC = ({ children }) => {
-  return (
-    <IntlProvider
-      locale={i18n.getLocale()}
-      messages={emptyMessages}
-      defaultLocale={i18n.getLocale()}
-      formats={i18n.getFormats()}
-      textComponent={React.Fragment}
-    >
-      {children}
-    </IntlProvider>
-  );
+export const I18nProviderMock: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  return <I18nProvider>{children}</I18nProvider>;
 };

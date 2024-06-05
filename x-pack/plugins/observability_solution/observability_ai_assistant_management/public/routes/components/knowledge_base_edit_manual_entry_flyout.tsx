@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +19,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiIconTip,
   EuiMarkdownEditor,
   EuiSpacer,
   EuiText,
@@ -27,7 +29,7 @@ import moment from 'moment';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
-import { useAppContext } from '../../hooks/use_app_context';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function KnowledgeBaseEditManualEntryFlyout({
   entry,
@@ -36,22 +38,31 @@ export function KnowledgeBaseEditManualEntryFlyout({
   entry?: KnowledgeBaseEntry;
   onClose: () => void;
 }) {
-  const { uiSettings } = useAppContext();
+  const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
   const { mutateAsync: createEntry, isLoading } = useCreateKnowledgeBaseEntry();
   const { mutateAsync: deleteEntry, isLoading: isDeleting } = useDeleteKnowledgeBaseEntry();
 
+  const [isPublic, setIsPublic] = useState(entry?.public ?? false);
+
   const [newEntryId, setNewEntryId] = useState(entry?.id ?? '');
   const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
 
-  const handleSubmitNewEntryClick = async () => {
-    createEntry({
+  const isEntryIdInvalid = newEntryId.trim() === '';
+  const isEntryTextInvalid = newEntryText.trim() === '';
+  const isFormInvalid = isEntryIdInvalid || isEntryTextInvalid;
+
+  const handleSubmit = async () => {
+    await createEntry({
       entry: {
         id: newEntryId,
         text: newEntryText,
+        public: isPublic,
       },
-    }).then(onClose);
+    });
+
+    onClose();
   };
 
   const handleDelete = async () => {
@@ -92,10 +103,11 @@ export function KnowledgeBaseEditManualEntryFlyout({
             )}
           >
             <EuiFieldText
-              data-test-subj="knowledgeBaseEditManualEntryFlyoutFieldText"
+              data-test-subj="knowledgeBaseEditManualEntryFlyoutIdInput"
               fullWidth
               value={newEntryId}
               onChange={(e) => setNewEntryId(e.target.value)}
+              isInvalid={isEntryIdInvalid}
             />
           </EuiFormRow>
         ) : (
@@ -125,6 +137,44 @@ export function KnowledgeBaseEditManualEntryFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
+        <EuiSpacer size="m" />
+
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.visibilityLabel',
+                { defaultMessage: 'Visibility' }
+              )}
+              options={[
+                {
+                  id: 'user',
+                  label: i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.userLabel',
+                    { defaultMessage: 'User' }
+                  ),
+                },
+                {
+                  id: 'global',
+                  label: i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.globalLabel',
+                    { defaultMessage: 'Global' }
+                  ),
+                },
+              ]}
+              idSelected={isPublic ? 'global' : 'user'}
+              onChange={(optionId) => setIsPublic(optionId === 'global')}
+              buttonSize="m"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content="Global entries will be available to all users. User entries will only be available to the author."
+              position="top"
+              type="iInCircle"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="m" />
 
@@ -136,6 +186,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
           )}
         >
           <EuiMarkdownEditor
+            editorId="knowledgeBaseEditManualEntryFlyoutMarkdownEditor"
             aria-label={i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.euiMarkdownEditor.observabilityAiAssistantKnowledgeBaseViewMarkdownEditorLabel',
               { defaultMessage: 'observabilityAiAssistantKnowledgeBaseViewMarkdownEditor' }
@@ -151,6 +202,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             onChange={(text) => setNewEntryText(text)}
           />
         </EuiFormRow>
+        <EuiSpacer size="m" />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -172,7 +224,8 @@ export function KnowledgeBaseEditManualEntryFlyout({
               data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"
               fill
               isLoading={isLoading}
-              onClick={handleSubmitNewEntryClick}
+              onClick={handleSubmit}
+              isDisabled={isFormInvalid}
             >
               {i18n.translate(
                 'xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.saveButtonLabel',

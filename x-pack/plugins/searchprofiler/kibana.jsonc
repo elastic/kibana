@@ -17,8 +17,7 @@
       "share"
     ],
     "requiredBundles": [
-      "esUiShared",
-      "kibanaReact"
+      "esUiShared"
     ]
   }
 }

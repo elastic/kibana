@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Delayed 15s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddableError');
       await testSubjects.existOrFail('searchTimeoutError');
     });
 
@@ -66,9 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Multiple delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddableError');
-      // there should be two failed panels
-      expect((await testSubjects.findAll('embeddableError')).length).to.be(2);
+
       // but only single error toast because searches are grouped
       expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);
 

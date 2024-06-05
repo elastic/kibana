@@ -153,7 +153,7 @@ export const APPLICATIONS_PLUGIN = {
     defaultMessage: 'Applications',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
-    defaultMessage: 'Search Applications',
+    defaultMessage: 'Build',
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/applications',
@@ -243,3 +243,6 @@ export const PLUGIN_ID = 'enterpriseSearch';
 
 export const CONNECTOR_NATIVE_TYPE = 'native';
 export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';
+
+// TODO remove this once the connector service types are no longer in "example" state
+export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];

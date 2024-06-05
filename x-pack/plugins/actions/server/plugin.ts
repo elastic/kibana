@@ -100,7 +100,11 @@ import {
   ConnectorWithOptionalDeprecation,
 } from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
-import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
+import {
+  ICaseServiceAbstract,
+  IServiceAbstract,
+  SubActionConnectorType,
+} from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
 import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -128,10 +132,16 @@ export interface PluginSetupContract {
   isPreconfiguredConnector(connectorId: string): boolean;
 
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
-  getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getCaseConnectorClass: <Config, Secrets, Incident, GetIncidentResponse>() => ICaseServiceAbstract<
+    Config,
+    Secrets,
+    Incident,
+    GetIncidentResponse
+  >;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
+  isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 }
 
 export interface PluginStartContract {
@@ -394,6 +404,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           );
         }
       },
+      isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
+        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
+      },
     };
   }
 
@@ -571,15 +584,17 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ]),
     });
 
-    this.eventLogService!.isEsContextReady().then(() => {
-      scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-    });
+    this.eventLogService!.isEsContextReady()
+      .then(() => {
+        scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+      })
+      .catch(() => {});
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       createAlertHistoryIndexTemplate({
         client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
-      });
+      }).catch(() => {});
     }
 
     this.validateEnabledConnectorTypes(plugins);

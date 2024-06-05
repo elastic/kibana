@@ -132,6 +132,26 @@
             "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.CoreRequestHandlerContext.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-common.UserProfileRequestHandlerContext",
+                "text": "UserProfileRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -82,7 +82,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     it('rejects if Puppeteer launch fails', async () => {
       jest.spyOn(puppeteer, 'launch').mockRejectedValue(`Puppeteer Launch mock fail.`);
 
-      expect(() =>
+      await expect(() =>
         factory
           .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
           .pipe(take(1))

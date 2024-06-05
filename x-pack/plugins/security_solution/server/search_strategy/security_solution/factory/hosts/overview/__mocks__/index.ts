@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { HostOverviewRequestOptions } from '../../../../../../../common/api/search_strategy';
 
 import { HostsQueries } from '../../../../../../../common/search_strategy';

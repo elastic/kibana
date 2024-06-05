@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { IClickActionDescriptor } from '..';
 import { OnActionDismiss } from './types';
@@ -37,7 +37,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
     defaultMessage: 'Cancel',
   });
   const message = i18n.translate('data.mgmt.searchSessions.cancelModal.message', {
-    defaultMessage: `Deleting the search session \'{name}\' deletes all cached results.`,
+    defaultMessage: `Deleting the search session ''{name}'' deletes all cached results.`,
     values: {
       name,
     },
@@ -74,7 +74,7 @@ export const createDeleteActionDescriptor = (
     const ref = core.overlays.openModal(
       toMountPoint(
         <DeleteConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
-        { theme$: core.theme.theme$ }
+        core
       )
     );
     await ref.onClose;

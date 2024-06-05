@@ -35,7 +35,7 @@ interface RangeFilter {
 }
 
 /*
- * Creates the boilerplace for querying monitoring data, including filling in
+ * Creates the boilerplate for querying monitoring data, including filling in
  * start time and end time, and injecting additional filters.
  *
  * Create a bool for types that will query for documents using `_type` (true type) and `type` (as a field)

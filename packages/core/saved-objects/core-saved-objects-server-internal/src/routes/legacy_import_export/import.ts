@@ -43,23 +43,23 @@ export const registerLegacyImportRoute = (
         },
       },
     },
-    async (ctx, req, res) => {
+    async (context, request, response) => {
       logger.warn(
         "The import dashboard API '/api/kibana/dashboards/import' is deprecated. Use the saved objects import objects API '/api/saved_objects/_import' instead."
       );
 
-      const { client } = (await ctx.core).savedObjects;
-      const objects = req.body.objects as SavedObject[];
-      const { force, exclude } = req.query;
+      const { client } = (await context.core).savedObjects;
+      const objects = request.body.objects as SavedObject[];
+      const { force, exclude } = request.query;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementLegacyDashboardsImport({ request: req }).catch(() => {});
+      usageStatsClient.incrementLegacyDashboardsImport({ request }).catch(() => {});
 
       const result = await importDashboards(client, objects, {
         overwrite: force,
         exclude: Array.isArray(exclude) ? exclude : [exclude],
       });
-      return res.ok({
+      return response.ok({
         body: result,
       });
     }

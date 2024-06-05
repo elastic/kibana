@@ -15,6 +15,7 @@ import {
   XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { Layer } from '..';
 import { ChartType } from '../../../common';
 import {
@@ -235,6 +236,9 @@ export const getConfiguration = (
       shouldTruncate: vis.params.truncateLegend ?? vis.type.visConfig.defaults.truncateLegend,
       maxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
       showSingleSeries: true,
+      legendStats: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show)
+        ? [XYLegendValue.CurrentAndLastValue]
+        : undefined,
     },
     fittingFunction: fittingFunction
       ? fittingFunction[0].toUpperCase() + fittingFunction.slice(1)
@@ -269,7 +273,6 @@ export const getConfiguration = (
     xTitle: xAxis.title.text,
     valueLabels:
       vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show ? 'show' : 'hide',
-    valuesInLegend: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show),
     showCurrentTimeMarker: isTimeChart
       ? Boolean(vis.params.addTimeMarker ?? vis.type.visConfig.defaults.addTimeMarker)
       : undefined,

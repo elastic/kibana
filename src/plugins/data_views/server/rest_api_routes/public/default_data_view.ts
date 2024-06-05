@@ -21,6 +21,8 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
 interface GetDefaultArgs {
@@ -58,7 +60,7 @@ export const setDefault = async ({
 };
 
 const manageDefaultIndexPatternRoutesFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, getDescription?: string, postDescription?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -67,14 +69,14 @@ const manageDefaultIndexPatternRoutesFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: 'public', description: getDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
           request: {},
           response: {
             200: {
-              body: schema.object({ [`${serviceKey}_id`]: schema.string() }),
+              body: () => schema.object({ [`${serviceKey}_id`]: schema.string() }),
             },
           },
         },
@@ -104,7 +106,7 @@ const manageDefaultIndexPatternRoutesFactory =
       })
     );
 
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description: postDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -121,7 +123,7 @@ const manageDefaultIndexPatternRoutesFactory =
           },
           response: {
             200: {
-              body: schema.object({ acknowledged: schema.boolean() }),
+              body: () => schema.object({ acknowledged: schema.boolean() }),
             },
           },
         },
@@ -159,7 +161,9 @@ const manageDefaultIndexPatternRoutesFactory =
 
 export const registerManageDefaultDataViewRoute = manageDefaultIndexPatternRoutesFactory(
   `${SERVICE_PATH}/default`,
-  SERVICE_KEY
+  SERVICE_KEY,
+  GET_DEFAULT_DATA_VIEW_DESCRIPTION,
+  SET_DEFAULT_DATA_VIEW_DESCRIPTION
 );
 
 export const registerManageDefaultDataViewRouteLegacy = manageDefaultIndexPatternRoutesFactory(

@@ -208,7 +208,7 @@ export interface GetBulkAssetsRequest {
 }
 
 export interface GetBulkAssetsResponse {
-  items: SimpleSOAssetType[];
+  items: Array<SimpleSOAssetType & { appLink?: string }>;
 }
 
 export interface GetInputsTemplatesRequest {

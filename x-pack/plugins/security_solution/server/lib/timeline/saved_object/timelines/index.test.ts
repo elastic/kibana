@@ -458,7 +458,7 @@ describe('saved_object', () => {
       await getDraftTimeline(mockRequest, TimelineType.default);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
-          'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: username and siem-ui-timeline.attributes.createdBy: username',
+          'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: "username" and siem-ui-timeline.attributes.createdBy: "username"',
         sortField: 'created',
         sortOrder: 'desc',
         perPage: 1,

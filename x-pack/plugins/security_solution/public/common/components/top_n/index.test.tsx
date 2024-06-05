@@ -9,7 +9,6 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { mockGlobalState, TestProviders, mockIndexPattern, createMockStore } from '../../mock';
 import type { State } from '../../store';
@@ -221,7 +220,7 @@ describe('StatefulTopN', () => {
     test('it has undefined combinedQueries when rendering in a global context', () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.combinedQueries).toBeUndefined();
+      expect(props.filterQuery).toBeUndefined();
     });
 
     test(`defaults to the 'Raw events' view when rendering in a global context`, () => {
@@ -277,6 +276,12 @@ describe('StatefulTopN', () => {
 
       expect(props.to).toEqual('2020-07-08T08:20:18.966Z');
     });
+
+    test(`provides 'applyGlobalQueriesAndFilters' = true`, () => {
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+
+      expect(props.applyGlobalQueriesAndFilters).toEqual(true);
+    });
   });
 
   describe('rendering in a timeline context', () => {
@@ -298,7 +303,7 @@ describe('StatefulTopN', () => {
     test('it has a combinedQueries value from Redux state composed of the timeline [data providers + kql + filter-bar-filters] when rendering in a timeline context', () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.combinedQueries).toEqual(
+      expect(props.filterQuery).toEqual(
         '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
       );
     });
@@ -344,26 +349,38 @@ describe('StatefulTopN', () => {
 
       expect(props.to).toEqual('2020-04-15T03:46:09.047Z');
     });
+
+    test(`provides 'applyGlobalQueriesAndFilters' = false`, () => {
+      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+
+      expect(props.applyGlobalQueriesAndFilters).toEqual(false);
+    });
   });
 
   describe('rendering in alerts context', () => {
-    detectionAlertsTables.forEach((tableId) => {
-      test(`defaults to the 'Alert events' option when rendering in Alerts`, async () => {
-        const wrapper = mount(
+    describe.each(detectionAlertsTables)('tableId: %s', (tableId) => {
+      let wrapper: ReactWrapper;
+      beforeEach(() => {
+        wrapper = mount(
           <TestProviders store={store}>
-            <StatefulTopN
-              {...{
-                ...testProps,
-                scopeId: tableId,
-              }}
-            />
+            <StatefulTopN {...{ ...testProps, scopeId: tableId }} />
           </TestProviders>
         );
+      });
+      afterEach(() => {
+        wrapper.unmount();
+      });
+
+      test(`defaults to the 'Alert events' option when rendering in Alerts`, async () => {
         await waitFor(() => {
           const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
           expect(props.defaultView).toEqual('alert');
         });
-        wrapper.unmount();
+      });
+
+      test(`provides 'applyGlobalQueriesAndFilters' = true`, () => {
+        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+        expect(props.applyGlobalQueriesAndFilters).toEqual(true);
       });
     });
   });

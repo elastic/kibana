@@ -56,7 +56,7 @@ import {
   StringLiteralContext,
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
-  FromIdentifierContext,
+  IndexIdentifierContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -87,21 +87,21 @@ import type {
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  return ctx
-    .getTypedRuleContexts(FromIdentifierContext)
-    .map((sourceCtx) => createSource(sourceCtx));
+  const fromContexts = ctx.getTypedRuleContexts(IndexIdentifierContext);
+
+  return fromContexts.map((sourceCtx) => createSource(sourceCtx));
 }
 
 function extractIdentifiers(
   ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
   if (ctx instanceof MetadataOptionContext) {
-    return wrapIdentifierAsArray(ctx.fromIdentifier_list());
+    return wrapIdentifierAsArray(ctx.indexIdentifier_list());
   }
   if (ctx instanceof MvExpandCommandContext) {
     return wrapIdentifierAsArray(ctx.qualifiedName());
   }
-  return wrapIdentifierAsArray(ctx.qualifiedNamePattern_list());
+  return wrapIdentifierAsArray(ctx.qualifiedNamePatterns().qualifiedNamePattern_list());
 }
 
 function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {

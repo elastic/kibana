@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TextWithIcon } from '../text_with_icon';
 
@@ -22,7 +22,7 @@ export interface TriggerLineItemProps {
   incompatible?: boolean;
 }
 
-export const TriggerLineItem: React.FC<TriggerLineItemProps> = ({
+export const TriggerLineItem: FC<PropsWithChildren<TriggerLineItemProps>> = ({
   tooltip,
   incompatible,
   children,

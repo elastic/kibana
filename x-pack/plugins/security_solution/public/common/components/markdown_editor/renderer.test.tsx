@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-
+import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { TestProviders } from '../../mock';
 import { MarkdownRenderer } from './renderer';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { UpsellingProvider } from '../upselling_provider';
 
 jest.mock('../../utils/default_date_settings', () => {
   const original = jest.requireActual('../../utils/default_date_settings');
@@ -58,6 +59,8 @@ jest.mock('../../hooks/use_app_toasts', () => ({
     addSuccess: jest.fn(),
   }),
 }));
+
+const mockUpselling = new UpsellingService();
 
 describe('Markdown', () => {
   describe('markdown links', () => {
@@ -114,7 +117,9 @@ describe('Markdown', () => {
     test('displays an upgrade message with a premium markdown plugin', () => {
       const { queryByText, getByText } = render(
         <TestProviders>
-          <MarkdownRenderer>{`!{investigate{"label": "",  "providers": [[{"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase", "excluded": "false"}]]}}`}</MarkdownRenderer>
+          <UpsellingProvider upsellingService={mockUpselling}>
+            <MarkdownRenderer>{`!{investigate{"label": "",  "providers": [[{"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase", "excluded": "false"}]]}}`}</MarkdownRenderer>
+          </UpsellingProvider>
         </TestProviders>
       );
 

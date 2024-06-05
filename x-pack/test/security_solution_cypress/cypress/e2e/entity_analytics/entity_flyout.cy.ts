@@ -32,7 +32,7 @@ import {
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
 } from '../../screens/asset_criticality/flyouts';
 import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
-import { mockFleetInstalledIntegrations } from '../../tasks/fleet_integrations';
+import { mockFleetIntegrations } from '../../tasks/fleet_integrations';
 import {
   expandManagedDataEntraPanel,
   expandManagedDataOktaPanel,
@@ -144,20 +144,24 @@ describe(
       });
 
       // https://github.com/elastic/kibana/issues/179248
-      describe('Managed data section', { tags: ['@skipInServerless'] }, () => {
+      describe('Managed data section', { tags: ['@skipInServerlessMKI'] }, () => {
         beforeEach(() => {
-          mockFleetInstalledIntegrations([
+          mockFleetIntegrations([
             {
               package_name: ENTRA_ID_PACKAGE_NAME,
-              is_enabled: true,
               package_title: 'azure entra',
-              package_version: 'test_package_version',
+              latest_package_version: 'test_package_version',
+              installed_package_version: 'test_package_version',
+              is_installed: true,
+              is_enabled: true,
             },
             {
               package_name: OKTA_PACKAGE_NAME,
-              is_enabled: true,
               package_title: 'okta',
-              package_version: 'test_package_version',
+              latest_package_version: 'test_package_version',
+              installed_package_version: 'test_package_version',
+              is_installed: true,
+              is_enabled: true,
             },
           ]);
         });

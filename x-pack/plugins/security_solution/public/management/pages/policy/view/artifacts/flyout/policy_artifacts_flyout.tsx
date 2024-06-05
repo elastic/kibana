@@ -22,6 +22,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
@@ -175,11 +176,19 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
       labels.flyoutNoSearchResultsMessage,
     ]);
 
+    const artifactsAssignFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'artifactsAssignFlyoutTitle',
+    });
+
     return (
-      <EuiFlyout onClose={onClose} data-test-subj="artifacts-assign-flyout">
+      <EuiFlyout
+        onClose={onClose}
+        data-test-subj="artifacts-assign-flyout"
+        aria-labelledby={artifactsAssignFlyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{labels.flyoutTitle}</h2>
+            <h2 id={artifactsAssignFlyoutTitleId}>{labels.flyoutTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           {labels.flyoutSubtitle(policyItem.name)}

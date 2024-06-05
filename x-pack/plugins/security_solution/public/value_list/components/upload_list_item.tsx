@@ -20,6 +20,7 @@ import {
   FAILED_TO_UPLOAD_LIST_ITEM,
   SUCCESSFULY_UPLOAD_LIST_ITEMS,
 } from '../translations';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 const validFileTypes = ['text/csv', 'text/plain'];
 
@@ -45,6 +46,7 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: ListTyp
   const handleImport = useCallback(() => {
     if (!importState.loading && file) {
       ctrl.current = new AbortController();
+      track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.ADDITIONAL_UPLOAD_VALUE_LIST_ITEM);
       importList({
         file,
         listId,

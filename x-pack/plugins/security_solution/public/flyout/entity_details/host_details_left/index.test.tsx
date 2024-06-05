@@ -27,7 +27,7 @@ const riskScore: HostRiskScore = {
       category_1_score: 150,
       category_1_count: 1,
       multipliers: [],
-      calculated_level: RiskSeverity.critical,
+      calculated_level: RiskSeverity.Critical,
       inputs: [],
       notes: [],
     },

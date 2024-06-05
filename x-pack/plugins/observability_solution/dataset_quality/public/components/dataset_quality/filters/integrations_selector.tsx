@@ -7,7 +7,6 @@
 
 import {
   EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -104,37 +103,35 @@ export function IntegrationsSelector({
   );
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="datasetQualityIntegrationsSelectable"
+        searchable
+        searchProps={{
+          placeholder: integrationsSelectorSearchPlaceholder,
+          compressed: true,
+        }}
+        aria-label={integrationsSelectorLabel}
+        options={integrations}
+        onChange={onIntegrationsChange}
+        isLoading={isLoading}
+        loadingMessage={integrationsSelectorLoading}
+        emptyMessage={integrationsSelectorNoneAvailable}
+        noMatchesMessage={integrationsSelectorNoneMatching}
+        renderOption={(option) => renderOption(option)}
       >
-        <EuiSelectable
-          data-test-subj="datasetQualityIntegrationsSelectable"
-          searchable
-          searchProps={{
-            placeholder: integrationsSelectorSearchPlaceholder,
-            compressed: true,
-          }}
-          aria-label={integrationsSelectorLabel}
-          options={integrations}
-          onChange={onIntegrationsChange}
-          isLoading={isLoading}
-          loadingMessage={integrationsSelectorLoading}
-          emptyMessage={integrationsSelectorNoneAvailable}
-          noMatchesMessage={integrationsSelectorNoneMatching}
-          renderOption={(option) => renderOption(option)}
-        >
-          {(list, search) => (
-            <div style={{ width: 300 }}>
-              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-              {list}
-            </div>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </EuiFilterGroup>
+        {(list, search) => (
+          <div style={{ width: 300 }}>
+            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 }

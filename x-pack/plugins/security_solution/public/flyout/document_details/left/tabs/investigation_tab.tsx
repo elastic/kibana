@@ -13,7 +13,7 @@ import { INVESTIGATION_TAB_CONTENT_TEST_ID } from './test_ids';
 /**
  * Investigations view displayed in the document details expandable flyout left section
  */
-export const InvestigationTab: React.FC = memo(() => {
+export const InvestigationTab = memo(() => {
   return (
     <EuiPanel data-test-subj={INVESTIGATION_TAB_CONTENT_TEST_ID} hasShadow={false}>
       <InvestigationGuide />

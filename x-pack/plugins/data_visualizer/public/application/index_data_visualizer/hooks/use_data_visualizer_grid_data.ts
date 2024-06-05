@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS, type DataViewField } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
-import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import useObservable from 'react-use/lib/useObservable';
@@ -21,7 +20,6 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
@@ -39,16 +37,19 @@ import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
-import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import type {
+  OverallStatsSearchStrategyParams,
+  SamplingOption,
+} from '../../../../common/types/field_stats';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
-import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
 import {
   DATA_VISUALIZER_INDEX_VIEWER_ID,
   getDefaultPageState,
 } from '../constants/index_data_visualizer_viewer';
 import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
+import type { FieldStatisticsTableEmbeddableState } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 
@@ -63,7 +64,7 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
 };
 export const useDataVisualizerGridData = (
   // Data view is required for non-ES|QL queries like kuery or lucene
-  input: Required<DataVisualizerGridInput, 'dataView'>,
+  input: Required<FieldStatisticsTableEmbeddableState, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
@@ -74,10 +75,10 @@ export const useDataVisualizerGridData = (
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
-  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+  const componentExecutionContext: KibanaExecutionContext = useMemo(() => {
     const child: KibanaExecutionContext = {
       type: 'visualization',
-      name: DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE,
+      name: 'field_statistics_table',
       id: input.id,
     };
 
@@ -87,7 +88,7 @@ export const useDataVisualizerGridData = (
     };
   }, [parentExecutionContext, input.id]);
 
-  useExecutionContext(executionContext, embeddableExecutionContext);
+  useExecutionContext(executionContext, componentExecutionContext);
 
   const { visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
@@ -108,17 +109,16 @@ export const useDataVisualizerGridData = (
   }, [security]);
 
   const { currentSavedSearch, currentDataView, currentQuery, currentFilters, samplingOption } =
-    useMemo(
-      () => ({
+    useMemo(() => {
+      return {
         currentSavedSearch: input?.savedSearch,
         currentDataView: input.dataView,
         currentQuery: input?.query,
         currentFilters: input?.filters,
         /** By default, use random sampling **/
         samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
-      }),
-      [input]
-    );
+      };
+    }, [input?.savedSearch, input.dataView, input?.query, input?.filters, input?.samplingOption]);
   const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
@@ -127,7 +127,10 @@ export const useDataVisualizerGridData = (
     return getFieldsWithSubFields({
       input,
       currentDataView,
-      shouldGetSubfields: input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
+      shouldGetSubfields:
+        input.shouldGetSubfields !== undefined
+          ? input.shouldGetSubfields
+          : input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input.id, input.fieldsToFetch, input.visibleFieldNames, currentDataView]);
@@ -261,7 +264,7 @@ export const useDataVisualizerGridData = (
         nonAggregatableFields,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
-        embeddableExecutionContext,
+        componentExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -277,7 +280,7 @@ export const useDataVisualizerGridData = (
       lastRefresh,
       fieldsToFetch,
       browserSessionSeed,
-      embeddableExecutionContext,
+      componentExecutionContext,
     ]
   );
 

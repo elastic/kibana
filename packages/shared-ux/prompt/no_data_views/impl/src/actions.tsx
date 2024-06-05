@@ -49,7 +49,7 @@ export const NoDataButtonLink = ({
         <EuiText size="xs" color={'subdued'}>
           <FormattedMessage
             id="sharedUXPackages.no_data_views.esqlMessage"
-            defaultMessage="Alternatively, you can query your data directly using ES|QL (technical preview). {docsLink}"
+            defaultMessage="Alternatively, you can query your data directly using ES|QL. {docsLink}"
             values={{
               docsLink: esqlDocLink && (
                 <EuiLink href={esqlDocLink} target="_blank">
@@ -65,7 +65,7 @@ export const NoDataButtonLink = ({
           <EuiButton color="success" onClick={onTryESQL} size="s" data-test-subj="tryESQLLink">
             <FormattedMessage
               id="sharedUXPackages.no_data_views.esqlButtonLabel"
-              defaultMessage="Try ES|QL"
+              defaultMessage="Language: ES|QL"
             />
           </EuiButton>
         </EuiText>

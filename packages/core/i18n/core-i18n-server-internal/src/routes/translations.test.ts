@@ -12,11 +12,27 @@ import { registerTranslationsRoute } from './translations';
 describe('registerTranslationsRoute', () => {
   test('registers route with expected options', () => {
     const router = mockRouter.create();
-    registerTranslationsRoute(router, 'en');
-    expect(router.get).toHaveBeenCalledTimes(1);
+    registerTranslationsRoute({
+      router,
+      locale: 'en',
+      isDist: true,
+      translationHash: 'XXXX',
+    });
+    expect(router.get).toHaveBeenCalledTimes(2);
     expect(router.get).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ options: { access: 'public', authRequired: false } }),
+      expect.objectContaining({
+        path: '/translations/{locale}.json',
+        options: { access: 'public', authRequired: false },
+      }),
+      expect.any(Function)
+    );
+    expect(router.get).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        path: '/translations/XXXX/{locale}.json',
+        options: { access: 'public', authRequired: false },
+      }),
       expect.any(Function)
     );
   });

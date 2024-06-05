@@ -23,9 +23,9 @@
     "@kbn/coloring",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-theme",
-    "@kbn/kibana-react-plugin",
     "@kbn/analytics",
     "@kbn/chart-expressions-common",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

@@ -73,6 +73,7 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  isValidDataset,
   INVALID_NAMESPACE_CHARACTERS,
   getFileMetadataIndexName,
   getFileDataIndexName,
@@ -129,6 +130,7 @@ export type {
   FullAgentPolicyOutput,
   FullAgentPolicyOutputPermissions,
   FullAgentPolicyInputStream,
+  TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
   Installation,
@@ -195,7 +197,7 @@ export type {
   FleetServerAgentComponentStatus,
   AssetSOObject,
   SimpleSOAssetType,
-  AllowedAssetTypes,
+  DisplayedAssetTypes,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
