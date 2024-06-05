@@ -35,11 +35,6 @@ export const HostIsolationPanel = React.memo(
     const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
     const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(details), [details]);
 
-    const hostName = useMemo(
-      () => getFieldValue({ category: 'host', field: 'host.name' }, details),
-      [details]
-    );
-
     const alertId = useMemo(
       () => getFieldValue({ category: '_id', field: '_id' }, details),
       [details]
@@ -61,6 +56,18 @@ export const HostIsolationPanel = React.memo(
       () => sentinelOneAgentId ?? crowdstrikeAgentId ?? elasticAgentId,
       [elasticAgentId, sentinelOneAgentId, crowdstrikeAgentId]
     );
+
+    const hostName = useMemo(() => {
+      switch (agentType) {
+        case 'crowdstrike':
+          return getFieldValue(
+            { category: 'crowdstrike', field: 'crowdstrike.event.HostName' },
+            details
+          );
+        default:
+          return getFieldValue({ category: 'host', field: 'host.name' }, details);
+      }
+    }, [agentType, details]);
 
     return isolateAction === 'isolateHost' ? (
       <IsolateHost
