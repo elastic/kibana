@@ -26,6 +26,11 @@ import { EventFiltersForm } from './form';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  ENTIRE_PROCESS_TREE_TAG,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -88,7 +93,7 @@ describe('Event filter form', () => {
       os_types: [OperatingSystem.WINDOWS],
       entries: [createEntry()],
       type: 'simple',
-      tags: ['policy:all'],
+      tags: [GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG],
     };
     return {
       ...defaults,
@@ -333,9 +338,9 @@ describe('Event filter form', () => {
 
       // move back to global
       userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-global'));
-      formProps.item.tags = ['policy:all'];
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerenderWithLatestProps();
-      expect(formProps.item.tags).toEqual(['policy:all']);
+      expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
       expect(
         renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
       ).toBeFalsy();
@@ -366,7 +371,7 @@ describe('Event filter form', () => {
 
     it('should hide assignment section when no license', () => {
       render();
-      formProps.item.tags = ['policy:all'];
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerender();
       expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
     });
@@ -395,12 +400,12 @@ describe('Event filter form', () => {
         'eventFilters-form-effectedPolicies-global'
       ) as HTMLButtonElement;
       userEvent.click(globalButtonInput);
-      formProps.item.tags = ['policy:all'];
+      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerender();
       const expected = createOnChangeArgs({
         item: {
           ...formProps.item,
-          tags: ['policy:all'],
+          tags: [GLOBAL_ARTIFACT_TAG],
         },
       });
       expect(formProps.onChange).toHaveBeenCalledWith(expected);
@@ -409,7 +414,80 @@ describe('Event filter form', () => {
         ? formProps.onChange.mock.calls[0][0].item.tags[0]
         : '';
 
-      expect(policyItem).toBe('policy:all');
+      expect(policyItem).toBe(GLOBAL_ARTIFACT_TAG);
+    });
+  });
+
+  describe('Filter entire process tree', () => {
+    it('should display unchecked toggle when tags are missing', () => {
+      delete formProps.item.tags;
+      render();
+
+      expect(
+        renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)
+      ).not.toBeChecked();
+    });
+
+    it('should display unchecked toggle when filtering entire process tree is disabled', () => {
+      formProps.item.tags = [];
+      render();
+
+      expect(
+        renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)
+      ).not.toBeChecked();
+    });
+
+    it('should display checked toggle when filtering entire process tree is enabled', () => {
+      formProps.item.tags = [ENTIRE_PROCESS_TREE_TAG];
+      render();
+
+      expect(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)).toBeChecked();
+    });
+
+    it('should add process tree filtering tag to tags when enabled', () => {
+      formProps.item.tags = [];
+      render();
+
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+
+      expect(latestUpdatedItem.tags).toStrictEqual([ENTIRE_PROCESS_TREE_TAG]);
+    });
+
+    it('should remove process tree filtering tag from tags when disabled', () => {
+      formProps.item.tags = [ENTIRE_PROCESS_TREE_TAG];
+      render();
+
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+
+      expect(latestUpdatedItem.tags).toStrictEqual([]);
+    });
+
+    it('should add the tag always after policy assignment tags', () => {
+      formProps.policies = createPolicies();
+      const perPolicyTags = formProps.policies.map(
+        (p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`
+      );
+      formProps.item.tags = perPolicyTags;
+      render();
+
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      expect(latestUpdatedItem.tags).toStrictEqual([...perPolicyTags, ENTIRE_PROCESS_TREE_TAG]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
+      expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG]);
+
+      rerenderWithLatestProps();
+      userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
+      expect(latestUpdatedItem.tags).toStrictEqual([...perPolicyTags, ENTIRE_PROCESS_TREE_TAG]);
     });
   });
 

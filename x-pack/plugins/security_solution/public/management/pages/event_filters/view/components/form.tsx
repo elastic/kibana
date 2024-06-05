@@ -8,13 +8,14 @@
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 
 import { isEqual } from 'lodash';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiSuperSelectOption, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiSpacer,
   EuiForm,
   EuiFormRow,
   EuiSuperSelect,
+  EuiSwitch,
   EuiText,
   EuiHorizontalRule,
   EuiTextArea,
@@ -30,6 +31,13 @@ import { OperatingSystem, validateHasWildcardWithWrongOperator } from '@kbn/secu
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { useGetUpdatedTags } from '../../../../hooks/artifacts';
+import { ENTIRE_PROCESS_TREE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import {
+  isFilterEntireProcessTreeEnabled,
+  isFilterEntireProcessTreeTag,
+  isPolicySelectionTag,
+} from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   eventsIndexPattern,
@@ -76,6 +84,12 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
   value: os,
   inputDisplay: OS_TITLES[os],
 }));
+
+// Defines the tag categories for Event Filters, using the given order.
+const TAG_FILTERS = {
+  policySelection: isPolicySelectionTag,
+  entireTree: isFilterEntireProcessTreeTag,
+};
 
 const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
   formFields.reduce<{ [k: string]: number }>((allFields, field) => {
@@ -149,6 +163,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       indexNames,
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
+    );
+
+    const isEntireTreeEnabled = useMemo(
+      () => isFilterEntireProcessTreeEnabled(exception),
+      [exception]
     );
 
     const [areConditionsValid, setAreConditionsValid] = useState(
@@ -529,19 +548,23 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
     );
 
+    const { getTagsUpdatedBy } = useGetUpdatedTags(exception, TAG_FILTERS);
+
     // policy and handler
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = getArtifactTagsByPolicySelection(change);
+        const policySelectionTags = getArtifactTagsByPolicySelection(change);
 
         // Preserve old selected policies when switching to global
         if (!change.isGlobal) {
           setSelectedPolicies(change.selected);
         }
+
+        const tags = getTagsUpdatedBy('policySelection', policySelectionTags);
         processChanged({ tags });
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [processChanged, hasFormChanged, setSelectedPolicies]
+      [processChanged, getTagsUpdatedBy, hasFormChanged]
     );
 
     const policiesSection = useMemo(
@@ -565,6 +588,18 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         handleOnPolicyChange,
         getTestId,
       ]
+    );
+
+    const handleFilterEntireProcessTreeOnChange = useCallback(
+      (event: EuiSwitchEvent) => {
+        const isChecked = event.target.checked;
+
+        const newFilterProcessTreeTags = isChecked ? [ENTIRE_PROCESS_TREE_TAG] : [];
+        const tags = getTagsUpdatedBy('entireTree', newFilterProcessTreeTags);
+
+        processChanged({ tags });
+      },
+      [getTagsUpdatedBy, processChanged]
     );
 
     useEffect(() => {
@@ -592,6 +627,17 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             </EuiText>
           </>
         )}
+        <EuiSwitch
+          checked={isEntireTreeEnabled}
+          onChange={handleFilterEntireProcessTreeOnChange}
+          label={
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.filterEntireProcessTree"
+              defaultMessage="Filter entire process tree"
+            />
+          }
+          data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
+        />
         {showAssignmentSection && (
           <>
             <EuiHorizontalRule />

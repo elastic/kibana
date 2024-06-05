@@ -12,6 +12,11 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 import type { EffectedPolicySelection } from '../../../../public/management/components/effected_policy_select';
 import type { PolicyData } from '../../types';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  ENTIRE_PROCESS_TREE_TAG,
+  GLOBAL_ARTIFACT_TAG,
+} from './constants';
 
 export type TagFilter = (tag: string) => boolean;
 
@@ -37,6 +42,9 @@ export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'ta
 
   return policyIds;
 };
+
+export const isPolicySelectionTag: TagFilter = (tag) =>
+  tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX) || tag === GLOBAL_ARTIFACT_TAG;
 
 /**
  * Return a list of artifact policy tags based on a current
@@ -71,7 +79,7 @@ export const getEffectedPolicySelectionByTags = (
   }
   const selected: PolicyData[] = tags.reduce((acc, tag) => {
     // edge case: a left over tag with a non-existed policy
-    // will be removed by veryfing the policy exists
+    // will be removed by verifying the policy exists
     const id = tag.split(':')[1];
     const foundPolicy = policies.find((policy) => policy.id === id);
     if (foundPolicy !== undefined) {
@@ -85,6 +93,12 @@ export const getEffectedPolicySelectionByTags = (
     selected,
   };
 };
+
+export const isFilterEntireProcessTreeEnabled = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => (item.tags ?? []).find((tag) => tag === ENTIRE_PROCESS_TREE_TAG) !== undefined;
+
+export const isFilterEntireProcessTreeTag: TagFilter = (tag) => tag === ENTIRE_PROCESS_TREE_TAG;
 
 export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {
   return {
