@@ -70,11 +70,16 @@ import type { GenericBulkCreateResponse } from '../factories';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
+interface WarningResult {
+  wroteWarningStatus: boolean;
+  warningMessage: string | undefined;
+}
+
 export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
-}): Promise<{ wroteWarningMessage: boolean; warningStatusMessage: string | undefined }> => {
+}): Promise<WarningResult> => {
   const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
 
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
@@ -89,20 +94,41 @@ export const hasReadIndexPrivileges = async (args: {
     (indexName) => privileges.index[indexName].read
   );
 
-  let warningStatusMessage;
+  let warningMessage;
 
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
+    warningMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
+      message: warningMessage,
     });
-    return { wroteWarningMessage: true, warningStatusMessage };
+    return { wroteWarningStatus: true, warningMessage };
   }
 
-  return { wroteWarningMessage: false, warningStatusMessage };
+  return { wroteWarningStatus: false, warningMessage };
+};
+
+export const warnIfUnmatchedIndexPatterns = async (args: {
+  indexPatterns: string[];
+  existingIndices: string[];
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+}): Promise<WarningResult> => {
+  const { indexPatterns, existingIndices, ruleExecutionLogger } = args;
+  const unmatchedIndexPatterns = indexPatterns.filter((index) => !existingIndices.includes(index));
+
+  if (unmatchedIndexPatterns.length > 0) {
+    const warningMessage = `Indexes matching "${unmatchedIndexPatterns.join()}" were not found.`;
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: warningMessage,
+    });
+
+    return { wroteWarningStatus: true, warningMessage };
+  }
+
+  return { wroteWarningStatus: false, warningMessage: undefined };
 };
 
 export const hasTimestampFields = async (args: {
@@ -113,11 +139,11 @@ export const hasTimestampFields = async (args: {
   timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-}): Promise<{
-  wroteWarningStatus: boolean;
-  foundNoIndices: boolean;
-  warningMessage: string | undefined;
-}> => {
+}): Promise<
+  WarningResult & {
+    foundNoIndices: boolean;
+  }
+> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 

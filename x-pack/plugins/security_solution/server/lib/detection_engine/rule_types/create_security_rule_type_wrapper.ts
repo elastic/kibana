@@ -28,6 +28,7 @@ import {
   isMachineLearningParams,
   isEsqlParams,
   getDisabledActionsWarningText,
+  warnIfUnmatchedIndexPatterns,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -261,19 +262,32 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
+              const {
+                wroteWarningStatus: wroteWarningStatusIndexPatterns,
+                warningMessage: unmatchedIndexPatternsWarningMessage,
+              } = await warnIfUnmatchedIndexPatterns({
+                existingIndices,
+                indexPatterns: inputIndex,
+                ruleExecutionLogger,
+              });
+
+              wroteWarningStatus = wroteWarningStatusIndexPatterns;
+              warningMessage = unmatchedIndexPatternsWarningMessage;
 
               if (existingIndices.length > 0) {
                 const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
 
-                const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
-                  await hasReadIndexPrivileges({
-                    privileges,
-                    ruleExecutionLogger,
-                    uiSettingsClient,
-                  });
+                const {
+                  wroteWarningStatus: wroteReadIndexPrivilegeWarning,
+                  warningMessage: readIndexWarningMessage,
+                } = await hasReadIndexPrivileges({
+                  privileges,
+                  ruleExecutionLogger,
+                  uiSettingsClient,
+                });
 
-                wroteWarningStatus = wroteWarningMessage;
-                warningMessage = readIndexWarningMessage;
+                wroteWarningStatus ||= wroteReadIndexPrivilegeWarning;
+                warningMessage ||= readIndexWarningMessage;
               }
 
               if (!wroteWarningStatus) {
@@ -302,7 +316,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
                 });
-                wroteWarningStatus = wroteWarningStatusResult;
+                wroteWarningStatus ||= wroteWarningStatusResult;
                 warningMessage = warningMissingTimestampFieldsMessage;
                 skipExecution = foundNoIndices;
               }
@@ -331,8 +345,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             alerting,
           });
           if (rangeTuplesWarningStatus) {
-            wroteWarningStatus = rangeTuplesWarningStatus;
-            warningMessage = rangeTuplesWarningMessage;
+            wroteWarningStatus ||= rangeTuplesWarningStatus;
+            warningMessage ||= rangeTuplesWarningMessage;
           }
 
           if (remainingGap.asMilliseconds() > 0) {

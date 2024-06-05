@@ -16,7 +16,7 @@ import {
   deleteAllAlerts,
   createAlertsIndex,
   waitForRulePartialFailure,
-  waitForRuleSuccess,
+  // waitForRuleSuccess,
   getRuleForAlertTesting,
 } from '../../../../../../common/utils/security_solution';
 import {
@@ -95,9 +95,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     context('when some specified indices do not exist, but user can read all others', () => {
-      const index = ['non-existent-index', 'auditbeat-*'];
+      const index = ['non-existent-index-*', 'other-dne-index', 'auditbeat-*'];
 
-      it(`sets rule status to success for KQL rule with index param: ${index}`, async () => {
+      it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
         const rule = {
           ...getRuleForAlertTesting(index),
           query: 'process.executable: "/usr/bin/sudo"',
@@ -108,11 +108,12 @@ export default ({ getService }: FtrProviderContext) => {
           pass: 'changeme',
         });
 
-        await waitForRuleSuccess({
+        await waitForRulePartialFailure({
           supertest,
           log,
           id,
         });
+
         const { body } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -120,9 +121,8 @@ export default ({ getService }: FtrProviderContext) => {
           .query({ id })
           .expect(200);
 
-        // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
         expect(body?.execution_summary?.last_execution.message).to.eql(
-          'Rule execution completed successfully'
+          'Indexes matching "non-existent-index-*,other-dne-index" were not found.'
         );
 
         await deleteUserAndRole(getService, ROLES.detections_admin);
