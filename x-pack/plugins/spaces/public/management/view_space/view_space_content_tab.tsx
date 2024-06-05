@@ -48,13 +48,15 @@ export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
       field: 'count',
       name: 'Count',
       render: (value: string, item: SpaceContentTypeSummaryItem) => {
-        const hrefToSelectedSavedObjects = addSpaceIdToPath(
+        const uriComponent = encodeURIComponent(
+          `/app/management/kibana/objects?initialQuery=type:(${item.type})`
+        );
+        const href = addSpaceIdToPath(
           serverBasePath,
           space.id,
-          `${ENTER_SPACE_PATH}?next=/app/management/kibana/objects?initialQuery=type:(${item.type})`
+          `${ENTER_SPACE_PATH}?next=${uriComponent}`
         );
-
-        return <EuiLink href={hrefToSelectedSavedObjects}>{value}</EuiLink>;
+        return <EuiLink href={href}>{value}</EuiLink>;
       },
     },
   ];
