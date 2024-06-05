@@ -223,6 +223,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       // by setting the searchValue (only setting the field value does not trigger a search)
       if (type === '__suggestion__') {
         setSearchValue(suggestion);
+        setFocus(false);
         return;
       }
 
@@ -245,10 +246,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             selectedRank,
           });
         }
+        setFocus(false);
       } catch (err) {
         reportEvent.error({ message: err, searchValue });
         // eslint-disable-next-line no-console
         console.log('Error trying to track searchbar metrics', err);
+        setFocus(false);
       }
 
       if (event.shiftKey) {
@@ -265,6 +268,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       if (searchRef) {
         clearField();
         searchRef.dispatchEvent(blurEvent);
+        setFocus(false);
       }
     },
     [reportEvent, navigateToUrl, searchRef, searchValue, setFocus]
