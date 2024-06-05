@@ -114,8 +114,10 @@ RUN for iter in {1..10}; do \
     done; \
     (exit $exit_code)
 
+{{#serverless}}
 # Use jemalloc as the default memory allocator (https://github.com/nodejs/help/issues/1518)
 RUN echo "/usr/lib/x86_64-linux-gnu/libjemalloc.so.2" >> /etc/ld.so.preload
+{{/serverless}}
 {{/ubuntu}}
 {{#chainguard}}
 RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
