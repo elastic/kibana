@@ -61,7 +61,7 @@ export const getSearchEmbeddableFactory = ({
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: async (serializedState) => {
-      console.log('serializedState', serializedState);
+      console.log('deserializeState', serializedState);
       const savedObjectId = serializedState.rawState.savedObjectId;
       if (savedObjectId) {
         const so = await get(savedObjectId);
@@ -101,38 +101,50 @@ export const getSearchEmbeddableFactory = ({
       const { searchEmbeddableApi, searchEmbeddableComparators, searchEmbeddableStateManager } =
         await initializeSearchEmbeddableApi(initialState, { discoverServices });
 
+      const getByValueState = () => {
+        const searchSource = searchEmbeddableApi.searchSource$.getValue();
+        const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
+        const savedSearchAttributes = toSavedSearchAttributes(
+          searchEmbeddableApi.getSavedSearch(),
+          searchSourceJSON
+        );
+        const { rawState, references } = extract({
+          attributes: {
+            ...savedSearchAttributes,
+            references: originalReferences,
+          },
+        });
+
+        return {
+          rawState: {
+            ...serializeTitles(),
+            ...(rawState as unknown as SearchEmbeddableSerializedState),
+          },
+          references,
+        };
+      };
+
       const serializeState = async (
-        title?: string
+        updateByReference: boolean = false,
+        forceByValue: boolean = false
       ): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
         const savedObjectId = savedObjectId$.getValue();
-        if (savedObjectId) {
-          const id = await save({
-            ...searchEmbeddableApi.getSavedSearch(),
-            id: savedObjectId,
-            title: title ?? defaultPanelTitle$.getValue(),
-            description: defaultPanelDescription$.getValue(),
-          });
+
+        if (savedObjectId && !forceByValue) {
+          let id = savedObjectId;
+          if (updateByReference) {
+            id =
+              (await save({
+                ...searchEmbeddableApi.getSavedSearch(),
+                id: savedObjectId,
+                title: defaultPanelTitle$.getValue(),
+                description: defaultPanelDescription$.getValue(),
+              })) ?? savedObjectId;
+          }
           return { rawState: { savedObjectId: id, ...serializeTitles() }, references: [] };
         } else {
-          const searchSource = searchEmbeddableApi.searchSource$.getValue();
-          const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
-          const savedSearchAttributes = toSavedSearchAttributes(
-            searchEmbeddableApi.getSavedSearch(),
-            searchSourceJSON
-          );
-          const { rawState, references } = extract({
-            attributes: {
-              ...savedSearchAttributes,
-              references: originalReferences,
-            },
-          });
-          return {
-            rawState: {
-              ...serializeTitles(),
-              ...(rawState as unknown as SearchEmbeddableSerializedState),
-            },
-            references,
-          };
+          console.log('getByValueState', getByValueState);
+          return getByValueState();
         }
       };
 
@@ -181,6 +193,7 @@ export const getSearchEmbeddableFactory = ({
             savedObjectId$.next(savedObjectId!);
             return savedObjectId!;
           },
+          // getByValueState,
           checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
             checkForDuplicateTitle({
               newTitle,
@@ -198,7 +211,8 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState,
+          serializeState: (saveByReference, forceByValue) =>
+            serializeState(saveByReference, forceByValue),
         },
         {
           ...titleComparators,
@@ -319,7 +333,6 @@ export const getSearchEmbeddableFactory = ({
                   api={{
                     ...api,
                     fetchContext$,
-                    // savedSearch$: searchEmbeddableApi.savedSearch$,
                   }}
                   onAddFilter={onAddFilter}
                 />

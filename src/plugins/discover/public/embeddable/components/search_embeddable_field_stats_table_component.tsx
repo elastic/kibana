@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { FetchContext, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
@@ -19,7 +18,6 @@ import type { SearchEmbeddableApi } from '../types';
 interface SavedSearchEmbeddableComponentProps {
   onAddFilter: DocViewFilterFn;
   api: SearchEmbeddableApi & {
-    savedSearch$: BehaviorSubject<SavedSearch>;
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
   };
 }
@@ -28,8 +26,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
   api,
   onAddFilter,
 }: SavedSearchEmbeddableComponentProps) {
-  const [savedSearch, fetchContext, dataViews, columns] = useBatchedPublishingSubjects(
-    api.savedSearch$,
+  const [fetchContext, dataViews, columns] = useBatchedPublishingSubjects(
     api.fetchContext$,
     api.dataViews,
     api.columns$
@@ -45,7 +42,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
     <FieldStatisticsTable
       dataView={dataView}
       columns={columns ?? []}
-      savedSearch={savedSearch}
+      savedSearch={api.getSavedSearch()}
       filters={fetchContext?.filters}
       query={fetchContext?.query}
       onAddFilter={onAddFilter}

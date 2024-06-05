@@ -55,7 +55,7 @@ const serializeAllPanelState = async (
     if (api && apiHasSerializableState(api)) {
       serializePromises.push(
         (async () => {
-          const serialized = await api.serializeState();
+          const serialized = await api.serializeState(true);
           return { uuid, serialized };
         })()
       );
