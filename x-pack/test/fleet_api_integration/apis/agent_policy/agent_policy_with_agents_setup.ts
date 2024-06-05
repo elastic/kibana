@@ -149,10 +149,12 @@ export default function (providerContext: FtrProviderContext) {
     describe('In a non default space', () => {
       const SPACE_ID = 'test';
       before(async () => {
-        await kibanaServer.spaces.create({
-          id: SPACE_ID,
-          name: SPACE_ID,
-        });
+        await kibanaServer.spaces
+          .create({
+            id: SPACE_ID,
+            name: SPACE_ID,
+          })
+          .catch((err) => {});
       });
       describe('POST /s/test/api/fleet/agent_policies', () => {
         it('should create an .fleet-policy and .fleet-enrollment key for the policy', async () => {
