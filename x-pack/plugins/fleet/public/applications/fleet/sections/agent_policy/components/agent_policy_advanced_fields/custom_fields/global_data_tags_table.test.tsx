@@ -42,7 +42,7 @@ describe('GlobalDataTagsTable', () => {
     });
   });
 
-  it('should add a new tag', async () => {
+  it('should add new tags', async () => {
     await renderComponent([]);
 
     await act(async () => {
@@ -56,7 +56,7 @@ describe('GlobalDataTagsTable', () => {
       fireEvent.change(nameInput, { target: { value: 'newTag' } });
     });
     await act(async () => {
-      fireEvent.change(valueInput, { target: { value: 'newValue' } });
+      fireEvent.change(valueInput, { target: { value: '123' } });
     });
 
     await act(async () => {
@@ -64,7 +64,32 @@ describe('GlobalDataTagsTable', () => {
     });
 
     expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({
-      global_data_tags: [{ name: 'newTag', value: 'newValue' }],
+      global_data_tags: [{ name: 'newTag', value: 123 }],
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByText('Add another field'));
+    });
+
+    const nameInput2 = renderResult.getByPlaceholderText('Enter name');
+    const valueInput2 = renderResult.getByPlaceholderText('Enter value');
+
+    await act(async () => {
+      fireEvent.change(nameInput2, { target: { value: 'newTag2' } });
+    });
+    await act(async () => {
+      fireEvent.change(valueInput2, { target: { value: '123 123' } });
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByLabelText('Confirm'));
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({
+      global_data_tags: [
+        { name: 'newTag', value: 123 },
+        { name: 'newTag2', value: '123 123' },
+      ],
     });
   });
 
