@@ -6,7 +6,7 @@
   "plugin": {
     "id": "dependencyInjectionExample",
     "server": true,
-    "browser": false,
+    "browser": true,
     "requiredPlugins": ["developerExamples"]
   }
 }
