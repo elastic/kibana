@@ -67,6 +67,48 @@ describe('SummaryClient', () => {
           aggs: {
             good: { sum: { field: 'slo.numerator' } },
             total: { sum: { field: 'slo.denominator' } },
+            last5m: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
+            last1h: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1h/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
+            last1d: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
           },
         });
       });
@@ -104,6 +146,48 @@ describe('SummaryClient', () => {
           aggs: {
             good: { sum: { field: 'slo.numerator' } },
             total: { sum: { field: 'slo.denominator' } },
+            last5m: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
+            last1h: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1h/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
+            last1d: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.numerator' } },
+                total: { sum: { field: 'slo.denominator' } },
+              },
+            },
           },
         });
       });
@@ -143,14 +227,48 @@ describe('SummaryClient', () => {
             },
           },
           aggs: {
-            good: {
-              sum: {
-                field: 'slo.isGoodSlice',
+            good: { sum: { field: 'slo.isGoodSlice' } },
+            total: { value_count: { field: 'slo.isGoodSlice' } },
+            last5m: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.isGoodSlice' } },
+                total: { value_count: { field: 'slo.isGoodSlice' } },
               },
             },
-            total: {
-              value_count: {
-                field: 'slo.isGoodSlice',
+            last1h: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1h/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.isGoodSlice' } },
+                total: { value_count: { field: 'slo.isGoodSlice' } },
+              },
+            },
+            last1d: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.isGoodSlice' } },
+                total: { value_count: { field: 'slo.isGoodSlice' } },
               },
             },
           },
@@ -196,14 +314,48 @@ describe('SummaryClient', () => {
             },
           },
           aggs: {
-            good: {
-              sum: {
-                field: 'slo.isGoodSlice',
+            good: { sum: { field: 'slo.isGoodSlice' } },
+            total: { value_count: { field: 'slo.isGoodSlice' } },
+            last5m: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.isGoodSlice' } },
+                total: { value_count: { field: 'slo.isGoodSlice' } },
               },
             },
-            total: {
-              value_count: {
-                field: 'slo.isGoodSlice',
+            last1h: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1h/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.isGoodSlice' } },
+                total: { value_count: { field: 'slo.isGoodSlice' } },
+              },
+            },
+            last1d: {
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d/m',
+                    lte: 'now/m',
+                  },
+                },
+              },
+              aggs: {
+                good: { sum: { field: 'slo.isGoodSlice' } },
+                total: { value_count: { field: 'slo.isGoodSlice' } },
               },
             },
           },
