@@ -72,6 +72,7 @@ export const fetchUpsertMonitor = async ({
       null,
       {
         version: INITIAL_REST_VERSION,
+        ui: true,
       }
     );
   } else {

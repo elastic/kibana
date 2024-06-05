@@ -507,7 +507,7 @@ export class SavedMap {
       if (!this._originatingApp) {
         getToasts().addDanger({
           title: i18n.translate('xpack.maps.topNav.saveErrorTitle', {
-            defaultMessage: `Error saving '{title}'`,
+            defaultMessage: `Error saving ''{title}''`,
             values: { title: newTitle },
           }),
           text: i18n.translate('xpack.maps.topNav.saveErrorText', {
@@ -545,7 +545,7 @@ export class SavedMap {
 
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
-        defaultMessage: `Saved '{title}'`,
+        defaultMessage: `Saved ''{title}''`,
         values: { title: newTitle },
       }),
     });

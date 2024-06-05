@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import {
   MetricsExplorerChartOptions,
@@ -48,13 +47,11 @@ interface Props {
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
   series: MetricsExplorerSeries;
-  source: MetricsSourceConfigurationProperties | undefined;
   timeRange: MetricsExplorerTimeOptions;
   onTimeChange: (start: string, end: string) => void;
 }
 
 export const MetricsExplorerChart = ({
-  source,
   options,
   chartOptions,
   series,
@@ -119,7 +116,6 @@ export const MetricsExplorerChart = ({
                 chartOptions={chartOptions}
                 series={series}
                 onFilter={onFilter}
-                source={source}
                 uiCapabilities={uiCapabilities}
               />
             </EuiFlexItem>
@@ -132,7 +128,6 @@ export const MetricsExplorerChart = ({
               options={options}
               chartOptions={chartOptions}
               series={series}
-              source={source}
               timeRange={timeRange}
               uiCapabilities={uiCapabilities}
             />

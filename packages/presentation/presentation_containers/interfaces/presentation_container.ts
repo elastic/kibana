@@ -23,13 +23,34 @@ export interface PanelPackage<SerializedState extends object = object> {
 export interface PresentationContainer
   extends Partial<PublishesViewMode & PublishesSettings>,
     CanAddNewPanel {
+  /**
+   * Removes a panel from the container.
+   */
   removePanel: (panelId: string) => void;
+
+  /**
+   * Determines whether or not a container is capable of removing panels.
+   */
   canRemovePanels?: () => boolean;
+
+  /**
+   * Replaces a panel in the container with a new panel.
+   */
   replacePanel: <SerializedState extends object = object>(
     idToRemove: string,
     newPanel: PanelPackage<SerializedState>
   ) => Promise<string>;
 
+  /**
+   * Returns the number of panels in the container.
+   */
+  getPanelCount: () => number;
+
+  /**
+   * A publishing subject containing the child APIs of the container. Note that
+   * children are created asynchronously. This means that the children$ observable might
+   * contain fewer children than the actual number of panels in the container.
+   */
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 

@@ -11,7 +11,7 @@ import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../../common/con
 import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/rule_management/read_rules';
 import { findRules } from '../../../logic/search/find_rules';
 import { MAX_RULES_TO_PROCESS_TOTAL } from './route';
 

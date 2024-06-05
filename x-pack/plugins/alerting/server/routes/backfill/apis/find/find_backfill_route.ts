@@ -12,7 +12,10 @@ import {
 } from '../../../../../common/routes/backfill/apis/find';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
+} from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 
 export const findBackfillRoute = (
@@ -21,7 +24,7 @@ export const findBackfillRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_find`,
+      path: `${INTERNAL_ALERTING_BACKFILL_FIND_API_PATH}`,
       validate: {
         query: findQuerySchemaV1,
       },

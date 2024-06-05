@@ -5,9 +5,29 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/logging';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+
+/**
+ * Parses a Bedrock buffer from an array of chunks.
+ *
+ * @param {Uint8Array[]} chunks - Array of Uint8Array chunks to be parsed.
+ * @returns {string} - Parsed string from the Bedrock buffer.
+ */
+export const parseBedrockBuffer = (chunks: Uint8Array[], logger: Logger): string => {
+  // Initialize an empty Uint8Array to store the concatenated buffer.
+  let bedrockBuffer: Uint8Array = new Uint8Array(0);
+
+  // Map through each chunk to process the Bedrock buffer.
+  return chunks
+    .map((chunk) => {
+      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer, logger });
+      bedrockBuffer = processedChunk.bedrockBuffer;
+      return processedChunk.decodedChunk;
+    })
+    .join('');
+};
 
 /**
  * Handle a chunk of data from the bedrock API.
@@ -55,7 +75,9 @@ export const handleBedrockChunk = ({
         Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
       );
       const decodedContent = prepareBedrockOutput(body, logger);
-      if (chunkHandler) chunkHandler(decodedContent);
+      if (chunkHandler) {
+        chunkHandler(decodedContent);
+      }
       return decodedContent;
     })
     .join('');
