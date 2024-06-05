@@ -59,6 +59,7 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { decode } from 'cbor';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -452,6 +453,24 @@ export class SearchInterceptor {
             ...request,
             ...searchOptions,
           }),
+          asResponse: true,
+          rawResponse: true,
+        })
+        .then(async (response) => {
+          const chunks = [];
+          for await (const chunk of response.response.body) {
+            chunks.push(chunk);
+          }
+          const decoded = chunks.length > 1 ? decode(Buffer.concat(chunks)) : decode(chunks[0]);
+
+          return {
+            id: decoded.id,
+            rawResponse: strategy === ENHANCED_ES_SEARCH_STRATEGY ? decoded.response : decoded,
+            isPartial: false,
+            isRunning: false,
+            // ...(response.body.header?.warning ? { warning: response.body.header?.warning } : {}),
+            // ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
+          };
         })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {
