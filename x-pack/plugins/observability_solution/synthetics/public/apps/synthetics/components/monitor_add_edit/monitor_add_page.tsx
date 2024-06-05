@@ -34,7 +34,7 @@ export const MonitorAddPage = () => {
 
   const canUsePublicLocations = useCanUsePublicLocations();
 
-  const { data: cloneMonitor, loading } = useCloneMonitor();
+  const { data: cloneMonitor, loading: cloneMonitorLoading } = useCloneMonitor();
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -46,7 +46,7 @@ export const MonitorAddPage = () => {
     return <LocationsLoadingError />;
   }
 
-  if (!locationsLoaded || loading) {
+  if (!locationsLoaded || cloneMonitorLoading) {
     return <LoadingState />;
   }
 

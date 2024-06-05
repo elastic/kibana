@@ -11,9 +11,8 @@ import { getDecryptedMonitorAPI } from '../../../state/monitor_management/api';
 
 export const useCloneMonitor = () => {
   const { cloneId } = useGetUrlParams();
-  const { data, loading, error } = useFetcher(() => {
+  return useFetcher(() => {
     if (!cloneId) return Promise.resolve(undefined);
     return getDecryptedMonitorAPI({ id: cloneId });
   }, [cloneId]);
-  return { data, loading, error };
 };
