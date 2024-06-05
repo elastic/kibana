@@ -286,7 +286,7 @@ interface TitleWithIconProps {
 const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiAvatar size="xl" name={title} iconType={iconType} iconSize="xl" color="subdued" />
+      <EuiAvatar size="l" name={title} iconType={iconType} iconSize="l" color="subdued" />
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiTitle size="s">
