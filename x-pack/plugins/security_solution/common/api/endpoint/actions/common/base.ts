@@ -78,6 +78,9 @@ export const KillOrSuspendProcessRequestSchema = {
     parameters: schema.oneOf([
       schema.object({ pid: schema.number({ min: 1 }) }),
       schema.object({ entity_id: schema.string({ minLength: 1 }) }),
+
+      // FIXME:PT code this param so that it applies only to sentinelOne
+      schema.object({ process_name: schema.string({ minLength: 1 }) }),
     ]),
   }),
 };
