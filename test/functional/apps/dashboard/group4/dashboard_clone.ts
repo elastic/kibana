@@ -35,19 +35,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });
 
-    it('Clone should suggest a unique title', async function () {
-      await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
-      await PageObjects.dashboard.duplicateDashboard();
-      await PageObjects.dashboard.gotoDashboardLandingPage;
-      await listingTable.searchAndExpectItemsCount('dashboard', `${clonedDashboardName} (2)`, 1);
-    });
-
     it('the copy should have all the same visualizations', async function () {
       await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
       await retry.try(async () => {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
       });
+    });
+
+    it('Clone should suggest a unique title', async function () {
+      await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
+      await PageObjects.dashboard.duplicateDashboard();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await listingTable.searchAndExpectItemsCount('dashboard', `${dashboardName} (2)`, 1);
     });
   });
 }
