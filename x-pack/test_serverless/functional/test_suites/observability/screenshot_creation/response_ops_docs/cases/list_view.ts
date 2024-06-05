@@ -56,7 +56,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
     });
 
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
     it('cases list screenshot', async () => {
