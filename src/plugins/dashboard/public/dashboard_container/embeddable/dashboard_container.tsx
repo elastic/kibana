@@ -809,9 +809,13 @@ export class DashboardContainer
   public saveNotification$: Subject<void> = new Subject<void>();
 
   public getSerializedStateForChild = (childId: string) => {
-    const references = getReferencesForPanelId(childId, this.savedObjectReferences);
+    const panelState = this.getInput().panels[childId];
+    const references = [
+      ...getReferencesForPanelId(childId, this.savedObjectReferences),
+      ...(panelState.references ?? []),
+    ];
     return {
-      rawState: this.getInput().panels[childId].explicitInput,
+      rawState: panelState.explicitInput,
       references,
     };
   };
