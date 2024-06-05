@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  title: Initiates alerts migration API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/migration:
+    post:
+      operationId: CreateAlertsMigration
+      x-codegen-enabled: false
+      description: Initiates an alerts migration
+      tags:
+        - Alerts migration API
+      requestBody:
+        description: Alerts migration parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAlertsMigrationRequestBody'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAlertsMigrationResponse'
+
+components:
+  schemas:
+    CreateAlertsMigrationRequestBody:
+      type: object
+      properties:
+        index:
+          type: array
+          items:
+            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          minItems: 1
+        requests_per_second:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+        slices:
+          type: integer
+          minimum: 1
+      required: [index]
+
+    CreateAlertsMigrationResponse:
+      type: object
+      properties:
+        index:
+          type: string
+        migration_id:
+          type: string
+        migration_index:
+          type: string

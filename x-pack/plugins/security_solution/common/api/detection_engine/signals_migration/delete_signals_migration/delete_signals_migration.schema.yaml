@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: Alerts migration cleanup API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/migration:
+    delete:
+      operationId: AlertsMigrationCleanup
+      x-codegen-enabled: false
+      description: |
+        Performs alerts migration(s) cleanup.
+        Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of the migration process. A successful migration will result in both the old and new indices being present. As such, the old, orphaned index can (and likely should) be deleted.
+        While you can delete these indices manually, the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted after 30 days. It also deletes other artifacts specific to the migration implementation.
+      tags:
+        - Alerts migration API
+      requestBody:
+        description: Array of `migration_id`s to cleanup
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleanupAlertsMigrationRequestBody'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanupAlertsMigrationResponse'
+
+components:
+  schemas:
+    CleanupAlertsMigrationRequestBody:
+      type: object
+      properties:
+        migration_ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+
+    CleanupAlertsMigrationResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/MigrationCleanupResult'
+
+    MigrationCleanupResult:
+      type: object
+      properties:
+        id:
+          type: string
+        destinationIndex:
+          type: string
+        status:
+          type: string
+          enum:
+            - success
+            - failure
+            - pending
+        sourceIndex:
+          type: string
+        version:
+          type: string
+        updated:
+          type: string
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status_code:
+              type: integer
+        required:
+          - id
+          - destinationIndex
+          - status
+          - sourceIndex
+          - version
+          - updated

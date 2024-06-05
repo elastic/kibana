@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  title: Finalize alerts migration API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/finalize_migration:
+    post:
+      operationId: FinalizeAlertsMigration
+      x-codegen-enabled: false
+      description: |
+        Finalizes alerts migration(s).
+        The finalization endpoint replaces the original index's alias with the successfully migrated index's alias. The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion, finalize it.
+      tags:
+        - Alerts migration API
+      requestBody:
+        description: Array of `migration_id`s to finalize
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeAlertsMigrationRequestBody'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinalizeAlertsMigrationResponse'
+
+components:
+  schemas:
+    FinalizeAlertsMigrationRequestBody:
+      type: object
+      properties:
+        migration_ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+
+    FinalizeAlertsMigrationResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/MigrationFinalizationResult'
+
+    MigrationFinalizationResult:
+      type: object
+      properties:
+        id:
+          type: string
+        completed:
+          type: boolean
+        destinationIndex:
+          type: string
+        status:
+          type: string
+          enum:
+            - success
+            - failure
+            - pending
+        sourceIndex:
+          type: string
+        version:
+          type: string
+        updated:
+          type: string
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status_code:
+              type: integer
+        required:
+          - id
+          - completed
+          - destinationIndex
+          - status
+          - sourceIndex
+          - version
+          - updated

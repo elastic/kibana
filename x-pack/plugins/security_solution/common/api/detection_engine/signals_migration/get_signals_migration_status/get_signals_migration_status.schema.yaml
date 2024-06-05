@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Get alerts migration status API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/migration_status:
+    post:
+      operationId: GetAlertsMigration
+      x-codegen-enabled: false
+      description: Returns an alerts migration
+      tags:
+        - Alerts migration API
+      parameters:
+        - name: from
+          in: query
+          description: Maximum age of qualifying detection alerts
+          required: true
+          schema:
+            $ref: '../../../detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleIntervalFrom'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAlertsMigrationStatusResponse'
+
+components:
+  schemas:
+    GetAlertsMigrationStatusResponse:
+      type: object
+      properties:
+        indices:
+          type: array
+          items:
+            $ref: '#/components/schemas/IndexMigrationStatus'
+
+    IndexMigrationStatus:
+      type: object
+      properties:
+        index:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        version:
+          type: integer
+        signal_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertVersion'
+        migrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MigrationStatus'
+        is_outdated:
+          type: boolean
+
+    AlertVersion:
+      type: object
+      properties:
+        version:
+          type: integer
+        count:
+          type: integer
+
+    MigrationStatus:
+      type: object
+      properties:
+        id:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        status:
+          type: string
+          enum:
+            - success
+            - failure
+            - pending
+        version:
+          type: integer
+        updated:
+          type: string
