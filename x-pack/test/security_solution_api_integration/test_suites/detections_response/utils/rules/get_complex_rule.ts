@@ -46,7 +46,7 @@ export const getComplexRule = (ruleId = 'rule-1'): RuleCreateProps => ({
   max_signals: 10,
   tags: ['tag 1', 'tag 2', 'any tag you want'],
   to: 'now',
-  from: 'now-6m',
+  from: 'now-1450m', // 1450m is 24h + 10m
   severity: 'high',
   severity_mapping: [],
   language: 'kuery',

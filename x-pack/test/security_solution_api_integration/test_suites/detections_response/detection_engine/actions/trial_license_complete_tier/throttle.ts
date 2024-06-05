@@ -211,6 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleWithWebHookAction(hookAction.id),
             throttle: '1h',
             interval: '1h', // "interval" has to be equal to or less than "throttle"
+            from: 'now-70m',
           };
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const {

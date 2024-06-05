@@ -23,4 +23,5 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): RuleU
   machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
   interval: '24h',
+  from: 'now-1450m', // 1450m is 24h + 10m
 });

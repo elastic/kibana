@@ -2014,6 +2014,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const createdRule = await createRule(supertest, log, {
               ...getSimpleRule(ruleId),
               interval: '8h',
+              from: 'now-490m', // 490m is 8h + 10m
               actions: [defaultRuleAction],
               throttle: '8h',
             });
@@ -2245,6 +2246,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 const createdRule = await createRule(supertest, log, {
                   ...getSimpleRule(ruleId),
                   interval: '1h',
+                  from: 'now-70m',
                 });
 
                 const { body } = await postBulkAction()

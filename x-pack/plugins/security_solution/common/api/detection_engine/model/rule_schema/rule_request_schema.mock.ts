@@ -75,7 +75,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
   threat_index: ['auditbeat-*'],
   threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
   interval: '24h',
-  from: 'now-6m',
+  from: 'now-1450m', // 1450m is 24h + 10m
   threat_mapping: [
     {
       entries: [
@@ -149,7 +149,7 @@ export const getCreateNewTermsRulesSchemaMock = (
   language: 'kuery',
   rule_id: ruleId,
   interval: '24h',
-  from: 'now-6m',
+  from: 'now-1450m', // 1450m is 24h + 10m
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
 });
@@ -168,7 +168,7 @@ export const getCreateEsqlRulesSchemaMock = (
   language: 'esql',
   rule_id: ruleId,
   interval: '24h',
-  from: 'now-6m',
+  from: 'now-1450m', // 1450m is 24h + 10m
 });
 
 export const getUpdateRulesSchemaMock = (
@@ -210,7 +210,7 @@ export const getUpdateNewTermsSchemaMock = (
   language: 'kuery',
   id,
   interval: '24h',
-  from: 'now-6m',
+  from: 'now-1450m', // 1450m is 24h + 10m
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
 });

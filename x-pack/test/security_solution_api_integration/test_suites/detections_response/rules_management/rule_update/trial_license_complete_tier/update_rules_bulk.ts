@@ -655,6 +655,7 @@ export default ({ getService }: FtrProviderContext) => {
             const createdRule = await createRule(supertest, log, {
               ...getSimpleRuleWithoutRuleId(),
               interval: '5m',
+              from: 'now-6m',
             });
 
             // update a simple rule's `throttle` and `actions`
@@ -665,7 +666,7 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             const expectedRule = updateUsername(
-              { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' },
+              { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m', from: 'now-6m' },
               ELASTICSEARCH_USERNAME
             );
             expectedRule.revision = 1;
@@ -696,6 +697,7 @@ export default ({ getService }: FtrProviderContext) => {
             const createdRule = await createRule(supertest, log, {
               ...getSimpleRuleWithoutRuleId(),
               interval: '5m',
+              from: 'now-6m',
             });
 
             // update a simple rule's `throttle` and `actions`
@@ -706,7 +708,7 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             const expectedRule = updateUsername(
-              { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' },
+              { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m', from: 'now-6m' },
               ELASTICSEARCH_USERNAME
             );
             expectedRule.revision = 1;
@@ -758,6 +760,7 @@ export default ({ getService }: FtrProviderContext) => {
             const createdRule = await createRule(supertest, log, {
               ...getSimpleRuleWithoutRuleId(),
               interval: '5m',
+              from: 'now-6m',
             });
 
             // update a simple rule's `throttle` and `actions`
@@ -768,7 +771,7 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             const expectedRule = updateUsername(
-              { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' },
+              { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m', from: 'now-6m' },
               ELASTICSEARCH_USERNAME
             );
             expectedRule.revision = 1;
