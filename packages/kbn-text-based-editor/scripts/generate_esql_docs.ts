@@ -47,8 +47,12 @@ function loadFunctionDocs(pathToElasticsearch: string) {
 }
 
 function writeFunctionDocs(functionDocs: Map<string, string>) {
-  const codeStrings = Array.from(functionDocs.entries()).map(
-    ([name, doc]) => `
+  const codeStrings = Array.from(functionDocs.entries()).map(([name, doc]) => {
+    const docWithoutLinks = removeAsciiDocInternalCrossReferences(
+      doc,
+      Array.from(functionDocs.keys())
+    );
+    return `
   const foo = {
     label: i18n.translate(
       'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.${name}',
@@ -62,15 +66,15 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
         markdownContent={i18n.translate(
           'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.${name}.markdown',
           {
-            defaultMessage: \`${doc.replaceAll('`', '\\`')}\`,
+            defaultMessage: \`${docWithoutLinks.replaceAll('`', '\\`')}\`,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
           }
         )}
       />
     ),
-  };`
-  );
+  };`;
+  });
 
   const pathToDocsFile = path.join(__dirname, '../src/esql_documentation_sections.tsx');
 
@@ -85,6 +89,31 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
   const newFileContents = recast.print(ast);
 
   fs.writeFileSync(pathToDocsFile, newFileContents.code);
+}
+
+/**
+ * Deals with asciidoc internal cross-references in the function descriptions
+ *
+ * Examples:
+ * <<esql-mv_max>> -> `MV_MAX`
+ * <<esql-st_intersects,ST_INTERSECTS>> -> `ST_INTERSECTS`
+ * <<esql-multivalued-fields, multivalued fields>> -> multivalued fields
+ */
+function removeAsciiDocInternalCrossReferences(asciidocString: string, functionNames: string[]) {
+  const internalCrossReferenceRegex = /<<(.+?)(,.+?)?>>/g;
+
+  const extractPossibleFunctionName = (id: string) => id.replace('esql-', '');
+
+  return asciidocString.replace(internalCrossReferenceRegex, (_match, anchorId, linkText) => {
+    const ret = linkText ? linkText.slice(1) : anchorId;
+
+    const matchingFunction = functionNames.find(
+      (name) =>
+        extractPossibleFunctionName(ret) === name.toLowerCase() ||
+        extractPossibleFunctionName(ret) === name.toUpperCase()
+    );
+    return matchingFunction ? `\`${matchingFunction.toUpperCase()}\`` : ret;
+  });
 }
 
 /**
