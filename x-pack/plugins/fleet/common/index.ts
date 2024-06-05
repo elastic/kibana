@@ -85,7 +85,7 @@ export {
   getAzureArmPropsFromPackagePolicy,
   getCloudFormationPropsFromPackagePolicy,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-} from '../public/components/cloud_security_posture/services'
+} from '../public/components/cloud_security_posture/services';
 
 export type { FleetAuthz } from './authz';
 export type {
@@ -209,4 +209,3 @@ export type {
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
-

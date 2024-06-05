@@ -16,11 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import {
-  ORGANIZATION_ACCOUNT,
-  SINGLE_ACCOUNT,
-  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-} from '../../../../common/constants';
+import { SINGLE_ACCOUNT, TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR } from '../../../../common/constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormAgentlessOptions,
