@@ -835,6 +835,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               className={editorClassName}
               css={css`
                 max-width: 100%;
+                ${isHistoryOpen ? 'position: relative;' : ''}
               `}
             >
               <div css={styles.editorContainer}>
