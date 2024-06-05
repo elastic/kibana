@@ -370,11 +370,18 @@ export function useOnSubmit({
           setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
           return;
         }
-        if (promptForAgentEnrollment) {
+
+        if (!isAgentlessPackagePolicy(packagePolicy) && promptForAgentEnrollment) {
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
-        onSaveNavigate(data!.item);
+
+        if (isAgentlessPackagePolicy(packagePolicy)) {
+          onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+
+        } else {
+          onSaveNavigate(data!.item);
+        }
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {

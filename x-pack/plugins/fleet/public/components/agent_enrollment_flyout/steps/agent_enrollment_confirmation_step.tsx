@@ -14,7 +14,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 
-import { ConfirmAgentEnrollment } from '../confirm_agent_enrollment';
+import { ConfirmAgentEnrollment, ConfirmAgentlessEnrollment } from '../confirm_agent_enrollment';
 
 const AgentEnrollmentPrePollInstructions: React.FC<{ troubleshootLink: string }> = ({
   troubleshootLink,
@@ -24,6 +24,29 @@ const AgentEnrollmentPrePollInstructions: React.FC<{ troubleshootLink: string }>
       <FormattedMessage
         id="xpack.fleet.confirmIncomingDataWithPreview.prePollingInstructions"
         defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
+        values={{
+          link: (
+            <EuiLink target="_blank" external href={troubleshootLink}>
+              <FormattedMessage
+                id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                defaultMessage="troubleshooting guide"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
+  );
+};
+
+const AgentlessPrePollInstructions: React.FC<{ troubleshootLink: string }> = ({
+  troubleshootLink,
+}) => {
+  return (
+    <EuiText>
+      <FormattedMessage
+        id="xpack.fleet.confirmIncomingDataWithPreview.prePollingInstructions"
+        defaultMessage="After the agentless deployment connection, the Elastic Stack listens for the agentless connection and confirms the integration is ready for data. If you're having trouble connecting, check out the {link}."
         values={{
           link: (
             <EuiLink target="_blank" external href={troubleshootLink}>
@@ -78,6 +101,52 @@ export const AgentEnrollmentConfirmationStep = ({
           />
         ) : (
           <AgentEnrollmentPrePollInstructions troubleshootLink={troubleshootLink} />
+        )}
+      </>
+    ),
+    status: !isComplete ? 'incomplete' : 'complete',
+  };
+};
+
+export const AgentlessEnrollmentConfirmationStep = ({
+  selectedPolicyId,
+  troubleshootLink,
+  onClickViewAgents,
+  agentCount,
+  showLoading,
+  poll = true,
+  isLongEnrollment = false,
+}: {
+  selectedPolicyId?: string;
+  troubleshootLink: string;
+  onClickViewAgents?: () => void;
+  agentCount: number;
+  poll?: boolean;
+  showLoading?: boolean;
+  isLongEnrollment?: boolean;
+}): EuiContainedStepProps => {
+  const isComplete = !!agentCount;
+  return {
+    title: isComplete
+      ? i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmationComplete', {
+          defaultMessage: 'Agentless enrollment confirmed',
+        })
+      : i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
+          defaultMessage: 'Confirm agentless enrollment',
+        }),
+    children: (
+      <>
+        {!!isComplete || poll ? (
+          <ConfirmAgentlessEnrollment
+            policyId={selectedPolicyId}
+            troubleshootLink={troubleshootLink}
+            onClickViewAgents={onClickViewAgents}
+            agentCount={agentCount}
+            showLoading={!isComplete || showLoading}
+            isLongEnrollment={isLongEnrollment}
+          />
+        ) : (
+          <AgentlessPrePollInstructions troubleshootLink={troubleshootLink} />
         )}
       </>
     ),

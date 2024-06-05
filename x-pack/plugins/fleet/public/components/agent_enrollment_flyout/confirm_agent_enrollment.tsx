@@ -95,6 +95,99 @@ export const usePollingAgentCount = (
   return { enrolledAgentIds: agentIds };
 };
 
+export const ConfirmAgentlessEnrollment: React.FunctionComponent<Props> = ({
+  policyId,
+  troubleshootLink,
+  onClickViewAgents,
+  agentCount,
+  showLoading = false,
+  isLongEnrollment = false,
+}) => {
+  const { getHref } = useLink();
+  const { application } = useStartServices();
+  const showViewAgents = !!onClickViewAgents;
+  const TroubleshootLink = () => (
+    <EuiLink target="_blank" external href={troubleshootLink}>
+      <FormattedMessage
+        id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+        defaultMessage="troubleshooting guide"
+      />
+    </EuiLink>
+  );
+
+  const onButtonClick = () => {
+    if (onClickViewAgents) onClickViewAgents();
+    const href = getHref('policies_list');
+    application.navigateToUrl(href);
+  };
+
+  if (!policyId || (agentCount === 0 && !showLoading)) {
+    return (
+      <EuiText>
+        <FormattedMessage
+          data-test-subj="ConfirmAgentEnrollmentCallOut.troubleshooting"
+          id="xpack.fleet.enrollmentInstructions.troubleshootingText"
+          defaultMessage="If you are having trouble connecting, see our {link}."
+          values={{
+            link: <TroubleshootLink />,
+          }}
+        />
+      </EuiText>
+    );
+  }
+
+  if (showLoading && !agentCount) {
+    return (
+      <>
+        <EuiCallOut
+          size="m"
+          color="primary"
+          iconType={EuiLoadingSpinner}
+          title={
+            isLongEnrollment ? (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
+                defaultMessage="Listening for agentless connection... this can take several minutes"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listening"
+                defaultMessage="Listening for agentless connection"
+              />
+            )
+          }
+        />
+      </>
+    );
+  }
+
+  return (
+    <EuiCallOut
+      data-test-subj="ConfirmAgentEnrollmentCallOut"
+      title={i18n.translate('xpack.fleet.agentEnrollment.confirmation.title', {
+        defaultMessage: 'Agentless deployment connection was successful',
+        values: {
+          agentCount,
+        },
+      })}
+      color="success"
+      iconType="check"
+    >
+      {showViewAgents && (
+        <EuiButton
+          onClick={onButtonClick}
+          color="success"
+          data-test-subj="ConfirmAgentlessEnrollmentButton"
+        >
+          {i18n.translate('xpack.fleet.agentlessEnrollment.confirmation.button', {
+            defaultMessage: 'View agentless deployments',
+          })}
+        </EuiButton>
+      )}
+    </EuiCallOut>
+  );
+};
+
 export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   policyId,
   troubleshootLink,

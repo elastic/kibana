@@ -46,6 +46,7 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   IncomingDataConfirmationStep,
+  AgentlessEnrollmentConfirmationStep,
 } from '.';
 
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
@@ -217,6 +218,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
+  isAgentless,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -365,9 +367,38 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     gcpProjectId,
   ]);
 
+  const agentlessInstructionsSteps = useMemo(() => {
+    const steps: EuiContainedStepProps[] = [
+      AgentlessEnrollmentConfirmationStep({
+        selectedPolicyId: selectedPolicy?.id,
+        onClickViewAgents,
+        troubleshootLink: link,
+        agentCount: enrolledAgentIds.length,
+        isLongEnrollment: cloudSecurityIntegration !== undefined,
+      }),
+      IncomingDataConfirmationStep({
+        agentIds: enrolledAgentIds,
+        agentDataConfirmed,
+        setAgentDataConfirmed,
+        installedPolicy: installedPackagePolicy,
+        troubleshootLink: link,
+      }),
+    ];
+
+    return steps;
+  }, [
+    selectedPolicy,
+    cloudSecurityIntegration,
+    onClickViewAgents,
+    link,
+    enrolledAgentIds,
+    agentDataConfirmed,
+    installedPackagePolicy,
+  ]);
+
   if (!agentVersion) {
     return <EuiLoadingSpinner />;
   }
 
-  return <EuiSteps steps={instructionsSteps} />;
+  return <EuiSteps steps={isAgentless ? agentlessInstructionsSteps : instructionsSteps} />;
 };

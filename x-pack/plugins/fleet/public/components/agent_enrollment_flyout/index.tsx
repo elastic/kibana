@@ -34,6 +34,8 @@ import type { PackagePolicy, AgentPolicy } from '../../types';
 
 import { Loading } from '..';
 
+import { useAgentless } from '../../applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
+
 import { Instructions } from './instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
 import type { FlyOutProps, SelectionType, FlyoutMode } from './types';
@@ -70,6 +72,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const [mode, setMode] = useState<FlyoutMode>(defaultMode);
   const [selectionType, setSelectionType] = useState<SelectionType>();
 
+  const { isAgentlessAgentPolicy } = useAgentless();
+
   const {
     agentPolicies,
     isLoadingInitialAgentPolicies,
@@ -85,6 +89,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
     : findPolicyById(agentPolicies, selectedPolicyId);
+
+  const isAgentless = isAgentlessAgentPolicy(selectedPolicy);
 
   const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
@@ -105,83 +111,103 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const { isK8s } = useIsK8sPolicy(selectedPolicy ?? undefined);
   const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
 
+  const AgentlessHeader = ({ name }: { name: string }) => (
+    <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentlessEnrollmentFlyoutTitle">
+      <EuiTitle size="m">
+        <h2 id="FleetAgentlessFlyoutTitle">
+          <FormattedMessage
+            id="xpack.fleet.agentlessEnrollment.flyoutTitle"
+            defaultMessage="{agentlessPolicyName}"
+            values={{ agentlessPolicyName: name }}
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+    </EuiFlyoutHeader>
+  );
+
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
-        <EuiTitle size="m">
-          <h2 id="FleetAgentEnrollmentFlyoutTitle">
-            {isFleetServerPolicySelected ? (
+      {!isAgentless && (
+        <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
+          <EuiTitle size="m">
+            <h2 id="FleetAgentEnrollmentFlyoutTitle">
+              {isFleetServerPolicySelected ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.flyoutFleetServerTitle"
+                  defaultMessage="Add Fleet Server"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.flyoutTitle"
+                  defaultMessage="Add agent"
+                />
+              )}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="l" />
+          {isFleetServerPolicySelected ? (
+            <EuiText>
               <FormattedMessage
-                id="xpack.fleet.agentEnrollment.flyoutFleetServerTitle"
-                defaultMessage="Add Fleet Server"
+                id="xpack.fleet.agentEnrollment.instructionstFleetServer"
+                defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. Follow the instructions below to set up a Fleet Server. For more information, see the {userGuideLink}"
+                values={{
+                  userGuideLink: (
+                    <EuiLink
+                      href={docLinks.links.fleet.fleetServerAddFleetServer}
+                      external
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentEnrollment.setupGuideLink"
+                        defaultMessage="Fleet and Elastic Agent Guide"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
-            ) : (
+            </EuiText>
+          ) : (
+            <EuiText>
               <FormattedMessage
-                id="xpack.fleet.agentEnrollment.flyoutTitle"
-                defaultMessage="Add agent"
+                id="xpack.fleet.agentEnrollment.agentDescription"
+                defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
               />
-            )}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {isFleetServerPolicySelected ? (
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.instructionstFleetServer"
-              defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. Follow the instructions below to set up a Fleet Server. For more information, see the {userGuideLink}"
-              values={{
-                userGuideLink: (
-                  <EuiLink
-                    href={docLinks.links.fleet.fleetServerAddFleetServer}
-                    external
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentEnrollment.setupGuideLink"
-                      defaultMessage="Fleet and Elastic Agent Guide"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        ) : (
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.agentDescription"
-              defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
-            />
-          </EuiText>
-        )}
+            </EuiText>
+          )}
 
-        {selectionType === 'tabs' ? (
-          <>
-            <EuiSpacer size="l" />
-            <EuiTabs style={{ marginBottom: '-25px' }}>
-              <EuiTab
-                data-test-subj="managedTab"
-                isSelected={mode === 'managed'}
-                onClick={() => setMode('managed')}
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.enrollFleetTabLabel"
-                  defaultMessage="Enroll in Fleet"
-                />
-              </EuiTab>
-              <EuiTab
-                data-test-subj="standaloneTab"
-                isSelected={mode === 'standalone'}
-                onClick={() => setMode('standalone')}
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
-                  defaultMessage="Run standalone"
-                />
-              </EuiTab>
-            </EuiTabs>
-          </>
-        ) : null}
-      </EuiFlyoutHeader>
+          {selectionType === 'tabs' ? (
+            <>
+              <EuiSpacer size="l" />
+              <EuiTabs style={{ marginBottom: '-25px' }}>
+                <EuiTab
+                  data-test-subj="managedTab"
+                  isSelected={mode === 'managed'}
+                  onClick={() => setMode('managed')}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.enrollFleetTabLabel"
+                    defaultMessage="Enroll in Fleet"
+                  />
+                </EuiTab>
+                <EuiTab
+                  data-test-subj="standaloneTab"
+                  isSelected={mode === 'standalone'}
+                  onClick={() => setMode('standalone')}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
+                    defaultMessage="Run standalone"
+                  />
+                </EuiTab>
+              </EuiTabs>
+            </>
+          ) : null}
+        </EuiFlyoutHeader>
+      )}
+
+      {isAgentless && selectedPolicy && <AgentlessHeader name={selectedPolicy.name} />}
+
       <EuiFlyoutBody
         banner={
           hasNoFleetServerHost && !isLoadingInitialRequest && mode === 'managed' ? (
@@ -214,6 +240,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             setSelectedAPIKeyId={setSelectedAPIKeyId}
             onClickViewAgents={onClose}
             installedPackagePolicy={installedPackagePolicy}
+            isAgentless={isAgentless}
           />
         )}
       </EuiFlyoutBody>

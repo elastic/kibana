@@ -23,7 +23,7 @@ interface Props {
   troubleshootLink: string;
 }
 
-export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
+export const ConfirmAgentlessIncomingData: React.FunctionComponent<Props> = ({
   agentIds,
   installedPolicy,
   agentDataConfirmed,
@@ -80,6 +80,82 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
             numAgentsWithData,
             enrolledAgents,
           },
+        })}
+        color="success"
+        iconType="check"
+      />
+      {installedPolicy && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s">{message}</EuiText>
+          <EuiSpacer size="m" />
+          <EuiButton
+            href={linkButton.href}
+            isDisabled={isLoading}
+            color="primary"
+            fill
+            data-test-subj="IncomingDataConfirmedButton"
+          >
+            {linkButton.text}
+          </EuiButton>
+        </>
+      )}
+    </>
+  );
+};
+
+export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
+  agentIds,
+  installedPolicy,
+  agentDataConfirmed,
+  setAgentDataConfirmed,
+  troubleshootLink,
+}) => {
+  const { incomingData, isLoading } = usePollingIncomingData(agentIds);
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(installedPolicy?.name);
+  const { guidedOnboarding } = useStartServices();
+
+  const { enrolledAgents, numAgentsWithData, linkButton, message } = useGetAgentIncomingData(
+    incomingData,
+    installedPolicy
+  );
+
+  if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
+    setAgentDataConfirmed(true);
+    if (installedPolicy?.name && isGuidedOnboardingActive) {
+      guidedOnboarding?.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
+        installedPolicy!.name
+      );
+    }
+  }
+
+  if (!agentDataConfirmed) {
+    return (
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.confirmIncomingData.loading"
+          defaultMessage="It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our {link}. You may close this dialog and check later by viewing your integration assets."
+          values={{
+            link: (
+              <EuiLink target="_blank" external href={troubleshootLink}>
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                  defaultMessage="troubleshooting guide"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+    );
+  }
+
+  return (
+    <>
+      <EuiCallOut
+        data-test-subj="IncomingDataConfirmedCallOut"
+        title={i18n.translate('xpack.fleet.confirmIncomingData.title', {
+          defaultMessage: 'Incoming data received from agentless integration',
         })}
         color="success"
         iconType="check"
