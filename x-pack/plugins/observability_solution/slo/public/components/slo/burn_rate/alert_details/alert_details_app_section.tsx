@@ -6,12 +6,14 @@
  */
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
 import { AlertSummaryField } from '@kbn/observability-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import React, { useEffect } from 'react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
-import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
+import { SLOGroupings } from '../../../../pages/slos/components/common/slo_groupings';
+import { useKibana } from '../../../../utils/kibana_react';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
+import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
 import { BurnRateAlert, BurnRateRule } from './types';
 
 interface AppSectionProps {
@@ -40,7 +42,7 @@ export default function AlertDetailsAppSection({
   const alertLink = alert.link;
 
   useEffect(() => {
-    setAlertSummaryFields([
+    const fields = [
       {
         label: i18n.translate('xpack.slo.burnRateRule.alertDetailsAppSection.summaryField.slo', {
           defaultMessage: 'Source SLO',
@@ -61,8 +63,20 @@ export default function AlertDetailsAppSection({
           </EuiLink>
         ),
       },
-    ]);
-  }, [alertLink, rule, ruleLink, setAlertSummaryFields, basePath, slo]);
+    ];
+
+    if (instanceId !== ALL_VALUE) {
+      fields.push({
+        label: i18n.translate(
+          'xpack.slo.burnRateRule.alertDetailsAppSection.summaryField.instanceId',
+          { defaultMessage: 'SLO Instance' }
+        ),
+        value: <SLOGroupings direction="column" slo={slo} gutterSize="none" truncate={false} />,
+      });
+    }
+
+    setAlertSummaryFields(fields);
+  }, [alertLink, rule, ruleLink, setAlertSummaryFields, basePath, slo, instanceId]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">

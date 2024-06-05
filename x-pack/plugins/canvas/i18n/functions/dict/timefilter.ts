@@ -46,7 +46,7 @@ export const errors = {
   invalidString: (str: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.timefilter.invalidStringErrorMessage', {
-        defaultMessage: "Invalid date/time string: '{str}'",
+        defaultMessage: "Invalid date/time string: ''{str}''",
         values: {
           str,
         },
