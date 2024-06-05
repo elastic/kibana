@@ -97,7 +97,7 @@ export function hasInvalidOperations(
 export const getRawQueryValidationError = (
   text: string,
   operations: Record<string, unknown>
-): Array<InvalidQueryError & { message: string }> => {
+): (InvalidQueryError & { message: string }) | undefined => {
   // try to extract the query context here
   const singleLine = text.split('\n').join('');
   const languagesRegexp = /(kql|lucene)/;
@@ -108,7 +108,7 @@ export const getRawQueryValidationError = (
   );
   // no args or no valid operation, no more work to do here
   if (allArgs.length === 0 || !containsOneValidOperation) {
-    return [];
+    return undefined;
   }
   // at this point each entry in allArgs may contain one or more
   // in the worst case it would be a math chain of count operation
@@ -118,32 +118,30 @@ export const getRawQueryValidationError = (
     arg.split('count').filter((subArg) => languagesRegexp.test(subArg))
   );
   const [kqlQueries, luceneQueries] = partition(flattenArgs, (arg) => /kql/.test(arg));
-  const errors: Array<InvalidQueryError & { message: string }> = [];
   for (const kqlQuery of kqlQueries) {
-    const result = validateQueryQuotes(kqlQuery, 'kql');
-    if (result) {
-      errors.push({
+    const message = validateQueryQuotes(kqlQuery, 'kql');
+    if (message) {
+      return {
         id: 'invalidQuery',
         meta: {
           language: 'kql',
         },
-        message: result,
-      });
+        message,
+      };
     }
   }
   for (const luceneQuery of luceneQueries) {
-    const result = validateQueryQuotes(luceneQuery, 'lucene');
-    if (result) {
-      errors.push({
+    const message = validateQueryQuotes(luceneQuery, 'lucene');
+    if (message) {
+      return {
         id: 'invalidQuery',
         meta: {
           language: 'lucene',
         },
-        message: result,
-      });
+        message,
+      };
     }
   }
-  return errors;
 };
 
 const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
@@ -501,10 +499,9 @@ export function tryToParse(
     // Internally the function has the following logic:
     // * if the formula contains no existing ES operation, assume it's a plain parse failure
     // * if the formula contains at least one existing operation, check for query problems
-    // TODO: not sure why we just consider the first error here
     const maybeQueryProblems = getRawQueryValidationError(formula, operations);
-    if (maybeQueryProblems.length > 0) {
-      return { error: { ...maybeQueryProblems[0], locations: [] } };
+    if (maybeQueryProblems) {
+      return { error: { ...maybeQueryProblems, locations: [] } };
     }
     return {
       error: getMessageFromId({ id: 'failedParsing', meta: { expression: formula } }, []),
