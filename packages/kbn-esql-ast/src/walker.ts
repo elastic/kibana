@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLAstItem, ESQLAstNode, ESQLFunction, ESQLSingleAstItem } from './types';
+import type { ESQLAstCommand, ESQLAstItem, ESQLAstMetricsCommand, ESQLAstNode, ESQLFunction, ESQLSingleAstItem } from './types';
 
 export interface WalkerOptions {
   visitSingleAstItem?: (node: ESQLSingleAstItem) => void;
@@ -16,21 +16,37 @@ export interface WalkerOptions {
 export class Walker {
   constructor(protected readonly options: WalkerOptions) {}
 
-  public walk(node: ESQLAstNode): void {
-    // Special case for array "ast nodes", ideally we should remove this edge case in the future.
+  public walk(node: undefined | ESQLAstNode | ESQLAstNode[]): void {
+    if (!node) return;
+
     if (node instanceof Array) {
-      this.walkAstItem(node);
+      for (const item of node) this.walk(item);
       return;
     }
 
-    switch (node.name) {
-      case 'command':
-      case 'metrics': {
-        throw new Error('Not implemented');
+    switch (node.type) {
+      case 'command': {
+        this.walkCommand(node as ESQLAstCommand);
         break;
       }
       default: {
         this.walkAstItem(node as ESQLAstItem);
+        break;
+      }
+    }
+  }
+
+  public walkCommand(node: ESQLAstCommand): void {
+    switch (node.name) {
+      case 'metrics': {
+        const metrics = node as ESQLAstMetricsCommand;
+        this.walk(metrics.sources);
+        this.walk(metrics.aggregates);
+        this.walk(metrics.grouping);
+        break;
+      }
+      default: {
+        this.walk(node.args);
         break;
       }
     }
@@ -67,7 +83,7 @@ export class Walker {
   }
 }
 
-export const walk = (node: ESQLAstNode, options: WalkerOptions): Walker => {
+export const walk = (node: ESQLAstNode | ESQLAstNode[], options: WalkerOptions): Walker => {
   const walker = new Walker(options);
   walker.walk(node);
   return walker;
