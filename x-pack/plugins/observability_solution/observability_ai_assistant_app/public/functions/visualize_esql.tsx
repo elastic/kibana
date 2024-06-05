@@ -126,7 +126,12 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(indexPattern, dataViews);
+    return getESQLAdHocDataview(indexPattern, dataViews).then((dataView) => {
+      if (dataView.fields.getByName('@timestamp')?.type === 'date') {
+        dataView.timeFieldName = '@timestamp';
+      }
+      return dataView;
+    });
   }, [indexPattern]);
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
@@ -156,20 +161,11 @@ export function VisualizeESQL({
     []
   );
 
-  const dataView = useMemo(() => {
-    if (dataViewAsync.value) {
-      if (dataViewAsync.value.fields.getByName('@timestamp')?.type === 'date') {
-        dataViewAsync.value.timeFieldName = '@timestamp';
-      }
-      return dataViewAsync.value;
-    }
-  }, [dataViewAsync.value]);
-
   // initialization
   useEffect(() => {
-    if (lensHelpersAsync.value && dataView && !lensInput) {
+    if (lensHelpersAsync.value && dataViewAsync.value && !lensInput) {
       const context = {
-        dataViewSpec: dataView?.toSpec(),
+        dataViewSpec: dataViewAsync.value?.toSpec(),
         fieldName: '',
         textBasedColumns: columns,
         query: {
@@ -179,7 +175,7 @@ export function VisualizeESQL({
 
       const chartSuggestions = lensHelpersAsync.value.suggestions(
         context,
-        dataView,
+        dataViewAsync.value,
         [],
         preferredChartType
       );
@@ -193,7 +189,7 @@ export function VisualizeESQL({
             esql: query,
           },
           suggestion,
-          dataView,
+          dataView: dataViewAsync.value,
         }) as TypedLensByValueInput['attributes'];
 
         const lensEmbeddableInput = {
@@ -203,7 +199,7 @@ export function VisualizeESQL({
         setLensInput(lensEmbeddableInput);
       }
     }
-  }, [columns, dataView, lensHelpersAsync.value, lensInput, query, preferredChartType]);
+  }, [columns, dataViewAsync.value, lensHelpersAsync.value, lensInput, query, preferredChartType]);
 
   // trigger options to open the inline editing flyout correctly
   const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
@@ -251,7 +247,7 @@ export function VisualizeESQL({
     }
   }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
 
-  if (!lensHelpersAsync.value || !dataView || !lensInput) {
+  if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;
   }
   // if the Lens suggestions api suggests a table then we want to render a Discover table instead
@@ -379,7 +375,7 @@ export function VisualizeESQL({
               <ESQLDataGrid
                 rows={rows}
                 columns={columns}
-                dataView={dataView}
+                dataView={dataViewAsync.value}
                 query={{ esql: query }}
                 flyoutType="overlay"
                 isTableView
@@ -401,7 +397,7 @@ export function VisualizeESQL({
           <ESQLDataGrid
             rows={rows}
             columns={columns}
-            dataView={dataView}
+            dataView={dataViewAsync.value}
             query={{ esql: query }}
             flyoutType="overlay"
           />
