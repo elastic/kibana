@@ -530,6 +530,18 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     await this.ensureValidActionId(actionId);
 
+    // FIXME:PT Refactor this into reusable logic
+    const agentResponseDoc = (
+      await this.fetchActionResponseEsDocs<
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileResponseMeta
+      >(actionId, [agentId])
+    )[agentId];
+
+    if (agentResponseDoc.EndpointActions.data.command === 'kill-process') {
+      return this.getFileDownloadForScriptExecution(agentResponseDoc);
+    }
+
     const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
 
     if (!agentResponse.meta?.activityLogEntryId) {
@@ -556,6 +568,39 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return {
       stream: data,
       fileName: agentResponse.meta.filename,
+      mimeType: undefined,
+    };
+  }
+
+  private async getFileDownloadForScriptExecution(
+    actionResponseDoc: LogsEndpointActionResponse
+  ): Promise<GetFileDownloadMethodResponse> {
+    // // FIXME:PT throw error if action response show to be at error
+    //
+    // const s1ScriptResultsResponse = await this.sendAction(SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS, {
+    //   taskId: actionResponseDoc.meta.taskId,
+    // });
+    //
+    // this.log.debug(
+    //   `Script results for taskId [${actionResponseDoc.meta.taskId}]:\n${stringify(
+    //     s1ScriptResultsResponse.data
+    //   )}`
+    // );
+    //
+    // // TODO:PT Need to log errors here if no file link found
+    //
+    // // TODO:PT need to ensure that the `taskId` in the item is the same one we searched for
+    // const { downloadUrl, fileName } = s1ScriptResultsResponse.data.data.downloadLinks.at(0);
+    //
+    // // g
+
+    const { data } = await this.sendAction(SUB_ACTION.DOWNLAOD_REMOTE_SCRIPT_RESULTS, {
+      taskId: actionResponseDoc.meta.taskId,
+    });
+
+    return {
+      stream: data,
+      fileName: actionResponseDoc.agent.id, // FIXME:PT capture the value in the action response from the task status. value is in the property `scriptResultsSignature`
       mimeType: undefined,
     };
   }
@@ -1109,7 +1154,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         isError: true,
         message: 'SentinelOne Task [${taskStatusRecord.parentTaskId}] was canceled by user...',
       },
-      completed: { isPending: true, isError: false, message },
+      completed: { isPending: false, isError: false, message },
       created: { isPending: true, isError: false, message },
       expired: { isPending: false, isError: true, message },
       failed: { isPending: false, isError: true, message },
