@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESQL_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +16,7 @@ import type { ISearchOptions } from '@kbn/search-types';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { getESQLWithSafeLimit, appendToESQLQuery } from '@kbn/esql-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import { ESQL_SAFE_LIMIT } from '@kbn/unified-field-list/src/constants';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import type {
   DataStatsFetchProgress,
@@ -97,7 +98,10 @@ const getESQLDocumentCountStats = async (
       },
     };
     try {
-      const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
+      const esqlResults = await runRequest(request, {
+        ...(searchOptions ?? {}),
+        strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+      });
       let totalCount = 0;
       const _buckets: Record<string, number> = {};
       // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
@@ -142,7 +146,10 @@ const getESQLDocumentCountStats = async (
       },
     };
     try {
-      const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
+      const esqlResults = await runRequest(request, {
+        ...(searchOptions ?? {}),
+        strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+      });
       return {
         request,
         documentCountStats: undefined,
@@ -266,12 +273,12 @@ export const useESQLOverallStatsData = (
           {
             params: {
               // Doing this to match with the default limit
-              query: esqlBaseQuery,
+              query: getESQLWithSafeLimit(esqlBaseQuery, ESQL_SAFE_LIMIT),
               ...(filter ? { filter } : {}),
               dropNullColumns: true,
             },
           },
-          { strategy: ESQL_SEARCH_STRATEGY }
+          { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
         )) as ESQLResponse | undefined;
         setQueryHistoryStatus(false);
 
@@ -446,13 +453,13 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        setQueryHistoryStatus(false);
         // If error already handled in sub functions, no need to propogate
         if (error.name !== 'AbortError' && error.handled !== true) {
           toasts.addError(error, {
             title: fieldStatsErrorTitle,
           });
         }
-        setQueryHistoryStatus(false);
         // Log error to console for better debugging
         // eslint-disable-next-line no-console
         console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);

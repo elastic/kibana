@@ -20,6 +20,7 @@ import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vul
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
+import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -131,6 +132,7 @@ export const LatestVulnerabilitiesTable = ({
           groupSelectorComponent={groupSelectorComponent}
           height={height}
           hasDistributionBar={false}
+          columnHeaders={vulnerabilitiesTableFieldLabels}
         />
       )}
     </>

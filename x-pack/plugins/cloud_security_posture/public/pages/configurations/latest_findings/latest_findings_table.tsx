@@ -22,6 +22,7 @@ import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
+import { findingsTableFieldLabels } from './findings_table_field_labels';
 
 interface LatestFindingsTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -149,6 +150,7 @@ export const LatestFindingsTable = ({
             groupSelectorComponent={groupSelectorComponent}
             height={height}
             createRuleFn={createMisconfigurationRuleFn}
+            columnHeaders={findingsTableFieldLabels}
           />
         </>
       )}
