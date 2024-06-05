@@ -7,7 +7,7 @@
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
-import { validateEsqlQuery } from './query/validate_esql_query';
+import { runAndValidateEsqlQuery } from './query/validate_esql_query';
 
 const getMessageForLLM = (
   intention: VisualizeESQLUserIntention,
@@ -28,7 +28,7 @@ export function registerVisualizeESQLFunction({
   resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(visualizeESQLFunction, async ({ arguments: { query, intention } }) => {
-    const { columns, errorMessages } = await validateEsqlQuery({
+    const { columns, errorMessages, rows } = await runAndValidateEsqlQuery({
       query,
       client: (await resources.context.core).elasticsearch.client.asCurrentUser,
     });
@@ -38,6 +38,7 @@ export function registerVisualizeESQLFunction({
     return {
       data: {
         columns,
+        rows,
       },
       content: {
         message,
