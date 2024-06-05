@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-
 export class EntitySecurityException extends Error {
-  public definition: EntityDefinition;
-
-  constructor(message: string, def: EntityDefinition) {
+  constructor(message: string) {
     super(message);
     this.name = 'EntitySecurityException';
-    this.definition = def;
   }
 }

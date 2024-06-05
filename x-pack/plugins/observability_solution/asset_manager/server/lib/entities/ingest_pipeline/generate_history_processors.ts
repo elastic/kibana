@@ -6,12 +6,12 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateIndexName } from '../helpers/generate_index_name';
+import { generateHistoryIndexName } from '../helpers/generate_index_name';
 
 function createIdTemplate(definition: EntityDefinition) {
   return definition.identityFields.reduce((template, id) => {
-    return template.replaceAll(id.field, `entity.identity.${id.field}`);
-  }, definition.identityTemplate);
+    return template.replaceAll(id.field, `entity.identityFields.${id.field}`);
+  }, definition.displayNameTemplate);
 }
 
 function mapDesitnationToPainless(destination: string, source: string) {
@@ -43,7 +43,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
-export function generateProcessors(definition: EntityDefinition, spaceId: string) {
+export function generateHistoryProcessors(definition: EntityDefinition, spaceId: string) {
   return [
     {
       set: {
@@ -65,19 +65,57 @@ export function generateProcessors(definition: EntityDefinition, spaceId: string
     },
     {
       set: {
-        field: 'entity.indexPatterns',
-        value: JSON.stringify(definition.indexPatterns),
-      },
-    },
-    {
-      json: {
-        field: 'entity.indexPatterns',
-      },
-    },
-    {
-      set: {
-        field: 'entity.id',
+        field: 'entity.displayName',
         value: createIdTemplate(definition),
+      },
+    },
+    {
+      script: {
+        description: 'Generated the entity.id field',
+        source: `
+        // This function will recursively collect all the values of a HashMap of HashMaps
+        Collection collectValues(HashMap subject) {
+          Collection values = new ArrayList();
+          // Iterate through the values
+          for(Object value: subject.values()) {
+            // If the value is a HashMap, recurse
+            if (value instanceof HashMap) {
+              values.addAll(collectValues((HashMap) value));
+            } else {
+              values.add(String.valueOf(value));
+            }
+          }
+          return values;
+        }
+
+        // Create the string builder
+        StringBuilder entityId = new StringBuilder();
+
+        if (ctx["entity"]["identityFields"] != null) {
+          // Get the values as a collection
+          Collection values = collectValues(ctx["entity"]["identityFields"]);
+
+          // Convert to a list and sort
+          List sortedValues = new ArrayList(values);
+          Collections.sort(sortedValues);
+
+          // Create comma delimited string
+          for(String instanceValue: sortedValues) {
+            entityId.append(instanceValue);
+            entityId.append(":");
+          }
+
+            // Assign the slo.instanceId
+          ctx["entity"]["id"] = entityId.length() > 0 ? entityId.substring(0, entityId.length() - 1) : "unknown";
+        }
+       `,
+      },
+    },
+    {
+      fingerprint: {
+        fields: ['entity.id'],
+        target_field: 'entity.id',
+        method: 'MurmurHash3',
       },
     },
     ...(definition.staticFields != null
@@ -95,9 +133,11 @@ export function generateProcessors(definition: EntityDefinition, spaceId: string
       },
     },
     {
-      set: {
-        field: '_index',
-        value: generateIndexName(definition),
+      date_index_name: {
+        field: '@timestamp',
+        index_name_prefix: `${generateHistoryIndexName(definition)}.${spaceId}.`,
+        date_rounding: 'M',
+        date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },
     },
   ];
