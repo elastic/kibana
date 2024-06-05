@@ -547,7 +547,7 @@ export default ({ getService }: FtrProviderContext): void => {
               criticality_modifier: 2.0,
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 14.8830616583983,
+              calculated_score_norm: 14.987153868113044,
               category_1_count: 1,
               category_1_score: 8.10060175898781,
               id_field: 'host.name',
