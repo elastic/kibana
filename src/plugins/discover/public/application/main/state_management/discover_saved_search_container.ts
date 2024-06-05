@@ -18,6 +18,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
+import { VIEW_MODE } from '../../../../common/constants';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -340,7 +341,12 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     const prevValue = getSavedSearchFieldForComparison(prevSavedSearch, key);
     const nextValue = getSavedSearchFieldForComparison(nextSavedSearchWithoutSearchSource, key);
 
-    const isSame = isEqual(prevValue, nextValue);
+    const isSame =
+      isEqual(prevValue, nextValue) ||
+      // By default, viewMode: undefined is equivalent to documents view
+      // So they should be treated as same
+      (key === 'viewMode' &&
+        (prevValue ?? VIEW_MODE.DOCUMENT_LEVEL) === (nextValue ?? VIEW_MODE.DOCUMENT_LEVEL));
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {

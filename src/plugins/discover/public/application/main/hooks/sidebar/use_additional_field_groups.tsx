@@ -7,6 +7,7 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { useMemo } from 'react';
 import { useDiscoverCustomization } from '../../../../customizations';
 import * as constants from '../../../../../common/data_types/logs/constants';
 
@@ -15,23 +16,33 @@ export const useAdditionalFieldGroups = () => {
   // are returned based on the data type.
   const isLogsContext = useDiscoverCustomization('field_list')?.logsFieldsEnabled;
 
-  if (isLogsContext) {
-    const smartFields = [
-      new DataViewField({
-        name: constants.RESOURCE_FIELD,
-        type: 'smart_field',
-        searchable: false,
-        aggregatable: false,
-      }),
-      new DataViewField({
-        name: constants.CONTENT_FIELD,
-        type: 'smart_field',
-        searchable: false,
-        aggregatable: false,
-      }),
-    ];
-    return {
-      smartFields,
-    };
-  }
+  const fields = useMemo(() => {
+    if (isLogsContext) {
+      const smartFields = [
+        new DataViewField({
+          name: constants.RESOURCE_FIELD,
+          type: 'smart_field',
+          searchable: false,
+          aggregatable: false,
+        }),
+        new DataViewField({
+          name: constants.CONTENT_FIELD,
+          type: 'smart_field',
+          searchable: false,
+          aggregatable: false,
+        }),
+      ];
+      // For functionality that cannot support smart fields, we need to provide fallback fields.
+      const fallbackFields = {
+        [constants.RESOURCE_FIELD]: constants.RESOURCE_FIELD_CONFIGURATION.fallbackFields,
+        [constants.CONTENT_FIELD]: constants.CONTENT_FIELD_CONFIGURATION.fallbackFields,
+      };
+      return {
+        smartFields,
+        fallbackFields,
+      };
+    }
+  }, [isLogsContext]);
+
+  return fields;
 };
