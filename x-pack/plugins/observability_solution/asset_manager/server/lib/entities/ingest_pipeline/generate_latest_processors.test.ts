@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { generateProcessors } from './generate_processors';
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
+import { generateLatestProcessors } from './generate_latest_processors';
 
-describe('generateProcessors(definition)', () => {
+describe('generateLatestProcessors(definition)', () => {
   it('should genearte a valid pipeline', () => {
-    const spaceId = 'test';
-    const processors = generateProcessors(entityDefinition, spaceId);
+    const processors = generateLatestProcessors(entityDefinition, 'default');
     expect(processors).toMatchSnapshot();
   });
 });
