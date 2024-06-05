@@ -60,7 +60,6 @@ describe('transactions with errors', () => {
       .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
-    expect(error['error.grouping_key']).toHaveLength(32);
-    expect(error['error.grouping_key']).toContain('00000000000000000test error');
+    expect(error['error.grouping_key']).toMatchInlineSnapshot(`"0000000000000000000000test error"`);
   });
 });

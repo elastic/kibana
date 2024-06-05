@@ -10,14 +10,12 @@ let seq = 0;
 const pid = String(process.pid);
 
 function generateId(seed?: string, length: number = 32) {
-  const id = seed ?? String(seq++);
-  const generatedId = pid + id.padStart(length - pid.length, '0');
-
-  if (generatedId.length > length) {
-    throw new Error('id is too long');
+  if (seed) {
+    return seed.padStart(length, '0');
   }
 
-  return generatedId;
+  const id = String(seq++);
+  return pid + id.padStart(length - pid.length, '0');
 }
 
 export function generateShortId(seed?: string) {
