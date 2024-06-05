@@ -8,7 +8,7 @@
 
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
@@ -23,7 +23,7 @@ import {
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
+import { toAsyncKibanaSearchStatusResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import {
   getDefaultSearchParams,
@@ -86,10 +86,26 @@ export const enhancedEsSearchStrategyProvider = (
     };
     const { body, headers } = await client.asyncSearch.get(
       { ...params, id: id! },
-      { ...options.transport, signal: options.abortSignal, meta: true }
+      {
+        ...options.transport,
+        signal: options.abortSignal,
+        meta: true,
+        asStream: true,
+        querystring: {
+          format: 'cbor',
+        },
+      }
     );
-    const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+    console.log(body);
+
+    return {
+      id: body.id,
+      rawResponse: body,
+      isPartial: !body.complete,
+      isRunning: !body.complete && !body.aborted,
+      ...(headers?.warning ? { warning: headers.warning } : {}),
+      // ...getTotalLoaded(response.response),
+    };
   }
 
   async function submitAsyncSearch(
@@ -104,15 +120,34 @@ export const enhancedEsSearchStrategyProvider = (
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
       ...options.transport,
+      querystring: {
+        format: 'cbor',
+      },
       signal: options.abortSignal,
       meta: true,
+      asStream: true,
     });
-    const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse(
-      { ...body, response },
-      headers?.warning,
-      meta?.request?.params
-    );
+    console.log(body);
+
+    // const chunks = [];
+    // for await (const chunk of body) {
+    //   chunks.push(chunk);
+    // }
+    //
+    // const decoded = decode(Buffer.concat(chunks));
+    // console.log(decoded);
+
+    return {
+      id: body.id,
+      rawResponse: body,
+      isPartial: !body.complete,
+      isRunning: !body.complete && !body.aborted,
+      ...(headers?.warning ? { warning: headers.warning } : {}),
+      ...(meta?.request?.params
+        ? { requestParams: sanitizeRequestParams(meta.request.params) }
+        : {}),
+      // ...getTotalLoaded(response.response),
+    };
   }
 
   function asyncSearch(
@@ -145,6 +180,7 @@ export const enhancedEsSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
+      map((response) => response.rawResponse),
       catchError((e) => {
         throw getKbnSearchError(e);
       })
