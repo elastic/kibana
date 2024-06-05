@@ -37,6 +37,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
   } = useKibanaContextForPlugin();
 
   const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
+  const href = onboardingLocator?.getRedirectUrl({ category: 'infra' });
   const { source, error: sourceError, loadSource, isLoading } = useSourceContext();
   const { error: dataViewLoadError, refetch: loadDataView } = useMetricsDataViewContext();
   const { remoteClustersExist, metricIndicesExist } = source?.status ?? {};
@@ -51,7 +52,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
           beats: {
             title: noMetricIndicesPromptPrimaryActionTitle,
             description: noMetricIndicesPromptDescription,
-            href: onboardingLocator?.useUrl({ category: 'infra' }),
+            href,
           },
         },
         docsLink: docLinks.links.observability.guide,

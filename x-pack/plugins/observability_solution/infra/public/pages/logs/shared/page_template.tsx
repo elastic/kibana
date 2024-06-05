@@ -35,7 +35,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
   } = useKibanaContextForPlugin();
 
   const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
-
+  const href = onboardingLocator?.getRedirectUrl({ category: 'logs' });
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
               defaultMessage:
                 'Use the Elastic Agent or Beats to send logs to Elasticsearch. We make it easy with integrations for many popular systems and apps.',
             }),
-            href: onboardingLocator?.useUrl({ category: 'logs' }),
+            href,
           },
         },
         docsLink: docLinks.links.observability.guide,
