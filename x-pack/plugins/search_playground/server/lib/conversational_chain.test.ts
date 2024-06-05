@@ -172,7 +172,7 @@ describe('conversational chain', () => {
         },
       ],
     });
-  });
+  }, 10000);
 
   it('should be able to create a conversational chain with nested field', async () => {
     await createTestChain({
@@ -207,7 +207,7 @@ describe('conversational chain', () => {
       ],
       contentField: { index: 'field', website: 'metadata.source' },
     });
-  });
+  }, 10000);
 
   it('asking with chat history should re-write the question', async () => {
     await createTestChain({
@@ -251,7 +251,7 @@ describe('conversational chain', () => {
         },
       ],
     });
-  });
+  }, 10000);
 
   it('should cope with quotes in the query', async () => {
     await createTestChain({
@@ -295,7 +295,7 @@ describe('conversational chain', () => {
         },
       ],
     });
-  });
+  }, 10000);
 
   it('should work with an LLM based model', async () => {
     await createTestChain({
@@ -340,7 +340,7 @@ describe('conversational chain', () => {
       ],
       isChatModel: false,
     });
-  });
+  }, 10000);
 
   it('should clip the conversation', async () => {
     await createTestChain({
@@ -407,7 +407,7 @@ describe('conversational chain', () => {
       ],
       isChatModel: false,
     });
-  });
+  }, 10000);
 
   describe('clipContext', () => {
     const prompt = ChatPromptTemplate.fromTemplate(

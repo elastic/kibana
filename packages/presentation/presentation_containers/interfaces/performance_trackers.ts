@@ -16,3 +16,10 @@ export interface TrackContentfulRender {
 export const canTrackContentfulRender = (root: unknown): root is TrackContentfulRender => {
   return root !== null && typeof root === 'object' && 'trackContentfulRender' in root;
 };
+
+export interface TracksQueryPerformance {
+  firstLoad: boolean;
+  creationStartTime?: number;
+  creationEndTime?: number;
+  lastLoadStartTime?: number;
+}

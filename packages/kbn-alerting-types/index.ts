@@ -13,3 +13,4 @@ export * from './alert_type';
 export * from './rule_notify_when_type';
 export * from './r_rule_types';
 export * from './rule_types';
+export * from './action_variable';
