@@ -17,6 +17,11 @@ import {
   ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 
+/**
+ * The default diff algorithm, diffs versions passed using a simple lodash `isEqual` comparison
+ *
+ * Meant to be used with primitive types (strings, numbers, booleans), NOT Arrays or Objects
+ */
 export const simpleDiffAlgorithm = <TValue>(
   versions: ThreeVersionsOf<TValue>
 ): ThreeWayDiff<TValue> => {
@@ -82,7 +87,7 @@ const mergeVersions = <TValue>({
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       return {
         mergeOutcome: ThreeWayMergeOutcome.Conflict,
-        mergedVersion: targetVersion,
+        mergedVersion: currentVersion,
       };
     }
     default:

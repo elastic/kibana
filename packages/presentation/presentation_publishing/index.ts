@@ -36,13 +36,16 @@ export {
 } from './interfaces/fetch/initialize_time_range';
 export {
   apiPublishesPartialUnifiedSearch,
+  apiPublishesFilters,
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   apiPublishesWritableUnifiedSearch,
   useSearchApi,
   type PublishesTimeRange,
+  type PublishesFilters,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
+  type PublishesTimeslice,
 } from './interfaces/fetch/publishes_unified_search';
 export {
   apiHasAppContext,
