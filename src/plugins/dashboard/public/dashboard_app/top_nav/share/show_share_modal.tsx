@@ -127,41 +127,51 @@ export function ShowShareModal({
 
   let unsavedStateForLocator: DashboardLocatorParams = {};
 
-  const { dashboardState: unsavedDashboardState, panels: unsavedPanelStates } =
+  const { dashboardState: unsavedDashboardState, panels: panelModifications } =
     dashboardBackup.getState(savedObjectId) ?? {};
 
-  const latestPanels = getDashboardState().panels;
-  const unsavedPanelsMap = unsavedPanelStates
-    ? Object.entries(unsavedPanelStates).reduce((acc, [panelId, unsavedPanel]) => {
-        if (unsavedPanel && latestPanels?.[panelId]) {
-          acc[panelId] = {
-            ...latestPanels[panelId],
-            explicitInput: {
-              ...latestPanels?.[panelId].explicitInput,
-              ...unsavedPanel,
-              id: panelId,
-            },
-          };
-        }
-        return acc;
-      }, {} as DashboardPanelMap)
-    : {};
+  const allUnsavedPanels = (() => {
+    if (
+      Object.keys(unsavedDashboardState?.panels ?? {}).length === 0 &&
+      Object.keys(panelModifications ?? {}).length === 0
+    ) {
+      // if this dashboard has no modifications or unsaved panels return early. No overrides needed.
+      return;
+    }
 
-  const allPanels: DashboardPanelMap = {
-    ...(latestPanels ?? {}),
-    ...(unsavedDashboardState?.panels ?? {}),
-    ...unsavedPanelsMap,
-  };
+    const latestPanels = getDashboardState().panels;
+    // apply modifications to panels.
+    const modifiedPanels = panelModifications
+      ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
+          if (unsavedPanel && latestPanels?.[panelId]) {
+            acc[panelId] = {
+              ...latestPanels[panelId],
+              explicitInput: {
+                ...latestPanels?.[panelId].explicitInput,
+                ...unsavedPanel,
+                id: panelId,
+              },
+            };
+          }
+          return acc;
+        }, {} as DashboardPanelMap)
+      : {};
+
+    // this dashboard has unsaved panels.
+    const allUnsavedPanelsMap = {
+      ...latestPanels,
+      ...(unsavedDashboardState?.panels ?? {}),
+      ...modifiedPanels,
+    };
+    return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
+  })();
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
-      panels:
-        allPanels && Object.keys(allPanels).length > 0
-          ? (convertPanelMapToSavedPanels(allPanels) as DashboardLocatorParams['panels'])
-          : undefined,
+      panels: allUnsavedPanels as DashboardLocatorParams['panels'],
 
       // options
       useMargins: unsavedDashboardState?.useMargins,
