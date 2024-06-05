@@ -11,7 +11,7 @@ import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
-  INDEX_PATTERN_LOGSTASH,
+  INDEX_PATTERN_LOGSTASH_MONITORING,
 } from '../../../../../../common/constants';
 import {
   postElasticsearchSettingsInternalMonitoringRequestPayloadRT,
@@ -95,7 +95,11 @@ export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: Ro
         const { ccs } = request.body;
         const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
         const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
-        const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH, ccs);
+        const lsIndexPattern = prefixIndexPatternWithCcs(
+          config,
+          INDEX_PATTERN_LOGSTASH_MONITORING,
+          ccs
+        );
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
           checkLatestMonitoringIsLegacy(context, kbnIndexPattern),

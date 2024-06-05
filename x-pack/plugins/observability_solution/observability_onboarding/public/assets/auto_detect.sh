@@ -205,6 +205,30 @@ ensure_elastic_agent_healthy() {
   fi
 }
 
+backup_elastic_agent_config() {
+  if [ -f "$elastic_agent_config_path" ]; then
+    echo -e "\nExisting config file found at $elastic_agent_config_path";
+
+    printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Create backup and continue installation?" "[Y/n] (default: Yes): "
+    read confirmation_reply
+    confirmation_reply="${confirmation_reply:-Y}"
+
+    if [[ "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
+      local backup_path="${elastic_agent_config_path%.yml}.$(date +%s).yml" # e.g. /opt/Elastic/Agent/elastic-agent.1712267614.yml
+      cp $elastic_agent_config_path $backup_path
+
+      if [ "$?" -eq 0 ]; then
+        printf "\n\e[1;32m✓\e[0m \e[1m%s\e[0m\n" "Backup saved to $backup_path"
+      else
+        update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
+        fail "Failed to backup existing config file - Try manually creating a backup or delete your existing config file before re-running this script"
+      fi
+    else
+      fail "Installation aborted"
+    fi
+  fi
+}
+
 download_elastic_agent_config() {
   local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
   local tmp_path="/tmp/elastic-agent-config-template.yml"
@@ -220,8 +244,8 @@ download_elastic_agent_config() {
     --no-progress-meter
 
   if [ "$?" -ne 0 ]; then
-    update_step_progress "ea-config" "warning" "Failed to install integrations and download Elastic Agent config."
-    fail "Failed to install integrations and download Elastic Agent config."
+    update_step_progress "ea-config" "warning" "Failed to install integrations."
+    fail "Failed to install integrations."
   fi
 
   sed "s/'\${API_KEY}'/$decoded_ingest_api_key/g" $tmp_path > $elastic_agent_config_path
@@ -361,12 +385,12 @@ function select_list() {
     fi
   done
 
-  echo -e "\n"
-  read -p "Do you want to ingest all of these logs? [Y/n] (default: Yes): " confirmation_reply
+  printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Ingest all detected logs?" "[Y/n] (default: Yes): "
+  read confirmation_reply
   confirmation_reply="${confirmation_reply:-Y}"
 
   if [[ ! "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
-    echo -e "\nExclude logs by listing their index numbers (e.g. 1, 2, 3):"
+    printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Exclude logs by listing their index numbers" "(e.g. 1, 2, 3): "
     read exclude_index_list_string
 
     IFS=', ' read -r -a exclude_index_list_array <<< "$exclude_index_list_string"
@@ -451,7 +475,8 @@ if [[ -n "$excluded_options_string" ]]; then
   echo -e "$excluded_options_string"
 fi
 
-echo -e "\nAdd paths to any custom logs we've missed (e.g. /var/log/myapp/*.log, /home/j/myapp/*.log). Press Enter to skip."
+
+printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m\n" "Add paths to any custom logs we've missed" "(e.g. /path1/*.log, /path2/*.log). Press Enter to skip."
 read custom_log_file_path_list_string
 
 IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
@@ -464,8 +489,9 @@ for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_p
   printf "• %s\n" "$item"
 done
 
-echo -e "\n"
-read -p "Confirm selection [Y/n] (default: Yes): " confirmation_reply
+
+printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Continue installation with selected logs?" "[Y/n] (default: Yes): "
+read confirmation_reply
 confirmation_reply="${confirmation_reply:-Y}"
 
 if [[ ! "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
@@ -475,16 +501,18 @@ fi
 
 build_install_integrations_api_body_string
 
-echo -e "\nDownloading Elastic Agent..."
+backup_elastic_agent_config
+
+echo -e "\nDownloading Elastic Agent...\n"
 download_elastic_agent
 extract_elastic_agent
 
-echo -e "\nInstalling Elastic Agent..."
+echo -e "\nInstalling Elastic Agent...\n"
 install_elastic_agent
 wait_for_elastic_agent_status
 ensure_elastic_agent_healthy
 
-echo -e "\nDownloading Elastic Agent configuration..."
+echo -e "\nInstalling integrations...\n"
 download_elastic_agent_config
 
 update_step_progress "ea-config" "complete"
