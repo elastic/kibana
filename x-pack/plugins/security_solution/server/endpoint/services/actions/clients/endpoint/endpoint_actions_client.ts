@@ -99,6 +99,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
 
+    if (actionError && !this.options.isAutomated) {
+      throw new ResponseActionsClientError(actionError, 400);
+    }
+
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
       try {
