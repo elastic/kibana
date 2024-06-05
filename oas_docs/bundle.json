@@ -519,7 +519,7 @@
             }
           }
         },
-        "summary": "Get Kibana's current status.",
+        "summary": "Get Kibana's current status",
         "tags": []
       }
     }
