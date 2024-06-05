@@ -23,7 +23,7 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
 
-describe('Manual rule run', { tags: ['@ess', '@serverless'] }, () => {
+describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

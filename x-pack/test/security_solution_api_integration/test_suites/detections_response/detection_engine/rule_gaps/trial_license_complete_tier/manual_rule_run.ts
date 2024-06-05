@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @serverless manual_rule_run', () => {
+  describe('@ess @serverless @skipInServerlessMKI manual_rule_run', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
     });
