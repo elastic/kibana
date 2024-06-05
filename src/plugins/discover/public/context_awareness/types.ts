@@ -8,9 +8,18 @@
 
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DataTableRecord } from '@kbn/discover-utils';
+
+export interface DocViewerProfileExtensions {
+  title: string;
+  docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+}
+
+export interface DocViewerProfileParams {
+  record: DataTableRecord;
+}
 
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
-  getDocViewerTitle: () => string;
-  getDocViewerViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  getDocViewer: (params: DocViewerProfileParams) => DocViewerProfileExtensions;
 }
