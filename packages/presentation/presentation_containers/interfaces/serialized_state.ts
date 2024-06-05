@@ -37,3 +37,7 @@ export interface HasSnapshottableState<RuntimeState extends object = object> {
    */
   snapshotRuntimeState: () => RuntimeState;
 }
+
+export const apiHasSnapshottableState = (api: unknown | null): api is HasSnapshottableState => {
+  return Boolean((api as HasSnapshottableState)?.snapshotRuntimeState);
+};
