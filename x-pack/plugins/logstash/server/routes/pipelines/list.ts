@@ -27,6 +27,9 @@ export function registerPipelinesListRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/pipelines',
+      options: {
+        description: `Get all managed Logstash pipelines`,
+      },
       validate: false,
     },
     wrapRouteWithLicenseCheck(

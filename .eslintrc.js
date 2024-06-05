@@ -295,7 +295,22 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
-
+    /**
+     * FormatJS linter for i18n code.
+     * https://formatjs.io/docs/tooling/linter
+     */
+    {
+      files: [
+        'src/**/*.{js,mjs,ts,tsx}',
+        'x-pack/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: ['formatjs'],
+      rules: {
+        'formatjs/enforce-default-message': ['error', 'anything'],
+        'formatjs/enforce-description': 'off',
+      },
+    },
     /**
      * Files that require dual-license headers, settings
      * are overridden below for files that require Elastic
@@ -1058,6 +1073,7 @@ module.exports = {
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
@@ -1071,6 +1087,7 @@ module.exports = {
         'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1090,6 +1107,7 @@ module.exports = {
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
@@ -1128,6 +1146,7 @@ module.exports = {
         'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',

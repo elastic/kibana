@@ -18,7 +18,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   Container,
   DefaultEmbeddableApi,
@@ -34,8 +33,14 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { TrackContentfulRender } from '@kbn/presentation-containers';
-import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
+import {
+  HasRuntimeChildState,
+  HasSaveNotification,
+  HasSerializedChildState,
+  TrackContentfulRender,
+  TracksQueryPerformance,
+} from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -47,12 +52,12 @@ import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
+import { apiHasSerializableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   DASHBOARD_APP_ID,
-  DASHBOARD_LOADED_EVENT,
   DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
@@ -68,17 +73,12 @@ import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api'
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import {
-  DashboardPublicState,
-  DashboardReduxState,
-  DashboardRenderPerformanceStats,
-} from '../types';
+import { DashboardPublicState, DashboardReduxState, UnsavedPanelState } from '../types';
 import {
   addFromLibrary,
   addOrUpdateEmbeddable,
-  runClone,
   runQuickSave,
-  runSaveAs,
+  runInteractiveSave,
   showSettings,
 } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
@@ -123,7 +123,13 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements DashboardExternallyAccessibleApi, TrackContentfulRender
+  implements
+    DashboardExternallyAccessibleApi,
+    TrackContentfulRender,
+    TracksQueryPerformance,
+    HasSaveNotification,
+    HasRuntimeChildState,
+    HasSerializedChildState
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -150,17 +156,20 @@ export class DashboardContainer
 
   public readonly executionContext: KibanaExecutionContext;
 
-  // cleanup
-  public stopSyncingWithUnifiedSearch?: () => void;
-  private cleanupStateTools: () => void;
-
-  // performance monitoring
-  private dashboardCreationStartTime?: number;
-
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
+
+  // performance monitoring
+  public lastLoadStartTime?: number;
+  public creationStartTime?: number;
+  public creationEndTime?: number;
+  public firstLoad: boolean = true;
   private hadContentfulRender = false;
+
+  // cleanup
+  public stopSyncingWithUnifiedSearch?: () => void;
+  private cleanupStateTools: () => void;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
@@ -222,7 +231,7 @@ export class DashboardContainer
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
     this.searchSessionId$.next(initialSessionId);
-    this.dashboardCreationStartTime = dashboardCreationStartTime;
+    this.creationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
     const diffingMiddleware = getDiffingMiddleware.bind(this)();
@@ -314,23 +323,6 @@ export class DashboardContainer
     return this.getState().componentState.lastSavedId;
   }
 
-  public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {
-    if (this.analyticsService && this.dashboardCreationStartTime) {
-      const panelCount = Object.keys(this.getState().explicitInput.panels).length;
-      const totalDuration = stats.panelsRenderDoneTime - this.dashboardCreationStartTime;
-      reportPerformanceMetricEvent(this.analyticsService, {
-        eventName: DASHBOARD_LOADED_EVENT,
-        duration: totalDuration,
-        key1: 'time_to_data',
-        value1: (stats.lastTimeToData || stats.panelsRenderDoneTime) - stats.panelsRenderStartTime,
-        key2: 'num_of_panels',
-        value2: panelCount,
-        key3: 'total_load_time',
-        value3: totalDuration,
-      });
-    }
-  }
-
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
@@ -393,6 +385,7 @@ export class DashboardContainer
       timeslice,
       syncColors,
       syncTooltips,
+      syncCursor,
       hidePanelTitles,
       refreshInterval,
       executionContext,
@@ -414,6 +407,7 @@ export class DashboardContainer
       executionContext,
       syncTooltips,
       syncColors,
+      syncCursor,
       viewMode,
       query,
       id,
@@ -442,8 +436,7 @@ export class DashboardContainer
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
 
-  public runClone = runClone;
-  public runSaveAs = runSaveAs;
+  public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
   public showSettings = showSettings;
@@ -575,11 +568,14 @@ export class DashboardContainer
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
-      const serialized = apiHasSerializableState(child) ? child.serializeState() : { rawState: {} };
+      const serialized = apiHasSerializableState(child)
+        ? await child.serializeState()
+        : { rawState: {} };
       return {
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
         gridData: panel.gridData,
+        references: serialized.references,
       };
     }
     return panel;
@@ -684,6 +680,7 @@ export class DashboardContainer
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
     });
+    this.firstLoad = true;
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
   };
@@ -806,17 +803,19 @@ export class DashboardContainer
     });
   };
 
-  public lastSavedState: Subject<void> = new Subject();
-  public getLastSavedStateForChild = (childId: string) => {
-    const {
-      componentState: {
-        lastSavedInput: { panels },
-      },
-    } = this.getState();
-    const panel: DashboardPanelState | undefined = panels[childId];
+  public saveNotification$: Subject<void> = new Subject<void>();
 
+  public getSerializedStateForChild = (childId: string) => {
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
-    return { rawState: panel?.explicitInput, version: panel?.version, references };
+    return {
+      rawState: this.getInput().panels[childId].explicitInput,
+      references,
+    };
+  };
+
+  public restoredRuntimeState: UnsavedPanelState | undefined = undefined;
+  public getRuntimeStateForChild = (childId: string) => {
+    return this.restoredRuntimeState?.[childId];
   };
 
   public removePanel(id: string) {
@@ -857,6 +856,7 @@ export class DashboardContainer
   };
 
   public resetAllReactEmbeddables = () => {
+    this.restoredRuntimeState = undefined;
     let resetChangedPanelCount = false;
     const currentChildren = this.children$.value;
     for (const panelId of Object.keys(currentChildren)) {

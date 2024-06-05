@@ -12,7 +12,6 @@ import {
   timesliceMetricIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-
 import { InvalidTransformError } from '../../errors';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
@@ -23,6 +22,7 @@ import {
 } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
+import { getFilterRange } from './common';
 
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
@@ -55,13 +55,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}/d`,
-                },
-              },
-            },
+            getFilterRange(slo, indicator.params.timestampField),
             getElasticsearchQueryOrThrow(indicator.params.filter),
           ],
         },

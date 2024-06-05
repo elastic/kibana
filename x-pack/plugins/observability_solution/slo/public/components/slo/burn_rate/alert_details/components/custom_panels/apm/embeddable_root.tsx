@@ -8,7 +8,12 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { GetSLOResponse, APMTransactionDurationIndicator } from '@kbn/slo-schema';
+import {
+  GetSLOResponse,
+  apmTransactionDurationIndicatorSchema,
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+} from '@kbn/slo-schema';
 import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../../types';
 
 type EmbeddableId =
@@ -18,17 +23,21 @@ type EmbeddableId =
   | 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE'
   | 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
 
+export type APMTransactionDurationSLOResponse = GetSLOResponse & {
+  indicator: APMTransactionDurationIndicator;
+};
+
+export type APMErrorRateSLOResponse = GetSLOResponse & {
+  indicator: APMTransactionErrorRateIndicator;
+};
+
 interface APMEmbeddableRootProps {
-  slo: APMTransactionDurationSLOResponse;
+  slo: APMTransactionDurationSLOResponse | APMErrorRateSLOResponse;
   dataTimeRange: TimeRange;
   embeddableId: EmbeddableId;
   alert: BurnRateAlert;
   rule: BurnRateRule;
 }
-
-export type APMTransactionDurationSLOResponse = GetSLOResponse & {
-  indicator: APMTransactionDurationIndicator;
-};
 
 export function APMEmbeddableRoot({
   slo,
@@ -40,6 +49,7 @@ export function APMEmbeddableRoot({
   const filter = slo.indicator.params.filter;
   const isKueryFilter = typeof filter === 'string';
   const groupingInput = getInputFromGroupings(slo);
+  const indicator = slo.indicator;
 
   const kuery = isKueryFilter ? filter : undefined;
   const allFilters =
@@ -48,7 +58,7 @@ export function APMEmbeddableRoot({
       : groupingInput.filters;
   const filters = buildQueryFromFilters(allFilters, undefined, undefined);
   const groupingsInput = getInputFromGroupings(slo);
-  const { transactionName, transactionType, environment, service } = slo.indicator.params;
+  const { transactionName, transactionType, environment, service } = indicator.params;
   const input = {
     id: uuidv4(),
     serviceName: service,
@@ -57,7 +67,9 @@ export function APMEmbeddableRoot({
     environment: environment !== '*' ? environment : undefined,
     rangeFrom: dataTimeRange.from.toISOString(),
     rangeTo: dataTimeRange.to.toISOString(),
-    latencyThresholdInMicroseconds: slo.indicator.params.threshold * 1000,
+    latencyThresholdInMicroseconds: apmTransactionDurationIndicatorSchema.is(indicator)
+      ? indicator.params.threshold * 1000
+      : undefined,
     kuery,
     filters,
     alert,
@@ -70,13 +82,15 @@ export function APMEmbeddableRoot({
   return (
     <ReactEmbeddableRenderer
       type={embeddableId}
-      state={{ rawState: input }}
+      getParentApi={() => ({ getSerializedStateForChild: () => ({ rawState: input }) })}
       hidePanelChrome={true}
     />
   );
 }
 
-const getInputFromGroupings = (slo: APMTransactionDurationSLOResponse) => {
+const getInputFromGroupings = (
+  slo: APMTransactionDurationSLOResponse | APMErrorRateSLOResponse
+) => {
   const groupings = Object.entries(slo.groupings) as Array<[string, string]>;
   const input: {
     transactionName?: string;
