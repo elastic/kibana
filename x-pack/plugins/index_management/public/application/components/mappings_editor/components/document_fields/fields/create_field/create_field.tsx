@@ -325,7 +325,7 @@ interface InferenceProps {
 }
 
 function InferenceIdCombo({ setValue, setCustomInferenceEndpointConfig }: InferenceProps) {
-  const { inferenceToModelIdMap, fields } = useMappingsState();
+  const { inferenceToModelIdMap } = useMappingsState();
   const dispatch = useDispatch();
   const [{ type }] = useFormData({ watch: 'type' });
 

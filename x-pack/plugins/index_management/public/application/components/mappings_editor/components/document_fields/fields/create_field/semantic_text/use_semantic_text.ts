@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import { MlPluginStart, TrainedModelConfigResponse } from '@kbn/ml-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
@@ -74,23 +74,6 @@ export function useSemanticText(props: UseSemanticTextProps) {
     }
   }, [form, inferenceId, inferenceToModelIdMap]);
 
-  const isModelDownloaded = useCallback(
-    async (modelId: string) => {
-      try {
-        const response: TrainedModelConfigResponse[] | undefined =
-          await ml?.mlApi?.trainedModels.getTrainedModels(modelId, {
-            include: 'definition_status',
-          });
-        return !!response?.[0]?.fully_defined;
-      } catch (error) {
-        if (error.body.statusCode !== 404) {
-          throw error;
-        }
-      }
-      return false;
-    },
-    [ml?.mlApi?.trainedModels]
-  );
   const createInferenceEndpoint = useCallback(
     async (
       trainedModelId: ElasticsearchModelDefaultOptions | string,
@@ -153,39 +136,19 @@ export function useSemanticText(props: UseSemanticTextProps) {
       return;
     }
 
-    const { trainedModelId, isDeployed, isDeployable } = inferenceData;
-    // trainedModelId is empty string when it's a third party model
+    const { trainedModelId } = inferenceData;
+    dispatch({ type: 'field.addSemanticText', value: data });
+    NotificationToasts({ toasts });
+
     try {
-      if (!trainedModelId) {
-        await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
-      } else {
-        if (isDeployable) {
-          const modelDownloaded: boolean = await isModelDownloaded(trainedModelId);
-          if (isDeployed) {
-            await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
-          } else if (modelDownloaded) {
-            ml?.mlApi?.trainedModels
-              .startModelAllocation(trainedModelId)
-              .then(() =>
-                createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig)
-              );
-          } else {
-            ml?.mlApi?.trainedModels
-              .installElasticTrainedModelConfig(trainedModelId)
-              .then(() => ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId))
-              .then(() => createInferenceEndpoint(trainedModelId, data));
-          }
-          NotificationToasts({ toasts });
-        }
-      }
+      await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
     } catch (error) {
+      // trainedModelId is empty string when it's a third party model
       if (trainedModelId) {
         setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
       }
       NotificationToasts({ toasts, error });
     }
-
-    dispatch({ type: 'field.addSemanticText', value: data });
   };
 
   return {

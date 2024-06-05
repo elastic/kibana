@@ -198,6 +198,7 @@ export const SelectInferenceId = ({
           modelConfig,
         };
         setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
+        NotificationToasts({ toasts });
       } catch (error) {
         NotificationToasts({ toasts, error });
         // reset options
