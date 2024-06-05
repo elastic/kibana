@@ -57,7 +57,7 @@ export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const rules = await Promise.all(
             request.body.map(async (payloadRule) => {
@@ -87,7 +87,7 @@ export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await rulesManagementClient.patchRule({
+                const rule = await detectionRulesClient.patchRule({
                   nextParams: payloadRule,
                 });
 
