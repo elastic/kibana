@@ -8,7 +8,6 @@
 import type { IDetectionRulesClient } from '../detection_rules_client';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
-import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { RuleAlertType } from '../../../../rule_schema';
 
 export type DetectionRulesClientMock = jest.Mocked<IDetectionRulesClient>;
@@ -33,14 +32,6 @@ export const detectionRulesClientMock: {
 };
 
 /* Mocks for internal methods */
-export const _upgradePrebuiltRuleWithTypeChange: jest.Mock<
-  (
-    rulesClient: RulesClient,
-    ruleAsset: PrebuiltRuleAsset,
-    existingRule: RuleAlertType
-  ) => Promise<RuleAlertType>
-> = jest.fn();
-
 export const _toggleRuleEnabledOnUpdate: jest.Mock<
   (rulesClient: RulesClient, existingRule: RuleAlertType, enabled: boolean) => Promise<void>
 > = jest.fn();

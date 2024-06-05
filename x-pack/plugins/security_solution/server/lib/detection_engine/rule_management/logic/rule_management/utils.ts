@@ -10,42 +10,8 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
-import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
-
-import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
-import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import type { RuleAlertType, RuleParams } from '../../../rule_schema';
+import type { RuleAlertType } from '../../../rule_schema';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-
-export const _upgradePrebuiltRuleWithTypeChange = async (
-  rulesClient: RulesClient,
-  ruleAsset: PrebuiltRuleAsset,
-  existingRule: RuleAlertType
-) => {
-  // If we're trying to change the type of a prepackaged rule, we need to delete the old one
-  // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
-  // and exception lists from the old rule
-  await rulesClient.delete({ id: existingRule.id });
-
-  const internalRule = convertCreateAPIToInternalSchema(
-    {
-      ...ruleAsset,
-      enabled: existingRule.enabled,
-      exceptions_list: existingRule.params.exceptionsList,
-      actions: existingRule.actions.map(transformAlertToRuleAction),
-      timeline_id: existingRule.params.timelineId,
-      timeline_title: existingRule.params.timelineTitle,
-    },
-    { immutable: true, defaultEnabled: existingRule.enabled }
-  );
-
-  const rule = await rulesClient.create<RuleParams>({
-    data: internalRule,
-    options: { id: existingRule.id },
-  });
-
-  return rule;
-};
 
 export const _toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
