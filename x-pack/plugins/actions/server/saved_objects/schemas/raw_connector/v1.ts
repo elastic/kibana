@@ -11,8 +11,9 @@ export const rawConnectorSchema = schema.object({
   actionTypeId: schema.string(),
   name: schema.string(),
   isMissingSecrets: schema.boolean(),
-  config: schema.any({ defaultValue: {} }),
-  secrets: schema.any({ defaultValue: {} }),
+  config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  // Encrypted fields are saved as string. Decrypted version of the 'secrets' field is an object
+  secrets: schema.string(),
 
   isPreconfigured: schema.maybe(schema.boolean()),
   isSystemAction: schema.maybe(schema.boolean()),
