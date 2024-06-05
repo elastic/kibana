@@ -519,7 +519,8 @@
             }
           }
         },
-        "summary": "Get Kibana's current status."
+        "summary": "Get Kibana's current status.",
+        "tags": []
       }
     }
   },
@@ -532,5 +533,6 @@
     {
       "url": "http://localhost:5622"
     }
-  ]
+  ],
+  "tags": []
 }
