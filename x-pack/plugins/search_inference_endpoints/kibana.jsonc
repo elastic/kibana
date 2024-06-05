@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-inference-endpoints",
-  "owner": "@elastic/enterprise-search-frontend",
+  "owner": "@elastic/search-kibana",
   "plugin": {
     "id": "searchInferenceEndpoints",
     "server": true,
