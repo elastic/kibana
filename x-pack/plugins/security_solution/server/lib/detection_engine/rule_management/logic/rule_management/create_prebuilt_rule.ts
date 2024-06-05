@@ -12,7 +12,7 @@ import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import { _validateMlAuth } from './utils';
+import { validateMlAuth } from './utils';
 
 export interface CreatePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
@@ -26,7 +26,7 @@ export const createPrebuiltRule = async (
   withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
     const { ruleAsset } = createPrebuiltRulePayload;
 
-    await _validateMlAuth(mlAuthz, ruleAsset.type);
+    await validateMlAuth(mlAuthz, ruleAsset.type);
 
     const internalRule = convertCreateAPIToInternalSchema(ruleAsset, {
       immutable: true,

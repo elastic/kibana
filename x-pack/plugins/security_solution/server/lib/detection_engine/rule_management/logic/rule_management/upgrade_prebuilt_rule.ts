@@ -16,7 +16,7 @@ import {
 } from '../../normalization/rule_converters';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 
-import { _validateMlAuth, ClientError } from './utils';
+import { validateMlAuth, ClientError } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -32,7 +32,7 @@ export const upgradePrebuiltRule = async (
   withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
     const { ruleAsset } = upgradePrebuiltRulePayload;
 
-    await _validateMlAuth(mlAuthz, ruleAsset.type);
+    await validateMlAuth(mlAuthz, ruleAsset.type);
 
     const existingRule = await readRules({
       rulesClient,

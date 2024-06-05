@@ -13,7 +13,7 @@ import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { getIdError } from '../../utils/utils';
 import { convertUpdateAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import { _validateMlAuth, ClientError, _toggleRuleEnabledOnUpdate } from './utils';
+import { validateMlAuth, ClientError, toggleRuleEnabledOnUpdate } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -30,7 +30,7 @@ export const updateRule = async (
     const { ruleUpdate } = updateRulePayload;
     const { rule_id: ruleId, id } = ruleUpdate;
 
-    await _validateMlAuth(mlAuthz, ruleUpdate.type);
+    await validateMlAuth(mlAuthz, ruleUpdate.type);
 
     const existingRule = await readRules({
       rulesClient,
@@ -53,7 +53,7 @@ export const updateRule = async (
       data: newInternalRule,
     });
 
-    await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleUpdate.enabled);
+    await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleUpdate.enabled);
 
     return { ...update, enabled: ruleUpdate.enabled ?? existingRule.enabled };
   });

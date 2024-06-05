@@ -13,7 +13,7 @@ import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { getIdError } from '../../utils/utils';
 import { convertPatchAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import { _validateMlAuth, ClientError, _toggleRuleEnabledOnUpdate } from './utils';
+import { validateMlAuth, ClientError, toggleRuleEnabledOnUpdate } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -41,7 +41,7 @@ export const patchRule = async (
       throw new ClientError(error.message, error.statusCode);
     }
 
-    await _validateMlAuth(mlAuthz, nextParams.type ?? existingRule.params.type);
+    await validateMlAuth(mlAuthz, nextParams.type ?? existingRule.params.type);
 
     const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
 
@@ -50,7 +50,7 @@ export const patchRule = async (
       data: patchedRule,
     });
 
-    await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled);
+    await toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled);
 
     if (nextParams.enabled != null) {
       return { ...update, enabled: nextParams.enabled };

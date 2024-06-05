@@ -12,7 +12,7 @@ import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import { _validateMlAuth } from './utils';
+import { validateMlAuth } from './utils';
 
 export interface CreateCustomRuleProps {
   params: RuleCreateProps;
@@ -25,7 +25,7 @@ export const createCustomRule = async (
 ): Promise<RuleAlertType> =>
   withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
     const { params } = createCustomRulePayload;
-    await _validateMlAuth(mlAuthz, params.type);
+    await validateMlAuth(mlAuthz, params.type);
 
     const internalRule = convertCreateAPIToInternalSchema(params, { immutable: false });
     const rule = await rulesClient.create<RuleParams>({

@@ -13,7 +13,7 @@ import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../rule_schema';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 
-export const _toggleRuleEnabledOnUpdate = async (
+export const toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
   existingRule: RuleAlertType,
   updatedRuleEnabled?: boolean
@@ -25,7 +25,7 @@ export const _toggleRuleEnabledOnUpdate = async (
   }
 };
 
-export const _validateMlAuth = async (mlAuthz: MlAuthz, ruleType: Type) => {
+export const validateMlAuth = async (mlAuthz: MlAuthz, ruleType: Type) => {
   throwAuthzError(await mlAuthz.validateRuleType(ruleType));
 };
 

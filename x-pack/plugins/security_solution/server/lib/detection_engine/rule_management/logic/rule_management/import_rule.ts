@@ -16,7 +16,7 @@ import {
   convertUpdateAPIToInternalSchema,
 } from '../../normalization/rule_converters';
 
-import { _validateMlAuth } from './utils';
+import { validateMlAuth } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -38,7 +38,7 @@ export const importRule = async (
   withSecuritySpan('DetectionRulesClient.importRule', async () => {
     const { ruleToImport, overwriteRules, options } = importRulePayload;
 
-    await _validateMlAuth(mlAuthz, ruleToImport.type);
+    await validateMlAuth(mlAuthz, ruleToImport.type);
 
     const existingRule = await readRules({
       rulesClient,
