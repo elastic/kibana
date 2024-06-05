@@ -13,6 +13,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { asMutableArray } from '../../utils/as_mutable_array';
 import { getApmAppLocator } from '../get_apm_app_url';
 import { Group, TimeRange } from '../types';
 
@@ -26,7 +27,7 @@ const AWS_SQS_QUEUE = 'aws.sqs.instance.id';
 
 const METRICS_DETAILS_PATH = '/app/metrics/detail';
 
-export const infraSources = [
+export const infraSources = asMutableArray([
   HOST_NAME,
   CONTAINER_ID,
   KUBERNETES_POD_ID,
@@ -34,9 +35,14 @@ export const infraSources = [
   AWS_S3_BUCKET,
   AWS_RDS_DATABASES,
   AWS_SQS_QUEUE,
-];
+] as const);
 
-export const apmSources = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME];
+export const apmSources = asMutableArray([
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+] as const);
 
 const infraSourceLinks: Record<string, string> = {
   [HOST_NAME]: `${METRICS_DETAILS_PATH}/host`,
@@ -107,7 +113,7 @@ export const generateSourceLink = (
   serviceName?: string,
   baseLocator?: LocatorPublic<SerializableRecord>
 ) => {
-  if (infraSources.includes(field)) {
+  if ((infraSources as string[]).includes(field)) {
     const hostTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
     const infraTimeRange = `_a=(time:(from:'${timeRange.from}',to:'${timeRange.to}',interval:>=1m))`;
     return prepend?.(generateInfraSourceLink({ field, value }, hostTimeRange, infraTimeRange));
