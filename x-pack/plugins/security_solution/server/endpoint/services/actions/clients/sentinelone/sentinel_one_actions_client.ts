@@ -12,11 +12,11 @@ import {
 import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
+  SentinelOneDownloadAgentFileParams,
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
-  SentinelOneDownloadAgentFileParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -40,6 +40,7 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
 import type {
@@ -68,12 +69,11 @@ import type {
 } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
+  ResponseActionsClientPendingAction,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
-  ResponseActionsClientPendingAction,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
-import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -672,6 +672,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               }
             }
             break;
+
+          case 'kill-process':
+            {
+              const responseDocsForKillProcess = await this.checkPendingKillProcessActions(
+                typePendingActions as ResponseActionsClientPendingAction[] // FIXME:PT types need fixing
+              );
+              if (responseDocsForKillProcess.length) {
+                addToQueue(...responseDocsForKillProcess);
+              }
+            }
+            break;
         }
       }
     }
@@ -1076,6 +1087,111 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (warnings.length > 0) {
       this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  private calculateTaskState(taskStatusRecord: object) {
+    const taskStatusValue = taskStatusRecord.status;
+    const message =
+      taskStatusRecord.detailedStatus ?? taskStatusRecord.statusDescription ?? taskStatusValue;
+
+    // FIXME:PT should move this to a static readonly object
+    const possibleTaskStatus: Record<
+      string,
+      { isPending: boolean; isError: boolean; message: string }
+    > = {
+      // FIXME:PT adjust all error reasons
+
+      canceled: {
+        isPending: false,
+        isError: true,
+        message: 'SentinelOne Task [${taskStatusRecord.parentTaskId}] was canceled by user...',
+      },
+      completed: { isPending: true, isError: false, message },
+      created: { isPending: true, isError: false, message },
+      expired: { isPending: false, isError: true, message },
+      failed: { isPending: false, isError: true, message },
+      in_progress: { isPending: true, isError: false, message },
+      partially_completed: { isPending: false, isError: false, message },
+      pending: { isPending: true, isError: false, message },
+      pending_user_action: { isPending: true, isError: false, message },
+      scheduled: { isPending: true, isError: false, message },
+    };
+
+    return {
+      ...(possibleTaskStatus[taskStatusValue] ?? {
+        isPending: false,
+        isError: true,
+        message: `Unknown SentinelOne task status value [${taskStatusRecord}] for task parent id [${taskStatusRecord.parentTaskId}]`,
+      }),
+    };
+  }
+
+  private async checkPendingKillProcessActions(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+
+    for (const pendingAction of actionRequests) {
+      const actionRequest = pendingAction.action;
+      const s1TaskStatusApiResponse = await this.sendAction(SUB_ACTION.GET_REMOTE_SCRIPT_STATUS, {
+        parentTaskId: actionRequest.meta.parentTaskId,
+      });
+
+      this.log.debug(
+        `Kill process status for action id [${
+          actionRequest.EndpointActions.action_id
+        }]:\n${stringify(s1TaskStatusApiResponse.data)}`
+      );
+
+      if (s1TaskStatusApiResponse.data.data.length) {
+        const killProcessStatus = s1TaskStatusApiResponse.data.data.at(0);
+        const taskState = this.calculateTaskState(killProcessStatus);
+
+        if (!taskState.isPending) {
+          this.log.debug(`Action is completed - generating response doc for it`);
+
+          const error: LogsEndpointActionResponse['error'] = taskState.isError
+            ? { message: `Action failed to execute in SentinelOne. message: ${taskState.message}` }
+            : undefined;
+
+          completedResponses.push(
+            this.buildActionResponseEsDoc<
+              ResponseActionGetFileOutputContent,
+              SentinelOneGetFileResponseMeta
+            >({
+              actionId: actionRequest.EndpointActions.action_id,
+              agentId: Array.isArray(actionRequest.agent.id)
+                ? actionRequest.agent.id[0]
+                : actionRequest.agent.id,
+              data: {
+                command: 'kill-process',
+                comment: taskState.message,
+                output: {
+                  type: 'json',
+                  content: {
+                    // FIXME:PT populate this
+                  },
+                },
+              },
+              error,
+              meta: {
+                // FIXME:PT type this meta for s1
+                taskId: killProcessStatus.id,
+              },
+            })
+          );
+        }
+      }
     }
 
     return completedResponses;
