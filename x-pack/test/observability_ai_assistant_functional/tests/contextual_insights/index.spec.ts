@@ -98,7 +98,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   // open contextual insights component and ensure it was opened
   async function openContextualInsights() {
-    await retry.try(async () => {
+    await retry.tryForTime(5 * 1000, async () => {
       await testSubjects.click(ui.pages.contextualInsights.button);
       const isOpen =
         (await (
@@ -161,7 +161,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await interceptor.waitAndComplete();
 
-        await retry.try(async () => {
+        await retry.tryForTime(5 * 1000, async () => {
           const llmResponse = await testSubjects.getVisibleText(ui.pages.contextualInsights.text);
           expect(llmResponse).to.contain('This error is nothing to worry about. Have a nice day!');
         });
