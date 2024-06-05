@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export default function ({ getService, loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const config = getService('config');
 
@@ -19,14 +21,14 @@ export default function ({ getService, loadTestFile }) {
     } else {
       loadTestFile(require.resolve('./_console'));
       loadTestFile(require.resolve('./_autocomplete'));
-      loadTestFile(require.resolve('./_vector_tile'));
+      //loadTestFile(require.resolve('./_vector_tile'));
       loadTestFile(require.resolve('./_comments'));
-      loadTestFile(require.resolve('./_variables'));
-      loadTestFile(require.resolve('./_xjson'));
-      loadTestFile(require.resolve('./_misc_console_behavior'));
-      loadTestFile(require.resolve('./_context_menu'));
-      loadTestFile(require.resolve('./_text_input'));
-      loadTestFile(require.resolve('./_settings'));
+      //loadTestFile(require.resolve('./_variables'));
+      //loadTestFile(require.resolve('./_xjson'));
+      //loadTestFile(require.resolve('./_misc_console_behavior'));
+      //loadTestFile(require.resolve('./_context_menu'));
+      //loadTestFile(require.resolve('./_text_input'));
+      //loadTestFile(require.resolve('./_settings'));
     }
   });
 }

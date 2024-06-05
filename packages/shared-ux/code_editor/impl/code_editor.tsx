@@ -155,6 +155,8 @@ export interface CodeEditorProps {
    * Enables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility.
    */
   accessibilityOverlayEnabled?: boolean;
+
+  dataTestSubj?: string;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -186,6 +188,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   fitToContent,
   accessibilityOverlayEnabled = true,
+                                                        dataTestSubj
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -485,7 +488,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     <div
       css={styles.container}
       onKeyDown={onKeyDown}
-      data-test-subj="kibanaCodeEditor"
+      data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
       className="kibanaCodeEditor"
     >
       {accessibilityOverlayEnabled && renderPrompt()}

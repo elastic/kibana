@@ -151,6 +151,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <CodeEditor
+        dataTestSubj={'consoleMonacoEditor'}
         languageId={CONSOLE_LANG_ID}
         value={value}
         onChange={setValue}

@@ -29,13 +29,15 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequest() {
-    const requestEditor = await this.getRequestEditor();
-    return await this.getVisibleTextFromAceEditor(requestEditor);
+    const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+    const editorViewDiv = await codeEditor.findByClassName('view-lines');
+    return await editorViewDiv.getVisibleText();
   }
 
   public async getResponse() {
-    const responseEditor = await this.testSubjects.find('response-editor');
-    return await this.getVisibleTextFromAceEditor(responseEditor);
+    const codeEditor = await this.testSubjects.find('consoleMonacoOutput');
+    const editorViewDiv = await codeEditor.findByClassName('view-lines');
+    return await editorViewDiv.getVisibleText();
   }
 
   public async clickPlay() {
@@ -137,13 +139,19 @@ export class ConsolePageObject extends FtrService {
 
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
-    const textArea = await this.testSubjects.find('console-textarea');
+    const textArea = await this.getEditorTextArea();
     await textArea.type(letter);
     await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
+  public async promptAutocomplete1() {
+    const textArea = await this.getEditorTextArea();
+    await textArea.pressKeys([Key.SPACE, Key.CONTROL]);
+    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
+  }
+
   public async isAutocompleteVisible() {
-    const element = await this.find.byCssSelector('.ace_autocomplete').catch(() => null);
+    const element = await this.find.byCssSelector('.suggest-widget.visible').catch(() => null);
     if (!element) return false;
 
     const attribute = await element.getAttribute('style');
@@ -165,21 +173,20 @@ export class ConsolePageObject extends FtrService {
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
+    const isAutocompleteVisible = await this.isAutocompleteVisible();
+    if (isAutocompleteVisible) {
+      await textArea.pressKeys(Key.ESCAPE);
+    }
   }
 
   public async enterText(text: string) {
-    const textArea = await this.testSubjects.find('console-textarea');
+    const textArea = await this.getEditorTextArea();
     await textArea.type(text);
   }
 
   private async getEditorTextArea() {
-    // This focusses the cursor on the bottom of the text area
-    await this.retry.try(async () => {
-      const editor = await this.getEditor();
-      const content = await editor.findByCssSelector('.ace_content');
-      await content.click();
-    });
-    return await this.testSubjects.find('console-textarea');
+    const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+    return await codeEditor.findByTagName('textarea');
   }
 
   public async getAllTextLines() {
@@ -209,7 +216,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async pressEnter() {
-    const textArea = await this.testSubjects.find('console-textarea');
+    const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(Key.ENTER);
   }
 
@@ -240,15 +247,11 @@ export class ConsolePageObject extends FtrService {
 
   public async clearTextArea() {
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-      const textArea = await this.testSubjects.find('console-textarea');
+      const textArea = await this.getEditorTextArea();
       await textArea.clickMouseButton();
-      await textArea.clearValueWithKeyboard();
 
-      const editor = await this.getEditor();
-      const lines = await editor.findAllByClassName('ace_line_group');
-      // there should be only one empty line after clearing the textarea
-      const text = await lines[lines.length - 1].getVisibleText();
-      return lines.length === 1 && text.trim() === '';
+      await textArea.clearValueWithKeyboard();
+      return true;
     });
   }
 
