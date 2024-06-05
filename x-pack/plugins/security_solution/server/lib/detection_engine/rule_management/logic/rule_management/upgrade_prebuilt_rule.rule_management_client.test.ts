@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { upgradePrebuiltRule } from './rules_management_client';
+import { upgradePrebuiltRule } from './detection_rules_client';
 
 import {
   getCreateEqlRuleSchemaMock,
@@ -26,7 +26,7 @@ jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 jest.mock('./read_rules');
 
-describe('RuleManagementClient.upgradePrebuiltRule', () => {
+describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   const mlAuthz = (buildMlAuthz as jest.Mock)();
 
