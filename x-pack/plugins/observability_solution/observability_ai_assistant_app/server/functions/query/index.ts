@@ -22,7 +22,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
-import { ESQLSearchReponse } from '@kbn/es-types';
+import { ESQLSearchResponse } from '@kbn/es-types';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import { validateEsqlQuery } from './validate_esql_query';
@@ -132,7 +132,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
         body: {
           query,
         },
-      })) as ESQLSearchReponse;
+      })) as ESQLSearchResponse;
 
       return {
         content: response,
