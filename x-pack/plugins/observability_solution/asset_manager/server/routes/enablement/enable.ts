@@ -47,7 +47,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           'checking if current Kibana user has permission to enable entity discovery'
         );
 
-        const esClient = (await context.core).elasticsearch.client;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const canEnable = await canEnableEntityDiscovery(esClient);
         if (!canEnable) {
           return res.ok({

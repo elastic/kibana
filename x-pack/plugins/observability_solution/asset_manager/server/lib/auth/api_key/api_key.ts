@@ -5,65 +5,69 @@
  * 2.0.
  */
 
-import { AssetManagerServerSetup } from "@kbn/assetManager-plugin/server/types";
-import { KibanaRequest } from "@kbn/core-http-server";
+import { KibanaRequest } from '@kbn/core-http-server';
+import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
+import { AssetManagerServerSetup } from '../../../types';
 import { canRunEntityDiscovery, requiredRunTimePrivileges } from '../privileges';
-import { getFakeKibanaRequest } from "@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request";
 
-export type EntityDiscoveryAPIKey = {
-    id: string;
-    name: string;
-    apiKey: string;
+export interface EntityDiscoveryAPIKey {
+  id: string;
+  name: string;
+  apiKey: string;
 }
 
-export const checkIfAPIKeysAreEnabled = async (server: AssetManagerServerSetup): Promise<boolean> => {
-    return await server.security.authc.apiKeys.areAPIKeysEnabled();
-}
+export const checkIfAPIKeysAreEnabled = async (
+  server: AssetManagerServerSetup
+): Promise<boolean> => {
+  return await server.security.authc.apiKeys.areAPIKeysEnabled();
+};
 
 export const checkIfEntityDiscoveryAPIKeyIsValid = async (
-    server: AssetManagerServerSetup,
-    apiKey: EntityDiscoveryAPIKey,
+  server: AssetManagerServerSetup,
+  apiKey: EntityDiscoveryAPIKey
 ): Promise<boolean> => {
-    server.logger.debug("validating API key against authentication service");
+  server.logger.debug('validating API key against authentication service');
 
-    const isValid = await server.security.authc.apiKeys.validate({
-        id: apiKey.id,
-        api_key: apiKey.apiKey,
-    });
+  const isValid = await server.security.authc.apiKeys.validate({
+    id: apiKey.id,
+    api_key: apiKey.apiKey,
+  });
 
-    if (!isValid) return false;
+  if (!isValid) return false;
 
-    // this fake kibana request is how you get an API key-scoped client...
-    const esClient = server.core.elasticsearch.client.asScoped(getFakeKibanaRequest({
-        id: apiKey.id,
-        api_key: apiKey.apiKey,
-    }));
+  // this fake kibana request is how you get an API key-scoped client...
+  const esClient = server.core.elasticsearch.client.asScoped(
+    getFakeKibanaRequest({
+      id: apiKey.id,
+      api_key: apiKey.apiKey,
+    })
+  ).asCurrentUser;
 
-    server.logger.debug("validating API key has runtime privileges for entity discovery");
+  server.logger.debug('validating API key has runtime privileges for entity discovery');
 
-    return canRunEntityDiscovery(esClient);
-}
+  return canRunEntityDiscovery(esClient);
+};
 
 export const generateEntityDiscoveryAPIKey = async (
-    server: AssetManagerServerSetup,
-    req: KibanaRequest,
+  server: AssetManagerServerSetup,
+  req: KibanaRequest
 ): Promise<EntityDiscoveryAPIKey | undefined> => {
-    const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
-        name: "Entity discovery API key",
-        role_descriptors: {
-            entity_discovery_admin: requiredRunTimePrivileges,
-        },
-        metadata: {
-            description:
-                'API key used to manage the transforms and ingest pipelines created by the entity discovery framework',
-        },
-    });
+  const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
+    name: 'Entity discovery API key',
+    role_descriptors: {
+      entity_discovery_admin: requiredRunTimePrivileges,
+    },
+    metadata: {
+      description:
+        'API key used to manage the transforms and ingest pipelines created by the entity discovery framework',
+    },
+  });
 
-    if (apiKey !== null) {
-        return {
-            id: apiKey.id,
-            name: apiKey.name,
-            apiKey: apiKey.api_key,
-        };
-    }
-}
+  if (apiKey !== null) {
+    return {
+      id: apiKey.id,
+      name: apiKey.name,
+      apiKey: apiKey.api_key,
+    };
+  }
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { ENTITY_BASE_PREFIX } from '../../../common/constants_entities';
 
 export const requiredRunTimePrivileges = {
@@ -35,8 +35,8 @@ export const requiredEnablementPrivileges = {
   cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'],
 };
 
-export const canRunEntityDiscovery = async (client: IScopedClusterClient) => {
-  const { has_all_requested: hasAllRequested } = await client.asCurrentUser.security.hasPrivileges({
+export const canRunEntityDiscovery = async (client: ElasticsearchClient) => {
+  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges({
     body: {
       cluster: requiredRunTimePrivileges.cluster,
       index: requiredRunTimePrivileges.index,
@@ -47,10 +47,10 @@ export const canRunEntityDiscovery = async (client: IScopedClusterClient) => {
   return hasAllRequested;
 };
 
-export const canEnableEntityDiscovery = async (client: IScopedClusterClient) => {
+export const canEnableEntityDiscovery = async (client: ElasticsearchClient) => {
   const [canRun, { cluster: grantedClusterPrivileges }] = await Promise.all([
     canRunEntityDiscovery(client),
-    client.asCurrentUser.security.hasPrivileges({
+    client.security.hasPrivileges({
       body: {
         cluster: requiredEnablementPrivileges.cluster,
       },
