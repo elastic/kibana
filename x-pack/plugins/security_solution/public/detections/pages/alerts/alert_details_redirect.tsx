@@ -12,13 +12,9 @@ import { Redirect, useLocation, useParams } from 'react-router-dom';
 import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
-import {
-  ALERTS_PATH,
-  DEFAULT_ALERTS_INDEX,
-  ENABLE_EXPANDABLE_FLYOUT_SETTING,
-} from '../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
 import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
@@ -73,14 +69,14 @@ export const AlertDetailsRedirect = () => {
 
   const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.flyout);
 
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
 
   const urlParams = new URLSearchParams({
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
     [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
     [URL_PARAM_KEY.flyout]: resolveFlyoutParams(
-      { index, alertId, isSecurityFlyoutEnabled },
+      { index, alertId, expandableFlyoutDisabled },
       currentFlyoutParams
     ),
   });
