@@ -53,6 +53,8 @@ xpack.fleet.internal.registry.excludePackages: [
     # Security integrations
     'endpoint',
     'beaconing',
+    'cloud_security_posture',
+    'cloud_defend',
     'security_detection_engine',
 
     # Removed in 8.11 integrations
