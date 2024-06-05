@@ -16,7 +16,7 @@ import {
 } from '../../../../common/conversation_complete';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 
-function appendErrorMessageToAssistantResponse(): OperatorFunction<
+function appendFunctionLimitExceededErrorMessageToAssistantResponse(): OperatorFunction<
   MessageOrChatEvent,
   MessageOrChatEvent
 > {
@@ -74,7 +74,9 @@ export function catchFunctionNotFoundError(
       catchError((error) => {
         if (isFunctionNotFoundError(error)) {
           if (functionLimitExceeded) {
-            return chunksWithoutErrors$.pipe(appendErrorMessageToAssistantResponse());
+            return chunksWithoutErrors$.pipe(
+              appendFunctionLimitExceededErrorMessageToAssistantResponse()
+            );
           }
           return chunksWithoutErrors$.pipe(emitWithConcatenatedMessage());
         }
