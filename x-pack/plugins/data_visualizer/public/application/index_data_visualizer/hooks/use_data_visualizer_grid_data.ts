@@ -109,17 +109,16 @@ export const useDataVisualizerGridData = (
   }, [security]);
 
   const { currentSavedSearch, currentDataView, currentQuery, currentFilters, samplingOption } =
-    useMemo(
-      () => ({
+    useMemo(() => {
+      return {
         currentSavedSearch: input?.savedSearch,
         currentDataView: input.dataView,
         currentQuery: input?.query,
         currentFilters: input?.filters,
         /** By default, use random sampling **/
         samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
-      }),
-      [input]
-    );
+      };
+    }, [input?.savedSearch, input.dataView, input?.query, input?.filters, input?.samplingOption]);
   const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const { visibleFieldNames, fieldsToFetch } = useMemo(() => {

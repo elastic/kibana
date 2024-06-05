@@ -77,6 +77,8 @@ export interface CloudSecurityDataTableProps {
    * Height override for the data grid.
    */
   height?: number | string;
+  /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
+  columnHeaders?: Record<string, string>;
   /**
    * Specify if distribution bar is shown on data table, used to calculate height of data table in virtualized mode
    */
@@ -95,6 +97,7 @@ export const CloudSecurityDataTable = ({
   customCellRenderer,
   groupSelectorComponent,
   height,
+  columnHeaders,
   hasDistributionBar = true,
   ...rest
 }: CloudSecurityDataTableProps) => {
@@ -117,7 +120,9 @@ export const CloudSecurityDataTable = ({
     `${columnsLocalStorageKey}:settings`,
     {
       columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
+        const columnDefaultSettings = curr.width
+          ? { width: curr.width, display: columnHeaders?.[curr.id] }
+          : { display: columnHeaders?.[curr.id] };
         const newColumn = { [curr.id]: columnDefaultSettings };
         return { ...prev, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
@@ -227,6 +232,7 @@ export const CloudSecurityDataTable = ({
     const newColumns = { ...(grid.columns || {}) };
     newColumns[colSettings.columnId] = {
       width: Math.round(colSettings.width),
+      display: columnHeaders?.[colSettings.columnId],
     };
     const newGrid = { ...grid, columns: newColumns };
     setSettings(newGrid);
