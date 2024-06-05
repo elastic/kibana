@@ -19,6 +19,7 @@ export interface ScenarioOptions {
 
 export interface EvaluationResult {
   name: string;
+  category: string;
   conversationId?: string;
   messages: Array<Message['message']>;
   passed: boolean;

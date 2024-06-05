@@ -517,7 +517,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = item;
+        const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
@@ -947,7 +947,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1108,7 +1108,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
         expect(newPolicy).to.eql({
@@ -1168,7 +1168,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1375,6 +1375,16 @@ export default function (providerContext: FtrProviderContext) {
             'agent-inactive-1',
             policyWithInactiveAgents.id
           );
+
+          // inactive agents are included in agent policy agents count
+          const {
+            body: {
+              item: { agents: agentsCount },
+            },
+          } = await supertest
+            .get(`/api/fleet/agent_policies/${policyWithInactiveAgents.id}`)
+            .expect(200);
+          expect(agentsCount).to.equal(1);
 
           const { body } = await supertest
             .post('/api/fleet/agent_policies/delete')

@@ -11,10 +11,9 @@ exports[`EnabledFeatures renders as expected 1`] = `
         size="xs"
       >
         <h3>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Set feature visibility"
             id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
-            values={Object {}}
           />
         </h3>
       </EuiTitle>
@@ -26,15 +25,14 @@ exports[`EnabledFeatures renders as expected 1`] = `
         size="s"
       >
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Hidden features are removed from the user interface, but not disabled. To secure access to features, {manageRolesLink}."
             id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
             values={
               Object {
-                "manageRolesLink": <FormattedMessage
+                "manageRolesLink": <Memo(MemoizedFormattedMessage)
                   defaultMessage="manage security roles"
                   id="xpack.spaces.management.enabledSpaceFeatures.manageRolesLinkText"
-                  values={Object {}}
                 />,
               }
             }
