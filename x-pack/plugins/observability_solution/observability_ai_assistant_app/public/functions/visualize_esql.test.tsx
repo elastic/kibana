@@ -31,6 +31,9 @@ describe('VisualizeESQL', () => {
           toSpec: jest.fn(),
           toMinimalSpec: jest.fn(),
           isPersisted: jest.fn().mockReturnValue(false),
+          fields: {
+            getByName: jest.fn(),
+          },
         })
       ),
     };
@@ -73,6 +76,7 @@ describe('VisualizeESQL', () => {
           ObservabilityAIAssistantMultipaneFlyoutContext={
             ObservabilityAIAssistantMultipaneFlyoutContext
           }
+          rows={[]}
         />
       </ObservabilityAIAssistantMultipaneFlyoutContext.Provider>
     );
@@ -138,8 +142,61 @@ describe('VisualizeESQL', () => {
       }),
     };
     renderComponent({}, lensService, undefined, ['There is an error mate']);
+    await waitFor(() => expect(screen.findByTestId('observabilityAiAssistantErrorsList')));
+  });
+
+  it('should not display the table on first render', async () => {
+    const lensService = {
+      ...lensPluginMock.createStartContract(),
+      stateHelperApi: jest.fn().mockResolvedValue({
+        formula: jest.fn(),
+        suggestions: jest.fn(),
+      }),
+    };
+    renderComponent({}, lensService);
+    // the button to render a table should be present
     await waitFor(() =>
-      expect(screen.getByTestId('observabilityAiAssistantErrorsList')).toBeInTheDocument()
+      expect(screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton'))
     );
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('observabilityAiAssistantESQLDataGrid')).not.toBeInTheDocument()
+    );
+  });
+
+  it('should display the table when user clicks the table button', async () => {
+    const lensService = {
+      ...lensPluginMock.createStartContract(),
+      stateHelperApi: jest.fn().mockResolvedValue({
+        formula: jest.fn(),
+        suggestions: jest.fn(),
+      }),
+    };
+    renderComponent({}, lensService);
+    await waitFor(() => {
+      userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLDisplayTableButton'));
+      expect(screen.findByTestId('observabilityAiAssistantESQLDataGrid'));
+    });
+  });
+
+  it('should render the ESQLDataGrid if Lens returns a table', async () => {
+    const lensService = {
+      ...lensPluginMock.createStartContract(),
+      stateHelperApi: jest.fn().mockResolvedValue({
+        formula: jest.fn(),
+        suggestions: jest.fn(),
+      }),
+    };
+    renderComponent(
+      {
+        attributes: {
+          visualizationType: 'lnsDatatable',
+        },
+      },
+      lensService
+    );
+    await waitFor(() => {
+      expect(screen.findByTestId('observabilityAiAssistantESQLDataGrid'));
+    });
   });
 });
