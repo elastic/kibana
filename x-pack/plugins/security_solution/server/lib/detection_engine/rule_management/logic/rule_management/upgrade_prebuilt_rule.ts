@@ -10,13 +10,9 @@ import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
+import { convertPatchAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import {
-  _validateMlAuth,
-  ClientError,
-  _patchRule,
-  _upgradePrebuiltRuleWithTypeChange,
-} from './utils';
+import { _validateMlAuth, ClientError, _upgradePrebuiltRuleWithTypeChange } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -50,7 +46,12 @@ export const upgradePrebuiltRule = async (
     }
 
     // Else, simply patch it.
-    await _patchRule(rulesClient, { existingRule, nextParams: ruleAsset });
+    const patchedRule = convertPatchAPIToInternalSchema(ruleAsset, existingRule);
+
+    await rulesClient.update({
+      id: existingRule.id,
+      data: patchedRule,
+    });
 
     const updatedRule = await readRules({
       rulesClient,
