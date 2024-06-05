@@ -6,12 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import type { SharedServices } from '@kbn/ml-plugin/server/shared_services';
-import { buildMlAuthz } from '../../../../machine_learning/authz';
+import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type { RuleAlertType } from '../../../rule_schema';
 
@@ -47,53 +42,39 @@ export interface IDetectionRulesClient {
 
 export const createDetectionRulesClient = (
   rulesClient: RulesClient,
-  request: KibanaRequest,
-  savedObjectsClient: SavedObjectsClientContract,
-  licensing: LicensingApiRequestHandlerContext,
-  ml?: SharedServices
-): IDetectionRulesClient => {
-  const mlAuthz = buildMlAuthz({
-    license: licensing.license,
-    ml,
-    request,
-    savedObjectsClient,
-  });
+  mlAuthz: MlAuthz
+): IDetectionRulesClient => ({
+  createCustomRule: async (
+    createCustomRulePayload: CreateCustomRuleProps
+  ): Promise<RuleAlertType> => {
+    return createCustomRule(rulesClient, createCustomRulePayload, mlAuthz);
+  },
 
-  const client = {
-    createCustomRule: async (
-      createCustomRulePayload: CreateCustomRuleProps
-    ): Promise<RuleAlertType> => {
-      return createCustomRule(rulesClient, createCustomRulePayload, mlAuthz);
-    },
+  createPrebuiltRule: async (
+    createPrebuiltRulePayload: CreatePrebuiltRuleProps
+  ): Promise<RuleAlertType> => {
+    return createPrebuiltRule(rulesClient, createPrebuiltRulePayload, mlAuthz);
+  },
 
-    createPrebuiltRule: async (
-      createPrebuiltRulePayload: CreatePrebuiltRuleProps
-    ): Promise<RuleAlertType> => {
-      return createPrebuiltRule(rulesClient, createPrebuiltRulePayload, mlAuthz);
-    },
+  updateRule: async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType> => {
+    return updateRule(rulesClient, updateRulePayload, mlAuthz);
+  },
 
-    updateRule: async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType> => {
-      return updateRule(rulesClient, updateRulePayload, mlAuthz);
-    },
+  patchRule: async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType> => {
+    return patchRule(rulesClient, patchRulePayload, mlAuthz);
+  },
 
-    patchRule: async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType> => {
-      return patchRule(rulesClient, patchRulePayload, mlAuthz);
-    },
+  deleteRule: async (deleteRulePayload: DeleteRuleProps): Promise<void> => {
+    return deleteRule(rulesClient, deleteRulePayload);
+  },
 
-    deleteRule: async (deleteRulePayload: DeleteRuleProps): Promise<void> => {
-      return deleteRule(rulesClient, deleteRulePayload);
-    },
+  upgradePrebuiltRule: async (
+    upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
+  ): Promise<RuleAlertType> => {
+    return upgradePrebuiltRule(rulesClient, upgradePrebuiltRulePayload, mlAuthz);
+  },
 
-    upgradePrebuiltRule: async (
-      upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
-    ): Promise<RuleAlertType> => {
-      return upgradePrebuiltRule(rulesClient, upgradePrebuiltRulePayload, mlAuthz);
-    },
-
-    importRule: async (importRulePayload: ImportRuleProps): Promise<RuleAlertType> => {
-      return importRule(rulesClient, importRulePayload, mlAuthz);
-    },
-  };
-
-  return client;
-};
+  importRule: async (importRulePayload: ImportRuleProps): Promise<RuleAlertType> => {
+    return importRule(rulesClient, importRulePayload, mlAuthz);
+  },
+});
