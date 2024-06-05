@@ -10,11 +10,15 @@ import type { SortDirection } from '@kbn/data-plugin/common';
 import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { Filter } from '@kbn/es-query';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
+
+  const svlUserManager = getService('svlUserManager');
+  let role: RoleCredentials;
 
   /*
    * Helper function to decorate with common fields needed in the API call
@@ -73,11 +77,19 @@ export default function ({ getService }: FtrProviderContext) {
     // see kibanaReportCompletion config
     this.timeout(7 * 60 * 1000);
 
+    before(async () => {
+      role = await svlUserManager.createApiKeyForRole('admin');
+    });
+
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
         'dateFormat:tz': 'UTC',
       });
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(role);
     });
 
     describe('exported CSV', () => {
@@ -96,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         const fromTime = '2019-06-20T00:00:00.000Z';
         const toTime = '2019-06-24T00:00:00.000Z';
 
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             browserTimezone: 'UTC',
@@ -155,10 +167,11 @@ export default function ({ getService }: FtrProviderContext) {
             },
             title: 'Ecommerce Data',
             version: '8.14.0',
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(124183);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -177,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Helper function
       async function generateCsvReportWithUnmapped(fields: string[]) {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             browserTimezone: 'UTC',
@@ -192,10 +205,11 @@ export default function ({ getService }: FtrProviderContext) {
             },
             title: 'Untitled discover search',
             version: '8.14.0',
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        return reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        return reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
       }
 
       it('includes an unmapped field to the report', async () => {
@@ -240,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'fieldsFromSource CSV Report',
@@ -337,16 +351,17 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             },
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(1267140);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('Exports CSV with all fields when using defaults', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'All Fields CSV Report',
@@ -383,10 +398,11 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             },
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(914755);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -404,7 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('With filters and timebased data, default to UTC', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             browserTimezone: undefined,
@@ -435,16 +451,17 @@ export default function ({ getService }: FtrProviderContext) {
               sort: [{ '@timestamp': 'desc' as SortDirection }],
             },
             columns: ['@timestamp', 'clientip', 'extension'],
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(3020);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('With filters and timebased data, non-default timezone', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'CSV Report of Non-Default Timezone',
@@ -475,10 +492,11 @@ export default function ({ getService }: FtrProviderContext) {
               sort: [{ '@timestamp': 'desc' as SortDirection }],
             },
             columns: ['@timestamp', 'clientip', 'extension'],
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(3020);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -496,7 +514,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Formatted date_nanos data, UTC timezone', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'Date_Nanos CSV Report',
@@ -509,16 +527,17 @@ export default function ({ getService }: FtrProviderContext) {
               filter: [],
             },
             columns: ['date', 'message'],
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(103);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             browserTimezone: 'America/New_York',
@@ -532,10 +551,11 @@ export default function ({ getService }: FtrProviderContext) {
               filter: [],
             },
             columns: ['date', 'message'],
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(103);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -557,7 +577,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Handle _id and _index columns', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'Handled _id and _index columns CSV Report',
@@ -569,16 +589,17 @@ export default function ({ getService }: FtrProviderContext) {
               filter: [],
             },
             columns: ['date', 'message', '_id', '_index'],
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(134);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('With filters and non-timebased data', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'Filters and Non-Timebased Data CSV Report',
@@ -595,10 +616,11 @@ export default function ({ getService }: FtrProviderContext) {
               ] as unknown as Filter[],
             },
             columns: ['name', 'power'],
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(274);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -620,7 +642,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('passes through the value without mutation', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'A Big Integer for _id CSV Report',
@@ -673,10 +695,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             columns: [],
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(329);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -695,7 +718,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
       it('Searches large amount of data, stops at Max Size Reached', async () => {
-        const res = await reportingAPI.createReportJobInternal(
+        const res = await reportingAPI.createReportJobInternalUsingRole(
           'csv_searchsource',
           createTestCsvJobParams({
             title: 'Large Data and Max Size Reached CSV Report',
@@ -733,10 +756,11 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
             },
-          })
+          }),
+          role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinishUsingRole(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutputUsingRole(res.path, role);
         expect((csvFile as string).length).to.be(4826973);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });

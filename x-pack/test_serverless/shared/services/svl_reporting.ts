@@ -12,6 +12,7 @@ import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { RoleCredentials } from './svl_user_manager';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
@@ -21,7 +22,7 @@ const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'K
  */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
 
@@ -41,7 +42,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);
 
-      const { status, body } = await supertest
+      const { status, body } = await supertestWithoutAuth
         .post(requestPath)
         .auth(username, password)
         .set(...API_HEADER)
@@ -56,6 +57,24 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       };
     },
 
+    async createReportJobInternalUsingRole(jobType: string, job: object, role: RoleCredentials) {
+      const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
+      log.debug(`POST request to ${requestPath}`);
+
+      const { status, body } = await supertestWithoutAuth
+        .post(requestPath)
+        .set(...API_HEADER)
+        .set(...INTERNAL_HEADER)
+        .set(role.apiKeyHeader)
+        .send({ jobParams: rison.encode(job) });
+
+      expect(status).to.be(200);
+
+      return {
+        job: (body as ReportingJobResponse).job,
+        path: (body as ReportingJobResponse).path,
+      };
+    },
     /*
      * This function is only used in the API tests
      */
@@ -69,7 +88,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         `job ${downloadReportPath} finished`,
         options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
         async () => {
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .get(`${downloadReportPath}?elasticInternalOrigin=true`)
             .auth(username, password)
             .responseType('blob')
@@ -100,7 +119,46 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
         }
       );
     },
+    async waitForJobToFinishUsingRole(
+      downloadReportPath: string,
+      role: RoleCredentials,
+      options?: { timeout?: number }
+    ) {
+      await retry.waitForWithTimeout(
+        `job ${downloadReportPath} finished`,
+        options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
+        async () => {
+          const response = await supertestWithoutAuth
+            .get(`${downloadReportPath}?elasticInternalOrigin=true`)
+            .responseType('blob')
+            .set(...API_HEADER)
+            .set(...INTERNAL_HEADER)
+            .set(role.apiKeyHeader);
 
+          if (response.status === 500) {
+            throw new Error(`Report at path ${downloadReportPath} has failed`);
+          }
+
+          if (response.status === 503) {
+            log.debug(`Report at path ${downloadReportPath} is pending`);
+
+            // add a delay before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+
+            return false;
+          }
+
+          log.debug(`Report at path ${downloadReportPath} returned code ${response.status}`);
+
+          if (response.status === 200) {
+            log.debug(`Report at path ${downloadReportPath} is complete`);
+            return true;
+          }
+
+          throw new Error(`unexpected status code ${response.status}`);
+        }
+      );
+    },
     /*
      * This function is only used in the API tests, funtional tests we have to click the download link in the UI
      */
@@ -109,9 +167,16 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       username = REPORTING_USER_USERNAME,
       password = REPORTING_USER_PASSWORD
     ) {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
         .auth(username, password);
+      return response.text as unknown;
+    },
+    async getCompletedJobOutputUsingRole(downloadReportPath: string, role: RoleCredentials) {
+      const response = await supertestWithoutAuth
+        .get(`${downloadReportPath}?elasticInternalOrigin=true`)
+        .set(role.apiKeyHeader);
+
       return response.text as unknown;
     },
     async deleteAllReports() {
@@ -119,10 +184,21 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(5000, async () => {
-        await supertest
+        await supertestWithoutAuth
           .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
           .send({ query: { match_all: {} } });
       });
     },
+    // async deleteAllReportsUsingRole(role: RoleCredentials) {
+    //   log.debug('ReportingAPI.deleteAllReports');
+    //
+    //   // ignores 409 errs and keeps retrying
+    //   await retry.tryForTime(5000, async () => {
+    //     await supertestWithoutAuth
+    //       .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
+    //       .set(role.apiKeyHeader)
+    //       .send({ query: { match_all: {} } });
+    //   });
+    // },
   };
 }
