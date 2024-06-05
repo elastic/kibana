@@ -81,6 +81,9 @@ export const allowedExperimentalValues = Object.freeze({
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: false,
 
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: false,
+
   /**
    * 8.15
    * Enables use of agent status service to get agent status information
