@@ -18,6 +18,7 @@ import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
 import { getConnectorType as getOpenAIConnectorType } from './openai';
+import { getConnectorType as getHuggingfaceConnectorType } from './huggingface';
 import { getConnectorType as getBedrockConnectorType } from './bedrock';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
@@ -107,6 +108,8 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
+  // Included the connector here
+  actions.registerSubActionConnectorType(getHuggingfaceConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());

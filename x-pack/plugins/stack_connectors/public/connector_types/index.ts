@@ -12,6 +12,7 @@ import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
 import { getOpenAIConnectorType } from './openai';
+import { getHuggingFaceConnectorType } from './huggingface';
 import { getBedrockConnectorType } from './bedrock';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
@@ -64,6 +65,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
+  connectorTypeRegistry.register(getHuggingFaceConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());

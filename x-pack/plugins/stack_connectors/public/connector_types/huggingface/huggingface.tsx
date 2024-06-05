@@ -8,23 +8,23 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/openai/constants';
-import { OPENAI_CONNECTOR_ID, OPENAI_TITLE } from '../../../common/openai/constants';
-import { ActionParams, OpenAIConnector } from './types';
+import { SUB_ACTION } from '../../../common/huggingface/constants';
+import { HUGGINGFACE_CONNECTOR_ID, HUGGINGFACE_TITLE } from '../../../common/huggingFace/constants';
+import { ActionParams, HuggingFaceConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];
   body: string[];
 }
 // Create method like this
-export function getConnectorType(): OpenAIConnector {
+export function getConnectorType(): HuggingFaceConnector {
   return {
-    id: OPENAI_CONNECTOR_ID,
+    id: HUGGINGFACE_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
       defaultMessage: 'Send a request to an OpenAI or Azure OpenAI service.',
     }),
-    actionTypeTitle: OPENAI_TITLE,
+    actionTypeTitle: HUGGINGFACE_TITLE,
     validateParams: async (
       actionParams: ActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
