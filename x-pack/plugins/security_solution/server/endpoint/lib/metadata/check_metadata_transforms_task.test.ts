@@ -23,6 +23,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import type { RunResult } from '@kbn/task-manager-plugin/server/task';
+import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
 import type { EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
 import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 
@@ -125,6 +126,16 @@ describe('check metadata transforms task', () => {
           ],
         },
       } as unknown as TransportResult<TransformGetTransformStatsResponse>);
+
+    it('should not run if task is outdated', async () => {
+      const result = await runTask({ ...MOCK_TASK_INSTANCE, id: 'old-id' });
+
+      expect(esClient.transform.getTransformStats).not.toHaveBeenCalled();
+      expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+      expect(esClient.transform.startTransform).not.toHaveBeenCalled();
+
+      expect(result).toEqual(DELETE_TASK_RUN_RESULT);
+    });
 
     describe('transforms restart', () => {
       it('should stop task if transform stats response fails', async () => {

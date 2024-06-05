@@ -9,7 +9,7 @@ import type {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
@@ -68,8 +68,12 @@ export class FleetMetricsTask {
     }
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
-      throwUnrecoverableError(new Error('Outdated task version for task: ' + taskInstance.id));
-      return;
+      appContextService
+        .getLogger()
+        .info(
+          `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+        );
+      return DELETE_TASK_RUN_RESULT;
     }
     if (!this.esClient) {
       appContextService.getLogger().debug('esClient not set, skipping Fleet metrics task');

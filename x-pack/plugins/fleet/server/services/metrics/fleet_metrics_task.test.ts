@@ -8,6 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { DELETE_TASK_RUN_RESULT } from '@kbn/task-manager-plugin/server/task';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -195,6 +196,18 @@ describe('fleet metrics task', () => {
         ],
         refresh: true,
       });
+    });
+
+    it('should not run if task is outdated', async () => {
+      const result = await runTask({ ...MOCK_TASK_INSTANCE, id: 'old-id' });
+
+      expect(esClient.index).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+
+      expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+        'Outdated task version: Got [old-id] from task instance. Current version is [Fleet-Metrics-Task:1.1.1]'
+      );
+      expect(result).toEqual(DELETE_TASK_RUN_RESULT);
     });
 
     it('should log errors from bulk create', async () => {
