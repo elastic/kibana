@@ -103,7 +103,9 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
       schemas: {
         create: schema.object({
           type: schema.string(),
-          state: schema.maybe(schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema])),
+          state: schema.maybe(
+            schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema, schema.never()])
+          ),
           progress: schema.mapOf(
             schema.string(),
             schema.object({
