@@ -112,7 +112,7 @@ describe('CloudSecurityDataTable', () => {
     });
 
     const showActions = getByRole('button', {
-      name: /show actions/i,
+      name: 'More actions',
     });
 
     expect(showActions).toBeInTheDocument();
@@ -125,7 +125,7 @@ describe('CloudSecurityDataTable', () => {
       total: mockRows.length,
     });
     const showActions = queryByRole('button', {
-      name: /show actions/i,
+      name: 'More actions',
     });
     expect(showActions).toBeNull();
   });
