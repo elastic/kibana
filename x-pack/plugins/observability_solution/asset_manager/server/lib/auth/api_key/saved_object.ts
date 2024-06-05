@@ -5,54 +5,45 @@
  * 2.0.
  */
 
-import {
-    SavedObjectsErrorHelpers,
-    SavedObjectsClientContract,
-} from '@kbn/core/server';
-import { EntityDiscoveryApiKeyType } from "@kbn/assetManager-plugin/server/saved_objects";
-import { AssetManagerServerSetup } from "@kbn/assetManager-plugin/server/types";
+import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
+import { EntityDiscoveryApiKeyType } from '../../../saved_objects';
+import { AssetManagerServerSetup } from '../../../types';
 import { EntityDiscoveryAPIKey } from './api_key';
 
 const ENTITY_DISCOVERY_API_KEY_SO_ID = '19540C97-E35C-485B-8566-FB86EC8455E4';
 
 const getEncryptedSOClient = (server: AssetManagerServerSetup) => {
-    return server.encryptedSavedObjects.getClient({
-        includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
-    });
+  return server.encryptedSavedObjects.getClient({
+    includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+  });
 };
 
 export const readEntityDiscoveryAPIKey = async (server: AssetManagerServerSetup) => {
-    try {
-        const soClient = getEncryptedSOClient(server);
-        const obj = await soClient.getDecryptedAsInternalUser<EntityDiscoveryAPIKey>(
-            EntityDiscoveryApiKeyType.name,
-            ENTITY_DISCOVERY_API_KEY_SO_ID,
-        );
-        return obj?.attributes;
-    } catch (err) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-            return undefined;
-        }
-        throw err;
+  try {
+    const soClient = getEncryptedSOClient(server);
+    const obj = await soClient.getDecryptedAsInternalUser<EntityDiscoveryAPIKey>(
+      EntityDiscoveryApiKeyType.name,
+      ENTITY_DISCOVERY_API_KEY_SO_ID
+    );
+    return obj?.attributes;
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      return undefined;
     }
+    throw err;
+  }
 };
 
 export const saveEntityDiscoveryAPIKey = async (
-    soClient: SavedObjectsClientContract,
-    apiKey: EntityDiscoveryAPIKey,
+  soClient: SavedObjectsClientContract,
+  apiKey: EntityDiscoveryAPIKey
 ) => {
-    await soClient.create(EntityDiscoveryApiKeyType.name, apiKey, {
-        id: ENTITY_DISCOVERY_API_KEY_SO_ID,
-        overwrite: true,
-    });
+  await soClient.create(EntityDiscoveryApiKeyType.name, apiKey, {
+    id: ENTITY_DISCOVERY_API_KEY_SO_ID,
+    overwrite: true,
+  });
 };
 
-export const deleteEntityDiscoveryAPIKey = async (
-    soClient: SavedObjectsClientContract
-) => {
-    try {
-        return await soClient.delete(EntityDiscoveryApiKeyType.name, ENTITY_DISCOVERY_API_KEY_SO_ID);
-    } catch (e) {
-        throw e;
-    }
-}
+export const deleteEntityDiscoveryAPIKey = async (soClient: SavedObjectsClientContract) => {
+  await soClient.delete(EntityDiscoveryApiKeyType.name, ENTITY_DISCOVERY_API_KEY_SO_ID);
+};

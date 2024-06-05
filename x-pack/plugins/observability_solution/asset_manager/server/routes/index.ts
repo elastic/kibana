@@ -20,6 +20,7 @@ import { resetEntityDefinitionRoute } from './entities/reset';
 import { checkEntityDiscoveryEnabledRoute } from './enablement/check';
 import { enableEntityDiscoveryRoute } from './enablement/enable';
 import { disableEntityDiscoveryRoute } from './enablement/disable';
+import { getEntityDefinitionRoute } from './entities/get';
 
 export function setupRoutes<T extends RequestHandlerContext>(dependencies: SetupRouteOptions<T>) {
   pingRoute<T>(dependencies);
@@ -32,6 +33,7 @@ export function setupRoutes<T extends RequestHandlerContext>(dependencies: Setup
   createEntityDefinitionRoute<T>(dependencies);
   deleteEntityDefinitionRoute<T>(dependencies);
   resetEntityDefinitionRoute<T>(dependencies);
+  getEntityDefinitionRoute<T>(dependencies);
   enableEntityDiscoveryRoute<T>(dependencies);
   disableEntityDiscoveryRoute<T>(dependencies);
   checkEntityDiscoveryEnabledRoute<T>(dependencies);
