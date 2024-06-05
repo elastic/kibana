@@ -87,7 +87,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         return;
       }
       const packagePolicyPath = getPath('policy_details', {
-        policyId: packagePolicy.policy_ids[0],
+        policyId: packagePolicy.policy_ids[0], // TODO navigates to first policy
       });
 
       const [onSaveNavigateTo, onSaveQueryParams]: [

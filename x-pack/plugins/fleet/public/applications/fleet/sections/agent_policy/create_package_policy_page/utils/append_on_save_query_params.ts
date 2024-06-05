@@ -33,7 +33,7 @@ export function appendOnSaveQueryParamsToPath({
       const [paramKey, paramValue] = createQueryParam(
         paramName,
         paramOptions,
-        policy.policy_ids[0]
+        policy.policy_ids[0] // TODO handle multiple
       );
       if (paramKey && paramValue) {
         queryParams[paramKey] = paramValue;

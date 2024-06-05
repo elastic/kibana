@@ -105,7 +105,7 @@ export const usePackagePoliciesWithAgentPolicy = (
       (packagePolicy) => {
         return {
           packagePolicy,
-          agentPolicy: agentPoliciesById[packagePolicy.policy_ids[0]],
+          agentPolicy: agentPoliciesById[packagePolicy.policy_ids[0]], // TODO multiple agent policies
         };
       }
     );

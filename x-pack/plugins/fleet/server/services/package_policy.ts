@@ -221,20 +221,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       request
     );
 
-    const agentPolicy = await agentPolicyService.get(
-      soClient,
-      enrichedPackagePolicy.policy_ids[0],
-      true
-    );
+    const agentPolicies = [];
 
-    if (agentPolicy && enrichedPackagePolicy.package?.name) {
-      await validateOutputForNewPackagePolicy(
-        soClient,
-        agentPolicy,
-        enrichedPackagePolicy.package?.name
-      );
-    }
     for (const policyId of enrichedPackagePolicy.policy_ids) {
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+      agentPolicies.push(agentPolicy);
+
+      if (agentPolicy && enrichedPackagePolicy.package?.name) {
+        await validateOutputForNewPackagePolicy(
+          soClient,
+          agentPolicy,
+          enrichedPackagePolicy.package?.name
+        );
+      }
+
       await validateIsNotHostedPolicy(soClient, policyId, options?.force);
     }
 
@@ -280,10 +280,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
-        if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
-          throw new FleetError(
-            `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
-          );
+        for (const agentPolicy of agentPolicies) {
+          if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
+            throw new FleetError(
+              `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
+            );
+          }
         }
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
