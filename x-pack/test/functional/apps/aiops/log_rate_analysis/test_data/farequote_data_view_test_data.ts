@@ -12,6 +12,7 @@ import type { TestData } from '../../types';
 export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote with spike',
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+  autoRun: false,
   dataGenerator: 'farequote_with_spike',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'ft_farequote',

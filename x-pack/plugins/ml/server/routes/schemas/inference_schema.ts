@@ -24,6 +24,10 @@ export const modelAndDeploymentIdSchema = schema.object({
    */
   deploymentId: schema.string(),
 });
+export const createInferenceSchema = schema.object({
+  taskType: schema.oneOf([schema.literal('sparse_embedding'), schema.literal('text_embedding')]),
+  inferenceId: schema.string(),
+});
 
 export const threadingParamsSchema = schema.maybe(
   schema.object({

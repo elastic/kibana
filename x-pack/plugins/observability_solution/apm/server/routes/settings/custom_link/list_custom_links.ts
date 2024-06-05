@@ -7,10 +7,7 @@
 
 import * as t from 'io-ts';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  CustomLink,
-  CustomLinkES,
-} from '../../../../common/custom_link/custom_link_types';
+import { CustomLink, CustomLinkES } from '../../../../common/custom_link/custom_link_types';
 import { fromESFormat } from './helper';
 import { filterOptionsRt } from './custom_link_types';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
@@ -53,10 +50,7 @@ export async function listCustomLinks({
       ],
     },
   };
-  const resp = await internalESClient.search<CustomLinkES>(
-    'list_custom_links',
-    params
-  );
+  const resp = await internalESClient.search<CustomLinkES>('list_custom_links', params);
   const customLinks = resp.hits.hits.map((item) =>
     fromESFormat({
       id: item._id,

@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 import { TelemetryPlugin } from './plugin';
+import type { NodeRoles } from '@kbn/core-node-server';
 
 describe('TelemetryPlugin', () => {
   describe('setup', () => {
@@ -63,6 +64,45 @@ describe('TelemetryPlugin', () => {
           ElasticV3ServerShipper,
           { channelName: 'kibana-server', version: 'version', sendTo: 'production' }
         );
+      });
+    });
+  });
+
+  describe('start', () => {
+    describe('per node behavior', () => {
+      function createPluginForNodeRole(roles: Partial<NodeRoles>) {
+        const initializerContext = coreMock.createPluginInitializerContext();
+        initializerContext.node.roles = { ...initializerContext.node.roles, ...roles };
+
+        const plugin = new TelemetryPlugin(initializerContext);
+
+        // eslint-disable-next-line dot-notation
+        const startFetcherMock = (plugin['startFetcher'] = jest.fn());
+
+        plugin.setup(coreMock.createSetup(), {
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
+        });
+
+        plugin.start(coreMock.createStart(), {
+          telemetryCollectionManager: telemetryCollectionManagerPluginMock.createStartContract(),
+        });
+
+        return { startFetcherMock };
+      }
+
+      afterEach(() => {
+        jest.resetAllMocks();
+      });
+
+      it('calls startFetcher when it is a UI node', () => {
+        const { startFetcherMock } = createPluginForNodeRole({ ui: true });
+        expect(startFetcherMock).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not call startFetcher when not a UI node', () => {
+        const { startFetcherMock } = createPluginForNodeRole({ ui: false });
+        expect(startFetcherMock).toHaveBeenCalledTimes(0);
       });
     });
   });

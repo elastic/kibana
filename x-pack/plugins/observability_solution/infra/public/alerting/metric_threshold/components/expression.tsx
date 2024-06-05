@@ -11,12 +11,11 @@ import {
   EuiCheckbox,
   EuiFieldSearch,
   EuiFormRow,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,8 +27,13 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
+import {
+  useMetricsDataViewContext,
+  useSourceContext,
+  withSourceProvider,
+} from '../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
@@ -42,12 +46,18 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
+  | 'defaultActionGroupId'
+  | 'actionGroups'
+  | 'charts'
+  | 'data'
+  | 'unifiedSearch'
+  | 'onChangeMetaData'
+  | 'dataViews'
 >;
 
 const defaultExpression = {
   aggType: Aggregators.AVERAGE,
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
@@ -57,14 +67,11 @@ export { defaultExpression };
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { docLinks } = useKibanaContextForPlugin().services;
-  const { source, createDerivedIndexPattern } = useSourceContext();
+  const { source } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
-  const derivedIndexPattern = useMemo(
-    () => createDerivedIndexPattern(),
-    [createDerivedIndexPattern]
-  );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -113,13 +120,13 @@ export const Expressions: React.FC<Props> = (props) => {
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
       }
     },
-    [setRuleParams, derivedIndexPattern]
+    [setRuleParams, metricsView?.dataViewReference]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -175,7 +182,7 @@ export const Expressions: React.FC<Props> = (props) => {
         'criteria',
         md.currentOptions.metrics.map((metric) => ({
           metric: metric.field,
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [],
           timeSize,
           timeUnit,
@@ -193,7 +200,10 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('filterQueryText', md.currentOptions.filterQuery);
       setRuleParams(
         'filterQuery',
-        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
+        convertKueryToElasticSearchQuery(
+          md.currentOptions.filterQuery,
+          metricsView?.dataViewReference
+        ) || ''
       );
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
@@ -203,10 +213,10 @@ export const Expressions: React.FC<Props> = (props) => {
       setRuleParams('filterQueryText', filter);
       setRuleParams(
         'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+        convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference) || ''
       );
     }
-  }, [metadata, derivedIndexPattern, setRuleParams]);
+  }, [metadata, metricsView?.dataViewReference, setRuleParams]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
@@ -299,7 +309,6 @@ export const Expressions: React.FC<Props> = (props) => {
           return (
             <ExpressionRow
               canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields}
               remove={removeExpression}
               addExpression={addExpression}
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
@@ -307,12 +316,9 @@ export const Expressions: React.FC<Props> = (props) => {
               setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
-              dataView={derivedIndexPattern}
             >
               <ExpressionChart
                 expression={e}
-                derivedIndexPattern={derivedIndexPattern}
-                source={source}
                 filterQuery={ruleParams.filterQueryText}
                 groupBy={ruleParams.groupBy}
               />
@@ -363,7 +369,9 @@ export const Expressions: React.FC<Props> = (props) => {
                 {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
                   defaultMessage: "Alert me if there's no data",
                 })}{' '}
-                <EuiToolTip
+                <EuiIconTip
+                  type="questionInCircle"
+                  color="subdued"
                   content={
                     (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
                     i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
@@ -371,9 +379,7 @@ export const Expressions: React.FC<Props> = (props) => {
                         'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
                     })
                   }
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
+                />
               </>
             }
             checked={ruleParams.alertOnNoData}
@@ -395,7 +401,6 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         {(metadata && (
           <MetricsExplorerKueryBar
-            derivedIndexPattern={derivedIndexPattern}
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
             value={ruleParams.filterQueryText}
@@ -424,7 +429,6 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields}
           options={{
             ...options,
             groupBy: ruleParams.groupBy || undefined,
@@ -466,7 +470,9 @@ export const Expressions: React.FC<Props> = (props) => {
             {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnGroupDisappear', {
               defaultMessage: 'Alert me if a group stops reporting data',
             })}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={
                 (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
                 i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
@@ -474,9 +480,7 @@ export const Expressions: React.FC<Props> = (props) => {
                     'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                 })
               }
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         disabled={!hasGroupBy}

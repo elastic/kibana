@@ -563,7 +563,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 legendSort={customLegendSort}
-                showLegendExtra={visParams.showValuesInLegend}
+                legendValues={visParams.legendStats}
                 onElementClick={([elementEvent]) => {
                   // this cast is safe because we are rendering a partition chart
                   const [layerValues] = elementEvent as PartitionElementEvent;

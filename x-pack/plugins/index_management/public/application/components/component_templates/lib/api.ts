@@ -95,13 +95,6 @@ export const getApi = (
     });
   }
 
-  async function getInferenceModels() {
-    return sendRequest({
-      path: `${apiBasePath}/inference/all`,
-      method: 'get',
-    });
-  }
-
   async function postDataStreamRollover(name: string) {
     return sendRequest<ComponentTemplateDatastreams>({
       path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/rollover`,
@@ -126,6 +119,5 @@ export const getApi = (
     getComponentTemplateDatastreams,
     postDataStreamRollover,
     postDataStreamMappingsFromTemplate,
-    getInferenceModels,
   };
 };

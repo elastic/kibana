@@ -87,7 +87,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 };
 
 export const useDeleteTransforms = () => {
-  const { http, i18n: i18nStart, theme } = useAppDependencies();
+  const { http, ...startServices } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -104,7 +104,7 @@ export const useDeleteTransforms = () => {
         }),
         text: toMountPoint(
           <ToastNotificationText previewTextLength={50} text={getErrorMessage(error)} />,
-          { theme, i18n: i18nStart }
+          startServices
         ),
       }),
     onSuccess: (results) => {
@@ -121,10 +121,10 @@ export const useDeleteTransforms = () => {
                 defaultMessage: 'An error occurred deleting the transform {transformId}',
                 values: { transformId },
               }),
-              text: toMountPoint(<ToastNotificationText previewTextLength={50} text={error} />, {
-                theme,
-                i18n: i18nStart,
-              }),
+              text: toMountPoint(
+                <ToastNotificationText previewTextLength={50} text={error} />,
+                startServices
+              ),
             });
           }
 
@@ -138,10 +138,10 @@ export const useDeleteTransforms = () => {
                   values: { destinationIndex },
                 }
               ),
-              text: toMountPoint(<ToastNotificationText previewTextLength={50} text={error} />, {
-                theme,
-                i18n: i18nStart,
-              }),
+              text: toMountPoint(
+                <ToastNotificationText previewTextLength={50} text={error} />,
+                startServices
+              ),
             });
           }
 
@@ -155,10 +155,10 @@ export const useDeleteTransforms = () => {
                   values: { destinationIndex },
                 }
               ),
-              text: toMountPoint(<ToastNotificationText previewTextLength={50} text={error} />, {
-                theme,
-                i18n: i18nStart,
-              }),
+              text: toMountPoint(
+                <ToastNotificationText previewTextLength={50} text={error} />,
+                startServices
+              ),
             });
           }
         }

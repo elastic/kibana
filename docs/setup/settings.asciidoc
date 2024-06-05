@@ -14,8 +14,11 @@ KBN_PATH_CONF=/home/kibana/config ./bin/kibana
 --
 
 The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
-variety of other options. Finally, environment variables can be injected into
-configuration using `${MY_ENV_VAR}` syntax.
+variety of other options. 
+
+Environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax. By default, configuration validation
+will fail if an environment variable used in the config file is not present when Kibana starts. This behavior can be changed by using a default value
+for the environment variable, using the `${MY_ENV_VAR:defaultValue}` syntax.
 
 `console.ui.enabled`::
 Toggling this causes the server to regenerate assets on the next startup,
@@ -452,6 +455,14 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 [[server-port]] `server.port`::
 {kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
+
+`server.protocol`::
+experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server. 
+*Default: `http1`*
++
+NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via <<server-ssl-enabled, `server.ssl.enabled`>>
+and <<server-ssl-supportedProtocols, `server.ssl.supportedProtocols`>>, if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of
+the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.
 
 [[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp`::
 Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.

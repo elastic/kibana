@@ -35,22 +35,19 @@ function useAgentInstancesFetcher({ serviceName }: { serviceName: string }) {
 
   return useProgressiveFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/agent_instances',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              environment,
-              start,
-              end,
-              kuery,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/agent_instances', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      );
+          query: {
+            environment,
+            start,
+            end,
+            kuery,
+          },
+        },
+      });
     },
     [start, end, serviceName, environment, kuery]
   );
@@ -85,12 +82,9 @@ export function AgentInstances({
             <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h4>
-                  {i18n.translate(
-                    'xpack.apm.agentExplorer.instancesFlyout.title',
-                    {
-                      defaultMessage: 'Agent Instances',
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.agentExplorer.instancesFlyout.title', {
+                    defaultMessage: 'Agent Instances',
+                  })}
                 </h4>
               </EuiTitle>
             </EuiFlexItem>

@@ -14,13 +14,13 @@ import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common
 import {
   Container,
   ContainerOutput,
-  EmbeddableAppContext,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { createExtract, createInject, DashboardContainerInput } from '../../../common';

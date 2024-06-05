@@ -21,7 +21,7 @@ import {
 import { IExecutionLogResult } from '../../../common';
 import { parseDate } from '../common';
 import { RulesClientContext } from '../types';
-import { get } from './get';
+import { getRule } from '../../application/rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetExecutionLogByIdParams {
@@ -49,7 +49,7 @@ export async function getExecutionLogForRule(
   { id, dateStart, dateEnd, filter, page, perPage, sort }: GetExecutionLogByIdParams
 ): Promise<IExecutionLogResult> {
   context.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
-  const rule = (await get(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
   try {
     // Make sure user has access to this rule

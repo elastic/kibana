@@ -22,9 +22,7 @@ const eventMetadataRoute = createApmServerRoute({
     }),
     query: rangeRt,
   }),
-  handler: async (
-    resources
-  ): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
+  handler: async (resources): Promise<{ metadata: Partial<Record<string, unknown[]>> }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { start, end } = params.query;

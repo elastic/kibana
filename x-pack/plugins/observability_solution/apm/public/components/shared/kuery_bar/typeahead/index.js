@@ -167,14 +167,10 @@ export class Typeahead extends Component {
   };
 
   render() {
-    const { disabled, isLoading, placeholder, prepend, suggestions } =
-      this.props;
+    const { disabled, isLoading, placeholder, prepend, suggestions } = this.props;
 
     return (
-      <ClickOutside
-        onClickOutside={this.onClickOutside}
-        style={{ position: 'relative' }}
-      >
+      <ClickOutside onClickOutside={this.onClickOutside} style={{ position: 'relative' }}>
         <div style={{ position: 'relative' }}>
           <EuiFieldSearch
             data-test-subj="headerFilterKuerybar"

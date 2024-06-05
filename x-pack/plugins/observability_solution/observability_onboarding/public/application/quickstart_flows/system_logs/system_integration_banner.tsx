@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -72,12 +66,9 @@ export function SystemIntegrationBanner({
               <EuiLoadingSpinner size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
-              {i18n.translate(
-                'xpack.observability_onboarding.systemIntegration.installing',
-                {
-                  defaultMessage: 'Installing system integration',
-                }
-              )}
+              {i18n.translate('xpack.observability_onboarding.systemIntegration.installing', {
+                defaultMessage: 'Installing system integration',
+              })}
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -90,12 +81,9 @@ export function SystemIntegrationBanner({
     return (
       <EuiFlexItem>
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.observability_onboarding.systemIntegration.status.failed',
-            {
-              defaultMessage: 'System integration installation failed',
-            }
-          )}
+          title={i18n.translate('xpack.observability_onboarding.systemIntegration.status.failed', {
+            defaultMessage: 'System integration installation failed',
+          })}
           color="warning"
           iconType="warning"
           data-test-subj="obltOnboardingSystemLogsIntegrationInstallationFailed"
@@ -134,9 +122,7 @@ export function SystemIntegrationBanner({
                           }
                         )}
                       </EuiFlexItem>
-                      <EuiFlexItem
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
-                      >
+                      <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <FormattedMessage
                           id="xpack.observability_onboarding.systemIntegration.installed.tooltip.link"
                           defaultMessage="{learnMoreLink} about the data you can collect using the Systems integration."

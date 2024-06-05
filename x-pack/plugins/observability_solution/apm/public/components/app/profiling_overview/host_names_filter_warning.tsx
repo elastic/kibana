@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -34,8 +28,7 @@ export function HostnamesFilterWarning({ hostNames = [] }: Props) {
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.apm.profiling.flamegraph.filteredLabel', {
-            defaultMessage:
-              "Displaying profiling insights from the service's host(s)",
+            defaultMessage: "Displaying profiling insights from the service's host(s)",
           })}
         </EuiText>
       </EuiFlexItem>

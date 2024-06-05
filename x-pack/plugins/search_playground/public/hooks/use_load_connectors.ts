@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import {
   OPENAI_CONNECTOR_ID,
   OpenAiProviderType,
+  BEDROCK_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from './use_kibana';
@@ -58,6 +59,17 @@ const connectorTypeToLLM: Array<{
         defaultMessage: 'OpenAI',
       }),
       type: LLMs.openai,
+    }),
+  },
+  {
+    actionId: BEDROCK_CONNECTOR_ID,
+    match: (connector) => connector.actionTypeId === BEDROCK_CONNECTOR_ID,
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.bedrockConnectorTitle', {
+        defaultMessage: 'Bedrock',
+      }),
+      type: LLMs.bedrock,
     }),
   },
 ];

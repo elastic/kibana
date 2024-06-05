@@ -27,8 +27,7 @@ async function testRunner(ftrProviderContext: FtrProviderContext) {
 
   if (
     result &&
-    ((result as CypressCommandLine.CypressFailedRunResult)?.status ===
-      'failed' ||
+    ((result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
       (result as CypressCommandLine.CypressRunResult)?.totalFailed)
   ) {
     process.exit(1);

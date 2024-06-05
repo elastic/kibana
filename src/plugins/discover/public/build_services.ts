@@ -14,6 +14,7 @@ import {
   CoreStart,
   DocLinksStart,
   ToastsStart,
+  I18nStart,
   IUiSettingsClient,
   PluginInitializerContext,
   HttpStart,
@@ -53,8 +54,11 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -74,9 +78,11 @@ export interface UrlTracker {
 }
 
 export interface DiscoverServices {
+  aiops?: AiopsPluginStart;
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -104,6 +110,7 @@ export interface DiscoverServices {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
+  dataVisualizer?: DataVisualizerPluginStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -121,6 +128,7 @@ export interface DiscoverServices {
   uiActions: UiActionsStart;
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export const buildServices = memoize(
@@ -151,6 +159,7 @@ export const buildServices = memoize(
     const storage = new Storage(localStorage);
 
     return {
+      aiops: plugins.aiops,
       application: core.application,
       addBasePath: core.http.basePath.prepend,
       analytics: core.analytics,
@@ -158,8 +167,10 @@ export const buildServices = memoize(
       chrome: core.chrome,
       core,
       data: plugins.data,
+      dataVisualizer: plugins.dataVisualizer,
       docLinks: core.docLinks,
       embeddable: plugins.embeddable,
+      i18n: core.i18n,
       theme: core.theme,
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
@@ -200,6 +211,7 @@ export const buildServices = memoize(
       uiActions: plugins.uiActions,
       contentClient: plugins.contentManagement.client,
       noDataPage: plugins.noDataPage,
+      observabilityAIAssistant: plugins.observabilityAIAssistant,
     };
   }
 );

@@ -28,16 +28,12 @@ export const getTimeTicksTZ = ({ domain, totalTicks, width }: Params) =>
     });
 
 export const getDomainTZ = (min: number, max: number): [number, number] => {
-  const [xMinZone, xMaxZone] = [min, max].map(
-    (time) => time - getTimezoneOffsetInMs(time)
-  );
+  const [xMinZone, xMaxZone] = [min, max].map((time) => time - getTimezoneOffsetInMs(time));
   return [xMinZone, xMaxZone];
 };
 
 export function getTimeZone(uiSettings?: IUiSettingsClient) {
-  const kibanaTimeZone = uiSettings?.get<'Browser' | string>(
-    UI_SETTINGS.DATEFORMAT_TZ
-  );
+  const kibanaTimeZone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
   if (!kibanaTimeZone || kibanaTimeZone === 'Browser') {
     return 'local';

@@ -7,10 +7,7 @@
 
 import { Elasticsearch, Kibana } from '..';
 import { callKibana } from './call_kibana';
-import {
-  customRoles,
-  ObservabilityOnboardingCustomRolename,
-} from '../authentication';
+import { customRoles, ObservabilityOnboardingCustomRolename } from '../authentication';
 
 export async function createCustomRole({
   elasticsearch,

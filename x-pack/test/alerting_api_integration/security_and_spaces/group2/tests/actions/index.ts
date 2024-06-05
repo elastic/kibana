@@ -21,6 +21,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
 
     loadTestFile(require.resolve('./connector_types/oauth_access_token'));
     loadTestFile(require.resolve('./connector_types/cases_webhook'));
+    loadTestFile(require.resolve('./connector_types/crowdstrike'));
     loadTestFile(require.resolve('./connector_types/jira'));
     loadTestFile(require.resolve('./connector_types/resilient'));
     loadTestFile(require.resolve('./connector_types/servicenow_itsm'));

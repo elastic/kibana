@@ -30,7 +30,7 @@ export const getComponents = ({ core }: GetComponentsOptions) => {
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
-  function wrapLazy<T>(fn: () => Promise<FC<T>>) {
+  function wrapLazy<T>(fn: () => Promise<FC<PropsWithChildren<T>>>) {
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
       <LazyWrapper fn={fn} core={core} props={props} />
     );

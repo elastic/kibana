@@ -17,8 +17,7 @@ import { OWNERS } from '../../common/constants';
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
 
-// FLAKY: https://github.com/elastic/kibana/issues/178163
-describe.skip('useGetCases', () => {
+describe('useGetCases', () => {
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
@@ -32,11 +31,14 @@ describe.skip('useGetCases', () => {
 
   it('calls getCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    const { waitFor } = renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toBeCalled();
+    });
+
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['securitySolution'] },
       queryParams: DEFAULT_QUERY_PARAMS,
@@ -53,12 +55,13 @@ describe.skip('useGetCases', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    const { waitFor } = renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('should set all owners when no owner is provided', async () => {
@@ -87,11 +90,13 @@ describe.skip('useGetCases', () => {
     };
 
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    const { waitFor } = renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [...OWNERS] },
@@ -104,11 +109,13 @@ describe.skip('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: [] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    const { waitFor } = renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['cases'] },
@@ -121,11 +128,13 @@ describe.skip('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    const { waitFor } = renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['observability'] },
@@ -138,14 +147,13 @@ describe.skip('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitForNextUpdate } = renderHook(
-      () => useGetCases({ filterOptions: { owner: ['my-owner'] } }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    const { waitFor } = renderHook(() => useGetCases({ filterOptions: { owner: ['my-owner'] } }), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['my-owner'] },

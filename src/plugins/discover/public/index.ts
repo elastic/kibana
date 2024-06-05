@@ -15,15 +15,12 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ISearchEmbeddable, SearchInput } from './embeddable';
-export type { DiscoverAppState } from './application/main/services/discover_app_state_container';
-export type { DiscoverStateContainer } from './application/main/services/discover_state';
-export type { DataDocumentsMsg } from './application/main/services/discover_data_state_container';
+export type { DiscoverAppState } from './application/main/state_management/discover_app_state_container';
+export type { DiscoverStateContainer } from './application/main/state_management/discover_state';
+export type { DataDocumentsMsg } from './application/main/state_management/discover_data_state_container';
 export type { DiscoverContainerProps } from './components/discover_container';
 export type {
   CustomizationCallback,
-  DiscoverProfileId,
-  DiscoverProfileOptions,
-  RegisterCustomizationProfile,
   DiscoverCustomization,
   DiscoverCustomizationService,
   FlyoutCustomization,

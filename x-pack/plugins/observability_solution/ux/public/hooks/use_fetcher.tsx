@@ -7,20 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import type {
-  IHttpFetchError,
-  ResponseErrorBody,
-} from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import {
-  useInspectorContext,
-  FETCH_STATUS,
-} from '@kbn/observability-shared-plugin/public';
-import {
-  AutoAbortedAPMClient,
-  callApmApi,
-} from '../services/rest/create_call_apm_api';
+import { useInspectorContext, FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { AutoAbortedAPMClient, callApmApi } from '../services/rest/create_call_apm_api';
 
 export interface FetcherResult<Data> {
   data?: Data;
@@ -28,9 +19,7 @@ export interface FetcherResult<Data> {
   error?: IHttpFetchError<ResponseErrorBody>;
 }
 
-function getDetailsFromErrorResponse(
-  error: IHttpFetchError<ResponseErrorBody>
-) {
+function getDetailsFromErrorResponse(error: IHttpFetchError<ResponseErrorBody>) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
     <>
@@ -45,9 +34,7 @@ function getDetailsFromErrorResponse(
   );
 }
 
-const createAutoAbortedAPMClient = (
-  signal: AbortSignal
-): AutoAbortedAPMClient => {
+const createAutoAbortedAPMClient = (signal: AbortSignal): AutoAbortedAPMClient => {
   return ((endpoint, options) => {
     return callApmApi(endpoint, {
       ...options,
@@ -58,9 +45,7 @@ const createAutoAbortedAPMClient = (
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
-type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
-  infer TResponseType
->
+type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<infer TResponseType>
   ? TResponseType
   : unknown;
 
@@ -74,9 +59,7 @@ export function useFetcher<TReturn>(
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
-  const [result, setResult] = useState<
-    FetcherResult<InferResponseType<TReturn>>
-  >({
+  const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
   });
@@ -124,8 +107,7 @@ export function useFetcher<TReturn>(
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
 
         if (!signal.aborted) {
-          const errorDetails =
-            'response' in err ? getDetailsFromErrorResponse(err) : err.message;
+          const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
             notifications.toasts.danger({

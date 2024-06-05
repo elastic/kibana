@@ -13,6 +13,7 @@ export interface PackagePolicyPackage {
   title: string;
   version: string;
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+  requires_root?: boolean;
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -86,6 +87,7 @@ export interface NewPackagePolicy {
       cluster?: string[];
     };
   };
+  overrides?: { inputs?: { [key: string]: any } } | null;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

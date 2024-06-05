@@ -22,13 +22,10 @@ export function WindowsInstallStep({
       <EuiFlexItem grow={false}>
         <EuiText color="subdued">
           <p>
-            {i18n.translate(
-              'xpack.observability_onboarding.windows.installStep.description',
-              {
-                defaultMessage:
-                  'This onboarding is currently only available for Linux and MacOS systems. See our documentation for information on streaming log files to Elastic from a Windows system.',
-              }
-            )}
+            {i18n.translate('xpack.observability_onboarding.windows.installStep.description', {
+              defaultMessage:
+                'This onboarding is currently only available for Linux and MacOS systems. See our documentation for information on streaming log files to Elastic from a Windows system.',
+            })}
           </p>
         </EuiText>
       </EuiFlexItem>
@@ -42,10 +39,9 @@ export function WindowsInstallStep({
           style={{ width: 'fit-content' }}
           data-test-subj="obltOnboardingInstallElasticAgentWindowsDocsLink"
         >
-          {i18n.translate(
-            'xpack.observability_onboarding.windows.installStep.link.label',
-            { defaultMessage: 'Read docs' }
-          )}
+          {i18n.translate('xpack.observability_onboarding.windows.installStep.link.label', {
+            defaultMessage: 'Read docs',
+          })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

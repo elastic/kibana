@@ -100,8 +100,7 @@ describe('Custom link helper', () => {
 
     it('returns error when transaction is not defined', () => {
       const expectedResult = {
-        error:
-          "We couldn't find a matching transaction document based on the defined filters.",
+        error: "We couldn't find a matching transaction document based on the defined filters.",
         formattedUrl: 'https://elastic.co?service.name=&trace.id=',
       };
       expect(
@@ -132,10 +131,7 @@ describe('Custom link helper', () => {
 
     it('returns error when variable is invalid', () => {
       expect(
-        replaceTemplateVariables(
-          'https://elastic.co?service.name={{service.name}',
-          transaction
-        )
+        replaceTemplateVariables('https://elastic.co?service.name={{service.name}', transaction)
       ).toEqual({
         error:
           "We couldn't find an example transaction document due to invalid variable(s) defined.",

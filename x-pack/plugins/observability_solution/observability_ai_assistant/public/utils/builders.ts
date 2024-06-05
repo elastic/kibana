@@ -10,7 +10,6 @@ import type { FunctionDefinition } from '../../common/functions/types';
 export function buildFunction(): FunctionDefinition {
   return {
     name: 'elasticsearch',
-    contexts: ['core'],
     description: 'Call Elasticsearch APIs on behalf of the user',
     descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
     parameters: {
@@ -36,7 +35,6 @@ export const buildFunctionElasticsearch = buildFunction;
 export function buildFunctionServiceSummary(): FunctionDefinition {
   return {
     name: 'get_service_summary',
-    contexts: ['core'],
     description:
       'Gets a summary of a single service, including: the language, service version, deployments, infrastructure, alerting, etc. ',
     descriptionForUser: 'Get a summary for a single service.',

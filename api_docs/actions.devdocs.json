@@ -231,7 +231,7 @@
             "section": "def-server.CaseConnector",
             "text": "CaseConnector"
           },
-          "<Config, Secrets> extends ",
+          "<Config, Secrets, Incident, GetIncidentResponse> extends ",
           {
             "pluginId": "actions",
             "scope": "server",
@@ -240,7 +240,8 @@
             "text": "SubActionConnector"
           },
           "<Config, Secrets> implements ",
-          "CaseConnectorInterface"
+          "CaseConnectorInterface",
+          "<Incident, GetIncidentResponse>"
         ],
         "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
         "deprecated": false,
@@ -281,6 +282,29 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "pushToServiceIncidentParamsSchema",
+                "description": [],
+                "signature": [
+                  "Record<string, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<unknown>>"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -293,7 +317,7 @@
             "label": "addComment",
             "description": [],
             "signature": [
-              "({ incidentId, comment, }: { incidentId: string; comment: string; }) => Promise<unknown>"
+              "({ incidentId, comment, }: { incidentId: string; comment: string; }) => Promise<void>"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
@@ -345,7 +369,7 @@
             "label": "createIncident",
             "description": [],
             "signature": [
-              "(incident: Record<string, unknown>) => Promise<",
+              "(incident: Incident) => Promise<",
               "ExternalServiceIncidentResponse",
               ">"
             ],
@@ -356,12 +380,12 @@
               {
                 "parentPluginId": "actions",
                 "id": "def-server.CaseConnector.createIncident.$1",
-                "type": "Object",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "incident",
                 "description": [],
                 "signature": [
-                  "Record<string, unknown>"
+                  "Incident"
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
@@ -379,7 +403,7 @@
             "label": "updateIncident",
             "description": [],
             "signature": [
-              "({ incidentId, incident, }: { incidentId: string; incident: Record<string, unknown>; }) => Promise<",
+              "({ incidentId, incident, }: { incidentId: string; incident: Incident; }) => Promise<",
               "ExternalServiceIncidentResponse",
               ">"
             ],
@@ -412,12 +436,12 @@
                   {
                     "parentPluginId": "actions",
                     "id": "def-server.CaseConnector.updateIncident.$1.incident",
-                    "type": "Object",
+                    "type": "Uncategorized",
                     "tags": [],
                     "label": "incident",
                     "description": [],
                     "signature": [
-                      "{ [x: string]: unknown; }"
+                      "Incident"
                     ],
                     "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                     "deprecated": false,
@@ -436,9 +460,7 @@
             "label": "getIncident",
             "description": [],
             "signature": [
-              "({ id }: { id: string; }) => Promise<",
-              "ExternalServiceIncidentResponse",
-              ">"
+              "({ id }: { id: string; }) => Promise<GetIncidentResponse>"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
@@ -479,9 +501,7 @@
             "label": "pushToService",
             "description": [],
             "signature": [
-              "(params: ",
-              "PushToServiceParams",
-              ") => Promise<",
+              "(params: { incident: { externalId: string | null; } & Incident; comments: { commentId: string; comment: string; }[]; }) => Promise<",
               "PushToServiceResponse",
               ">"
             ],
@@ -496,13 +516,39 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": [
-                  "PushToServiceParams"
-                ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "children": [
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.CaseConnector.pushToService.$1.incident",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "incident",
+                    "description": [],
+                    "signature": [
+                      "{ externalId: string | null; } & Incident"
+                    ],
+                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "actions",
+                    "id": "def-server.CaseConnector.pushToService.$1.comments",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "comments",
+                    "description": [],
+                    "signature": [
+                      "{ commentId: string; comment: string; }[]"
+                    ],
+                    "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -580,39 +626,7 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
+              "{ create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -718,7 +732,39 @@
               "WriteResponseBase",
               ">; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -2385,6 +2431,39 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-server.getBasicAuthHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "getBasicAuthHeader",
+        "description": [],
+        "signature": [
+          "({ username, password }: GetBasicAuthHeaderArgs) => { Authorization: string; }"
+        ],
+        "path": "x-pack/plugins/actions/server/lib/get_basic_auth_header.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.getBasicAuthHeader.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ username, password }",
+            "description": [],
+            "signature": [
+              "GetBasicAuthHeaderArgs"
+            ],
+            "path": "x-pack/plugins/actions/server/lib/get_basic_auth_header.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-server.urlAllowListValidator",
         "type": "Function",
         "tags": [],
@@ -3724,9 +3803,9 @@
           "label": "getCaseConnectorClass",
           "description": [],
           "signature": [
-            "<Config, Secrets>() => ",
-            "IServiceAbstract",
-            "<Config, Secrets>"
+            "<Config, Secrets, Incident, GetIncidentResponse>() => ",
+            "ICaseServiceAbstract",
+            "<Config, Secrets, Incident, GetIncidentResponse>"
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
@@ -3795,6 +3874,62 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.isActionTypeEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "isActionTypeEnabled",
+          "description": [],
+          "signature": [
+            "(id: string, options?: { notifyUsage: boolean; } | undefined) => boolean"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isActionTypeEnabled.$1",
+              "type": "string",
+              "tags": [],
+              "label": "id",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.isActionTypeEnabled.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "children": [
+                {
+                  "parentPluginId": "actions",
+                  "id": "def-server.PluginSetupContract.isActionTypeEnabled.$2.notifyUsage",
+                  "type": "boolean",
+                  "tags": [],
+                  "label": "notifyUsage",
+                  "description": [],
+                  "path": "x-pack/plugins/actions/server/plugin.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
             }
           ],
           "returnComment": []

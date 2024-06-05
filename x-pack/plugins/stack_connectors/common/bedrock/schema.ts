@@ -24,6 +24,7 @@ export const RunActionParamsSchema = schema.object({
   model: schema.maybe(schema.string()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const InvokeAIActionParamsSchema = schema.object({
@@ -39,6 +40,7 @@ export const InvokeAIActionParamsSchema = schema.object({
   system: schema.maybe(schema.string()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
+  timeout: schema.maybe(schema.number()),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({

@@ -85,7 +85,7 @@ export const EngineRouter: React.FC = () => {
   if (engineNotFound) {
     setQueuedErrorMessage(
       i18n.translate('xpack.enterpriseSearch.appSearch.engine.notFound', {
-        defaultMessage: "No engine with name '{engineName}' could be found.",
+        defaultMessage: "No engine with name ''{engineName}'' could be found.",
         values: { engineName },
       })
     );

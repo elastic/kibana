@@ -57,23 +57,15 @@ export function SummaryStats({ data, loading, hasData }: Props) {
   });
 
   return (
-    <EuiPanel
-      hasBorder={true}
-      hasShadow={false}
-      paddingSize="l"
-      style={{ position: 'relative' }}
-    >
+    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l" style={{ position: 'relative' }}>
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xl">
             <SummaryMetric
-              label={i18n.translate(
-                'xpack.apm.storageExplorer.summary.totalSize',
-                {
-                  defaultMessage: 'Total APM size',
-                }
-              )}
+              label={i18n.translate('xpack.apm.storageExplorer.summary.totalSize', {
+                defaultMessage: 'Total APM size',
+              })}
               tooltipContent={i18n.translate(
                 'xpack.apm.storageExplorer.summary.totalSize.tooltip',
                 {
@@ -86,12 +78,9 @@ export function SummaryStats({ data, loading, hasData }: Props) {
               hasData={hasData}
             />
             <SummaryMetric
-              label={i18n.translate(
-                'xpack.apm.storageExplorer.summary.diskSpaceUsedPct',
-                {
-                  defaultMessage: 'Relative disk space used',
-                }
-              )}
+              label={i18n.translate('xpack.apm.storageExplorer.summary.diskSpaceUsedPct', {
+                defaultMessage: 'Relative disk space used',
+              })}
               tooltipContent={i18n.translate(
                 'xpack.apm.storageExplorer.summary.diskSpaceUsedPct.tooltip',
                 {
@@ -104,12 +93,9 @@ export function SummaryStats({ data, loading, hasData }: Props) {
               hasData={hasData}
             />
             <SummaryMetric
-              label={i18n.translate(
-                'xpack.apm.storageExplorer.summary.deltaInSize',
-                {
-                  defaultMessage: 'Delta in APM size',
-                }
-              )}
+              label={i18n.translate('xpack.apm.storageExplorer.summary.deltaInSize', {
+                defaultMessage: 'Delta in APM size',
+              })}
               tooltipContent={i18n.translate(
                 'xpack.apm.storageExplorer.summary.deltaInSize.tooltip',
                 {
@@ -122,34 +108,25 @@ export function SummaryStats({ data, loading, hasData }: Props) {
               hasData={hasData}
             />
             <SummaryMetric
-              label={i18n.translate(
-                'xpack.apm.storageExplorer.summary.dailyDataGeneration',
-                {
-                  defaultMessage: 'Daily data generation',
-                }
-              )}
+              label={i18n.translate('xpack.apm.storageExplorer.summary.dailyDataGeneration', {
+                defaultMessage: 'Daily data generation',
+              })}
               value={asDynamicBytes(data?.dailyDataGeneration)}
               loading={loading}
               hasData={hasData}
             />
             <SummaryMetric
-              label={i18n.translate(
-                'xpack.apm.storageExplorer.summary.tracesPerMinute',
-                {
-                  defaultMessage: 'Traces per minute',
-                }
-              )}
+              label={i18n.translate('xpack.apm.storageExplorer.summary.tracesPerMinute', {
+                defaultMessage: 'Traces per minute',
+              })}
               value={asTransactionRate(data?.tracesPerMinute)}
               loading={loading}
               hasData={hasData}
             />
             <SummaryMetric
-              label={i18n.translate(
-                'xpack.apm.storageExplorer.summary.numberOfServices',
-                {
-                  defaultMessage: 'Number of services',
-                }
-              )}
+              label={i18n.translate('xpack.apm.storageExplorer.summary.numberOfServices', {
+                defaultMessage: 'Number of services',
+              })}
               value={(data?.numberOfServices ?? 0).toString()}
               loading={loading}
               hasData={hasData}
@@ -164,12 +141,9 @@ export function SummaryStats({ data, loading, hasData }: Props) {
                 data-test-subj="apmSummaryStatsGoToServiceInventoryLink"
                 href={serviceInventoryLink}
               >
-                {i18n.translate(
-                  'xpack.apm.storageExplorer.summary.serviceInventoryLink',
-                  {
-                    defaultMessage: 'Go to Service Inventory',
-                  }
-                )}
+                {i18n.translate('xpack.apm.storageExplorer.summary.serviceInventoryLink', {
+                  defaultMessage: 'Go to Service Inventory',
+                })}
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -177,12 +151,9 @@ export function SummaryStats({ data, loading, hasData }: Props) {
                 data-test-subj="apmSummaryStatsGoToIndexManagementLink"
                 href={getIndexManagementHref(core)}
               >
-                {i18n.translate(
-                  'xpack.apm.storageExplorer.summary.indexManagementLink',
-                  {
-                    defaultMessage: 'Go to Index Management',
-                  }
-                )}
+                {i18n.translate('xpack.apm.storageExplorer.summary.indexManagementLink', {
+                  defaultMessage: 'Go to Index Management',
+                })}
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -214,12 +185,7 @@ function SummaryMetric({
         <EuiToolTip content={tooltipContent}>
           <EuiText size="s" color="subdued">
             {label}{' '}
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </EuiText>
         </EuiToolTip>
       ) : (

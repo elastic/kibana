@@ -6,9 +6,9 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreStart } from '@kbn/core/public';
 import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import { StartServices } from '../../types';
 import { TagAction } from './types';
 import { getDeleteAction } from './delete';
 import { getEditAction } from './edit';
@@ -17,7 +17,7 @@ import { getAssignAction } from './assign';
 export type { TagAction } from './types';
 
 interface GetActionsOptions {
-  core: CoreStart;
+  startServices: StartServices;
   capabilities: TagsCapabilities;
   tagClient: ITagInternalClient;
   tagCache: ITagsCache;
@@ -29,7 +29,7 @@ interface GetActionsOptions {
 }
 
 export const getTableActions = ({
-  core: { notifications, overlays, theme },
+  startServices,
   capabilities,
   tagClient,
   tagCache,
@@ -41,26 +41,24 @@ export const getTableActions = ({
   const actions: TagAction[] = [];
 
   if (capabilities.edit) {
-    actions.push(getEditAction({ notifications, overlays, theme, tagClient, fetchTags }));
+    actions.push(getEditAction({ ...startServices, tagClient, fetchTags }));
   }
 
   if (capabilities.assign && assignableTypes.length > 0) {
     actions.push(
       getAssignAction({
+        ...startServices,
         tagCache,
         assignmentService,
         assignableTypes,
         fetchTags,
-        notifications,
-        overlays,
-        theme,
         canceled$,
       })
     );
   }
 
   if (capabilities.delete) {
-    actions.push(getDeleteAction({ overlays, notifications, tagClient, fetchTags }));
+    actions.push(getDeleteAction({ ...startServices, tagClient, fetchTags }));
   }
 
   return actions;

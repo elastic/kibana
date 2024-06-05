@@ -71,5 +71,9 @@ export type LogsExplorerPublicStateUpdate = QueryState &
     dataSourceSelection?: DataSourceSelectionPlain;
   };
 
-// a placeholder for now
-export type LogsExplorerPublicEvent = never;
+export interface LogsExplorerPublicEvent {
+  type: 'LOGS_EXPLORER_DATA_RECEIVED';
+  payload: {
+    rowCount: number;
+  };
+}

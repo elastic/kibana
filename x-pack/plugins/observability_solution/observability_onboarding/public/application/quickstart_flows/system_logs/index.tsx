@@ -9,10 +9,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
-import {
-  createWizardContext,
-  Step,
-} from '../../../context/create_wizard_context';
+import { createWizardContext, Step } from '../../../context/create_wizard_context';
 import { InstallElasticAgent } from './install_elastic_agent';
 
 interface WizardState {
@@ -34,10 +31,9 @@ export type SystemLogsSteps = 'installElasticAgent';
 const steps: Record<SystemLogsSteps, Step> = {
   installElasticAgent: {
     component: InstallElasticAgent,
-    title: i18n.translate(
-      'xpack.observability_onboarding.systemLogs.installShipper.title',
-      { defaultMessage: 'Install shipper to collect system logs' }
-    ),
+    title: i18n.translate('xpack.observability_onboarding.systemLogs.installShipper.title', {
+      defaultMessage: 'Install shipper to collect system logs',
+    }),
   },
 };
 
@@ -61,9 +57,7 @@ export const SystemLogsPanel: React.FC = () => {
         {Object.keys(systemLogsRoutes).map((key) => {
           const path = key as keyof typeof systemLogsRoutes;
           const { handler, exact } = systemLogsRoutes[path];
-          return (
-            <Route key={path} path={path} exact={exact} component={handler} />
-          );
+          return <Route key={path} path={path} exact={exact} component={handler} />;
         })}
       </EuiPanel>
     </Provider>

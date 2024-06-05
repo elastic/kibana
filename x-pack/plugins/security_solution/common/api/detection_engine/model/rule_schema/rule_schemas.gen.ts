@@ -53,17 +53,19 @@ import {
   MaxSignals,
   ThreatArray,
   SetupGuide,
+  RelatedIntegrationArray,
+  RequiredFieldInput,
   RuleObjectId,
   RuleSignatureId,
   IsRuleImmutable,
-  RelatedIntegrationArray,
+  RuleSource,
   RequiredFieldArray,
   RuleQuery,
   IndexPatternArray,
   DataViewId,
   RuleFilterArray,
-  SavedQueryId,
   AlertSuppression,
+  SavedQueryId,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
@@ -135,6 +137,8 @@ export const BaseDefaultableFields = z.object({
   max_signals: MaxSignals.optional(),
   threat: ThreatArray.optional(),
   setup: SetupGuide.optional(),
+  related_integrations: RelatedIntegrationArray.optional(),
+  required_fields: z.array(RequiredFieldInput).optional(),
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
@@ -156,12 +160,12 @@ export const ResponseFields = z.object({
   id: RuleObjectId,
   rule_id: RuleSignatureId,
   immutable: IsRuleImmutable,
+  rule_source: RuleSource.optional(),
   updated_at: z.string().datetime(),
   updated_by: z.string(),
   created_at: z.string().datetime(),
   created_by: z.string(),
   revision: z.number().int().min(0),
-  related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
   execution_summary: RuleExecutionSummary.optional(),
 });
@@ -219,6 +223,7 @@ export const EqlOptionalFields = z.object({
   event_category_override: EventCategoryOverride.optional(),
   tiebreaker_field: TiebreakerField.optional(),
   timestamp_field: TimestampField.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
@@ -555,14 +560,19 @@ export const EsqlRuleRequiredFields = z.object({
   query: RuleQuery,
 });
 
+export type EsqlRuleOptionalFields = z.infer<typeof EsqlRuleOptionalFields>;
+export const EsqlRuleOptionalFields = z.object({
+  alert_suppression: AlertSuppression.optional(),
+});
+
 export type EsqlRulePatchFields = z.infer<typeof EsqlRulePatchFields>;
-export const EsqlRulePatchFields = EsqlRuleRequiredFields.partial();
+export const EsqlRulePatchFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields.partial());
 
 export type EsqlRuleResponseFields = z.infer<typeof EsqlRuleResponseFields>;
-export const EsqlRuleResponseFields = EsqlRuleRequiredFields;
+export const EsqlRuleResponseFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields);
 
 export type EsqlRuleCreateFields = z.infer<typeof EsqlRuleCreateFields>;
-export const EsqlRuleCreateFields = EsqlRuleRequiredFields;
+export const EsqlRuleCreateFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields);
 
 export type EsqlRule = z.infer<typeof EsqlRule>;
 export const EsqlRule = SharedResponseProps.merge(EsqlRuleResponseFields);

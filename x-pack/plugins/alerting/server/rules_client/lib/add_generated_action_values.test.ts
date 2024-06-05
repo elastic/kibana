@@ -21,6 +21,7 @@ import { AlertingAuthorization } from '../../authorization';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ConstructorOptions } from '../rules_client';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
@@ -31,14 +32,16 @@ describe('addGeneratedActionValues()', () => {
   const taskManager = taskManagerMock.createStart();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-
   const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
   const authorization = alertingAuthorizationMock.create();
   const actionsAuthorization = actionsAuthorizationMock.create();
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
   const kibanaVersion = 'v7.10.0';
   const logger = loggingSystemMock.create().get();
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const uiSettingsClient = uiSettingsServiceMock.createClient();
+
+  uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
 
   const rulesClientParams: jest.Mocked<ConstructorOptions> = {
     taskManager,
@@ -62,7 +65,8 @@ describe('addGeneratedActionValues()', () => {
     getAuthenticationAPIKey: jest.fn(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
+    backfillClient: backfillClientMock.create(),
+    uiSettings,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     isSystemAction: jest.fn(),
   };
@@ -100,6 +104,10 @@ describe('addGeneratedActionValues()', () => {
     actionTypeId: 'slack',
     params: {},
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('adds uuid', async () => {
     const actionWithGeneratedValues = await addGeneratedActionValues(
@@ -143,10 +151,25 @@ describe('addGeneratedActionValues()', () => {
       params: {},
       uuid: '111-222',
     });
+
+    expect(uiSettingsClient.get).toHaveBeenCalledTimes(3);
+    expect(uiSettingsClient.get.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "query:allowLeadingWildcards",
+        ],
+        Array [
+          "query:queryString:options",
+        ],
+        Array [
+          "courier:ignoreFilterIfFieldNotInIndex",
+        ],
+      ]
+    `);
   });
 
   test('throws error if KQL is not valid', async () => {
-    expect(async () =>
+    await expect(async () =>
       addGeneratedActionValues(
         [
           {
@@ -154,6 +177,7 @@ describe('addGeneratedActionValues()', () => {
             alertsFilter: { query: { kql: 'foo:bar:1', filters: [] } },
           },
         ],
+
         [mockSystemAction],
         {
           ...rulesClientParams,
@@ -161,6 +185,12 @@ describe('addGeneratedActionValues()', () => {
           minimumScheduleIntervalInMs: 0,
         }
       )
-    ).rejects.toThrowErrorMatchingSnapshot('"Error creating DSL query: invalid KQL"');
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `
+      "Invalid KQL: Expected AND, OR, end of input but \\":\\" found.
+      foo:bar:1
+      -------^"
+    `
+    );
   });
 });

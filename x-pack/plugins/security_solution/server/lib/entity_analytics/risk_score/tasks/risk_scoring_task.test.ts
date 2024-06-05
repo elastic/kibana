@@ -59,6 +59,7 @@ describe('Risk Scoring Task', () => {
         logger: mockLogger,
         telemetry: mockTelemetry,
         entityAnalyticsConfig,
+        auditLogger: undefined,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).toHaveBeenCalled();
     });
@@ -72,6 +73,7 @@ describe('Risk Scoring Task', () => {
         logger: mockLogger,
         telemetry: mockTelemetry,
         entityAnalyticsConfig,
+        auditLogger: undefined,
       });
       expect(mockTaskManagerSetup.registerTaskDefinitions).not.toHaveBeenCalled();
     });

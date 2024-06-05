@@ -28,6 +28,10 @@ import {
 } from './locators/infra/asset_details_locator';
 import { type HostsLocator, HostsLocatorDefinition } from './locators/infra/hosts_locator';
 import {
+  type InventoryLocator,
+  InventoryLocatorDefinition,
+} from './locators/infra/inventory_locator';
+import {
   type FlamegraphLocator,
   FlamegraphLocatorDefinition,
 } from './locators/profiling/flamegraph_locator';
@@ -39,7 +43,15 @@ import {
   type TopNFunctionsLocator,
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
+import {
+  type ServiceOverviewLocator,
+  ServiceOverviewLocatorDefinition,
+} from './locators/apm/service_overview_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
+import {
+  type TransactionDetailsByNameLocator,
+  TransactionDetailsByNameLocatorDefinition,
+} from './locators/apm/transaction_details_by_name_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -61,11 +73,16 @@ interface ObservabilitySharedLocators {
     assetDetailsLocator: AssetDetailsLocator;
     assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
     hostsLocator: HostsLocator;
+    inventoryLocator: InventoryLocator;
   };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
     topNFunctionsLocator: TopNFunctionsLocator;
     stacktracesLocator: StacktracesLocator;
+  };
+  apm: {
+    serviceOverview: ServiceOverviewLocator;
+    transactionDetailsByName: TransactionDetailsByNameLocator;
   };
 }
 
@@ -125,11 +142,18 @@ export class ObservabilitySharedPlugin implements Plugin {
           new AssetDetailsFlyoutLocatorDefinition()
         ),
         hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
+        inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
       },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),
         topNFunctionsLocator: urlService.locators.create(new TopNFunctionsLocatorDefinition()),
         stacktracesLocator: urlService.locators.create(new StacktracesLocatorDefinition()),
+      },
+      apm: {
+        serviceOverview: urlService.locators.create(new ServiceOverviewLocatorDefinition()),
+        transactionDetailsByName: urlService.locators.create(
+          new TransactionDetailsByNameLocatorDefinition()
+        ),
       },
     };
   }

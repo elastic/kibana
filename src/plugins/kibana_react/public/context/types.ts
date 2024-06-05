@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaReactOverlays } from '../overlays';
 import { KibanaReactNotifications } from '../notifications';
@@ -21,6 +21,6 @@ export interface KibanaReactContextValue<Services extends KibanaServices> {
 
 export interface KibanaReactContext<T extends KibanaServices> {
   value: KibanaReactContextValue<T>;
-  Provider: React.FC<{ services?: T }>;
+  Provider: FC<PropsWithChildren<{ services?: T }>>;
   Consumer: React.Consumer<KibanaReactContextValue<T>>;
 }

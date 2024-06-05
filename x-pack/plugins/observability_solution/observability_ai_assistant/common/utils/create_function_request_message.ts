@@ -14,7 +14,7 @@ export function createFunctionRequestMessage({
   args,
 }: {
   name: string;
-  args: unknown;
+  args?: Record<string, any>;
 }): MessageAddEvent {
   return {
     id: v4(),
@@ -28,6 +28,7 @@ export function createFunctionRequestMessage({
           trigger: MessageRole.Assistant as const,
         },
         role: MessageRole.Assistant,
+        content: '',
       },
     },
   };

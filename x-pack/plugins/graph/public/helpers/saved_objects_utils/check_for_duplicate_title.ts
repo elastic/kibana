@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OverlayStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 import type { GraphWorkspaceSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
@@ -26,11 +26,10 @@ export async function checkForDuplicateTitle(
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
   services: {
-    overlays: OverlayStart;
     contentClient: ContentClient;
-  }
+  } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
 ): Promise<boolean> {
-  const { overlays, contentClient } = services;
+  const { contentClient, ...startServices } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
     return true;
@@ -55,5 +54,5 @@ export async function checkForDuplicateTitle(
 
   // TODO: make onTitleDuplicate a required prop and remove UI components from this class
   // Need to leave here until all users pass onTitleDuplicate.
-  return displayDuplicateTitleConfirmModal(savedObject, overlays);
+  return displayDuplicateTitleConfirmModal(savedObject, startServices);
 }

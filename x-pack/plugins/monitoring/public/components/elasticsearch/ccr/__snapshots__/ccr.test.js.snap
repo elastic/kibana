@@ -5,10 +5,9 @@ exports[`Ccr that it renders normally 1`] = `
   <EuiPageBody>
     <EuiScreenReaderOnly>
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="CCR"
           id="xpack.monitoring.elasticsearch.ccr.heading"
-          values={Object {}}
         />
       </h1>
     </EuiScreenReaderOnly>
@@ -127,7 +126,6 @@ exports[`Ccr that it renders normally 1`] = `
           ]
         }
         pagination={false}
-        responsive={true}
         searchFormat="eql"
         sorting={
           Object {

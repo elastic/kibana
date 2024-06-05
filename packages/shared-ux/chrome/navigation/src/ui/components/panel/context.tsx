@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
+import React, {
+  type FC,
+  type PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  ReactNode,
+} from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
@@ -30,7 +38,11 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const PanelProvider: FC<Props> = ({ children, contentProvider, activeNodes }) => {
+export const PanelProvider: FC<PropsWithChildren<Props>> = ({
+  children,
+  contentProvider,
+  activeNodes,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNode, setActiveNode] = useState<PanelNavNode | null>(null);
 

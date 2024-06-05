@@ -13,7 +13,6 @@ export const ERROR_STATE_PATH = '/error_state';
 export const SEARCH_INDICES_PATH = `${ROOT_PATH}search_indices`;
 export const CONNECTORS_PATH = `${ROOT_PATH}connectors`;
 export const CRAWLERS_PATH = `${ROOT_PATH}crawlers`;
-export const PLAYGROUND_PATH = `${ROOT_PATH}playground`;
 export const SETTINGS_PATH = `${ROOT_PATH}settings`;
 
 export const NEW_INDEX_PATH = `${SEARCH_INDICES_PATH}/new_index`;

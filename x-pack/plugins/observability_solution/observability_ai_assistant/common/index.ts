@@ -41,7 +41,10 @@ export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
 } from './ui_settings/settings_keys';
+
+export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
 
 export { DEFAULT_LANGUAGE_OPTION, LANGUAGE_OPTIONS } from './ui_settings/language_options';
 

@@ -8,7 +8,9 @@
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { UnifiedDocViewerServices, UnifiedDocViewerStart } from '../types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -21,7 +23,9 @@ export const mockUnifiedDocViewer: jest.Mocked<UnifiedDocViewerStart> = {
 export const mockUnifiedDocViewerServices: jest.Mocked<UnifiedDocViewerServices> = {
   analytics: analyticsServiceMock.createAnalyticsServiceStart(),
   data: dataPluginMock.createStartContract(),
+  discoverShared: discoverSharedPluginMock.createStartContract(),
   fieldFormats: fieldFormatsMock,
+  fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   storage: new Storage(localStorage),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   unifiedDocViewer: mockUnifiedDocViewer,

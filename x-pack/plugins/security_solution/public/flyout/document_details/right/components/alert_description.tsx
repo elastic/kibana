@@ -21,11 +21,8 @@ import {
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import {
-  DocumentDetailsPreviewPanelKey,
-  type PreviewPanelProps,
-  RulePreviewPanel,
-} from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
 
 /**
  * Displays the rule description of a signal document.
@@ -59,7 +56,7 @@ export const AlertDescription: FC = () => {
       },
     });
     telemetry.reportDetailsFlyoutOpened({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'preview',
     });
   }, [eventId, openPreviewPanel, indexName, scopeId, ruleId, telemetry]);

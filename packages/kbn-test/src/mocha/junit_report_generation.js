@@ -7,6 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '@kbn/code-owners';
 import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
@@ -91,6 +92,9 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       .filter((node) => node.pending || !results.find((result) => result.node === node))
       .map((node) => ({ skipped: true, node }));
 
+    // cache codeowners for quicker lookup
+    const reversedCodeowners = getPathsWithOwnersReversed();
+
     const builder = xmlBuilder.create(
       'testsuites',
       { encoding: 'utf-8' },
@@ -108,17 +112,26 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       'metadata-json': JSON.stringify(metadata ?? {}),
     });
 
-    function addTestcaseEl(node) {
-      return testsuitesEl.ele('testcase', {
+    function addTestcaseEl(node, failed) {
+      const attrs = {
         name: getFullTitle(node),
         classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,
         time: getDuration(node),
         'metadata-json': JSON.stringify(getTestMetadata(node) || {}),
-      });
+      };
+
+      // adding code owners only for the failed test case
+      if (failed) {
+        const testCaseRelativePath = getPath(node);
+        const owners = getCodeOwnersForFile(testCaseRelativePath, reversedCodeowners);
+        attrs.owners = owners || ''; // empty string when no codeowners are defined
+      }
+
+      return testsuitesEl.ele('testcase', attrs);
     }
 
     [...results, ...skippedResults].forEach((result) => {
-      const el = addTestcaseEl(result.node);
+      const el = addTestcaseEl(result.node, result.failed);
 
       if (result.failed) {
         el.ele('system-out').dat(escapeCdata(getSnapshotOfRunnableLogs(result.node) || ''));

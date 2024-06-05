@@ -137,6 +137,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS Kubernetes',
         }),
         icon: 'logoKubernetes',
+        testId: 'cisK8sTestId',
       },
       {
         type: CLOUDBEAT_EKS,
@@ -150,6 +151,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
           defaultMessage: 'Elastic Kubernetes Service',
         }),
+        testId: 'cisEksTestId',
       },
       {
         type: CLOUDBEAT_AKS,
@@ -232,8 +234,30 @@ export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
 export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
 
 export const FINDINGS_GROUPING_OPTIONS = {
+  NONE: 'none',
   RESOURCE_NAME: 'resource.name',
   RULE_NAME: 'rule.name',
+  RULE_SECTION: 'rule.section',
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
+};
+export const VULNERABILITY_FIELDS = {
+  VULNERABILITY_ID: 'vulnerability.id',
+  SCORE_BASE: 'vulnerability.score.base',
+  RESOURCE_NAME: 'resource.name',
+  RESOURCE_ID: 'resource.id',
+  SEVERITY: 'vulnerability.severity',
+  PACKAGE_NAME: 'package.name',
+  PACKAGE_VERSION: 'package.version',
+  PACKAGE_FIXED_VERSION: 'package.fixed_version',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  CLOUD_PROVIDER: 'cloud.provider',
+  DESCRIPTION: 'vulnerability.description',
+} as const;
+export const VULNERABILITY_GROUPING_OPTIONS = {
+  NONE: 'none',
+  RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
+  RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
+  CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
+  CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
 };

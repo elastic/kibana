@@ -16,13 +16,11 @@ interface Props {
 }
 
 export function SelectAnomalyDetector({ values, onChange }: Props) {
-  const options: EuiSelectableOption[] = ANOMALY_DETECTOR_SELECTOR_OPTIONS.map(
-    (option) => ({
-      key: option.type,
-      label: option.label,
-      checked: values.includes(option.type) ? 'on' : undefined,
-    })
-  );
+  const options: EuiSelectableOption[] = ANOMALY_DETECTOR_SELECTOR_OPTIONS.map((option) => ({
+    key: option.type,
+    label: option.label,
+    checked: values.includes(option.type) ? 'on' : undefined,
+  }));
 
   const onOptionSelect = useCallback(
     (selectedOptions: EuiSelectableOption[]) => {
@@ -35,11 +33,7 @@ export function SelectAnomalyDetector({ values, onChange }: Props) {
   );
 
   return (
-    <EuiSelectable
-      options={options}
-      onChange={onOptionSelect}
-      style={{ width: 200 }}
-    >
+    <EuiSelectable options={options} onChange={onOptionSelect} style={{ width: 200 }}>
       {(list) => list}
     </EuiSelectable>
   );

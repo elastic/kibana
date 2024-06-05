@@ -25,11 +25,7 @@ export function DataStreamsStatus() {
   const isOk = getIsDataStreamTabOk(diagnosticsBundle);
 
   return (
-    <TabStatus
-      isLoading={isLoading}
-      isOk={isOk}
-      data-test-subj="dataStreamsStatus"
-    >
+    <TabStatus isLoading={isLoading} isOk={isOk} data-test-subj="dataStreamsStatus">
       Data streams
       <EuiLink
         data-test-subj="apmDataStreamsStatusSeeDetailsLink"

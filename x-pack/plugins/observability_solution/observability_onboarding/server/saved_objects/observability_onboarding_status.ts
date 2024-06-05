@@ -7,9 +7,10 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { StepProgressPayload } from '../routes/types';
 
-export const OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE =
-  'observability-onboarding-state';
+export const OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE = 'observability-onboarding-state';
+
 export interface LogFilesState {
   datasetName: string;
   serviceName?: string;
@@ -22,16 +23,9 @@ export interface SystemLogsState {
   namespace: string;
 }
 
-export interface ElasticAgentStepPayload {
-  agentId: string;
-}
-
 export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
 
-type ObservabilityOnboardingFlowState =
-  | LogFilesState
-  | SystemLogsState
-  | undefined;
+type ObservabilityOnboardingFlowState = LogFilesState | SystemLogsState | undefined;
 
 export interface ObservabilityOnboardingFlow {
   type: ObservabilityOnboardingType;
@@ -41,13 +35,12 @@ export interface ObservabilityOnboardingFlow {
     {
       status: string;
       message?: string;
-      payload?: ElasticAgentStepPayload;
+      payload?: StepProgressPayload;
     }
   >;
 }
 
-export interface SavedObservabilityOnboardingFlow
-  extends ObservabilityOnboardingFlow {
+export interface SavedObservabilityOnboardingFlow extends ObservabilityOnboardingFlow {
   id: string;
   updatedAt: number;
 }
@@ -68,6 +61,14 @@ const ElasticAgentStepPayloadSchema = schema.object({
   agentId: schema.string(),
 });
 
+export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
+  schema.object({
+    pkgName: schema.string(),
+    installSource: schema.string(),
+    logFilePaths: schema.maybe(schema.arrayOf(schema.string())),
+  })
+);
+
 export const observabilityOnboardingFlow: SavedObjectsType = {
   name: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   hidden: false,
@@ -85,15 +86,34 @@ export const observabilityOnboardingFlow: SavedObjectsType = {
       schemas: {
         create: schema.object({
           type: schema.string(),
-          state: schema.maybe(
-            schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema])
-          ),
+          state: schema.maybe(schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema])),
           progress: schema.mapOf(
             schema.string(),
             schema.object({
               status: schema.string(),
               message: schema.maybe(schema.string()),
               payload: schema.maybe(ElasticAgentStepPayloadSchema),
+            })
+          ),
+        }),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        create: schema.object({
+          type: schema.string(),
+          state: schema.maybe(
+            schema.oneOf([LogFilesStateSchema, SystemLogsStateSchema, schema.never()])
+          ),
+          progress: schema.mapOf(
+            schema.string(),
+            schema.object({
+              status: schema.string(),
+              message: schema.maybe(schema.string()),
+              payload: schema.maybe(
+                schema.oneOf([ElasticAgentStepPayloadSchema, InstallIntegrationsStepPayloadSchema])
+              ),
             })
           ),
         }),

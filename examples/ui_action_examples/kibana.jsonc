@@ -10,8 +10,6 @@
     "requiredPlugins": [
       "uiActions"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

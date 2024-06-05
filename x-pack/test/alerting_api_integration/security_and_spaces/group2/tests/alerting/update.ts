@@ -873,7 +873,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle updates for a long running alert type without failing the underlying tasks due to invalidated ApiKey', async () => {
-          const { body: createdAlert } = await supertest
+          const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -889,7 +889,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               notify_when: 'onThrottleInterval',
             })
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
           const updatedData = {
             name: 'bcd',
             tags: ['bar'],
@@ -901,15 +901,23 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
           };
+
+          // Update the rule which should invalidate the first API key
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(updatedData);
 
+          // Invoke the invalidate API key task
+          await supertest
+            .post('/api/alerts_fixture/api_key_invalidation/_run_soon')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
           const statusUpdates: string[] = [];
           await retry.try(async () => {
-            const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id)).docs[0];
+            const alertTask = (await getAlertingTaskById(createdRule.scheduled_task_id)).docs[0];
             statusUpdates.push(alertTask.status);
             expect(alertTask.status).to.eql('idle');
           });
@@ -934,7 +942,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
-                const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))
+                const alertTask = (await getAlertingTaskById(createdRule.scheduled_task_id))
                   .docs[0];
                 expect(alertTask.status).to.eql('idle');
                 // ensure the alert is rescheduled to a minute from now

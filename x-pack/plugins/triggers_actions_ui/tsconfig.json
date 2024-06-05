@@ -65,7 +65,10 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
-    "@kbn/controls-plugin"
+    "@kbn/controls-plugin",
+    "@kbn/search-types",
+    "@kbn/alerting-comparators",
+    "@kbn/alerting-types"
   ],
   "exclude": ["target/**/*"]
 }

@@ -16,6 +16,7 @@ import {
   TelemetryUsageCounter,
 } from '../types';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import { registerTopNFunctionsAPMTransactionsRoute } from './apm';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
 import { registerSetupRoute } from './setup/route';
@@ -61,4 +62,5 @@ export function registerRoutes(params: RouteRegisterParameters) {
   // and will show instructions on how to add data
   registerSetupRoute(params);
   registerStorageExplorerRoute(params);
+  registerTopNFunctionsAPMTransactionsRoute(params);
 }

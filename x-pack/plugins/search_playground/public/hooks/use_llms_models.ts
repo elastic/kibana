@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
+import { BedrockLogo, OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
 import { ComponentType, useMemo } from 'react';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
+import { MODELS } from '../../common/models';
 
 const mapLlmToModels: Record<
   LLMs,
@@ -19,9 +20,18 @@ const mapLlmToModels: Record<
     getModels: (
       connectorName: string,
       includeName: boolean
-    ) => Array<{ label: string; value?: string }>;
+    ) => Array<{ label: string; value?: string; promptTokenLimit?: number }>;
   }
 > = {
+  [LLMs.openai]: {
+    icon: OpenAILogo,
+    getModels: (connectorName, includeName) =>
+      MODELS.filter(({ provider }) => provider === LLMs.openai).map((model) => ({
+        label: `${model.name} ${includeName ? `(${connectorName})` : ''}`,
+        value: model.model,
+        promptTokenLimit: model.promptTokenLimit,
+      })),
+  },
   [LLMs.openai_azure]: {
     icon: OpenAILogo,
     getModels: (connectorName, includeName) => [
@@ -33,12 +43,13 @@ const mapLlmToModels: Record<
       },
     ],
   },
-  [LLMs.openai]: {
-    icon: OpenAILogo,
-    getModels: (connectorName, includeName) =>
-      ['gpt-3.5-turbo', 'gpt-4'].map((model) => ({
-        label: `${model} ${includeName ? `(${connectorName})` : ''}`,
-        value: model,
+  [LLMs.bedrock]: {
+    icon: BedrockLogo,
+    getModels: () =>
+      MODELS.filter(({ provider }) => provider === LLMs.bedrock).map((model) => ({
+        label: model.name,
+        value: model.model,
+        promptTokenLimit: model.promptTokenLimit,
       })),
   },
 };
@@ -71,16 +82,20 @@ export const useLLMsModels = (): LLMModel[] => {
 
         return [
           ...result,
-          ...llmParams.getModels(connector.name, false).map(({ label, value }) => ({
-            id: connector?.id + label,
-            name: label,
-            value,
-            connectorName: connector.name,
-            showConnectorName,
-            icon: llmParams.icon,
-            disabled: !connector,
-            connectorId: connector.id,
-          })),
+          ...llmParams
+            .getModels(connector.name, false)
+            .map(({ label, value, promptTokenLimit }) => ({
+              id: connector?.id + label,
+              name: label,
+              value,
+              connectorType: connector.type,
+              connectorName: connector.name,
+              showConnectorName,
+              icon: llmParams.icon,
+              disabled: !connector,
+              connectorId: connector.id,
+              promptTokenLimit,
+            })),
         ];
       }, []) || [],
     [connectors, mapConnectorTypeToCount]

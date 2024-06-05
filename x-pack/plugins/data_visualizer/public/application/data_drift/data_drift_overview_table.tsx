@@ -305,7 +305,6 @@ export const DataDriftOverviewTable = ({
       cellProps={getCellProps}
       itemId="featureName"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable={true}
       sorting={sorting}
       onChange={onTableChange}
       pagination={pagination}

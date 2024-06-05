@@ -92,7 +92,7 @@ export const executeAction = async ({
     logger,
     responseStream: readable,
     abortSignal,
-  });
+  }).catch(() => {});
 
   return readable.pipe(new PassThrough());
 };

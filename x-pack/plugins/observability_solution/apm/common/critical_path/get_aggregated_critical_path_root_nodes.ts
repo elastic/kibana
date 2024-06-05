@@ -28,29 +28,24 @@ export function getAggregatedCriticalPathRootNodes(params: {
 
   let numNodes = 0;
 
-  function mergeNodesWithSameOperationId(
-    nodes: CriticalPathTreeNode[]
-  ): CriticalPathTreeNode[] {
+  function mergeNodesWithSameOperationId(nodes: CriticalPathTreeNode[]): CriticalPathTreeNode[] {
     const nodesByOperationId: Record<string, CriticalPathTreeNode> = {};
-    const mergedNodes = nodes.reduce<CriticalPathTreeNode[]>(
-      (prev, node, index, array) => {
-        const nodeId = node.nodeId;
-        const operationId = criticalPath.operationIdByNodeId[nodeId];
-        if (nodesByOperationId[operationId]) {
-          const prevNode = nodesByOperationId[operationId];
-          prevNode.children.push(...node.children);
-          prevNode.countExclusive += node.countExclusive;
-          prevNode.countInclusive += node.countInclusive;
-          return prev;
-        }
-
-        nodesByOperationId[operationId] = node;
-
-        prev.push(node);
+    const mergedNodes = nodes.reduce<CriticalPathTreeNode[]>((prev, node, index, array) => {
+      const nodeId = node.nodeId;
+      const operationId = criticalPath.operationIdByNodeId[nodeId];
+      if (nodesByOperationId[operationId]) {
+        const prevNode = nodesByOperationId[operationId];
+        prevNode.children.push(...node.children);
+        prevNode.countExclusive += node.countExclusive;
+        prevNode.countInclusive += node.countInclusive;
         return prev;
-      },
-      []
-    );
+      }
+
+      nodesByOperationId[operationId] = node;
+
+      prev.push(node);
+      return prev;
+    }, []);
 
     numNodes += mergedNodes.length;
 

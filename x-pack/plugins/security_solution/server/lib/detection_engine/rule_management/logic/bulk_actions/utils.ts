@@ -21,3 +21,18 @@ export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) =>
   ];
   return indexPatternsActions.includes(editAction);
 };
+
+/**
+ * helper utility that defines whether bulk edit action is related to investigation fields, i.e. one of:
+ * 'add_investigation_fields', 'delete_investigation_fields', 'set_investigation_fields'
+ * @param editAction {@link BulkActionEditType}
+ * @returns {boolean}
+ */
+export const isInvestigationFieldsBulkEditAction = (editAction: BulkActionEditType) => {
+  const investigationFieldsActions: BulkActionEditType[] = [
+    BulkActionEditTypeEnum.add_investigation_fields,
+    BulkActionEditTypeEnum.delete_investigation_fields,
+    BulkActionEditTypeEnum.set_investigation_fields,
+  ];
+  return investigationFieldsActions.includes(editAction);
+};

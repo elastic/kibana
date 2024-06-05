@@ -32,12 +32,9 @@ export function maybeRedirectToAvailableSpanSample({
   }
 
   const nextSpanId =
-    samples.find((sample) => sample.spanId === spanId)?.spanId ||
-    samples[0]?.spanId ||
-    '';
+    samples.find((sample) => sample.spanId === spanId)?.spanId || samples[0]?.spanId || '';
 
-  const indexOfNextSample =
-    samples.findIndex((sample) => sample.spanId === nextSpanId) ?? 0;
+  const indexOfNextSample = samples.findIndex((sample) => sample.spanId === nextSpanId) ?? 0;
 
   const nextPageIndex = Math.floor((indexOfNextSample + 1) / (pageSize ?? 10));
 

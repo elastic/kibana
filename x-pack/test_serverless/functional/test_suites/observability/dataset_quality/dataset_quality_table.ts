@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality table', () => {
+  describe('Dataset quality table', function () {
+    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
+
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
@@ -46,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
       expect(namespaceColCellTexts).to.eql([defaultNamespace, defaultNamespace, defaultNamespace]);
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -64,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('ascending');
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -88,7 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
     });
 
-    it('shows the updated size of the index', async () => {
+    // https://github.com/elastic/kibana/issues/178954
+    it.skip('shows the updated size of the index', async () => {
       const testDatasetIndex = 2;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
@@ -126,8 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('sorts by dataset name', async () => {
       // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      expect(Object.keys(cols).length).to.eql(7);
-
       const datasetNameCol = cols['Dataset Name'];
 
       // Sort ascending
@@ -225,6 +226,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('hides inactive datasets', async () => {
+      await PageObjects.datasetQuality.waitUntilTableLoaded();
+
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];

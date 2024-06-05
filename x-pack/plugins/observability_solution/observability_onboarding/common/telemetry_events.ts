@@ -41,16 +41,14 @@ export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
     step_message: {
       type: 'keyword',
       _meta: {
-        description:
-          'Error or warning message of the current step in the onboarding flow',
+        description: 'Error or warning message of the current step in the onboarding flow',
         optional: true,
       },
     },
     uses_legacy_onboarding_page: {
       type: 'boolean',
       _meta: {
-        description:
-          'Whether the user is using the legacy onboarding page or the new one',
+        description: 'Whether the user is using the legacy onboarding page or the new one',
       },
     },
   },

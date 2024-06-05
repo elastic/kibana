@@ -16,7 +16,7 @@ export type SettingsServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart, startPlugins }) => {
-  const { uiSettings, theme } = coreStart;
+  const { i18n, uiSettings, theme } = coreStart;
 
   const {
     presentationUtil: {
@@ -25,6 +25,7 @@ export const settingsServiceFactory: SettingsServiceFactory = ({ coreStart, star
   } = startPlugins;
 
   return {
+    i18n,
     uiSettings,
     theme,
     isProjectEnabledInLabs: isProjectEnabled,

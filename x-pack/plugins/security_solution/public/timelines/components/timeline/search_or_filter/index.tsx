@@ -17,12 +17,11 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { State, inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store';
@@ -31,9 +30,8 @@ import { timelineDefaults } from '../../../store/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 import { setDataProviderVisibility } from '../../../store/actions';
+import { getNonDropAreaFilters } from '../helpers';
 import * as i18n from './translations';
-
-const FilterItemsContainer = styled(EuiFlexGroup)``;
 
 interface OwnProps {
   filterManager: FilterManager;
@@ -110,19 +108,37 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 
+    // Keep filter manager in sync with redux filters
+    useEffect(() => {
+      if (!deepEqual(filterManager.getFilters(), filters)) {
+        filterManager.setFilters(filters);
+      }
+    }, [filterManager, filters]);
+
+    // When a filter update comes in through the filter manager, update redux
+    useEffect(() => {
+      const subscription = filterManager.getUpdates$().subscribe(() => {
+        const filtersWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
+        if (!deepEqual(filtersWithoutDropArea, filters)) {
+          setFilters({
+            id: timelineId,
+            filters: filtersWithoutDropArea,
+          });
+        }
+      });
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [filterManager, timelineId, setFilters, filters]);
+
+    // Sync redux filters with updated from <FilterItems />
     const onFiltersUpdated = useCallback(
       (newFilters: Filter[]) => {
-        filterManager.setFilters(newFilters);
-      },
-      [filterManager]
-    );
-
-    const setFiltersInTimeline = useCallback(
-      (newFilters: Filter[]) =>
         setFilters({
           id: timelineId,
           filters: newFilters,
-        }),
+        });
+      },
       [timelineId, setFilters]
     );
 
@@ -180,7 +196,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
                 kqlMode={kqlMode}
                 refreshInterval={refreshInterval}
                 savedQueryId={savedQueryId}
-                setFilters={setFiltersInTimeline}
                 setSavedQueryId={setSavedQueryInTimeline}
                 timelineId={timelineId}
                 to={to}
@@ -196,7 +211,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         </EuiFlexItem>
         {filters && filters.length > 0 ? (
           <EuiFlexItem>
-            <FilterItemsContainer
+            <EuiFlexGroup
               data-test-subj="timeline-filters-container"
               direction="row"
               gutterSize="xs"
@@ -208,7 +223,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
                 onFiltersUpdated={onFiltersUpdated}
                 indexPatterns={arrDataView}
               />
-            </FilterItemsContainer>
+            </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

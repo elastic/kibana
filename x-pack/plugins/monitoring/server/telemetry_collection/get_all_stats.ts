@@ -19,7 +19,8 @@ import {
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
-import { getLogstashStats, LogstashStatsByClusterUuid } from './get_logstash_stats';
+import { getLogstashStats } from './get_logstash_stats';
+import { LogstashStatsByClusterUuid } from './logstash_monitoring';
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
@@ -52,6 +53,7 @@ export async function getAllStats(
  * @param {Array} clusters The Elasticsearch clusters
  * @param {Object} kibana The Kibana instances keyed by Cluster UUID
  * @param {Object} logstash The Logstash nodes keyed by Cluster UUID
+ * @param {Object} beats The Beats nodes keyed by Cluster UUID
  *
  * Returns the clusters joined with the Kibana and Logstash instances under each cluster's {@code stack_stats}.
  */
@@ -67,7 +69,7 @@ export function handleAllStats(
     beats: BeatsStatsByClusterUuid;
   }
 ) {
-  return clusters.map((cluster) => {
+  const mappedClusters = clusters.map((cluster) => {
     const stats = {
       ...cluster,
       stack_stats: {
@@ -83,6 +85,29 @@ export function handleAllStats(
 
     return stats;
   });
+
+  const mappedClusterUuids = mappedClusters.map(
+    (cluster) => cluster.cluster_uuid || cluster?.elasticsearch?.cluster?.id
+  );
+
+  // Logstash agent driven monitoring isn't based on cluster UUID
+  // or standalone LS clusters will be reported with monitoring cluster UUIDs
+  const logstashOrphanClusterStats = logstash
+    ? Object.entries(logstash)
+        .filter(([clusterUuid]) => !mappedClusterUuids.includes(clusterUuid))
+        .map(([clusterUuid, logstashBaseStats]) => ({
+          cluster_name: LOGSTASH_SYSTEM_ID,
+          timestamp: `${moment.utc().format()}`,
+          version:
+            logstashBaseStats.versions.length > 0 ? logstashBaseStats.versions[0].version : '',
+          cluster_uuid: clusterUuid,
+          stack_stats: {
+            [LOGSTASH_SYSTEM_ID]: logstashBaseStats,
+          },
+          cluster_stats: {},
+        }))
+    : [];
+  return mappedClusters.concat(logstashOrphanClusterStats);
 }
 
 export function getStackStats<T extends { [clusterUuid: string]: K }, K>(

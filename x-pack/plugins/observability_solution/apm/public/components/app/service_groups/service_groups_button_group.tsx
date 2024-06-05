@@ -24,10 +24,9 @@ const buttonGroupOptions = {
   serviceGroups: {
     option: {
       id: 'serviceGroups',
-      label: i18n.translate(
-        'xpack.apm.serviceGroups.buttonGroup.serviceGroups',
-        { defaultMessage: 'Service groups' }
-      ),
+      label: i18n.translate('xpack.apm.serviceGroups.buttonGroup.serviceGroups', {
+        defaultMessage: 'Service groups',
+      }),
     },
     pathname: '/service-groups',
   },
@@ -50,20 +49,14 @@ export function ServiceGroupsButtonGroup({
       title={i18n.translate('xpack.apm.serviceGroups.tour.createGroups.title', {
         defaultMessage: 'Introducing service groups',
       })}
-      content={i18n.translate(
-        'xpack.apm.serviceGroups.tour.createGroups.content',
-        {
-          defaultMessage:
-            'Group services together to build curated inventory views that remove noise and simplify investigations across services. Groups are Kibana space-specific and available for any users with appropriate access.',
-        }
-      )}
+      content={i18n.translate('xpack.apm.serviceGroups.tour.createGroups.content', {
+        defaultMessage:
+          'Group services together to build curated inventory views that remove noise and simplify investigations across services. Groups are Kibana space-specific and available for any users with appropriate access.',
+      })}
     >
       <EuiButtonGroup
         color="primary"
-        options={[
-          buttonGroupOptions.allServices.option,
-          buttonGroupOptions.serviceGroups.option,
-        ]}
+        options={[buttonGroupOptions.allServices.option, buttonGroupOptions.serviceGroups.option]}
         idSelected={selectedNavButton as string}
         onChange={(id) => {
           const { pathname } = buttonGroupOptions[id as SelectedNavButton];

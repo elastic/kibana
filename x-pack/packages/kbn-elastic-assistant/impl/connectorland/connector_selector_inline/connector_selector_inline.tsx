@@ -152,6 +152,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               selectedConnectorId={selectedConnectorId}
               setIsOpen={setIsOpen}
               onConnectorSelectionChange={onChange}
+              isFlyoutMode={isFlyoutMode}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -180,12 +181,12 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               selectedConnectorId={selectedConnectorId}
               setIsOpen={setIsOpen}
               onConnectorSelectionChange={onChange}
+              isFlyoutMode={isFlyoutMode}
             />
           ) : (
             <span>
               <EuiButtonEmpty
                 className={placeholderButtonClassName}
-                color={'text'}
                 data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"

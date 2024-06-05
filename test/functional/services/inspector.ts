@@ -144,7 +144,7 @@ export class InspectorService extends FtrService {
       return await inspectorPanel.findByTagName('thead');
     });
     const $ = await dataTableHeader.parseDomContent();
-    return $('th span.euiTableCellContent__text')
+    return $('th .euiTableCellContent span')
       .toArray()
       .map((cell) => $(cell).text().trim());
   }

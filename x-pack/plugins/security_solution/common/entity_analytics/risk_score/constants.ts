@@ -9,6 +9,8 @@
  */
 export const RISK_ENGINE_PUBLIC_PREFIX = '/api/risk_scores' as const;
 export const RISK_SCORE_CALCULATION_URL = `${RISK_ENGINE_PUBLIC_PREFIX}/calculation` as const;
+export const RISK_SCORE_ENTITY_CALCULATION_URL =
+  `${RISK_ENGINE_PUBLIC_PREFIX}/calculation/entity` as const;
 
 /**
  * Internal Risk Score routes

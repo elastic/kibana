@@ -21,7 +21,7 @@ import { Response } from 'superagent';
 export const postActionsClientExecute = async (
   connectorId: string,
   args: any,
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<Response> => {
   const response = await supertest
     .post(`/internal/elastic_assistant/actions/connector/${connectorId}/_execute`)

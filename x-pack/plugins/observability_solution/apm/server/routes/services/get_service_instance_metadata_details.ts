@@ -7,11 +7,7 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  METRICSET_NAME,
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-} from '../../../common/es_fields/apm';
+import { METRICSET_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { maybe } from '../../../common/utils/maybe';
 import {
   getBackwardCompatibleDocumentTypeFilter,
@@ -109,9 +105,7 @@ export async function getServiceInstanceMetadataDetails({
           size: 1,
           query: {
             bool: {
-              filter: filter.concat(
-                getBackwardCompatibleDocumentTypeFilter(true)
-              ),
+              filter: filter.concat(getBackwardCompatibleDocumentTypeFilter(true)),
             },
           },
         },
@@ -122,15 +116,12 @@ export async function getServiceInstanceMetadataDetails({
 
   // we can expect the most detail of application metrics,
   // followed by transaction events, and then finally transaction metrics
-  const [
-    applicationMetricSample,
-    transactionEventSample,
-    transactionMetricSample,
-  ] = await Promise.all([
-    getApplicationMetricSample(),
-    getTransactionEventSample(),
-    getTransactionMetricSample(),
-  ]);
+  const [applicationMetricSample, transactionEventSample, transactionMetricSample] =
+    await Promise.all([
+      getApplicationMetricSample(),
+      getTransactionEventSample(),
+      getTransactionMetricSample(),
+    ]);
 
   const sample = merge(
     {},

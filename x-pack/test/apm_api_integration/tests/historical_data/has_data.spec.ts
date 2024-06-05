@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   // FLAKY: https://github.com/elastic/kibana/issues/177385
   registry.when('Historical data ', { config: 'basic', archives: [] }, () => {
@@ -45,10 +45,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
         ];
 
-        await synthtraceEsClient.index(documents);
+        await apmSynthtraceEsClient.index(documents);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns hasData=true', async () => {
         const response = await apmApiClient.readUser({ endpoint: `GET /internal/apm/has_data` });

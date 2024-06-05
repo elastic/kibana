@@ -37,6 +37,7 @@ import {
 import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
+import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 
 type Options = AddVersionOpts<unknown, unknown, unknown>;
 
@@ -108,7 +109,10 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   /** This method assumes that one or more versions handlers are registered  */
   private getDefaultVersion(): undefined | ApiVersion {
-    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
+    return resolvers[this.router.defaultHandlerResolutionStrategy](
+      [...this.handlers.keys()],
+      this.options.access
+    );
   }
 
   private versionsToString(): string {
@@ -169,7 +173,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
       try {
-        const { body, params, query } = validate(req, validation.request, handler.options.version);
+        const { body, params, query } = validate(req, validation.request);
         req.body = body;
         req.params = params;
         req.query = query;
@@ -188,12 +192,14 @@ export class CoreVersionedRoute implements VersionedRoute {
     const response = await handler.fn(ctx, req, res);
 
     if (this.router.isDev && validation?.response?.[response.status]) {
-      const responseValidation = validation.response[response.status];
+      const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
         validate(
           { body: response.payload },
-          { body: responseValidation.body, unsafe: { body: validation.response.unsafe?.body } },
-          handler.options.version
+          {
+            body: unwrapVersionedResponseBodyValidation(responseValidation.body),
+            unsafe: { body: unsafe?.body },
+          }
         );
       } catch (e) {
         return res.custom({
@@ -237,7 +243,11 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
-    this.handlers.set(options.version, { fn: handler, options });
+    options = prepareVersionedRouteValidation(options);
+    this.handlers.set(options.version, {
+      fn: handler,
+      options,
+    });
     return this;
   }
 

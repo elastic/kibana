@@ -67,10 +67,12 @@ export async function processDocument(
 
     traverseItem.visitedDocumentNodes.add(traverseItem.node);
 
-    if (shouldSkipNode(traverseItem, processors)) {
+    if (shouldRemoveSubTree(traverseItem, processors)) {
       removeNode(traverseItem);
       continue;
     }
+
+    applyEnterProcessors(traverseItem, processors);
 
     postOrderTraversalStack.push(traverseItem);
 
@@ -144,14 +146,14 @@ export async function processDocument(
       // If ref has been inlined by one of the processors it's not a ref node anymore
       // so we can skip the following processors
       if (isRefNode(traverseItem.node) && traverseItem.resolvedRef) {
-        processor.ref?.(
+        processor.onRefNodeLeave?.(
           traverseItem.node as RefNode,
           traverseItem.resolvedRef,
           traverseItem.context
         );
       }
 
-      processor.leave?.(traverseItem.node, traverseItem.context);
+      processor.onNodeLeave?.(traverseItem.node, traverseItem.context);
     }
   }
 }
@@ -165,9 +167,28 @@ export function isRefNode(node: DocumentNode): node is { $ref: string } {
   return isPlainObject(node) && '$ref' in node;
 }
 
-function shouldSkipNode(traverseItem: TraverseItem, processors: DocumentNodeProcessor[]): boolean {
-  return processors?.some((p) =>
-    p.enter?.(traverseItem.node, {
+function applyEnterProcessors(
+  traverseItem: TraverseItem,
+  processors: DocumentNodeProcessor[]
+): void {
+  for (const processor of processors) {
+    processor.onNodeEnter?.(traverseItem.node, {
+      ...traverseItem.context,
+      parentNode: traverseItem.parentNode,
+      parentKey: traverseItem.parentKey,
+    });
+  }
+}
+
+/**
+ * Removes a node with its subtree
+ */
+function shouldRemoveSubTree(
+  traverseItem: TraverseItem,
+  processors: DocumentNodeProcessor[]
+): boolean {
+  return processors.some((p) =>
+    p.shouldRemove?.(traverseItem.node, {
       ...traverseItem.context,
       parentNode: traverseItem.parentNode,
       parentKey: traverseItem.parentKey,

@@ -38,11 +38,11 @@ import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_co
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { hasConfiguredConfiguration } from '../../utils/has_configured_configuration';
 
-import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
 import { ResearchConfiguration } from '../search_index/connector/native_connector_configuration/research_configuration';
+import { SyncsContextMenu } from '../shared/header_actions/syncs_context_menu';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
@@ -142,106 +142,111 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 <EuiSpacer />
               </>
             )}
-            <EuiSteps
-              steps={[
-                {
-                  children: <ResearchConfiguration nativeConnector={nativeConnector} />,
-                  status: hasResearched ? 'complete' : 'incomplete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.researchConfigurationTitle',
+            {
+              <>
+                <EuiSpacer />
+                <AttachIndexBox connector={connector} />
+              </>
+            }
+            {connector.index_name && (
+              <>
+                <EuiSpacer />
+                <EuiSteps
+                  steps={[
                     {
-                      defaultMessage: 'Research configuration requirements',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-                {
-                  children: (
-                    <NativeConnectorConfigurationConfig
-                      connector={connector}
-                      nativeConnector={nativeConnector}
-                      status={connector.status}
-                    />
-                  ),
-                  status: hasConfigured ? 'complete' : 'incomplete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.configurationTitle',
+                      children: <ResearchConfiguration nativeConnector={nativeConnector} />,
+                      status: hasResearched ? 'complete' : 'incomplete',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.researchConfigurationTitle',
+                        {
+                          defaultMessage: 'Research configuration requirements',
+                        }
+                      ),
+                      titleSize: 'xs',
+                    },
                     {
-                      defaultMessage: 'Configuration',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-                {
-                  children: (
-                    <ApiKeyConfig
-                      indexName={connector.index_name || ''}
-                      hasApiKey={hasApiKey}
-                      isNative
-                    />
-                  ),
-                  status: hasApiKey ? 'complete' : 'incomplete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.manageApiKeyTitle',
+                      children: (
+                        <NativeConnectorConfigurationConfig
+                          connector={connector}
+                          nativeConnector={nativeConnector}
+                          status={connector.status}
+                        />
+                      ),
+                      status: hasConfigured ? 'complete' : 'incomplete',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.configurationTitle',
+                        {
+                          defaultMessage: 'Configuration',
+                        }
+                      ),
+                      titleSize: 'xs',
+                    },
                     {
-                      defaultMessage: 'Manage API key',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-                {
-                  children: (
-                    <EuiFlexGroup direction="column">
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <FormattedMessage
-                            id="xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.description"
-                            defaultMessage="Finalize your connector by triggering a one time sync, or setting a recurring sync schedule."
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiFlexGroup responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonTo
-                              to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                                connectorId: connector.id,
-                                tabId: ConnectorDetailTabId.SCHEDULING,
-                              })}`}
-                            >
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.schedulingButtonLabel',
-                                {
-                                  defaultMessage: 'Set schedule and sync',
-                                }
-                              )}
-                            </EuiButtonTo>
+                      children: (
+                        <ApiKeyConfig
+                          indexName={connector.index_name || ''}
+                          hasApiKey={hasApiKey}
+                          isNative
+                        />
+                      ),
+                      status: hasApiKey ? 'complete' : 'incomplete',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.manageApiKeyTitle',
+                        {
+                          defaultMessage: 'Manage API key',
+                        }
+                      ),
+                      titleSize: 'xs',
+                    },
+                    {
+                      children: (
+                        <EuiFlexGroup direction="column">
+                          <EuiFlexItem>
+                            <EuiText size="s">
+                              <FormattedMessage
+                                id="xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.description"
+                                defaultMessage="Finalize your connector by triggering a one time sync, or setting a recurring sync schedule."
+                              />
+                            </EuiText>
                           </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <SyncsContextMenu />
+                          <EuiFlexItem>
+                            <EuiFlexGroup responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonTo
+                                  to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                                    connectorId: connector.id,
+                                    tabId: ConnectorDetailTabId.SCHEDULING,
+                                  })}`}
+                                >
+                                  {i18n.translate(
+                                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.schedulingButtonLabel',
+                                    {
+                                      defaultMessage: 'Set schedule and sync',
+                                    }
+                                  )}
+                                </EuiButtonTo>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <SyncsContextMenu />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
-                  status: hasConfiguredAdvanced ? 'complete' : 'incomplete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.advancedConfigurationTitle',
-                    {
-                      defaultMessage: 'Sync your data',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-              ]}
-            />
+                      ),
+                      status: hasConfiguredAdvanced ? 'complete' : 'incomplete',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.advancedConfigurationTitle',
+                        {
+                          defaultMessage: 'Sync your data',
+                        }
+                      ),
+                      titleSize: 'xs',
+                    },
+                  ]}
+                />
+              </>
+            )}
           </EuiPanel>
-          {
-            <>
-              <EuiSpacer />
-              <AttachIndexBox connector={connector} />
-            </>
-          }
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">
@@ -306,7 +311,12 @@ export const NativeConnectorConfiguration: React.FC = () => {
                       }
                     )}
                     <EuiSpacer size="s" />
-                    <EuiLink href={docLinks.documentLevelSecurity} target="_blank">
+                    <EuiLink
+                      data-test-subj="entSearchContent-connectorDetail-documentLevelSecurityLink"
+                      data-telemetry-id="entSearchContent-connectorDetail-documentLevelSecurityLink"
+                      href={docLinks.documentLevelSecurity}
+                      target="_blank"
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.securityLinkLabel',
                         {

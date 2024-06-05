@@ -7,10 +7,7 @@
 
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  DataView,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { useDynamicDataViewTitle } from '../../../../hooks/use_dynamic_data_view';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 
@@ -27,19 +24,13 @@ interface ContextType {
 const defaultContext: ContextType = {
   sharedData: { totalPageViews: 0 },
   setSharedData: (d) => {
-    throw new Error(
-      'setSharedData was not initialized, set it when you invoke the context'
-    );
+    throw new Error('setSharedData was not initialized, set it when you invoke the context');
   },
 };
 
 export const CsmSharedContext = createContext(defaultContext);
 
-export function CsmSharedContextProvider({
-  children,
-}: {
-  children: JSX.Element;
-}) {
+export function CsmSharedContextProvider({ children }: { children: JSX.Element }) {
   const [newData, setNewData] = useState<SharedData>({ totalPageViews: 0 });
   const [dataView, setDataView] = useState<DataView>();
 

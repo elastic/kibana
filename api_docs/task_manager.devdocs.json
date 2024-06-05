@@ -1883,7 +1883,7 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkEnable\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+        ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
         "TaskStore",
         ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
       ],

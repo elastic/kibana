@@ -42,9 +42,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .failure()
         .errors(
-          opbeansJava
-            .error({ message: '[MockError] Foo', type: `Exception` })
-            .timestamp(timestamp)
+          opbeansJava.error({ message: '[MockError] Foo', type: `Exception` }).timestamp(timestamp)
         )
         .children(
           opbeansJava
@@ -71,9 +69,6 @@ export function opbeans({ from, to }: { from: number; to: number }) {
         .timestamp(timestamp)
         .duration(1000)
         .success(),
-      opbeansRum
-        .transaction({ transactionName: '/' })
-        .timestamp(timestamp)
-        .duration(1000),
+      opbeansRum.transaction({ transactionName: '/' }).timestamp(timestamp).duration(1000),
     ]);
 }

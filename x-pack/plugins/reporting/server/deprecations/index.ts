@@ -20,7 +20,7 @@ export const registerDeprecations = ({
   core.deprecations.registerDeprecations({
     getDeprecations: async (ctx) => {
       return [
-        ...(await getIlmPolicyDeprecationsInfo(ctx, { reportingCore })),
+        ...(await getIlmPolicyDeprecationsInfo(ctx)),
         ...(await getReportingRoleDeprecationsInfo(ctx, { reportingCore })),
       ];
     },

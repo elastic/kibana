@@ -27,33 +27,30 @@ export async function getMetadataForDependency({
   start: number;
   end: number;
 }): Promise<MetadataForDependencyResponse> {
-  const sampleResponse = await apmEventClient.search(
-    'get_metadata_for_dependency',
-    {
-      apm: {
-        events: [ProcessorEvent.span],
-      },
-      body: {
-        track_total_hits: false,
-        size: 1,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName,
-                },
+  const sampleResponse = await apmEventClient.search('get_metadata_for_dependency', {
+    apm: {
+      events: [ProcessorEvent.span],
+    },
+    body: {
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName,
               },
-              ...rangeQuery(start, end),
-            ],
-          },
-        },
-        sort: {
-          '@timestamp': 'desc',
+            },
+            ...rangeQuery(start, end),
+          ],
         },
       },
-    }
-  );
+      sort: {
+        '@timestamp': 'desc',
+      },
+    },
+  });
 
   const sample = maybe(sampleResponse.hits.hits[0])?._source;
 

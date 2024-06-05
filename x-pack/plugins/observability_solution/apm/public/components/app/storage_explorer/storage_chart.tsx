@@ -64,10 +64,7 @@ export function StorageChart() {
       return {
         data: timeseries ?? [],
         type: 'area',
-        color:
-          groupedPalette[
-            Math.floor(index % (10 * euiPaletteColorBlindRotations))
-          ],
+        color: groupedPalette[Math.floor(index % (10 * euiPaletteColorBlindRotations))],
         title: serviceName,
       };
     }) ?? [];

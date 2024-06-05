@@ -57,6 +57,12 @@ describe('<RolesGridPage />', () => {
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
       {
+        name: 'test-role-with-description',
+        description: 'role-description',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
         name: 'reserved-role',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
@@ -144,34 +150,28 @@ describe('<RolesGridPage />', () => {
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
-    let editButton = wrapper.find('EuiButtonEmpty[data-test-subj="edit-role-action-test-role-1"]');
+    let editButton = wrapper.find('a[data-test-subj="edit-role-action-test-role-1"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/test-role-1');
 
-    editButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="edit-role-action-special%chars%role"]'
-    );
+    editButton = wrapper.find('a[data-test-subj="edit-role-action-special%chars%role"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/special%25chars%25role');
 
-    let cloneButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="clone-role-action-test-role-1"]'
-    );
+    let cloneButton = wrapper.find('a[data-test-subj="clone-role-action-test-role-1"]');
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/test-role-1');
 
-    cloneButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="clone-role-action-special%chars%role"]'
-    );
+    cloneButton = wrapper.find('a[data-test-subj="clone-role-action-special%chars%role"]');
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/special%25chars%25role');
 
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="edit-role-action-disabled-role"]')
-    ).toHaveLength(1);
-    expect(
-      wrapper.find('EuiButtonEmpty[data-test-subj="clone-role-action-disabled-role"]')
-    ).toHaveLength(1);
+    expect(wrapper.find('a[data-test-subj="edit-role-action-disabled-role"]')).toHaveLength(1);
+    expect(wrapper.find('a[data-test-subj="clone-role-action-disabled-role"]')).toHaveLength(1);
+
+    expect(findTestSubject(wrapper, 'roleRowDescription-test-role-with-description')).toHaveLength(
+      1
+    );
   });
 
   it('hides reserved roles when instructed to', async () => {
@@ -211,6 +211,12 @@ describe('<RolesGridPage />', () => {
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
     ]);
 
     findTestSubject(wrapper, 'showReservedRolesSwitch').simulate('click');
@@ -229,6 +235,12 @@ describe('<RolesGridPage />', () => {
       },
       {
         name: 'test-role-1',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },

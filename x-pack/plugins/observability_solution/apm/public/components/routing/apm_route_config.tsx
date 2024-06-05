@@ -23,17 +23,29 @@ import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
+import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 
-const ServiceGroupsTitle = i18n.translate(
-  'xpack.apm.views.serviceGroups.title',
-  { defaultMessage: 'Services' }
-);
+const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
+  defaultMessage: 'Services',
+});
 
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
  */
 const apmRoutes = {
+  '/link-to/transaction': {
+    element: <TransactionDetailsByNameLink />,
+    params: t.type({
+      query: t.intersection([
+        t.type({ transactionName: t.string, serviceName: t.string }),
+        t.partial({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+        }),
+      ]),
+    }),
+  },
   '/link-to/transaction/{transactionId}': {
     element: <TransactionLink />,
     params: t.intersection([
@@ -69,7 +81,12 @@ const apmRoutes = {
   },
   '/': {
     element: (
-      <Breadcrumb title="APM" href="/">
+      <Breadcrumb
+        title={i18n.translate('xpack.apm..breadcrumb.apmLabel', {
+          defaultMessage: 'APM',
+        })}
+        href="/"
+      >
         <Outlet />
       </Breadcrumb>
     ),

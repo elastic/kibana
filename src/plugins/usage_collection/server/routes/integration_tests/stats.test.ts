@@ -20,12 +20,12 @@ import {
   metricsServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/server/mocks';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
 
-type HttpService = ReturnType<typeof createHttpServer>;
+type HttpService = ReturnType<typeof createHttpService>;
 type HttpSetup = Awaited<ReturnType<HttpService['setup']>>;
 
 describe('/api/stats', () => {
@@ -35,7 +35,7 @@ describe('/api/stats', () => {
   let metrics: MetricsServiceSetup;
 
   beforeEach(async () => {
-    server = createHttpServer();
+    server = createHttpService();
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),

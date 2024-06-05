@@ -66,33 +66,35 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -297,66 +299,70 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -586,96 +592,102 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -824,96 +836,102 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -1067,96 +1085,102 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -1305,96 +1329,102 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiConfirmModal
-                      cancelButtonText="Cancel"
-                      confirmButtonText="Confirm"
-                      onCancel={[Function]}
-                      onConfirm={[Function]}
-                    >
-                      Some message
-                    </EuiConfirmModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiConfirmModal
+                        cancelButtonText="Cancel"
+                        confirmButtonText="Confirm"
+                        onCancel={[Function]}
+                        onConfirm={[Function]}
+                      >
+                        Some message
+                      </EuiConfirmModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -1560,33 +1590,35 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -1668,33 +1700,35 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -1781,33 +1815,35 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },
@@ -1889,33 +1925,35 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaErrorBoundaryProvider
-                  analytics={
-                    Object {
-                      "optIn": [MockFunction],
-                      "reportEvent": [MockFunction],
-                      "telemetryCounter$": Subject {
-                        "closed": false,
-                        "currentObservers": null,
-                        "hasError": false,
-                        "isStopped": false,
-                        "observers": Array [],
-                        "thrownError": null,
-                      },
+                "value": <I18nProvider>
+                  <KibanaErrorBoundaryProvider
+                    analytics={
+                      Object {
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
+                        },
+                      }
                     }
-                  }
-                >
-                  <KibanaErrorBoundary>
-                    <EuiModal
-                      onClose={[Function]}
-                    >
-                      <MountWrapper
-                        className="kbnOverlayMountWrapper"
-                        mount={[Function]}
-                      />
-                    </EuiModal>
-                  </KibanaErrorBoundary>
-                </KibanaErrorBoundaryProvider>,
+                  >
+                    <KibanaErrorBoundary>
+                      <EuiModal
+                        onClose={[Function]}
+                      >
+                        <MountWrapper
+                          className="kbnOverlayMountWrapper"
+                          mount={[Function]}
+                        />
+                      </EuiModal>
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>
+                </I18nProvider>,
               },
             ],
           },

@@ -275,7 +275,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       <EuiBasicTable<EnrollmentAPIKey>
         data-test-subj="enrollmentTokenListTable"
         loading={isLoading}
-        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage

@@ -40,7 +40,7 @@ describe('Security Plugin', () => {
         })
       ).toEqual({
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
-        authz: { isRoleManagementEnabled: expect.any(Function) },
+        authz: { isRoleManagementEnabled: expect.any(Function), roles: expect.any(Object) },
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
@@ -84,7 +84,7 @@ describe('Security Plugin', () => {
       });
     });
 
-    it('calls core.security.registerSecurityApi', () => {
+    it('calls core.security.registerSecurityDelegate', () => {
       const coreSetupMock = getCoreSetupMock();
 
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
@@ -93,7 +93,19 @@ describe('Security Plugin', () => {
         licensing: licensingMock.createSetup(),
       });
 
-      expect(coreSetupMock.security.registerSecurityApi).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      const coreSetupMock = getCoreSetupMock();
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(coreSetupMock, {
+        licensing: licensingMock.createSetup(),
+      });
+
+      expect(coreSetupMock.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -115,6 +127,12 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "isRoleManagementEnabled": [Function],
+            "roles": Object {
+              "deleteRole": [Function],
+              "getRole": [Function],
+              "getRoles": [Function],
+              "saveRole": [Function],
+            },
           },
           "navControlService": Object {
             "addUserMenuLinks": [Function],

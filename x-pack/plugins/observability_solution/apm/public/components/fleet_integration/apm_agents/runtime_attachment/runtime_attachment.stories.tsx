@@ -53,9 +53,7 @@ const excludeOptions = [
 const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
 export const RuntimeAttachmentExample: Story = () => {
-  const [runtimeAttachmentSettings, setRuntimeAttachmentSettings] = useState(
-    {}
-  );
+  const [runtimeAttachmentSettings, setRuntimeAttachmentSettings] = useState({});
   const [isEnabled, setIsEnabled] = useState(true);
   return (
     <>
@@ -101,13 +99,7 @@ export const RuntimeAttachmentExample: Story = () => {
 };
 
 export const JavaRuntimeAttachmentExample: Story = () => {
-  return (
-    <JavaRuntimeAttachment
-      policy={policy}
-      newPolicy={newPolicy}
-      onChange={() => {}}
-    />
-  );
+  return <JavaRuntimeAttachment policy={policy} newPolicy={newPolicy} onChange={() => {}} />;
 };
 
 const policy = {

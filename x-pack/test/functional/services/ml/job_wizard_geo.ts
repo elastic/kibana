@@ -46,7 +46,7 @@ export function MachineLearningJobWizardGeoProvider({ getService }: FtrProviderC
       );
 
       await testSubjects.existOrFail('mlGeoJobWizardMap');
-      await testSubjects.existOrFail('mlEmbeddedMapContent');
+      await testSubjects.existOrFail('mapContainer');
     },
   };
 }

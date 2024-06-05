@@ -42,36 +42,32 @@ export function useMobileStatisticsFetcher({
 }: Props) {
   const { serviceName } = useApmServiceContext();
 
-  const { data = INITIAL_STATE_MAIN_STATISTICS, status: mainStatisticsStatus } =
-    useFetcher(
-      (callApmApi) => {
-        if (start && end) {
-          return callApmApi(
-            'GET /internal/apm/mobile-services/{serviceName}/main_statistics',
-            {
-              params: {
-                path: { serviceName },
-                query: {
-                  environment,
-                  kuery,
-                  start,
-                  end,
-                  field,
-                },
-              },
-            }
-          ).then((response) => {
-            return {
-              // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
-              requestId: uuidv4(),
-              mainStatistics: response.mainStatistics,
-              totalItems: response.mainStatistics.length,
-            };
-          });
-        }
-      },
-      [environment, start, end, kuery, serviceName, field]
-    );
+  const { data = INITIAL_STATE_MAIN_STATISTICS, status: mainStatisticsStatus } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi('GET /internal/apm/mobile-services/{serviceName}/main_statistics', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              field,
+            },
+          },
+        }).then((response) => {
+          return {
+            // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
+            requestId: uuidv4(),
+            mainStatistics: response.mainStatistics,
+            totalItems: response.mainStatistics.length,
+          };
+        });
+      }
+    },
+    [environment, start, end, kuery, serviceName, field]
+  );
 
   const { mainStatistics, requestId, totalItems } = data;
 
@@ -81,28 +77,20 @@ export function useMobileStatisticsFetcher({
   } = useFetcher(
     (callApmApi) => {
       if (totalItems && start && end) {
-        return callApmApi(
-          'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                field,
-                fieldValues: JSON.stringify(
-                  data?.mainStatistics.map(({ name }) => name).sort()
-                ),
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-              },
+        return callApmApi('GET /internal/apm/mobile-services/{serviceName}/detailed_statistics', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              field,
+              fieldValues: JSON.stringify(data?.mainStatistics.map(({ name }) => name).sort()),
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             },
-          }
-        );
+          },
+        });
       }
     },
     // only fetches agg results when requestId changes

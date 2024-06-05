@@ -80,17 +80,6 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchParams.version",
-            "type": "string",
-            "tags": [],
-            "label": "version",
-            "description": [],
-            "path": "packages/kbn-es-types/src/search.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchParams.filter",
             "type": "Unknown",
             "tags": [],
@@ -603,6 +592,22 @@
         "description": [],
         "signature": [
           "T[] | readonly T[]"
+        ],
+        "path": "packages/kbn-es-types/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-types",
+        "id": "def-common.SearchField",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchField",
+        "description": [],
+        "signature": [
+          "string | ",
+          "QueryDslFieldAndFormat"
         ],
         "path": "packages/kbn-es-types/src/index.ts",
         "deprecated": false,

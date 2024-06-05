@@ -20,6 +20,13 @@ import {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { catchError, map, switchMap, tap } from 'rxjs';
+import type {
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchOptions,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '@kbn/search-types';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -56,13 +63,8 @@ import {
   fieldFunction,
   geoBoundingBoxFunction,
   geoPointFunction,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   ipPrefixFunction,
   ipRangeFunction,
-  ISearchOptions,
   kibana,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
@@ -256,7 +258,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerFunction: expressions.registerFunction,
     });
 
-    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+    void firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {
         aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
         expressions.registerFunction(aggShardDelay);
@@ -314,6 +316,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
+            dataViews: scopedIndexPatterns,
             scriptedFieldsEnabled: true,
           };
 

@@ -6,32 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
 import img from './portable_dashboard_image.png';
-import { PLUGIN_ID } from './constants';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
+  embeddable: EmbeddableSetup;
 }
 
-export interface PortableDashboardsExampleStartDeps {
+export interface StartDeps {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
 }
 
-export class PortableDashboardsExamplePlugin
-  implements Plugin<void, void, SetupDeps, PortableDashboardsExampleStartDeps>
-{
-  public setup(
-    core: CoreSetup<PortableDashboardsExampleStartDeps>,
-    { developerExamples }: SetupDeps
-  ) {
+export class PortableDashboardsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, { developerExamples, embeddable }: SetupDeps) {
     core.application.register({
       id: PLUGIN_ID,
       title: 'Portable dashboard examples',
@@ -49,9 +45,14 @@ export class PortableDashboardsExamplePlugin
       description: `Showcases different ways to embed a dashboard into your app`,
       image: img,
     });
+
+    embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
+      const { factory } = await import('./filter_debugger_embeddable');
+      return factory;
+    });
   }
 
-  public async start(core: CoreStart, { dashboard }: PortableDashboardsExampleStartDeps) {}
+  public async start() {}
 
   public stop() {}
 }

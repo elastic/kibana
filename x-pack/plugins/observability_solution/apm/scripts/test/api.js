@@ -73,17 +73,7 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const {
-  bail,
-  basic,
-  trial,
-  server,
-  runner,
-  grep,
-  grepFiles,
-  inspect,
-  updateSnapshots,
-} = argv;
+const { bail, basic, trial, server, runner, grep, grepFiles, inspect, updateSnapshots } = argv;
 
 if (trial === false && basic === false) {
   throw new Error('Please specify either --trial or --basic');

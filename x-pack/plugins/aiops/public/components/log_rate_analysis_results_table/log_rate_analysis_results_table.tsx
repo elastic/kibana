@@ -16,15 +16,11 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiCode,
-  EuiIcon,
   EuiIconTip,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
-
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
@@ -32,13 +28,14 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 import { MiniHistogram } from '../mini_histogram';
+import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
-import { useLogRateAnalysisResultsTableRowContext } from './log_rate_analysis_results_table_row_provider';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { useViewInDiscoverAction } from './use_view_in_discover_action';
@@ -59,7 +56,6 @@ const TRUNCATE_TEXT_LINES = 3;
 
 interface LogRateAnalysisResultsTableProps {
   significantItems: SignificantItem[];
-  dataView: DataView;
   loading: boolean;
   isExpandedRow?: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
@@ -73,7 +69,6 @@ interface LogRateAnalysisResultsTableProps {
 
 export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
   significantItems,
-  dataView,
   loading,
   isExpandedRow,
   searchQuery,
@@ -84,6 +79,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
+  const { dataView } = useDataSource();
   const dataViewId = dataView.id;
 
   const {
@@ -93,7 +89,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     selectedSignificantItem,
     setPinnedSignificantItem,
     setSelectedSignificantItem,
-  } = useLogRateAnalysisResultsTableRowContext();
+  } = useLogRateAnalysisStateContext();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -152,7 +148,11 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
               />
             )}
             {type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN && (
-              <EuiToolTip
+              <EuiIconTip
+                type="aggregate"
+                data-test-subj={'aiopsLogPatternIcon'}
+                css={{ marginLeft: euiTheme.euiSizeS, marginRight: euiTheme.euiSizeXS }}
+                size="m"
                 content={i18n.translate(
                   'xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern',
                   {
@@ -160,22 +160,16 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
                       'The field value for this field shows an example of the identified significant text field pattern.',
                   }
                 )}
-              >
-                <EuiIcon
-                  type="aggregate"
-                  data-test-subj={'aiopsLogPatternIcon'}
-                  css={{ marginLeft: euiTheme.euiSizeS, marginRight: euiTheme.euiSizeXS }}
-                  size="m"
-                />
-              </EuiToolTip>
+              />
             )}
 
-            <span title={fieldName}>{fieldName}</span>
+            <span title={fieldName} className="eui-textTruncate">
+              {fieldName}
+            </span>
           </>
         );
       },
       sortable: true,
-      truncateText: true,
       valign: 'middle',
     },
     {
@@ -207,21 +201,27 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTooltip', {
-            defaultMessage:
-              'A visual representation of the impact of the field on the message rate difference',
-          })}
-        >
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTable.logRateLabel"
-              defaultMessage="Log rate"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
+        <>
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.resultsTable.logRateLabel"
+            defaultMessage="Log rate"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            position="top"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate(
+              'xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTooltip',
+              {
+                defaultMessage:
+                  'A visual representation of the impact of the field on the message rate difference',
+              }
+            )}
+          />
+        </>
       ),
       render: (_, { histogram, fieldName, fieldValue }) => (
         <MiniHistogram
@@ -253,21 +253,27 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.pValueColumnTooltip', {
-            defaultMessage:
-              'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
-          })}
-        >
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTable.pValueLabel"
-              defaultMessage="p-value"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
+        <>
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.resultsTable.pValueLabel"
+            defaultMessage="p-value"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            position="top"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate(
+              'xpack.aiops.logRateAnalysis.resultsTable.pValueColumnTooltip',
+              {
+                defaultMessage:
+                  'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
+              }
+            )}
+          />
+        </>
       ),
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
@@ -279,23 +285,26 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip',
-            {
-              defaultMessage: 'The level of impact of the field on the message rate difference.',
-            }
-          )}
-        >
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
-              defaultMessage="Impact"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
+        <>
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.resultsTable.impactLabel"
+            defaultMessage="Impact"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            position="top"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate(
+              'xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip',
+              {
+                defaultMessage: 'The level of impact of the field on the message rate difference.',
+              }
+            )}
+          />
+        </>
       ),
       render: (_, { pValue }) => {
         if (typeof pValue !== 'number') return NOT_AVAILABLE;

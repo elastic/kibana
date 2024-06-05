@@ -42,7 +42,7 @@ describe('Registry request', () => {
       (appContextService.getKibanaVersion as jest.Mock).mockReturnValue('8.0.0');
     });
     it('should set User-Agent header including kibana version', async () => {
-      getResponse('');
+      await getResponse('');
 
       expect(fetchMock).toHaveBeenCalledWith('', {
         headers: {
@@ -54,7 +54,7 @@ describe('Registry request', () => {
     it('should set User-Agent header including kibana version with agent', async () => {
       mockRegistryProxyUrl = 'url';
 
-      getResponse('');
+      await getResponse('');
 
       expect(fetchMock).toHaveBeenCalledWith('', {
         agent: 'proxy agent',

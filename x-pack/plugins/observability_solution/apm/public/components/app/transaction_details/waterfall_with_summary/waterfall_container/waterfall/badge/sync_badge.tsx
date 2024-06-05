@@ -18,19 +18,13 @@ export interface SyncBadgeProps {
   agentName: AgentName;
 }
 
-const BLOCKING_LABEL = i18n.translate(
-  'xpack.apm.transactionDetails.syncBadgeBlocking',
-  {
-    defaultMessage: 'blocking',
-  }
-);
+const BLOCKING_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeBlocking', {
+  defaultMessage: 'blocking',
+});
 
-const ASYNC_LABEL = i18n.translate(
-  'xpack.apm.transactionDetails.syncBadgeAsync',
-  {
-    defaultMessage: 'async',
-  }
-);
+const ASYNC_LABEL = i18n.translate('xpack.apm.transactionDetails.syncBadgeAsync', {
+  defaultMessage: 'async',
+});
 
 // true will show blocking, false will show async.
 // otel doesn't set sync field

@@ -298,8 +298,6 @@ export const BrowserStepsList = ({
         loading={loading}
         columns={columns}
         error={error?.message}
-        isExpandable={showExpand}
-        hasActions={false}
         items={stepEnds}
         noItemsMessage={
           loading
@@ -310,9 +308,9 @@ export const BrowserStepsList = ({
                 defaultMessage: 'No data found',
               })
         }
-        tableLayout={'auto'}
+        tableLayout="auto"
         itemId="_id"
-        itemIdToExpandedRowMap={testNowMode ? expandedMap : undefined}
+        itemIdToExpandedRowMap={testNowMode || showExpand ? expandedMap : undefined}
       />
     </>
   );

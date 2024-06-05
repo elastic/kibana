@@ -24,6 +24,12 @@ describe('Versioned router', () => {
     expect(versionedRouter.getRoutes()).toHaveLength(3);
   });
 
+  it('registers pluginId if router has one', () => {
+    const pluginId = Symbol('test');
+    const versionedRouter = CoreVersionedRouter.from({ router: createRouter({ pluginId }) });
+    expect(versionedRouter.pluginId).toBe(pluginId);
+  });
+
   it('provides the expected metadata', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter.get({ path: '/test/{id}', access: 'internal' });

@@ -131,12 +131,7 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       aggregationType: 'avg',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
     await executor({ params });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
@@ -269,12 +264,7 @@ describe('registerTransactionDurationRuleType', () => {
         series: {
           buckets: [
             {
-              key: [
-                'opbeans-java',
-                'ENVIRONMENT_NOT_DEFINED',
-                'request',
-                'tx-java',
-              ],
+              key: ['opbeans-java', 'ENVIRONMENT_NOT_DEFINED', 'request', 'tx-java'],
               avgLatency: {
                 value: 5500000,
               },
@@ -300,12 +290,7 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       aggregationType: 'avg',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
     await executor({ params });
     expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);

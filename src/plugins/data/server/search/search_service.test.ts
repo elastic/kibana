@@ -9,7 +9,7 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-
+import { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { createIndexPatternsStartMock } from '../data_views/mocks';
@@ -17,9 +17,8 @@ import { createIndexPatternsStartMock } from '../data_views/mocks';
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
 import { lastValueFrom, of } from 'rxjs';
+
 import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
   IScopedSearchClient,
   IScopedSearchSessionsClient,
   ISearchStart,

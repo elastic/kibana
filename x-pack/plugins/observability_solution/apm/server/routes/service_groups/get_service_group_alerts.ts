@@ -29,12 +29,13 @@ export async function getServiceGroupAlerts({
   if (!spaceId || serviceGroups.length === 0) {
     return {};
   }
-  const serviceGroupsKueryMap = serviceGroups.reduce<
-    Record<string, QueryDslQueryContainer>
-  >((acc, sg) => {
-    acc[sg.id] = kqlQuery(sg.kuery)[0];
-    return acc;
-  }, {});
+  const serviceGroupsKueryMap = serviceGroups.reduce<Record<string, QueryDslQueryContainer>>(
+    (acc, sg) => {
+      acc[sg.id] = kqlQuery(sg.kuery)[0];
+      return acc;
+    },
+    {}
+  );
   const params = {
     size: 0,
     track_total_hits: false,
@@ -65,12 +66,13 @@ export async function getServiceGroupAlerts({
 
   const filterAggBuckets = result.aggregations?.service_groups.buckets ?? {};
 
-  const serviceGroupAlertsCount = Object.keys(filterAggBuckets).reduce<
-    Record<string, number>
-  >((acc, serviceGroupId) => {
-    acc[serviceGroupId] = filterAggBuckets[serviceGroupId].alerts_count.value;
-    return acc;
-  }, {});
+  const serviceGroupAlertsCount = Object.keys(filterAggBuckets).reduce<Record<string, number>>(
+    (acc, serviceGroupId) => {
+      acc[serviceGroupId] = filterAggBuckets[serviceGroupId].alerts_count.value;
+      return acc;
+    },
+    {}
+  );
 
   return serviceGroupAlertsCount;
 }

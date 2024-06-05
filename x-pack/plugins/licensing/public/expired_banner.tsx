@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 interface Props {
   type: string;
@@ -46,5 +47,7 @@ const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
   </EuiCallOut>
 );
 
-export const mountExpiredBanner = (props: Props) =>
-  toMountPoint(<ExpiredBanner type={props.type!} uploadUrl={props.uploadUrl} />);
+type MountProps = Props & Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
+export const mountExpiredBanner = ({ type, uploadUrl, ...startServices }: MountProps) =>
+  toMountPoint(<ExpiredBanner type={type!} uploadUrl={uploadUrl} />, startServices);

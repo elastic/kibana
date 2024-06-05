@@ -8,7 +8,7 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { of } from 'rxjs';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { generateMockFileIndicator } from '../../../../common/types/indicator';
 import { CommentChildren } from './comment_children';
 import { StoryProvidersComponent } from '../../../mocks/story_providers';

@@ -95,6 +95,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsBulkGet).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

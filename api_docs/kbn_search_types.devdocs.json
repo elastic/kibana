@@ -1,0 +1,1023 @@
+{
+  "id": "@kbn/search-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.IEsErrorAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEsErrorAttributes",
+        "description": [],
+        "path": "packages/kbn-search-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IEsErrorAttributes.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ErrorCause",
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IEsErrorAttributes.rawResponse",
+            "type": "Object",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [],
+            "signature": [
+              "SearchResponseBody",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">> | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IEsErrorAttributes.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.SanitizedConnectionRequestParams",
+                "text": "SanitizedConnectionRequestParams"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.IEsSearchRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEsSearchRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IEsSearchRequest",
+            "text": "IEsSearchRequest"
+          },
+          "<T> extends ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-search-types/src/es_search_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IEsSearchRequest.indexType",
+            "type": "string",
+            "tags": [],
+            "label": "indexType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/es_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.IKibanaSearchRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "IKibanaSearchRequest",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<Params>"
+        ],
+        "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchRequest.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nAn id can be used to uniquely identify this request."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchRequest.params",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Params | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.IKibanaSearchResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "IKibanaSearchResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<RawResponse>"
+        ],
+        "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nSome responses may contain a unique id to identify the request this response came from."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [
+              "\nIf relevant to the search strategy, return a total number\nthat represents how progress is indicated."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.loaded",
+            "type": "number",
+            "tags": [],
+            "label": "loaded",
+            "description": [
+              "\nIf relevant to the search strategy, return a loaded number\nthat represents how progress is indicated."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.isRunning",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRunning",
+            "description": [
+              "\nIndicates whether search is still in flight"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.isPartial",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPartial",
+            "description": [
+              "\nIndicates whether the results returned are complete or partial"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.isRestored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRestored",
+            "description": [
+              "\nIndicates whether the results returned are from the async-search index"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.isStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isStored",
+            "description": [
+              "\nIndicates whether the search has been saved to a search-session object and long keepAlive was set"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.warning",
+            "type": "string",
+            "tags": [],
+            "label": "warning",
+            "description": [
+              "\nOptional warnings returned from Elasticsearch (for example, deprecation warnings)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.rawResponse",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "rawResponse",
+            "description": [
+              "\nThe raw response returned by the internal search method (usually the raw ES response)"
+            ],
+            "signature": [
+              "RawResponse"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.IKibanaSearchResponse.requestParams",
+            "type": "Object",
+            "tags": [],
+            "label": "requestParams",
+            "description": [
+              "\nHTTP request parameters from elasticsearch transport client t"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.SanitizedConnectionRequestParams",
+                "text": "SanitizedConnectionRequestParams"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/kibana_search_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.ISearchClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISearchClient",
+        "description": [],
+        "path": "packages/kbn-search-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchClient.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "<SearchStrategyRequest extends ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IKibanaSearchRequest",
+                "text": "IKibanaSearchRequest"
+              },
+              "<any> = ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IEsSearchRequest",
+                "text": "IEsSearchRequest"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchRequestParams",
+                "text": "ISearchRequestParams"
+              },
+              ">, SearchStrategyResponse extends ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any> = ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IEsSearchResponse",
+                "text": "IEsSearchResponse"
+              },
+              "<any>>(request: SearchStrategyRequest, options?: ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined) => ",
+              "Observable",
+              "<SearchStrategyResponse>"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-types",
+                "id": "def-common.ISearchClient.search.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "SearchStrategyRequest"
+                ],
+                "path": "packages/kbn-search-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-types",
+                "id": "def-common.ISearchClient.search.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.ISearchOptions",
+                    "text": "ISearchOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-search-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchClient.cancel",
+            "type": "Function",
+            "tags": [],
+            "label": "cancel",
+            "description": [
+              "\nUsed to cancel an in-progress search request."
+            ],
+            "signature": [
+              "(id: string, options?: ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-types",
+                "id": "def-common.ISearchClient.cancel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-search-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-types",
+                "id": "def-common.ISearchClient.cancel.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.ISearchOptions",
+                    "text": "ISearchOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-search-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchClient.extend",
+            "type": "Function",
+            "tags": [],
+            "label": "extend",
+            "description": [
+              "\nUsed to extend the TTL of an in-progress search request."
+            ],
+            "signature": [
+              "(id: string, keepAlive: string, options?: ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/search-types",
+                "id": "def-common.ISearchClient.extend.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-search-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-types",
+                "id": "def-common.ISearchClient.extend.$2",
+                "type": "string",
+                "tags": [],
+                "label": "keepAlive",
+                "description": [],
+                "path": "packages/kbn-search-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/search-types",
+                "id": "def-common.ISearchClient.extend.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.ISearchOptions",
+                    "text": "ISearchOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-search-types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.ISearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISearchOptions",
+        "description": [],
+        "path": "packages/kbn-search-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [
+              "\nAn `AbortSignal` that allows the caller of `search` to abort a search request."
+            ],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.strategy",
+            "type": "string",
+            "tags": [],
+            "label": "strategy",
+            "description": [
+              "\nUse this option to force using a specific server side search strategy. Leave empty to use the default strategy."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.legacyHitsTotal",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legacyHitsTotal",
+            "description": [
+              "\nRequest the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to\nsomething other than `true`, this should be set to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.sessionId",
+            "type": "string",
+            "tags": [],
+            "label": "sessionId",
+            "description": [
+              "\nA session ID, grouping multiple search requests into a single session."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.isStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isStored",
+            "description": [
+              "\nWhether the session is already saved (i.e. sent to background)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.isSearchStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSearchStored",
+            "description": [
+              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.isRestore",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRestore",
+            "description": [
+              "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.retrieveResults",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "retrieveResults",
+            "description": [
+              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [
+              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [
+              "\nIndex pattern reference is used for better error messages"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchOptions.transport",
+            "type": "Object",
+            "tags": [],
+            "label": "transport",
+            "description": [
+              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
+            ],
+            "signature": [
+              "Omit<",
+              "TransportRequestOptions",
+              ", \"signal\"> | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.IEsSearchResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "IEsSearchResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<",
+          "SearchResponse",
+          "<Source, Record<string, ",
+          "AggregationsAggregate",
+          ">>>"
+        ],
+        "path": "packages/kbn-search-types/src/es_search_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.ISearchGeneric",
+        "type": "Type",
+        "tags": [],
+        "label": "ISearchGeneric",
+        "description": [],
+        "signature": [
+          "<SearchStrategyRequest extends ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<any> = ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IEsSearchRequest",
+            "text": "IEsSearchRequest"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.ISearchRequestParams",
+            "text": "ISearchRequestParams"
+          },
+          ">, SearchStrategyResponse extends ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<any> = ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<any>>(request: SearchStrategyRequest, options?: ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.ISearchOptions",
+            "text": "ISearchOptions"
+          },
+          " | undefined) => ",
+          "Observable",
+          "<SearchStrategyResponse>"
+        ],
+        "path": "packages/kbn-search-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchGeneric.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "SearchStrategyRequest"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-types",
+            "id": "def-common.ISearchGeneric.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.ISearchOptionsSerializable",
+        "type": "Type",
+        "tags": [],
+        "label": "ISearchOptionsSerializable",
+        "description": [
+          "\nSame as `ISearchOptions`, but contains only serializable fields, which can\nbe sent over the network."
+        ],
+        "signature": [
+          "{ executionContext?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-search-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.ISearchRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ISearchRequestParams",
+        "description": [],
+        "signature": [
+          "{ trackTotalHits?: boolean | undefined; } & ",
+          "SearchRequest"
+        ],
+        "path": "packages/kbn-search-types/src/es_search_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-types",
+        "id": "def-common.SanitizedConnectionRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SanitizedConnectionRequestParams",
+        "description": [],
+        "signature": [
+          "{ path: string; method: string; querystring?: string | undefined; }"
+        ],
+        "path": "packages/kbn-search-types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

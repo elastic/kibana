@@ -76,6 +76,7 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
+        - INVESTIGATION_FIELDS_FEATURE
 
     NormalizedRuleError:
       type: object
@@ -281,6 +282,9 @@ components:
         - add_rule_actions
         - set_rule_actions
         - set_schedule
+        - add_investigation_fields
+        - delete_investigation_fields
+        - set_investigation_fields
 
     # Per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
     NormalizedRuleAction:
@@ -381,6 +385,21 @@ components:
         - type
         - value
 
+    BulkActionEditPayloadInvestigationFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - add_investigation_fields
+            - delete_investigation_fields
+            - set_investigation_fields
+        value:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/InvestigationFields'
+      required:
+        - type
+        - value
+
     BulkActionEditPayloadTimeline:
       type: object
       properties:
@@ -406,6 +425,7 @@ components:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
         - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
+        - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'

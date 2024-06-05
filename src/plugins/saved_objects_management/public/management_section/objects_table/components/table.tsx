@@ -153,13 +153,11 @@ export class Table extends PureComponent<TableProps, TableState> {
 
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
-          <FormattedRelative value={new Date(dateTime).getTime()}>
-            {(formattedDate: string) => (
-              <EuiToolTip content={updatedAt.format('LL LT')}>
-                <span>{formattedDate}</span>
-              </EuiToolTip>
-            )}
-          </FormattedRelative>
+          <EuiToolTip content={updatedAt.format('LL LT')}>
+            <span>
+              <FormattedRelative value={new Date(dateTime).getTime()} />
+            </span>
+          </EuiToolTip>
         );
       }
       return (
@@ -234,7 +232,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTypeName', {
           defaultMessage: 'Type',
         }),
-        width: '50px',
+        width: '65px',
         align: 'center',
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.table.columnTypeDescription',

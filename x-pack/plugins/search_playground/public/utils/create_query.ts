@@ -7,16 +7,16 @@
 
 import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
-type IndexFields = Record<string, string[]>;
+export type IndexFields = Record<string, string[]>;
 
 // These fields are used to suggest the fields to use for the query
 // If the field is not found in the suggested fields,
 // we will use the first field for BM25 and all fields for vectors
-const SUGGESTED_SPARSE_FIELDS = [
+export const SUGGESTED_SPARSE_FIELDS = [
   'vector.tokens', // LangChain field
 ];
 
-const SUGGESTED_BM25_FIELDS = [
+export const SUGGESTED_BM25_FIELDS = [
   'title',
   'body_content',
   'page_content_text',
@@ -25,9 +25,15 @@ const SUGGESTED_BM25_FIELDS = [
   `text_field`,
 ];
 
-const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
+export const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text', 'page_content_text'];
+const SUGGESTED_SOURCE_FIELDS = [
+  'body_content',
+  'content',
+  'text',
+  'page_content_text',
+  'text_field',
+];
 
 interface Matches {
   queryMatches: any[];
@@ -216,8 +222,12 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
+      // if there are no source fields, we don't need to suggest anything
       if (indexFieldDescriptors.source_fields.length === 0) {
-        throw new Error('No source fields found');
+        return {
+          ...acc,
+          [index]: [],
+        };
       }
 
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>

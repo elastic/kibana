@@ -24,6 +24,15 @@ export const commonMonitorStateI18 = [
     ),
   },
   {
+    name: 'configId',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.configId',
+      {
+        defaultMessage: 'Config ID of the monitor.',
+      }
+    ),
+  },
+  {
     name: 'monitorUrl',
     description: i18n.translate(
       'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorUrl',

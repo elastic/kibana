@@ -14,7 +14,10 @@ import type {
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
-import { DocumentCountChart, type BrushSelectionUpdateHandler } from '@kbn/aiops-components';
+import {
+  DocumentCountChartWithAutoAnalysisStart,
+  type BrushSelectionUpdateHandler,
+} from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import type { DocumentCountStats } from '../../../get_document_stats';
@@ -29,13 +32,11 @@ export interface DocumentCountContentProps {
   isBrushCleared: boolean;
   totalCount: number;
   sampleProbability: number;
-  initialAnalysisStart?: number | WindowParameters;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
   windowParameters?: WindowParameters;
-  incomingInitialAnalysisStart?: number | WindowParameters;
   baselineLabel?: string;
   deviationLabel?: string;
   barStyleAccessor?: BarStyleAccessor;
@@ -51,11 +52,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   isBrushCleared,
   totalCount,
   sampleProbability,
-  initialAnalysisStart,
   barColorOverride,
   barHighlightColorOverride,
   windowParameters,
-  incomingInitialAnalysisStart,
   ...docCountChartProps
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
@@ -100,7 +99,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
       </EuiFlexItem>
       {documentCountStats.interval !== undefined && (
         <EuiFlexItem>
-          <DocumentCountChart
+          <DocumentCountChartWithAutoAnalysisStart
             dependencies={{ data, uiSettings, fieldFormats, charts }}
             brushSelectionUpdateHandler={brushSelectionUpdateHandler}
             chartPoints={chartPoints}
@@ -110,7 +109,6 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             interval={documentCountStats.interval}
             chartPointsSplitLabel={documentCountStatsSplitLabel}
             isBrushCleared={isBrushCleared}
-            autoAnalysisStart={initialAnalysisStart}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
             changePoint={documentCountStats.changePoint}

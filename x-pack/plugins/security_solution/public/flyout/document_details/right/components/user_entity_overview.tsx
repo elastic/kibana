@@ -19,7 +19,8 @@ import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -34,7 +35,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 

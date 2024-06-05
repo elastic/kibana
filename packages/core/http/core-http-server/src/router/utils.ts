@@ -9,6 +9,7 @@
 import {
   RouteValidator,
   RouteValidatorFullConfigRequest,
+  RouteValidatorFullConfigResponse,
   RouteValidatorRequestAndResponses,
 } from './route_validator';
 
@@ -36,4 +37,18 @@ export function getRequestValidation<P, Q, B>(
 ): RouteValidatorFullConfigRequest<P, Q, B> {
   if (typeof value === 'function') value = value();
   return isFullValidatorContainer(value) ? value.request : value;
+}
+
+/**
+ * Extracts {@link RouteValidatorFullConfigRequest} from the validation container.
+ * This utility is intended to be used by code introspecting router validation configuration.
+ * @public
+ */
+export function getResponseValidation(
+  value:
+    | RouteValidator<unknown, unknown, unknown>
+    | (() => RouteValidator<unknown, unknown, unknown>)
+): undefined | RouteValidatorFullConfigResponse {
+  if (typeof value === 'function') value = value();
+  return isFullValidatorContainer(value) ? value.response : undefined;
 }

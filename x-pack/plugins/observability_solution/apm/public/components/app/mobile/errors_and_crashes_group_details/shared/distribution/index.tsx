@@ -37,13 +37,7 @@ interface Props {
   height: number;
 }
 
-export function ErrorDistribution({
-  distribution,
-  title,
-  tip,
-  height,
-  fetchStatus,
-}: Props) {
+export function ErrorDistribution({ distribution, title, tip, height, fetchStatus }: Props) {
   const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
 
@@ -74,9 +68,7 @@ export function ErrorDistribution({
 
   return (
     <EuiPanel hasBorder={true} style={{ position: 'relative' }}>
-      {isPending(fetchStatus) && (
-        <EuiProgress size="xs" color="accent" position="absolute" />
-      )}
+      {isPending(fetchStatus) && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">

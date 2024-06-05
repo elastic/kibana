@@ -8,6 +8,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { createSessionExpirationToast, SessionExpirationToast } from './session_expiration_toast';
@@ -15,6 +16,7 @@ import type { SessionState } from './session_timeout';
 
 describe('createSessionExpirationToast', () => {
   it('creates a toast', () => {
+    const coreStart = coreMock.createStart();
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
       expiresInMs: 60 * 1000,
@@ -22,7 +24,7 @@ describe('createSessionExpirationToast', () => {
     });
     const onExtend = jest.fn();
     const onClose = jest.fn();
-    const toast = createSessionExpirationToast(sessionState$, onExtend, onClose);
+    const toast = createSessionExpirationToast(coreStart, sessionState$, onExtend, onClose);
 
     expect(toast).toEqual(
       expect.objectContaining({

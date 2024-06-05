@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { UserSettingsServiceSetup, UserProfileSettingsClientContract } from './types';
+export type { UserSettingsServiceSetup } from './types';

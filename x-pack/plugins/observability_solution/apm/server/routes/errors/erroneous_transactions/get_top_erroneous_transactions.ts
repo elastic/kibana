@@ -12,11 +12,7 @@
  * 2.0.
  */
 
-import {
-  rangeQuery,
-  kqlQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import {
   ERROR_GROUP_ID,
@@ -192,10 +188,7 @@ export async function getTopErroneousTransactionsPeriods({
       : [],
   ]);
 
-  const previousPeriodByTransactionName = keyBy(
-    previousPeriod,
-    'transactionName'
-  );
+  const previousPeriodByTransactionName = keyBy(previousPeriod, 'transactionName');
 
   return {
     topErroneousTransactions: currentPeriod.map(

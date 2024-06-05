@@ -50,15 +50,15 @@ describe('NonTextFieldsBody', () => {
     const tableRows = getTableRows(wrapper);
 
     expect(tableRows.length).toBe(3);
-    expect(tableRows.at(0).find('[data-test-subj="ResultSettingFieldName"]').dive().text()).toEqual(
-      'bar'
-    );
-    expect(tableRows.at(1).find('[data-test-subj="ResultSettingFieldName"]').dive().text()).toEqual(
-      'foo'
-    );
-    expect(tableRows.at(2).find('[data-test-subj="ResultSettingFieldName"]').dive().text()).toEqual(
-      'zoo'
-    );
+    expect(
+      tableRows.at(0).find('[data-test-subj="ResultSettingFieldName"]').render().text()
+    ).toEqual('bar');
+    expect(
+      tableRows.at(1).find('[data-test-subj="ResultSettingFieldName"]').render().text()
+    ).toEqual('foo');
+    expect(
+      tableRows.at(2).find('[data-test-subj="ResultSettingFieldName"]').render().text()
+    ).toEqual('zoo');
   });
 
   describe('the "raw" checkbox within each table row', () => {

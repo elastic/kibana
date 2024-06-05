@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { ErrorGroupList } from '../../error_group_overview/error_group_list';
 
@@ -20,11 +21,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { query } = useApmParams('/services/{serviceName}/overview');
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      data-test-subj="serviceOverviewErrorsTable"
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="serviceOverviewErrorsTable">
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -46,13 +43,15 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ErrorGroupList
-          serviceName={serviceName}
-          initialPageSize={5}
-          isCompactMode={true}
-          saveTableOptionsToUrl={false}
-          showPerPageOptions={false}
-        />
+        <OverviewTableContainer fixedHeight={true} isEmptyAndNotInitiated={false}>
+          <ErrorGroupList
+            serviceName={serviceName}
+            initialPageSize={5}
+            isCompactMode={true}
+            saveTableOptionsToUrl={false}
+            showPerPageOptions={false}
+          />
+        </OverviewTableContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

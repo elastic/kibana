@@ -51,8 +51,7 @@ export async function scheduleSourceMapMigration({
           async run() {
             logger.debug(`Run task: "${TASK_TYPE}"`);
             const coreStart = await coreStartPromise;
-            const internalESClient =
-              coreStart.elasticsearch.client.asInternalUser;
+            const internalESClient = coreStart.elasticsearch.client.asInternalUser;
 
             // ensure that the index template has been created before running migration
             await createApmSourceMapIndexTemplate({
@@ -112,9 +111,7 @@ export async function runFleetSourcemapArtifactsMigration({
   logger: Logger;
 }) {
   try {
-    const latestApmSourceMapTimestamp = await getLatestApmSourceMap(
-      internalESClient
-    );
+    const latestApmSourceMapTimestamp = await getLatestApmSourceMap(internalESClient);
     const createdDateFilter = latestApmSourceMapTimestamp
       ? ` AND created:>${asLuceneEncoding(latestApmSourceMapTimestamp)}`
       : '';

@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
     hostname: string;
   }
 
-  describe('@ess @serverless Tests involving runtime fields of source indexes and the alerts index', () => {
+  describe('@ess @serverless @serverlessQA Tests involving runtime fields of source indexes and the alerts index', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/runtime');
     });

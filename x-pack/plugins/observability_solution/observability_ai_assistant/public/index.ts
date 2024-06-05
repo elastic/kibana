@@ -28,9 +28,11 @@ export type {
   RenderFunction,
 };
 
+export { aiAssistantCapabilities } from '../common/capabilities';
 export { AssistantAvatar } from './components/assistant_avatar';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
+export { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 
 export { createStorybookChatService, createStorybookService } from './storybook_mock';
 
@@ -55,8 +57,6 @@ export {
   VisualizeESQLUserIntention,
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../common/functions/visualize_esql';
-
-export { getAssistantSystemMessage } from './service/get_assistant_system_message';
 
 export { isSupportedConnectorType } from '../common';
 export { FunctionVisibility } from '../common';
@@ -83,6 +83,7 @@ export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
 } from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<

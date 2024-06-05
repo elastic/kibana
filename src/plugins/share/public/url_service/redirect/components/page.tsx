@@ -38,7 +38,7 @@ export const Page: React.FC<PageProps> = ({
 
   if (error) {
     return (
-      <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
+      <KibanaThemeProvider theme={theme}>
         <EuiPageTemplate>
           <RedirectEmptyPrompt docTitle={docTitle} error={error} homeHref={homeHref} />
         </EuiPageTemplate>
@@ -47,7 +47,7 @@ export const Page: React.FC<PageProps> = ({
   }
 
   return (
-    <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
+    <KibanaThemeProvider theme={theme}>
       <EuiPageTemplate>
         <Spinner showPlainSpinner={Boolean(hasCustomBranding)} />
       </EuiPageTemplate>

@@ -8,7 +8,7 @@
 
 const create = () => {
   const mock = {
-    detectCloudService: jest.fn(),
+    detectCloudService: jest.fn(async () => {}), // We need it to be a promise, or it'll crash because of missing `.catch`
     getCloudDetails: jest.fn(),
   };
 

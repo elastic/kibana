@@ -13,7 +13,10 @@ import {
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import {
+  ExpressionValueVisDimension,
+  PartitionLegendValue,
+} from '@kbn/visualizations-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { waffleVisFunction } from './waffle_vis_function';
 import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
@@ -34,7 +37,7 @@ describe('interpreter/functions#waffleVis', () => {
 
   const visConfig: WaffleVisConfig = {
     addTooltip: true,
-    showValuesInLegend: true,
+    legendStats: [PartitionLegendValue.Value],
     metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',

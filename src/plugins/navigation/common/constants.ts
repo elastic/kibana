@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'navigation.solutionNavEnabled';
-
-export const ENABLE_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:enable';
+export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';

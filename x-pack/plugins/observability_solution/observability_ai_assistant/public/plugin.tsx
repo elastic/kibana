@@ -29,7 +29,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
-import { getObsAIAssistantConnectorType } from './rule_connector';
+import { aiAssistantCapabilities } from '../common/capabilities';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -62,7 +62,10 @@ export class ObservabilityAIAssistantPlugin
     const service = (this.service = createService({
       analytics: coreStart.analytics,
       coreStart,
-      enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+      enabled:
+        coreStart.application.capabilities.observabilityAIAssistant[
+          aiAssistantCapabilities.show
+        ] === true,
     }));
 
     const withProviders = <P extends {}, R = {}>(
@@ -87,10 +90,6 @@ export class ObservabilityAIAssistantPlugin
     };
 
     const isEnabled = service.isEnabled();
-
-    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-      getObsAIAssistantConnectorType(service)
-    );
 
     return {
       service,

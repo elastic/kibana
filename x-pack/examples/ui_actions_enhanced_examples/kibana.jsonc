@@ -22,8 +22,7 @@
     "requiredBundles": [
       "dashboardEnhanced",
       "embeddable",
-      "kibanaUtils",
-      "kibanaReact"
+      "kibanaUtils"
     ]
   }
 }

@@ -42,19 +42,13 @@ export async function getRootTransactionByTraceId({
               },
             },
           ],
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            ...rangeQuery(start, end),
-          ],
+          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
         },
       },
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_root_transaction_by_trace_id',
-    params
-  );
+  const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);
   return {
     transaction: resp.hits.hits[0]?._source,
   };

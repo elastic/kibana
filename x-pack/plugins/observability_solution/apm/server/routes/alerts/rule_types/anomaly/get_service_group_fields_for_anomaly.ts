@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,

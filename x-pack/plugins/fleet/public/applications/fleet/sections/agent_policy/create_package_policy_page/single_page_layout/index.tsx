@@ -34,7 +34,11 @@ import {
 
 import { useCancelAddPackagePolicy } from '../hooks';
 
-import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
+import {
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+  splitPkgKey,
+} from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
 import {
@@ -75,6 +79,7 @@ import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
+import { RootPrivilegesCallout } from './root_callout';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -226,10 +231,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }
     };
 
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      setAgentCount(0);
+      return;
+    }
+
     if (isFleetEnabled && agentPolicyId) {
       getAgentCount();
     }
-  }, [agentPolicyId, isFleetEnabled]);
+  }, [agentPolicyId, selectedPolicyTab, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -319,6 +329,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateNewAgentPolicy,
       updateAgentPolicy,
       setSelectedPolicyTab,
+      packageInfo,
     });
 
   const replaceStepConfigurePackagePolicy =
@@ -403,6 +414,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }),
       'data-test-subj': 'dataCollectionSetupStep',
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      headingElement: 'h2',
     },
   ];
 
@@ -412,6 +424,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Where to add this integration?',
       }),
       children: stepSelectAgentPolicy,
+      headingElement: 'h2',
     });
   }
 
@@ -429,6 +442,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
+
+  const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -438,6 +454,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             agentPolicy={agentPolicy}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
+            showUnprivilegedAgentsCallout={Boolean(
+              packageInfo &&
+                isRootPrivilegesRequired(packageInfo) &&
+                (agentPolicy?.unprivileged_agents ?? 0) > 0
+            )}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+            dataStreams={rootPrivilegedDataStreams}
           />
         )}
         {formState === 'SUBMITTED_NO_AGENTS' &&
@@ -483,21 +506,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         )}
         {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
           <>
-            <EuiCallOut
-              size="s"
-              color="warning"
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.requireRootCalloutTitle"
-                  defaultMessage="Requires root privileges"
-                />
-              }
-            >
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
-                defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
-              />
-            </EuiCallOut>
+            <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
             <EuiSpacer size="m" />
           </>
         ) : null}

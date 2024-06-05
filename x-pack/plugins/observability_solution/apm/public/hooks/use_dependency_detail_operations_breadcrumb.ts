@@ -29,10 +29,9 @@ export function useDependencyDetailOperationsBreadcrumb() {
   useBreadcrumb(
     () => [
       {
-        title: i18n.translate(
-          'xpack.apm.dependencyDetailOperations.breadcrumbTitle',
-          { defaultMessage: 'Operations' }
-        ),
+        title: i18n.translate('xpack.apm.dependencyDetailOperations.breadcrumbTitle', {
+          defaultMessage: 'Operations',
+        }),
         href: apmRouter.link('/dependencies/operations', {
           query: {
             dependencyName,

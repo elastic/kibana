@@ -160,7 +160,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     idleSocket?: number;
   };
 
-  /** Human-friendly description of this endpoint */
+  /** A short, human-friendly description of this endpoint */
   description?: string;
 }
 

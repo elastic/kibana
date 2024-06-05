@@ -8,7 +8,10 @@
 
 import { Router } from '../router';
 
-export function createRouter() {
+interface CreateMockRouterOptions {
+  pluginId?: symbol;
+}
+export function createRouter(opts: CreateMockRouterOptions = {}) {
   return {
     delete: jest.fn(),
     get: jest.fn(),
@@ -19,5 +22,6 @@ export function createRouter() {
     patch: jest.fn(),
     routerPath: '',
     versioned: {} as any,
+    pluginId: opts.pluginId,
   } as unknown as jest.Mocked<Router>;
 }

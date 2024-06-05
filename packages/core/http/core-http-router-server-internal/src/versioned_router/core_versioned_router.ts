@@ -43,6 +43,7 @@ export interface VersionedRouterArgs {
 export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
   public readonly useVersionResolutionStrategyForInternalPaths: Map<string, boolean> = new Map();
+  public pluginId?: symbol;
   public static from({
     router,
     defaultHandlerResolutionStrategy,
@@ -62,6 +63,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     public readonly isDev: boolean = false,
     useVersionResolutionStrategyForInternalPaths: string[] = []
   ) {
+    this.pluginId = this.router.pluginId;
     for (const path of useVersionResolutionStrategyForInternalPaths) {
       this.useVersionResolutionStrategyForInternalPaths.set(path, true);
     }

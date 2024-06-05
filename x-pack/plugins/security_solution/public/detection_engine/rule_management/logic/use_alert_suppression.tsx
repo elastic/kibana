@@ -14,22 +14,21 @@ export interface UseAlertSuppressionReturn {
 }
 
 export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppressionReturn => {
-  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForNewTermsRuleEnabled'
+  const isAlertSuppressionForEsqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEsqlRuleEnabled'
   );
 
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) {
       return false;
     }
-
     // Remove this condition when the Feature Flag for enabling Suppression in the New terms rule is removed.
-    if (ruleType === 'new_terms') {
-      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForNewTermsRuleEnabled;
+    if (ruleType === 'esql') {
+      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForEsqlRuleEnabled;
     }
 
     return isSuppressibleAlertRule(ruleType);
-  }, [ruleType, isAlertSuppressionForNewTermsRuleEnabled]);
+  }, [ruleType, isAlertSuppressionForEsqlRuleEnabled]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),

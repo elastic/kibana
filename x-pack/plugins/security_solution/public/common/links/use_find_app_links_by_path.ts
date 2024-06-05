@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getNavigationPropsFromId } from '@kbn/security-solution-navigation';
 import { useCallback, useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import { APP_PATH } from '../../../common';
@@ -23,7 +24,8 @@ export const useFindAppLinksByPath = (navLinks: NavigationLink[] | undefined) =>
 
   const isCurrentPathItem = useCallback(
     (navItem: NavigationLink) => {
-      const appUrl = getAppUrl({ deepLinkId: navItem.id });
+      const { appId, deepLinkId } = getNavigationPropsFromId(navItem.id);
+      const appUrl = getAppUrl({ appId, deepLinkId });
       return !!matchPath(`${basePath}${APP_PATH}${pathname}`, { path: appUrl, strict: false });
     },
     [basePath, getAppUrl, pathname]

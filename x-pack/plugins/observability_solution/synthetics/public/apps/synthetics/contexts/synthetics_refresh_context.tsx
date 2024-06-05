@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  FC,
+  PropsWithChildren,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useEvent } from 'react-use';
 import moment from 'moment';
@@ -25,7 +34,7 @@ const defaultContext: SyntheticsRefreshContext = {
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
+export const SyntheticsRefreshContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshPaused = useSelector(selectRefreshPaused);

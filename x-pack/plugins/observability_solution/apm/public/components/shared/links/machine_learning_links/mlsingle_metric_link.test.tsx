@@ -13,12 +13,9 @@ import { MLSingleMetricLink } from './mlsingle_metric_link';
 describe('MLSingleMetricLink', () => {
   it('should produce the correct URL with jobId', async () => {
     const href = await getRenderedHref(
-      () => (
-        <MLSingleMetricLink jobId="myservicename-mytransactiontype-high_mean_response_time" />
-      ),
+      () => <MLSingleMetricLink jobId="myservicename-mytransactiontype-high_mean_response_time" />,
       {
-        search:
-          '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
+        search: '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 
@@ -36,8 +33,7 @@ describe('MLSingleMetricLink', () => {
         />
       ),
       {
-        search:
-          '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
+        search: '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 

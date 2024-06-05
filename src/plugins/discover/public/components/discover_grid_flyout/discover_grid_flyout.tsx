@@ -14,22 +14,26 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   EuiSpacer,
   EuiPortal,
   EuiPagination,
   keys,
+  EuiButtonEmpty,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { Filter, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
@@ -55,6 +59,8 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
     return h.id === id;
   });
 }
+
+export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 /**
  * Flyout displaying an expanded Elasticsearch document
  */
@@ -75,8 +81,14 @@ export function DiscoverGridFlyout({
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
-
-  const isPlainRecord = isTextBasedQuery(query);
+  const { euiTheme } = useEuiTheme();
+  const isXlScreen = useIsWithinMinBreakpoint('xl');
+  const DEFAULT_WIDTH = euiTheme.base * 34;
+  const defaultWidth = flyoutCustomization?.size ?? DEFAULT_WIDTH; // Give enough room to search bar to not wrap
+  const [flyoutWidth, setFlyoutWidth] = useLocalStorage(FLYOUT_WIDTH_KEY, defaultWidth);
+  const minWidth = euiTheme.base * 24;
+  const maxWidth = euiTheme.breakpoint.xl;
+  const isEsqlQuery = isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
@@ -128,7 +140,7 @@ export function DiscoverGridFlyout({
       onAddColumn(columnName);
       services.toastNotifications.addSuccess(
         i18n.translate('discover.grid.flyout.toastColumnAdded', {
-          defaultMessage: `Column '{columnName}' was added`,
+          defaultMessage: `Column ''{columnName}'' was added`,
           values: { columnName },
         })
       );
@@ -141,7 +153,7 @@ export function DiscoverGridFlyout({
       onRemoveColumn(columnName);
       services.toastNotifications.addSuccess(
         i18n.translate('discover.grid.flyout.toastColumnRemoved', {
-          defaultMessage: `Column '{columnName}' was removed`,
+          defaultMessage: `Column ''{columnName}'' was removed`,
           values: { columnName },
         })
       );
@@ -159,7 +171,7 @@ export function DiscoverGridFlyout({
         hit={actualHit}
         onAddColumn={addColumn}
         onRemoveColumn={removeColumn}
-        textBasedHits={isPlainRecord ? hits : undefined}
+        textBasedHits={isEsqlQuery ? hits : undefined}
         docViewsRegistry={flyoutCustomization?.docViewsRegistry}
       />
     ),
@@ -170,7 +182,7 @@ export function DiscoverGridFlyout({
       columnsMeta,
       dataView,
       hits,
-      isPlainRecord,
+      isEsqlQuery,
       onFilter,
       removeColumn,
       flyoutCustomization?.docViewsRegistry,
@@ -196,24 +208,33 @@ export function DiscoverGridFlyout({
     renderDefaultContent()
   );
 
-  const defaultFlyoutTitle = isPlainRecord
-    ? i18n.translate('discover.grid.tableRow.docViewerTextBasedDetailHeading', {
+  const defaultFlyoutTitle = isEsqlQuery
+    ? i18n.translate('discover.grid.tableRow.docViewerEsqlDetailHeading', {
         defaultMessage: 'Result',
       })
     : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
         defaultMessage: 'Document',
       });
   const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
-  const flyoutSize = flyoutCustomization?.size ?? 'm';
 
   return (
     <EuiPortal>
-      <EuiFlyout
+      <EuiFlyoutResizable
+        className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
-        size={flyoutSize}
+        type="push"
+        size={flyoutWidth}
+        pushMinBreakpoint="xl"
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
-        ownFocus={false}
+        ownFocus={true}
+        minWidth={minWidth}
+        maxWidth={maxWidth}
+        onResize={setFlyoutWidth}
+        css={{
+          maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
+        }}
+        paddingSize="m"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
@@ -225,7 +246,7 @@ export function DiscoverGridFlyout({
           >
             <EuiFlexItem grow={false}>
               <EuiTitle
-                size="s"
+                size="xs"
                 data-test-subj="docTableRowDetailsTitle"
                 css={css`
                   white-space: nowrap;
@@ -249,7 +270,7 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          {isPlainRecord || !flyoutActions.length ? null : (
+          {isEsqlQuery || !flyoutActions.length ? null : (
             <>
               <EuiSpacer size="s" />
               <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
@@ -257,7 +278,14 @@ export function DiscoverGridFlyout({
           )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
-      </EuiFlyout>
+        <EuiFlyoutFooter>
+          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            {i18n.translate('discover.grid.flyout.close', {
+              defaultMessage: 'Close',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      </EuiFlyoutResizable>
     </EuiPortal>
   );
 }

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './src';
+export * from './src/types';
+
+export * from './src/context';
+export * from './src/components';
+export * from './src/hooks';

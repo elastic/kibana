@@ -53,7 +53,7 @@
         "label": "ProfilingConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; readonly symbolizer?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly collector?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly enabled: boolean; }"
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; password: string; hosts: string; }> | undefined; readonly symbolizer?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly collector?: Readonly<{ telemetry?: boolean | undefined; host?: string | undefined; tls_enabled?: boolean | undefined; tls_supported_protocols?: string[] | undefined; tls_certificate_path?: string | undefined; tls_key_path?: string | undefined; } & {}> | undefined; readonly enabled: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/profiling/server/index.ts",
         "deprecated": false,
@@ -102,7 +102,7 @@
         "label": "getRoutePaths",
         "description": [],
         "signature": [
-          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; StorageExplorerSummary: string; StorageExplorerHostStorageDetails: string; StorageExplorerIndicesStorageDetails: string; }"
+          "() => { TopN: string; TopNContainers: string; TopNDeployments: string; TopNFunctions: string; TopNHosts: string; TopNThreads: string; TopNTraces: string; APMTransactions: string; Flamechart: string; HasSetupESResources: string; SetupDataCollectionInstructions: string; StorageExplorerSummary: string; StorageExplorerHostStorageDetails: string; StorageExplorerIndicesStorageDetails: string; }"
         ],
         "path": "x-pack/plugins/observability_solution/profiling/common/index.ts",
         "deprecated": false,

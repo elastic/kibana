@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termsQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
+import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
@@ -72,19 +64,14 @@ export async function getServiceStats({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_stats_for_service_map',
-    params
-  );
+  const response = await apmEventClient.search('get_service_stats_for_service_map', params);
 
   return (
     response.aggregations?.services.buckets.map((bucket) => {
       return {
         [SERVICE_NAME]: bucket.key as string,
-        [AGENT_NAME]:
-          (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]:
-          environment === ENVIRONMENT_ALL.value ? null : environment,
+        [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+        [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
       };
     }) || []
   );

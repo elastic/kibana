@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -125,15 +120,10 @@ export function TopErrors() {
                 start,
                 end,
                 numBuckets: 20,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
+                offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
               body: {
-                groupIds: JSON.stringify(
-                  items.map(({ groupId: groupId }) => groupId).sort()
-                ),
+                groupIds: JSON.stringify(items.map(({ groupId: groupId }) => groupId).sort()),
               },
             },
           }
@@ -159,11 +149,7 @@ export function TopErrors() {
   });
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      data-test-subj="topErrorsForTransactionTable"
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="topErrorsForTransactionTable">
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h2>
@@ -177,25 +163,19 @@ export function TopErrors() {
         <EuiBasicTable
           error={
             status === FETCH_STATUS.FAILURE
-              ? i18n.translate(
-                  'xpack.apm.transactionDetails.topErrors.errorMessage',
-                  { defaultMessage: 'Failed to fetch errors' }
-                )
+              ? i18n.translate('xpack.apm.transactionDetails.topErrors.errorMessage', {
+                  defaultMessage: 'Failed to fetch errors',
+                })
               : ''
           }
           noItemsMessage={
             status === FETCH_STATUS.LOADING
-              ? i18n.translate(
-                  'xpack.apm.transactionDetails.topErrors.loading',
-                  { defaultMessage: 'Loading...' }
-                )
-              : i18n.translate(
-                  'xpack.apm.transactionDetails.topErrors.noResults',
-                  {
-                    defaultMessage:
-                      'No errors found for this transaction group',
-                  }
-                )
+              ? i18n.translate('xpack.apm.transactionDetails.topErrors.loading', {
+                  defaultMessage: 'Loading...',
+                })
+              : i18n.translate('xpack.apm.transactionDetails.topErrors.noResults', {
+                  defaultMessage: 'No errors found for this transaction group',
+                })
           }
           columns={columns}
           items={items}

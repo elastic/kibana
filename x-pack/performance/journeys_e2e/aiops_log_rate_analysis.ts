@@ -33,8 +33,14 @@ export const journey = new Journey({
     await page.waitForSelector(subj('aiopsNoWindowParametersEmptyPrompt'));
   })
   .step('Run AIOps Log Rate Analysis', async ({ page }) => {
-    // Select the chart and click in the area where the spike is located to trigger log rate analysis.
+    // Select the chart and click in the area where the spike is located.
     const chart = await page.locator(subj('aiopsDocumentCountChart'));
     await chart.click({ position: { x: 710, y: 50 } });
+
+    // Click the "Run analysis" button.
+    await page.waitForSelector(subj('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton'));
+    await page.click(subj('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton'));
+
+    // Wait for the analysis to complete.
     await page.waitForSelector(subj('aiopsAnalysisComplete'), { timeout: 120000 });
   });

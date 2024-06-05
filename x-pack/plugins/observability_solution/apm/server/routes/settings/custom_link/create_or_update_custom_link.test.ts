@@ -33,46 +33,40 @@ describe('Create or Update Custom link', () => {
     mockNow(1570737000000);
   });
 
-  it('creates a new custom link', () => {
-    createOrUpdateCustomLink({
+  it('creates a new custom link', async () => {
+    await createOrUpdateCustomLink({
       customLink,
       internalESClient: mockInternalESClient,
     });
-    expect(internalClientIndexMock).toHaveBeenCalledWith(
-      'create_or_update_custom_link',
-      {
-        refresh: 'wait_for',
-        index: '.apm-custom-link',
-        body: {
-          '@timestamp': 1570737000000,
-          label: 'foo',
-          url: 'http://elastic.com/{{trace.id}}',
-          'service.name': ['opbeans-java'],
-          'transaction.type': ['Request'],
-        },
-      }
-    );
+    expect(internalClientIndexMock).toHaveBeenCalledWith('create_or_update_custom_link', {
+      refresh: 'wait_for',
+      index: '.apm-custom-link',
+      body: {
+        '@timestamp': 1570737000000,
+        label: 'foo',
+        url: 'http://elastic.com/{{trace.id}}',
+        'service.name': ['opbeans-java'],
+        'transaction.type': ['Request'],
+      },
+    });
   });
-  it('update a new custom link', () => {
-    createOrUpdateCustomLink({
+  it('update a new custom link', async () => {
+    await createOrUpdateCustomLink({
       customLinkId: 'bar',
       customLink,
       internalESClient: mockInternalESClient,
     });
-    expect(internalClientIndexMock).toHaveBeenCalledWith(
-      'create_or_update_custom_link',
-      {
-        refresh: 'wait_for',
-        index: '.apm-custom-link',
-        id: 'bar',
-        body: {
-          '@timestamp': 1570737000000,
-          label: 'foo',
-          url: 'http://elastic.com/{{trace.id}}',
-          'service.name': ['opbeans-java'],
-          'transaction.type': ['Request'],
-        },
-      }
-    );
+    expect(internalClientIndexMock).toHaveBeenCalledWith('create_or_update_custom_link', {
+      refresh: 'wait_for',
+      index: '.apm-custom-link',
+      id: 'bar',
+      body: {
+        '@timestamp': 1570737000000,
+        label: 'foo',
+        url: 'http://elastic.com/{{trace.id}}',
+        'service.name': ['opbeans-java'],
+        'transaction.type': ['Request'],
+      },
+    });
   });
 });

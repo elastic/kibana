@@ -15,12 +15,9 @@ import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
 
-export const expectedBoundsTitle = i18n.translate(
-  'xpack.apm.comparison.expectedBoundsTitle',
-  {
-    defaultMessage: 'Expected bounds',
-  }
-);
+export const expectedBoundsTitle = i18n.translate('xpack.apm.comparison.expectedBoundsTitle', {
+  defaultMessage: 'Expected bounds',
+});
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
   theme,
@@ -97,7 +94,7 @@ export function getChartAnomalyTimeseries({
     return {
       title: i18n.translate('xpack.apm.anomalyScore', {
         defaultMessage:
-          '{severity, select, minor {Minor} major {Major} critical {Critical}} anomaly',
+          '{severity, select, minor {Minor} major {Major} critical {Critical} other {unknown severity}} anomaly',
         values: {
           severity,
         },

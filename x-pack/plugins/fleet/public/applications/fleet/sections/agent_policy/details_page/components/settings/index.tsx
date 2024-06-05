@@ -68,7 +68,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const {
       agents: { enabled: isFleetEnabled },
     } = useConfig();
-    const hasFleetAllPrivileges = useAuthz().fleet.all;
+    const hasAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
@@ -98,7 +98,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         if (data) {
           notifications.toasts.addSuccess(
             i18n.translate('xpack.fleet.editAgentPolicy.successNotificationTitle', {
-              defaultMessage: "Successfully updated '{name}' settings",
+              defaultMessage: "Successfully updated ''{name}'' settings",
               values: { name: agentPolicy.name },
             })
           );
@@ -228,7 +228,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={
-                          !hasFleetAllPrivileges ||
+                          !hasAllAgentPoliciesPrivileges ||
                           isLoading ||
                           Object.keys(validation).length > 0 ||
                           hasAdvancedSettingsErrors

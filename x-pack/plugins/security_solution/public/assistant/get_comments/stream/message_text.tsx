@@ -5,6 +5,10 @@
  * 2.0.
  */
 import {
+  EuiTable,
+  EuiTableRow,
+  EuiTableRowCell,
+  EuiTableHeaderCell,
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
@@ -114,36 +118,21 @@ const getPluginDependencies = () => {
     },
     table: (props) => (
       <>
-        <div className="euiBasicTable">
-          {' '}
-          <table className="euiTable" {...props} />
-        </div>
+        <EuiTable {...props} />
         <EuiSpacer size="m" />
       </>
     ),
     th: (props) => {
       const { children, ...rest } = props;
-      return (
-        <th className="euiTableHeaderCell" {...rest}>
-          <span className="euiTableCellContent">
-            <span className="euiTableCellContent__text" title={children}>
-              {children}
-            </span>
-          </span>
-        </th>
-      );
+      return <EuiTableHeaderCell {...rest}>{children}</EuiTableHeaderCell>;
     },
-    tr: (props) => <tr className="euiTableRow" {...props} />,
+    tr: (props) => <EuiTableRow {...props} />,
     td: (props) => {
       const { children, ...rest } = props;
       return (
-        <td className="euiTableRowCell" {...rest}>
-          <div className="euiTableCellContent euiTableCellContent--truncateText">
-            <span className="euiTableCellContent__text" title={children}>
-              {children}
-            </span>
-          </div>
-        </td>
+        <EuiTableRowCell truncateText={true} {...rest}>
+          {children}
+        </EuiTableRowCell>
       );
     },
   };

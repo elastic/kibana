@@ -122,6 +122,12 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreAuditService,
+  AuditEvent,
+  AuditHttp,
+  AuditKibana,
+  AuditRequest,
+  AuditLogger,
 } from '@kbn/core-security-server';
 export type {
   User,
@@ -129,6 +135,20 @@ export type {
   AuthenticatedUser,
   AuthenticationProvider,
 } from '@kbn/core-security-common';
+
+export type {
+  UserProfileUserInfo,
+  UserProfile,
+  UserProfileUserInfoWithSecurity,
+  UserProfileWithSecurity,
+  UserProfileLabels,
+  UserProfileData,
+} from '@kbn/core-user-profile-common';
+export type {
+  UserProfileRequestHandlerContext,
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+} from '@kbn/core-user-profile-server';
 
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
@@ -212,6 +232,7 @@ export type {
   HttpServiceStart,
   RawRequest,
   FakeRawRequest,
+  HttpProtocol,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 

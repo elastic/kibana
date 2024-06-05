@@ -30,7 +30,6 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  ENABLE_ESQL,
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
@@ -309,26 +308,5 @@ export const getUiSettings: (
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-  },
-  [ENABLE_ESQL]: {
-    name: i18n.translate('discover.advancedSettings.enableESQLTitle', {
-      defaultMessage: 'Enable ES|QL',
-    }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
-      defaultMessage:
-        'This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
-      values: {
-        link:
-          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
-            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
-          }) +
-          '</a>',
-      },
-    }),
-    requiresPageReload: true,
-    category: ['discover'],
-    schema: schema.boolean(),
   },
 });

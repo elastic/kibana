@@ -19,7 +19,10 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
@@ -28,8 +31,8 @@ import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 
@@ -51,19 +54,50 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   const dispatch = useDispatch();
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
+  const { telemetry } = useKibana().services;
+  const { openFlyout } = useExpandableFlyoutApi();
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+
   const handleClick = useCallback(() => {
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        panelView: 'eventDetail',
-        tabType: TimelineTabs.notes,
-        id: timelineId,
-        params: {
-          eventId,
-          indexName: selectedPatterns.join(','),
+    const indexName = selectedPatterns.join(',');
+
+    if (!expandableFlyoutDisabled) {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
         },
-      })
-    );
-  }, [dispatch, eventId, selectedPatterns, timelineId]);
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: timelineId,
+        panel: 'right',
+      });
+    } else {
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          panelView: 'eventDetail',
+          tabType: TimelineTabs.notes,
+          id: timelineId,
+          params: {
+            eventId,
+            indexName,
+          },
+        })
+      );
+    }
+  }, [
+    dispatch,
+    eventId,
+    expandableFlyoutDisabled,
+    openFlyout,
+    selectedPatterns,
+    telemetry,
+    timelineId,
+  ]);
 
   return (
     <EuiButtonIcon

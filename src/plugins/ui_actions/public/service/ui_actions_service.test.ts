@@ -10,8 +10,8 @@ import { UiActionsService } from './ui_actions_service';
 import { ActionDefinition, ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { TriggerRegistry, ActionRegistry } from '../types';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { OverlayStart } from '@kbn/core/public';
 
 const FOO_TRIGGER = 'FOO_TRIGGER';
 const BAR_TRIGGER = 'BAR_TRIGGER';
@@ -159,10 +159,12 @@ describe('UiActionsService', () => {
   });
 
   describe('.getTriggerCompatibleActions()', () => {
+    const coreStart = coreMock.createStart();
+
     test('can register and get actions', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
-      const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
+      const helloWorldAction = createHelloWorldAction(coreStart);
       const length = actions.size;
 
       service.registerAction(helloWorldAction);
@@ -173,7 +175,7 @@ describe('UiActionsService', () => {
 
     test('getTriggerCompatibleActions returns attached actions', async () => {
       const service = new UiActionsService();
-      const helloWorldAction = createHelloWorldAction({} as unknown as OverlayStart);
+      const helloWorldAction = createHelloWorldAction(coreStart);
 
       service.registerAction(helloWorldAction);
 

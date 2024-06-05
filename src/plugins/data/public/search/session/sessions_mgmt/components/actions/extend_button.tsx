@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import moment from 'moment';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { IClickActionDescriptor } from '..';
 import { OnActionDismiss } from './types';
@@ -42,7 +42,8 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
     defaultMessage: 'Cancel',
   });
   const message = i18n.translate('data.mgmt.searchSessions.extendModal.extendMessage', {
-    defaultMessage: "The search session '{name}' expiration would be extended until {newExpires}.",
+    defaultMessage:
+      "The search session ''{name}'' expiration would be extended until {newExpires}.",
     values: {
       name,
       newExpires: newExpiration.toLocaleString(),
@@ -81,7 +82,7 @@ export const createExtendActionDescriptor = (
     const ref = core.overlays.openModal(
       toMountPoint(
         <ExtendConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
-        { theme$: core.theme.theme$ }
+        core
       )
     );
     await ref.onClose;

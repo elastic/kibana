@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  CoreStart,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { CoreStart, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { promisify } from 'util';
 import { unzip } from 'zlib';
 import { Artifact } from '@kbn/fleet-plugin/server';
@@ -134,13 +130,7 @@ export async function updateSourceMapsOnFleetPolicies({
 
   return Promise.all(
     apmFleetPolicies.items.map(async (item) => {
-      const {
-        id,
-        revision,
-        updated_at: updatedAt,
-        updated_by: updatedBy,
-        ...packagePolicy
-      } = item;
+      const { id, revision, updated_at: updatedAt, updated_by: updatedBy, ...packagePolicy } = item;
 
       const updatedPackagePolicy = getPackagePolicyWithSourceMap({
         packagePolicy,

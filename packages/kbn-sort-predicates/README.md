@@ -9,6 +9,7 @@ This package contains a flexible sorting function who supports the following typ
 * dates (both as number or ISO string)
 * ranges open and closed (number type only for now)
 * null and undefined (always sorted as last entries, no matter the direction)
+  * if it matters the difference: null values are sorted always before undefined ones
 * any multi-value version of the types above (version excluded)
   * for multi-values with different length it wins the first non-zero comparison (see note at the bottom)
 

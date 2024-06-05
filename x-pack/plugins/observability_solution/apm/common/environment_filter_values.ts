@@ -10,15 +10,12 @@ import { escapeKuery } from '@kbn/es-query';
 import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import { Environment } from './environment_rt';
 
-const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
+export const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
 
-export const allOptionText = i18n.translate(
-  'xpack.apm.filter.environment.allLabel',
-  {
-    defaultMessage: 'All',
-  }
-);
+export const allOptionText = i18n.translate('xpack.apm.filter.environment.allLabel', {
+  defaultMessage: 'All',
+});
 
 export function getEnvironmentLabel(environment: string): string {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
@@ -80,10 +77,8 @@ export function getNextEnvironmentUrlParam({
   requestedEnvironment?: string;
   currentEnvironmentUrlParam: Environment;
 }) {
-  const normalizedRequestedEnvironment =
-    requestedEnvironment || ENVIRONMENT_NOT_DEFINED.value;
-  const normalizedQueryEnvironment =
-    currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;
+  const normalizedRequestedEnvironment = requestedEnvironment || ENVIRONMENT_NOT_DEFINED.value;
+  const normalizedQueryEnvironment = currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;
 
   if (normalizedRequestedEnvironment === normalizedQueryEnvironment) {
     return currentEnvironmentUrlParam || ENVIRONMENT_ALL.value;

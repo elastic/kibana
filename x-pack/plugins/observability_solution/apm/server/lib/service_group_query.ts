@@ -9,8 +9,6 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ServiceGroup } from '../../common/service_groups';
 
-export function serviceGroupQuery(
-  serviceGroup?: ServiceGroup | null
-): QueryDslQueryContainer[] {
+export function serviceGroupQuery(serviceGroup?: ServiceGroup | null): QueryDslQueryContainer[] {
   return serviceGroup ? kqlQuery(serviceGroup?.kuery) : [];
 }

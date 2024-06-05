@@ -7,23 +7,12 @@
 
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import {
-  DATE_1970,
-  mockedRule,
-  mockTaskInstance,
-  RULE_ID,
-  RULE_NAME,
-  RULE_TYPE_ID,
-} from './fixtures';
+import { DATE_1970, mockTaskInstance, RULE_ID, RULE_NAME, RULE_TYPE_ID } from './fixtures';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { RuleTypeRunner } from './rule_type_runner';
+import { RuleTypeRunner, RuleData } from './rule_type_runner';
 import { TaskRunnerTimer } from './task_runner_timer';
-import {
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
-  RecoveredActionGroup,
-} from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup } from '../types';
 import { TaskRunnerContext } from './types';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -34,6 +23,13 @@ import { publicRuleResultServiceMock } from '../monitoring/rule_result_service.m
 import { wrappedScopedClusterClientMock } from '../lib/wrap_scoped_cluster_client.mock';
 import { wrappedSearchSourceClientMock } from '../lib/wrap_search_source_client.mock';
 import { NormalizedRuleType } from '../rule_type_registry';
+import {
+  ConcreteTaskInstance,
+  createTaskRunError,
+  TaskErrorSource,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const alertsClient = alertsClientMock.create();
@@ -74,6 +70,64 @@ const ruleType: jest.Mocked<
   validLegacyConsumers: [],
 };
 
+const mockedRule: RuleData<Record<string, unknown>> = {
+  alertTypeId: ruleType.id,
+  consumer: 'bar',
+  schedule: { interval: '10s' },
+  throttle: null,
+  notifyWhen: 'onActiveAlert',
+  name: RULE_NAME,
+  tags: ['rule-', '-tags'],
+  createdBy: 'rule-creator',
+  updatedBy: 'rule-updater',
+  createdAt: new Date('2019-02-12T21:01:22.479Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  enabled: true,
+  actions: [
+    {
+      group: 'default',
+      actionTypeId: 'action',
+      params: {
+        foo: true,
+      },
+      uuid: '111-111',
+      id: '1',
+    },
+    {
+      group: RecoveredActionGroup.id,
+      actionTypeId: 'action',
+      params: {
+        isResolved: true,
+      },
+      uuid: '222-222',
+      id: '2',
+    },
+  ],
+  muteAll: false,
+  revision: 0,
+};
+
+const mockedRuleParams = { bar: true };
+
+const mockedTaskInstance: ConcreteTaskInstance = {
+  id: '',
+  attempts: 0,
+  status: TaskStatus.Running,
+  version: '123',
+  runAt: new Date(),
+  scheduledAt: new Date(),
+  startedAt: new Date(DATE_1970),
+  retryAt: new Date(Date.now() + 5 * 60 * 1000),
+  state: {},
+  taskType: 'backfill',
+  timeoutOverride: '3m',
+  params: {
+    adHocRunParamsId: 'abc',
+    spaceId: 'default',
+  },
+  ownerId: null,
+};
+
 describe('RuleTypeRunner', () => {
   let ruleTypeRunner: RuleTypeRunner<{}, {}, { foo: string }, {}, {}, 'default', 'recovered', {}>;
   let context: TaskRunnerContext;
@@ -95,9 +149,9 @@ describe('RuleTypeRunner', () => {
       {}
     >({
       context,
-      timer,
       logger,
-      ruleType,
+      task: mockedTaskInstance,
+      timer,
     });
   });
 
@@ -109,7 +163,7 @@ describe('RuleTypeRunner', () => {
         context: {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+          queryDelaySec: 0,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -127,9 +181,10 @@ describe('RuleTypeRunner', () => {
           wrappedSearchSourceClient,
         },
         rule: mockedRule,
+        ruleType,
         startedAt: new Date(DATE_1970),
         state: mockTaskInstance().state,
-        validatedParams: mockedRule.params,
+        validatedParams: mockedRuleParams,
       });
 
       expect(ruleType.executor).toHaveBeenCalledWith({
@@ -148,9 +203,10 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -191,12 +247,12 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         eventLogger: alertingEventLogger,
         ruleRunMetricsStore,
@@ -204,18 +260,15 @@ describe('RuleTypeRunner', () => {
       });
     });
 
-    test('should return error when checkLimitUsage() throws error', async () => {
-      const err = new Error('limit exceeded');
-      alertsClient.checkLimitUsage.mockImplementationOnce(() => {
-        throw err;
-      });
+    test('should identify when startedAt passed to executor does not equal task startedAt', async () => {
+      const differentStartedAt = new Date();
       ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
 
       const { state, error, stackTrace } = await ruleTypeRunner.run({
         context: {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+          queryDelaySec: 0,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -233,9 +286,10 @@ describe('RuleTypeRunner', () => {
           wrappedSearchSourceClient,
         },
         rule: mockedRule,
-        startedAt: new Date(DATE_1970),
+        ruleType,
+        startedAt: differentStartedAt,
         state: mockTaskInstance().state,
-        validatedParams: mockedRule.params,
+        validatedParams: mockedRuleParams,
       });
 
       expect(ruleType.executor).toHaveBeenCalledWith({
@@ -254,9 +308,179 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
+        state: mockTaskInstance().state,
+        startedAt: differentStartedAt,
+        startedAtOverridden: true,
+        previousStartedAt: null,
+        spaceId: 'default',
+        rule: {
+          id: RULE_ID,
+          name: mockedRule.name,
+          tags: mockedRule.tags,
+          consumer: mockedRule.consumer,
+          producer: ruleType.producer,
+          revision: mockedRule.revision,
+          ruleTypeId: mockedRule.alertTypeId,
+          ruleTypeName: ruleType.name,
+          enabled: mockedRule.enabled,
+          schedule: mockedRule.schedule,
+          actions: mockedRule.actions,
+          createdBy: mockedRule.createdBy,
+          updatedBy: mockedRule.updatedBy,
+          createdAt: mockedRule.createdAt,
+          updatedAt: mockedRule.updatedAt,
+          throttle: mockedRule.throttle,
+          notifyWhen: mockedRule.notifyWhen,
+          muteAll: mockedRule.muteAll,
+          snoozeSchedule: mockedRule.snoozeSchedule,
+          alertDelay: mockedRule.alertDelay,
+        },
+        logger,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange: expect.any(Function),
+      });
+
+      expect(state).toEqual({ foo: 'bar' });
+      expect(error).toBeUndefined();
+      expect(stackTrace).toBeUndefined();
+      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
+      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
+      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
+        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
+      );
+      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
+        alertDelay: 0,
+        ruleRunMetricsStore,
+      });
+      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertingEventLogger.setMaintenanceWindowIds).not.toHaveBeenCalled();
+      expect(alertsClient.logAlerts).toHaveBeenCalledWith({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: true,
+      });
+    });
+
+    test('should update maintenance window ids in event logger if alerts are affected', async () => {
+      alertsClient.persistAlerts.mockResolvedValueOnce({
+        alertId: ['1'],
+        maintenanceWindowIds: ['abc'],
+      });
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      const { state, error, stackTrace } = await ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          dataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          wrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType,
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+
+      expect(ruleType.executor).toHaveBeenCalled();
+
+      expect(state).toEqual({ foo: 'bar' });
+      expect(error).toBeUndefined();
+      expect(stackTrace).toBeUndefined();
+      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
+      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
+      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
+        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
+      );
+      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        maintenanceWindowIds: [],
+        alertDelay: 0,
+        ruleRunMetricsStore,
+      });
+      expect(alertsClient.persistAlerts).toHaveBeenCalledWith([]);
+      expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(['abc']);
+      expect(alertsClient.logAlerts).toHaveBeenCalledWith({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: true,
+      });
+    });
+
+    test('should return error when checkLimitUsage() throws error', async () => {
+      const err = new Error('limit exceeded');
+      alertsClient.checkLimitUsage.mockImplementationOnce(() => {
+        throw err;
+      });
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      const { state, error, stackTrace } = await ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          dataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          wrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType,
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+
+      expect(ruleType.executor).toHaveBeenCalledWith({
+        executionId: 'abc',
+        services: {
+          alertFactory: alertsClient.factory(),
+          alertsClient: alertsClient.client(),
+          dataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          scopedClusterClient: wrappedScopedClusterClient.client(),
+          searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
+          share: {},
+          shouldStopExecution: expect.any(Function),
+          shouldWriteAlerts: expect.any(Function),
+          uiSettingsClient,
+        },
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -312,7 +536,7 @@ describe('RuleTypeRunner', () => {
         context: {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+          queryDelaySec: 0,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -330,9 +554,10 @@ describe('RuleTypeRunner', () => {
           wrappedSearchSourceClient,
         },
         rule: mockedRule,
+        ruleType,
         startedAt: new Date(DATE_1970),
         state: mockTaskInstance().state,
-        validatedParams: mockedRule.params,
+        validatedParams: mockedRuleParams,
       });
 
       expect(ruleType.executor).toHaveBeenCalledWith({
@@ -351,9 +576,10 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -399,15 +625,17 @@ describe('RuleTypeRunner', () => {
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
-    test('should handle reaching alert limit when rule type executor succeeds', async () => {
-      alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
-      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+    test('should return user error when rule type executor throws a user error', async () => {
+      const err = createTaskRunError(new Error('fail'), TaskErrorSource.USER);
+      ruleType.executor.mockImplementationOnce(() => {
+        throw err;
+      });
 
-      const { state, error, stackTrace } = await ruleTypeRunner.run({
+      const { error } = await ruleTypeRunner.run({
         context: {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+          queryDelaySec: 0,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -425,9 +653,45 @@ describe('RuleTypeRunner', () => {
           wrappedSearchSourceClient,
         },
         rule: mockedRule,
+        ruleType,
         startedAt: new Date(DATE_1970),
         state: mockTaskInstance().state,
-        validatedParams: mockedRule.params,
+        validatedParams: mockedRuleParams,
+      });
+
+      expect(getErrorSource(error!)).toEqual(TaskErrorSource.USER);
+    });
+
+    test('should handle reaching alert limit when rule type executor succeeds', async () => {
+      alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      const { state, error, stackTrace } = await ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          dataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          wrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType,
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
       });
 
       expect(ruleType.executor).toHaveBeenCalledWith({
@@ -446,9 +710,10 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -493,7 +758,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -518,7 +782,7 @@ describe('RuleTypeRunner', () => {
         context: {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+          queryDelaySec: 0,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
@@ -536,9 +800,10 @@ describe('RuleTypeRunner', () => {
           wrappedSearchSourceClient,
         },
         rule: mockedRule,
+        ruleType,
         startedAt: new Date(DATE_1970),
         state: mockTaskInstance().state,
-        validatedParams: mockedRule.params,
+        validatedParams: mockedRuleParams,
       });
 
       expect(ruleType.executor).toHaveBeenCalledWith({
@@ -557,9 +822,10 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -604,7 +870,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -629,7 +894,7 @@ describe('RuleTypeRunner', () => {
           context: {
             alertingEventLogger,
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+            queryDelaySec: 0,
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
@@ -647,9 +912,10 @@ describe('RuleTypeRunner', () => {
             wrappedSearchSourceClient,
           },
           rule: mockedRule,
+          ruleType,
           startedAt: new Date(DATE_1970),
           state: mockTaskInstance().state,
-          validatedParams: mockedRule.params,
+          validatedParams: mockedRuleParams,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"process alerts failed"`);
 
@@ -669,9 +935,10 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -709,7 +976,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -730,7 +996,7 @@ describe('RuleTypeRunner', () => {
           context: {
             alertingEventLogger,
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+            queryDelaySec: 0,
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
@@ -748,9 +1014,10 @@ describe('RuleTypeRunner', () => {
             wrappedSearchSourceClient,
           },
           rule: mockedRule,
+          ruleType,
           startedAt: new Date(DATE_1970),
           state: mockTaskInstance().state,
-          validatedParams: mockedRule.params,
+          validatedParams: mockedRuleParams,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"persist alerts failed"`);
 
@@ -770,9 +1037,10 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -810,7 +1078,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -831,7 +1098,7 @@ describe('RuleTypeRunner', () => {
           context: {
             alertingEventLogger,
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+            queryDelaySec: 0,
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
@@ -849,9 +1116,10 @@ describe('RuleTypeRunner', () => {
             wrappedSearchSourceClient,
           },
           rule: mockedRule,
+          ruleType,
           startedAt: new Date(DATE_1970),
           state: mockTaskInstance().state,
-          validatedParams: mockedRule.params,
+          validatedParams: mockedRuleParams,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"log alerts failed"`);
 
@@ -871,9 +1139,10 @@ describe('RuleTypeRunner', () => {
           shouldWriteAlerts: expect.any(Function),
           uiSettingsClient,
         },
-        params: mockedRule.params,
+        params: mockedRuleParams,
         state: mockTaskInstance().state,
         startedAt: new Date(DATE_1970),
+        startedAtOverridden: false,
         previousStartedAt: null,
         spaceId: 'default',
         rule: {
@@ -911,7 +1180,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,

@@ -56,11 +56,10 @@ export async function fetchSearchSourceQuery({
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
-
-  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+  const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
-  const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+  const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
     initialSearchSource,
     index,
     params,
@@ -102,7 +101,7 @@ export async function fetchSearchSourceQuery({
   };
 }
 
-export function updateSearchSource(
+export async function updateSearchSource(
   searchSource: ISearchSource,
   index: DataView,
   params: OnlySearchSourceRuleParams,
@@ -110,20 +109,19 @@ export function updateSearchSource(
   dateStart: string,
   dateEnd: string,
   alertLimit?: number
-): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
+): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const timeFieldName = params.timeField || index.timeFieldName;
+  const timeField = await index.getTimeField();
 
-  if (!timeFieldName) {
-    throw new Error('Invalid data view without timeFieldName.');
+  if (!timeField) {
+    throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
   }
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
-  const field = index.fields.find((f) => f.name === timeFieldName);
   const filters = [
     buildRangeFilter(
-      field!,
+      timeField,
       { lte: dateEnd, gte: dateStart, format: 'strict_date_optional_time' },
       index
     ),
@@ -135,7 +133,7 @@ export function updateSearchSource(
       // add additional filter for documents with a timestamp greater than
       // the timestamp of the previous run, so that those documents are not counted twice
       filterToExcludeHitsFromPreviousRun = buildRangeFilter(
-        field!,
+        timeField,
         { gt: latestTimestamp, format: 'strict_date_optional_time' },
         index
       );
@@ -150,7 +148,7 @@ export function updateSearchSource(
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [
     {
-      [timeFieldName]: {
+      [timeField.name]: {
         order: SortDirection.desc,
         format: 'strict_date_optional_time||epoch_millis',
       },

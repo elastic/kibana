@@ -50,15 +50,25 @@ export class TabbedAggResponseWriter {
   row() {
     const rowBuffer: TabbedAggRow = {};
 
-    this.bucketBuffer.forEach((bucket) => {
+    for (let i = 0; i < this.bucketBuffer.length; i++) {
+      const bucket = this.bucketBuffer[i];
       rowBuffer[bucket.id] = bucket.value;
-    });
+    }
 
-    this.metricBuffer.forEach((metric) => {
+    for (let i = 0; i < this.metricBuffer.length; i++) {
+      const metric = this.metricBuffer[i];
       rowBuffer[metric.id] = metric.value;
-    });
+    }
 
-    const isPartialRow = !this.columns.every((column) => rowBuffer.hasOwnProperty(column.id));
+    let isPartialRow = false;
+    for (let i = 0; i < this.columns.length; i++) {
+      const column = this.columns[i];
+      if (!rowBuffer.hasOwnProperty(column.id)) {
+        isPartialRow = true;
+        break;
+      }
+    }
+
     const removePartial = isPartialRow && !this.partialRows;
     if (!isEmpty(rowBuffer) && !removePartial) {
       this.rows.push(rowBuffer);

@@ -14,11 +14,7 @@ import type {
 import { groupBy } from 'lodash';
 import React from 'react';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
-import {
-  asPercent,
-  asTransactionRate,
-  getDurationFormatter,
-} from '../../common/utils/formatters';
+import { asPercent, asTransactionRate, getDurationFormatter } from '../../common/utils/formatters';
 import type {
   GetApmTimeseriesFunctionArguments,
   GetApmTimeseriesFunctionResponse,
@@ -45,10 +41,7 @@ export function registerGetApmTimeseriesFunction({
 }) {
   registerRenderFunction('get_apm_timeseries', (parameters) => {
     const { response } = parameters as Parameters<
-      RenderFunction<
-        GetApmTimeseriesFunctionArguments,
-        GetApmTimeseriesFunctionResponse
-      >
+      RenderFunction<GetApmTimeseriesFunctionArguments, GetApmTimeseriesFunctionResponse>
     >[0];
 
     const groupedSeries = groupBy(response.data, (series) => series.group);
@@ -109,15 +102,9 @@ export function registerGetApmTimeseriesFunction({
                       break;
 
                     case 'transaction_latency':
-                      if (
-                        series.stat.timeseries.function ===
-                        LatencyAggregationType.p99
-                      ) {
+                      if (series.stat.timeseries.function === LatencyAggregationType.p99) {
                         chartType = ChartType.LATENCY_P99;
-                      } else if (
-                        series.stat.timeseries.function ===
-                        LatencyAggregationType.p95
-                      ) {
+                      } else if (series.stat.timeseries.function === LatencyAggregationType.p95) {
                         chartType = ChartType.LATENCY_P95;
                       } else {
                         chartType = ChartType.LATENCY_AVG;

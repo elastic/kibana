@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { CoreStart, ToastInput } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { JobId } from '@kbn/reporting-common/types';
 import React from 'react';
 import { JobSummary } from '../types';
@@ -18,15 +18,15 @@ export const getSuccessToast = (
   job: JobSummary,
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string,
-  theme: ThemeServiceStart
+  core: CoreStart
 ): ToastInput => ({
   title: toMountPoint(
     <FormattedMessage
       id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
-      defaultMessage="{reportType} created for '{reportObjectTitle}'"
+      defaultMessage="{reportType} created for ''{reportObjectTitle}''"
       values={{ reportType: job.jobtype, reportObjectTitle: job.title }}
     />,
-    { theme$: theme.theme$ }
+    core
   ),
   color: 'success',
   text: toMountPoint(
@@ -36,7 +36,7 @@ export const getSuccessToast = (
       </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </>,
-    { theme$: theme.theme$ }
+    core
   ),
   'data-test-subj': 'completeReportSuccess',
 });

@@ -293,16 +293,14 @@ export const TestRunsTable = ({
       />
       <EuiBasicTable
         itemId="docId"
-        isExpandable={true}
         itemIdToExpandedRowMap={expandedRows}
         css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
-        compressed={false}
         loading={pingsLoading}
         columns={columns}
         error={pingsError?.body?.message}
         items={sortedPings}
         noItemsMessage={pingsLoading ? LOADING_TEST_RUNS : NO_DATA_FOUND}
-        tableLayout={'auto'}
+        tableLayout="auto"
         sorting={sorting}
         onChange={handleTableChange}
         rowProps={getRowProps}

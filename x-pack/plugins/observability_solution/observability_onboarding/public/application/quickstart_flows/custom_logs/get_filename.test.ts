@@ -21,10 +21,7 @@ describe('Observability onboarding - get_filename', () => {
     ['te_st', "/logs-on'boarding/te'st.log"],
     ['test_123', '/logs-onboarding/test 123.log'],
     ['t_e_s_t_1_2_3_', '/logs-onboarding/t-e%s*t#1@2!3$.log'],
-  ])(
-    'should return "%s" for filename "%s"',
-    (expectedFilename: string, filePath: string) => {
-      expect(getFilename(filePath)).toBe(expectedFilename);
-    }
-  );
+  ])('should return "%s" for filename "%s"', (expectedFilename: string, filePath: string) => {
+    expect(getFilename(filePath)).toBe(expectedFilename);
+  });
 });
