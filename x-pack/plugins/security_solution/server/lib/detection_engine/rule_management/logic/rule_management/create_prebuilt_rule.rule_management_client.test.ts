@@ -45,8 +45,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             immutable: true,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -88,8 +86,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             immutable: true,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -119,8 +115,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             immutable: true,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -146,8 +140,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             immutable: true,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -164,8 +156,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             immutable: true,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });

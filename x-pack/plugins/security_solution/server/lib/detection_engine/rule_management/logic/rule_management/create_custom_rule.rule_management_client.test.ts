@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { createCustomRule } from './detection_rules_client';
+import { createCustomRule } from './create_custom_rule';
 
 import {
   getCreateRulesSchemaMock,
@@ -44,8 +44,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -78,8 +76,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -105,8 +101,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -131,8 +125,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -147,8 +139,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });

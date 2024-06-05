@@ -64,7 +64,6 @@ describe('DetectionRulesClient.importRule', () => {
             version: ruleToImport.version,
           }),
         }),
-        options: {},
         allowMissingConnectorSecrets,
       })
     );

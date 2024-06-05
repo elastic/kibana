@@ -127,7 +127,6 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
           options: {
             id: installedRule.id, // id is maintained
           },
-          allowMissingConnectorSecrets: undefined,
         })
       );
     });
