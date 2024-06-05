@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { registerContextFunction } from './context';
+import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context';
 import { registerSummarizationFunction } from './summarize';
 import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
@@ -80,7 +80,7 @@ export const registerFunctions: RegistrationCallback = async ({
           All summaries MUST be created in English, even if the conversation was carried out in a different language.`);
       }
 
-      if (availableFunctionNames.includes('context')) {
+      if (availableFunctionNames.includes(CONTEXT_FUNCTION_NAME)) {
         instructions.push(
           `Additionally, you can use the "context" function to retrieve relevant information from the knowledge database.`
         );
