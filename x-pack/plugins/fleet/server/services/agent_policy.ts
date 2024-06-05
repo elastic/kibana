@@ -183,7 +183,11 @@ class AgentPolicyService {
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
-    logger.debug(`Agent policy ${id} update completed`);
+    logger.debug(
+      `Agent policy ${id} update completed, revision: ${
+        options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
+      }`
+    );
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
@@ -195,7 +199,11 @@ class AgentPolicyService {
     created: boolean;
     policy?: AgentPolicy;
   }> {
-    const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
+    const {
+      id,
+      space_id: kibanaSpaceId,
+      ...preconfiguredAgentPolicy
+    } = omit(config, 'package_policies');
     const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
@@ -328,7 +336,7 @@ class AgentPolicyService {
       {
         ...agentPolicy,
         status: 'active',
-        is_managed: agentPolicy.is_managed ?? false,
+        is_managed: (agentPolicy.is_managed || agentPolicy?.supports_agentless) ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
@@ -383,7 +391,11 @@ class AgentPolicyService {
       throw new FleetError(agentPolicySO.error.message);
     }
 
-    const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
+    const agentPolicy = {
+      id: agentPolicySO.id,
+      version: agentPolicySO.version,
+      ...agentPolicySO.attributes,
+    };
 
     if (withPackagePolicies) {
       agentPolicy.package_policies =
@@ -657,6 +669,7 @@ class AgentPolicyService {
           'download_source_id',
           'fleet_server_host_id',
           'supports_agentless',
+          'global_data_tags',
         ]),
         ...newAgentPolicyProps,
       },
@@ -1032,6 +1045,14 @@ class AgentPolicyService {
       acc.push(fleetServerPolicy);
       return acc;
     }, [] as FleetServerPolicy[]);
+
+    appContextService
+      .getLogger()
+      .debug(
+        `Deploying policies: ${fleetServerPolicies
+          .map((pol) => `${pol.policy_id}:${pol.revision_idx}`)
+          .join(', ')}`
+      );
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
       {

@@ -28,6 +28,7 @@ pageLoadAssetSize:
   dashboard: 52967
   dashboardEnhanced: 65646
   data: 454087
+  dataQuality: 19384
   datasetQuality: 50624
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
@@ -61,6 +62,7 @@ pageLoadAssetSize:
   expressionXY: 45000
   features: 21723
   fieldFormats: 65209
+  fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
   fileUpload: 25664

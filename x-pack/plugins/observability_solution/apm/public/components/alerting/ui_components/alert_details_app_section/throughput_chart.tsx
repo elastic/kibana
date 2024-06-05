@@ -25,6 +25,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
+import { ViewInAPMButton } from './view_in_apm_button';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -162,6 +163,21 @@ function ThroughputChart({
               />
             </EuiFlexItem>
           )}
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <ViewInAPMButton
+                  serviceName={serviceName}
+                  environment={environment}
+                  from={start}
+                  to={end}
+                  kuery={kuery}
+                  transactionName={transactionName}
+                  transactionType={transactionType}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <TimeseriesChart

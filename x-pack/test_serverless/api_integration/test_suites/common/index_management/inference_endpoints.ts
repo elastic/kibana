@@ -19,6 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
   const service = 'elser';
 
   describe('Inference endpoints', function () {
+    // test adds new trained model '.elser_model_2_linux-x86_64', but does not clean it. Follow up tests are affected
+    this.tags(['failsOnMKI']);
     before(async () => {
       log.debug(`Creating inference endpoint`);
       try {

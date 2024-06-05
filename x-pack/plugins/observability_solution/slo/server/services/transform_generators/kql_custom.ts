@@ -18,7 +18,7 @@ import {
   SLO_INGEST_PIPELINE_NAME,
 } from '../../../common/constants';
 import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
-import { getTimesliceTargetComparator } from './common';
+import { getTimesliceTargetComparator, getFilterRange } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(
@@ -61,13 +61,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}/d`,
-                },
-              },
-            },
+            getFilterRange(slo, indicator.params.timestampField),
             getElasticsearchQueryOrThrow(indicator.params.filter),
           ],
         },

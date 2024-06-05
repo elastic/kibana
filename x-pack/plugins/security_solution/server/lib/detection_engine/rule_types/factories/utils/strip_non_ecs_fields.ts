@@ -67,9 +67,9 @@ const getIsEcsFieldObject = (path: string) => {
 /**
  * checks if path is in Ecs mapping
  */
-const getIsEcsField = (path: string) => {
+export const getIsEcsField = (path: string): boolean => {
   const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
-  const isEcsField = !!ecsField || ecsObjectFields[path];
+  const isEcsField = Boolean(!!ecsField || ecsObjectFields[path]);
 
   return isEcsField;
 };

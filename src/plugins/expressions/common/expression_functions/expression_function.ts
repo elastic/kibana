@@ -39,6 +39,11 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   type: string;
 
   /**
+   * Opt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.
+   */
+  allowCache: boolean;
+
+  /**
    * Function to run function (context, args)
    */
   fn: (
@@ -100,6 +105,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
       extract,
       migrations,
       namespace,
+      allowCache,
     } = functionDefinition;
 
     this.name = name;
@@ -109,6 +115,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.fn = fn as ExpressionFunction['fn'];
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
+    this.allowCache = !!allowCache;
     this.disabled = disabled || false;
     this.deprecated = !!deprecated;
     this.telemetry = telemetry || ((s, c) => c);

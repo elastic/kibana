@@ -27,12 +27,12 @@ import {
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { MonitorTypeEnum, MonitorFields } from '../../../../../../common/runtime_types';
+import { MonitorTypeEnum, SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { inspectMonitorAPI, MonitorInspectResponse } from '../../../state/monitor_management/api';
 
 interface InspectorProps {
   isValid: boolean;
-  monitorFields: MonitorFields;
+  monitorFields: SyntheticsMonitor;
 }
 export const MonitorInspectWrapper = (props: InspectorProps) => {
   const {

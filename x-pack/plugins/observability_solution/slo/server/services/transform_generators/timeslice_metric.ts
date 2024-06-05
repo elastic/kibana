@@ -23,6 +23,7 @@ import {
 } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
+import { getFilterRange } from './common';
 
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
@@ -67,13 +68,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}/d`,
-                },
-              },
-            },
+            getFilterRange(slo, indicator.params.timestampField),
             getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },

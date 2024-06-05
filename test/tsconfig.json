@@ -72,7 +72,6 @@
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/monaco",
-    "@kbn/esql-utils",
     "@kbn/search-types",
   ]
 }

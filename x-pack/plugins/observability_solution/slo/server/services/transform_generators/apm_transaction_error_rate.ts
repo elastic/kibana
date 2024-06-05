@@ -22,8 +22,7 @@ import {
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
-import { parseIndex } from './common';
-import { getTimesliceTargetComparator } from './common';
+import { parseIndex, getTimesliceTargetComparator, getFilterRange } from './common';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public async getTransformParams(
@@ -79,15 +78,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     indicator: APMTransactionErrorRateIndicator,
     dataViewService: DataViewsService
   ) {
-    const queryFilter: estypes.QueryDslQueryContainer[] = [
-      {
-        range: {
-          '@timestamp': {
-            gte: `now-${slo.timeWindow.duration.format()}/d`,
-          },
-        },
-      },
-    ];
+    const queryFilter: estypes.QueryDslQueryContainer[] = [getFilterRange(slo, '@timestamp')];
 
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({

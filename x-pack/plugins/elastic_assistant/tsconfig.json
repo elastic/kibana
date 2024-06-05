@@ -29,7 +29,6 @@
     "@kbn/logging",
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
-    "@kbn/core-analytics-server",
     "@kbn/elastic-assistant-common",
     "@kbn/core-http-router-server-mocks",
     "@kbn/data-stream-adapter",
@@ -45,6 +44,9 @@
     "@kbn/ml-response-stream",
     "@kbn/data-plugin",
     "@kbn/i18n",
+    "@kbn/core-security-common",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/langchain",
   ],
   "exclude": [
     "target/**/*",
