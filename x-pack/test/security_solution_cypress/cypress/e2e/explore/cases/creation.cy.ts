@@ -52,12 +52,12 @@ import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
-import { CLOUD_SERVERLESS, ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
+import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../env_var_names_constants';
 import { deleteCases } from '../../../tasks/api_calls/cases';
 
 // https://github.com/elastic/kibana/issues/179231
-const isCloudServerless = Cypress.env(CLOUD_SERVERLESS);
-const username = isCloudServerless ? 'admin' : Cypress.env(ELASTICSEARCH_USERNAME);
+const isServerless = Cypress.env(IS_SERVERLESS);
+const username = isServerless ? 'platform_engineer' : Cypress.env(ELASTICSEARCH_USERNAME);
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {

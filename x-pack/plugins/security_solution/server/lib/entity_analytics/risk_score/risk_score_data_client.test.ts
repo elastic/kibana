@@ -463,4 +463,29 @@ describe('RiskScoreDataClient', () => {
       );
     });
   });
+
+  describe('tearDown', () => {
+    it('deletes all resources', async () => {
+      const errors = await riskScoreDataClient.tearDown();
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledTimes(1);
+      expect(esClient.cluster.deleteComponentTemplate).toHaveBeenCalledTimes(1);
+      expect(errors).toEqual([]);
+    });
+
+    it('returns errors when promises are rejected', async () => {
+      const error = new Error('test error');
+
+      esClient.transform.deleteTransform.mockRejectedValueOnce(error);
+      esClient.indices.deleteDataStream.mockRejectedValueOnce(error);
+      esClient.indices.deleteIndexTemplate.mockRejectedValueOnce(error);
+      esClient.cluster.deleteComponentTemplate.mockRejectedValueOnce(error);
+
+      const errors = await riskScoreDataClient.tearDown();
+
+      expect(errors).toEqual([error, error, error, error]);
+    });
+  });
 });

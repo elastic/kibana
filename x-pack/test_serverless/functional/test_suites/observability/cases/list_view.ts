@@ -17,6 +17,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
+  const toasts = getService('toasts');
 
   describe('Cases list', function () {
     before(async () => {
@@ -258,6 +259,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 
         it('deletes a case correctly', async () => {
+          await toasts.dismissAll();
           await cases.casesTable.deleteCase(0);
           await cases.casesTable.waitForTableToFinishLoading();
           await cases.casesTable.validateCasesTableHasNthRows(0);
