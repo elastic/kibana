@@ -6,33 +6,63 @@
  */
 
 import { useCallback, useState } from 'react';
+import * as uuid from 'uuid';
 import type { AttackDiscoveryStatus, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryGetResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import type { HttpSetup } from '@kbn/core-http-browser';
+import moment from 'moment';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
+import { getErrorToastText } from '../pages/helpers';
+import { replaceNewlineLiterals } from '../helpers';
 
 export interface Props {
   http: HttpSetup;
-  // toasts?: IToasts;
+  setApproximateFutureTime: (date: Date | null) => void;
+  toasts?: IToasts;
+}
+
+export interface AttackDiscoveryData extends AttackDiscoveryResponse {
+  connectorId: string;
 }
 
 export const usePollApi = ({
   http,
+  setApproximateFutureTime,
+  toasts,
 }: Props): {
   status: AttackDiscoveryStatus | null;
-  data: AttackDiscoveryResponse | null;
-  error: string | null;
+  data: AttackDiscoveryData | null;
   pollApi: (connectorId: string) => void;
 } => {
   const [status, setStatus] = useState<AttackDiscoveryStatus | null>(null);
-  const [data, setData] = useState<AttackDiscoveryResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<AttackDiscoveryData | null>(null);
+  const handleResponse = useCallback(
+    (responseData: AttackDiscoveryResponse, connectorId: string) => {
+      setStatus(responseData.status);
+      setApproximateFutureTime(
+        moment(responseData.updatedAt).add(responseData.averageIntervalMs, 'milliseconds').toDate()
+      );
+      setData({
+        ...responseData,
+        connectorId,
+        attackDiscoveries: responseData.attackDiscoveries.map((attackDiscovery) => ({
+          ...attackDiscovery,
+          id: uuid.v4(),
+          detailsMarkdown: replaceNewlineLiterals(attackDiscovery.detailsMarkdown),
+          entitySummaryMarkdown: replaceNewlineLiterals(attackDiscovery.entitySummaryMarkdown),
+          summaryMarkdown: replaceNewlineLiterals(attackDiscovery.summaryMarkdown),
+        })),
+      });
+    },
+    [setApproximateFutureTime]
+  );
   const pollApi = useCallback(
     async (connectorId: string) => {
       try {
-        console.log('stephhh useCallback (actually) pollApi');
         // call the internal API to generate attack discoveries:
         const rawResponse = await http.fetch(
           `/internal/elastic_assistant/attack_discovery/${connectorId}`,
@@ -43,9 +73,9 @@ export const usePollApi = ({
         );
 
         const parsedResponse = AttackDiscoveryGetResponse.safeParse(rawResponse);
-        console.log('stephhh useCallback (actually) pollApi after', parsedResponse);
+
         if (!parsedResponse.success) {
-          throw new Error('Failed to parse the response');
+          throw new Error('Failed to parse the attack discovery GET response');
         }
         if (parsedResponse.data.entryExists === false || parsedResponse.data.data == null) {
           setStatus(null);
@@ -54,23 +84,28 @@ export const usePollApi = ({
           parsedResponse.data.data.status === attackDiscoveryStatus.succeeded ||
           parsedResponse.data.data.status === attackDiscoveryStatus.failed
         ) {
-          setStatus(parsedResponse.data.data.status);
-          setData(parsedResponse.data.data);
+          handleResponse(parsedResponse.data.data, connectorId);
         } else if (parsedResponse.data.data.status === attackDiscoveryStatus.running) {
+          handleResponse(parsedResponse.data.data, connectorId);
           // poll every 3 seconds if attack discovery is running
-          setTimeout(pollApi, 3000);
+          setTimeout(() => pollApi(connectorId), 3000);
         } else {
-          setError('Unexpected status');
+          throw new Error('Invalid status from attack discovery GET response');
         }
-      } catch (err) {
-        console.log('stephhh useCallback (actually) pollApi err', err);
-        setError(err);
+      } catch (error) {
+        setStatus(null);
+        setData(null);
+
+        toasts?.addDanger(error, {
+          title: ERROR_GENERATING_ATTACK_DISCOVERIES,
+          text: getErrorToastText(error),
+        });
       }
     },
-    [http]
+    [handleResponse, http, toasts]
   );
 
-  return { status, data, error, pollApi };
+  return { status, data, pollApi };
 };
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {

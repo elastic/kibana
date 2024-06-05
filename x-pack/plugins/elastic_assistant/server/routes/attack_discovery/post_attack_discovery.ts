@@ -198,6 +198,8 @@ export const postAttackDiscoveryRoute = (
                 return { alertsContextCount, attackDiscoveries };
               };
 
+              const endTime = moment();
+              const durationMs = endTime.diff(startTime);
               const dependentProps =
                 rawAttackDiscoveries == null
                   ? {
@@ -208,6 +210,10 @@ export const postAttackDiscoveryRoute = (
                       attackDiscoveries: getDataFromJSON().attackDiscoveries,
                       alertsContextCount: getDataFromJSON().alertsContextCount,
                       status: attackDiscoveryStatus.succeeded,
+                      generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
+                        durationMs,
+                        date: new Date().toISOString(),
+                      }),
                     };
 
               console.log('stephhh updateResult attempt', {
@@ -215,18 +221,12 @@ export const postAttackDiscoveryRoute = (
                 id: attackDiscoveryId,
                 replacements: latestReplacements,
               });
-              const endTime = moment();
-              const durationMs = endTime.diff(startTime);
               const updateResult = await dataClient?.updateAttackDiscovery({
                 attackDiscoveryUpdateProps: {
                   ...dependentProps,
                   id: attackDiscoveryId,
                   replacements: latestReplacements,
                   backingIndex: currentAd.backingIndex,
-                  generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
-                    durationMs,
-                    date: new Date().toISOString(),
-                  }),
                 },
                 authenticatedUser,
               });

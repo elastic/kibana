@@ -64,7 +64,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
             body:
               attackDiscovery != null
                 ? {
-                    data: attackDiscovery ?? {},
+                    data: attackDiscovery,
                     entryExists: true,
                   }
                 : {

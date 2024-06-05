@@ -102,11 +102,9 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
   public updateAttackDiscovery = async ({
     attackDiscoveryUpdateProps,
     authenticatedUser,
-    isPatch,
   }: {
     attackDiscoveryUpdateProps: AttackDiscoveryUpdateProps;
     authenticatedUser: AuthenticatedUser;
-    isPatch?: boolean;
   }): Promise<AttackDiscoveryResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return updateAttackDiscovery({
@@ -114,7 +112,6 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       logger: this.options.logger,
       attackDiscoveryIndex: attackDiscoveryUpdateProps.backingIndex,
       attackDiscoveryUpdateProps,
-      isPatch,
       user: authenticatedUser,
     });
   };

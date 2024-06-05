@@ -143,7 +143,7 @@ export const transformToUpdateScheme = (
         entity_summary_markdown: attackDiscovery.entitySummaryMarkdown,
         mitre_attack_tactics: attackDiscovery.mitreAttackTactics,
         summary_markdown: attackDiscovery.summaryMarkdown,
-        timestamp: attackDiscovery.timestamp,
+        timestamp: updatedAt,
       })) ?? [],
     ...averageIntervalMsObj,
   };
