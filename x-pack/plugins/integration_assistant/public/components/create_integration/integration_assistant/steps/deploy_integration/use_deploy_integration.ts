@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
-import type { BuildIntegrationApiRequest } from '../../../../../common';
+import type { BuildIntegrationApiRequest } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from './api';
 

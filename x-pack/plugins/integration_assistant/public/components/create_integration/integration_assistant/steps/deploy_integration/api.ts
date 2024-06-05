@@ -6,9 +6,9 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { BuildIntegrationApiRequest } from '../../../../../common';
-import { INTEGRATION_BUILDER_PATH } from '../../../../../common';
-import { FLEET_PACKAGES_PATH } from '../../../../../common/constants';
+import type { BuildIntegrationApiRequest } from '../../../../../../common';
+import { INTEGRATION_BUILDER_PATH } from '../../../../../../common';
+import { FLEET_PACKAGES_PATH } from '../../../../../../common/constants';
 
 export const runBuildIntegration = async (
   body: BuildIntegrationApiRequest,

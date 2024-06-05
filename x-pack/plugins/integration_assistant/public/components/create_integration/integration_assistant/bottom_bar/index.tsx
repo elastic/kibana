@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../common/hooks/use_kibana';
+import { useKibana } from '../../../../common/hooks/use_kibana';
 import type { State } from '../state';
 
 interface IntegrationAssistantBottomBarProps {

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPlainObject } from 'lodash/fp';
-import type { InputType } from '../../../../../common/types';
+import type { InputType } from '../../../../../../common/types';
 import type { IntegrationSettings, State } from '../../state';
 import * as i18n from './translations';
 

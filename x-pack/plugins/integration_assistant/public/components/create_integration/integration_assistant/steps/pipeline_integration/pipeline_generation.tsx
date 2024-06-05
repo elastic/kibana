@@ -23,7 +23,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 // import { JsonEditor } from '@kbn/es-ui-shared-plugin/public';
 import React, { useCallback, useState } from 'react';
-import type { Pipeline } from '../../../../../common';
+import type { Pipeline } from '../../../../../../common';
 import type { Actions, State } from '../../state';
 import { FieldsTable } from './fields_table';
 import type { ProgressItem } from './use_pipeline_generation';

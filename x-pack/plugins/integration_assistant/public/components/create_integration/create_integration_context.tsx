@@ -8,14 +8,13 @@
 import React, { type PropsWithChildren } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AssistantProvider } from '@kbn/elastic-assistant';
+import type { CreateIntegrationServices } from './types';
 
-import type { IntegrationAssistantServices } from '../../types';
-
-interface IntegrationAssistantProps {
-  services: IntegrationAssistantServices;
+interface CreateIntegrationProps {
+  services: CreateIntegrationServices;
 }
 
-export const IntegrationAssistantContext = React.memo<PropsWithChildren<IntegrationAssistantProps>>(
+export const CreateIntegrationContext = React.memo<PropsWithChildren<CreateIntegrationProps>>(
   ({ children, services }) => {
     const { http, docLinks, triggersActionsUi, notifications } = services;
     const basePath = http.basePath.get();
@@ -62,4 +61,4 @@ export const IntegrationAssistantContext = React.memo<PropsWithChildren<Integrat
     );
   }
 );
-IntegrationAssistantContext.displayName = 'IntegrationAssistantContext';
+CreateIntegrationContext.displayName = 'CreateIntegrationContext';

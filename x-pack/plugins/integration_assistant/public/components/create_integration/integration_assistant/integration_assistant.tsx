@@ -18,6 +18,7 @@ import { ConfigureIntegration, isConfigureIntegrationReady } from './steps/confi
 import { isLogsAnalysisReady, LogsAnalysis } from './steps/logs_analysis';
 import { isPipelineGenerationReady, PipelineGeneration } from './steps/pipeline_integration';
 import { DeployIntegration } from './steps/deploy_integration';
+import type { SetPage } from '../../types';
 
 const useContentCss = () => {
   const { euiTheme } = useEuiTheme();
@@ -28,7 +29,10 @@ const useContentCss = () => {
   `;
 };
 
-export const IntegrationAssistant = React.memo(() => {
+interface IntegrationAssistantProps {
+  setPage: SetPage;
+}
+export const IntegrationAssistant = React.memo<IntegrationAssistantProps>(({ setPage }) => {
   const { state, actions } = useAssistantState();
   const contendCss = useContentCss();
 

@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash/fp';
 import { useState, useEffect, useCallback } from 'react';
-import type { CheckPipelineApiRequest, Pipeline } from '../../../../../common';
+import type { CheckPipelineApiRequest, Pipeline } from '../../../../../../common';
 import type { Actions, State } from '../../state';
 import {
   runCategorizationGraph,

@@ -9,7 +9,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
   CheckPipelineApiRequest,
   CheckPipelineApiResponse,
-} from '../../../../../common/types';
+} from '../../../../../../common/types';
 import type {
   EcsMappingApiRequest,
   EcsMappingApiResponse,
@@ -17,13 +17,13 @@ import type {
   CategorizationApiResponse,
   RelatedApiRequest,
   RelatedApiResponse,
-} from '../../../../../common';
+} from '../../../../../../common';
 import {
   ECS_GRAPH_PATH,
   CATEGORIZATION_GRAPH_PATH,
   RELATED_GRAPH_PATH,
   CHECK_PIPELINE_PATH,
-} from '../../../../../common';
+} from '../../../../../../common';
 
 export const runEcsGraph = async (
   body: EcsMappingApiRequest,

@@ -13,10 +13,10 @@ export const CreateIntegration = React.memo(() => {
   const { integrationAssistant } = useStartServices();
   useBreadcrumbs('integration_create');
 
-  const IntegrationAssistant = useMemo(
-    () => integrationAssistant?.IntegrationAssistant,
+  const CreateIntegrationAssistant = useMemo(
+    () => integrationAssistant?.CreateIntegration,
     [integrationAssistant]
   );
 
-  return IntegrationAssistant ? <IntegrationAssistant /> : null;
+  return CreateIntegrationAssistant ? <CreateIntegrationAssistant /> : null;
 });

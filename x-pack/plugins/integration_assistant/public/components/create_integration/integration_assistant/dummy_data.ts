@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Pipeline } from '../../../common';
+import type { Pipeline } from '../../../../common';
 import type { State } from './state';
 
 const result: { pipeline: Pipeline; docs: object[] } = {

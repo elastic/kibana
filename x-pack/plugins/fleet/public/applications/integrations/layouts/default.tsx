@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiNotificationBadge,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink, useStartServices } from '../../../hooks';
@@ -79,7 +72,14 @@ export const DefaultLayout: React.FC<Props> = memo(
                   </p>
                 </EuiText>
               </EuiFlexItem>
+
+              <EuiSpacer size="s" />
             </EuiFlexGroup>
+          </EuiFlexGroup>
+        }
+        rightColumnGrow={false}
+        rightColumn={
+          <>
             {integrationAssistant && (
               <EuiFlexItem grow={false}>
                 <integrationAssistant.CreateIntegrationCardButton
@@ -87,7 +87,7 @@ export const DefaultLayout: React.FC<Props> = memo(
                 />
               </EuiFlexItem>
             )}
-          </EuiFlexGroup>
+          </>
         }
         tabs={tabs.map((tab) => {
           const notificationCount = notificationsBySection?.[tab.section];

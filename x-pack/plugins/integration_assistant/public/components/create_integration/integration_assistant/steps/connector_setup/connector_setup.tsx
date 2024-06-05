@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { useKibana } from '../../../../common/hooks/use_kibana';
+import { useKibana } from '../../../../../common/hooks/use_kibana';
 import * as i18n from './translations';
 
 interface ConnectorSetupProps {

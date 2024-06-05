@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type IntegrationAssistantComponent = React.ComponentType;
+export { IntegrationAssistant } from './integration_assistant';

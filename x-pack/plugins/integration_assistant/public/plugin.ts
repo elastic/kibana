@@ -11,7 +11,7 @@ import type {
   IntegrationAssistantPluginStart,
   IntegrationAssistantPluginStartDependencies,
 } from './types';
-import { getIntegrationAssistantLazy } from './components/integration_assistant';
+import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
 
 export class IntegrationAssistantPlugin
@@ -27,8 +27,8 @@ export class IntegrationAssistantPlugin
   ): IntegrationAssistantPluginStart {
     const services = { ...core, ...dependencies };
     return {
-      IntegrationAssistant: getIntegrationAssistantLazy(services),
-      CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(services),
+      CreateIntegration: getCreateIntegrationLazy(services),
+      CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(),
     };
   }
 
