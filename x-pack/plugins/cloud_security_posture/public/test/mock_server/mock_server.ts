@@ -12,6 +12,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { indexPatternFieldEditorPluginMock as dataViewFieldEditorMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
+import { http, HttpResponse, JsonBodyType } from 'msw';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
 import { CspClientPluginStartDeps } from '../../types';
@@ -56,11 +57,23 @@ export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}) => 
         request.url,
         response.status,
         response.statusText,
-        body
+        JSON.stringify(body, null, 2)
       );
     });
   }
-  return server;
+  return {
+    server,
+    mockGetRequest: (path: string, response: JsonBodyType) =>
+      mockServerGetRequest(server, path, response),
+  };
+};
+
+export const mockServerGetRequest = (
+  server: SetupServerApi,
+  path: string,
+  response: JsonBodyType
+) => {
+  server.use(http.get(path, () => HttpResponse.json(response)));
 };
 
 /**
