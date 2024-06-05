@@ -16,7 +16,7 @@ import {
   apiPublishesUnifiedSearch,
   apiPublishesPanelTitle,
 } from '@kbn/presentation-publishing';
-import { LensSavedObjectAttributes, ViewUnderlyingDataArgs } from '../embeddable';
+import { LensSavedObjectAttributes, Simplify, ViewUnderlyingDataArgs } from '../embeddable';
 
 export type HasLensConfig = HasType<'lens'> & {
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
@@ -24,10 +24,9 @@ export type HasLensConfig = HasType<'lens'> & {
   getViewUnderlyingDataArgs: () => ViewUnderlyingDataArgs;
 };
 
-export type LensApi = HasLensConfig &
-  PublishesPanelTitle &
-  PublishesUnifiedSearch &
-  Partial<HasParentApi<unknown>>;
+export type LensApi = Simplify<
+  HasLensConfig & PublishesPanelTitle & PublishesUnifiedSearch & Partial<HasParentApi<unknown>>
+>;
 
 export const isLensApi = (api: unknown): api is LensApi => {
   return Boolean(

@@ -55,7 +55,7 @@ import type {
   UserMessagesGetter,
   StartServices,
 } from '../types';
-import type { LensAttributeService } from '../lens_attribute_service';
+import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
@@ -157,7 +157,7 @@ export interface LensAppServices extends StartServices {
   usageCollection?: UsageCollectionStart;
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
-  attributeService: LensAttributeService;
+  attributeService: LensAttributesService;
   contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;

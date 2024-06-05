@@ -53,8 +53,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   save = async (vis: Document) => {
-    const { savedObjectId, type, references, ...rest } = vis;
-    const attributes = rest;
+    const { savedObjectId, type, references, ...attributes } = vis;
 
     if (savedObjectId) {
       const result = await this.client.update({
@@ -65,15 +64,14 @@ export class SavedObjectIndexStore implements SavedObjectStore {
         },
       });
       return { ...vis, savedObjectId: result.item.id };
-    } else {
-      const result = await this.client.create({
-        data: attributes,
-        options: {
-          references,
-        },
-      });
-      return { ...vis, savedObjectId: result.item.id };
     }
+    const result = await this.client.create({
+      data: attributes,
+      options: {
+        references,
+      },
+    });
+    return { ...vis, savedObjectId: result.item.id };
   };
 
   async load(savedObjectId: string) {

@@ -16,7 +16,7 @@ export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
   attributes: SerializableRecord;
 };
 
-export const inject: EmbeddableRegistryDefinition['inject'] = (state, references) => {
+export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (state, references) => {
   const typedState = state as LensEmbeddablePersistableState;
 
   if ('attributes' in typedState && typedState.attributes !== undefined) {
