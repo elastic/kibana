@@ -6,15 +6,8 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import {
-  ENTITY_HISTORY_BASE_PREFIX,
-  ENTITY_LATEST_BASE_PREFIX,
-} from '../../../../common/constants_entities';
+import { ENTITY_LATEST_BASE_PREFIX } from '../../../../common/constants_entities';
 
-export function generateLatestIndexName(definition: EntityDefinition) {
+export function generateLatestIngestPipelineId(definition: EntityDefinition) {
   return `${ENTITY_LATEST_BASE_PREFIX}.${definition.id}`;
-}
-
-export function generateHistoryIndexName(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_BASE_PREFIX}.${definition.id}`;
 }
