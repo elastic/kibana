@@ -29,9 +29,14 @@ export const textBasedLanguageEditorStyles = (
 
   const showHeader = hideHeaderWhenExpanded === true && isCodeEditorExpanded;
 
+  let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
+  if (isCodeEditorExpanded) {
+    position = 'relative' as 'relative';
+  }
+
   return {
     editorContainer: {
-      position: 'relative' as const,
+      position,
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
