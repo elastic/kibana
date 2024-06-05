@@ -138,11 +138,13 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         timeRange,
         indexPatterns,
         limit,
+        agentId,
       }: {
         ids: string[];
         timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
+        agentId: string;
       }): Promise<SafeResolverEvent[]> {
         return ids.map((id: string) =>
           mockEndpointEvent({

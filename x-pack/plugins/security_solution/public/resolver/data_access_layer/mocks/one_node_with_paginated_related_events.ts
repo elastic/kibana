@@ -133,11 +133,13 @@ export function oneNodeWithPaginatedEvents(): {
         timeRange,
         indexPatterns,
         limit,
+        agentId,
       }: {
         ids: string[];
         timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
+        agentId: string;
       }): Promise<SafeResolverEvent[]> {
         return [];
       },

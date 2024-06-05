@@ -1185,7 +1185,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       childrenLevels: levels,
       startTime,
       endTime,
-      agentId: alert.agent.id,
     };
   }
 

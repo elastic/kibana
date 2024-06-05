@@ -48,7 +48,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
             databaseDocumentID,
             indices,
             filters,
-            agentId: state.tree?.lastResponse?.parameters?.agentId,
+            agentId: state.tree?.lastResponse?.parameters?.agentId || '',
           },
         };
         state.resolverComponentInstanceID = resolverComponentInstanceID;

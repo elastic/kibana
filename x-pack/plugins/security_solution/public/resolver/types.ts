@@ -846,8 +846,6 @@ export interface ResolverProps {
    * A flag to update data from an external source
    */
   shouldUpdate: boolean;
-
-  agentId: string;
 }
 
 /**
