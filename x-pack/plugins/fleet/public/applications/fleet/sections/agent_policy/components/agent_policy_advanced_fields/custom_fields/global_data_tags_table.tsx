@@ -105,6 +105,11 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
     return { nameError, valueError, isValid: !nameError && !valueError };
   };
 
+  const parseValue = (value: string): string | number => {
+    const parsedValue = Number(value);
+    return isNaN(parsedValue) ? value : parsedValue;
+  };
+
   const confirmNewTagChanges = () => {
     const { nameError, valueError, isValid } = validateTag(newTag);
     if (!isValid) {
@@ -114,7 +119,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
 
     const updatedTags = [
       ...globalDataTags,
-      { ...newTag, name: newTag.name.trim(), value: newTag.value.toString().trim() },
+      { ...newTag, name: newTag.name.trim(), value: parseValue(newTag.value.toString().trim()) },
     ];
 
     setGlobalDataTags(updatedTags);
@@ -137,7 +142,9 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
     }
 
     const updatedTags = globalDataTags.map((t, i) =>
-      i === index ? { ...tag, name: tag.name.trim(), value: tag.value.toString().trim() } : t
+      i === index
+        ? { ...tag, name: tag.name.trim(), value: parseValue(tag.value.toString().trim()) }
+        : t
     );
     setGlobalDataTags(updatedTags);
     updateAgentPolicy({ global_data_tags: updatedTags });
