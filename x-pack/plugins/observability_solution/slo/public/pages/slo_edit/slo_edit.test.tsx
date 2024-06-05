@@ -94,6 +94,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
         create: jest.fn().mockResolvedValue({
           getIndexPattern: jest.fn().mockReturnValue('some-index'),
           getRuntimeMappings: jest.fn().mockReturnValue({}),
+          id: 'some-data-view-id',
         }),
       },
       docLinks: {

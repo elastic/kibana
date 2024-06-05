@@ -35,13 +35,13 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
     });
 
   useEffect(() => {
-    if (!currentDataViewId && currentIndexPattern && !isDataViewsLoading) {
-      const indPattern = getDataViewPattern({
-        byPatten: currentIndexPattern,
-        dataViewsList,
-        adHocDataViews,
-      });
-      setValue(DATA_VIEW_FIELD, indPattern);
+    const indPatternId = getDataViewPattern({
+      byPatten: currentIndexPattern,
+      dataViewsList,
+      adHocDataViews,
+    });
+    if (!currentDataViewId && currentIndexPattern && !isDataViewsLoading && indPatternId) {
+      setValue(DATA_VIEW_FIELD, indPatternId);
     }
   }, [
     adHocDataViews,
