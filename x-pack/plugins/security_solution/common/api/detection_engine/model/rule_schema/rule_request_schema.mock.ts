@@ -74,7 +74,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
   threat_query: '*:*',
   threat_index: ['auditbeat-*'],
   threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
-  interval: '5m',
+  interval: '24h',
   from: 'now-6m',
   threat_mapping: [
     {
@@ -209,7 +209,7 @@ export const getUpdateNewTermsSchemaMock = (
   risk_score: 55,
   language: 'kuery',
   id,
-  interval: '5m',
+  interval: '24h',
   from: 'now-6m',
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
