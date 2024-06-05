@@ -405,6 +405,22 @@ components:
       required:
         - field_names
 
+    DataTier:
+      type: object
+      properties:
+        excluded:
+          type: array
+          items:
+            type: string
+            enum:
+              - data_hot
+              - data_warm
+              - data_cold
+              - data_frozen
+          minItems: 1
+      required:
+        - excluded
+
     RuleActionThrottle:
       description: Defines the interval on which a rule's actions are executed.
       oneOf:

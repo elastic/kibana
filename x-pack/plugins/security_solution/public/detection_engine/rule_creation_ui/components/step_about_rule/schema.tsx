@@ -298,6 +298,23 @@ export const schema: FormSchema<AboutStepRule> = {
       },
     ],
   },
+  excludedDataTiers: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.excludedDataTiersLabel',
+      {
+        defaultMessage: 'Exclude data tiers from search',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.excludedDataTiersHelpText',
+      {
+        defaultMessage:
+          'Add one or more data tiers that will be excluded from search during rule execution.',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   note: {
     type: FIELD_TYPES.TEXTAREA,
     label: i18n.translate(

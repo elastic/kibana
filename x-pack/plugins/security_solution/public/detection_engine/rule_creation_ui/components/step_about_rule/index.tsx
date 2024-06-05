@@ -33,6 +33,7 @@ import { MarkdownEditorForm } from '../../../../common/components/markdown_edito
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
+import { DataTiersSelector } from '../data_tiers_selector';
 import { useFetchIndex } from '../../../../common/containers/source';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
@@ -255,6 +256,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 isDisabled: isLoading || indexPatternLoading || isInvestigationFieldsLoading,
                 fullWidth: true,
                 dataTestSubj: 'detectionEngineStepAboutRuleInvestigationFields',
+              }}
+            />
+            <EuiSpacer size="l" />
+            <UseField
+              path="excludedDataTiers"
+              component={DataTiersSelector}
+              componentProps={{
+                dataTestSubj: 'detectionEngineStepAboutRuleExcludedDataTiers',
               }}
             />
             <EuiSpacer size="l" />

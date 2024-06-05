@@ -85,6 +85,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
   investigationFields: [],
+  excludedDataTiers: [],
   references: [''],
   falsePositives: [''],
   license: '',

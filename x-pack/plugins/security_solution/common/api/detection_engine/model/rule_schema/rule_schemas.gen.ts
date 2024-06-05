@@ -36,6 +36,7 @@ import {
   AlertsIndexNamespace,
   RuleMetadata,
   InvestigationFields,
+  DataTier,
   RuleActionThrottle,
   RuleVersion,
   RuleTagArray,
@@ -116,6 +117,7 @@ export const BaseOptionalFields = z.object({
   namespace: AlertsIndexNamespace.optional(),
   meta: RuleMetadata.optional(),
   investigation_fields: InvestigationFields.optional(),
+  data_tier: DataTier.optional(),
   throttle: RuleActionThrottle.optional(),
 });
 

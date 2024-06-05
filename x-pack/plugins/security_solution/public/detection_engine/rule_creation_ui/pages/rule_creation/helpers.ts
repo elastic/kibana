@@ -631,6 +631,9 @@ export const formatAboutStepData = (
     timestamp_override_fallback_disabled: timestampOverrideFallbackDisabled,
     ...(!isEmpty(note) ? { note } : {}),
     max_signals: Number.isSafeInteger(maxSignals) ? maxSignals : undefined,
+    data_tier: aboutStepData?.excludedDataTiers?.length
+      ? { excluded: aboutStepData.excludedDataTiers }
+      : undefined,
     ...rest,
   };
   return resp;

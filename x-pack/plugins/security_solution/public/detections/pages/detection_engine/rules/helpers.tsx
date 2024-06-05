@@ -238,6 +238,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     false_positives: falsePositives,
     risk_score: riskScore,
     investigation_fields: investigationFields,
+    data_tier: dataTier,
     tags,
     threat,
     max_signals: maxSignals,
@@ -275,6 +276,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     threatIndicatorPath,
     maxSignals,
     setup,
+    excludedDataTiers: dataTier?.excluded ?? [],
   };
 };
 

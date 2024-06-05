@@ -438,6 +438,22 @@ const prepareAboutSectionListItems = (
     });
   }
 
+  if (rule?.data_tier?.excluded?.length) {
+    aboutSectionListItems.push({
+      title: (
+        <span data-test-subj="excludedDataTiersPropertyTitle">
+          {i18n.EXCLUDED_DATA_TIERS_FIELD_LABEL}
+        </span>
+      ),
+      description: (
+        <BadgeList
+          badges={rule.data_tier.excluded}
+          data-test-subj="excludedDataTiersPropertyValue"
+        />
+      ),
+    });
+  }
+
   return aboutSectionListItems;
 };
 

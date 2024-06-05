@@ -383,6 +383,11 @@ export const InvestigationFields = z.object({
   field_names: z.array(NonEmptyString).min(1),
 });
 
+export type DataTier = z.infer<typeof DataTier>;
+export const DataTier = z.object({
+  excluded: z.array(z.enum(['data_hot', 'data_warm', 'data_cold', 'data_frozen'])).min(1),
+});
+
 /**
  * Defines the interval on which a rule's actions are executed.
  */

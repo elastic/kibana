@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
-
 export const threatDefault = [
   {
     framework: 'MITRE ATT&CK',
@@ -16,24 +12,3 @@ export const threatDefault = [
     technique: [],
   },
 ];
-
-export const stepAboutDefaultValue: AboutStepRule = {
-  author: [],
-  name: '',
-  description: '',
-  isAssociatedToEndpointList: false,
-  isBuildingBlock: false,
-  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
-  riskScore: { value: 21, mapping: [], isMappingChecked: false },
-  references: [''],
-  falsePositives: [''],
-  investigationFields: [],
-  license: '',
-  ruleNameOverride: '',
-  tags: [],
-  timestampOverride: '',
-  threat: threatDefault,
-  note: '',
-  maxSignals: DEFAULT_MAX_SIGNALS,
-  setup: '',
-};

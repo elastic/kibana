@@ -196,6 +196,13 @@ export const TAGS_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const EXCLUDED_DATA_TIERS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.excludedDataTiersFieldLabel',
+  {
+    defaultMessage: 'Excluded from search data tiers',
+  }
+);
+
 export const INDEX_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.indexFieldLabel',
   {
