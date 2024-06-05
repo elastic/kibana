@@ -893,12 +893,12 @@ export function trainedModelsRoutes(
   /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/download_status Gets models download status
+   * @api {get} /internal/ml/trained_models/download_status Gets models download status
    * @apiName ModelsDownloadStatus
    * @apiDescription Gets download status for all currently downloading models
    */
   router.versioned
-    .post({
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
       access: 'internal',
       options: {
@@ -916,7 +916,7 @@ export function trainedModelsRoutes(
             const body = await modelsProvider(client, mlClient, cloud).getModelsDownloadStatus();
 
             return response.ok({
-              body,
+              body: body ?? undefined,
             });
           } catch (e) {
             return response.customError(wrapError(e));

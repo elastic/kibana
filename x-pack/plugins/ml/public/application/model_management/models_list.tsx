@@ -57,6 +57,7 @@ import { StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type {
+  ModelDownloadState,
   ModelPipelines,
   TrainedModelConfigResponse,
   TrainedModelDeploymentStatsResponse,
@@ -94,6 +95,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   arch?: string;
   softwareLicense?: string;
   licenseUrl?: string;
+  downloadState?: ModelDownloadState;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -310,6 +312,8 @@ export const ModelsList: FC<Props> = ({
           }, {} as Record<string, JSX.Element>)
         );
       }
+
+      await fetchDownloadStatus();
     } catch (error) {
       displayErrorToast(
         error,
@@ -399,6 +403,33 @@ export const ModelsList: FC<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Updates model list with download status
+   */
+  const fetchDownloadStatus = useCallback(async () => {
+    try {
+      const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
+
+      if (!downloadStatus) return;
+
+      setItems((prevItems) => {
+        return prevItems.map((item) => {
+          const newItem = { ...item };
+          if (downloadStatus[item.model_id]) {
+            newItem.downloadState = downloadStatus[item.model_id];
+          }
+          return newItem;
+        });
+      });
+
+      // Wait for one second
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await fetchDownloadStatus();
+    } catch (e) {
+      // Fail silently
+    }
+  }, [setItems, trainedModelsApiService]);
 
   /**
    * Unique inference types from models
