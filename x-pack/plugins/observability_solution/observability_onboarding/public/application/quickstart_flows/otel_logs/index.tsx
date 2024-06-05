@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -22,6 +22,7 @@ import {
   EuiIcon,
   EuiButtonGroup,
   EuiCopy,
+  EuiLink,
 } from '@elastic/eui';
 import {
   AllDatasetsLocatorParams,
@@ -29,6 +30,8 @@ import {
 } from '@kbn/deeplinks-observability/locators';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -51,35 +54,45 @@ export const OtelLogsPanel: React.FC = () => {
     services: { share, http },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
+  const AGENT_CDN_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent/';
+
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
+
+  const [{ value: allDatasetsUrl }, getDeeplinks] = useAsyncFn(async () => {
+    return allDatasetsLocator!.getRedirectUrl({
+      type: 'logs',
+    });
+  }, [allDatasetsLocator]);
+  const hostsUrl = http?.basePath.prepend('/app/metrics/hosts');
+
+  useEffect(() => {
+    getDeeplinks();
+  }, [getDeeplinks]);
 
   const installTabContents = [
     {
       id: 'mac',
       name: 'Mac',
       prompt: 'Run the following commands in your terminal to install the collector.',
-      content: `curl --proto '=https' --tlsv1.2 -fOL https://snapshots.elastic.co/8.14.0-6b2f3648/downloads/beats/elastic-agent/elastic-agent-8.14.0-SNAPSHOT-darwin-x86_64.tar.gz
-      tar -xvf elastic-agent-8.13.4-darwin-x86_64.tar.gz
-      rm elastic-agent-8.13.4-darwin-x86_64/otel.yml && cp elastic-agent-8.13.4-darwin-x86_64/otel_templates/logs_hostmetrics.yaml elastic-agent-8.13.4-darwin-x86_64/otel.yml
-      sed -i '' 's/<<ES_ENDPOINT>>/'${setup?.elasticsearchUrl}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml && sed -i '' 's/<<ES_API_KEY>>/'${apiKeyData?.apiKeyEncoded}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml
+      content: `arch=$(if [[ $(arch) == "arm" ]]; then echo "aarch64"; else echo $(arch); fi)
+
+curl --output elastic-distro-${setup?.elasticAgentVersion}-macos-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-macos-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && tar -xvf elastic-distro-c${setup?.elasticAgentVersion}-macos-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-macos-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-macos-$arch 
       
-      elastic-agent-8.13.4-darwin-x86_64/elastic-agent otel`,
-      check: 'run_collector',
+rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+      check: './otelcol --config otel.yml',
       type: 'copy',
     },
     {
       id: 'linux',
       name: 'Linux',
       prompt: 'Run the following commands in your terminal to install the collector.',
-      content: `# not final
-      curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.100.0/otelcol_0.100.0_linux_amd64.tar.gz
-tar -xvf otelcol_0.100.0_linux_amd64.tar.gz
-curl --proto '=https' --tlsv1.2 -fOL https://github.com/elastic/observability/releases/download/v1.0.0/otel-collector-mac.yml
-# Use sed to add your API key and Elasticsearch endpoint
-sed -i '' 's/APIKEY/${apiKeyData?.apiKeyEncoded}/g' otel-collector-linux.yml
-sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel-collector-linux.yml`,
-      check: 'run_collector',
+      content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
+
+curl --output elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-linux-$arch 
+  
+rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+      check: './otelcol --config otel.yml',
       type: 'copy',
     },
     {
@@ -93,7 +106,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
       sed -i '' 's/<<ES_ENDPOINT>>/'${setup?.elasticsearchUrl}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml && sed -i '' 's/<<ES_API_KEY>>/'${apiKeyData?.apiKeyEncoded}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml
       
       elastic-agent-8.13.4-darwin-x86_64/elastic-agent otel`,
-      check: 'run_collector',
+      check: './otelcol --config otel.yml',
       type: 'copy',
     },
     {
@@ -327,27 +340,87 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
                           'xpack.observability_onboarding.otelLogsPanel.p.waitForTheDataLabel',
                           {
                             defaultMessage:
-                              'After running the previous command, view your data in Logs Explorer.',
+                              'After running the previous command, come back and view your data.',
                           }
                         )}
                       </p>
                     </EuiText>
                     <EuiSpacer />
-                    <EuiButton
-                      data-test-subj="obltOnboardingExploreLogs"
-                      color="primary"
-                      fill
-                      iconType="eye"
-                      onClick={() => {
-                        allDatasetsLocator!.navigate({
-                          type: 'logs',
-                        });
-                      }}
-                    >
-                      {i18n.translate('xpack.observability_onboarding.otelLogsPanel.exploreLogs', {
-                        defaultMessage: 'Open Logs Explorer',
-                      })}
-                    </EuiButton>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <img
+                          src={http?.staticAssets.getPluginAssetHref('dashboard_illustration.svg')}
+                          width={160}
+                          alt="Illustration"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow>
+                        <EuiFlexGroup direction="column" gutterSize="xs">
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s">
+                              {i18n.translate(
+                                'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel',
+                                { defaultMessage: 'View and analyze your logs' }
+                              )}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiLink
+                              data-test-subj="obltOnboardingExploreLogs"
+                              href={allDatasetsUrl}
+                            >
+                              {i18n.translate(
+                                'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
+                                {
+                                  defaultMessage: 'Open Logs Explorer',
+                                }
+                              )}
+                            </EuiLink>
+                          </EuiFlexItem>
+                          <EuiSpacer size="s" />
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s">
+                              {i18n.translate(
+                                'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
+                                { defaultMessage: 'View and analyze your metrics' }
+                              )}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiLink data-test-subj="obltOnboardingExploreMetrics" href={hostsUrl}>
+                              {i18n.translate(
+                                'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
+                                {
+                                  defaultMessage: 'Open Hosts',
+                                }
+                              )}
+                            </EuiLink>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer />
+                    <EuiText size="xs" color="subdued">
+                      <FormattedMessage
+                        id="xpack.observability_onboarding.otelLogsPanel.troubleshooting"
+                        defaultMessage="Find more details and troubleshooting solution in our documentation. {link}"
+                        values={{
+                          link: (
+                            <EuiLink
+                              data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
+                              href="https://www.elastic.co/guide/en/observability/current/otel-getting-started.html"
+                              target="_blank"
+                              external
+                            >
+                              {i18n.translate(
+                                'xpack.observability_onboarding.otelLogsPanel.documentationLink',
+                                { defaultMessage: 'Open documentation' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiText>
                   </>
                 ),
               },

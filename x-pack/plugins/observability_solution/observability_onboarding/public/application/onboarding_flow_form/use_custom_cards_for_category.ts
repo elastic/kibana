@@ -35,9 +35,9 @@ export function useCustomCardsForCategory(
     id: 'otel-logs',
     type: 'virtual',
     release: 'preview',
-    title: 'Elastic OpenTelemetry Collector',
+    title: 'OpenTelemetry',
     description:
-      'Collect Logs and host metrics using our distribution of the Elastic OpenTelemetry collector',
+      'Collect Logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
     name: 'custom-logs-virtual',
     categories: ['observability'],
     icons: [
