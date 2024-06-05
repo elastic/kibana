@@ -44,7 +44,7 @@ const collapseDatasetAriaLabel = i18n.translate('xpack.datasetQuality.collapseLa
   defaultMessage: 'Collapse',
 });
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
-  defaultMessage: 'Dataset Name',
+  defaultMessage: 'Data Set Name',
 });
 
 const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
@@ -60,7 +60,7 @@ const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocs
 });
 
 const datasetQualityColumnName = i18n.translate('xpack.datasetQuality.datasetQualityColumnName', {
-  defaultMessage: 'Dataset Quality',
+  defaultMessage: 'Data Set Quality',
 });
 
 const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
@@ -102,7 +102,7 @@ const degradedDocsDescription = (
 const degradedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.degradedDocsColumnTooltip"
-    defaultMessage="The percentage of documents with the {ignoredProperty} property in your dataset."
+    defaultMessage="The percentage of documents with the {ignoredProperty} property in your data set."
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
@@ -116,7 +116,7 @@ const degradedDocsColumnTooltip = (
 const datasetQualityColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.datasetQualityColumnTooltip"
-    defaultMessage="Quality is based on the percentage of degraded docs in a dataset. {visualQueue}"
+    defaultMessage="Quality is based on the percentage of degraded docs in a data set. {visualQueue}"
     values={{
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">

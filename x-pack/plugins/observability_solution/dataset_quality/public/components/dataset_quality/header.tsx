@@ -37,7 +37,7 @@ export default function Header() {
       description={
         <FormattedMessage
           id="xpack.datasetQuality.appDescription"
-          defaultMessage="Monitor the dataset quality for {logsPattern} data streams that follow the {ecsNamingSchemeLink}."
+          defaultMessage="Monitor the data set quality for {logsPattern} data streams that follow the {ecsNamingSchemeLink}."
           values={{
             logsPattern: <EuiCode>logs-*</EuiCode>,
             ecsNamingSchemeLink: (

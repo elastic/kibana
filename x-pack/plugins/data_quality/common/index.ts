@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'data_quality';
 export const PLUGIN_NAME = i18n.translate('xpack.dataQuality.name', {
-  defaultMessage: 'Dataset Quality',
+  defaultMessage: 'Data Set Quality',
 });
 
 export { DATA_QUALITY_URL_STATE_KEY, datasetQualityUrlSchemaV1 } from './url_schema';
