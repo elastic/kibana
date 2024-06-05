@@ -56,16 +56,19 @@ For more information about their impact on alert notifications, refer to <<maint
 [[alert-status]]
 ==== Alert statuses
 
-There are four common alert statuses:
+There are three common alert statuses:
 
 `active`:: The conditions for the rule are met and actions should be generated according to the notification settings.
-`flapping`:: The alert is switching repeatedly between active and recovered states.
 `recovered`:: The conditions for the rule are no longer met and recovery actions should be generated.
 `untracked`:: Actions are no longer generated. For example, you can choose to move active alerts to this state when you disable or delete rules.
 
 [NOTE]
 ====
-The `flapping` state is possible only if you have enabled alert flapping detection in *{stack-manage-app} > {rules-ui} > Settings*. For each space, you can choose a look back window and threshold that are used to determine whether alerts are flapping. For example, you can specify that the alert must change status at least 6 times in the last 10 runs. If the rule has actions that run when the alert status changes, those actions are suppressed while the alert is flapping.
+An alert can also be in a "flapping" state when it is switching repeatedly between active and recovered states.
+This state is possible only if you have enabled alert flapping detection in *{stack-manage-app} > {rules-ui} > Settings*.
+For each space, you can choose a look back window and threshold that are used to determine whether alerts are flapping.
+For example, you can specify that the alert must change status at least 6 times in the last 10 runs.
+If the rule has actions that run when the alert status changes, those actions are suppressed while the alert is flapping.
 ====
 
 
