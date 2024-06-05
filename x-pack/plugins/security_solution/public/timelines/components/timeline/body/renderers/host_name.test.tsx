@@ -185,8 +185,7 @@ describe('HostName', () => {
 
   test('should open old flyout on table', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'newHostDetailsFlyout') return false;
-      if (feature === 'expandableTimelineFlyoutEnabled') return false;
+      if (feature === 'expandableFlyoutDisabled') return true;
     });
     const context = {
       enableHostDetailsFlyout: true,
@@ -219,8 +218,7 @@ describe('HostName', () => {
 
   test('should open old flyout in timeline', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'newHostDetailsFlyout') return false;
-      if (feature === 'expandableTimelineFlyoutEnabled') return false;
+      if (feature === 'expandableFlyoutDisabled') return true;
     });
     const context = {
       enableHostDetailsFlyout: true,
@@ -253,8 +251,7 @@ describe('HostName', () => {
 
   test('should open expandable flyout on table', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'newHostDetailsFlyout') return true;
-      if (feature === 'expandableTimelineFlyoutEnabled') return false;
+      if (feature === 'expandableFlyoutDisabled') return false;
     });
     const context = {
       enableHostDetailsFlyout: true,
@@ -288,8 +285,7 @@ describe('HostName', () => {
 
   test('should open expandable flyout in timeline', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'newHostDetailsFlyout') return true;
-      if (feature === 'expandableTimelineFlyoutEnabled') return true;
+      if (feature === 'expandableFlyoutDisabled') return false;
     });
     const context = {
       enableHostDetailsFlyout: true,

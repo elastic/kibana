@@ -9,17 +9,17 @@ import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/consta
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import type { IRulesManagementClient } from '../../../rule_management/logic/rule_management/rules_management_client';
+import type { IDetectionRulesClient } from '../../../rule_management/logic/rule_management/detection_rules_client';
 
 /**
  * Upgrades existing prebuilt rules given a set of rules and output index.
  * This implements a chunked approach to not saturate network connections and
  * avoid being a "noisy neighbor".
- * @param rulesManagementClient RulesManagementClient
+ * @param detectionRulesClient IDetectionRulesClient
  * @param rules The rules to apply the update for
  */
 export const upgradePrebuiltRules = async (
-  rulesManagementClient: IRulesManagementClient,
+  detectionRulesClient: IDetectionRulesClient,
   rules: PrebuiltRuleAsset[]
 ) =>
   withSecuritySpan('upgradePrebuiltRules', async () => {
@@ -27,7 +27,7 @@ export const upgradePrebuiltRules = async (
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: rules,
       executor: async (rule) => {
-        return rulesManagementClient.upgradePrebuiltRule({ ruleAsset: rule });
+        return detectionRulesClient.upgradePrebuiltRule({ ruleAsset: rule });
       },
     });
 
