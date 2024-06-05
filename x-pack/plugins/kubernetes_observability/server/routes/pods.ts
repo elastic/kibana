@@ -29,6 +29,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
               name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
               deployment: schema.maybe(schema.string()),
+              daemonset: schema.maybe(schema.string()),
             }),
           },
         },
@@ -60,6 +61,15 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
               {
                   term: {
                       'resource.attributes.k8s.deployment.name': request.query.deployment,
+                  },
+              },
+            )
+          };
+          if (request.query.daemonset !== undefined) {
+            podmusts.push(
+              {
+                  term: {
+                      'resource.attributes.k8s.daemonset.name': request.query.daemonset,
                   },
               },
             )

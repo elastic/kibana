@@ -73,6 +73,7 @@ export type Query = {
   namespace: string;
   name: string;
   deployment: string;
+  daemonset: string;
 };
 
 export const NAMESPACE_OPTIONS = [
@@ -125,11 +126,12 @@ export class PublicKubernetesObservabilityClient {
       return results;
     }
 
-    async getPodsStatus(pod: any, namespace: any, deployment: any) {
+    async getPodsStatus(pod: any, namespace: any, deployment: any, daemonset: any) {
       console.log("CALLED TO GET PODS STATUS")
       console.log(pod);
       console.log(namespace);
       console.log(deployment);
+      console.log(daemonset);
       var query = {} as Query;
       if (pod !== undefined) {
         query['name'] = pod
@@ -139,6 +141,9 @@ export class PublicKubernetesObservabilityClient {
       }
       if (deployment !== undefined) {
         query['deployment'] = deployment
+      }
+      if (daemonset !== undefined) {
+        query['daemonset'] = daemonset
       }
       const results = await this.http.get('/api/kubernetes/pods/status', {version: '1', query});
       console.log(results);
@@ -300,6 +305,8 @@ const  KubernetesObservabilityComp = ({
   const [hasTimeElapsed, setHasTimeElapsed] = useState(true);
   const [services, setServices] = useState(['all']);
   const [service, setService] = useState('all');
+  const [svcIsDeploy, setSvcIsDeploy] = useState(false);
+  const [svcIsDaemon, setSvcIsDaemon] = useState(false);
   // useEffect(() => {
   //   const timer = setInterval(() => {
   //     console.log('This will run after 10 second!')
@@ -409,6 +416,14 @@ const  KubernetesObservabilityComp = ({
       const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
       
       const deploys = deployArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      const found = deploys.some(el => el.name === service);
+      if (found){
+        const podsArray = data.deployments[0].pods;
+        const keys = ['name', 'namespace',  'node', 'memory_utilization', 'message', 'alarm'];
+        const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setPodsMem(pods);
+      }
+      
       setDeploysMem(deploys);
       })
       .catch(error => {
@@ -426,6 +441,15 @@ const  KubernetesObservabilityComp = ({
       const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
       
       const deploys = deployArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      const found = deploys.some(el => el.name === service);
+      if (found){
+        setSvcIsDeploy(true);
+        setSvcIsDaemon(false);
+        const podsArray = data.deployments[0].pods;
+        const podkeys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
+        const pods = podsArray.map(item => podkeys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setPodsCpu(pods);
+      }
       setDeploysCpu(deploys);
       })
       .catch(error => {
@@ -443,6 +467,13 @@ const  KubernetesObservabilityComp = ({
       const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
       
       const daemons = daemonArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      const found = daemons.some(el => el.name === service);
+      if (found){
+        const podsArray = data.daemonsets[0].pods;
+        const keys = ['name', 'namespace',  'node', 'memory_utilization', 'message', 'alarm'];
+        const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setPodsMem(pods);
+      }
       setDaemonsMem(daemons);
       })
       .catch(error => {
@@ -460,6 +491,15 @@ const  KubernetesObservabilityComp = ({
       const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
       
       const daemons = daemonArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      const found = daemons.some(el => el.name === service);
+      if (found){
+        setSvcIsDeploy(false);
+        setSvcIsDaemon(true);
+        const podsArray = data.daemonsets[0].pods;
+        const podkeys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
+        const pods = podsArray.map(item => podkeys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setPodsCpu(pods);
+      }
       setDaemonsCpu(daemons);
       })
       .catch(error => {
@@ -482,7 +522,7 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
@@ -499,12 +539,13 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    const svc = service === 'all' ? undefined : service;
-    client.getPodsStatus(undefined, ns, svc).then(data => {
+    const deploy = svcIsDeploy ? service : undefined;
+    const daemon = svcIsDaemon ? service : undefined;
+    client.getPodsStatus(undefined, ns, deploy, daemon).then(data => {
       console.log(data);
       setPodsStatusTime(data.time);
       const podsArray = data.pods;
@@ -523,7 +564,7 @@ const  KubernetesObservabilityComp = ({
       .catch(error => {
           console.log(error)
       });
-  }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
+  }, [client, namespace, hasTimeElapsed, svcIsDaemon, svcIsDeploy]); // *** Note the dependency
 
   const nodeMemcolumns: Array<EuiBasicTableColumn<any>> = [
     {
