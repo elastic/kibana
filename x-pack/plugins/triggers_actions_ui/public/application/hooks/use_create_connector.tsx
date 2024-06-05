@@ -47,7 +47,7 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
           i18n.translate(
             'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
             {
-              defaultMessage: "Created '{connectorName}'",
+              defaultMessage: "Created ''{connectorName}''",
               values: {
                 connectorName: res.name,
               },

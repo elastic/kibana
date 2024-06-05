@@ -62,6 +62,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   agents?: number;
   unprivileged_agents?: number;
   is_protected: boolean;
+  version?: string;
 }
 
 export interface FullAgentPolicyInputStream {
@@ -89,6 +90,8 @@ export interface FullAgentPolicyInput {
   processors?: FullAgentPolicyAddFields[];
   [key: string]: any;
 }
+
+export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
 
 export interface FullAgentPolicyAddFields {
   add_fields: {

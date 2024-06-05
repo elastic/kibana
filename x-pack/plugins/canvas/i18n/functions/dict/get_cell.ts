@@ -34,7 +34,7 @@ export const errors = {
   rowNotFound: (row: number) =>
     new Error(
       i18n.translate('xpack.canvas.functions.getCell.rowNotFoundErrorMessage', {
-        defaultMessage: "Row not found: '{row}'",
+        defaultMessage: "Row not found: ''{row}''",
         values: {
           row,
         },
@@ -43,7 +43,7 @@ export const errors = {
   columnNotFound: (column: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.getCell.columnNotFoundErrorMessage', {
-        defaultMessage: "Column not found: '{column}'",
+        defaultMessage: "Column not found: ''{column}''",
         values: {
           column,
         },
