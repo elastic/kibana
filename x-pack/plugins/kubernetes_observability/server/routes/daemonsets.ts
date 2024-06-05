@@ -9,7 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
 import {extractFieldValue, phaseToState, Event, Daemonset, checkDefaultNamespace} from '../lib/utils';
-import {getPodEvents} from './pods';
+import {getPodEvents, getPodContainersStatus} from './pods';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     DAEMONSET_STATUS_ROUTE,
@@ -261,8 +261,8 @@ export async function getDaemonPods(client: any, daemonName: string, namespace: 
     const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
     const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
     message = `Daemonset ${namespace}/${daemonName} has ${desiredNodes} desired nodes desired but ${readyNodes} are ready`;
+    var state = phaseToState(podPhase)
     if (podPhase !== 2 && podPhase !== 3) {
-      const state = phaseToState(podPhase);
       reason = `Pod ${namespace}/${podName} is in ${state} state`;
       var failingReason = {} as Event;
       const event = await getPodEvents(client, podName, namespace);
@@ -275,7 +275,29 @@ export async function getDaemonPods(client: any, daemonName: string, namespace: 
         'event': failingReason,
       };
       notRunningPods.push(pod);
-    }
+    } else {
+        const [podContainerStatus, container, conTime] = await getPodContainersStatus(client, podName, namespace);
+        state = podContainerStatus === 'Not Ready' ? 'Failed' : state;
+        if (podContainerStatus === 'Not Ready') {
+          const failingMessage = `Pod ${namespace}/${podName} is in ${state} state because container ${container} is not Ready. Check the container's logs for more details`
+          message = podContainerStatus === 'Not Ready' ? failingMessage : message;
+          failingReason = {
+            note: `Container ${container} is not Ready. Check the container's logs for more details`,
+            reason: `Container ${container} may be crashing`,
+            type: 'Warning',
+            time: conTime,
+            kind: 'Container',
+            object: container
+          }
+          const pod = {
+            'name': podName,
+            'state': state,
+            'event': failingReason,
+          };
+          notRunningPods.push(pod);
+        }
+      }
+      
   }
   var reasons = new Array();
   var events = new Array();

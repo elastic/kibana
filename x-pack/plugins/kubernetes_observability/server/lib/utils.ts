@@ -159,6 +159,20 @@ export function phaseToState(phase: number) {
     }
 }
 
+export function conStatusToState(phase: number) {
+    switch (phase) {
+        case 1: {
+            return "Ready";
+        }
+        case 0: {
+            return "Not Ready";
+        }
+        default: {
+            return "Unknown";
+        }
+    }
+}
+
 export function round(num: number, decimalPlaces = 0): number {
     var p = Math.pow(10, decimalPlaces);
     var n = (num * p) * (1 + Number.EPSILON);

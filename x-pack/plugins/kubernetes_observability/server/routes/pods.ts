@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState, Event, Pod, checkDefaultNamespace } from '../lib/utils';
+import {extractFieldValue, phaseToState, conStatusToState, Event, Pod, checkDefaultNamespace } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     POD_STATUS_ROUTE,
@@ -267,24 +267,42 @@ export async function getPodStatus(client: any, podName: string, namespace?: str
   console.log(esResponse);
   console.log(esResponse.hits.hits.length);
   var pod = {} as Pod;
+  var state = '';
+  var message = ''
   if (esResponse.hits.hits.length > 0) {
     const hit = esResponse.hits.hits[0];
     const { fields = {} } = hit;
     const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
     const nodeName = extractFieldValue(fields['resource.attributes.k8s.node.name']);
     const time = extractFieldValue(fields['@timestamp']);
-    const state = phaseToState(podPhase);
+    state = phaseToState(podPhase);
     const podNamespace =  extractFieldValue(fields['resource.attributes.k8s.namespace.name']);
     var failingReason = {} as Event;
+    message = "Pod " + podNamespace + "/" + podName + " is in " + state + " state";
     if (state !== 'Succeeded' && state !== 'Running') {
       const event = await getPodEvents(client, podName, podNamespace);
       if (event.note != '') {
         failingReason = event;
       }
+    } else {
+      const [podContainerStatus, container, contTime] = await getPodContainersStatus(client, podName, podNamespace);
+      state = podContainerStatus === 'Not Ready' ? 'Failed' : state;
+      if (podContainerStatus === 'Not Ready') {
+        const failingMessage = `Pod ${podNamespace}/${podName} is in ${state} state because container ${container} is not Ready. Check the container's logs for more details`
+        message = podContainerStatus === 'Not Ready' ? failingMessage : message;
+        failingReason = {
+          note: `Container ${container} is not Ready. Check the container's logs for more details`,
+          reason: `Container ${container} may be crashing`,
+          type: 'Warning',
+          time: contTime,
+          kind: 'Container',
+          object: container
+        }
+      }
     }
     pod = {
       time: time,
-      message: "Pod " + podNamespace + "/" + podName + " is in " + state + " state",
+      message: message,
       state: state,
       name: podName,
       namespace: podNamespace,
@@ -294,4 +312,60 @@ export async function getPodStatus(client: any, podName: string, namespace?: str
 }
 
   return pod;
+}
+
+export async function getPodContainersStatus(client: any, podName: string, namespace?: string){
+
+  var musts = new Array();
+  musts.push(
+    {
+      term: {
+        'resource.attributes.k8s.pod.name': podName,
+      },
+    },
+    { exists: { field: 'metrics.k8s.container.ready' } }
+  )
+  if (namespace !== undefined) {
+    musts.push(
+       {
+        term: {
+          'resource.attributes.k8s.namespace.name': namespace,
+        },
+      }
+    )
+  }
+ 
+  const dsl: estypes.SearchRequest = {
+    index: ["metrics-otel.*"],
+    size: 1,
+    sort: [{ '@timestamp': 'desc' }],
+    _source: false,
+    fields: [
+      '@timestamp',
+      'metrics.k8s.container.ready',
+      'resource.attributes.k8s.container.name'
+    ],
+    query: {
+      bool: {
+        must: musts,
+      },
+    },
+  };
+
+  const esResponse = await client.search(dsl);
+  console.log(esResponse);
+  console.log(esResponse.hits.hits.length);
+  var state = "Unknown";
+  var containerName = '';
+  var time = '';
+  if (esResponse.hits.hits.length > 0) {
+    const hit = esResponse.hits.hits[0];
+    const { fields = {} } = hit;
+    const podContainerReady = extractFieldValue(fields['metrics.k8s.container.ready']);
+    containerName = extractFieldValue(fields['resource.attributes.k8s.container.name']);
+    time = extractFieldValue(fields['@timestamp']);
+    state = conStatusToState(podContainerReady);
+}
+
+  return [state, containerName, time];
 }
