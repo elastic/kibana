@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { logDocumentProfileProvider } from './profile';
+export { createLogDocumentProfileProvider } from './profile';

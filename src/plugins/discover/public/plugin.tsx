@@ -56,15 +56,10 @@ import {
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
-import {
-  logDocumentProfileProvider,
-  logsDataSourceProfileProvider,
-  o11yRootProfileProvider,
-} from './context_awareness/profiles/example_profiles';
 import { createProfileProviderServices } from './context_awareness/profiles/profile_provider_services';
-import { createLogsDataSourceProfileProvider } from './context_awareness/profile_providers/logs_data_source_profile/profile';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
-import { createLogDocumentProfileProvider } from './context_awareness/profile_providers/log_document_profile/profile';
+import { createLogsDataSourceProfileProvider } from './context_awareness/profile_providers/logs_data_source_profile';
+import { createLogDocumentProfileProvider } from './context_awareness/profile_providers/log_document_profile';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
