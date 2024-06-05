@@ -21,7 +21,7 @@ export const DegradedFieldTable = () => {
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
-  const columns = getDegradedFieldsColumns({ dateFormatter });
+  const columns = getDegradedFieldsColumns({ dateFormatter, isLoading });
 
   return (
     <EuiBasicTable
