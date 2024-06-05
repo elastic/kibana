@@ -40,7 +40,7 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isPlainRecord: false,
+        isEsqlMode: false,
       },
     });
     expect(resultForDocuments).toEqual(
@@ -51,13 +51,13 @@ describe('sidebar reducer', function () {
         status: DiscoverSidebarReducerStatus.PROCESSING,
       })
     );
-    const resultForTextBasedQuery = discoverSidebarReducer(state, {
+    const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        isPlainRecord: true,
+        isEsqlMode: true,
       },
     });
-    expect(resultForTextBasedQuery).toEqual(
+    expect(resultForEsqlQuery).toEqual(
       expect.objectContaining({
         dataView,
         allFields: null,
@@ -75,7 +75,7 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isPlainRecord: false,
+        isEsqlMode: false,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts,
       },
@@ -96,13 +96,13 @@ describe('sidebar reducer', function () {
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
-    const resultForTextBasedQuery = discoverSidebarReducer(state, {
+    const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isPlainRecord: true,
+        isEsqlMode: true,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: {},
-        textBasedQueryColumns: [
+        esqlQueryColumns: [
           {
             id: '1',
             name: 'text1',
@@ -122,7 +122,7 @@ describe('sidebar reducer', function () {
         ] as DatatableColumn[],
       },
     });
-    expect(resultForTextBasedQuery).toStrictEqual({
+    expect(resultForEsqlQuery).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
       allFields: [
         new DataViewField({
@@ -149,7 +149,7 @@ describe('sidebar reducer', function () {
     const resultWhileLoading = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isPlainRecord: false,
+        isEsqlMode: false,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: null,
       },

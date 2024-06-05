@@ -700,7 +700,7 @@ const createCaseWithFiles = async ({
   owner,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   fileKind: string;
   owner: string;
   auth?: { user: User; space: string | null };

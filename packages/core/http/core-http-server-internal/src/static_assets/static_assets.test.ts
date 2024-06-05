@@ -46,6 +46,12 @@ describe('StaticAssets', () => {
       staticAssets = new StaticAssets(args);
       expect(staticAssets.isUsingCdn()).toBe(true);
     });
+
+    it('returns false when CDN config contains "null" URL', () => {
+      args.cdnConfig = CdnConfig.from({ url: null });
+      staticAssets = new StaticAssets(args);
+      expect(staticAssets.isUsingCdn()).toBe(false);
+    });
   });
 
   describe('#getPluginAssetHref()', () => {

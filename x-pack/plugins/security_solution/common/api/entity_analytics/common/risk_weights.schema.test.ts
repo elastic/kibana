@@ -59,9 +59,7 @@ describe('risk weight schema', () => {
         const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
 
         expect(decoded.success).toBeFalsy();
-        expect(stringifyZodError(decoded.error)).toEqual(
-          'host: Required, user: Required, type: Invalid literal value, expected "risk_category", value: Invalid literal value, expected "category_1", host: Required, and 3 more'
-        );
+        expect(stringifyZodError(decoded.error)).toContain('host: Required, user: Required');
       });
 
       it('allows a single host weight', () => {
@@ -123,42 +121,8 @@ describe('risk weight schema', () => {
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toEqual(
-          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier", value: Invalid literal value, expected "category_1", host: Required, and 1 more'
+          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier"'
         );
-      });
-
-      it('rejects if neither host nor user weight are specified', () => {
-        const payload = { type, value: RiskCategories.category_1 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
-
-        expect(decoded.success).toBeFalsy();
-        expect(stringifyZodError(decoded.error)).toEqual(
-          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier", user: Required, host: Required, and 1 more'
-        );
-      });
-
-      it('allows a single host weight', () => {
-        const payload = { type, value: RiskCategories.category_1, host: 0.1 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
-
-        expect(decoded.success).toBeTruthy();
-        expect(decoded.data).toEqual(payload);
-      });
-
-      it('allows a single user weight', () => {
-        const payload = { type, value: RiskCategories.category_1, user: 0.1 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
-
-        expect(decoded.success).toBeTruthy();
-        expect(decoded.data).toEqual(payload);
-      });
-
-      it('allows both a host and user weight', () => {
-        const payload = { type, value: RiskCategories.category_1, user: 0.1, host: 0.5 };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
-
-        expect(decoded.success).toBeTruthy();
-        expect(decoded.data).toEqual(payload);
       });
 
       it('rejects a weight outside of 0-1', () => {
@@ -169,47 +133,6 @@ describe('risk weight schema', () => {
         expect(stringifyZodError(decoded.error)).toContain(
           `host: Number must be greater than or equal to 0`
         );
-      });
-
-      it('removes extra keys if specified', () => {
-        const payload = {
-          type,
-          value: RiskCategories.category_1,
-          host: 0.1,
-          extra: 'even more',
-        };
-        const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
-
-        expect(decoded.success).toBeTruthy();
-        expect(decoded.data).toEqual({ type, value: RiskCategories.category_1, host: 0.1 });
-      });
-
-      describe('allowed category values', () => {
-        it('allows the alerts type for a category', () => {
-          const payload = {
-            type,
-            value: RiskCategories.category_1,
-            host: 0.1,
-          };
-          const decoded = RiskScoreWeight.safeParse(payload) as SafeParseSuccess<object>;
-
-          expect(decoded.success).toBeTruthy();
-          expect(decoded.data).toEqual(payload);
-        });
-
-        it('rejects an unknown category value', () => {
-          const payload = {
-            type,
-            value: 'unknown',
-            host: 0.1,
-          };
-          const decoded = RiskScoreWeight.safeParse(payload) as SafeParseError<object>;
-
-          expect(decoded.success).toBeFalsy();
-          expect(stringifyZodError(decoded.error)).toContain(
-            'type: Invalid literal value, expected "global_identifier", type: Invalid literal value, expected "global_identifier", user: Required, value: Invalid literal value, expected "category_1", value: Invalid literal value, expected "category_1", and 1 more'
-          );
-        });
       });
     });
   });

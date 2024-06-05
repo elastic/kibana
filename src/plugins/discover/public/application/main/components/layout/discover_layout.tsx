@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import './discover_layout.scss';
 import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -23,7 +24,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
@@ -44,10 +45,9 @@ import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg, RecordRawType } from '../../state_management/discover_data_state_container';
+import { DataMainMsg } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
@@ -55,6 +55,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -74,6 +75,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     observabilityAIAssistant,
+    dataVisualizer: dataVisualizerService,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -84,10 +86,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.columns,
     state.sort,
   ]);
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isEsqlMode = useIsEsqlMode();
+
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isPlainRecord)
+    const fieldStatsNotAvailable =
+      !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
+    if (state.viewMode === VIEW_MODE.AGGREGATED_LEVEL && fieldStatsNotAvailable) {
       return VIEW_MODE.DOCUMENT_LEVEL;
+    }
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
@@ -140,13 +146,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   useEffect(() => {
     return observabilityAIAssistant?.service.setScreenContext({
       screenDescription: `The user is looking at the Discover view on the ${
-        isPlainRecord ? 'ES|QL' : 'dataView'
+        isEsqlMode ? 'ES|QL' : 'dataView'
       } mode. The index pattern is the ${dataView.getIndexPattern()}`,
     });
-  }, [dataView, isPlainRecord, observabilityAIAssistant?.service]);
+  }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
-  const onAddFilter = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+  const onAddFilter = useCallback<DocViewFilterFn>(
+    (field, values, operation) => {
+      if (!field) {
+        return;
+      }
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(dataView, fieldName, dataViews, capabilities);
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
@@ -158,36 +167,50 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onPopulateWhereClause = useCallback(
-    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      if (query && isOfAggregateQueryType(query) && 'esql' in query) {
-        const fieldName = typeof field === 'string' ? field : field.name;
-        // send the field type for casting
-        const fieldType = typeof field !== 'string' ? field.type : undefined;
-        // weird existence logic from Discover components
-        // in the field it comes the operator _exists_ and in the value the field
-        // I need to take care of it here but I think it should be handled on the fieldlist instead
-        const updatedQuery = appendWhereClauseToESQLQuery(
-          query.esql,
-          fieldName === '_exists_' ? String(values) : fieldName,
-          fieldName === '_exists_' ? undefined : values,
-          fieldName === '_exists_' ? '_exists_' : operation,
-          fieldType
-        );
-        data.query.queryString.setQuery({
-          esql: updatedQuery,
-        });
-        if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
-        }
+  const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
+    if (fieldName === '_exists_') {
+      return 'is_not_null';
+    }
+    if (values == null && operation === '-') {
+      return 'is_not_null';
+    }
+
+    if (values == null && operation === '+') {
+      return 'is_null';
+    }
+
+    return operation;
+  };
+
+  const onPopulateWhereClause = useCallback<DocViewFilterFn>(
+    (field, values, operation) => {
+      if (!field || !isOfAggregateQueryType(query)) {
+        return;
+      }
+      const fieldName = typeof field === 'string' ? field : field.name;
+      // send the field type for casting
+      const fieldType = typeof field !== 'string' ? field.type : undefined;
+      // weird existence logic from Discover components
+      // in the field it comes the operator _exists_ and in the value the field
+      // I need to take care of it here but I think it should be handled on the fieldlist instead
+      const updatedQuery = appendWhereClauseToESQLQuery(
+        query.esql,
+        fieldName === '_exists_' ? String(values) : fieldName,
+        fieldName === '_exists_' || values == null ? undefined : values,
+        getOperator(fieldName, values, operation),
+        fieldType
+      );
+      data.query.queryString.setQuery({
+        esql: updatedQuery,
+      });
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
     },
     [data.query.queryString, query, trackUiMetric]
   );
 
-  const onFilter = isPlainRecord
-    ? (onPopulateWhereClause as DocViewFilterFn)
-    : (onAddFilter as DocViewFilterFn);
+  const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
 
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
@@ -212,17 +235,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
 
-  const textBasedLanguageModeWarning = useMemo(() => {
-    if (isPlainRecord) {
-      return documentState.textBasedHeaderWarning;
+  const esqlModeWarning = useMemo(() => {
+    if (isEsqlMode) {
+      return documentState.esqlHeaderWarning;
     }
-  }, [documentState.textBasedHeaderWarning, isPlainRecord]);
+  }, [documentState.esqlHeaderWarning, isEsqlMode]);
 
-  const textBasedLanguageModeErrors = useMemo(() => {
-    if (isPlainRecord) {
+  const esqlModeErrors = useMemo(() => {
+    if (isEsqlMode) {
       return dataState.error;
     }
-  }, [dataState.error, isPlainRecord]);
+  }, [dataState.error, isEsqlMode]);
 
   const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
   const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
@@ -262,7 +285,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return (
       <>
         <DiscoverHistogramLayout
-          isPlainRecord={isPlainRecord}
           dataView={dataView}
           stateContainer={stateContainer}
           columns={currentColumns}
@@ -278,7 +300,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     );
   }, [
     resultState,
-    isPlainRecord,
     dataView,
     stateContainer,
     currentColumns,
@@ -329,8 +350,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-        textBasedLanguageModeWarning={textBasedLanguageModeWarning}
+        esqlModeErrors={esqlModeErrors}
+        esqlModeWarning={esqlModeWarning}
         onFieldEdited={onFieldEdited}
         isLoading={isLoading}
         onCancelClick={onCancelClick}
