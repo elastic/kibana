@@ -9,8 +9,10 @@ import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/ser
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Duration, DurationUnit } from '../domain/models';
+import { BurnRatesClient } from './burn_rates_client';
 import { createSLO } from './fixtures/slo';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
+import { createBurnRatesClientMock } from './mocks';
 import { DefaultSummaryClient } from './summary_client';
 
 const createEsResponse = (good: number = 90, total: number = 100) => ({
@@ -33,9 +35,17 @@ const createEsResponse = (good: number = 90, total: number = 100) => ({
 
 describe('SummaryClient', () => {
   let esClientMock: ElasticsearchClientMock;
+  let burnRatesClientMock: jest.Mocked<BurnRatesClient>;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    burnRatesClientMock = createBurnRatesClientMock();
+
+    burnRatesClientMock.calculate.mockResolvedValueOnce([
+      { name: '5m', burnRate: 0.5, sli: 0.9 },
+      { name: '1h', burnRate: 0.6, sli: 0.9 },
+      { name: '1d', burnRate: 0.7, sli: 0.9 },
+    ]);
   });
 
   describe('fetchSummary', () => {
@@ -43,7 +53,7 @@ describe('SummaryClient', () => {
       it('returns the summary', async () => {
         const slo = createSLO({ timeWindow: sevenDaysRolling() });
         esClientMock.search.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
         const result = await summaryClient.computeSummary({ slo });
 
@@ -67,48 +77,6 @@ describe('SummaryClient', () => {
           aggs: {
             good: { sum: { field: 'slo.numerator' } },
             total: { sum: { field: 'slo.denominator' } },
-            last5m: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
-              },
-            },
-            last1h: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1h/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
-              },
-            },
-            last1d: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1d/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
-              },
-            },
           },
         });
       });
@@ -120,7 +88,7 @@ describe('SummaryClient', () => {
           timeWindow: weeklyCalendarAligned(),
         });
         esClientMock.search.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
         await summaryClient.computeSummary({ slo });
 
@@ -146,48 +114,6 @@ describe('SummaryClient', () => {
           aggs: {
             good: { sum: { field: 'slo.numerator' } },
             total: { sum: { field: 'slo.denominator' } },
-            last5m: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
-              },
-            },
-            last1h: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1h/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
-              },
-            },
-            last1d: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1d/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.numerator' } },
-                total: { sum: { field: 'slo.denominator' } },
-              },
-            },
           },
         });
       });
@@ -205,7 +131,7 @@ describe('SummaryClient', () => {
           timeWindow: sevenDaysRolling(),
         });
         esClientMock.search.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
         const result = await summaryClient.computeSummary({ slo });
 
@@ -229,48 +155,6 @@ describe('SummaryClient', () => {
           aggs: {
             good: { sum: { field: 'slo.isGoodSlice' } },
             total: { value_count: { field: 'slo.isGoodSlice' } },
-            last5m: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.isGoodSlice' } },
-                total: { value_count: { field: 'slo.isGoodSlice' } },
-              },
-            },
-            last1h: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1h/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.isGoodSlice' } },
-                total: { value_count: { field: 'slo.isGoodSlice' } },
-              },
-            },
-            last1d: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1d/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.isGoodSlice' } },
-                total: { value_count: { field: 'slo.isGoodSlice' } },
-              },
-            },
           },
         });
       });
@@ -288,7 +172,7 @@ describe('SummaryClient', () => {
           timeWindow: weeklyCalendarAligned(),
         });
         esClientMock.search.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
         const result = await summaryClient.computeSummary({ slo });
 
@@ -316,48 +200,6 @@ describe('SummaryClient', () => {
           aggs: {
             good: { sum: { field: 'slo.isGoodSlice' } },
             total: { value_count: { field: 'slo.isGoodSlice' } },
-            last5m: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.isGoodSlice' } },
-                total: { value_count: { field: 'slo.isGoodSlice' } },
-              },
-            },
-            last1h: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1h/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.isGoodSlice' } },
-                total: { value_count: { field: 'slo.isGoodSlice' } },
-              },
-            },
-            last1d: {
-              filter: {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1d/m',
-                    lte: 'now/m',
-                  },
-                },
-              },
-              aggs: {
-                good: { sum: { field: 'slo.isGoodSlice' } },
-                total: { value_count: { field: 'slo.isGoodSlice' } },
-              },
-            },
           },
         });
       });

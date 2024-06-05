@@ -23,6 +23,7 @@ import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
+import { BurnRatesClient } from './burn_rates_client';
 import { getFlattenedGroupings } from './utils';
 import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
 
@@ -47,7 +48,7 @@ export interface SummaryClient {
 }
 
 export class DefaultSummaryClient implements SummaryClient {
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private burnRatesClient: BurnRatesClient) {}
 
   async computeSummary({ slo, instanceId, remoteName }: Params): Promise<SummaryResult> {
     const dateRange = toDateRange(slo.timeWindow);
@@ -65,18 +66,6 @@ export class DefaultSummaryClient implements SummaryClient {
         good: AggregationsSumAggregate;
         total: AggregationsSumAggregate;
         last_doc: AggregationsTopHitsAggregate;
-        last5m: {
-          good: AggregationsSumAggregate;
-          total: AggregationsSumAggregate | AggregationsValueCountAggregate;
-        };
-        last1h: {
-          good: AggregationsSumAggregate;
-          total: AggregationsSumAggregate | AggregationsValueCountAggregate;
-        };
-        last1d: {
-          good: AggregationsSumAggregate;
-          total: AggregationsSumAggregate | AggregationsValueCountAggregate;
-        };
       }
     >({
       index: remoteName
@@ -128,26 +117,25 @@ export class DefaultSummaryClient implements SummaryClient {
     const sliValue = computeSliValue(slo, dateRange, result.aggregations);
     const errorBudget = computeErrorBudget(slo, sliValue);
 
+    const burnRates = await this.burnRatesClient.calculate(
+      slo,
+      instanceId ?? ALL_VALUE,
+      [
+        { name: '5m', duration: new Duration(5, DurationUnit.Minute) },
+        { name: '1h', duration: new Duration(1, DurationUnit.Hour) },
+        { name: '1d', duration: new Duration(1, DurationUnit.Day) },
+      ],
+      remoteName
+    );
+
     return {
       summary: {
         sliValue,
         errorBudget,
         status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
-        fiveMinuteBurnRate: computeBurnRate(
-          slo,
-          new Duration(5, DurationUnit.Minute),
-          result.aggregations?.last5m
-        ),
-        oneHourBurnRate: computeBurnRate(
-          slo,
-          new Duration(1, DurationUnit.Hour),
-          result.aggregations?.last1h
-        ),
-        oneDayBurnRate: computeBurnRate(
-          slo,
-          new Duration(1, DurationUnit.Day),
-          result.aggregations?.last1d
-        ),
+        fiveMinuteBurnRate: burnRates.find(({ name }) => name === '5m')?.burnRate ?? 0,
+        oneHourBurnRate: burnRates.find(({ name }) => name === '1h')?.burnRate ?? 0,
+        oneDayBurnRate: burnRates.find(({ name }) => name === '1d')?.burnRate ?? 0,
       },
       groupings: groupings ? getFlattenedGroupings({ groupBy: slo.groupBy, groupings }) : {},
       meta: getMetaFields(slo, source ?? {}),
@@ -156,7 +144,7 @@ export class DefaultSummaryClient implements SummaryClient {
 }
 
 function buildAggs(slo: SLODefinition) {
-  const aggs = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+  return timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
     ? {
         good: { sum: { field: 'slo.isGoodSlice' } },
         total: { value_count: { field: 'slo.isGoodSlice' } },
@@ -165,43 +153,6 @@ function buildAggs(slo: SLODefinition) {
         good: { sum: { field: 'slo.numerator' } },
         total: { sum: { field: 'slo.denominator' } },
       };
-
-  return {
-    ...aggs,
-    last5m: {
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: 'now-5m/m',
-            lte: 'now/m',
-          },
-        },
-      },
-      aggs,
-    },
-    last1h: {
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: 'now-1h/m',
-            lte: 'now/m',
-          },
-        },
-      },
-      aggs,
-    },
-    last1d: {
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: 'now-1d/m',
-            lte: 'now/m',
-          },
-        },
-      },
-      aggs,
-    },
-  };
 }
 
 function getMetaFields(
@@ -257,32 +208,4 @@ function computeErrorBudget(slo: SLODefinition, sliValue: number) {
     calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
       occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
   );
-}
-
-function computeBurnRate(
-  slo: SLODefinition,
-  duration: Duration,
-  bucket: BurnRateBucket | undefined
-) {
-  const good = bucket?.good?.value ?? 0;
-  const total = bucket?.total?.value ?? 0;
-  if (total === 0) {
-    return 0;
-  }
-
-  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-    const totalSlicesInBucket = Math.floor(
-      duration.asMinutes() / slo.objective.timesliceWindow!.asMinutes()
-    );
-    if (totalSlicesInBucket === 0) {
-      return 0;
-    }
-
-    const badEvents = total - good;
-    const sliValue = 1 - badEvents / totalSlicesInBucket;
-    return (1 - sliValue) / (1 - slo.objective.target);
-  }
-
-  const sliValue = good / total;
-  return (1 - sliValue) / (1 - slo.objective.target);
 }
