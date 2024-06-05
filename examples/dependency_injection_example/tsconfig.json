@@ -4,6 +4,7 @@
     "outDir": "target/types",
   },
   "include": [
+    "public/**/*",
     "server/**/*",
   ],
   "exclude": [
@@ -11,7 +12,9 @@
   ],
   "kbn_references": [
     "@kbn/config-schema",
+    "@kbn/core-application-browser",
     "@kbn/core-di-common",
+    "@kbn/core-http-browser",
     "@kbn/core-http-server",
   ]
 }
