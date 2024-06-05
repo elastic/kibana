@@ -264,6 +264,176 @@ export class InfraServerPlugin
 
     registerRuleTypes(plugins.alerting, this.libs, this.config);
 
+    const detectionRouter = core.http.createRouter();
+    detectionRouter.post(
+      {
+        path: '/api/observability/detections',
+        validate: {
+          body: schema.object({}, { unknowns: 'allow' }),
+        },
+        options: { authRequired: false },
+      },
+      async (context, request, response) => {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+        const hostName = request.body.hostName;
+
+        // get the agent.id of data shipped from the host
+        const agentId = await esClient
+          .search({
+            index: 'logs-*',
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        'host.hostname': hostName,
+                      },
+                    },
+                  ],
+                },
+              },
+              size: 1,
+              _source: ['agent.id'],
+            },
+          })
+          .then((res) => {
+            return (res.hits.hits[0]._source as any).agent.id;
+          });
+
+        console.log('agentId:', agentId);
+
+        // get the detections for the agent.id
+        const detections = await esClient
+          .search({
+            index: 'logs-edgedetections-*',
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        'agent.id': agentId,
+                      },
+                    },
+                  ],
+                },
+              },
+              sort: [{ '@timestamp': 'desc' }],
+              size: 100,
+            },
+          })
+          .then((res) => {
+            return res.hits.hits.map((hit) => hit._source);
+          });
+
+        // detections look like this:
+        /*
+          [
+    {
+      "agent.id": "08506667-7423-4a4b-a58f-c3030da6f8ae",
+      "detection": {
+        "package": "apache",
+        "paths": [
+          "/var/log/apache2/error.log",
+          "/var/log/apache2/other_vhosts_access.log",
+          "/var/log/apache2/access.log",
+          "/var/log/apache2/error.log",
+          "/var/log/apache2/other_vhosts_access.log",
+          "/var/log/apache2/access.log",
+          "/var/log/apache2/error.log",
+          "/var/log/apache2/other_vhosts_access.log",
+          "/var/log/apache2/access.log"
+        ]
+      },
+      "@timestamp": "2024-06-04T12:57:51.407305Z"
+    },
+    {
+      "agent.id": "08506667-7423-4a4b-a58f-c3030da6f8ae",
+      "detection": {
+        "package": "custom",
+        "paths": [
+          "/run/log/journal/6e276c66949342438fbf8ac981c92628/system.journal",
+          "/var/log/auth.log",
+          "/var/log/user.log",
+          "/var/log/syslog",
+          "/var/log/messages",
+          "/var/log/daemon.log",
+          "/var/log/lightdm/lightdm.log",
+          "/var/log/lightdm/x-0.log",
+          "/var/log/lightdm/x-0.log",
+          "/var/log/Xorg.0.log",
+          "/run/user/1000/i3/errorlog.715",
+          "/opt/Elastic/Agent/data/elastic-agent-8.15.0-SNAPSHOT-e984ed/logs/elastic-agent-20240604-7.ndjson",
+          "/opt/Elastic/Agent/data/elastic-agent-8.15.0-SNAPSHOT-e984ed/run/log-default/registry/filebeat/log.json",
+          "/opt/Elastic/Agent/data/elastic-agent-8.15.0-SNAPSHOT-e984ed/logs/elastic-agent-20240604-7.ndjson",
+          "/opt/Elastic/Agent/data/elastic-agent-8.15.0-SNAPSHOT-e984ed/run/filestream-monitoring/registry/filebeat/log.json"
+        ]
+      },
+      */
+        // we need to extract all the paths, then check whether we already ingest these logs by querying logs with log.file.path
+        // then we can filter the detections by the logs we already ingest
+
+        const paths = detections.flatMap((detection) => detection.detection.paths);
+        console.log('paths:', paths);
+
+        const logs = await esClient.search({
+          index: 'logs-*',
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      'log.file.path': paths,
+                    },
+                  },
+                  {
+                    term: {
+                      'host.hostname': hostName,
+                    },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              paths: {
+                terms: {
+                  field: 'log.file.path',
+                  size: 10000,
+                },
+              },
+            },
+            size: 0,
+          },
+        });
+
+        console.log('logs:', logs);
+
+        const ingestedPaths = logs.aggregations.paths.buckets.map((bucket) => bucket.key);
+
+        console.log('ingestedPaths:', ingestedPaths);
+
+        const filteredDetections = detections
+          .map((detection) => ({
+            ...detection,
+            detection: {
+              ...detection.detection,
+              paths: detection.detection.paths.filter((path) => !ingestedPaths.includes(path)),
+            },
+          }))
+          .filter((detection) => detection.detection.paths.length > 0);
+
+        return response.ok({
+          body: {
+            params: request.body,
+            results: filteredDetections,
+          },
+        });
+      }
+    );
+
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
       async (context, request) => {
