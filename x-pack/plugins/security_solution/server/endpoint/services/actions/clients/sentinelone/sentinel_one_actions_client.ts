@@ -46,10 +46,13 @@ import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  KillOrSuspendProcessRequestBody,
+  KillProcessActionOutputContent,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionParametersWithPidOrEntityId,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
@@ -555,6 +558,66 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       fileName: agentResponse.meta.filename,
       mimeType: undefined,
     };
+  }
+
+  async killProcess(
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  > {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      {} // FIXME:PT define type
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'kill-process',
+      meta: {
+        parentTaskId: '',
+      },
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          const s1Response = await this.sendAction(SUB_ACTION.EXECUTE_SCRIPT, {
+            filter: {
+              uuids: actionRequest.endpoint_ids[0],
+            },
+            script: {
+              scriptId: '1466645476786791838', // FIXME:PT get the S1 terminate process script info by OS
+              taskDescription: 'tbd....',
+              requiresApproval: false,
+              inputParams: `--terminate --processes ${actionRequest.parameters.process_name} --force`,
+              outputDestination: 'SentinelCloud',
+            },
+          });
+
+          this.log.debug(`Response for kill-process:\n${stringify(s1Response.data)}`);
+
+          reqIndexOptions.meta.parentTaskId = s1Response.data.data.parentTaskId ?? '';
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails } = await this.handleResponseActionCreation<
+      ResponseActionParametersWithPidOrEntityId,
+      KillProcessActionOutputContent
+    >(reqIndexOptions);
+
+    return actionDetails;
   }
 
   async processPendingActions({
