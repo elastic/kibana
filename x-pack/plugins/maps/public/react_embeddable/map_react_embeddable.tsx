@@ -79,6 +79,9 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
     const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(
       savedMap.getAttributes().title
     );
+    const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
+      savedMap.getAttributes().description
+    );
     const reduxSync = initializeReduxSync({
       savedMap,
       state,
@@ -132,6 +135,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
     api = buildApi(
       {
         defaultPanelTitle: defaultPanelTitle$,
+        defaultPanelDescription: defaultPanelDescription$,
         ...timeRange.api,
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         ...title.titlesApi,
@@ -174,11 +178,13 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
     return {
       api,
       Component: () => {
-        const [defaultPanelTitle, panelTitle, panelDescription] = useBatchedPublishingSubjects(
-          defaultPanelTitle$,
-          title.titlesApi.panelTitle,
-          title.titlesApi.panelDescription
-        );
+        const [defaultPanelTitle, panelTitle, defaultPanelDescription, panelDescription] =
+          useBatchedPublishingSubjects(
+            defaultPanelTitle$,
+            title.titlesApi.panelTitle,
+            defaultPanelDescription$,
+            title.titlesApi.panelDescription
+          );
 
         useEffect(() => {
           return () => {
@@ -216,7 +222,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
               getActionContext={actionHandlers.getActionContext}
               renderTooltipContent={state.tooltipRenderer}
               title={panelTitle ?? defaultPanelTitle}
-              description={panelDescription}
+              description={panelDescription ?? defaultPanelDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
               isSharable={state.isSharable ?? true}
             />
