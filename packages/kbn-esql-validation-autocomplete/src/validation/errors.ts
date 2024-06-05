@@ -391,7 +391,7 @@ export function createMessage(
   message: string,
   location: ESQLLocation,
   messageId: string
-) {
+): ESQLMessage {
   return {
     type,
     text: message,
@@ -399,6 +399,36 @@ export function createMessage(
     code: messageId,
   };
 }
+
+const createError = (messageId: string, location: ESQLLocation, message: string = '') =>
+  createMessage('error', message, location, messageId);
+
+export const errors = {
+  unexpected: (
+    location: ESQLLocation,
+    message: string = i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.validation.errors.unexpected.message',
+      {
+        defaultMessage: 'Unexpected error, this should never happen.',
+      }
+    )
+  ): ESQLMessage => {
+    return createError('unexpected', location, message);
+  },
+
+  missingAggregates: (command: string, location: ESQLLocation): ESQLMessage => {
+    return createError(
+      'missingAggregates',
+      location,
+      i18n.translate('kbn-esql-validation-autocomplete.esql.validation.missingAggregates', {
+        defaultMessage: 'At least one aggregation or grouping expression required in [{command}]',
+        values: {
+          command: command.toUpperCase(),
+        },
+      })
+    );
+  },
+};
 
 export function getUnknownTypeLabel() {
   return i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownColumnType', {

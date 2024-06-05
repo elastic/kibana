@@ -7,7 +7,7 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import type {
+import {
   AstProviderFn,
   ESQLAstItem,
   ESQLAstMetricsCommand,
@@ -19,6 +19,7 @@ import type {
   ESQLMessage,
   ESQLSingleAstItem,
   ESQLSource,
+  walk,
 } from '@kbn/esql-ast';
 import {
   CommandModeDefinition,
@@ -54,7 +55,7 @@ import {
   isValidLiteralOption,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
-import { getMessageFromId, getUnknownTypeLabel } from './errors';
+import { getMessageFromId, getUnknownTypeLabel, errors } from './errors';
 import type {
   ErrorTypes,
   ESQLRealField,
@@ -74,6 +75,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
+import { i18n } from '@kbn/i18n';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -568,15 +570,143 @@ function validateSetting(
   return messages;
 }
 
+// const isAggFunction = (fn: ESQLFunction): boolean =>
+//   getFunctionDefinition(fn.name)?.type === 'agg';
+
+// const isAggFunction = (fn: ESQLFunction): boolean =>
+//   getFunctionDefinition(fn.name)?.type === 'agg';
+
+/**
+ * Validates aggregates fields: `... <aggregates> ...`.
+ */
+const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstItem[]) => {
+  const messages: ESQLMessage[] = [];
+
+  // Should never happen.
+  if (!aggregates.length) {
+    messages.push(errors.unexpected(command.location));
+    return messages;
+  }
+
+  walk(aggregates, {
+    visitFunction: (fn) => {
+      const definition = getFunctionDefinition(fn.name);
+      if (!definition) {
+        console.log('unknown function', fn.name)
+        return;
+      }
+      // console.log('fn', fn.name);
+    },
+  });
+
+    // // now that all functions are supported, there's a specific check to perform
+    // // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
+    // // until an agg function is detected
+    // // in the long run this might be integrated into the validation function
+    // const statsArg = command.args
+    //   .flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg))
+    //   .filter(isFunctionItem);
+
+    // if (statsArg.length) {
+    //   function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
+    //     return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+    //   }
+    //   function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
+    //     return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
+    //   }
+
+    //   function checkAggExistence(arg: ESQLFunction): boolean {
+    //     // TODO the grouping function check may not
+    //     // hold true for all future cases
+    //     if (isAggFunction(arg)) {
+    //       return true;
+    //     }
+    //     if (isOtherFunction(arg)) {
+    //       return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
+    //     }
+    //     return false;
+    //   }
+    //   // first check: is there an agg function somewhere?
+    //   const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
+
+    //   if (noAggsExpressions.length) {
+    //     messages.push(
+    //       ...noAggsExpressions.map((fn) => ({
+    //         location: fn.location,
+    //         text: i18n.translate(
+    //           'kbn-esql-validation-autocomplete.esql.validation.statsNoAggFunction',
+    //           {
+    //             defaultMessage:
+    //               'At least one aggregation function required in [STATS], found [{expression}]',
+    //             values: {
+    //               expression: fn.text,
+    //             },
+    //           }
+    //         ),
+    //         type: 'error' as const,
+    //         code: 'statsNoAggFunction',
+    //       }))
+    //     );
+    //   } else {
+    //     function isConstantOrAggFn(arg: ESQLAstItem): boolean {
+    //       return isLiteralItem(arg) || isAggFunction(arg);
+    //     }
+    //     // now check that:
+    //     // * the agg function is at root level
+    //     // * or if it's a builtin function, then all operands are agg functions or literals
+    //     // * or if it's a eval function then all arguments are agg functions or literals
+    //     function checkFunctionContent(arg: ESQLFunction) {
+    //       // TODO the grouping function check may not
+    //       // hold true for all future cases
+    //       if (isAggFunction(arg)) {
+    //         return true;
+    //       }
+    //       return (arg as ESQLFunction).args.every(
+    //         (subArg): boolean =>
+    //           isConstantOrAggFn(subArg) ||
+    //           (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
+    //       );
+    //     }
+    //     // @TODO: improve here the check to get the last instance of the invalidExpression
+    //     // to provide a better location for the error message
+    //     // i.e. STATS round(round(round( a + sum(b) )))
+    //     // should return the location of the + node, just before the agg one
+    //     const invalidExpressions = statsArg.filter((arg) => !checkFunctionContent(arg));
+
+    //     if (invalidExpressions.length) {
+    //       messages.push(
+    //         ...invalidExpressions.map((fn) => ({
+    //           location: fn.location,
+    //           text: i18n.translate(
+    //             'kbn-esql-validation-autocomplete.esql.validation.noCombinationOfAggAndNonAggValues',
+    //             {
+    //               defaultMessage:
+    //                 'Cannot combine aggregation and non-aggregation values in [STATS], found [{expression}]',
+    //               values: {
+    //                 expression: fn.text,
+    //               },
+    //             }
+    //           ),
+    //           type: 'error' as const,
+    //           code: 'statsNoCombinationOfAggAndNonAggValues',
+    //         }))
+    //       );
+    //     }
+    //   }
+    // }
+
+  return messages;
+};
+
 /**
  * Validates grouping fields of the BY clause: `... BY <grouping>`.
  */
-function validateByGrouping(
+const validateByGrouping = (
   fields: ESQLAstItem[],
   commandName: string,
   referenceMaps: ReferenceMaps,
   multipleParams: boolean,
-): ESQLMessage[] {
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   for (const field of fields) {
     if (!Array.isArray(field)) {
@@ -595,7 +725,7 @@ function validateByGrouping(
     }
   }
   return messages;
-}
+};
 
 function validateOption(
   option: ESQLCommandOption,
@@ -789,6 +919,36 @@ export function validateSources(command: ESQLCommand, sources: ESQLSource[], ref
   return messages;
 }
 
+/**
+ * Validates the METRICS source command:
+ * 
+ *     METRICS <sources> [ <aggregates> [ BY <grouping> ]]
+ */
+const validateMetricsCommand = (command: ESQLAstMetricsCommand, references: ReferenceMaps): ESQLMessage[] => {
+  const messages: ESQLMessage[] = [];
+  const {sources, aggregates, grouping} = command;
+
+  // METRICS <sources> ...
+  messages.push(...validateSources(command, sources, references));
+
+  // ... <aggregates> ...
+  if (aggregates && aggregates.length) {
+    messages.push(...validateAggregates(command, aggregates));
+
+    // ... BY <grouping>
+    if (grouping && grouping.length) {
+      messages.push(...validateByGrouping(grouping, 'metrics', references, true));
+    }
+  }
+
+  const hasGroupingButDoesNotHaveAggregates = grouping && grouping.length && (!aggregates || !aggregates.length);
+  if (hasGroupingButDoesNotHaveAggregates) {
+    messages.push(errors.unexpected(command.location, 'Grouping fields are not allowed without aggregate functions.'));
+  }
+
+  return messages;
+};
+
 function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -804,13 +964,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
   switch (commandDef.name) {
     case 'metrics': {
       const metrics = command as ESQLAstMetricsCommand;
-      messages.push(...validateSources(metrics, metrics.sources, references));
-      if (metrics.aggregates) {
-        // TODO: validate aggregates
-        if (metrics.grouping) {
-          messages.push(...validateByGrouping(metrics.grouping, 'metrics', references, true));
-        }
-      }
+      messages.push(...validateMetricsCommand(metrics, references));
       break;
     }
     default: {

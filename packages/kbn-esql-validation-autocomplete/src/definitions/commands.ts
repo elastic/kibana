@@ -96,7 +96,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: [
       'metrics index [, index2 ...] [aggregate [, aggregate2 ...] [by field [, field2 ...]]]',
     ],
-    options: [], // TODO ...
+    options: [],
     modes: [],
     signature: {
       multipleParams: true,

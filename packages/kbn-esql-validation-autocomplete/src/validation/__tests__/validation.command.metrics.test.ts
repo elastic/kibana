@@ -119,7 +119,7 @@ describe('validation', () => {
           ]);
         });
 
-        test.skip('errors on unknown function', async () => {
+        test.only('errors on unknown function', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('metrics a_index var0 = avg(fn(number)), count(*)', [
