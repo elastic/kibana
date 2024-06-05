@@ -16,7 +16,7 @@ in order to decrypt the protected attributes ("Additional Authenticated Data", o
 The ESO Service encrypts ESOs with the Encrypted Saved Object encryption key, a Kibana configuration setting. This setting must have a valid value for the ESO Service
 to function. For more details see [Secure saved objects](https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html). When running in a
 development environment, Kibana is always automatically configured with a static ESO encryption key of "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".
-As the the ESO encryption key is an optional setting, developers should rely on the `canEncrypt` function exposed by the ESO Plugin to decide whether they should
+As the ESO encryption key is an optional setting, developers should rely on the `canEncrypt` function exposed by the ESO Plugin to decide whether they should
 gracefully degrade any functionality dependent on ESOs, or reject functioning entirely.
 
 Developers create and manage their Encrypted Saved Object types programmatically. This document will cover the basics.
@@ -70,7 +70,7 @@ comprises data that could only be accessed by an authenticated user and either n
 For ESOs, AAD is constructed of key-value pairs composed of the Saved Object Descriptor and any attributes included in `attributesToIncludeInAAD` when the ESO is
 registered. The Saved Object Descriptor consists of the object type, ID, and, if applicable, namespace (or space ID). The descriptor for space-agnostic types
 (`namespaceType: 'agnostic'`), and multi-namespace types (`namespaceType: 'multiple-isolated'` and `namespaceType: 'multiple'`), will not include a namespace. Thus,
-the Saved Object Descriptor for an Saved Object never changes.
+the Saved Object Descriptor for a Saved Object never changes.
 
 ```ts
   export interface SavedObjectDescriptor {
@@ -99,7 +99,7 @@ Good candidates for attributes to INCLUDE in AAD are attributes that...
 
 Good candidates for attributes to EXCLUDE from AAD are attributes that...
 
-- the value of can be changed by an end user, and is meant to be updated seperately from encrypted data, and has no association to any of the encrypted or AAD attributes (e.g. the name or UI properties of an object, the email title for an action or alert)
+- the value can be changed by an end user, and is meant to be updated separately from encrypted data, and has no association to any of the encrypted or AAD attributes (e.g. the name or UI properties of an object, the email title for an action or alert)
 - may not be present or populated, or populated algorithmically (e.g. any optional attributes, or calculated attributes like statistics or last updated time)
 - may be removed from the object or refactored in the future (e.g. deprecated or soon-to-be deprecated attributes, experimental attributes)
 - contain a large amount of data that can significantly slow down encryption and decryption, especially during bulk operations (e.g. large geo shape, arbitrary HTML document or image data)
@@ -167,7 +167,7 @@ ESOs of this type will first be decrypted before the unknown fields are dropped.
 subfields of an attribute are added or removed, the previous version of Kibana will still be able to successfully construct AAD and decrypt the object.
 
 The table below offers some general guidance on how various changes could be supported (or not). Keep in mind that any time you are adding or removing attributes from
-an Saved Object type, all related business logic for that type must be capable of gracefully and appropriately handling an object with or without the attribute in both
+a Saved Object type, all related business logic for that type must be capable of gracefully and appropriately handling an object with or without the attribute in both
 the current and previous version of Kibana. Some of the advice here is applicable to any Saved Object type migration.
 
 | Change to ESO                                | Encrypted? | In AAD? | General Guidance                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
