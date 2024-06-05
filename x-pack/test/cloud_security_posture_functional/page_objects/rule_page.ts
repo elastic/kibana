@@ -189,6 +189,10 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     doesElementExist: async (selector: string) => {
       return await testSubjects.exists(selector);
     },
+
+    getRulesTable: async () => {
+      return await testSubjects.find('csp_rules_table');
+    },
   };
 
   const navigateToRulePage = async (benchmarkCisId: string, benchmarkCisVersion: string) => {
@@ -197,6 +201,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
       { shouldUseHashForSubUrl: false }
     );
+    await retry.waitFor('Rule table to be displayed', async () => !!rulePage.getRulesTable());
   };
 
   return {
