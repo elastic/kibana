@@ -31,4 +31,19 @@ export interface EcsRiskScore {
   };
 }
 
+export type ElasticsearchCalculateRiskInput = Omit<RiskScoreInput, 'description'> & {
+  rule_name: string;
+};
+
+export type ElasticsearchEntityRiskScoreRecord = Omit<EntityRiskScoreRecord, 'inputs'> & {
+  inputs: ElasticsearchCalculateRiskInput[];
+};
+
+export interface ElasticsearchCalculateResponse {
+  scores: {
+    host?: ElasticsearchEntityRiskScoreRecord[];
+    user?: ElasticsearchEntityRiskScoreRecord[];
+  };
+}
+
 export type RiskInputs = RiskScoreInput[];

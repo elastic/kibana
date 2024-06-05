@@ -302,6 +302,11 @@ export const runTask = async ({
 
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
+    const taskDurationInMilliseconds = moment(taskCompletionTime).diff(
+      moment(taskStartTime),
+      'milliseconds'
+    );
+    console.log('taskDurationInMs ', taskDurationInMilliseconds);
     const telemetryEvent = {
       scoresWritten,
       taskDurationInSeconds,
