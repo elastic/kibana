@@ -11,8 +11,9 @@ import type { MlAuthz } from '../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { getIdError } from '../../utils/utils';
+import { convertUpdateAPIToInternalSchema } from '../../normalization/rule_converters';
 
-import { _validateMlAuth, ClientError, _updateRule, _toggleRuleEnabledOnUpdate } from './utils';
+import { _validateMlAuth, ClientError, _toggleRuleEnabledOnUpdate } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -42,7 +43,15 @@ export const updateRule = async (
       throw new ClientError(error.message, error.statusCode);
     }
 
-    const update = await _updateRule(rulesClient, { ruleUpdate, existingRule });
+    const newInternalRule = convertUpdateAPIToInternalSchema({
+      existingRule,
+      ruleUpdate,
+    });
+
+    const update = await rulesClient.update({
+      id: existingRule.id,
+      data: newInternalRule,
+    });
 
     await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleUpdate.enabled);
 

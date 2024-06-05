@@ -11,9 +11,12 @@ import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { createBulkErrorObject } from '../../../routes/utils';
-import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
+import {
+  convertCreateAPIToInternalSchema,
+  convertUpdateAPIToInternalSchema,
+} from '../../normalization/rule_converters';
 
-import { _validateMlAuth, _updateRule } from './utils';
+import { _validateMlAuth } from './utils';
 
 import { readRules } from './read_rules';
 
@@ -48,16 +51,19 @@ export const importRule = async (
         immutable: false,
       });
 
-      const rule = await rulesClient.create<RuleParams>({
+      return rulesClient.create<RuleParams>({
         data: internalRule,
         allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
       });
-
-      return rule;
     } else if (existingRule && overwriteRules) {
-      return _updateRule(rulesClient, {
+      const newInternalRule = convertUpdateAPIToInternalSchema({
         existingRule,
         ruleUpdate: ruleToImport,
+      });
+
+      return rulesClient.update({
+        id: existingRule.id,
+        data: newInternalRule,
       });
     } else {
       throw createBulkErrorObject({

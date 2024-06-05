@@ -9,40 +9,17 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import type {
-  PatchRuleRequestBody,
-  RuleUpdateProps,
-} from '../../../../../../common/api/detection_engine';
+import type { PatchRuleRequestBody } from '../../../../../../common/api/detection_engine';
 
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
 import {
   convertPatchAPIToInternalSchema,
-  convertUpdateAPIToInternalSchema,
   convertCreateAPIToInternalSchema,
 } from '../../normalization/rule_converters';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-
-export const _updateRule = async (
-  rulesClient: RulesClient,
-  updateRulePayload: _UpdateRuleProps
-): Promise<RuleAlertType> => {
-  const { ruleUpdate, existingRule } = updateRulePayload;
-
-  const newInternalRule = convertUpdateAPIToInternalSchema({
-    existingRule,
-    ruleUpdate,
-  });
-
-  const update = await rulesClient.update({
-    id: existingRule.id,
-    data: newInternalRule,
-  });
-
-  return update;
-};
 
 export const _patchRule = async (
   rulesClient: RulesClient,
@@ -105,11 +82,6 @@ export const _toggleRuleEnabledOnUpdate = async (
 export const _validateMlAuth = async (mlAuthz: MlAuthz, ruleType: Type) => {
   throwAuthzError(await mlAuthz.validateRuleType(ruleType));
 };
-
-export interface _UpdateRuleProps {
-  existingRule: RuleAlertType;
-  ruleUpdate: RuleUpdateProps;
-}
 
 export interface _PatchRuleProps {
   existingRule: RuleAlertType;
