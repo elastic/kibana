@@ -117,7 +117,7 @@ export const generateSourceLink = (
     const hostTimeRange = `assetDetails=(dateRange:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
     const infraTimeRange = `_a=(time:(from:'${timeRange.from}',to:'${timeRange.to}',interval:>=1m))`;
     return prepend?.(generateInfraSourceLink({ field, value }, hostTimeRange, infraTimeRange));
-  } else if (apmSources.includes(field)) {
+  } else if ((apmSources as string[]).includes(field)) {
     return generateApmSourceLink({ field, value }, timeRange, serviceName, baseLocator);
   }
 };
