@@ -9,10 +9,10 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
-import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import { i18n } from '@kbn/i18n';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -21,54 +21,42 @@ import {
   apiIsOfType,
   EmbeddableApiContext,
   getInheritedViewMode,
-  HasParentApi,
-  HasType,
-  HasUniqueId,
-  PublishesViewMode,
+  hasEditCapabilities,
 } from '@kbn/presentation-publishing';
-import { ACTION_DELETE_CONTROL } from '.';
-import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
-import { CONTROL_GROUP_TYPE } from '../types';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-export type DeleteControlActionApi = HasType &
-  HasUniqueId &
-  HasParentApi<PresentationContainer & PublishesViewMode & HasType>;
+import { DataControlApi } from '../data_controls/types';
 
-const isApiCompatible = (api: unknown | null): api is DeleteControlActionApi =>
+const isApiCompatible = (api: unknown | null): api is DataControlApi =>
   Boolean(
     apiHasType(api) &&
       apiHasUniqueId(api) &&
+      hasEditCapabilities(api) &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi) &&
       apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
 
-export class DeleteControlAction implements Action<EmbeddableApiContext> {
-  public readonly type = ACTION_DELETE_CONTROL;
-  public readonly id = ACTION_DELETE_CONTROL;
-  public order = 100; // should always be last
+const ACTION_EDIT_CONTROL = 'editDataControl';
 
-  private openConfirm;
+export class EditControlAction implements Action<EmbeddableApiContext> {
+  public readonly type = ACTION_EDIT_CONTROL;
+  public readonly id = ACTION_EDIT_CONTROL;
+  public order = 2;
 
-  constructor() {
-    ({
-      overlays: { openConfirm: this.openConfirm },
-    } = pluginServices.getServices());
-  }
+  constructor() {}
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     if (!isApiCompatible(context.embeddable)) throw new IncompatibleActionError();
-
     return (
       <EuiToolTip content={this.getDisplayName(context)}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${context.embeddable.uuid}-delete`}
+          data-test-subj={`control-action-${context.embeddable.uuid}-edit`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
           onClick={() => this.execute(context)}
-          color="danger"
+          color="text"
         />
       </EuiToolTip>
     );
@@ -76,32 +64,26 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return ControlGroupStrings.floatingActions.getRemoveButtonTitle();
+    return i18n.translate('controls.controlGroup.floatingActions.editTitle', {
+      defaultMessage: 'Edit',
+    });
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return 'trash';
+    return 'pencil';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     return (
-      isApiCompatible(embeddable) && getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT
+      isApiCompatible(embeddable) &&
+      getInheritedViewMode(embeddable.parentApi) === ViewMode.EDIT &&
+      embeddable.isEditingEnabled()
     );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-
-    this.openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-      confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-      cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-      title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-      buttonColor: 'danger',
-    }).then((confirmed) => {
-      if (confirmed) {
-        embeddable.parentApi.removePanel(embeddable.uuid);
-      }
-    });
+    await embeddable.onEdit();
   }
 }
