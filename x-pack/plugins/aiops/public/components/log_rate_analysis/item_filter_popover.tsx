@@ -34,7 +34,9 @@ interface ItemFilterPopoverProps {
   disabledApplyButton?: boolean;
   disabledApplyTooltipContent?: string;
   helpText: string;
-  itemType?: string;
+  itemSearchAriaLabel: string;
+  initialSkippedItems?: string[];
+  popoverButtonTitle: string;
   selectedItemLimit?: number;
   uniqueItemNames: string[];
   onChange: (skippedItems: string[]) => void;
@@ -47,7 +49,9 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
   disabledApplyButton,
   disabledApplyTooltipContent,
   helpText,
-  itemType = 'fields',
+  itemSearchAriaLabel,
+  initialSkippedItems = [],
+  popoverButtonTitle,
   selectedItemLimit = 2,
   uniqueItemNames,
   onChange,
@@ -64,7 +68,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
 
   const [isTouched, setIsTouched] = useState(false);
   const [itemSearchText, setItemSearchText] = useState('');
-  const [skippedItems, setSkippedItems] = useState<string[]>([]);
+  const [skippedItems, setSkippedItems] = useState<string[]>(initialSkippedItems);
   const setItemsFilter = (itemNames: string[], checked: boolean) => {
     let updatedSkippedItems = [...skippedItems];
     if (!checked) {
@@ -101,6 +105,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
       data-test-subj="aiopsFieldFilterPopover"
       anchorPosition="downLeft"
       panelPaddingSize="s"
+      panelStyle={{ minWidth: '20%' }}
       button={
         <EuiButton
           data-test-subj="aiopsFieldFilterButton"
@@ -112,17 +117,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
           iconSize="s"
           color="text"
         >
-          {itemType === 'columns' ? (
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.page.columnsFilterButtonLabel"
-              defaultMessage="Columns"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.page.fieldFilterButtonLabel"
-              defaultMessage="Filter fields"
-            />
-          )}
+          {popoverButtonTitle}
         </EuiButton>
       }
       isOpen={isItemSelectionPopoverOpen}
@@ -138,10 +133,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
           placeholder={i18n.translate('xpack.aiops.analysis.fieldSelectorPlaceholder', {
             defaultMessage: 'Search',
           })}
-          aria-label={i18n.translate('xpack.aiops.analysis.fieldSelectorAriaLabel', {
-            defaultMessage: 'Filter {itemType}',
-            values: { itemType },
-          })}
+          aria-label={itemSearchAriaLabel}
           value={itemSearchText}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setItemSearchText(e.currentTarget.value)}
           data-test-subj="aiopsFieldSelectorSearch"
@@ -181,15 +173,13 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
               >
                 {itemSearchText.length > 0 ? (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllSearchedFields"
-                    defaultMessage="Select filtered {itemType}"
-                    values={{ itemType }}
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllSearchedItems"
+                    defaultMessage="Select filtered"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllFields"
-                    defaultMessage="Select all {itemType}"
-                    values={{ itemType }}
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllItems"
+                    defaultMessage="Select all"
                   />
                 )}
               </EuiButtonEmpty>
@@ -204,15 +194,13 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
               >
                 {itemSearchText.length > 0 ? (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllSearchedFields"
-                    defaultMessage="Deselect filtered {itemType}"
-                    values={{ itemType }}
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllSearchedItems"
+                    defaultMessage="Deselect filtered"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllFields"
-                    defaultMessage="Deselect all {itemType}"
-                    values={{ itemType }}
+                    id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllItems"
+                    defaultMessage="Deselect all"
                   />
                 )}
               </EuiButtonEmpty>

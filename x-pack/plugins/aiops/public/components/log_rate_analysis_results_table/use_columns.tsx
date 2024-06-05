@@ -30,12 +30,41 @@ const NARROW_COLUMN_WIDTH = '120px';
 const UNIQUE_COLUMN_WIDTH = '40px';
 const NOT_AVAILABLE = '--';
 
-export const commonColumns = ['Log rate', 'Doc count', 'p-value', 'Impact', 'Actions'];
-export const significantItemColumns = ['Field name', 'Field value', ...commonColumns] as const;
+export const commonColumns = {
+  ['Log rate']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTitle', {
+    defaultMessage: 'Log rate',
+  }),
+  ['Doc count']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountColumnTitle', {
+    defaultMessage: 'Doc count',
+  }),
+  ['p-value']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.pValueColumnTitle', {
+    defaultMessage: 'p-value',
+  }),
+  ['Impact']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.impactColumnTitle', {
+    defaultMessage: 'Impact',
+  }),
+  ['Actions']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnTitle', {
+    defaultMessage: 'Actions',
+  }),
+};
+
+export const significantItemColumns = {
+  ['Field name']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameColumnTitle', {
+    defaultMessage: 'Field name',
+  }),
+  ['Field value']: i18n.translate(
+    'xpack.aiops.logRateAnalysis.resultsTable.fieldValueColumnTitle',
+    {
+      defaultMessage: 'Field value',
+    }
+  ),
+  ...commonColumns,
+} as const;
+
 export const GROUPS_TABLE = 'groups';
 export const SIG_ITEMS_TABLE = 'significantItems';
 type TableType = typeof GROUPS_TABLE | typeof SIG_ITEMS_TABLE;
-type ColumnNames = typeof significantItemColumns[number] | 'unique';
+type ColumnNames = keyof typeof significantItemColumns | 'unique';
 
 const logRateHelpMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTooltip',
@@ -334,23 +363,27 @@ export const useColumns = (
   );
 
   const columns = useMemo(() => {
-    const columnNamesToReturn = (isGroupsTable ? commonColumns : significantItemColumns).filter(
-      (columnName) => {
-        if (skippedColumns.includes(columnName)) return false;
+    const columnNamesToReturn: Partial<Record<ColumnNames, string>> = isGroupsTable
+      ? commonColumns
+      : significantItemColumns;
+    const columnsToReturn = [];
 
-        if ((columnName === 'p-value' || columnName === 'Impact') && zeroDocsFallback) {
-          return false;
-        }
+    for (const columnName in columnNamesToReturn) {
+      if (
+        columnNamesToReturn.hasOwnProperty(columnName) === false ||
+        skippedColumns.includes(columnNamesToReturn[columnName as ColumnNames] as string) ||
+        ((columnName === 'p-value' || columnName === 'Impact') && zeroDocsFallback)
+      )
+        continue;
 
-        return true;
-      }
-    );
-
-    if (isExpandedRow === true) {
-      columnNamesToReturn.unshift('unique');
+      columnsToReturn.push(columnsMap[columnName as ColumnNames]);
     }
 
-    return columnNamesToReturn.map((columnName) => columnsMap[columnName]);
+    if (isExpandedRow === true) {
+      columnsToReturn.unshift(columnsMap.unique);
+    }
+
+    return columnsToReturn;
   }, [isGroupsTable, skippedColumns, zeroDocsFallback, isExpandedRow, columnsMap]);
 
   return columns;

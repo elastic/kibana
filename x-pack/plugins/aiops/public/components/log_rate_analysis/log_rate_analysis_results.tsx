@@ -89,7 +89,7 @@ const fieldFilterHelpText = i18n.translate('xpack.aiops.logRateAnalysis.page.fie
 const columnsFilterHelpText = i18n.translate(
   'xpack.aiops.logRateAnalysis.page.columnsFilterHelpText',
   {
-    defaultMessage: 'Deselect non-relevant columns to remove them from the table.',
+    defaultMessage: 'Configure visible columns.',
   }
 );
 const disabledFieldFilterApplyButtonTooltipContent = i18n.translate(
@@ -104,6 +104,15 @@ const disabledColumnFilterApplyButtonTooltipContent = i18n.translate(
     defaultMessage: 'At least one column must be selected.',
   }
 );
+const columnSearchAriaLabel = i18n.translate('xpack.aiops.analysis.columnSelectorAriaLabel', {
+  defaultMessage: 'Filter columns',
+});
+const columnsButton = i18n.translate('xpack.aiops.logRateAnalysis.page.columnsFilterButtonLabel', {
+  defaultMessage: 'Columns',
+});
+const fieldsButton = i18n.translate('xpack.aiops.analysis.fieldFilterButtonLabel', {
+  defaultMessage: 'Filter fields',
+});
 
 /**
  * Interface for log rate analysis results data.
@@ -184,7 +193,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
-  const [skippedColumns, setSkippedColumns] = useState<string[]>([]);
+  const [skippedColumns, setSkippedColumns] = useState<string[]>(['p-value']);
 
   const onGroupResultsToggle = (optionId: string) => {
     setToggleIdSelected(optionId);
@@ -414,6 +423,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             disabledApplyButton={isRunning}
             disabledApplyTooltipContent={disabledFieldFilterApplyButtonTooltipContent}
             helpText={fieldFilterHelpText}
+            itemSearchAriaLabel={fieldsButton}
+            popoverButtonTitle={fieldsButton}
             uniqueItemNames={uniqueFieldNames}
             onChange={onFieldsFilterChange}
           />
@@ -424,8 +435,15 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             disabledApplyButton={isRunning}
             disabledApplyTooltipContent={disabledColumnFilterApplyButtonTooltipContent}
             helpText={columnsFilterHelpText}
-            itemType="columns"
-            uniqueItemNames={(groupResults ? commonColumns : significantItemColumns) as string[]}
+            itemSearchAriaLabel={columnSearchAriaLabel}
+            initialSkippedItems={skippedColumns}
+            popoverButtonTitle={columnsButton}
+            selectedItemLimit={1}
+            uniqueItemNames={
+              (groupResults
+                ? Object.values(commonColumns)
+                : Object.values(significantItemColumns)) as string[]
+            }
             onChange={onVisibleColumnsChange}
           />
         </EuiFlexItem>
