@@ -43,6 +43,7 @@ import { appContextService } from '..';
 import type { CustomPackageDatasetConfiguration } from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
+import { getPackageFieldsMetadata } from './registry';
 import * as Registry from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
@@ -100,8 +101,14 @@ export interface PackageClient {
 
   getPackage(
     packageName: string,
-    packageVersion: string
-  ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
+    packageVersion: string,
+    options?: Parameters<typeof getPackage>['2']
+  ): ReturnType<typeof getPackage>;
+
+  getPackageFieldsMetadata(
+    params: Parameters<typeof getPackageFieldsMetadata>['0'],
+    options?: Parameters<typeof getPackageFieldsMetadata>['1']
+  ): ReturnType<typeof getPackageFieldsMetadata>;
 
   getPackages(params?: {
     excludeInstallStatus?: false;
@@ -310,6 +317,14 @@ class PackageClientImpl implements PackageClient {
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getPackage(packageName, packageVersion, options);
+  }
+
+  public async getPackageFieldsMetadata(
+    params: Parameters<typeof getPackageFieldsMetadata>['0'],
+    options?: Parameters<typeof getPackageFieldsMetadata>['1']
+  ) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+    return getPackageFieldsMetadata(params, options);
   }
 
   public async getPackages(params?: {

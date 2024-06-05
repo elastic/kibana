@@ -7,20 +7,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { matchPath } from 'react-router-dom';
 import { sourcererSelectors } from '../store';
 import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
 import { SourcererScopeName } from '../store/model';
-import {
-  ALERTS_PATH,
-  HOSTS_PATH,
-  USERS_PATH,
-  NETWORK_PATH,
-  OVERVIEW_PATH,
-  RULES_PATH,
-  CASES_PATH,
-  DATA_QUALITY_PATH,
-} from '../../../common/constants';
 import { checkIfIndicesExist } from '../store/helpers';
 import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 import { useFetchIndex } from '../../common/containers/source';
@@ -155,31 +144,3 @@ export const useSourcererDataView = (
     ]
   );
 };
-
-const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`];
-
-export const getScopeFromPath = (
-  pathname: string
-): SourcererScopeName.default | SourcererScopeName.detections =>
-  matchPath(pathname, {
-    path: detectionsPaths,
-    strict: false,
-  }) == null
-    ? SourcererScopeName.default
-    : SourcererScopeName.detections;
-
-export const sourcererPaths = [
-  ALERTS_PATH,
-  DATA_QUALITY_PATH,
-  `${RULES_PATH}/id/:id`,
-  HOSTS_PATH,
-  USERS_PATH,
-  NETWORK_PATH,
-  OVERVIEW_PATH,
-];
-
-export const showSourcererByPath = (pathname: string): boolean =>
-  matchPath(pathname, {
-    path: sourcererPaths,
-    strict: false,
-  }) != null;
