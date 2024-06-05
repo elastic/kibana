@@ -11,28 +11,45 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../ftr_provider_context';
+import type { RoleCredentials } from '../../../test_serverless/shared/services';
 
 export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
   // Overwriting the `object` type to a more test-friendly type
   stack_stats: Record<string, any>;
 }
 
+export interface GetTelemetryStatsOpts {
+  roleAuthc: RoleCredentials;
+}
+
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  async function getTelemetryStats(payload: {
-    unencrypted: true;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
-  async function getTelemetryStats(payload: {
-    unencrypted: false;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: string }>>;
-  async function getTelemetryStats(payload: {
-    unencrypted?: boolean;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
-    const { body } = await supertest
+  async function getTelemetryStats(
+    payload: {
+      unencrypted: true;
+      refreshCache?: boolean;
+    },
+    opts?: GetTelemetryStatsOpts
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
+  async function getTelemetryStats(
+    payload: {
+      unencrypted: false;
+      refreshCache?: boolean;
+    },
+    opts?: GetTelemetryStatsOpts
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
+  async function getTelemetryStats(
+    payload: {
+      unencrypted?: boolean;
+      refreshCache?: boolean;
+    },
+    opts?: GetTelemetryStatsOpts
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
+    const client = opts?.roleAuthc ? supertestWithoutAuth.set(roleAuthc.apiKeyHeader) : supertest;
+
+    const { body } = await client
       .post('/internal/telemetry/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2')

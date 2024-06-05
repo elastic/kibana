@@ -7,48 +7,64 @@
 
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../../shared/services';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
 
-  // failsOnMKI, see https://github.com/elastic/kibana/issues/180348
   describe('/api/telemetry/v2/config API Telemetry config', function () {
-    this.tags(['failsOnMKI']);
+    let roleAuthc: RoleCredentials;
+
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     const baseConfig = {
       allowChangingOptInStatus: false,
       optIn: true,
       sendUsageFrom: 'server',
       telemetryNotifyUserAboutOptInDefault: false,
-      labels: {
-        serverless: 'security',
-      },
     };
 
     it('GET should get the default config', async () => {
-      const { body } = await supertest
+      const { body } = await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .expect(200);
-      expect(body).toMatchObject(baseConfig);
+      // Flipped because this API matches as "left is part of right"
+      expect(baseConfig).toMatchObject(body);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {
-      await supertest
+      const { body: initialConfig } = await supertestWithoutAuth
+        .get('/api/telemetry/v2/config')
+        .set(svlCommonApi.getCommonRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200);
+
+      await supertestWithoutAuth
         .put('/internal/core/_settings')
         .set(svlCommonApi.getInternalRequestHeader())
         .set('elastic-api-version', '1')
+        .set(roleAuthc.apiKeyHeader)
         .send({ 'telemetry.labels.journeyName': 'my-ftr-test' })
         .expect(200, { ok: true });
 
-      await supertest
+      await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .expect(200, {
-          ...baseConfig,
+          ...initialConfig,
           labels: {
-            ...baseConfig.labels,
+            ...initialConfig.labels,
             journeyName: 'my-ftr-test',
           },
         });
