@@ -8,7 +8,7 @@
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESQLSearchReponse } from '@kbn/es-types';
+import { ESQLSearchResponse } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType, type KBN_FIELD_TYPES } from '@kbn/field-types';
 import { splitIntoCommands } from './correct_common_esql_mistakes';
 
@@ -59,7 +59,7 @@ export async function validateEsqlQuery({
       },
     })
     .then((res) => {
-      const esqlResponse = res as ESQLSearchReponse;
+      const esqlResponse = res as ESQLSearchResponse;
 
       const columns =
         esqlResponse.columns?.map(({ name, type }) => ({
