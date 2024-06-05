@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Reporting Management', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
-    // this.tags(['failsOnMKI']);
+    this.tags(['failsOnMKI']);
 
     const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
 
