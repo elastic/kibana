@@ -58,6 +58,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   // These hooks are used when on chromeStyle set to 'project'
   const [isVisible, setIsVisible] = useState(false);
+  const [focus, setFocus] = useState<boolean>(true);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // General hooks
@@ -254,8 +255,10 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         window.open(url);
       } else if (event.ctrlKey || event.metaKey) {
         window.open(url, '_blank');
+        setFocus(false);
       } else {
         navigateToUrl(url);
+        setFocus(false);
       }
 
       (document.activeElement as HTMLElement).blur();
@@ -264,7 +267,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue]
+    [reportEvent, navigateToUrl, searchRef, searchValue, setFocus]
   );
 
   const clearField = () => setSearchValue('');
@@ -362,7 +365,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         repositionOnScroll: true,
         popoverRef: setButtonRef,
         panelStyle: { marginTop: '6px' },
-        ownFocus: true,
+        ownFocus: focus,
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
