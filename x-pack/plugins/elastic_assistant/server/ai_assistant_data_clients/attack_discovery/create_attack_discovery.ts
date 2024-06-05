@@ -86,6 +86,7 @@ export const transformToCreateScheme = (
     },
     alerts_context_count: alertsContextCount,
     attack_discoveries: attackDiscoveries?.map((attackDiscovery) => ({
+      id: attackDiscovery.id,
       alert_ids: attackDiscovery.alertIds,
       title: attackDiscovery.title,
       details_markdown: attackDiscovery.detailsMarkdown,

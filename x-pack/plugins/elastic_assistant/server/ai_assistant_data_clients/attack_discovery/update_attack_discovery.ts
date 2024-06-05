@@ -29,6 +29,7 @@ export interface UpdateAttackDiscoverySchema {
     entity_summary_markdown: string;
     mitre_attack_tactics?: string[];
     summary_markdown: string;
+    id?: string;
   }>;
   api_config: {
     action_type_id?: string;

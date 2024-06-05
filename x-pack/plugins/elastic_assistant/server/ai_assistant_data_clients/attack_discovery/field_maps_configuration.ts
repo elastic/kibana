@@ -82,6 +82,11 @@ export const attackDiscoveryFieldMap: FieldMap = {
     required: false,
   },
 
+  'attack_discoveries.id': {
+    type: 'string',
+    required: false,
+  },
+
   'attack_discoveries.alert_ids': {
     type: 'keyword',
     array: true,

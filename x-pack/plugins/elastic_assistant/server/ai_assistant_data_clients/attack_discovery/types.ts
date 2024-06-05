@@ -21,6 +21,7 @@ export interface EsAttackDiscoverySchema {
     entity_summary_markdown: string;
     mitre_attack_tactics?: string[];
     summary_markdown: string;
+    id?: string;
   }>;
   api_config: {
     connector_id: string;
@@ -53,6 +54,7 @@ export interface CreateAttackDiscoverySchema {
     entity_summary_markdown: string;
     mitre_attack_tactics?: string[];
     summary_markdown: string;
+    id?: string;
   }>;
   api_config: {
     action_type_id: string;
