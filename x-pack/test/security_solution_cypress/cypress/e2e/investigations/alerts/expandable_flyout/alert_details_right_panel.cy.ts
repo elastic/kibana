@@ -61,13 +61,18 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
+import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../../env_var_names_constants';
+
+// We need to use the 'soc_manager' role in order to have the 'Respond' action displayed in serverless
+const isServerless = Cypress.env(IS_SERVERLESS);
+const role = isServerless ? 'soc_manager' : Cypress.env(ELASTICSEARCH_USERNAME);
 
 describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    login();
+    login(role);
     createRule(rule);
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
