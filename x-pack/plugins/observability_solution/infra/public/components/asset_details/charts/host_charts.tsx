@@ -29,7 +29,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
     const { charts } = useHostCharts({
       metric,
       dataViewId: dataView?.id,
-      options: { overview },
+      overview,
     });
 
     return (

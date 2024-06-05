@@ -27,7 +27,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
   ({ assetId, dataView, dateRange, onShowAll, overview }, ref) => {
     const { charts } = useKubernetesCharts({
       dataViewId: dataView?.id,
-      options: { overview },
+      overview,
     });
 
     const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetesNode });

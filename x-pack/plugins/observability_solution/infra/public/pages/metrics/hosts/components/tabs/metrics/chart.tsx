@@ -62,6 +62,7 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
     chartProps.dataset,
     searchCriteria.filters,
     searchCriteria.panelFilters,
+    shouldUseSearchCriteria,
   ]);
 
   return (

@@ -34,7 +34,11 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
     const builder = new LensConfigBuilder(dataViews, formulaAPI);
 
     return builder.build(params) as Promise<LensAttributes>;
-  }, [params.chartType, params.dataset, dataViews]);
+    // FIXME: this should be memoized upstream, but Dario
+    // cannot find a reasonable fix, so he'll just leave
+    // this in place.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.chartType, params.dataset, dataViews, lens]);
 
   const injectFilters = useCallback(
     ({ filters, query }: { filters: Filter[]; query: Query }): LensAttributes | null => {

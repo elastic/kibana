@@ -37,7 +37,7 @@ export const useDockerContainerPageViewMetricsCharts = ({
         }),
       };
     });
-  }, [metricsDataViewId]);
+  }, [metricsDataViewId, metric]);
 
   return { charts, error };
 };
@@ -76,7 +76,7 @@ export const useK8sContainerPageViewMetricsCharts = ({
         }),
       };
     });
-  }, [metricsDataViewId]);
+  }, [metricsDataViewId, metric]);
 
   return { charts, error };
 };
@@ -97,10 +97,10 @@ const getK8sContainerCharts = async (metric: ContainerMetricTypes) => {
 
 export const useDockerContainerKpiCharts = ({
   dataViewId,
-  options,
+  seriesColor,
 }: {
   dataViewId?: string;
-  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
+  seriesColor?: string;
 }) => {
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('container');
@@ -109,9 +109,8 @@ export const useDockerContainerKpiCharts = ({
     return [cpu.metric.dockerContainerCpuUsage, memory.metric.dockerContainerMemoryUsage].map(
       (chart) => ({
         ...chart,
-        seriesColor: options?.seriesColor,
+        seriesColor,
         decimals: 1,
-        subtitle: getSubtitle(options, chart),
         ...(dataViewId && {
           dataset: {
             index: dataViewId,
@@ -119,17 +118,17 @@ export const useDockerContainerKpiCharts = ({
         }),
       })
     );
-  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
+  }, [dataViewId, seriesColor]);
 
   return charts;
 };
 
 export const useK8sContainerKpiCharts = ({
   dataViewId,
-  options,
+  seriesColor,
 }: {
   dataViewId?: string;
-  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
+  seriesColor?: string;
 }) => {
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('container');
@@ -138,9 +137,9 @@ export const useK8sContainerKpiCharts = ({
     return [cpu.metric.k8sContainerCpuUsage, memory.metric.k8sContainerMemoryUsage].map(
       (chart) => ({
         ...chart,
-        seriesColor: options?.seriesColor,
+        seriesColor,
         decimals: 1,
-        subtitle: getSubtitle(options, chart),
+        subtitle: getSubtitle(chart),
         ...(dataViewId && {
           dataset: {
             index: dataViewId,
@@ -148,16 +147,11 @@ export const useK8sContainerKpiCharts = ({
         }),
       })
     );
-  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
+  }, [dataViewId, seriesColor]);
 
   return charts;
 };
 
-function getSubtitle(
-  options: { getSubtitle?: ((formulaValue: string) => string) | undefined } | undefined,
-  chart: { value: string }
-) {
-  return options?.getSubtitle
-    ? options?.getSubtitle(chart.value)
-    : getSubtitleFromFormula(chart.value);
+function getSubtitle(chart: { value: string }) {
+  return getSubtitleFromFormula(chart.value);
 }
