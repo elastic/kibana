@@ -12,7 +12,6 @@ import {
   FeatureName,
   IngestPipelineParams,
   IngestionMethod,
-  IngestionStatus,
 } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
@@ -29,6 +28,12 @@ import {
 } from '../../api/connector/update_connector_configuration_api_logic';
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
+
+import {
+  hasDocumentLevelSecurityFeature,
+  hasIncrementalSyncFeature,
+} from '../../utils/connector_helpers';
+import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
 
 import {
   ConnectorNameAndDescriptionLogic,
@@ -53,7 +58,6 @@ export interface ConnectorViewActions {
 }
 
 export interface ConnectorViewValues {
-  updateConnectorConfigurationStatus: Status;
   connector: Connector | undefined;
   connectorData: CachedFetchConnectorByIdApiLogicValues['connectorData'];
   connectorError: string | undefined;
@@ -71,7 +75,6 @@ export interface ConnectorViewValues {
   index: ElasticsearchViewIndex | undefined;
   indexName: string;
   ingestionMethod: IngestionMethod;
-  ingestionStatus: IngestionStatus;
   isCanceling: boolean;
   isHiddenIndex: boolean;
   isLoading: boolean;
@@ -81,6 +84,7 @@ export interface ConnectorViewValues {
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
+  updateConnectorConfigurationStatus: Status;
 }
 
 export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, ConnectorViewActions>>({
@@ -142,6 +146,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         actions.fetchConnector({ connectorId: values.connectorId });
       }
     },
+    fetchConnectorApiSuccess: ({ connector }) => {
+      if (!values.index && connector?.index_name) {
+        actions.fetchIndex({ indexName: connector.index_name });
+      }
+    },
   }),
   path: ['enterprise_search', 'content', 'connector_view_logic'],
   selectors: ({ selectors }) => ({
@@ -162,13 +171,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         connector?.error ||
         connector?.last_sync_error ||
         connector?.last_access_control_sync_error ||
+        (connector && isLastSeenOld(connector) && getConnectorLastSeenError(connector)) ||
         null,
-    ],
-    indexName: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => {
-        return connector?.index_name || undefined;
-      },
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
@@ -188,8 +192,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
     hasDocumentLevelSecurityFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false,
+      (connector?: Connector) => hasDocumentLevelSecurityFeature(connector),
     ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
@@ -197,13 +200,18 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
     hasIncrementalSyncFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.INCREMENTAL_SYNC]?.enabled || false,
+      (connector?: Connector) => hasIncrementalSyncFeature(connector),
     ],
     htmlExtraction: [
       () => [selectors.connector],
       (connector: Connector | undefined) =>
         connector?.configuration.extract_full_html?.value ?? undefined,
+    ],
+    indexName: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => {
+        return connector?.index_name || undefined;
+      },
     ],
     isLoading: [
       () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus, selectors.index],

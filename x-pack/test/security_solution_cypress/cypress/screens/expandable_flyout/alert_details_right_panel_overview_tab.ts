@@ -104,6 +104,8 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER 
   getDataTestSubjectSelector('securitySolutionFlyoutVisualizationsHeader');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_CONTENT =
   getDataTestSubjectSelector('securitySolutionFlyoutVisualizationsContent');
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_TITLE_LINK =
+  getDataTestSubjectSelector('securitySolutionFlyoutAnalyzerPreviewTitleLink');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTAINER =
   getDataTestSubjectSelector('securitySolutionFlyoutAnalyzerPreviewContent');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER =
