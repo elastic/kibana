@@ -164,7 +164,7 @@ export const UserFilterPanel: FC<{}> = () => {
           },
           onSearchChange: setSearchTerm,
         }}
-        panelProps={{ css: { minWidth: euiTheme.base * 18 } }}
+        panelProps={{ css: { minWidth: euiTheme.base * 22 } }}
       />
     </>
   );
