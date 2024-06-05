@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -159,17 +158,7 @@ export const InferenceEndpoints: React.FC = () => {
           ]}
         />
       )}
-      <KibanaPageTemplate.Section
-        alignment="top"
-        restrictWidth={false}
-        grow
-        css={{
-          position: 'relative',
-        }}
-        contentProps={{ css: { display: 'flex', flexGrow: 1, position: 'absolute', inset: 0 } }}
-        paddingSize="none"
-        className="eui-yScroll"
-      >
+      <EuiPageTemplate.Section className="eui-yScroll">
         {inferenceEndpoints.length === 0 ? (
           <EmptyPromptPage
             addEndpointLabel={addEndpointLabel}
@@ -178,7 +167,7 @@ export const InferenceEndpoints: React.FC = () => {
         ) : (
           <TabularPage inferenceEndpoints={inferenceEndpoints} />
         )}
-      </KibanaPageTemplate.Section>
+      </EuiPageTemplate.Section>
       {isInferenceFlyoutVisible && (
         <InferenceFlyoutWrapper
           errorCallout={

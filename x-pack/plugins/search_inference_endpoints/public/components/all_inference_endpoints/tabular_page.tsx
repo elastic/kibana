@@ -12,7 +12,6 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useTableData } from '../../hooks/use_table_data';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
-
 import { EndpointsTable } from './endpoints_table';
 import { TABLE_COLUMNS } from './table_columns';
 
