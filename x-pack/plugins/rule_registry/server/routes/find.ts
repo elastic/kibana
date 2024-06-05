@@ -12,6 +12,7 @@ import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
@@ -24,7 +25,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
         body: buildRouteValidation(
           t.exact(
             t.partial({
-              aggs: t.object,
+              aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsSchemas])),
               feature_ids: t.union([t.array(t.string), t.undefined]),
               index: t.string,
               query: t.object,
