@@ -1686,7 +1686,7 @@
             "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ", { connectorId, jobType, targetIndexName, }: { connectorId: string; jobType?: ",
+          ", { connectorId, jobType, }: { connectorId: string; jobType?: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -1694,9 +1694,7 @@
             "section": "def-common.SyncJobType",
             "text": "SyncJobType"
           },
-          " | undefined; targetIndexName?: string | undefined; }) => Promise<",
-          "WriteResponseBase",
-          ">"
+          " | undefined; }) => Promise<{ id: string; }>"
         ],
         "path": "packages/kbn-search-connectors/lib/start_sync.ts",
         "deprecated": false,
@@ -1728,7 +1726,7 @@
             "id": "def-common.startConnectorSync.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    connectorId,\n    jobType,\n    targetIndexName,\n  }",
+            "label": "{\n    connectorId,\n    jobType,\n  }",
             "description": [],
             "path": "packages/kbn-search-connectors/lib/start_sync.ts",
             "deprecated": false,
@@ -1761,20 +1759,6 @@
                     "text": "SyncJobType"
                   },
                   " | undefined"
-                ],
-                "path": "packages/kbn-search-connectors/lib/start_sync.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/search-connectors",
-                "id": "def-common.startConnectorSync.$2.targetIndexName",
-                "type": "string",
-                "tags": [],
-                "label": "targetIndexName",
-                "description": [],
-                "signature": [
-                  "string | undefined"
                 ],
                 "path": "packages/kbn-search-connectors/lib/start_sync.ts",
                 "deprecated": false,
