@@ -291,14 +291,14 @@ export class CoreSystem {
       const analytics = this.analytics.start();
       const security = this.security.start();
       const userProfile = this.userProfile.start();
-      const injectedMetadata = await this.injectedMetadata.start();
-      const uiSettings = await this.uiSettings.start();
-      const settings = await this.settings.start();
+      const injectedMetadata = this.injectedMetadata.start();
+      const uiSettings = this.uiSettings.start();
+      const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start();
+      const http = this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
-      const i18n = await this.i18n.start();
-      const fatalErrors = await this.fatalErrors.start();
+      const i18n = this.i18n.start();
+      const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
 
@@ -345,7 +345,16 @@ export class CoreSystem {
       });
       const deprecations = this.deprecations.start({ http });
 
-      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
+      this.coreApp.start({
+        application,
+        docLinks,
+        http,
+        notifications,
+        uiSettings,
+        analytics,
+        i18n,
+        theme,
+      });
 
       const core: InternalCoreStart = {
         analytics,

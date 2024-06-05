@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy } from '../../../types';
-import { UnprivilegedAgentsCallout } from '../create_package_policy_page/single_page_layout/confirm_modal';
 
 export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   onConfirm: () => void;
@@ -20,6 +19,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   showUnprivilegedAgentsCallout?: boolean;
   unprivilegedAgentsCount?: number;
+  dataStreams?: Array<{ name: string; title: string }>;
 }> = ({
   onConfirm,
   onCancel,
@@ -27,6 +27,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   agentPolicy,
   showUnprivilegedAgentsCallout = false,
   unprivilegedAgentsCount = 0,
+  dataStreams,
 }) => {
   return (
     <EuiConfirmModal
@@ -74,15 +75,6 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
           />
         </div>
       </EuiCallOut>
-      {showUnprivilegedAgentsCallout && (
-        <>
-          <EuiSpacer size="m" />
-          <UnprivilegedAgentsCallout
-            agentPolicyName={agentPolicy.name}
-            unprivilegedAgentsCount={unprivilegedAgentsCount}
-          />
-        </>
-      )}
       <EuiSpacer size="l" />
       <FormattedMessage
         id="xpack.fleet.agentPolicy.confirmModalDescription"
