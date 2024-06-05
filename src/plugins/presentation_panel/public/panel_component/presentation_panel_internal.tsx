@@ -9,14 +9,12 @@
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
-  apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Subscription } from 'rxjs';
+import React, { useMemo, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
@@ -37,8 +35,6 @@ export const PresentationPanelInternal = <
 
   Component,
   componentProps,
-
-  onPanelStatusChange,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -80,16 +76,6 @@ export const PresentationPanelInternal = <
     Boolean(hidePanelTitle) ||
     Boolean(parentHidePanelTitle) ||
     (viewMode === 'view' && !Boolean(panelTitle ?? defaultPanelTitle));
-
-  useEffect(() => {
-    let subscription: Subscription;
-    if (api && onPanelStatusChange && apiPublishesPhaseEvents(api)) {
-      subscription = api.phase$.subscribe((phase) => {
-        if (phase) onPanelStatusChange(phase);
-      });
-    }
-    return () => subscription?.unsubscribe();
-  }, [api, onPanelStatusChange]);
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
