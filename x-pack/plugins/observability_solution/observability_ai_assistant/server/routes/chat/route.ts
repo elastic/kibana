@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 import { Readable } from 'stream';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core/server';
+import { context as otelContext } from '@opentelemetry/api';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
@@ -18,6 +19,7 @@ import { createObservabilityAIAssistantServerRoute } from '../create_observabili
 import { screenContextRt, messageRt, functionRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
+import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
 
 const chatCompleteBaseRt = t.type({
   body: t.intersection([
@@ -144,6 +146,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
           }
         : {}),
       simulateFunctionCalling,
+      tracer: new LangTracer(otelContext.active()),
     });
 
     return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));

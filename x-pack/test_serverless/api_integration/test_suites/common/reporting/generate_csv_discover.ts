@@ -68,6 +68,11 @@ export default function ({ getService }: FtrProviderContext) {
    * Tests
    */
   describe('Generate CSV from SearchSource', function () {
+    // 7 minutes timeout for each test in serverless
+    // This is because it may take up to 5 minutes to generate the CSV
+    // see kibanaReportCompletion config
+    this.timeout(7 * 60 * 1000);
+
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
@@ -108,14 +113,14 @@ export default function ({ getService }: FtrProviderContext) {
             objectType: 'search',
             searchSource: {
               fields: [
-                { field: 'order_date', include_unmapped: 'true' },
-                { field: 'category', include_unmapped: 'true' },
-                { field: 'currency', include_unmapped: 'true' },
-                { field: 'customer_id', include_unmapped: 'true' },
-                { field: 'order_id', include_unmapped: 'true' },
-                { field: 'day_of_week_i', include_unmapped: 'true' },
-                { field: 'products.created_on', include_unmapped: 'true' },
-                { field: 'sku', include_unmapped: 'true' },
+                { field: 'order_date', include_unmapped: true },
+                { field: 'category', include_unmapped: true },
+                { field: 'currency', include_unmapped: true },
+                { field: 'customer_id', include_unmapped: true },
+                { field: 'order_id', include_unmapped: true },
+                { field: 'day_of_week_i', include_unmapped: true },
+                { field: 'products.created_on', include_unmapped: true },
+                { field: 'sku', include_unmapped: true },
               ],
               filter: [
                 {
@@ -181,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
               version: true,
               index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
               query: { language: 'kuery', query: '' },
-              fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+              fields: fields.map((field) => ({ field, include_unmapped: true })),
               filter: [],
               sort: [{ text: 'asc' as SortDirection }],
             },
@@ -621,7 +626,7 @@ export default function ({ getService }: FtrProviderContext) {
             title: 'A Big Integer for _id CSV Report',
             searchSource: {
               query: { query: '', language: 'kuery' },
-              fields: [{ field: '*', include_unmapped: 'true' }],
+              fields: [{ field: '*', include_unmapped: true }],
               index: 'c424ce04-f440-4f48-aa0c-534da84d06f6',
               sort: [{ timestamp: 'desc' as SortDirection }],
               filter: [

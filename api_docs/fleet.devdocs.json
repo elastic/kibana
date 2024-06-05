@@ -8455,6 +8455,91 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.getAgentPolicyInputs",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentPolicyInputs",
+            "description": [],
+            "signature": [
+              "(pkgName: string, pkgVersion?: string | undefined, prerelease?: false | undefined, ignoreUnverified?: boolean | undefined) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.TemplateAgentPolicyInput",
+                "text": "TemplateAgentPolicyInput"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getAgentPolicyInputs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pkgName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getAgentPolicyInputs.$2",
+                "type": "string",
+                "tags": [],
+                "label": "pkgVersion",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getAgentPolicyInputs.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "prerelease",
+                "description": [],
+                "signature": [
+                  "false | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getAgentPolicyInputs.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ignoreUnverified",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.PackageClient.reinstallEsAssets",
             "type": "Function",
             "tags": [],
@@ -19485,6 +19570,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AgentPolicy.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -27260,6 +27359,29 @@
           "10000"
         ],
         "path": "x-pack/plugins/fleet/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.TemplateAgentPolicyInput",
+        "type": "Type",
+        "tags": [],
+        "label": "TemplateAgentPolicyInput",
+        "description": [],
+        "signature": [
+          "{ id: string; type: string; streams?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.FullAgentPolicyInputStream",
+            "text": "FullAgentPolicyInputStream"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
