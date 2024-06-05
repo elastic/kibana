@@ -197,7 +197,6 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
       { shouldUseHashForSubUrl: false }
     );
-    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   return {
