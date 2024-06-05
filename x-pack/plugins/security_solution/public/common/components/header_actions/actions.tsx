@@ -67,11 +67,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
     'unifiedComponentsInTimelineEnabled'
   );
   const emptyNotes: string[] = [];
-  const timelineState = useShallowEqualSelector((state) =>
+  const { timelineType } = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
 
-  const { timelineType } = timelineState;
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
