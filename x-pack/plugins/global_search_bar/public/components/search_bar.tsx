@@ -12,7 +12,6 @@ import {
   EuiFormLabel,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  EuiImage,
   EuiLoadingSpinner,
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
@@ -22,8 +21,7 @@ import {
 import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import { i18n } from '@kbn/i18n';
-import React, { FC, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -39,6 +37,10 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 import { SearchBarProps } from './types';
 
+const NoMatchesMessage = (props: { basePathUrl: string }) => {
+  return <PopoverPlaceholder basePath={props.basePathUrl} />;
+};
+
 const EmptyMessage = () => (
   <EuiFlexGroup direction="column" justifyContent="center" style={{ minHeight: '300px' }}>
     <EuiFlexItem grow={false}>
@@ -51,8 +53,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
   const isMounted = useMountedState();
-  const { euiTheme, colorMode } = useEuiTheme();
-
+  const { euiTheme } = useEuiTheme();
   const chromeStyle = useObservable(chromeStyle$);
 
   // These hooks are used when on chromeStyle set to 'project'
@@ -70,8 +71,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
   const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
-  const [image, setImage] = useState<ReactElement | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (initialLoad) {
@@ -281,28 +281,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   useEvent('keydown', onKeyDown);
 
-  const loadNoResult = useCallback(() => {
-    return (
-      <EuiImage
-        alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
-          defaultMessage: 'Illustration of black hole',
-        })}
-        size="fullWidth"
-        height="140px"
-        url={`${props.basePathUrl}illustration_product_no_search_results_${
-          colorMode === 'DARK' ? 'dark' : 'light'
-        }.svg`}
-      />
-    );
-  }, [props.basePathUrl, colorMode]);
-
-  const NoMatchesMessage = useCallback(() => {
-    if (!image) {
-      return loadNoResult();
-    }
-    return <PopoverPlaceholder basePath={props.basePathUrl} />;
-  }, [image, loadNoResult, props.basePathUrl]);
-
   if (chromeStyle === 'project' && !isVisible) {
     return (
       <EuiHeaderSectionItemButton
@@ -375,7 +353,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           reportEvent.searchFocus();
           setInitialLoad(true);
           setShowAppend(false);
-          setImage(loadNoResult());
         },
         onBlur: () => {
           reportEvent.searchBlur();
@@ -385,7 +362,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         append: getAppendForChromeStyle(),
       }}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={NoMatchesMessage()}
+      noMatchesMessage={<NoMatchesMessage {...props} />}
       popoverProps={{
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
