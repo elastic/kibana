@@ -7,8 +7,13 @@
 
 import expect from '@kbn/expect';
 import { DatasetQualityFtrProviderContext } from './config';
-import { datasetNames, defaultNamespace, getInitialTestLogs, getLogsForDataset } from './data';
-import { productionNamespace } from '../../../../test_serverless/functional/test_suites/observability/dataset_quality/data';
+import {
+  datasetNames,
+  defaultNamespace,
+  getInitialTestLogs,
+  getLogsForDataset,
+  productionNamespace,
+} from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
