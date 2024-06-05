@@ -73,7 +73,7 @@ const loadEsqlDocs = once(async () => {
 export function registerQueryFunction({ functions, resources }: FunctionRegistrationParameters) {
   functions.registerInstruction(({ availableFunctionNames }) =>
     availableFunctionNames.includes(QUERY_FUNCTION_NAME)
-      ? `You MUST use the "query" function when the user wants to:
+      ? `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
   - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
@@ -81,9 +81,9 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   - asks general questions about ES|QL
 
   DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
+  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${QUERY_FUNCTION_NAME}" function for this.
 
-  Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
+  Even if the "context" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
   even if it has been called before.
 
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
@@ -95,8 +95,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
     {
       name: 'execute_query',
       visibility: FunctionVisibility.UserOnly,
-      description:
-        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
+      description: `Display the results of an ES|QL query. ONLY use this if the "${QUERY_FUNCTION_NAME}" function has been used before or if the user or screen context has provided a query you can use.`,
       parameters: {
         type: 'object',
         properties: {
