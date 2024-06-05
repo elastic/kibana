@@ -14,14 +14,14 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
 }: SetupRouteOptions<T>) {
-  router.get<{ managed: boolean; page: number; perPage: number }, unknown, unknown>(
+  router.get<unknown, { managed?: boolean; page?: number; perPage?: number }, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/definitions`,
+      path: `${ENTITY_INTERNAL_API_PREFIX}/definition`,
       validate: {
-        params: schema.object({
-          managed: schema.boolean(),
-          page: schema.number(),
-          perPage: schema.number(),
+        query: schema.object({
+          managed: schema.maybe(schema.boolean()),
+          page: schema.maybe(schema.number()),
+          perPage: schema.maybe(schema.number()),
         }),
       },
     },
@@ -30,9 +30,9 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
         const soClient = (await context.core).savedObjects.client;
         const definitions = await findEntityDefinitions({
           soClient,
-          page: req.params.page ?? 1,
-          perPage: req.params.perPage ?? 10,
-          managed: req.params.managed,
+          page: req.query.page ?? 1,
+          perPage: req.query.perPage ?? 10,
+          managed: req.query.managed,
         });
         return res.ok({ body: definitions });
       } catch (e) {
