@@ -116,7 +116,6 @@ export const useAttackDiscovery = ({
   }, [pollStatus]);
 
   useEffect(() => {
-    console.log('stephhh useEffect pollData', pollData);
     if (pollData !== null && pollData.connectorId === connectorId) {
       if (pollData.alertsContextCount) setAlertsContextCount(null);
       if (pollData.updatedAt) setLastUpdated(new Date(pollData.updatedAt));

@@ -70,7 +70,6 @@ export const getAttackDiscovery = async ({
       seq_no_primary_term: true,
     });
     const attackDiscovery = transformESSearchToAttackDiscovery(response);
-    console.log('stephhh exact response', JSON.stringify(response));
     return attackDiscovery[0] ?? null;
   } catch (err) {
     logger.error(`Error fetching attack discovery: ${err} with id: ${id}`);

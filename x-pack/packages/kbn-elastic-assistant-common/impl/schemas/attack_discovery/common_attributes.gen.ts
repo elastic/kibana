@@ -29,6 +29,10 @@ export const AttackDiscovery = z.object({
    */
   alertIds: z.array(z.string()),
   /**
+   * UUID of attack discovery
+   */
+  id: z.string().optional(),
+  /**
    * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
    */
   detailsMarkdown: z.string(),

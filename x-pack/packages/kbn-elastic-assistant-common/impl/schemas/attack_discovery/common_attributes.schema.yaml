@@ -22,6 +22,9 @@ components:
           items:
             type: string
           type: array
+        id:
+          description: UUID of attack discovery
+          type: string
         detailsMarkdown:
           description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
           type: string

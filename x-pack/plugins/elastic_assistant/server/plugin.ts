@@ -76,7 +76,6 @@ export class ElasticAssistantPlugin
       PLUGIN_ID,
       (context, request) => requestContextFactory.create(context, request)
     );
-
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     const getElserId = createGetElserId(plugins.ml);

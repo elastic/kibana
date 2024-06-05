@@ -7,10 +7,9 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { getAttackDiscoveryMarkdown } from '../../get_attack_discovery_markdown/get_attack_discovery_markdown';
-import type { AttackDiscovery } from '../../types';
 
 /**
  * This category is provided in the prompt context for the assistant

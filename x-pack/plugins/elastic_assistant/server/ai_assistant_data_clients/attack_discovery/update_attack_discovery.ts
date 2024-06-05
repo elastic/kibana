@@ -14,6 +14,7 @@ import {
   UUID,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import * as uuid from 'uuid';
 import { EsReplacementSchema } from '../conversations/types';
 import { getAttackDiscovery } from './get_attack_discovery';
 
@@ -63,15 +64,14 @@ export const updateAttackDiscovery = async ({
   const updatedAt = new Date().toISOString();
   const params = transformToUpdateScheme(updatedAt, attackDiscoveryUpdateProps);
   try {
-    console.log('stephhh bout to update', attackDiscoveryIndex);
-    const response = await esClient.update({
+    await esClient.update({
       refresh: 'wait_for',
       index: attackDiscoveryIndex,
       id: params.id,
       doc: params,
     });
-    console.log('stephhh update response', response);
-    //
+
+    // TODO do something
     // if (response.result.status === 'failure') {
     //   logger.warn(`Error updating attack discovery: ${response.result.error} by ID: ${params.id}`);
     //   return null;
@@ -84,7 +84,7 @@ export const updateAttackDiscovery = async ({
       logger,
       user,
     });
-    console.log('stephhh update updatedAttackDiscovery', updatedAttackDiscovery);
+
     return updatedAttackDiscovery;
   } catch (err) {
     logger.warn(`Error updating attackDiscovery: ${err} by ID: ${params.id}`);
@@ -137,6 +137,7 @@ export const transformToUpdateScheme = (
     alerts_context_count: alertsContextCount,
     attack_discoveries:
       attackDiscoveries?.map((attackDiscovery) => ({
+        id: attackDiscovery.id ?? uuid.v4(),
         alert_ids: attackDiscovery.alertIds,
         title: attackDiscovery.title,
         details_markdown: attackDiscovery.detailsMarkdown,

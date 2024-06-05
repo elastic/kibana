@@ -112,18 +112,6 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       // update the connector ID in local storage:
       setConnectorId(selectedConnectorId);
       setLocalStorageAttackDiscoveryConnectorId(selectedConnectorId);
-
-      // TODO i think i can trash this all
-      // const cached = cachedAttackDiscoveries[selectedConnectorId];
-      // if (cached != null) {
-      //   setSelectedConnectorReplacements(cached.replacements ?? {});
-      //   setSelectedConnectorAttackDiscoveries(cached.attackDiscoveries ?? []);
-      //   setSelectedConnectorLastUpdated(cached.updated ?? null);
-      // } else {
-      //   setSelectedConnectorReplacements({});
-      //   setSelectedConnectorAttackDiscoveries([]);
-      //   setSelectedConnectorLastUpdated(null);
-      // }
     },
     [setLocalStorageAttackDiscoveryConnectorId]
   );

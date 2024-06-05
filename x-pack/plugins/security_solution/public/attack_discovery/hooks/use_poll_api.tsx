@@ -51,7 +51,7 @@ export const usePollApi = ({
         connectorId,
         attackDiscoveries: responseData.attackDiscoveries.map((attackDiscovery) => ({
           ...attackDiscovery,
-          id: uuid.v4(),
+          id: attackDiscovery.id ?? uuid.v4(),
           detailsMarkdown: replaceNewlineLiterals(attackDiscovery.detailsMarkdown),
           entitySummaryMarkdown: replaceNewlineLiterals(attackDiscovery.entitySummaryMarkdown),
           summaryMarkdown: replaceNewlineLiterals(attackDiscovery.summaryMarkdown),

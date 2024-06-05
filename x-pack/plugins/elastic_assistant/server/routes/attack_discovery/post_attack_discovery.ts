@@ -189,7 +189,7 @@ export const postAttackDiscoveryRoute = (
               currentAd = ad;
             }
           }
-          console.log('stephhh currentAD', currentAd);
+
           toolInstance
             ?.invoke('')
             .then(async (rawAttackDiscoveries) => {
@@ -216,12 +216,7 @@ export const postAttackDiscoveryRoute = (
                       }),
                     };
 
-              console.log('stephhh updateResult attempt', {
-                ...dependentProps,
-                id: attackDiscoveryId,
-                replacements: latestReplacements,
-              });
-              const updateResult = await dataClient?.updateAttackDiscovery({
+              await dataClient?.updateAttackDiscovery({
                 attackDiscoveryUpdateProps: {
                   ...dependentProps,
                   id: attackDiscoveryId,
@@ -230,10 +225,10 @@ export const postAttackDiscoveryRoute = (
                 },
                 authenticatedUser,
               });
-              console.log('stephhh updateResult success', updateResult);
+              // TODO implement success telemetry here
             })
             .catch(async (e) => {
-              console.log('stephhh errd', e);
+              // TODO implement failed telemetry here
               await dataClient?.updateAttackDiscovery({
                 attackDiscoveryUpdateProps: {
                   attackDiscoveries: [],

@@ -49,7 +49,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Find attack discovery by apiConfig connectorId
+   * Creates an attack discovery, if given at least the "apiConfig"
    * @param options
    * @param options.attackDiscoveryCreate
    * @param options.authenticatedUser
@@ -74,9 +74,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Creates an attack discovery, if given at least the "apiConfig"
-   * See {@link https://www.elastic.co/guide/en/security/current/}
-   * for more information around formats of the deserializer and serializer
+   * Find attack discovery by apiConfig connectorId
    * @param options
    * @param options.connectorId
    * @param options.authenticatedUser
@@ -99,6 +97,12 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     });
   };
 
+  /**
+   * Updates an attack discovery
+   * @param options
+   * @param options.attackDiscoveryUpdateProps
+   * @param options.authenticatedUser
+   */
   public updateAttackDiscovery = async ({
     attackDiscoveryUpdateProps,
     authenticatedUser,
