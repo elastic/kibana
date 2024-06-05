@@ -25,6 +25,8 @@ import inferenceEndpoint from '../../assets/images/inference_endpoint.svg';
 import { ElserPrompt } from './elser_prompt';
 import { MultilingualE5Prompt } from './multilingual_e5_prompt';
 
+import './add_empty_prompt.scss';
+
 interface AddEmptyPromptProps {
   addEndpointLabel: string;
   setIsInferenceFlyoutVisible: (value: boolean) => void;
@@ -36,6 +38,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
 }) => {
   return (
     <EuiEmptyPrompt
+      className="addEmptyPrompt"
       layout="horizontal"
       title={
         <h2>
