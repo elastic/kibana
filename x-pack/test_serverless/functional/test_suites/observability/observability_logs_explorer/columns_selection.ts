@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the whole JSON when neither message, error.message and event.original are present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(4, 3);
+          const cellElement = await dataGrid.getCellElement(4, 4);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(true);
 
