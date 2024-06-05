@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     });
 
-  describe.only('When the logs explorer loads', () => {
+  describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
       await navigateToLogsExplorer();
