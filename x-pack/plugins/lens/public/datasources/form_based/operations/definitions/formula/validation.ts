@@ -623,17 +623,17 @@ function getQueryValidationErrors(
               : undefined
           );
           if (errorId) {
-            errors.push(getMessageFromId({ id: errorId, meta: {} }, [arg.location]));
+            errors.push(getMessageFromId({ id: errorId }, [arg.location]));
           }
         } else {
-          errors.push(getMessageFromId({ id: 'invalidTimeShift', meta: {} }, [arg.location]));
+          errors.push(getMessageFromId({ id: 'invalidTimeShift' }, [arg.location]));
         }
       }
     }
     if (arg.name === 'reducedTimeRange') {
       const parsedReducedTimeRange = parseTimeShift(arg.value || '');
       if (parsedReducedTimeRange === 'invalid' || parsedReducedTimeRange === 'previous') {
-        errors.push(getMessageFromId({ id: 'invalidReducedTimeRange', meta: {} }, [arg.location]));
+        errors.push(getMessageFromId({ id: 'invalidReducedTimeRange' }, [arg.location]));
       }
     }
   });
@@ -740,7 +740,7 @@ function validateNameArguments(
 
   const hasTooManyQueries = checkSingleQuery(namedArguments);
   if (hasTooManyQueries) {
-    errors.push(getMessageFromId({ id: 'tooManyQueries', meta: {} }, getNodeLocation(node)));
+    errors.push(getMessageFromId({ id: 'tooManyQueries' }, getNodeLocation(node)));
   }
   return errors;
 }
