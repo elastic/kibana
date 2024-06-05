@@ -32,7 +32,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HostsLocatorParams } from '@kbn/observability-shared-plugin/public/locators/infra/hosts_locator';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -60,7 +59,9 @@ export const OtelLogsPanel: React.FC = () => {
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
 
-  const hostsLocator = share.url.locators.get<HostsLocatorParams>('HOSTS_LOCATOR');
+  const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
+
+  const inventoryLocator = share.url.locators.get('INVENTORY_LOCATOR');
 
   const [{ value: deeplinks }, getDeeplinks] = useAsyncFn(async () => {
     return {
@@ -68,6 +69,16 @@ export const OtelLogsPanel: React.FC = () => {
         type: 'logs',
       }),
       metrics: hostsLocator!.getRedirectUrl({}),
+      pods: inventoryLocator!.getRedirectUrl({
+        view: 'map',
+        metric: '',
+        nodeType: 'pod',
+        sort: {
+          by: 'name',
+          direction: 'desc',
+        },
+        timelineOpen: false,
+      }),
     };
   }, [allDatasetsLocator]);
 
@@ -392,17 +403,31 @@ rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && 
                             </EuiText>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiLink
-                              data-test-subj="obltOnboardingExploreMetrics"
-                              href={deeplinks?.metrics}
-                            >
-                              {i18n.translate(
-                                'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
-                                {
-                                  defaultMessage: 'Open Hosts',
-                                }
-                              )}
-                            </EuiLink>
+                            {selectedTab === 'kubernetes' ? (
+                              <EuiLink
+                                data-test-subj="obltOnboardingExploreMetrics"
+                                href={deeplinks?.pods}
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.otelLogsPanel.explorePods',
+                                  {
+                                    defaultMessage: 'Open Pods',
+                                  }
+                                )}
+                              </EuiLink>
+                            ) : (
+                              <EuiLink
+                                data-test-subj="obltOnboardingExploreMetrics"
+                                href={deeplinks?.metrics}
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
+                                  {
+                                    defaultMessage: 'Open Hosts',
+                                  }
+                                )}
+                              </EuiLink>
+                            )}
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
