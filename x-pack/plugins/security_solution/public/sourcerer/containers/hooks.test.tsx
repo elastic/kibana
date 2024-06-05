@@ -10,7 +10,8 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
+import { useSourcererDataView } from '.';
+import { getScopeFromPath } from './sourcerer_paths';
 import { mockPatterns } from './mocks';
 import type { RouteSpyState } from '../../common/utils/route/types';
 import {
@@ -31,6 +32,7 @@ import * as source from '../../common/containers/source/use_data_view';
 import { sourcererActions } from '../store';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { createSourcererDataView } from './create_sourcerer_data_view';
+import { useInitSourcerer } from './use_init_sourcerer';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
