@@ -65,9 +65,11 @@ export const registerFunctions: RegistrationCallback = async ({
     const instructions: string[] = [];
 
     if (availableFunctionNames.includes(GET_DATASET_INFO_FUNCTION_NAME)) {
-      instructions.push(`You MUST use the "${GET_DATASET_INFO_FUNCTION_NAME}" function before calling the "${QUERY_FUNCTION_NAME}" or "${CHANGES_FUNCTION_NAME}" function.
+      instructions.push(`You MUST use the "${GET_DATASET_INFO_FUNCTION_NAME}" ${
+        functions.hasFunction('get_apm_dataset_info') ? 'or the get_apm_dataset_info' : ''
+      } function before calling the "${QUERY_FUNCTION_NAME}" or the "${CHANGES_FUNCTION_NAME}" functions.
         
-        If a function requires an index, you MUST use the results from the "${GET_DATASET_INFO_FUNCTION_NAME}" function.`);
+      If a function requires an index, you MUST use the results from the dataset info functions.`);
     }
 
     if (availableFunctionNames.includes(GET_DATA_ON_SCREEN_FUNCTION_NAME)) {
