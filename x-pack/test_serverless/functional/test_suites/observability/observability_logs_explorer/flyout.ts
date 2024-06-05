@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         NAMESPACE
       );
       await PageObjects.observabilityLogsExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     beforeEach(async () => {

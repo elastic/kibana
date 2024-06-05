@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('create window', function () {
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {
