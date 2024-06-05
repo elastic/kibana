@@ -10813,6 +10813,11 @@
     set-cookie-parser "^2.3.5"
     undici "^6.21.1"
 
+"@redtea/react-inversify@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@redtea/react-inversify/-/react-inversify-1.0.1.tgz#54fb325b223cb05e1d489f84058404ac0e272dcc"
+  integrity sha512-+0KMIcXHpZfV9j8di8G4b0jelwuFi4GVCcC7Ah7QIGA4GiC8b+8VlYRbBglDVZgm+jAPj+3WAbH1pQuUVuK7lw==
+
 "@redux-saga/core@^1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@redux-saga/core/-/core-1.3.0.tgz#2ce08b73d407fc6ea9e7f7d83d2e97d981a3a8b8"
