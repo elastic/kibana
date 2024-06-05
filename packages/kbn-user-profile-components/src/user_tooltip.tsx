@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiText, EuiToolTipProps } from '@elastic/eui';
 import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -44,10 +44,10 @@ export const UserToolTip: FunctionComponent<UserToolTipProps> = ({ user, avatar,
             <UserAvatar user={user} avatar={avatar} size="l" />
           </EuiFlexItem>
           <EuiFlexItem grow style={{ minWidth: 0 }}>
-            <div>
-              <strong>{displayName}</strong>
-            </div>
-            {user.email && user.email !== displayName ? <div>{user.email}</div> : undefined}
+            <div>{displayName}</div>
+            {user.email && user.email !== displayName ? (
+              <EuiText size={'xs'}>{user.email}</EuiText>
+            ) : undefined}
           </EuiFlexItem>
         </EuiFlexGroup>
       }

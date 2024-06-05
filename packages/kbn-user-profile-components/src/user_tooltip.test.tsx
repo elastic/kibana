@@ -68,13 +68,13 @@ describe('UserToolTip', () => {
               }
             >
               <div>
-                <strong>
-                  Delighted Nightingale
-                </strong>
+                Delighted Nightingale
               </div>
-              <div>
+              <EuiText
+                size="xs"
+              >
                 delighted_nightingale@elastic.co
-              </div>
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
