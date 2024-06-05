@@ -31,7 +31,6 @@ import { enterConsoleCommand } from '../../../console/mocks';
 import { SCAN_ROUTE } from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type {
-  ActionDetailsApiResponse,
   EndpointPrivileges,
   ResponseActionScanOutputContent,
 } from '../../../../../../common/endpoint/types';
@@ -69,7 +68,7 @@ describe('When using scan action from response actions console', () => {
 
     getConsoleCommandsOptions = {
       agentType: 'endpoint',
-      endpointAgentId: 'a.b.c',
+      endpointAgentId: 'agent-a',
       endpointCapabilities: [...ENDPOINT_CAPABILITIES],
       endpointPrivileges,
     };
@@ -161,7 +160,7 @@ describe('When using scan action from response actions console', () => {
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.scan).toHaveBeenCalledWith({
-        body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two"}}',
+        body: '{"agent_type":"endpoint","endpoint_ids":["agent-a"],"parameters":{"path":"one/two"}}',
         path: SCAN_ROUTE,
         version: '2023-10-31',
       });
@@ -193,13 +192,21 @@ describe('When using scan action from response actions console', () => {
       {
         data: {
           ...apiMocks.responseProvider.actionDetails({
-            path: '/1',
+            path: '/agent-a',
           } as HttpFetchOptionsWithPath).data,
-
           completedAt: new Date().toISOString(),
           command: 'scan',
+          outputs: {
+            'agent-a': {
+              type: 'json',
+              content: {
+                code: 'ra_scan_success_done',
+              } as unknown as ResponseActionScanOutputContent,
+            },
+          },
         },
       };
+
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
@@ -210,7 +217,7 @@ describe('When using scan action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('scan-success').textContent).toEqual('Action completed.');
+      expect(renderResult.getByTestId('scan-success').textContent).toEqual('Scan complete');
     });
   });
 
@@ -218,24 +225,45 @@ describe('When using scan action from response actions console', () => {
     'ra_scan_error_not-found',
     'ra_scan_error_scan-invalid-input',
     'ra_scan_error_scan-queue-quota',
-  ])('should show detailed error if scan failure returned code: %s', async (outputCode) => {
-    const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
-      path: '/api/endpoint/action/a.b.c',
-    }) as ActionDetailsApiResponse<ResponseActionScanOutputContent>;
-    pendingDetailResponse.data.agents = ['a.b.c'];
-    pendingDetailResponse.data.wasSuccessful = false;
-    pendingDetailResponse.data.errors = ['not found'];
-    pendingDetailResponse.data.outputs = {
-      'a.b.c': {
-        type: 'json',
-        content: {
-          code: outputCode,
-        } as unknown as ResponseActionScanOutputContent,
-      },
-    };
-    apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
+  ])('should show detailed error if `scan` failure returned code: %s', async (outputCode) => {
+    const mockData = apiMocks.responseProvider.actionDetails({
+      path: '/api/endpoint/action/agent-a',
+    }).data;
+
+    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
+      {
+        data: {
+          ...mockData,
+          id: '123',
+          completedAt: new Date().toISOString(),
+          command: 'scan',
+          outputs: {
+            'agent-a': {
+              type: 'json',
+              content: {
+                code: outputCode,
+              } as unknown as ResponseActionScanOutputContent,
+            },
+          },
+          errors: ['error message'],
+          wasSuccessful: false,
+          status: 'failed',
+          agentState: {
+            'agent-a': {
+              ...mockData.agentState['agent-a'],
+              wasSuccessful: false,
+              errors: ['error message'],
+            },
+          },
+          parameters: {
+            path: '/error/path',
+          },
+        },
+      };
+
+    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
     await render();
-    enterConsoleCommand(renderResult, 'scan --path one');
+    enterConsoleCommand(renderResult, 'scan --path="/error/path"');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('scan-actionFailure').textContent).toMatch(
