@@ -178,7 +178,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
+
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
+  const [measuredContentWidth, setMeasuredContentWidth] = useState(0);
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
@@ -589,12 +591,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   // use a ref because editorDidMount is only called once, and the reference
   // to the state becomes stale after re-renders.
   const onLayoutChange = (layoutInfoEvent: monaco.editor.EditorLayoutInfo) => {
-    if (layoutInfoEvent.contentWidth !== measuredEditorWidth) {
+    if (layoutInfoEvent.contentWidth !== measuredContentWidth) {
       const nextMeasuredWidth = layoutInfoEvent.contentWidth;
-      setMeasuredEditorWidth(nextMeasuredWidth);
+      setMeasuredContentWidth(nextMeasuredWidth);
       if (!isCodeEditorExpandedFocused && !isCompactFocused) {
         calculateVisibleCode(nextMeasuredWidth, true);
       }
+    }
+
+    if (layoutInfoEvent.width !== measuredEditorWidth) {
+      setMeasuredEditorWidth(layoutInfoEvent.width);
     }
   };
 
@@ -920,6 +926,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                       onQuerySubmit
                     );
+
+                    setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                    setMeasuredContentWidth(editor.getContentWidth());
 
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);

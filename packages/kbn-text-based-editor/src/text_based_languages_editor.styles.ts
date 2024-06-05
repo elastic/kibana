@@ -37,7 +37,6 @@ export const textBasedLanguageEditorStyles = (
   return {
     editorContainer: {
       position,
-      ...(historyIsOpen ? { left: 0, right: 0 } : {}),
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
