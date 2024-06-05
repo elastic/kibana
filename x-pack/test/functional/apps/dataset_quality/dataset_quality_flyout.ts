@@ -458,94 +458,135 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const goodDatasetName = 'good';
       const degradedDatasetName = 'degraded';
       const today = new Date().toISOString();
-      before(async () => {
-        await synthtrace.index([
-          getLogsForDataset({
-            to: today,
-            count: 2,
-            dataset: goodDatasetName,
-            isMalformed: false,
-          }),
-          createDegradedFieldsRecord({
-            to: today,
-            count: 2,
-            dataset: degradedDatasetName,
-          }),
-        ]);
-        await PageObjects.datasetQuality.navigateTo();
+
+      describe('Degraded Fields Table with common data', () => {
+        before(async () => {
+          await synthtrace.index([
+            getLogsForDataset({
+              to: today,
+              count: 2,
+              dataset: goodDatasetName,
+              isMalformed: false,
+            }),
+            createDegradedFieldsRecord({
+              to: today,
+              count: 2,
+              dataset: degradedDatasetName,
+            }),
+          ]);
+          await PageObjects.datasetQuality.navigateTo();
+        });
+
+        after(async () => {
+          await synthtrace.clean();
+        });
+
+        it('shows the degraded fields table with no data when no degraded fields are present', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(goodDatasetName);
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedTableNoData
+          );
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should load the degraded fields table with data', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+          );
+
+          const rows =
+            await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+
+          expect(rows.length).to.eql(2);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should display Spark Plot for every row of degraded fields', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+          const rows =
+            await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+
+          const sparkPlots = await testSubjects.findAll(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
+          );
+
+          expect(rows.length).to.be(sparkPlots.length);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should sort the table when the count table header is clicked', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+          const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
+
+          const countColumn = table['Docs count'];
+          const cellTexts = await countColumn.getCellTexts();
+
+          await countColumn.sort('ascending');
+          const sortedCellTexts = await countColumn.getCellTexts();
+
+          expect(cellTexts.reverse()).to.eql(sortedCellTexts);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
       });
 
-      after(async () => {
-        await synthtrace.clean();
-      });
+      describe('Degraded Fields Table with data ingestion', () => {
+        before(async () => {
+          await synthtrace.index([
+            getLogsForDataset({
+              to: today,
+              count: 2,
+              dataset: goodDatasetName,
+              isMalformed: false,
+            }),
+            createDegradedFieldsRecord({
+              to: today,
+              count: 2,
+              dataset: degradedDatasetName,
+            }),
+          ]);
+          await PageObjects.datasetQuality.navigateTo();
+        });
 
-      it('shows the degraded fields table with no data when no degraded fields are present', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(goodDatasetName);
+        after(async () => {
+          await synthtrace.clean();
+        });
 
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedTableNoData
-        );
+        it('should update the table when new data is ingested and the flyout is refreshed using the time selector', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
 
-        await PageObjects.datasetQuality.closeFlyout();
-      });
+          const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-      it('should load the degraded fields table with data', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+          const countColumn = table['Docs count'];
+          const cellTexts = await countColumn.getCellTexts();
 
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
-        );
+          await synthtrace.index([
+            createDegradedFieldsRecord({
+              to: today,
+              count: 2,
+              dataset: degradedDatasetName,
+            }),
+          ]);
 
-        const rows =
-          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+          await PageObjects.datasetQuality.refreshFlyout();
 
-        expect(rows.length).to.eql(2);
+          const updatedCellTexts = await countColumn.getCellTexts();
 
-        await PageObjects.datasetQuality.closeFlyout();
-      });
+          const singleValuePreviously = parseInt(cellTexts[0], 10);
+          const singleValueNow = parseInt(updatedCellTexts[0], 10);
 
-      it('should sort the table when the count table header is clicked', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+          expect(singleValueNow).to.be(singleValuePreviously * 2);
 
-        const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-
-        const countColumn = table.Count;
-        const cellTexts = await countColumn.getCellTexts();
-
-        await countColumn.sort('ascending');
-        const sortedCellTexts = await countColumn.getCellTexts();
-
-        expect(cellTexts.reverse()).to.eql(sortedCellTexts);
-
-        await PageObjects.datasetQuality.closeFlyout();
-      });
-
-      it('should update the table when new data is ingested and the flyout is refreshed using the time selector', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
-
-        const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-
-        const countColumn = table.Count;
-        const cellTexts = await countColumn.getCellTexts();
-
-        await synthtrace.index([
-          createDegradedFieldsRecord({
-            to: today,
-            count: 2,
-            dataset: degradedDatasetName,
-          }),
-        ]);
-
-        await PageObjects.datasetQuality.refreshFlyout();
-
-        const updatedCellTexts = await countColumn.getCellTexts();
-
-        const singleValuePreviously = parseInt(cellTexts[0], 10);
-        const singleValueNow = parseInt(updatedCellTexts[0], 10);
-
-        expect(singleValueNow).to.be(singleValuePreviously * 2);
-
-        await PageObjects.datasetQuality.closeFlyout();
+          await PageObjects.datasetQuality.closeFlyout();
+        });
       });
     });
   });

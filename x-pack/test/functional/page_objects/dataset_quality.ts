@@ -77,6 +77,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
     datasetQualityFlyoutDegradedFieldTable: 'datasetQualityFlyoutDegradedFieldTable',
     datasetQualityFlyoutDegradedTableNoData: 'datasetQualityFlyoutDegradedTableNoData',
+    datasetQualitySparkPlot: 'datasetQualitySparkPlot',
     datasetQualityHeaderButton: 'datasetQualityHeaderButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
     datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
@@ -226,7 +227,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async parseDegradedFieldTable() {
       const table = await this.getDatasetQualityFlyoutDegradedFieldTable();
-      return parseDatasetTable(table, ['Field', 'Count', 'Last Occurrence']);
+      return parseDatasetTable(table, ['Field', 'Docs count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {
