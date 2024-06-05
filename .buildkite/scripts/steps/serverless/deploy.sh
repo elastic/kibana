@@ -117,6 +117,7 @@ Kibana: $PROJECT_KIBANA_LOGIN_URL
 Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
 Credentials: \`vault kv get $VAULT_KV_PREFIX/cloud-deploy/$VAULT_KEY_NAME\`
+
 (Stored in the production vault: VAULT_ADDR=https://vault-ci-prod.elastic.dev, more info: https://docs.elastic.dev/ci/using-secrets)
 
 Kibana image: \`$KIBANA_IMAGE\`

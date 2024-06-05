@@ -119,18 +119,19 @@ CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq 
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
 cat << EOF | buildkite-agent annotate --style "info" --context cloud
-  ### Cloud Deployment
+### Cloud Deployment
 
-  Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
+Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
 
-  Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
+Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Credentials: \`vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
-  (Stored in the production vault: VAULT_ADDR=https://vault-ci-prod.elastic.dev, more info: https://docs.elastic.dev/ci/using-secrets)
+Credentials: \`vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
 
-  Kibana image: \`$KIBANA_CLOUD_IMAGE\`
+(Stored in the production vault: VAULT_ADDR=https://vault-ci-prod.elastic.dev, more info: https://docs.elastic.dev/ci/using-secrets)
 
-  Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
+Kibana image: \`$KIBANA_CLOUD_IMAGE\`
+
+Elasticsearch image: \`$ELASTICSEARCH_CLOUD_IMAGE\`
 EOF
 
 buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"
