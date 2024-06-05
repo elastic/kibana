@@ -84,6 +84,7 @@ import type {
   ESQLFunction,
   ESQLCommandOption,
   ESQLAstItem,
+  ESQLAstField,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -474,14 +475,14 @@ export function visitField(ctx: FieldContext) {
   return collectBooleanExpression(ctx.booleanExpression());
 }
 
-export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQLAstItem[] {
-  const ast: ESQLAstItem[] = [];
+export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[] {
+  const ast: ESQLAstField[] = [];
   if (!ctx) {
     return ast;
   }
   try {
     for (const field of ctx.field_list()) {
-      ast.push(...visitField(field));
+      ast.push(...(visitField(field) as ESQLAstField[]));
     }
   } catch (e) {
     // do nothing
@@ -494,7 +495,7 @@ export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | un
     return [];
   }
   const option = createOption(ctx.BY()!.getText().toLowerCase(), ctx);
-  option.args.push(...collectAllFieldsStatements(expr));
+  option.args.push(...collectAllFields(expr));
   return [option];
 }
 

@@ -22,6 +22,8 @@ export type ESQLSingleAstItem =
   | ESQLLiteral
   | ESQLCommandMode;
 
+export type ESQLAstField = ESQLFunction | ESQLColumn;
+
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
 export interface ESQLLocation {
@@ -43,8 +45,8 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
 
 export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
   sources: ESQLSource[];
-  aggregates?: ESQLAstItem[];
-  grouping?: ESQLAstItem[];
+  aggregates?: ESQLAstField[];
+  grouping?: ESQLAstField[];
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {

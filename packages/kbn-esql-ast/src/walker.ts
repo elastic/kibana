@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLAstCommand, ESQLAstItem, ESQLAstMetricsCommand, ESQLAstNode, ESQLFunction, ESQLSingleAstItem } from './types';
+import type {
+  ESQLAstCommand,
+  ESQLAstItem,
+  ESQLAstMetricsCommand,
+  ESQLAstNode,
+  ESQLFunction,
+  ESQLSingleAstItem,
+} from './types';
 
 export interface WalkerOptions {
   visitSingleAstItem?: (node: ESQLSingleAstItem) => void;
