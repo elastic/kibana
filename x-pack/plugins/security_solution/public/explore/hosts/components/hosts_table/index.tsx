@@ -12,6 +12,11 @@ import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 import { EuiButton } from '@elastic/eui';
+import { useMutation } from '@tanstack/react-query';
+import type { DeleteAssetCriticalityResponse } from '../../../../entity_analytics/api/api';
+import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import type { Params } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   Columns,
@@ -180,6 +185,32 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 
+  const { createAssetCriticality, deleteAssetCriticality } = useEntityAnalyticsRoutes();
+
+  const criticality = useMutation<
+    Array<AssetCriticalityRecord | DeleteAssetCriticalityResponse>,
+    unknown,
+    Params[],
+    unknown
+  >({
+    mutationFn: (records) => {
+      console.log('mutating records', records);
+      const promises = records.map(({ criticalityLevel, idField, idValue }) => {
+        if (criticalityLevel === 'unassigned') {
+          return deleteAssetCriticality({ idField, idValue, refresh: 'wait_for' });
+        }
+
+        return createAssetCriticality({ idField, idValue, criticalityLevel, refresh: 'wait_for' });
+      });
+
+      return Promise.all(promises).then((results) => {
+        console.log('results', results);
+        return results;
+      });
+    },
+    onSuccess: () => location.reload(),
+  });
+
   return (
     <PaginatedTable
       activePage={activePage}
@@ -191,7 +222,12 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       headerSupplement={
         selected.length > 0 ? (
           <EuiButton
-            onClick={() => ''}
+            onClick={() => {
+              console.log('clicked');
+              const obj = selected.map(buildCriticalityMutationParams('extreme_impact'));
+              console.log('obj', obj);
+              criticality.mutate(obj);
+            }}
             title={`Assign criticality to ${selected.length} selected items`}
           >{`Assign criticality to ${selected.length} selected items`}</EuiButton>
         ) : undefined
@@ -246,3 +282,13 @@ const getNodeField = (field: HostsFields): string => {
 export const HostsTable = React.memo(HostsTableComponent);
 
 HostsTable.displayName = 'HostsTable';
+
+const buildCriticalityMutationParams =
+  (criticalityLevel: Params['criticalityLevel']) =>
+  (edge: HostsEdges): Params => {
+    return {
+      idField: 'host.name',
+      idValue: edge.node.host?.name?.[0] || '',
+      criticalityLevel,
+    };
+  };

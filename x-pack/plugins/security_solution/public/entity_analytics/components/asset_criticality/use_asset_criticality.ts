@@ -117,7 +117,7 @@ export interface State {
     unknown
   >;
 }
-interface Params {
+export interface Params {
   idField: AssetCriticality['idField'];
   idValue: AssetCriticality['idValue'];
   criticalityLevel: CriticalityLevelWithUnassigned;
