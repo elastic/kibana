@@ -15,7 +15,12 @@ function generateId(seed?: string, length: number = 32) {
   }
 
   const id = String(seq++);
-  return pid + id.padStart(length - pid.length, '0');
+  const generatedId = pid + id.padStart(length - pid.length, '0');
+  if (generatedId.length > length) {
+    throw new Error(`generated id is longer than ${length} characters: ${generatedId.length}`);
+  }
+
+  return generatedId;
 }
 
 export function generateShortId(seed?: string) {
