@@ -7,8 +7,10 @@
 
 import type {
   EuiBasicTableProps,
+  EuiTableSelectionType,
   EuiGlobalToastListToast as Toast,
   EuiTableRowCellProps,
+  ItemId,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -23,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import type { FC, ComponentType } from 'react';
-import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { Direction } from '../../../../common/search_strategy';
@@ -111,6 +113,7 @@ export interface BasicTableProps<T> {
   headerUnit?: string | React.ReactElement;
   headerSubtitle?: string | React.ReactElement;
   id?: string;
+  itemId?: ItemId<unknown>;
   itemsPerRow?: ItemsPerRow[];
   isInspect?: boolean;
   limit: number;
@@ -121,6 +124,7 @@ export interface BasicTableProps<T> {
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
+  selection?: EuiTableSelectionType<unknown>;
   split?: boolean;
   stackHeader?: boolean;
   totalCount: number;
@@ -162,11 +166,13 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   setQuerySkip,
   showMorePagesIndicator,
   sorting = null,
+  selection,
   split,
   stackHeader,
   totalCount,
   updateActivePage,
   updateLimitPagination,
+  itemId,
 }) => {
   const [myLoading, setMyLoading] = useState(loading);
   const [myActivePage, setActivePage] = useState(activePage);
@@ -247,19 +253,6 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     ));
   const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
-  const tableSorting = useMemo(
-    () =>
-      sorting
-        ? {
-            sort: {
-              field: sorting.field,
-              direction: sorting.direction,
-            },
-          }
-        : undefined,
-    [sorting]
-  );
-
   const { toggleStatus, setToggleStatus } = useQueryToggle(id);
 
   const toggleQuery = useCallback(
@@ -302,10 +295,12 @@ const PaginatedTableComponent: FC<SiemTables> = ({
             <>
               <BasicTable
                 data-test-subj="paginated-basic-table"
+                itemId={itemId}
                 columns={columns}
                 items={pageOfItems}
                 onChange={onChange}
-                sorting={tableSorting}
+                sorting={{ sort: sorting }}
+                selection={selection}
               />
               <FooterAction>
                 <EuiFlexItem>

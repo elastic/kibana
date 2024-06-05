@@ -171,6 +171,7 @@ export const getHostsColumns = (
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
+
       render: (assetCriticality: string) => {
         return assetCriticality;
       },

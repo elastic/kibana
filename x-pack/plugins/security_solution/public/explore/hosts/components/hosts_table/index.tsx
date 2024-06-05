@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+
+import { EuiButton } from '@elastic/eui';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   Columns,
@@ -138,6 +140,8 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     [direction, sortField, type, dispatch]
   );
 
+  const [selected, setSelected] = useState<HostsEdges[]>([]);
+
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
@@ -184,6 +188,14 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       headerCount={totalCount}
       headerTitle={i18n.HOSTS}
       headerUnit={i18n.UNIT(totalCount)}
+      headerSupplement={
+        selected.length > 0 ? (
+          <EuiButton
+            onClick={() => ''}
+            title={`Assign criticality to ${selected.length} selected items`}
+          >{`Assign criticality to ${selected.length} selected items`}</EuiButton>
+        ) : undefined
+      }
       id={id}
       isInspect={isInspect}
       itemsPerRow={rowItems}
@@ -195,6 +207,11 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
+      selection={{
+        selected,
+        onSelectionChange: (items) => setSelected(items as HostsEdges[]),
+      }}
+      itemId={(item: HostsEdges) => item.node._id}
       totalCount={fakeTotalCount}
       updateLimitPagination={updateLimitPagination}
       updateActivePage={updateActivePage}
