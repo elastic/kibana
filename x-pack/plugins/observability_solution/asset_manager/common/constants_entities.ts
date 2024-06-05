@@ -11,4 +11,4 @@ export const ENTITY_TRANSFORM_PREFIX = `entities-observability-summary-${ENTITY_
 export const ENTITY_DEFAULT_FREQUENCY = '1m';
 export const ENTITY_DEFAULT_SYNC_DELAY = '60s';
 export const ENTITY_API_PREFIX = '/api/entities';
-export const ENTITY_INTERNAL_API_PREFIX = '/internal/entities';
+export const ENTITY_INTERNAL_API_PREFIX = `/internal${ENTITY_API_PREFIX}`;

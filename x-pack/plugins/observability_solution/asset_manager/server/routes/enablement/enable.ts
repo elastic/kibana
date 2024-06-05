@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RequestHandlerContext } from '@kbn/core/server';
 import {
   readEntityDiscoveryAPIKey,
   saveEntityDiscoveryAPIKey,
@@ -14,7 +15,6 @@ import {
   generateEntityDiscoveryAPIKey,
   checkIfEntityDiscoveryAPIKeyIsValid,
 } from '../../lib/auth';
-import { RequestHandlerContext } from '@kbn/core/server';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
@@ -25,24 +25,27 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
 }: SetupRouteOptions<T>) {
   router.put(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/enablement`,
+      path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
       validate: false,
     },
     async (context, req, res) => {
       try {
-        server.logger.debug("checking if API key service is enabled");
+        server.logger.debug('checking if API key service is enabled');
 
         const apiKeysEnabled = await checkIfAPIKeysAreEnabled(server);
         if (!apiKeysEnabled) {
           return res.ok({
             body: {
               success: false,
-              reason: "API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config",
-            }
+              reason:
+                'API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config',
+            },
           });
-        };
+        }
 
-        server.logger.debug("checking if current Kibana user has permission to enable entity discovery");
+        server.logger.debug(
+          'checking if current Kibana user has permission to enable entity discovery'
+        );
 
         const esClient = (await context.core).elasticsearch.client;
         const canEnable = await canEnableEntityDiscovery(esClient);
@@ -50,21 +53,22 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           return res.ok({
             body: {
               success: false,
-              reason: "current Kibana user does not have the required permissions to enable entity discovery"
-            }
-          })
+              reason:
+                'current Kibana user does not have the required permissions to enable entity discovery',
+            },
+          });
         }
 
         const soClient = (await context.core).savedObjects.getClient({
-          includedHiddenTypes: [EntityDiscoveryApiKeyType.name]
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
         });
 
-        server.logger.debug("reading entity discovery API key from saved object");
+        server.logger.debug('reading entity discovery API key from saved object');
 
         const existingApiKey = await readEntityDiscoveryAPIKey(server);
 
         if (existingApiKey !== undefined) {
-          server.logger.debug("validating existing entity discovery API key");
+          server.logger.debug('validating existing entity discovery API key');
 
           const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, existingApiKey);
 
@@ -72,40 +76,40 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
             return res.ok({
               body: {
                 success: true,
-                reason: "valid entity discovery API key already exists"
-              }
-            })
+                reason: 'valid entity discovery API key already exists',
+              },
+            });
           }
 
-          server.logger.debug("existing entity discovery API key is invalid; deleting it");
+          server.logger.debug('existing entity discovery API key is invalid; deleting it');
 
           await deleteEntityDiscoveryAPIKey(soClient);
           await server.security.authc.apiKeys.invalidateAsInternalUser({
             ids: [existingApiKey.id],
-          })
+          });
         }
 
-        server.logger.debug("generating a fresh entity discovery API key");
-        
+        server.logger.debug('generating a fresh entity discovery API key');
+
         const apiKey = await generateEntityDiscoveryAPIKey(server, req);
 
         if (apiKey === undefined) {
           throw new Error('could not generate entity discovery API key');
         }
 
-        server.logger.debug("saving entity discovery API key in encrypted saved object");
+        server.logger.debug('saving entity discovery API key in encrypted saved object');
         await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
         return res.ok({
           body: {
             success: true,
-            reason: "new entity discovery API key generated"
-          }
-        })
+            reason: 'new entity discovery API key generated',
+          },
+        });
       } catch (e) {
         server.logger.error(e);
         throw e;
       }
     }
-  )
+  );
 }

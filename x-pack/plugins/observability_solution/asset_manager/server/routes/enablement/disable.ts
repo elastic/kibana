@@ -8,40 +8,38 @@
 import { RequestHandlerContext } from '@kbn/core/server';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
-import {
-    readEntityDiscoveryAPIKey,
-    deleteEntityDiscoveryAPIKey,
-} from '../../lib/auth';
-
+import { readEntityDiscoveryAPIKey, deleteEntityDiscoveryAPIKey } from '../../lib/auth';
 
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
-    router,
-    server,
+  router,
+  server,
 }: SetupRouteOptions<T>) {
-    router.delete(
-        {
-            path: `${ENTITY_INTERNAL_API_PREFIX}/enablement`,
-            validate: false,
-        },
-        async (context, req, res) => {
-            try {
-                server.logger.debug("reading entity discovery API key from saved object");
-                const apiKey = await readEntityDiscoveryAPIKey(server);
+  router.delete(
+    {
+      path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
+      validate: false,
+    },
+    async (context, req, res) => {
+      try {
+        server.logger.debug('reading entity discovery API key from saved object');
+        const apiKey = await readEntityDiscoveryAPIKey(server);
 
-                if (apiKey !== undefined) {
-                    server.logger.debug("existing entity discovery API key found; deleting and invalidating it");
+        if (apiKey !== undefined) {
+          server.logger.debug(
+            'existing entity discovery API key found; deleting and invalidating it'
+          );
 
-                    await deleteEntityDiscoveryAPIKey((await context.core).savedObjects.client);
-                    await server.security.authc.apiKeys.invalidateAsInternalUser({
-                        ids: [apiKey.id],
-                    })
-                }
-
-                return res.ok()
-            } catch (e) {
-                server.logger.error(e);
-                throw e;
-            }
+          await deleteEntityDiscoveryAPIKey((await context.core).savedObjects.client);
+          await server.security.authc.apiKeys.invalidateAsInternalUser({
+            ids: [apiKey.id],
+          });
         }
-    )
+
+        return res.ok();
+      } catch (e) {
+        server.logger.error(e);
+        throw e;
+      }
+    }
+  );
 }
