@@ -78,6 +78,23 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
+const filePathValidator = (argData: ParsedArgData): true | string => {
+  const emptyResult = emptyArgumentValidator(argData);
+  if (emptyResult !== true) {
+    return emptyResult;
+  } else if (
+    String(argData) &&
+    String(argData).trim().length > 0 &&
+    /\/|\\/.test(String(argData))
+  ) {
+    return true;
+  } else {
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidFilePath', {
+      defaultMessage: 'Argument must be a non-empty string representing a file path',
+    });
+  }
+};
+
 const capabilitiesAndPrivilegesValidator = (
   agentType: ResponseActionAgentType
 ): ((command: Command) => string | true) => {
@@ -526,9 +543,7 @@ export const getEndpointConsoleCommands = ({
           required: true,
           allowMultiples: false,
           about: CONSOLE_COMMANDS.scan.args.path.about,
-          validate: (argData) => {
-            return emptyArgumentValidator(argData);
-          },
+          validate: filePathValidator,
         },
         comment: {
           required: false,

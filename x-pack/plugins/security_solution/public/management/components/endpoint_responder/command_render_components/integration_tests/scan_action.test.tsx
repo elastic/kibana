@@ -61,7 +61,11 @@ describe('When using scan action from response actions console', () => {
 
     mockedContext.setExperimentalFlag({ responseActionScanEnabled: true });
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
-    endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
+    endpointPrivileges = {
+      ...getEndpointAuthzInitialStateMock(),
+      loading: false,
+      canWriteScanOperations: true,
+    };
 
     getConsoleCommandsOptions = {
       agentType: 'endpoint',
@@ -130,6 +134,24 @@ describe('When using scan action from response actions console', () => {
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --path. Argument cannot be empty'
+    );
+  });
+
+  it('should show error if `--path` is invalid string', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'scan --path="testpath"');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --path. Argument must be a non-empty string representing a file path'
+    );
+  });
+
+  it('should show error if `--path` is a number', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'scan --path 1234');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --path. Argument must be a non-empty string representing a file path'
     );
   });
 
