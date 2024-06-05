@@ -22,7 +22,7 @@ async function main() {
       );
     } else {
       console.log(`Commit ${commitSha} isn't in main, triggering container build :green_heart:`);
-      uploadTriggerBuildStep();
+      uploadTriggerBuildStep(commitSha!);
     }
   } else {
     if (DRY_RUN) {
@@ -41,12 +41,14 @@ function isCurrentHeadInMain(commitSha: string) {
   return parseInt(containmentTest, 10) >= 1;
 }
 
-function uploadTriggerBuildStep() {
+function uploadTriggerBuildStep(commitSha: string) {
   const triggerStep: BuildkiteTriggerStep = {
     label: ':point_right: Trigger emergency commit container build',
     trigger: 'kibana-artifacts-container-image',
     build: {
       message: `Triggered by '${process.env.BUILDKITE_PIPELINE_NAME || 'unknown'}'`,
+      branch: process.env?.BUILDKITE_BRANCH || 'main',
+      commit: commitSha,
       env: {},
     },
   };
