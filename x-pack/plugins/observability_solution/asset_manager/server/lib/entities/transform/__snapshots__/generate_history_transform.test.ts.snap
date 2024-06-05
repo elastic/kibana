@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateTransform(definition) should generate a valid summary transform 1`] = `
+exports[`generateHistoryTransform(definition) should generate a valid latest transform 1`] = `
 Object {
   "defer_validation": true,
   "dest": Object {
-    "index": ".entities-observability.summary-v1.noop",
-    "pipeline": ".entities-observability.summary-v1.admin-console-logs-service",
+    "index": ".entities-observability.history-v1.noop",
+    "pipeline": ".entities-observability.history-v1.admin-console-services",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -16,8 +16,8 @@ Object {
             "minimum_should_match": 1,
             "should": Array [
               Object {
-                "match": Object {
-                  "log.level": "error",
+                "match_phrase": Object {
+                  "log.level": "ERROR",
                 },
               },
             ],
@@ -38,7 +38,7 @@ Object {
           },
         },
       },
-      "entity.latestTimestamp": Object {
+      "entity.lastSeenTimestamp": Object {
         "max": Object {
           "field": "@timestamp",
         },
@@ -49,43 +49,49 @@ Object {
           "size": 1000,
         },
       },
-      "entity.metadata.kubernetes.pod.name": Object {
-        "terms": Object {
-          "field": "kubernetes.pod.name",
-          "size": 1000,
-        },
-      },
       "entity.metadata.tags": Object {
         "terms": Object {
           "field": "tags",
           "size": 1000,
         },
       },
-      "entity.metric.errorRate": Object {
+      "entity.metrics.errorRate": Object {
         "bucket_script": Object {
           "buckets_path": Object {
             "A": "_errorRate_A>_count",
           },
           "script": Object {
             "lang": "painless",
-            "source": "params.A / 5",
+            "source": "params.A",
           },
         },
       },
-      "entity.metric.logRate": Object {
+      "entity.metrics.logRate": Object {
         "bucket_script": Object {
           "buckets_path": Object {
             "A": "_logRate_A>_count",
           },
           "script": Object {
             "lang": "painless",
-            "source": "params.A / 5",
+            "source": "params.A",
           },
         },
       },
     },
     "group_by": Object {
-      "entity.identity.log.logger": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "1m",
+        },
+      },
+      "entity.identityFields.event.category": Object {
+        "terms": Object {
+          "field": "event.category",
+          "missing_bucket": true,
+        },
+      },
+      "entity.identityFields.log.logger": Object {
         "terms": Object {
           "field": "log.logger",
           "missing_bucket": false,
@@ -101,19 +107,6 @@ Object {
     "index": Array [
       "kbn-data-forge-fake_stack.*",
     ],
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "gte": "now-5m",
-              },
-            },
-          },
-        ],
-      },
-    },
   },
   "sync": Object {
     "time": Object {
@@ -121,6 +114,6 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": "entities-observability-summary-v1-admin-console-logs-service",
+  "transform_id": "entity-history-v1-admin-console-services",
 }
 `;
