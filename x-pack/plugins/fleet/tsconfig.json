@@ -108,6 +108,7 @@
     "@kbn/zod-helpers",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/fields-metadata-plugin",
     "@kbn/test-jest-helpers",
   ]
 }

@@ -36,6 +36,7 @@ import type { ChatFunctionWithoutConnector } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 import { getSystemMessageFromInstructions } from '../../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../../util/replace_system_message';
+import { LangTracer } from '../instrumentation/lang_tracer';
 import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
 import { hideTokenCountEvents } from './hide_token_count_events';
@@ -50,6 +51,7 @@ function executeFunctionAndCatchError({
   chat,
   signal,
   logger,
+  tracer,
 }: {
   name: string;
   args: string | undefined;
@@ -58,62 +60,69 @@ function executeFunctionAndCatchError({
   chat: ChatFunctionWithoutConnector;
   signal: AbortSignal;
   logger: Logger;
+  tracer: LangTracer;
 }): Observable<MessageOrChatEvent> {
   // hide token count events from functions to prevent them from
   // having to deal with it as well
-  return hideTokenCountEvents((hide) => {
-    const executeFunctionResponse$ = from(
-      functionClient.executeFunction({
-        name,
-        chat: (operationName, params) => {
-          return chat(operationName, params).pipe(hide());
-        },
-        args,
-        signal,
-        messages,
-      })
-    );
 
-    return executeFunctionResponse$.pipe(
-      catchError((error) => {
-        logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
-        // We want to catch the error only when a promise occurs
-        // if it occurs in the Observable, we cannot easily recover
-        // from it because the function may have already emitted
-        // values which could lead to an invalid conversation state,
-        // so in that case we let the stream fail.
-        return of(createServerSideFunctionResponseError({ name, error }));
-      }),
-      switchMap((response) => {
-        if (isObservable(response)) {
-          return response;
-        }
+  return tracer.startActiveSpan(`execute_function ${name}`, ({ tracer: nextTracer }) =>
+    hideTokenCountEvents((hide) => {
+      const executeFunctionResponse$ = from(
+        functionClient.executeFunction({
+          name,
+          chat: (operationName, params) => {
+            return chat(operationName, {
+              ...params,
+              tracer: nextTracer,
+            }).pipe(hide());
+          },
+          args,
+          signal,
+          messages,
+        })
+      );
 
-        // is messageAdd event
-        if ('type' in response) {
-          return of(response);
-        }
+      return executeFunctionResponse$.pipe(
+        catchError((error) => {
+          logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
+          // We want to catch the error only when a promise occurs
+          // if it occurs in the Observable, we cannot easily recover
+          // from it because the function may have already emitted
+          // values which could lead to an invalid conversation state,
+          // so in that case we let the stream fail.
+          return of(createServerSideFunctionResponseError({ name, error }));
+        }),
+        switchMap((response) => {
+          if (isObservable(response)) {
+            return response;
+          }
 
-        const encoded = encode(JSON.stringify(response.content || {}));
+          // is messageAdd event
+          if ('type' in response) {
+            return of(response);
+          }
 
-        const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
+          const encoded = encode(JSON.stringify(response.content || {}));
 
-        return of(
-          createFunctionResponseMessage({
-            name,
-            content: exceededTokenLimit
-              ? {
-                  message:
-                    'Function response exceeded the maximum length allowed and was truncated',
-                  truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
-                }
-              : response.content,
-            data: response.data,
-          })
-        );
-      })
-    );
-  });
+          const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
+
+          return of(
+            createFunctionResponseMessage({
+              name,
+              content: exceededTokenLimit
+                ? {
+                    message:
+                      'Function response exceeded the maximum length allowed and was truncated',
+                    truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                  }
+                : response.content,
+              data: response.data,
+            })
+          );
+        })
+      );
+    })
+  );
 }
 
 function getFunctionDefinitions({
@@ -157,6 +166,7 @@ export function continueConversation({
   knowledgeBaseInstructions,
   logger,
   disableFunctions,
+  tracer,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -167,6 +177,7 @@ export function continueConversation({
   knowledgeBaseInstructions: UserInstruction[];
   logger: Logger;
   disableFunctions: boolean;
+  tracer: LangTracer;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -205,6 +216,7 @@ export function continueConversation({
       return chat(operationName, {
         messages: messagesWithUpdatedSystemMessage,
         functions: definitions,
+        tracer,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
@@ -278,6 +290,7 @@ export function continueConversation({
       messages: messagesWithUpdatedSystemMessage,
       signal,
       logger,
+      tracer,
     });
   }
 
@@ -304,6 +317,7 @@ export function continueConversation({
               requestInstructions,
               logger,
               disableFunctions,
+              tracer,
             });
           })
         )
