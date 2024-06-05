@@ -37,7 +37,10 @@ import { getLatestAvailableAgentVersion } from './versions';
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 
-function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
+// TODO move
+export function _joinFilters(
+  filters: Array<string | undefined | KueryNode>
+): KueryNode | undefined {
   try {
     return filters
       .filter((filter) => filter !== undefined)
@@ -214,6 +217,7 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
+    spaceId?: string;
     getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
@@ -241,8 +245,19 @@ export async function getAgentsByKuery(
     searchAfter,
     pitId,
     aggregations,
+    spaceId,
   } = options;
   const filters = [];
+
+  // TODO put behind a feature flag
+  if (spaceId) {
+    if (spaceId === 'default') {
+      // TODO use constant
+      filters.push(`namespaces:"default" or not namespaces:*`);
+    } else {
+      filters.push(`namespaces:"${spaceId}"`);
+    }
+  }
 
   if (kuery && kuery !== '') {
     filters.push(kuery);

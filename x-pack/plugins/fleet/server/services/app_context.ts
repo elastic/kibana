@@ -22,6 +22,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -55,6 +56,7 @@ import type { UninstallTokenServiceInterface } from './security/uninstall_token_
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private experimentalFeatures?: ExperimentalFeatures;
@@ -80,6 +82,7 @@ class AppContextService {
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
+    this.encryptedSavedObjectsStart = appContext.encryptedSavedObjectsStart;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
     this.securitySetup = appContext.securitySetup;
@@ -251,6 +254,10 @@ class AppContextService {
 
   public getEncryptedSavedObjectsSetup() {
     return this.encryptedSavedObjectsSetup;
+  }
+
+  public getEncryptedSavedObjectsStart() {
+    return this.encryptedSavedObjectsStart;
   }
 
   public getKibanaVersion() {

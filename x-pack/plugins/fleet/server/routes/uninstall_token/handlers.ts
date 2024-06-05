@@ -27,24 +27,24 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
 > = async (context, request, response) => {
-  const uninstallTokenService = appContextService.getUninstallTokenService();
-  if (!uninstallTokenService) {
-    return response.customError(UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR);
-  }
-
-  const { page = 1, perPage = 20, policyId, search } = request.query;
-
-  if (policyId && search) {
-    return response.badRequest({
-      body: {
-        message: 'Query parameters `policyId` and `search` cannot be used at the same time.',
-      },
-    });
-  }
-
   try {
-    const fleetContext = await context.fleet;
-    const soClient = fleetContext.internalSoClient;
+    const [fleetContext, coreContext] = await Promise.all([context.fleet, context.core]);
+    const uninstallTokenService = fleetContext.uninstallTokenService.asCurrentUser;
+    if (!uninstallTokenService) {
+      return response.customError(UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR);
+    }
+
+    const { page = 1, perPage = 20, policyId, search } = request.query;
+
+    if (policyId && search) {
+      return response.badRequest({
+        body: {
+          message: 'Query parameters `policyId` and `search` cannot be used at the same time.',
+        },
+      });
+    }
+
+    const soClient = coreContext.savedObjects.client;
 
     const { items: managedPolicies } = await agentPolicyService.list(soClient, {
       fields: ['id'],

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { toElasticsearchQuery } from '@kbn/es-query';
 
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
@@ -20,9 +20,8 @@ import { FleetError, EnrollmentKeyNameExistsError, EnrollmentKeyNotFoundError } 
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
-
 import { auditLoggingService } from '../audit_logging';
-
+import { _joinFilters } from '../agents';
 import { appContextService } from '../app_context';
 
 import { invalidateAPIKeys } from './security';
@@ -38,10 +37,37 @@ export async function listEnrollmentApiKeys(
     kuery?: string;
     query?: ReturnType<typeof toElasticsearchQuery>;
     showInactive?: boolean;
+    spaceId?: string;
   }
 ): Promise<{ items: EnrollmentAPIKey[]; total: any; page: any; perPage: any }> {
-  const { page = 1, perPage = 20, kuery } = options;
-  const query = options.query ?? (kuery && toElasticsearchQuery(fromKueryExpression(kuery)));
+  const { page = 1, perPage = 20, kuery, spaceId } = options;
+  // const query = options.query ?? (kuery && toElasticsearchQuery(fromKueryExpression(kuery)));
+
+  let query: ReturnType<typeof toElasticsearchQuery> | undefined;
+  if (options.query && spaceId) {
+    throw new Error('not implemented (query should only be used in Fleet internal usage)');
+  }
+  if (!options.query) {
+    const filters: string[] = [];
+
+    if (kuery) {
+      filters.push(kuery);
+    }
+
+    if (spaceId) {
+      if (spaceId === 'default') {
+        // TODO use constant
+        filters.push(`namespaces:"default" or not namespaces:*`);
+      } else {
+        filters.push(`namespaces:"${spaceId}"`);
+      }
+    }
+
+    const kueryNode = _joinFilters(filters);
+    query = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
+  } else {
+    query = options.query;
+  }
 
   const res = await esClient.search<SearchResponse<FleetServerEnrollmentAPIKey, {}>>({
     index: ENROLLMENT_API_KEYS_INDEX,

@@ -7,6 +7,7 @@
 
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetEnrollmentAPIKeysRequestSchema,
@@ -30,12 +31,14 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const soClient = (await context.core).savedObjects.client;
 
   try {
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       kuery: request.query.kuery,
+      spaceId: soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING,
     });
     const body: GetEnrollmentAPIKeysResponse = {
       list: items, // deprecated

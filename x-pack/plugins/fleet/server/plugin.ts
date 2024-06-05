@@ -521,6 +521,20 @@ export class FleetPlugin
               asInternalUser: agentService.asInternalUser,
             };
           },
+          get uninstallTokenService() {
+            const uninstallTokenService = new UninstallTokenService(
+              appContextService.getEncryptedSavedObjectsStart()!.getClient({
+                includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+              }),
+              appContextService.getSavedObjects().getScopedClient(request, {
+                includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+              })
+            );
+
+            return {
+              asCurrentUser: uninstallTokenService,
+            };
+          },
           get packagePolicyService() {
             const service = plugin.setupPackagePolicyService();
 

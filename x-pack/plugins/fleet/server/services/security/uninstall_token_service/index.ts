@@ -173,7 +173,14 @@ export interface UninstallTokenServiceInterface {
 export class UninstallTokenService implements UninstallTokenServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
 
-  constructor(private esoClient: EncryptedSavedObjectsClient) {}
+  constructor(
+    private esoClient: EncryptedSavedObjectsClient,
+    soClient?: SavedObjectsClientContract
+  ) {
+    if (soClient) {
+      this._soClient = soClient;
+    }
+  }
 
   public async getToken(id: string): Promise<UninstallToken | null> {
     const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
@@ -401,7 +408,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     exclude?: AggregationsTermsExclude
   ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
-
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -451,7 +457,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     // sorting and paginating buckets is done here instead of ES,
     // because SO query doesn't support `bucket_sort`
     aggResults.sort((a, b) => getCreatedAt(b) - getCreatedAt(a));
-
     return aggResults.map((bucket) => bucket.latest.hits.hits[0]);
   }
 

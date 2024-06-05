@@ -8,6 +8,7 @@
 import { uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetAgentsResponse,
@@ -178,6 +179,7 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
+      spaceId: soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
       getStatusSummary: request.query.getStatusSummary,
