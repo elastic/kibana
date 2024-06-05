@@ -362,6 +362,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         repositionOnScroll: true,
         popoverRef: setButtonRef,
         panelStyle: { marginTop: '6px' },
+        ownFocus: true,
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
