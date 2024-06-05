@@ -175,7 +175,7 @@ describe('Timeslice Metric Transform Generator', () => {
     });
   });
 
-  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
     const slo = createSLOWithTimeslicesBudgetingMethod({
       indicator: everythingIndicator,
       settings: {
@@ -185,7 +185,7 @@ describe('Timeslice Metric Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

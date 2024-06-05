@@ -229,7 +229,7 @@ describe('Metric Custom Transform Generator', () => {
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
 
-  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
     const slo = createSLO({
       indicator: createMetricCustomIndicator(),
       settings: {
@@ -239,7 +239,7 @@ describe('Metric Custom Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

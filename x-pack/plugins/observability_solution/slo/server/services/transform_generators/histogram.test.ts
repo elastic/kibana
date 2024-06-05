@@ -31,12 +31,13 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
+
       expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL: foo:/
       );
     });
 
-    it('throws when the total filter is invalid', () => {
+    it('throws when the total filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({
           good: {
@@ -46,6 +47,7 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
+
       expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
         /Invalid KQL: foo:/
       );
@@ -174,7 +176,7 @@ describe('Histogram Transform Generator', () => {
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
 
-  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
     const slo = createSLO({
       indicator: createHistogramIndicator(),
       settings: {
@@ -184,7 +186,7 @@ describe('Histogram Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

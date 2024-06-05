@@ -156,7 +156,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
     expect(transform.pivot?.group_by).toMatchSnapshot();
   });
 
-  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator(),
       settings: {
@@ -166,7 +166,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

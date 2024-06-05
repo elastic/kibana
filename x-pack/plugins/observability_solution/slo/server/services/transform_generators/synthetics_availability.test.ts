@@ -407,7 +407,7 @@ describe('Synthetics Availability Transform Generator', () => {
     });
   });
 
-  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
     const slo = createSLO({
       indicator: createSyntheticsAvailabilityIndicator(),
       settings: {
@@ -417,7 +417,7 @@ describe('Synthetics Availability Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo, 'default', dataViewsService);
+    const transform = await generator.getTransformParams(slo, 'default', dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

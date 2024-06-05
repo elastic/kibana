@@ -153,7 +153,7 @@ describe('APM Transaction Duration Transform Generator', () => {
     expect(transform.pivot?.group_by).toMatchSnapshot();
   });
 
-  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionDurationIndicator(),
       settings: {
@@ -163,7 +163,7 @@ describe('APM Transaction Duration Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
