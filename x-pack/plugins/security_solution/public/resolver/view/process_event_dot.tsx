@@ -275,6 +275,7 @@ const UnstyledProcessEventDot = React.memo(
     const nodeState = useSelector((state: State) =>
       selectors.nodeDataStatus(state.analyzer[id])(nodeID)
     );
+    const agentId = useSelector((state: State) => selectors.agentId(state.analyzer[id]));
     const isNodeLoading = nodeState === 'loading';
     const {
       backingFill,
@@ -303,7 +304,7 @@ const UnstyledProcessEventDot = React.memo(
 
     const processDetailNavProps = useLinkProps(id, {
       panelView: 'nodeDetail',
-      panelParameters: { nodeID },
+      panelParameters: { nodeID, agentId },
     });
 
     const handleFocus = useCallback(() => {

@@ -238,6 +238,7 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
   const eventsInCategoryCount = useSelector((state: State) =>
     selectors.relatedEventCountOfTypeForNode(state.analyzer[id])(nodeID, eventCategory)
   );
+  const agentId = useSelector((state: State) => selectors.agentId(state.analyzer[id]));
 
   const nodesLinkNavProps = useLinkProps(id, {
     panelView: 'nodes',
@@ -245,7 +246,7 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
 
   const nodeDetailNavProps = useLinkProps(id, {
     panelView: 'nodeDetail',
-    panelParameters: { nodeID },
+    panelParameters: { nodeID, agentId },
   });
 
   const nodeEventsNavProps = useLinkProps(id, {
