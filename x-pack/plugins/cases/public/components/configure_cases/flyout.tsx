@@ -19,19 +19,13 @@ import {
 } from '@elastic/eui';
 import type { CustomFieldFormState } from '../custom_fields/form';
 import type { TemplateFormState } from '../templates/form';
-import type { ActionConnector, CustomFieldConfiguration } from '../../../common/types/domain';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 import type { TemplateFormProps } from '../templates/types';
-import type { CasesConfigurationUI } from '../../containers/types';
 
-export interface FlyOutBodyProps<T> {
-  initialValue: T;
+export interface FlyOutBodyProps {
   onChange: (state: CustomFieldFormState | TemplateFormState) => void;
-  configConnectors?: ActionConnector[];
-  configConnectorId?: string;
-  configCustomFields?: CasesConfigurationUI['customFields'];
-  configTemplateTags?: string[];
 }
 
 export interface FlyoutProps<T> {
@@ -39,20 +33,8 @@ export interface FlyoutProps<T> {
   isLoading: boolean;
   onCloseFlyout: () => void;
   onSaveField: (data: T) => void;
-  data: T;
-  connectors?: ActionConnector[];
-  configurationConnectorId?: string;
-  configurationCustomFields?: CasesConfigurationUI['customFields'];
-  configurationTemplateTags?: string[];
   renderHeader: () => React.ReactNode;
-  renderBody: ({
-    initialValue,
-    onChange,
-    configConnectors,
-    configConnectorId,
-    configCustomFields,
-    configTemplateTags,
-  }: FlyOutBodyProps<T>) => React.ReactNode;
+  renderBody: ({ onChange }: FlyOutBodyProps) => React.ReactNode;
 }
 
 export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormProps | null>({
@@ -60,13 +42,8 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
   onSaveField,
   isLoading,
   disabled,
-  data: initialValue,
   renderHeader,
   renderBody,
-  connectors,
-  configurationConnectorId,
-  configurationCustomFields,
-  configurationTemplateTags,
 }: FlyoutProps<T>) => {
   const [formState, setFormState] = useState<CustomFieldFormState | TemplateFormState>({
     isValid: undefined,
@@ -95,11 +72,6 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {renderBody({
-          initialValue,
-          configConnectors: connectors,
-          configConnectorId: configurationConnectorId,
-          configCustomFields: configurationCustomFields,
-          configTemplateTags: configurationTemplateTags,
           onChange: setFormState,
         })}
       </EuiFlyoutBody>

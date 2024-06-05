@@ -441,10 +441,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
         }
         onCloseFlyout={onCloseCustomFieldFlyout}
         onSaveField={onCustomFieldSave}
-        data={customFieldToEdit as CustomFieldConfiguration}
         renderHeader={() => <span>{i18n.ADD_CUSTOM_FIELD}</span>}
-        renderBody={({ initialValue, onChange }) => (
-          <CustomFieldsForm onChange={onChange} initialValue={initialValue} />
+        renderBody={({ onChange }) => (
+          <CustomFieldsForm onChange={onChange} initialValue={customFieldToEdit} />
         )}
       />
     ) : null;
@@ -464,26 +463,14 @@ export const ConfigureCases: React.FC = React.memo(() => {
           }
           onCloseFlyout={onCloseTemplateFlyout}
           onSaveField={onTemplateSave}
-          data={templateToEdit as TemplateFormProps | null}
-          connectors={connectors}
-          configurationConnectorId={connector.id}
-          configurationCustomFields={customFields}
-          configurationTemplateTags={configurationTemplateTags}
           renderHeader={() => <span>{i18n.CRATE_TEMPLATE}</span>}
-          renderBody={({
-            initialValue,
-            configConnectors,
-            configConnectorId,
-            configCustomFields,
-            configTemplateTags,
-            onChange,
-          }) => (
+          renderBody={({ onChange }) => (
             <TemplateForm
-              initialValue={initialValue}
-              connectors={configConnectors ?? []}
-              configurationConnectorId={configConnectorId ?? ''}
-              configurationCustomFields={configCustomFields ?? []}
-              configurationTemplateTags={configTemplateTags ?? []}
+              initialValue={templateToEdit as TemplateFormProps | null}
+              connectors={connectors ?? []}
+              configurationConnectorId={connector.id ?? ''}
+              configurationCustomFields={customFields ?? []}
+              configurationTemplateTags={configurationTemplateTags ?? []}
               onChange={onChange}
             />
           )}

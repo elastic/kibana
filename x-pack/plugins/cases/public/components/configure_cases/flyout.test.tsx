@@ -18,14 +18,12 @@ import {
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
 } from '../../../common/constants';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
 import { FIELD_LABEL, DEFAULT_VALUE } from '../custom_fields/translations';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
-import type { TemplateFormProps } from '../templates/types';
 import * as i18n from './translations';
 import type { FlyOutBodyProps } from './flyout';
 import { CommonFlyout } from './flyout';
@@ -42,7 +40,6 @@ describe('CommonFlyout ', () => {
     onSaveField: jest.fn(),
     isLoading: false,
     disabled: false,
-    data: null,
     renderHeader: () => <div>{`Flyout header`}</div>,
     renderBody: () => <div>{`This is a flyout body`}</div>,
   };
@@ -109,11 +106,8 @@ describe('CommonFlyout ', () => {
   });
 
   describe('CustomFieldsFlyout', () => {
-    const renderBody = ({
-      initialValue,
-      onChange,
-    }: FlyOutBodyProps<CustomFieldConfiguration | null>) => (
-      <CustomFieldsForm onChange={onChange} initialValue={initialValue} />
+    const renderBody = ({ onChange }: FlyOutBodyProps) => (
+      <CustomFieldsForm onChange={onChange} initialValue={null} />
     );
 
     const newProps = {
@@ -238,11 +232,8 @@ describe('CommonFlyout ', () => {
       });
 
       it('renders flyout with the correct data when an initial customField value exists', async () => {
-        const newRenderBody = ({
-          initialValue,
-          onChange,
-        }: FlyOutBodyProps<CustomFieldConfiguration | null>) => (
-          <CustomFieldsForm onChange={onChange} initialValue={initialValue} />
+        const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+          <CustomFieldsForm onChange={onChange} initialValue={customFieldsConfigurationMock[0]} />
         );
 
         const modifiedProps = {
@@ -328,16 +319,12 @@ describe('CommonFlyout ', () => {
       });
 
       it('renders flyout with the correct data when an initial customField value exists', async () => {
-        const newRenderBody = ({
-          initialValue,
-          onChange,
-        }: FlyOutBodyProps<CustomFieldConfiguration | null>) => (
-          <CustomFieldsForm onChange={onChange} initialValue={initialValue} />
+        const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+          <CustomFieldsForm onChange={onChange} initialValue={customFieldsConfigurationMock[1]} />
         );
 
         const modifiedProps = {
           ...props,
-          data: customFieldsConfigurationMock[1],
           renderBody: newRenderBody,
         };
 
@@ -360,30 +347,19 @@ describe('CommonFlyout ', () => {
   });
 
   describe('TemplateFlyout', () => {
-    const renderBody = ({
-      initialValue,
-      onChange,
-      configCustomFields,
-      configConnectorId,
-      configConnectors,
-      configTemplateTags,
-    }: FlyOutBodyProps<TemplateFormProps | null>) => (
+    const renderBody = ({ onChange }: FlyOutBodyProps) => (
       <TemplateForm
-        initialValue={initialValue}
-        connectors={configConnectors ?? []}
-        configurationConnectorId={configConnectorId ?? 'none'}
-        configurationCustomFields={configCustomFields ?? []}
-        configurationTemplateTags={configTemplateTags ?? []}
+        initialValue={null}
+        connectors={connectorsMock}
+        configurationConnectorId={'none'}
+        configurationCustomFields={[]}
+        configurationTemplateTags={[]}
         onChange={onChange}
       />
     );
 
     const newProps = {
       ...props,
-      connectors: connectorsMock,
-      configurationConnectorId: 'none',
-      configurationCustomFields: [],
-      configurationTemplateTags: [],
       renderBody,
     };
 
@@ -421,15 +397,26 @@ describe('CommonFlyout ', () => {
     });
 
     it('calls onSaveField with case fields correctly', async () => {
+      const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+        <TemplateForm
+          initialValue={{
+            key: 'random_key',
+            name: 'Template 1',
+            templateDescription: 'test description',
+          }}
+          connectors={[]}
+          configurationConnectorId={'none'}
+          configurationCustomFields={[]}
+          configurationTemplateTags={[]}
+          onChange={onChange}
+        />
+      );
+
       appMockRender.render(
         <CommonFlyout
           {...{
             ...newProps,
-            data: {
-              key: 'random_key',
-              name: 'Template 1',
-              templateDescription: 'test description',
-            },
+            renderBody: newRenderBody,
           }}
         />
       );
@@ -463,35 +450,23 @@ describe('CommonFlyout ', () => {
     });
 
     it('calls onSaveField form with custom fields correctly', async () => {
-      const newRenderBody = ({
-        initialValue,
-        onChange,
-        configCustomFields,
-        configConnectorId,
-        configConnectors,
-        configTemplateTags,
-      }: FlyOutBodyProps<TemplateFormProps | null>) => (
+      const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
         <TemplateForm
-          initialValue={initialValue}
-          connectors={configConnectors ?? []}
-          configurationConnectorId={configConnectorId ?? 'none'}
-          configurationCustomFields={configCustomFields ?? []}
-          configurationTemplateTags={configTemplateTags ?? []}
+          initialValue={{
+            key: 'random_key',
+            name: 'Template 1',
+            templateDescription: 'test description',
+          }}
+          connectors={[]}
+          configurationConnectorId={'none'}
+          configurationCustomFields={customFieldsConfigurationMock}
+          configurationTemplateTags={[]}
           onChange={onChange}
         />
       );
 
       const modifiedProps = {
         ...props,
-        connectors: [],
-        configurationConnectorId: 'none',
-        configurationCustomFields: customFieldsConfigurationMock,
-        configurationTemplateTags: [],
-        data: {
-          key: 'random_key',
-          name: 'Template 1',
-          templateDescription: 'test description',
-        },
         renderBody: newRenderBody,
       };
 
@@ -525,35 +500,23 @@ describe('CommonFlyout ', () => {
     it('calls onSaveField form with connector fields correctly', async () => {
       useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
 
-      const newRenderBody = ({
-        initialValue,
-        onChange,
-        configCustomFields,
-        configConnectorId,
-        configConnectors,
-        configTemplateTags,
-      }: FlyOutBodyProps<TemplateFormProps | null>) => (
+      const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
         <TemplateForm
-          initialValue={initialValue}
-          connectors={configConnectors ?? []}
-          configurationConnectorId={configConnectorId ?? 'none'}
-          configurationCustomFields={configCustomFields ?? []}
-          configurationTemplateTags={configTemplateTags ?? []}
+          initialValue={{
+            key: 'random_key',
+            name: 'Template 1',
+            templateDescription: 'test description',
+          }}
+          connectors={connectorsMock}
+          configurationConnectorId={'servicenow-1'}
+          configurationCustomFields={[]}
+          configurationTemplateTags={[]}
           onChange={onChange}
         />
       );
 
       const modifiedProps = {
         ...props,
-        connectors: connectorsMock,
-        configurationConnectorId: 'servicenow-1',
-        configurationCustomFields: [],
-        configurationTemplateTags: [],
-        data: {
-          key: 'random_key',
-          name: 'Template 1',
-          templateDescription: 'test description',
-        },
         renderBody: newRenderBody,
       };
 
