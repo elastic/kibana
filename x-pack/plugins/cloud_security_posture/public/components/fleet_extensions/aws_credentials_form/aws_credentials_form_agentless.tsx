@@ -147,7 +147,6 @@ export const AwsCredentialsFormAgentless = ({
   const fields = getInputVarsFields(input, group.fields);
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
-  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,

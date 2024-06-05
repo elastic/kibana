@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import {
   getTemplateUrlFromPackageInfo,
@@ -26,71 +26,6 @@ import {
 import { getPosturePolicy } from '../utils';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-
-const GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL = 'https://cloud.google.com/shell/docs';
-
-const GoogleCloudShellCredentialsGuide = (props: {
-  commandText: string;
-  isOrganization?: boolean;
-}) => {
-  return (
-    <>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpack.csp.agentlessForm.googleCloudShell.guide.description"
-            defaultMessage="The Google Cloud Shell Command below will create all the necessary resources to evaluate the security posture of your GCP projects. Learn more about {learnMore}."
-            values={{
-              learnMore: (
-                <EuiLink
-                  href={GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL}
-                  target="_blank"
-                  rel="noopener nofollow noreferrer"
-                  data-test-subj="externalLink"
-                >
-                  <FormattedMessage
-                    id="xpack.csp.AgentlessForm.googleCloudShell.cloudCredentials.steps.learnMoreLinkText"
-                    defaultMessage="Google Cloud Shell"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-        <EuiText size="s" color="subdued">
-          <ol>
-            <li>
-              <>
-                {props?.isOrganization ? (
-                  <FormattedMessage
-                    id="xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.organization.steps.copyWithoutProjectId"
-                    defaultMessage="Replace <PROJECT_ID> and <ORG_ID_VALUE> in the following command with your project ID and organization ID  then copy the command"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.singleAccount.steps.copyWithProjectId"
-                    defaultMessage="Replace <PROJECT_ID> in the following command with your project ID then copy the command"
-                  />
-                )}
-                <EuiSpacer size="m" />
-                <EuiCodeBlock language="bash" isCopyable contentEditable="true">
-                  {props.commandText}
-                </EuiCodeBlock>
-              </>
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.steps.launch"
-                defaultMessage="Click Launch Google Cloud Shell, then run the command"
-              />
-            </li>
-          </ol>
-        </EuiText>
-      </EuiText>
-    </>
-  );
-};
 
 export const GcpCredentialsFormAgentless = ({
   input,
