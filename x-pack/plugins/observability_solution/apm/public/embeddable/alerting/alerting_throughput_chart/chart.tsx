@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import React from 'react';
 import { ALERT_END } from '@kbn/rule-data-utils';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -48,6 +48,8 @@ export function APMAlertingThroughputChart({
     return <ServiceNameCallout />;
   }
 
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+
   return (
     <ThroughputChart
       transactionType={currentTransactionType}
@@ -59,7 +61,7 @@ export function APMAlertingThroughputChart({
       start={rangeFrom}
       end={rangeTo}
       alertStart={alert.start}
-      alertEnd={alert.fields[ALERT_END]}
+      alertEnd={alertEnd}
       comparisonChartTheme={comparisonChartTheme}
       timeZone={timeZone}
       comparisonEnabled={false}

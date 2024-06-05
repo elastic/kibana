@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
@@ -145,6 +145,8 @@ export function AlertDetailsAppSection({
     );
   }
 
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <TimeRangeMetadataContextProvider
@@ -180,7 +182,7 @@ export function AlertDetailsAppSection({
                 start={from}
                 end={to}
                 alertStart={alert.start}
-                alertEnd={alert.fields[ALERT_END]}
+                alertEnd={alertEnd}
                 comparisonChartTheme={comparisonChartTheme}
                 comparisonEnabled={false}
                 offset={''}
@@ -194,7 +196,7 @@ export function AlertDetailsAppSection({
                 start={from}
                 end={to}
                 alertStart={alert.start}
-                alertEnd={alert.fields[ALERT_END]}
+                alertEnd={alertEnd}
                 comparisonChartTheme={comparisonChartTheme}
                 timeZone={timeZone}
               />
