@@ -25,7 +25,6 @@ import {
   isValidNumber,
   getFilter,
   isColumnOfType,
-  combineErrorMessages,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
@@ -325,11 +324,10 @@ export const percentileOperation: OperationDefinition<
       aggs,
     };
   },
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    combineErrorMessages([
-      getInvalidFieldMessage(layer, columnId, indexPattern),
-      getColumnReducedTimeRangeError(layer, columnId, indexPattern),
-    ]),
+  getErrorMessage: (layer, columnId, indexPattern) => [
+    ...getInvalidFieldMessage(layer, columnId, indexPattern),
+    ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+  ],
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
     currentColumn,
