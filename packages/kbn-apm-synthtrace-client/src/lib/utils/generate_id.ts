@@ -9,11 +9,10 @@
 let seq = 0;
 const pid = String(process.pid);
 
-function generateId(seed?: string, length: number = 32) {
-  if (seed) {
-    return seed.padStart(length, '0');
-  }
+const LONG_ID_LENGTH = 32;
+const SHORT_ID_LENGTH = 16;
 
+function generateId(length: number = LONG_ID_LENGTH) {
   const id = String(seq++);
   const generatedId = pid + id.padStart(length - pid.length, '0');
   if (generatedId.length > length) {
@@ -23,10 +22,18 @@ function generateId(seed?: string, length: number = 32) {
   return generatedId;
 }
 
-export function generateShortId(seed?: string) {
-  return generateId(seed, 16);
+function generateIdWithSeed(seed: string, length: number = LONG_ID_LENGTH) {
+  return seed?.padStart(length, '0');
 }
 
-export function generateLongId(seed?: string) {
-  return generateId(seed, 32);
+export function generateShortId() {
+  return generateId(SHORT_ID_LENGTH);
+}
+
+export function generateLongId() {
+  return generateId(LONG_ID_LENGTH);
+}
+
+export function generateLongIdWithSeed(seed: string) {
+  return generateIdWithSeed(seed, LONG_ID_LENGTH);
 }
