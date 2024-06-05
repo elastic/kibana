@@ -71,7 +71,6 @@ export interface PresentableGroup<Context = unknown>
     Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
   > {
   id: string;
-  placementPriority?: number;
 }
 
 export type PresentableGrouping<Context = unknown> = Array<PresentableGroup<Context>>;

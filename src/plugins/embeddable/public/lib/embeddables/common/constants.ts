@@ -15,7 +15,7 @@ export const COMMON_EMBEDDABLE_GROUPING = {
       i18n.translate('embeddableApi.common.constants.grouping.legacy', {
         defaultMessage: 'Legacy',
       }),
-    placementPriority: -1,
+    order: -1,
   },
   annotation: {
     id: 'annotation-and-navigation',

@@ -86,7 +86,7 @@ export const getAddPanelActionMenuItemsGroup = (
             id: groupId,
             title: group.getDisplayName ? group.getDisplayName(context) : '',
             'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
-            placementPriority: group.placementPriority ?? 0,
+            placementPriority: group.order ?? 0,
             items: [],
           };
         }

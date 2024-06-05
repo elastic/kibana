@@ -225,7 +225,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
             appName: group.getDisplayName ? group.getDisplayName({ embeddable }) : group.id,
             icon: group.getIconType?.({ embeddable }),
             factories: [factory],
-            placementPriority: group.placementPriority ?? 0,
+            placementPriority: group.order ?? 0,
           };
         }
       });
