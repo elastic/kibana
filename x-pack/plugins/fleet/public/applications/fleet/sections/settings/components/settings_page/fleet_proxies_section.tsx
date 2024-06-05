@@ -13,7 +13,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -45,9 +44,6 @@ export const FleetProxiesSection: React.FunctionComponent<FleetProxiesSectionPro
               />
             </h4>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge label="beta" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiText color="subdued" size="m">
