@@ -27,6 +27,8 @@ import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import { validateEsqlQuery } from './validate_esql_query';
 
+export const QUERY_FUNCTION_NAME = 'query';
+
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
 
@@ -70,7 +72,7 @@ const loadEsqlDocs = once(async () => {
 
 export function registerQueryFunction({ functions, resources }: FunctionRegistrationParameters) {
   functions.registerInstruction(({ availableFunctionNames }) =>
-    availableFunctionNames.includes('query')
+    availableFunctionNames.includes(QUERY_FUNCTION_NAME)
       ? `You MUST use the "query" function when the user wants to:
   - visualize data
   - run any arbitrary query
@@ -136,7 +138,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   );
   functions.registerFunction(
     {
-      name: 'query',
+      name: QUERY_FUNCTION_NAME,
       description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
@@ -429,7 +431,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
         }),
         startWith(
           createFunctionResponseMessage({
-            name: 'query',
+            name: QUERY_FUNCTION_NAME,
             content: {},
             data: {
               // add the included docs for debugging
