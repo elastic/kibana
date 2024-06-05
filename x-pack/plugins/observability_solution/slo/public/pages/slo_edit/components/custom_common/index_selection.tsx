@@ -8,10 +8,10 @@
 import { EuiFormRow } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { useFetchDataViews } from '@kbn/observability-plugin/public';
+import { getDataViewPattern, useAdhocDataViews } from './use_adhoc_data_views';
 import { SloPublicPluginsStart } from '../../../..';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -24,61 +24,33 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService, dataViewFieldEditor } = useKibana().services;
 
-  const { isLoading: isDataViewsLoading, data: dataViews = [], refetch } = useFetchDataViews();
-
   const { dataViewEditor } = useKibana<SloPublicPluginsStart>().services;
-  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>([]);
 
   const currentIndexPattern = watch(INDEX_FIELD);
   const currentDataViewId = watch(DATA_VIEW_FIELD);
 
-  useEffect(() => {
-    if (!isDataViewsLoading) {
-      const missingAdHocDataView =
-        dataViews.find((dataView) => dataView.title === currentIndexPattern) ||
-        adHocDataViews.find((dataView) => dataView.getIndexPattern() === currentIndexPattern);
-
-      if (!missingAdHocDataView && currentIndexPattern) {
-        async function loadMissingDataView() {
-          const dataView = await dataViewsService.create(
-            {
-              title: currentIndexPattern,
-              allowNoIndex: true,
-            },
-            true
-          );
-          if (dataView.getIndexPattern() === currentIndexPattern) {
-            setAdHocDataViews((prev) => [...prev, dataView]);
-          }
-        }
-
-        loadMissingDataView();
-      }
-    }
-  }, [adHocDataViews, currentIndexPattern, dataViews, dataViewsService, isDataViewsLoading]);
-
-  const getDataViewPatternById = (id?: string) => {
-    return (
-      dataViews.find((dataView) => dataView.id === id)?.title ||
-      adHocDataViews.find((dataView) => dataView.id === id)?.getIndexPattern()
-    );
-  };
-
-  const getDataViewIdByIndexPattern = useCallback(
-    (indexPattern: string) => {
-      return (
-        dataViews.find((dataView) => dataView.title === indexPattern) ||
-        adHocDataViews.find((dataView) => dataView.getIndexPattern() === indexPattern)
-      );
-    },
-    [adHocDataViews, dataViews]
-  );
+  const { dataViewsList, isDataViewsLoading, adHocDataViews, setAdHocDataViews, refetch } =
+    useAdhocDataViews({
+      currentIndexPattern,
+    });
 
   useEffect(() => {
-    if (!currentDataViewId && currentIndexPattern) {
-      setValue(DATA_VIEW_FIELD, getDataViewIdByIndexPattern(currentIndexPattern)?.id);
+    if (!currentDataViewId && currentIndexPattern && !isDataViewsLoading) {
+      const indPattern = getDataViewPattern({
+        byPatten: currentIndexPattern,
+        dataViewsList,
+        adHocDataViews,
+      });
+      setValue(DATA_VIEW_FIELD, indPattern);
     }
-  }, [currentDataViewId, currentIndexPattern, getDataViewIdByIndexPattern, setValue]);
+  }, [
+    adHocDataViews,
+    currentDataViewId,
+    currentIndexPattern,
+    dataViewsList,
+    isDataViewsLoading,
+    setValue,
+  ]);
 
   return (
     <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid}>
@@ -98,7 +70,10 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
               'data-test-subj': 'indexSelection',
             }}
             onChangeDataView={(newId: string) => {
-              setValue(INDEX_FIELD, getDataViewPatternById(newId)!);
+              setValue(
+                INDEX_FIELD,
+                getDataViewPattern({ byId: newId, adHocDataViews, dataViewsList })!
+              );
               field.onChange(newId);
               dataViewsService.get(newId).then((dataView) => {
                 if (dataView.timeFieldName) {
@@ -118,7 +93,14 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
                   }
                 : undefined
             }
-            currentDataViewId={field.value ?? getDataViewIdByIndexPattern(currentIndexPattern)?.id}
+            currentDataViewId={
+              field.value ??
+              getDataViewPattern({
+                byPatten: currentIndexPattern,
+                dataViewsList,
+                adHocDataViews,
+              })
+            }
             onDataViewCreated={() => {
               dataViewEditor.openEditor({
                 allowAdHocDataView: true,
@@ -130,7 +112,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
                   } else {
                     refetch();
                     field.onChange(dataView.id);
-                    setValue(INDEX_FIELD, getDataViewPatternById(dataView.id)!);
+                    setValue(INDEX_FIELD, dataView.getIndexPattern());
                   }
                   if (dataView.timeFieldName) {
                     setValue(TIMESTAMP_FIELD, dataView.timeFieldName);

@@ -184,7 +184,7 @@ describe('Histogram Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo);
+    const transform = generator.getTransformParams(slo, spaceId, dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

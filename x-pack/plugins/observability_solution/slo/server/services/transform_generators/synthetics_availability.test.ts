@@ -417,7 +417,7 @@ describe('Synthetics Availability Transform Generator', () => {
       },
     });
 
-    const transform = generator.getTransformParams(slo, 'default');
+    const transform = generator.getTransformParams(slo, 'default', dataViewsService);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

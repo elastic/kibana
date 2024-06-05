@@ -68,7 +68,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
         bool: {
           filter: [
             getFilterRange(slo, indicator.params.timestampField),
-            getElasticsearchQueryOrThrow(indicator.params.filter),
+            getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },
       },

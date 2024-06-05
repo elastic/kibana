@@ -28,7 +28,6 @@ const filtersSchema = t.array(
       field: t.string,
       params: t.any,
       value: t.string,
-      field: t.string,
     }),
     query: t.record(t.string, t.any),
   })
