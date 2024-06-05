@@ -29,7 +29,7 @@ import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
@@ -44,11 +44,10 @@ import { RuleTab } from './rule_tab';
 import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { BenchmarkName } from '../../../../common/types_old';
-import { FINDINGS_FLYOUT } from '../test_subjects';
+import { FINDINGS_FLYOUT, FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST } from '../test_subjects';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { CspInlineDescriptionList } from '../../../components/csp_inline_description_list';
-import { FINDINGS_VULNERABILITY_FLYOUT_DESCRIPTION_LIST } from '../../vulnerabilities/test_subjects';
 
 const tabs = [
   {
@@ -121,15 +120,14 @@ export const CisKubernetesIcons = ({
 const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps['listItems'] =>
   [
     finding.resource?.id && {
-      title: i18n.translate(
-        'xpack.csp.vulnerabilities.vulnerabilitiesFindingFlyout.flyoutDescriptionList.resourceId',
-        { defaultMessage: 'Resource ID' }
-      ),
+      title: i18n.translate('xpack.csp.findings.findingsFlyout.flyoutDescriptionList.resourceId', {
+        defaultMessage: 'Resource ID',
+      }),
       description: finding.resource.id,
     },
     finding.resource?.name && {
       title: i18n.translate(
-        'xpack.csp.vulnerabilities.vulnerabilitiesFindingFlyout.flyoutDescriptionList.resourceName',
+        'xpack.csp.findings.findingsFlyout.flyoutDescriptionList.resourceName',
         { defaultMessage: 'Resource Name' }
       ),
       description: finding.resource.name,
@@ -195,7 +193,7 @@ export const FindingsRuleFlyout = ({
           `}
         >
           <CspInlineDescriptionList
-            testId={FINDINGS_VULNERABILITY_FLYOUT_DESCRIPTION_LIST}
+            testId={FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST}
             listItems={getFlyoutDescriptionList(findings)}
           />
         </div>
