@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
 import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -620,14 +621,25 @@ export const ModelsList: FC<Props> = ({
     },
     {
       width: '10%',
-      field: 'state',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
       }),
       align: 'left',
       truncateText: false,
-      render: (state: ModelState) => {
+      render: ({ state, downloadState }: ModelItem) => {
         const config = getModelStateColor(state);
+
+        if (state === MODEL_STATE.DOWNLOADING) {
+          return (
+            <EuiProgress
+              value={downloadState?.downloaded_parts}
+              max={downloadState?.total_parts}
+              size="xs"
+              color={'primary'}
+            />
+          );
+        }
+
         return config ? (
           <EuiHealth textSize={'xs'} color={config.color}>
             {config.name}
