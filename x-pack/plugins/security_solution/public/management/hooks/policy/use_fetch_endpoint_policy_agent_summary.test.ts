@@ -46,7 +46,7 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
     renderHook = () => {
       return (testContext.renderReactQueryHook as HookRenderer)(() =>
-        useFetchAgentByAgentPolicySummary(policy.policy_id, queryOptions)
+        useFetchAgentByAgentPolicySummary(policy.policy_ids[0], queryOptions)
       );
     };
   });

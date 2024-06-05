@@ -55,6 +55,7 @@ const getMockNewPackage = (): NewPackagePolicy => {
     namespace: 'someNamespace',
     enabled: true,
     policy_id: 'somePolicyid',
+    policy_ids: ['somePolicyid'],
   };
   return mockNewPackage;
 };

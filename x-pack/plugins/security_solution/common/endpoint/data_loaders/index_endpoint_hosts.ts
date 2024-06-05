@@ -169,7 +169,7 @@ export const indexEndpointHostDocs = usageTracker.track(
 
           const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
             endpoints: [hostMetadata],
-            agentPolicyId: realPolicies[appliedPolicyId].policy_id,
+            agentPolicyId: realPolicies[appliedPolicyId].policy_ids[0],
             kibanaVersion,
           });
 

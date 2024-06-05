@@ -1589,7 +1589,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       created_by: 'elastic',
       updated_at: new Date().toISOString(),
       updated_by: 'elastic',
-      policy_id: this.seededUUIDv4(),
+      policy_ids: [this.seededUUIDv4()],
       enabled: true,
       inputs: [
         {
