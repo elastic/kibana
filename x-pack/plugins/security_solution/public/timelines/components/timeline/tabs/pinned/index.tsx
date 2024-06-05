@@ -171,12 +171,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
-  const leadingControlColumns = useTimelineControlColumn(
+  const leadingControlColumns = useTimelineControlColumn({
     columns,
     sort,
     timelineId,
-    TimelineTabs.pinned
-  );
+    activeTab: TimelineTabs.pinned,
+    refetch,
+  });
 
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),

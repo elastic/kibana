@@ -39,10 +39,19 @@ describe('useTimelineColumns', () => {
     },
   ];
 
+  const refetchMock = jest.fn();
+
   describe('leadingControlColumns', () => {
     it('should return the leading control columns', () => {
       const { result } = renderHook(
-        () => useTimelineControlColumn(mockColumns, [], TimelineId.test, TimelineTabs.query),
+        () =>
+          useTimelineControlColumn({
+            columns: mockColumns,
+            sort: [],
+            timelineId: TimelineId.test,
+            activeTab: TimelineTabs.query,
+            refetch: refetchMock,
+          }),
         {
           wrapper: TestProviders,
         }
@@ -54,7 +63,14 @@ describe('useTimelineColumns', () => {
         isEnterprise: () => false,
       });
       const { result } = renderHook(
-        () => useTimelineControlColumn(mockColumns, [], TimelineId.test, TimelineTabs.query),
+        () =>
+          useTimelineControlColumn({
+            columns: mockColumns,
+            sort: [],
+            timelineId: TimelineId.test,
+            activeTab: TimelineTabs.query,
+            refetch: refetchMock,
+          }),
         {
           wrapper: TestProviders,
         }
@@ -67,7 +83,14 @@ describe('useTimelineColumns', () => {
         isEnterprise: () => true,
       });
       const { result } = renderHook(
-        () => useTimelineControlColumn(mockColumns, [], TimelineId.test, TimelineTabs.query),
+        () =>
+          useTimelineControlColumn({
+            columns: mockColumns,
+            sort: [],
+            timelineId: TimelineId.test,
+            activeTab: TimelineTabs.query,
+            refetch: refetchMock,
+          }),
         {
           wrapper: TestProviders,
         }

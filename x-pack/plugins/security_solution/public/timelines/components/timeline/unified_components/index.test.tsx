@@ -118,6 +118,8 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
+    eventIdToNoteIds: {} as Record<string, string[]>,
+    pinnedEventIds: {} as Record<string, boolean>,
   };
 
   const dispatch = useDispatch();

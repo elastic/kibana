@@ -19,18 +19,12 @@ export interface UnifiedActionProps extends ActionProps {
   pinnedEventIds: TimelineModel['pinnedEventIds'];
 }
 
-const ControlColumnCellRenderMemoized = memo(function RowCellRenderMemoized(
+export const ControlColumnCellRender = memo(function ControlColumnCellRender(
   props: UnifiedActionProps
 ) {
-  const {
-    rowIndex,
-    events,
-    ecsData,
-    pinnedEventIds,
-    onToggleShowNotes,
-    eventIdToNoteIds,
-    timelineId,
-  } = props;
+  const { rowIndex, events, pinnedEventIds, onToggleShowNotes, eventIdToNoteIds, timelineId } =
+    props;
+
   const event = useMemo(() => events && events[rowIndex], [events, rowIndex]);
   const isPinned = useMemo(
     () => eventIsPinned({ eventId: event?._id, pinnedEventIds }),
@@ -41,8 +35,6 @@ const ControlColumnCellRenderMemoized = memo(function RowCellRenderMemoized(
       {...props}
       ariaRowindex={rowIndex}
       columnValues="columnValues"
-      ecsData={ecsData ?? event.ecs}
-      eventId={event?._id}
       eventIdToNoteIds={eventIdToNoteIds}
       isEventPinned={isPinned}
       isEventViewer={false}
@@ -51,14 +43,7 @@ const ControlColumnCellRenderMemoized = memo(function RowCellRenderMemoized(
       showNotes={true}
       timelineId={timelineId}
       toggleShowNotes={onToggleShowNotes}
-      refetch={noOp}
       rowIndex={rowIndex}
     />
   );
 });
-
-// We have to do below because during tests, Eui throws a error when processing a memoized component
-// because `typeof ControlColumnCellRenderMemoized` is not a function
-export const ControlColumnCellRender = (props: UnifiedActionProps) => (
-  <ControlColumnCellRenderMemoized {...props} />
-);
