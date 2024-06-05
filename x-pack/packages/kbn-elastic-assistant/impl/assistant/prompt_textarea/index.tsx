@@ -30,13 +30,16 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
 
     const onKeyDown = useCallback(
       (event) => {
-        if (event.key === 'Enter' && !event.shiftKey && value.trim().length > 0) {
+        // isComposing is needed in case of IME input
+        if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
           event.preventDefault();
-          onPromptSubmit(event.target.value?.trim());
-          handlePromptChange('');
-        } else if (event.key === 'Enter' && !event.shiftKey && value.trim().length === 0) {
-          event.preventDefault();
-          event.stopPropagation();
+
+          if (value.trim().length) {
+            onPromptSubmit(event.target.value?.trim());
+            handlePromptChange('');
+          } else {
+            event.stopPropagation();
+          }
         }
       },
       [value, onPromptSubmit, handlePromptChange]
