@@ -39,6 +39,7 @@
     "@kbn/features-plugin",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
+    "@kbn/observability-ai-assistant-app-plugin",
   ],
   "exclude": ["target/**/*"]
 }
