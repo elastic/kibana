@@ -16,7 +16,7 @@ import type { UserProfile, UserProfileUserInfo } from './user_profile';
 import {
   getUserAvatarColor,
   getUserAvatarInitials,
-  getUserDisplayName,
+  getUserDisplayLabel,
   USER_AVATAR_MAX_INITIALS,
 } from './user_profile';
 
@@ -62,15 +62,15 @@ export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, .
     return <EuiAvatar name="" color={euiTheme.colors.lightestShade} initials="?" {...rest} />;
   }
 
-  const displayName = getUserDisplayName(user);
+  const displayLabel = getUserDisplayLabel(user);
 
   if (avatar?.imageUrl) {
-    return <EuiAvatar name={displayName} imageUrl={avatar.imageUrl} color="plain" {...rest} />;
+    return <EuiAvatar name={displayLabel} imageUrl={avatar.imageUrl} color="plain" {...rest} />;
   }
 
   return (
     <EuiAvatar
-      name={displayName}
+      name={displayLabel}
       initials={getUserAvatarInitials(user, avatar)}
       initialsLength={USER_AVATAR_MAX_INITIALS}
       color={getUserAvatarColor(user, avatar)}

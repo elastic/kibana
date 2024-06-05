@@ -21,8 +21,8 @@ import {
 
 import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
-  RelatedIntegrationArray,
   RuleCreateProps,
+  RuleUpdateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -74,6 +74,7 @@ import type {
   InternalRuleUpdate,
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
+  RuleSourceCamelCased,
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import {
@@ -430,11 +431,69 @@ export const patchTypeSpecificSnakeToCamel = (
   }
 };
 
+interface ConvertUpdateAPIToInternalSchemaProps {
+  existingRule: SanitizedRule<RuleParams>;
+  ruleUpdate: RuleUpdateProps;
+}
+
+export const convertUpdateAPIToInternalSchema = ({
+  existingRule,
+  ruleUpdate,
+}: ConvertUpdateAPIToInternalSchemaProps) => {
+  const alertActions =
+    ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
+  const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
+
+  const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
+
+  const newInternalRule: InternalRuleUpdate = {
+    name: ruleUpdate.name,
+    tags: ruleUpdate.tags ?? [],
+    params: {
+      author: ruleUpdate.author ?? [],
+      buildingBlockType: ruleUpdate.building_block_type,
+      description: ruleUpdate.description,
+      ruleId: existingRule.params.ruleId,
+      falsePositives: ruleUpdate.false_positives ?? [],
+      from: ruleUpdate.from ?? 'now-6m',
+      investigationFields: ruleUpdate.investigation_fields,
+      immutable: existingRule.params.immutable,
+      ruleSource: convertImmutableToRuleSource(existingRule.params.immutable),
+      license: ruleUpdate.license,
+      outputIndex: ruleUpdate.output_index ?? '',
+      timelineId: ruleUpdate.timeline_id,
+      timelineTitle: ruleUpdate.timeline_title,
+      meta: ruleUpdate.meta,
+      maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
+      relatedIntegrations: ruleUpdate.related_integrations ?? [],
+      requiredFields: addEcsToRequiredFields(ruleUpdate.required_fields),
+      riskScore: ruleUpdate.risk_score,
+      riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
+      ruleNameOverride: ruleUpdate.rule_name_override,
+      setup: ruleUpdate.setup,
+      severity: ruleUpdate.severity,
+      severityMapping: ruleUpdate.severity_mapping ?? [],
+      threat: ruleUpdate.threat ?? [],
+      timestampOverride: ruleUpdate.timestamp_override,
+      timestampOverrideFallbackDisabled: ruleUpdate.timestamp_override_fallback_disabled,
+      to: ruleUpdate.to ?? 'now',
+      references: ruleUpdate.references ?? [],
+      namespace: ruleUpdate.namespace,
+      note: ruleUpdate.note,
+      version: ruleUpdate.version ?? existingRule.params.version,
+      exceptionsList: ruleUpdate.exceptions_list ?? [],
+      ...typeSpecificParams,
+    },
+    schedule: { interval: ruleUpdate.interval ?? '5m' },
+    actions,
+  };
+
+  return newInternalRule;
+};
+
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  nextParams: PatchRuleRequestBody & {
-    related_integrations?: RelatedIntegrationArray;
-  },
+  nextParams: PatchRuleRequestBody,
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
@@ -457,6 +516,7 @@ export const convertPatchAPIToInternalSchema = (
       investigationFields: nextParams.investigation_fields ?? existingParams.investigationFields,
       from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
+      ruleSource: convertImmutableToRuleSource(existingParams.immutable),
       license: nextParams.license ?? existingParams.license,
       outputIndex: nextParams.output_index ?? existingParams.outputIndex,
       timelineId: nextParams.timeline_id ?? existingParams.timelineId,
@@ -489,13 +549,18 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
+interface RuleCreateOptions {
+  immutable?: boolean;
+  defaultEnabled?: boolean;
+}
+
+// eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
-  input: RuleCreateProps & {
-    related_integrations?: RelatedIntegrationArray;
-  },
-  immutable = false,
-  defaultEnabled = true
+  input: RuleCreateProps,
+  options?: RuleCreateOptions
 ): InternalRuleCreate => {
+  const { immutable = false, defaultEnabled = true } = options ?? {};
+
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
 
@@ -516,6 +581,7 @@ export const convertCreateAPIToInternalSchema = (
       investigationFields: input.investigation_fields,
       from: input.from ?? DEFAULT_FROM,
       immutable,
+      ruleSource: convertImmutableToRuleSource(immutable),
       license: input.license,
       outputIndex: input.output_index ?? '',
       timelineId: input.timeline_id,
@@ -764,13 +830,16 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     author: [],
   };
 
+  const immutable = true;
+
   const ruleResponseSpecificFields = {
     id: uuidv4(),
     updated_at: new Date(0).toISOString(),
     updated_by: '',
     created_at: new Date(0).toISOString(),
     created_by: '',
-    immutable: true,
+    immutable,
+    rule_source: convertObjectKeysToSnakeCase(convertImmutableToRuleSource(immutable)),
     revision: 1,
   };
 
@@ -780,4 +849,17 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     required_fields: addEcsToRequiredFields(prebuiltRuleAsset.required_fields),
     ...ruleResponseSpecificFields,
   });
+};
+
+export const convertImmutableToRuleSource = (immutable: boolean): RuleSourceCamelCased => {
+  if (immutable) {
+    return {
+      type: 'external',
+      isCustomized: false,
+    };
+  }
+
+  return {
+    type: 'internal',
+  };
 };
