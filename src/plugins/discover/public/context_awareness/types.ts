@@ -7,7 +7,10 @@
  */
 
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
+  getDocViewerTitle: () => string;
+  getDocViewerViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
 }
