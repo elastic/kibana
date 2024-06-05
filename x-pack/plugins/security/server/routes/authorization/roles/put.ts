@@ -45,6 +45,9 @@ export function definePutRolesRoutes({
   router.put(
     {
       path: '/api/security/role/{name}',
+      options: {
+        description: `Create or update a role`,
+      },
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
         query: schema.object({ createOnly: schema.boolean({ defaultValue: false }) }),

@@ -12,8 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  tGridEnabled: true,
-
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
@@ -29,11 +27,6 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/security_solution_api_integration/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
-
-  /**
-   * Enables the insights module for related alerts by process ancestry
-   */
-  insightsRelatedAlertsByProcessAncestry: true,
 
   /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
@@ -117,25 +110,9 @@ export const allowedExperimentalValues = Object.freeze({
   alertTypeEnabled: false,
 
   /**
-   * Enables expandable flyout in create rule page, alert preview
+   * Disables expandable flyout
    */
-  expandableFlyoutInCreateRuleEnabled: true,
-
-  /**
-   * Enables expandable flyout for event type documents
-   */
-  expandableEventFlyoutEnabled: true,
-
-  /**
-   * Enables expandable flyout in timeline
-   */
-  expandableTimelineFlyoutEnabled: true,
-  /*
-
-  /**
-   * Enables new Set of filters on the Alerts page.
-   */
-  alertsPageFiltersEnabled: true,
+  expandableFlyoutDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -148,20 +125,10 @@ export const allowedExperimentalValues = Object.freeze({
   assistantKnowledgeBaseByDefault: false,
 
   /**
-   * Enables the new user details flyout displayed on the Alerts table.
-   */
-  newUserDetailsFlyout: true,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need newUserDetailsFlyout flag enabled.
+   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
-
-  /**
-   * Enables the new host details flyout displayed on the Alerts table.
-   */
-  newHostDetailsFlyout: true,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
