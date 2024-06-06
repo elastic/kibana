@@ -32,12 +32,11 @@ import type {
 
 import { isResponseError } from '@kbn/es-errors';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
 import type { AgentPolicySOAttributes } from '../../../types';
-
 import { UninstallTokenError } from '../../../../common/errors';
-
 import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
-
 import type {
   UninstallToken,
   UninstallTokenMetadata,
@@ -172,6 +171,7 @@ export interface UninstallTokenServiceInterface {
 
 export class UninstallTokenService implements UninstallTokenServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
+  private isScopped = false;
 
   constructor(
     private esoClient: EncryptedSavedObjectsClient,
@@ -179,6 +179,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   ) {
     if (soClient) {
       this._soClient = soClient;
+      this.isScopped = true;
     }
   }
 
@@ -363,6 +364,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         {
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
           perPage: SO_SEARCH_LIMIT,
+          namespaces: this.isScopped
+            ? [this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID]
+            : undefined,
           ...options,
         }
       );
