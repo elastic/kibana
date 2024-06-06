@@ -14,6 +14,7 @@ import type {
   TransformPutTransformRequest,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isEqual, get } from 'lodash/fp';
 import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
@@ -139,6 +140,11 @@ export const scheduleTransformNow = async ({
   }
 };
 
+/**
+ * Whenever we change the latest transform configuration, we must ensure we update the transform in environments where it has already been installed.
+ *
+ * We updates the delay and unattended properties on this PR: https://github.com/elastic/kibana/pull/184797
+ */
 const upgradeLatestTransformIfNeeded = async ({
   esClient,
   namespace,
@@ -156,20 +162,19 @@ const upgradeLatestTransformIfNeeded = async ({
     transform_id: transformId,
   });
 
-  if (
-    response.transforms[0].sync?.time?.delay === '2s' ||
-    response.transforms[0].settings?.unattended === undefined
-  ) {
+  const newConfig = getTransformOptions({
+    dest: latestIndex,
+    source: [timeSeriesIndex],
+  });
+
+  if (isTransformOutdated(response.transforms[0], newConfig)) {
     logger.info(`Upgrading transform ${transformId}`);
 
-    const { latest: _unused, ...newConfig } = getTransformOptions({
-      dest: latestIndex,
-      source: [timeSeriesIndex],
-    });
+    const { latest: _unused, ...changes } = newConfig;
 
     await esClient.transform.updateTransform({
       transform_id: transformId,
-      ...newConfig,
+      ...changes,
     });
   }
 };
@@ -194,4 +199,14 @@ export const scheduleLatestTransformNow = async ({
   }
 
   await scheduleTransformNow({ esClient, transformId });
+};
+
+const UPDATED_TRANSFORM_PROPERTIES = ['sync', 'settings', 'frequency', 'dest', 'source.index'];
+const isTransformOutdated = (
+  transform: TransformGetTransformTransformSummary,
+  newConfig: object
+): boolean => {
+  return UPDATED_TRANSFORM_PROPERTIES.some(
+    (key) => !isEqual(get(key, transform), get(key, newConfig))
+  );
 };
