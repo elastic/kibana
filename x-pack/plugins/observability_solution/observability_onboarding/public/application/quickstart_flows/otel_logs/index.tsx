@@ -91,9 +91,9 @@ export const OtelLogsPanel: React.FC = () => {
       id: 'mac',
       name: 'Mac',
       prompt: 'Run the following commands in your terminal to install the collector.',
-      content: `arch=$(if [[ $(arch) == "arm" ]]; then echo "aarch64"; else echo $(arch); fi)
+      content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${setup?.elasticAgentVersion}-macos-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-macos-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && tar -xvf elastic-distro-c${setup?.elasticAgentVersion}-macos-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-macos-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-macos-$arch 
+curl --output elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch" && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch 
       
 rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       check: './otelcol --config otel.yml',
@@ -105,8 +105,8 @@ rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && 
       prompt: 'Run the following commands in your terminal to install the collector.',
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-linux-$arch 
-  
+curl --output elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${setup?.elasticAgentVersion}-linux-$arch && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-linux-$arch 
+        
 rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       check: './otelcol --config otel.yml',
       type: 'copy',
