@@ -11,7 +11,6 @@ import { render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-const setIsInferenceFlyoutVisibleMock = jest.fn();
 const inferenceEndpoints = [
   {
     model_id: 'my-elser-model-05',
