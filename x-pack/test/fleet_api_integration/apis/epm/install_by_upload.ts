@@ -10,14 +10,16 @@ import path from 'path';
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { HTTPError } from 'superagent';
-import { promisify } from 'util';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
-const sleep = promisify(setTimeout);
+/*
+ * This test takes long to execute because of the wait time between uploads
+ * The upload endpoint is rate limited with a minimum wait time of 10s
+ */
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -80,6 +82,8 @@ export default function (providerContext: FtrProviderContext) {
 
     async function uploadPackage() {
       const buf = fs.readFileSync(testPkgArchiveTgz);
+      // wait 10s before uploading again to avoid getting 429
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       return await supertest
         .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
@@ -95,9 +99,8 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should upgrade when uploading a newer zip archive', async () => {
       await uploadPackage();
-      // wait 10s before uploading again to avoid getting 429
-      await sleep(10000);
 
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveZipNewer);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -168,6 +171,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveZip);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -179,6 +183,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveZip);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -192,6 +197,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should throw an error if the archive is tar.gz but content type is zip', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveTgz);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -205,6 +211,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should throw an error if the archive contains two top-level directories', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveInvalidTwoToplevels);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -218,6 +225,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should throw an error if the archive does not contain a manifest', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveInvalidNoManifest);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -231,6 +239,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should throw an error if the archive manifest contains invalid YAML', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveInvalidManifestInvalidYaml);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -244,6 +253,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should throw an error if the archive manifest misses a mandatory field', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveInvalidManifestMissingField);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -257,6 +267,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should throw an error if the toplevel directory name does not match the package key', async function () {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveInvalidToplevelMismatch);
       const res = await supertest
         .post(`/api/fleet/epm/packages`)
@@ -270,6 +281,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should not allow users without all access', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveTgz);
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)
@@ -281,6 +293,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should allow user with all access', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
       const buf = fs.readFileSync(testPkgArchiveTgz);
       await supertestWithoutAuth
         .post(`/api/fleet/epm/packages`)

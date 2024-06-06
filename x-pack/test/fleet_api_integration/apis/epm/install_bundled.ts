@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('installing bundled packages', async () => {
+  describe('Installing bundled packages', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -82,6 +82,8 @@ export default function (providerContext: FtrProviderContext) {
       it('allows for upgrading from newer bundled source when outdated package was installed from bundled source', async () => {
         await bundlePackage('nginx-1.1.0');
         await bundlePackage('nginx-1.2.1');
+        // wait 10s before uploading again to avoid getting 429
+        await new Promise((resolve) => setTimeout(resolve, 10000));
 
         const installResponse = await supertest
           .post(`/api/fleet/epm/packages/nginx/1.1.0`)
@@ -89,9 +91,9 @@ export default function (providerContext: FtrProviderContext) {
           .type('application/json')
           .send({ force: true })
           .expect(200);
-
         expect(installResponse.body._meta.install_source).to.be('bundled');
 
+        await new Promise((resolve) => setTimeout(resolve, 10000));
         const updateResponse = await supertest
           .post(`/api/fleet/epm/packages/nginx/1.2.1`)
           .set('kbn-xsrf', 'xxxx')
@@ -104,6 +106,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should load package archive from bundled package', async () => {
         await bundlePackage('nginx-1.2.1');
+        // wait 10s before uploading again to avoid getting 429
 
         const response = await supertest
           .get(`/api/fleet/epm/packages/nginx/1.2.1?full=true`)
@@ -117,7 +120,8 @@ export default function (providerContext: FtrProviderContext) {
     describe('with registry', () => {
       it('allows for updating from registry when outdated package is installed from bundled source', async () => {
         await bundlePackage('nginx-1.1.0');
-
+        // wait 10s before uploading again to avoid getting 429
+        await new Promise((resolve) => setTimeout(resolve, 10000));
         const bundledInstallResponse = await supertest
           .post(`/api/fleet/epm/packages/nginx/1.1.0`)
           .set('kbn-xsrf', 'xxxx')
@@ -126,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(bundledInstallResponse.body._meta.install_source).to.be('bundled');
-
+        await new Promise((resolve) => setTimeout(resolve, 10000));
         // Update to one version prior to the bundled version of nginx
         const registryUpdateResponse = await supertest
           .post(`/api/fleet/epm/packages/elastic_agent/1.2.0`)
