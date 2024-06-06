@@ -6,15 +6,20 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  DeleteByQueryResponse,
+  IndexRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KbnClient } from '@kbn/test';
 import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DeepPartial } from 'utility-types';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
-import { wrapErrorAndRejectPromise } from './utils';
+import { createToolingLogger, wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
@@ -188,4 +193,32 @@ export const deleteIndexedFleetAgents = async (
   }
 
   return response;
+};
+
+export const indexFleetServerAgent = async (
+  esClient: Client,
+  log: ToolingLog = createToolingLogger(),
+  overrides: DeepPartial<FleetServerAgent> = {}
+): Promise<IndexedFleetAgentResponse> => {
+  const doc = defaultFleetAgentGenerator.generateEsHit({
+    _source: overrides,
+  });
+
+  const indexRequest: IndexRequest<FleetServerAgent> = {
+    index: doc._index,
+    id: doc._id,
+    body: doc._source,
+    op_type: 'create',
+    refresh: 'wait_for',
+  };
+
+  log.verbose(`Indexing new fleet agent with:\n${JSON.stringify(indexRequest, null, 2)}`);
+
+  await esClient.index<FleetServerAgent>(indexRequest).catch(wrapErrorAndRejectPromise);
+
+  return {
+    fleetAgentsIndex: doc._index,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    agents: [doc._source!],
+  };
 };
