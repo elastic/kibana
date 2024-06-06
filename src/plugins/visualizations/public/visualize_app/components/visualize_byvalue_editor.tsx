@@ -9,10 +9,11 @@
 import { EventEmitter } from 'events';
 import React, { useEffect, useState, useMemo } from 'react';
 import './visualize_editor.scss';
+import { EuiErrorBoundary } from '@elastic/eui';
 
 import { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { VisByValueEditor } from '@kbn/vis-type-timeseries-plugin/public';
+import { DefaultEditor } from '@kbn/vis-default-editor-plugin/public';
 import { VisualizeConstants } from '../../../common/constants';
 import { VisualizeAppProps } from '../app';
 import { VisualizeServices } from '../types';
@@ -26,10 +27,7 @@ import {
 } from '../utils';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { useVisEditorBreadcrumbs } from '../utils/use/use_vis_editor_breadcrumbs';
-import type {
-  VisualizeSavedVisInputState,
-  VisualizeSerializedState,
-} from '../../react_embeddable/types';
+import type { VisualizeSavedVisInputState } from '../../react_embeddable/types';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -122,7 +120,6 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     };
   }, [eventEmitter]);
 
-  console.log('INITIAL STATE', initialState);
   return (
     <VisualizeEditorCommon
       visInstance={byValueVisInstance}
@@ -144,15 +141,18 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       serializeStateFn={serializeStateFn}
     >
       {initialState && (
-        <VisByValueEditor
-          eventEmitter={eventEmitter}
-          timeRange={timefilter.getTime()}
-          filters={filterManager.getFilters()}
-          query={queryString.getQuery() as Query}
-          defaultIndexPattern={currentAppState?.dataView}
-          embeddableApiHandler={embeddableApiHandler}
-          initialState={initialState}
-        />
+        <EuiErrorBoundary>
+          <DefaultEditor
+            initialState={initialState}
+            references={[]}
+            embeddableApiHandler={embeddableApiHandler}
+            eventEmitter={eventEmitter}
+            timeRange={timefilter.getTime()}
+            filters={filterManager.getFilters()}
+            query={queryString.getQuery() as Query}
+            dataView={currentAppState?.dataView}
+          />
+        </EuiErrorBoundary>
       )}
     </VisualizeEditorCommon>
   );

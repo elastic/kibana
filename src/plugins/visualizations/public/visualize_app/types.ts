@@ -144,14 +144,11 @@ export interface IEditorController {
 }
 
 export interface EditorRenderProps {
-  core: CoreStart;
-  data: DataPublicPluginStart;
   filters: Filter[];
   timeRange: TimeRange;
   query?: Query;
   savedSearch?: SavedSearch;
   uiState: PersistedState;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */

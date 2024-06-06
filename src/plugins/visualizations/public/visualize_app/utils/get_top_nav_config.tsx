@@ -163,6 +163,7 @@ export const getTopNavConfig = (
     };
 
     try {
+      console.log('SAVING', visSavedObjectAttributes);
       const id = await saveVisualization(
         visSavedObjectAttributes,
         saveOptions,

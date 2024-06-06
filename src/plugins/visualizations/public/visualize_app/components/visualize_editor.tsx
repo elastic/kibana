@@ -16,7 +16,6 @@ import './visualize_editor.scss';
 import { Query } from '@kbn/es-query';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { DefaultEditor } from '@kbn/vis-default-editor-plugin/public';
-import { TSVBVisEditor } from '@kbn/vis-type-timeseries-plugin/public';
 import { VisualizeConstants } from '../../../common/constants';
 import { VisualizeAppProps } from '../app';
 import { VisualizeServices } from '../types';
@@ -43,11 +42,6 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   const { search } = services.history.location;
   const searchParams = useMemo(() => parse(search), [search]);
-
-  const VisEditor = useMemo(
-    () => (searchParams.type === 'metrics' ? TSVBVisEditor : DefaultEditor),
-    [searchParams]
-  );
 
   const {
     timefilter: { timefilter },
