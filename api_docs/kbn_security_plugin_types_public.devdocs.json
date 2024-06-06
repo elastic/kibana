@@ -90,6 +90,28 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.AuthorizationServiceSetup.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nA set of methods to work with Kibana user roles."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.RolesAPIClient",
+                "text": "RolesAPIClient"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -161,6 +183,210 @@
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.RolePutPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "RolePutPayload",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolePutPayload.role",
+            "type": "Object",
+            "tags": [],
+            "label": "role",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolePutPayload.createOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createOnly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.RolesAPIClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "RolesAPIClient",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.getRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "getRoles",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.getRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getRole",
+            "description": [],
+            "signature": [
+              "(roleName: string) => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.getRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "roleName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.deleteRole",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteRole",
+            "description": [],
+            "signature": [
+              "(roleName: string) => Promise<void>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.deleteRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "roleName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.saveRole",
+            "type": "Function",
+            "tags": [],
+            "label": "saveRole",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.RolePutPayload",
+                "text": "RolePutPayload"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.saveRole.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-public",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                    "section": "def-public.RolePutPayload",
+                    "text": "RolePutPayload"
+                  }
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
