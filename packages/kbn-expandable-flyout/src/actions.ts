@@ -20,6 +20,7 @@ export enum ActionType {
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
   urlChanged = 'urlChanged',
+  goBack = 'goBack',
 }
 
 export const openPanelsAction = createAction<{
@@ -119,3 +120,10 @@ export const urlChangedAction = createAction<{
    */
   id: string;
 }>(ActionType.urlChanged);
+
+export const goBackAction = createAction<{
+  /**
+   * Unique identifier for the flyout (either the urlKey or 'memory')
+   */
+  id: string;
+}>(ActionType.goBack);
