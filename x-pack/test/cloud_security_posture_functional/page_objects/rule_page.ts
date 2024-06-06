@@ -32,6 +32,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
   const retry = getService('retry');
   const supertest = getService('supertest');
   const log = getService('log');
+  const browser = getService('browser');
 
   /**
    * required before indexing findings
@@ -192,6 +193,11 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
 
     getRulesTable: async () => {
       return await testSubjects.find('csp_rules_table');
+    },
+
+    doesCurrentUrlContains: async (urlText: string) => {
+      const currentUrl = await browser.getCurrentUrl();
+      return currentUrl.includes(urlText);
     },
   };
 

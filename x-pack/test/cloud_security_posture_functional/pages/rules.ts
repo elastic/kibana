@@ -93,9 +93,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('Clicking the integrations counter button leads to the integration page', async () => {
         await rule.rulePage.clickIntegrationsEvaluatedButton();
-        await retry.waitFor(
-          'Wait until url includes',
-          async () => !!pageObjects.common.waitUntilUrlIncludes('add-integration/kspm')
+        await retry.waitFor('Wait until url includes', async () =>
+          rule.rulePage.doesCurrentUrlContains('add-integration/kspm')
         );
       });
 
