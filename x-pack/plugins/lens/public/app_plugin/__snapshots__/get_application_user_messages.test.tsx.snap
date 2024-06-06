@@ -88,6 +88,7 @@ Array [
     </React.Fragment>,
     "severity": "error",
     "shortMessage": "",
+    "uniqueId": "editor_missing_dataview",
   },
   Object {
     "displayLocations": Array [
@@ -99,6 +100,7 @@ Array [
     "longMessage": "Could not find the data view: missing_pattern",
     "severity": "error",
     "shortMessage": "",
+    "uniqueId": "editor_missing_expression_dataview",
   },
 ]
 `;

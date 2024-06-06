@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
@@ -14,7 +15,7 @@ export default createTestConfig({
   },
   kbnServerArgs: [
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
-    `--xpack.fleet.packages.0.version=1.5.2`,
+    `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
   ],
   // load tests in the index file
   testFiles: [require.resolve('./ftr/cloud_security_posture')],
