@@ -21,6 +21,8 @@ export const sortAndPrettyPrint = (object: object) => {
   return JSON.stringify(object, Array.from(keys).sort(), 2);
 };
 
+const OAS_OUTPUT_DIR = path.resolve(REPO_ROOT, './oas_docs');
+
 run(
   async ({ log, flagsReader }) => {
     const update = flagsReader.boolean('update');
@@ -33,7 +35,7 @@ run(
       await captureOasSnapshot({
         log,
         buildFlavour: 'serverless',
-        outputFile: path.resolve(REPO_ROOT, './oas_docs/bundle.json'),
+        outputFile: path.resolve(OAS_OUTPUT_DIR, 'bundle.json'),
         filters: { pathStartsWith, excludePathsMatching },
         update,
       });
@@ -43,7 +45,7 @@ run(
       await captureOasSnapshot({
         log,
         buildFlavour: 'serverless',
-        outputFile: path.resolve(REPO_ROOT, './oas_docs/bundle.serverless.json'),
+        outputFile: path.resolve(OAS_OUTPUT_DIR, 'bundle.serverless.json'),
         filters: { pathStartsWith, excludePathsMatching },
         update,
       });
@@ -64,7 +66,7 @@ run(
       help: `
         --include-path            Path to include. Path must start with provided value. Can be passed multiple times.
         --exclude-path            Path to exclude. Path must NOT start with provided value. Can be passed multiple times.
-        --update                  Write the current OAS to ${chalk.cyan(OAS_FILE_PATH)}.
+        --update                  Write the current OAS bundles to ${chalk.cyan(OAS_OUTPUT_DIR)}.
         --no-serverless           Whether to skip OAS for serverless Kibana. Defaults to false.
         --no-traditional          Whether to skip OAS for traditional Kibana. Defaults to false.
       `,
