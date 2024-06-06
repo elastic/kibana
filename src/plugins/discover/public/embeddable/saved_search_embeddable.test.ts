@@ -156,7 +156,9 @@ describe('saved search embeddable', () => {
       }
     );
 
-    servicesMock.core.chrome.getActiveSolutionNavId$ = () => new BehaviorSubject('test');
+    jest
+      .spyOn(servicesMock.core.chrome, 'getActiveSolutionNavId$')
+      .mockReturnValue(new BehaviorSubject('test'));
   });
 
   afterEach(() => {

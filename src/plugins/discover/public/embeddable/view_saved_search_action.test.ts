@@ -35,7 +35,9 @@ const embeddableConfig = {
   executeTriggerActions,
 };
 
-services.core.chrome.getActiveSolutionNavId$ = () => new BehaviorSubject('test');
+jest
+  .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
+  .mockReturnValue(new BehaviorSubject('test'));
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
