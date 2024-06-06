@@ -306,4 +306,65 @@ describe('OpenAPI Bundler - include labeled operations', () => {
       },
     });
   });
+
+  it('removes path items without HTTP verbs defined', async () => {
+    const spec = createOASDocument({
+      paths: {
+        '/api/some_api': {
+          get: {
+            // @ts-expect-error custom property is unexpected here
+            'x-labels': ['labelA'],
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/api/to_be_removed': {
+          summary: 'Some API PUT method OAS definition',
+          put: {
+            // @ts-expect-error custom property is unexpected here
+            'x-labels': ['labelB'],
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const [bundledSpec] = Object.values(
+      await bundleSpecs(
+        {
+          1: spec,
+        },
+        {
+          includeLabels: ['labelA'],
+        }
+      )
+    );
+
+    expect(bundledSpec.paths).toEqual({
+      '/api/some_api': {
+        get: expect.anything(),
+      },
+    });
+  });
 });

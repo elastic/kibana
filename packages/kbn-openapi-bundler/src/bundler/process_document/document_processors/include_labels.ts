@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { logger } from '../../../logger';
 import { hasProp } from '../../../utils/has_prop';
 import { X_LABELS } from '../../known_custom_props';
@@ -41,6 +42,7 @@ export function createIncludeLabelsProcessor(labelsToInclude: string[]): Documen
       )}".`
     );
   };
+  const KNOWN_HTTP_METHODS = ['head', 'get', 'post', 'patch', 'put', 'options', 'delete', 'trace'];
 
   return {
     shouldRemove(node, { parentKey }) {
@@ -91,7 +93,11 @@ export function createIncludeLabelsProcessor(labelsToInclude: string[]): Documen
           continue;
         }
 
-        if (Object.keys(pathObject).length === 0) {
+        // We need to check HTTP verbs only
+        // If there are no HTTP verbs the path definition is considered empty
+        const httpVerbs = pick(pathObject, KNOWN_HTTP_METHODS);
+
+        if (Object.keys(httpVerbs).length === 0) {
           delete node.paths[path as keyof typeof node.paths];
         }
       }
