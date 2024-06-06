@@ -136,8 +136,7 @@ export const InferenceEndpoints: React.FC = () => {
           description={i18n.translate(
             'xpack.searchInferenceEndpoints.inferenceEndpoints.allInferenceEndpoints.description',
             {
-              defaultMessage:
-                'Manage your inference endpoints.',
+              defaultMessage: 'Manage your inference endpoints.',
             }
           )}
           rightSideItems={[
