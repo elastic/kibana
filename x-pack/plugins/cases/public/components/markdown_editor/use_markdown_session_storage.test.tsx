@@ -60,6 +60,7 @@ describe('useMarkdownSessionStorage', () => {
     );
 
     await waitFor(() => {
+      expect(field.setValue).not.toHaveBeenCalled();
       expect(result.current.hasConflicts).toBe(false);
     });
   });

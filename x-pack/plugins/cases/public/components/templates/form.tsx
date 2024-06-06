@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,14 +14,10 @@ import { FormFields } from './form_fields';
 import { templateSerializer } from './utils';
 import type { TemplateFormProps } from './types';
 import type { CasesConfigurationUI } from '../../containers/types';
-
-export interface TemplateFormState {
-  isValid: boolean | undefined;
-  submit: FormHook<TemplateFormProps | {}>['submit'];
-}
+import type { FormState } from '../configure_cases/flyout';
 
 interface Props {
-  onChange: (state: TemplateFormState) => void;
+  onChange: (state: FormState<TemplateFormProps>) => void;
   initialValue: TemplateFormProps | null;
   connectors: ActionConnector[];
   configurationConnectorId: string;

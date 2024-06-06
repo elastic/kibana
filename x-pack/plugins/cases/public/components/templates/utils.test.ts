@@ -21,7 +21,20 @@ describe('templateSerializer', () => {
       category: null,
     });
 
-    expect(res).toEqual({});
+    expect(res).toEqual({ fields: null });
+  });
+
+  it('serializes connectors fields correctly', () => {
+    const res = templateSerializer({
+      key: '',
+      name: '',
+      templateDescription: '',
+      fields: null,
+    });
+
+    expect(res).toEqual({
+      fields: null,
+    });
   });
 
   it('serializes non empty fields correctly', () => {
@@ -39,6 +52,7 @@ describe('templateSerializer', () => {
       templateDescription: 'description 1',
       category: 'new',
       templateTags: ['sample'],
+      fields: null,
     });
   });
 
@@ -61,6 +75,7 @@ describe('templateSerializer', () => {
         custom_field_1: 'foobar',
         custom_field_3: true,
       },
+      fields: null,
     });
   });
 

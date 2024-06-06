@@ -56,7 +56,6 @@ describe('CaseFormFields', () => {
     expect(await screen.findByTestId('caseCategory')).toBeInTheDocument();
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
     expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
-    expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
   });
 
   it('does not render customFields when empty', () => {
@@ -108,20 +107,6 @@ describe('CaseFormFields', () => {
     expect(await screen.findByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
 
-  it('does not render syncAlerts when feature is not enabled', () => {
-    appMock = createAppMockRenderer({
-      features: { alerts: { sync: false, enabled: true } },
-    });
-
-    appMock.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <CaseFormFields {...defaultProps} />
-      </FormTestComponent>
-    );
-
-    expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
-  });
-
   it('calls onSubmit with case fields', async () => {
     appMock.render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -145,7 +130,7 @@ describe('CaseFormFields', () => {
     const caseCategory = await screen.findByTestId('caseCategory');
     userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -154,7 +139,6 @@ describe('CaseFormFields', () => {
           tags: ['template-1'],
           description: 'This is a case description',
           title: 'Case with Template 1',
-          syncAlerts: true,
         },
         true
       );
@@ -189,14 +173,13 @@ describe('CaseFormFields', () => {
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
           category: null,
           tags: [],
-          syncAlerts: true,
           customFields: {
             test_key_1: 'My text test value 1',
             test_key_2: false,
@@ -229,14 +212,13 @@ describe('CaseFormFields', () => {
 
     userEvent.click(screen.getByText(`${userProfiles[0].user.full_name}`));
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
           category: null,
           tags: [],
-          syncAlerts: true,
           assignees: [{ uid: userProfiles[0].uid }],
         },
         true

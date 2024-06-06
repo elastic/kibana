@@ -26,28 +26,23 @@ interface Props {
   disabled: boolean;
   isLoading: boolean;
   templates: CasesConfigurationUITemplate[];
-  handleAddTemplate: () => void;
+  onAddTemplate: () => void;
 }
 
-const TemplatesComponent: React.FC<Props> = ({
-  disabled,
-  isLoading,
-  templates,
-  handleAddTemplate,
-}) => {
+const TemplatesComponent: React.FC<Props> = ({ disabled, isLoading, templates, onAddTemplate }) => {
   const { permissions } = useCasesContext();
   const canAddTemplates = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);
 
-  const onAddTemplate = useCallback(() => {
+  const handleAddTemplate = useCallback(() => {
     if (templates.length === MAX_TEMPLATES_LENGTH && !error) {
       setError(true);
       return;
     }
 
-    handleAddTemplate();
+    onAddTemplate();
     setError(false);
-  }, [handleAddTemplate, error, templates]);
+  }, [onAddTemplate, error, templates]);
 
   return (
     <EuiDescribedFormGroup
@@ -92,7 +87,7 @@ const TemplatesComponent: React.FC<Props> = ({
                 isLoading={isLoading}
                 isDisabled={disabled || error}
                 size="s"
-                onClick={onAddTemplate}
+                onClick={handleAddTemplate}
                 iconType="plusInCircle"
                 data-test-subj="add-template"
               >

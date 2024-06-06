@@ -17,15 +17,19 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import type { CustomFieldFormState } from '../custom_fields/form';
-import type { TemplateFormState } from '../templates/form';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 import type { TemplateFormProps } from '../templates/types';
 
-export interface FlyOutBodyProps {
-  onChange: (state: CustomFieldFormState | TemplateFormState) => void;
+export interface FormState<T> {
+  isValid: boolean | undefined;
+  submit: FormHook<T>['submit'];
+}
+
+export interface FlyOutBodyProps<T> {
+  onChange: (state: FormState<T>) => void;
 }
 
 export interface FlyoutProps<T> {
@@ -34,10 +38,10 @@ export interface FlyoutProps<T> {
   onCloseFlyout: () => void;
   onSaveField: (data: T) => void;
   renderHeader: () => React.ReactNode;
-  renderBody: ({ onChange }: FlyOutBodyProps) => React.ReactNode;
+  renderBody: ({ onChange }: FlyOutBodyProps<T>) => React.ReactNode;
 }
 
-export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormProps | null>({
+export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormProps>({
   onCloseFlyout,
   onSaveField,
   isLoading,
@@ -45,11 +49,11 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
   renderHeader,
   renderBody,
 }: FlyoutProps<T>) => {
-  const [formState, setFormState] = useState<CustomFieldFormState | TemplateFormState>({
+  const [formState, setFormState] = useState<FormState<T>>({
     isValid: undefined,
     submit: async () => ({
       isValid: false,
-      data: {},
+      data: {} as T,
     }),
   });
 

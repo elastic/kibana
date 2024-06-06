@@ -23,7 +23,7 @@ describe('CustomFields', () => {
   const defaultProps = {
     configurationCustomFields: customFieldsConfigurationMock,
     isLoading: false,
-    setAsOptional: false,
+    setCustomFieldsOptional: false,
   };
 
   beforeEach(() => {
@@ -51,7 +51,11 @@ describe('CustomFields', () => {
   it('should not show the custom fields if the configuration is empty', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
-        <CustomFields isLoading={false} configurationCustomFields={[]} />
+        <CustomFields
+          isLoading={false}
+          setCustomFieldsOptional={false}
+          configurationCustomFields={[]}
+        />
       </FormTestComponent>
     );
 
@@ -65,7 +69,7 @@ describe('CustomFields', () => {
         <CustomFields
           isLoading={false}
           configurationCustomFields={customFieldsConfigurationMock}
-          setAsOptional={true}
+          setCustomFieldsOptional={true}
         />
       </FormTestComponent>
     );
@@ -80,6 +84,7 @@ describe('CustomFields', () => {
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields
           isLoading={false}
+          setCustomFieldsOptional={false}
           configurationCustomFields={reversedCustomFieldsConfiguration}
         />
       </FormTestComponent>

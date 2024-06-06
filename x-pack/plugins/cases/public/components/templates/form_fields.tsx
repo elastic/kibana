@@ -7,19 +7,16 @@
 
 import React, { memo, useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  TextField,
-  HiddenField,
-  TextAreaField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiSteps } from '@elastic/eui';
 import { CaseFormFields } from '../case_form_fields';
 import * as i18n from './translations';
 import { Connector } from './connector';
 import type { ActionConnector } from '../../containers/configure/types';
 import type { CasesConfigurationUI } from '../../containers/types';
-import { OptionalFieldLabel } from '../create/optional_field_label';
-import { TemplateTags } from './template_tags';
+import { TemplateFields } from './template_fields';
+import { useCasesFeatures } from '../../common/use_cases_features';
+import { SyncAlertsToggle } from '../create/sync_alerts_toggle';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
@@ -36,37 +33,16 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   configurationCustomFields,
   configurationTemplateTags,
 }) => {
+  const { isSyncAlertsEnabled } = useCasesFeatures();
+
   const firstStep = useMemo(
     () => ({
       title: i18n.TEMPLATE_FIELDS,
       children: (
-        <>
-          <UseField
-            path="name"
-            component={TextField}
-            componentProps={{
-              euiFieldProps: {
-                'data-test-subj': 'template-name-input',
-                fullWidth: true,
-                autoFocus: true,
-                isLoading: isSubmitting,
-              },
-            }}
-          />
-          <TemplateTags isLoading={isSubmitting} tags={configurationTemplateTags} />
-          <UseField
-            path="templateDescription"
-            component={TextAreaField}
-            componentProps={{
-              labelAppend: OptionalFieldLabel,
-              euiFieldProps: {
-                'data-test-subj': 'template-description-input',
-                fullWidth: true,
-                isLoading: isSubmitting,
-              },
-            }}
-          />
-        </>
+        <TemplateFields
+          isLoading={isSubmitting}
+          configurationTemplateTags={configurationTemplateTags}
+        />
       ),
     }),
     [isSubmitting, configurationTemplateTags]
@@ -79,6 +55,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
         <CaseFormFields
           configurationCustomFields={configurationCustomFields}
           isLoading={isSubmitting}
+          setCustomFieldsOptional={true}
         />
       ),
     }),
@@ -86,6 +63,14 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   );
 
   const thirdStep = useMemo(
+    () => ({
+      title: i18n.CASE_SETTINGS,
+      children: <SyncAlertsToggle isLoading={isSubmitting} />,
+    }),
+    [isSubmitting]
+  );
+
+  const fourthStep = useMemo(
     () => ({
       title: i18n.CONNECTOR_FIELDS,
       children: (
@@ -102,8 +87,8 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   );
 
   const allSteps = useMemo(
-    () => [firstStep, secondStep, thirdStep],
-    [firstStep, secondStep, thirdStep]
+    () => [firstStep, secondStep, ...(isSyncAlertsEnabled ? [thirdStep] : []), fourthStep],
+    [firstStep, secondStep, thirdStep, fourthStep, isSyncAlertsEnabled]
   );
 
   return (

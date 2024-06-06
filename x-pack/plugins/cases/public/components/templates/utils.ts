@@ -5,49 +5,33 @@
  * 2.0.
  */
 
-import { getConnectorsFormSerializer, isEmptyValue } from '../utils';
+import { isEmpty } from 'lodash';
+import { getConnectorsFormSerializer } from '../utils';
 import type { TemplateFormProps } from './types';
 
-export const removeEmptyFields = (
-  data: TemplateFormProps | Record<string, string | boolean | null | undefined> | null | undefined
-): TemplateFormProps | Record<string, string | boolean> | null => {
-  if (data) {
-    return Object.entries(data).reduce((acc, [key, value]) => {
-      let initialValue = {};
+export function removeEmptyFields<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj)
+      .filter(([_, value]) => !isEmpty(value) || typeof value === 'boolean')
+      .map(([key, value]) => [
+        key,
+        value === Object(value) && !Array.isArray(value)
+          ? removeEmptyFields(value as Record<string, unknown>)
+          : value,
+      ])
+  ) as T;
+}
 
-      if (key === 'customFields') {
-        const nonEmptyCustomFields =
-          removeEmptyFields(value as Record<string, string | boolean | null | undefined>) ?? {};
-
-        if (Object.entries(nonEmptyCustomFields).length > 0) {
-          initialValue = {
-            customFields: nonEmptyCustomFields,
-          };
-        }
-      } else if (!isEmptyValue(value)) {
-        initialValue = { [key]: value };
-      }
-
-      return {
-        ...acc,
-        ...initialValue,
-      };
-    }, {});
-  }
-
-  return null;
-};
-
-export const templateSerializer = <T extends TemplateFormProps | null>(data: T): T => {
+export const templateSerializer = (data: TemplateFormProps): TemplateFormProps => {
   if (data !== null) {
     const { fields = null, ...rest } = data;
     const connectorFields = getConnectorsFormSerializer({ fields });
-    const serializedFields = removeEmptyFields({ ...rest, fields: connectorFields.fields });
+    const serializedFields = removeEmptyFields({ ...rest });
 
     return {
       ...serializedFields,
-      // fields: connectorFields.fields,
-    } as T;
+      fields: connectorFields.fields,
+    } as TemplateFormProps;
   }
 
   return data;

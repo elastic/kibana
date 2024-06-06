@@ -830,12 +830,11 @@ describe('ConfigureCases', () => {
 
   describe('templates', () => {
     let appMockRender: AppMockRenderer;
-    let persistCaseConfigure: jest.Mock;
+    const persistCaseConfigure = jest.fn();
 
     beforeEach(() => {
       jest.clearAllMocks();
       appMockRender = createAppMockRenderer();
-      persistCaseConfigure = jest.fn();
       usePersistConfigurationMock.mockImplementation(() => ({
         ...usePersistConfigurationMockResponse,
         mutate: persistCaseConfigure,

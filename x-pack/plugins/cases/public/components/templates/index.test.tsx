@@ -24,7 +24,7 @@ describe('Templates', () => {
     disabled: false,
     isLoading: false,
     templates: [],
-    handleAddTemplate: jest.fn(),
+    onAddTemplate: jest.fn(),
   };
 
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe('Templates', () => {
 
     userEvent.click(await screen.findByTestId('add-template'));
 
-    expect(props.handleAddTemplate).toBeCalled();
+    expect(props.onAddTemplate).toBeCalled();
   });
 
   it('shows the experimental badge', async () => {

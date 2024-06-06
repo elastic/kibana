@@ -14,7 +14,7 @@ import { FormTestComponent } from '../../common/test_utils';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
-import { TEMPLATE_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS } from './translations';
+import { TEMPLATE_FIELDS, CASE_FIELDS, CONNECTOR_FIELDS, CASE_SETTINGS } from './translations';
 import { FormFields } from './form_fields';
 
 jest.mock('../connectors/servicenow/use_get_choices');
@@ -56,6 +56,7 @@ describe('form fields', () => {
 
     expect(await screen.findByText(TEMPLATE_FIELDS)).toBeInTheDocument();
     expect(await screen.findByText(CASE_FIELDS)).toBeInTheDocument();
+    expect(await screen.findByText(CASE_SETTINGS)).toBeInTheDocument();
     expect(await screen.findByText(CONNECTOR_FIELDS)).toBeInTheDocument();
   });
 
@@ -66,6 +67,7 @@ describe('form fields', () => {
       </FormTestComponent>
     );
 
+    expect(await screen.findByTestId('template-fields')).toBeInTheDocument();
     expect(await screen.findByTestId('template-name-input')).toBeInTheDocument();
     expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
     expect(await screen.findByTestId('template-description-input')).toBeInTheDocument();
@@ -84,6 +86,16 @@ describe('form fields', () => {
     expect(await screen.findByTestId('caseCategory')).toBeInTheDocument();
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
     expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
+  });
+
+  it('renders sync alerts correctly', async () => {
+    appMockRenderer.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <FormFields {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
   });
 
   it('renders custom fields correctly', async () => {
@@ -125,6 +137,20 @@ describe('form fields', () => {
     expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
     expect(await screen.findByTestId('connector-fields')).toBeInTheDocument();
     expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
+  });
+
+  it('does not render sync alerts when feature is not enabled', () => {
+    appMockRenderer = createAppMockRenderer({
+      features: { alerts: { sync: false, enabled: true } },
+    });
+
+    appMockRenderer.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <FormFields {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
   });
 
   it('calls onSubmit with template fields', async () => {

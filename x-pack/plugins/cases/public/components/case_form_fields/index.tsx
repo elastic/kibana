@@ -15,16 +15,20 @@ import { Description } from '../create/description';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { Assignees } from '../create/assignees';
 import { CustomFields } from './custom_fields';
-import { SyncAlertsToggle } from '../create/sync_alerts_toggle';
 import type { CasesConfigurationUI } from '../../containers/types';
 
 interface Props {
   isLoading: boolean;
   configurationCustomFields: CasesConfigurationUI['customFields'];
+  setCustomFieldsOptional?: boolean;
 }
 
-const CaseFormFieldsComponent: React.FC<Props> = ({ isLoading, configurationCustomFields }) => {
-  const { caseAssignmentAuthorized, isSyncAlertsEnabled } = useCasesFeatures();
+const CaseFormFieldsComponent: React.FC<Props> = ({
+  isLoading,
+  configurationCustomFields,
+  setCustomFieldsOptional = false,
+}) => {
+  const { caseAssignmentAuthorized } = useCasesFeatures();
 
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column">
@@ -40,11 +44,9 @@ const CaseFormFieldsComponent: React.FC<Props> = ({ isLoading, configurationCust
 
       <Description isLoading={isLoading} />
 
-      {isSyncAlertsEnabled ? <SyncAlertsToggle isLoading={isLoading} /> : null}
-
       <CustomFields
         isLoading={isLoading}
-        setAsOptional={true}
+        setCustomFieldsOptional={setCustomFieldsOptional}
         configurationCustomFields={configurationCustomFields}
       />
     </EuiFlexGroup>

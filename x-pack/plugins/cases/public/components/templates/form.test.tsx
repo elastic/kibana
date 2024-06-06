@@ -20,8 +20,9 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
-import type { TemplateFormState } from './form';
+import type { FormState } from '../configure_cases/flyout';
 import { TemplateForm } from './form';
+import type { TemplateFormProps } from './types';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -126,9 +127,9 @@ describe('TemplateForm', () => {
   });
 
   it('serializes the template field data correctly', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
 
@@ -162,14 +163,15 @@ describe('TemplateForm', () => {
         templateTags: ['foo', 'bar'],
         connectorId: 'none',
         syncAlerts: true,
+        fields: null,
       });
     });
   });
 
   it('serializes the case field data correctly', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
 
@@ -215,14 +217,15 @@ describe('TemplateForm', () => {
         category: 'new',
         connectorId: 'none',
         syncAlerts: true,
+        fields: null,
       });
     });
   });
 
   it('serializes the connector fields data correctly', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(
       <TemplateForm
@@ -274,9 +277,9 @@ describe('TemplateForm', () => {
   });
 
   it('serializes the custom fields data correctly', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(
       <TemplateForm
@@ -299,9 +302,11 @@ describe('TemplateForm', () => {
       'this is a first template'
     );
 
-    const customFieldsEle = await screen.findByTestId('caseCustomFields');
+    const customFieldsElement = await screen.findByTestId('caseCustomFields');
 
-    expect(await within(customFieldsEle).findAllByTestId('form-optional-field-label')).toHaveLength(
+    expect(
+      await within(customFieldsElement).findAllByTestId('form-optional-field-label')
+    ).toHaveLength(
       customFieldsConfigurationMock.filter((field) => field.type === CustomFieldTypes.TEXT).length
     );
 
@@ -336,14 +341,15 @@ describe('TemplateForm', () => {
           test_key_2: true,
           test_key_4: true,
         },
+        fields: null,
       });
     });
   });
 
   it('shows form state as invalid when template name missing', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
 
@@ -363,9 +369,9 @@ describe('TemplateForm', () => {
   });
 
   it('shows from state as invalid when template name is too long', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
 
@@ -387,9 +393,9 @@ describe('TemplateForm', () => {
   });
 
   it('shows from state as invalid when template description is too long', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
 
@@ -411,9 +417,9 @@ describe('TemplateForm', () => {
   });
 
   it('shows from state as invalid when template tags are more than 10', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
 
@@ -440,9 +446,9 @@ describe('TemplateForm', () => {
   });
 
   it('shows from state as invalid when template tag is more than 50 characters', async () => {
-    let formState: TemplateFormState;
+    let formState: FormState<TemplateFormProps>;
 
-    const onChangeState = (state: TemplateFormState) => (formState = state);
+    const onChangeState = (state: FormState<TemplateFormProps>) => (formState = state);
 
     appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
 

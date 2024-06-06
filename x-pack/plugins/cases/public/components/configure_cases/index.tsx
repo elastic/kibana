@@ -22,11 +22,7 @@ import {
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type {
-  CustomFieldConfiguration,
-  CustomFieldsConfiguration,
-  TemplateConfiguration,
-} from '../../../common/types/domain';
+import type { CustomFieldConfiguration, TemplateConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -336,12 +332,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
   }, [setFlyOutVisibility, setCustomFieldToEdit]);
 
   const onCustomFieldSave = useCallback(
-    (data: CustomFieldConfiguration | null) => {
-      const updatedCustomFields = addOrReplaceField(customFields, data as CustomFieldConfiguration);
+    (data: CustomFieldConfiguration) => {
+      const updatedCustomFields = addOrReplaceField(customFields, data);
 
       persistCaseConfigure({
         connector,
-        customFields: updatedCustomFields as CustomFieldsConfiguration,
+        customFields: updatedCustomFields,
         templates,
         id: configurationId,
         version: configurationVersion,
@@ -368,7 +364,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   }, [setFlyOutVisibility, setTemplateToEdit]);
 
   const onTemplateSave = useCallback(
-    (data: TemplateFormProps | null) => {
+    (data: TemplateFormProps) => {
       const {
         connectorId,
         fields,
@@ -379,7 +375,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         templateTags,
         templateDescription,
         ...otherCaseFields
-      } = (data ?? {}) as TemplateFormProps;
+      } = data;
 
       const transformedCustomFields = templateCustomFields
         ? transformCustomFieldsData(templateCustomFields, customFields)
@@ -429,8 +425,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ]
   );
 
-  const AddOrEditCustomFieldFlyout = useMemo(() => {
-    return flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible ? (
+  const AddOrEditCustomFieldFlyout =
+    flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible ? (
       <CommonFlyout<CustomFieldConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
         disabled={
@@ -447,38 +443,32 @@ export const ConfigureCases: React.FC = React.memo(() => {
         )}
       />
     ) : null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flyOutVisibility]);
 
-  const AddOrEditTemplateFlyout = useMemo(
-    () =>
-      flyOutVisibility?.type === 'template' && flyOutVisibility?.visible ? (
-        <CommonFlyout<TemplateFormProps | null>
-          isLoading={loadingCaseConfigure || isPersistingConfiguration}
-          disabled={
-            !permissions.create ||
-            !permissions.update ||
-            loadingCaseConfigure ||
-            isPersistingConfiguration
-          }
-          onCloseFlyout={onCloseTemplateFlyout}
-          onSaveField={onTemplateSave}
-          renderHeader={() => <span>{i18n.CRATE_TEMPLATE}</span>}
-          renderBody={({ onChange }) => (
-            <TemplateForm
-              initialValue={templateToEdit as TemplateFormProps | null}
-              connectors={connectors ?? []}
-              configurationConnectorId={connector.id ?? ''}
-              configurationCustomFields={customFields ?? []}
-              configurationTemplateTags={configurationTemplateTags ?? []}
-              onChange={onChange}
-            />
-          )}
-        />
-      ) : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flyOutVisibility]
-  );
+  const AddOrEditTemplateFlyout =
+    flyOutVisibility?.type === 'template' && flyOutVisibility?.visible ? (
+      <CommonFlyout<TemplateFormProps>
+        isLoading={loadingCaseConfigure || isPersistingConfiguration}
+        disabled={
+          !permissions.create ||
+          !permissions.update ||
+          loadingCaseConfigure ||
+          isPersistingConfiguration
+        }
+        onCloseFlyout={onCloseTemplateFlyout}
+        onSaveField={onTemplateSave}
+        renderHeader={() => <span>{i18n.CRATE_TEMPLATE}</span>}
+        renderBody={({ onChange }) => (
+          <TemplateForm
+            initialValue={templateToEdit as TemplateFormProps | null}
+            connectors={connectors ?? []}
+            configurationConnectorId={connector.id ?? ''}
+            configurationCustomFields={customFields ?? []}
+            configurationTemplateTags={configurationTemplateTags ?? []}
+            onChange={onChange}
+          />
+        )}
+      />
+    ) : null;
 
   return (
     <EuiPageSection restrictWidth={true}>
@@ -563,7 +553,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 templates={templates}
                 isLoading={isLoadingCaseConfiguration}
                 disabled={isLoadingCaseConfiguration}
-                handleAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
+                onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
               />
             </EuiFlexItem>
           </div>

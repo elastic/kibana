@@ -18,6 +18,7 @@ import {
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
 } from '../../../common/constants';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
@@ -27,6 +28,7 @@ import { TemplateForm } from '../templates/form';
 import * as i18n from './translations';
 import type { FlyOutBodyProps } from './flyout';
 import { CommonFlyout } from './flyout';
+import type { TemplateFormProps } from '../templates/types';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -61,7 +63,7 @@ describe('CommonFlyout ', () => {
   it('renders flyout header correctly', async () => {
     appMockRender.render(<CommonFlyout {...props} />);
 
-    expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent('Flyout header');
+    expect(await screen.findByText('Flyout header'));
   });
 
   it('renders loading state correctly', async () => {
@@ -106,7 +108,7 @@ describe('CommonFlyout ', () => {
   });
 
   describe('CustomFieldsFlyout', () => {
-    const renderBody = ({ onChange }: FlyOutBodyProps) => (
+    const renderBody = ({ onChange }: FlyOutBodyProps<CustomFieldConfiguration>) => (
       <CustomFieldsForm onChange={onChange} initialValue={null} />
     );
 
@@ -232,7 +234,7 @@ describe('CommonFlyout ', () => {
       });
 
       it('renders flyout with the correct data when an initial customField value exists', async () => {
-        const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+        const newRenderBody = ({ onChange }: FlyOutBodyProps<CustomFieldConfiguration>) => (
           <CustomFieldsForm onChange={onChange} initialValue={customFieldsConfigurationMock[0]} />
         );
 
@@ -319,7 +321,7 @@ describe('CommonFlyout ', () => {
       });
 
       it('renders flyout with the correct data when an initial customField value exists', async () => {
-        const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+        const newRenderBody = ({ onChange }: FlyOutBodyProps<CustomFieldConfiguration>) => (
           <CustomFieldsForm onChange={onChange} initialValue={customFieldsConfigurationMock[1]} />
         );
 
@@ -347,7 +349,7 @@ describe('CommonFlyout ', () => {
   });
 
   describe('TemplateFlyout', () => {
-    const renderBody = ({ onChange }: FlyOutBodyProps) => (
+    const renderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
       <TemplateForm
         initialValue={null}
         connectors={connectorsMock}
@@ -392,12 +394,13 @@ describe('CommonFlyout ', () => {
           templateTags: ['foo'],
           connectorId: 'none',
           syncAlerts: true,
+          fields: null,
         });
       });
     });
 
     it('calls onSaveField with case fields correctly', async () => {
-      const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+      const newRenderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
         <TemplateForm
           initialValue={{
             key: 'random_key',
@@ -445,12 +448,13 @@ describe('CommonFlyout ', () => {
           category: 'new',
           connectorId: 'none',
           syncAlerts: true,
+          fields: null,
         });
       });
     });
 
     it('calls onSaveField form with custom fields correctly', async () => {
-      const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+      const newRenderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
         <TemplateForm
           initialValue={{
             key: 'random_key',
@@ -493,6 +497,7 @@ describe('CommonFlyout ', () => {
             [customFieldsConfigurationMock[1].key]: true,
             [customFieldsConfigurationMock[3].key]: false,
           },
+          fields: null,
         });
       });
     });
@@ -500,7 +505,7 @@ describe('CommonFlyout ', () => {
     it('calls onSaveField form with connector fields correctly', async () => {
       useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
 
-      const newRenderBody = ({ onChange }: FlyOutBodyProps) => (
+      const newRenderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
         <TemplateForm
           initialValue={{
             key: 'random_key',
