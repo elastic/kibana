@@ -769,7 +769,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
               [ALERT_SUPPRESSION_START]: firstTimestamp,
               [ALERT_SUPPRESSION_END]: secondTimestamp,
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 3, // TODO this means that the original anomaly was used as the suppression base, and the three new were suppressed into it (1 original + three new - 1 parent). Is this correct?
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
             })
           );
         });
