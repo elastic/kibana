@@ -237,7 +237,7 @@ export const EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT = i18n.translate(
 export const MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionDisabledLabel',
   {
-    defaultMessage: 'Alert suppression will be disabled until the Machine Learning jobs are run.',
+    defaultMessage: 'Machine Learning jobs must be running to enable alert suppression.',
   }
 );
 
@@ -245,7 +245,7 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionIncompleteLabel',
   {
     defaultMessage:
-      'Alert suppression may have incomplete field options until all Machine Learning jobs are run.',
+      'This list of fields may be incomplete as some Machine Learning jobs are not running.',
   }
 );
 
