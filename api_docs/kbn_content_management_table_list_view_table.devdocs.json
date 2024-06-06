@@ -282,18 +282,49 @@
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
             "id": "def-public.TableListViewKibanaDependencies.FormattedRelative",
-            "type": "Object",
+            "type": "Function",
             "tags": [],
             "label": "FormattedRelative",
             "description": [
               "The <FormattedRelative /> component from the @kbn/i18n-react package"
             ],
             "signature": [
-              "typeof ReactIntl.FormattedRelative"
+              "({ value: valueInput, updateIntervalInSeconds, }: ",
+              {
+                "pluginId": "@kbn/i18n-react",
+                "scope": "common",
+                "docId": "kibKbnI18nReactPluginApi",
+                "section": "def-common.FormattedRelativeProps",
+                "text": "FormattedRelativeProps"
+              },
+              ") => JSX.Element"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-table-list-view-table",
+                "id": "def-public.TableListViewKibanaDependencies.FormattedRelative.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/i18n-react",
+                    "scope": "common",
+                    "docId": "kibKbnI18nReactPluginApi",
+                    "section": "def-common.FormattedRelativeProps",
+                    "text": "FormattedRelativeProps"
+                  }
+                ],
+                "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import React, { useEffect } from 'react';
 import moment from 'moment';
 import {
@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -31,7 +30,6 @@ import { Rule } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
-import { TIME_LABELS } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../../common/components/threshold';
 import { withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
@@ -88,7 +86,6 @@ export function AlertDetailsAppSection({
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
-  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const annotations = [
     <AlertAnnotation
@@ -140,61 +137,68 @@ export function AlertDetailsAppSection({
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
-      {rule.params.criteria.map((criterion, index) => (
-        <EuiFlexItem key={generateUniqueKey(criterion)}>
-          <EuiPanel hasBorder hasShadow={false}>
-            <EuiTitle size="xs">
-              <h4>
-                {criterion.aggType.toUpperCase()}{' '}
-                {'metric' in criterion ? criterion.metric : undefined}
-              </h4>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.infra.metrics.alertDetailsAppSection.criterion.subtitle"
-                defaultMessage="Last {lookback} {timeLabel}"
-                values={{
-                  lookback: criterion.timeSize,
-                  timeLabel: TIME_LABELS[criterion.timeUnit as keyof typeof TIME_LABELS],
-                }}
-              />
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
-                <Threshold
-                  chartProps={chartProps}
-                  id={`threshold-${generateUniqueKey(criterion)}`}
-                  threshold={criterion.threshold[0]}
-                  value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
-                  valueFormatter={(d) =>
-                    metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
-                  }
-                  title={i18n.translate(
-                    'xpack.infra.metrics.alertDetailsAppSection.thresholdTitle',
-                    {
-                      defaultMessage: 'Threshold breached',
+      {rule.params.criteria.map((criterion, index) => {
+        const timeRange = getPaddedAlertTimeRange(
+          alert.fields[ALERT_START]!,
+          alert.fields[ALERT_END],
+          {
+            size: criterion.timeSize,
+            unit: criterion.timeUnit,
+          }
+        );
+        return (
+          <EuiFlexItem key={generateUniqueKey(criterion)}>
+            <EuiPanel hasBorder hasShadow={false}>
+              <EuiTitle size="xs">
+                <h4>
+                  {criterion.aggType.toUpperCase()}{' '}
+                  {'metric' in criterion ? criterion.metric : undefined}
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
+                  <Threshold
+                    chartProps={chartProps}
+                    id={`threshold-${generateUniqueKey(criterion)}`}
+                    thresholds={criterion.threshold}
+                    value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
+                    valueFormatter={(d) =>
+                      metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
                     }
-                  )}
-                  comparator={criterion.comparator}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={5}>
-                <ExpressionChart
-                  annotations={annotations}
-                  chartType={MetricsExplorerChartType.line}
-                  expression={criterion}
-                  filterQuery={rule.params.filterQueryText}
-                  groupBy={rule.params.groupBy}
-                  groupInstance={groupInstance}
-                  hideTitle
-                  timeRange={timeRange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      ))}
+                    title={i18n.translate(
+                      'xpack.infra.metrics.alertDetailsAppSection.thresholdTitle',
+                      {
+                        defaultMessage: 'Threshold breached',
+                      }
+                    )}
+                    comparator={convertToBuiltInComparators(criterion.comparator)}
+                    warning={
+                      criterion.warningThreshold &&
+                      criterion.warningComparator && {
+                        thresholds: criterion.warningThreshold,
+                        comparator: convertToBuiltInComparators(criterion.warningComparator),
+                      }
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={5}>
+                  <ExpressionChart
+                    annotations={annotations}
+                    chartType={MetricsExplorerChartType.line}
+                    expression={criterion}
+                    filterQuery={rule.params.filterQueryText}
+                    groupBy={rule.params.groupBy}
+                    groupInstance={groupInstance}
+                    hideTitle
+                    timeRange={timeRange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   ) : null;
 }

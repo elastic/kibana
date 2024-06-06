@@ -473,99 +473,140 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Until then, the below describe block is added to cover the tests for the
     // newly added degraded Fields Table. This must be merged under the above
     // describe block once the tech debt is fixed.
-    describe('Dataset quality flyout with degraded fields', () => {
+    //
+    // FLAKY: https://github.com/elastic/kibana/issues/184438
+    describe.skip('Dataset quality flyout with degraded fields', () => {
       const goodDatasetName = 'good';
       const degradedDatasetName = 'degraded';
       const today = new Date().toISOString();
-      before(async () => {
-        await PageObjects.svlCommonPage.loginWithRole('admin');
-        await synthtrace.index([
-          getLogsForDataset({
-            to: today,
-            count: 2,
-            dataset: goodDatasetName,
-            isMalformed: false,
-          }),
-          createDegradedFieldsRecord({
-            to: today,
-            count: 2,
-            dataset: degradedDatasetName,
-          }),
-        ]);
-        await PageObjects.datasetQuality.navigateTo();
+      describe('Degraded Fields Table with common data', () => {
+        before(async () => {
+          await PageObjects.svlCommonPage.loginWithRole('admin');
+          await synthtrace.index([
+            getLogsForDataset({
+              to: today,
+              count: 2,
+              dataset: goodDatasetName,
+              isMalformed: false,
+            }),
+            createDegradedFieldsRecord({
+              to: today,
+              count: 2,
+              dataset: degradedDatasetName,
+            }),
+          ]);
+          await PageObjects.datasetQuality.navigateTo();
+        });
+
+        after(async () => {
+          await synthtrace.clean();
+        });
+        it('shows the degraded fields table with no data when no degraded fields are present', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(goodDatasetName);
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedTableNoData
+          );
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should load the degraded fields table with data', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+          );
+
+          const rows =
+            await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+
+          expect(rows.length).to.eql(2);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should display Spark Plot for every row of degraded fields', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+          const rows =
+            await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+
+          const sparkPlots = await testSubjects.findAll(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
+          );
+
+          expect(rows.length).to.be(sparkPlots.length);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
+
+        it('should sort the table when the count table header is clicked', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+          const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
+
+          const countColumn = table['Docs count'];
+          const cellTexts = await countColumn.getCellTexts();
+
+          await countColumn.sort('ascending');
+          const sortedCellTexts = await countColumn.getCellTexts();
+
+          expect(cellTexts.reverse()).to.eql(sortedCellTexts);
+
+          await PageObjects.datasetQuality.closeFlyout();
+        });
       });
 
-      after(async () => {
-        await synthtrace.clean();
-      });
+      describe('Degraded Fields Table with data ingestion', () => {
+        before(async () => {
+          await PageObjects.svlCommonPage.loginWithRole('admin');
+          await synthtrace.index([
+            getLogsForDataset({
+              to: today,
+              count: 2,
+              dataset: goodDatasetName,
+              isMalformed: false,
+            }),
+            createDegradedFieldsRecord({
+              to: today,
+              count: 2,
+              dataset: degradedDatasetName,
+            }),
+          ]);
+          await PageObjects.datasetQuality.navigateTo();
+        });
 
-      it('shows the degraded fields table with no data when no degraded fields are present', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(goodDatasetName);
+        after(async () => {
+          await synthtrace.clean();
+        });
+        it('should update the table when new data is ingested and the flyout is refreshed using the time selector', async () => {
+          await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
 
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedTableNoData
-        );
+          const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        await PageObjects.datasetQuality.closeFlyout();
-      });
+          const countColumn = table['Docs count'];
+          const cellTexts = await countColumn.getCellTexts();
+          const singleValuePreviously = parseInt(cellTexts[0], 10);
 
-      it('should load the degraded fields table with data', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+          await synthtrace.index([
+            createDegradedFieldsRecord({
+              to: today,
+              count: 2,
+              dataset: degradedDatasetName,
+            }),
+          ]);
 
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
-        );
+          await PageObjects.datasetQuality.refreshFlyout();
 
-        const rows =
-          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+          const updatedCellTexts = await countColumn.getCellTexts();
 
-        expect(rows.length).to.eql(2);
+          const singleValueNow = parseInt(updatedCellTexts[0], 10);
 
-        await PageObjects.datasetQuality.closeFlyout();
-      });
+          expect(singleValueNow).to.be(singleValuePreviously * 2);
 
-      it('should sort the table when the count table header is clicked', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
-
-        const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-
-        const countColumn = table.Count;
-        const cellTexts = await countColumn.getCellTexts();
-
-        await countColumn.sort('ascending');
-        const sortedCellTexts = await countColumn.getCellTexts();
-
-        expect(cellTexts.reverse()).to.eql(sortedCellTexts);
-
-        await PageObjects.datasetQuality.closeFlyout();
-      });
-
-      it('should update the table when new data is ingested and the flyout is refreshed using the time selector', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
-
-        const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-
-        const countColumn = table.Count;
-        const cellTexts = await countColumn.getCellTexts();
-
-        await synthtrace.index([
-          createDegradedFieldsRecord({
-            to: today,
-            count: 2,
-            dataset: degradedDatasetName,
-          }),
-        ]);
-
-        await PageObjects.datasetQuality.refreshFlyout();
-
-        const updatedCellTexts = await countColumn.getCellTexts();
-
-        const singleValuePreviously = parseInt(cellTexts[0], 10);
-        const singleValueNow = parseInt(updatedCellTexts[0], 10);
-
-        expect(singleValueNow).to.be(singleValuePreviously * 2);
-
-        await PageObjects.datasetQuality.closeFlyout();
+          await PageObjects.datasetQuality.closeFlyout();
+        });
       });
     });
   });
