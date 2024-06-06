@@ -551,6 +551,8 @@ export interface DocLinks {
     remoteESOoutput: string;
     performancePresets: string;
     scalingKubernetesResourcesAndLimits: string;
+    roleAndPrivileges: string;
+    proxiesSettings: string;
   }>;
   readonly ecs: {
     readonly guide: string;

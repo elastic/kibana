@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
@@ -12,16 +13,15 @@ import React, { useEffect } from 'react';
 import {
   noMetricIndicesPromptDescription,
   noMetricIndicesPromptPrimaryActionTitle,
+  NoRemoteCluster,
 } from '../../components/empty_states';
-import { useSourceContext } from '../../containers/metrics_source';
+import { SourceErrorPage } from '../../components/source_error_page';
+import { SourceLoadingPage } from '../../components/source_loading_page';
+import { useMetricsDataViewContext, useSourceContext } from '../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { ErrorCallout } from './hosts/components/error_callout';
 
-interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
-  hasData?: boolean;
-}
-
-export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
-  hasData = true,
+export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   'data-test-subj': _dataTestSubj,
   ...pageTemplateProps
 }) => {
@@ -31,13 +31,18 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
       observabilityShared: {
         navigation: { PageTemplate },
       },
+      share,
       docLinks,
     },
   } = useKibanaContextForPlugin();
 
-  const { source } = useSourceContext();
+  const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
+  const href = onboardingLocator?.getRedirectUrl({ category: 'infra' });
+  const { source, error: sourceError, loadSource, isLoading } = useSourceContext();
+  const { error: dataViewLoadError, refetch: loadDataView } = useMetricsDataViewContext();
+  const { remoteClustersExist, metricIndicesExist } = source?.status ?? {};
 
-  const noDataConfig: NoDataConfig | undefined = hasData
+  const noDataConfig: NoDataConfig | undefined = metricIndicesExist
     ? undefined
     : {
         solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
@@ -47,6 +52,7 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
           beats: {
             title: noMetricIndicesPromptPrimaryActionTitle,
             description: noMetricIndicesPromptDescription,
+            href,
           },
         },
         docsLink: docLinks.links.observability.guide,
@@ -64,7 +70,7 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
         },
       ],
       starterPrompts: [
-        ...(!hasData
+        ...(!metricIndicesExist
           ? [
               {
                 title: i18n.translate(
@@ -85,11 +91,37 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
           : []),
       ],
     });
-  }, [hasData, setScreenContext, source]);
+  }, [metricIndicesExist, setScreenContext, source]);
+
+  if (isLoading && !source) return <SourceLoadingPage />;
+
+  if (!remoteClustersExist) {
+    return <NoRemoteCluster />;
+  }
+
+  if (sourceError) {
+    <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;
+  }
+
+  if (dataViewLoadError) {
+    <ErrorCallout
+      error={dataViewLoadError}
+      titleOverride={i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataviewTitle', {
+        defaultMessage: 'Error creating Data View',
+      })}
+      messageOverride={i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
+        defaultMessage:
+          'There was an error trying to create a Data View: {metricAlias}. Try reloading the page.',
+        values: { metricAlias: source?.configuration.metricAlias ?? '' },
+      })}
+      onTryAgainClick={loadDataView}
+      hasTryAgainButton
+    />;
+  }
 
   return (
     <PageTemplate
-      data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
+      data-test-subj={metricIndicesExist ? _dataTestSubj : 'noDataPage'}
       noDataConfig={noDataConfig}
       {...pageTemplateProps}
     />

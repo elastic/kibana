@@ -16,6 +16,7 @@ import {
   EuiBasicTable,
   EuiLink,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +24,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
+import { getRootIntegrations } from '../../../../../../common/services';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   useAuthz,
@@ -164,24 +166,45 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <span>
-                {'('}
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.agentPolicyList.agentsColumn.totalAgentsTooltip"
-                      defaultMessage="Total agents"
-                    />
-                  }
-                >
-                  <LinkedAgentCount
-                    count={agents}
-                    agentPolicyId={agentPolicy.id}
-                    showAgentText={false}
-                  />
-                </EuiToolTip>
-                {')'}
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyList.agentsColumn.totalAgentsTooltipWrapper"
+                  defaultMessage="({message})"
+                  values={{
+                    message: (
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicyList.agentsColumn.totalAgentsTooltip"
+                            defaultMessage="Total agents"
+                          />
+                        }
+                      >
+                        <LinkedAgentCount
+                          count={agents}
+                          agentPolicyId={agentPolicy.id}
+                          showAgentText={false}
+                        />
+                      </EuiToolTip>
+                    ),
+                  }}
+                />
               </span>
             </EuiFlexItem>
+            {getRootIntegrations(agentPolicy.package_policies || []).length > 0 &&
+              (agentPolicy.unprivileged_agents || 0) > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="warning"
+                    color="warning"
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyList.agentsColumn.containsUnprivilegedAgentsWarning"
+                        defaultMessage="This agent policy contains integrations that require Elastic Agents to have root privileges. Some enrolled agents are running in unprivileged mode."
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              )}
           </EuiFlexGroup>
         ),
       },

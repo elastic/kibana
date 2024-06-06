@@ -12,7 +12,6 @@ describe('navTabsHosts', () => {
   test('it should skip anomalies tab if without mlUserPermission', () => {
     const tabs = navTabsHosts({
       hasMlUserPermissions: false,
-      isRiskyHostsEnabled: false,
     });
     expect(tabs).toHaveProperty(HostsTableType.hosts);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
@@ -23,7 +22,6 @@ describe('navTabsHosts', () => {
   test('it should display anomalies tab if with mlUserPermission', () => {
     const tabs = navTabsHosts({
       hasMlUserPermissions: true,
-      isRiskyHostsEnabled: false,
     });
     expect(tabs).toHaveProperty(HostsTableType.hosts);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
@@ -31,21 +29,9 @@ describe('navTabsHosts', () => {
     expect(tabs).toHaveProperty(HostsTableType.events);
   });
 
-  test('it should skip risk tab if without hostRisk', () => {
+  test('it should display risk tab', () => {
     const tabs = navTabsHosts({
       hasMlUserPermissions: false,
-      isRiskyHostsEnabled: false,
-    });
-    expect(tabs).toHaveProperty(HostsTableType.hosts);
-    expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
-    expect(tabs).not.toHaveProperty(HostsTableType.risk);
-    expect(tabs).toHaveProperty(HostsTableType.events);
-  });
-
-  test('it should display risk tab if with hostRisk', () => {
-    const tabs = navTabsHosts({
-      hasMlUserPermissions: false,
-      isRiskyHostsEnabled: true,
     });
     expect(tabs).toHaveProperty(HostsTableType.hosts);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);

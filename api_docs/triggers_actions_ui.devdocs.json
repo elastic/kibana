@@ -1205,9 +1205,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -3634,9 +3634,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -3675,53 +3675,6 @@
             "label": "total",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.Comparator",
-        "type": "Interface",
-        "tags": [],
-        "label": "Comparator",
-        "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.Comparator.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.Comparator.value",
-            "type": "string",
-            "tags": [],
-            "label": "value",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.Comparator.requiredValues",
-            "type": "number",
-            "tags": [],
-            "label": "requiredValues",
-            "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4163,9 +4116,9 @@
             "signature": [
               "Omit<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
@@ -4195,9 +4148,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4211,9 +4164,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4227,9 +4180,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -4519,9 +4472,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -5671,9 +5624,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -5687,9 +5640,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -5703,9 +5656,9 @@
               },
               "<",
               {
-                "pluginId": "alerting",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibAlertingPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
@@ -6009,18 +5962,6 @@
         "label": "AlertProvidedActionVariables",
         "description": [],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.COMPARATORS",
-        "type": "Enum",
-        "tags": [],
-        "label": "COMPARATORS",
-        "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6451,9 +6392,9 @@
         "signature": [
           "Omit<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
@@ -6565,7 +6506,7 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6588,9 +6529,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -6604,9 +6545,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -6620,9 +6561,9 @@
           },
           "<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
@@ -6643,23 +6584,23 @@
         "signature": [
           "Omit<",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.RuleAction",
             "text": "RuleAction"
           },
           ", \"alertsFilter\"> & { alertsFilter?: ",
           {
-            "pluginId": "alerting",
+            "pluginId": "@kbn/alerting-types",
             "scope": "common",
-            "docId": "kibAlertingPluginApi",
+            "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.SanitizedAlertsFilter",
             "text": "SanitizedAlertsFilter"
           },
           " | undefined; }"
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "path": "packages/kbn-alerting-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7049,7 +6990,7 @@
         "tags": [],
         "label": "builtInComparators",
         "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7060,7 +7001,7 @@
             "tags": [],
             "label": "[COMPARATORS.GREATER_THAN]",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7071,7 +7012,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7084,14 +7025,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "triggersActionsUi",
-                    "scope": "public",
-                    "docId": "kibTriggersActionsUiPluginApi",
-                    "section": "def-public.COMPARATORS",
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
                     "text": "COMPARATORS"
                   }
                 ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7102,7 +7043,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7115,7 +7056,7 @@
             "tags": [],
             "label": "[COMPARATORS.GREATER_THAN_OR_EQUALS]",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7126,7 +7067,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7139,14 +7080,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "triggersActionsUi",
-                    "scope": "public",
-                    "docId": "kibTriggersActionsUiPluginApi",
-                    "section": "def-public.COMPARATORS",
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
                     "text": "COMPARATORS"
                   }
                 ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7157,7 +7098,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7170,7 +7111,7 @@
             "tags": [],
             "label": "[COMPARATORS.LESS_THAN]",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7181,7 +7122,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7194,14 +7135,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "triggersActionsUi",
-                    "scope": "public",
-                    "docId": "kibTriggersActionsUiPluginApi",
-                    "section": "def-public.COMPARATORS",
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
                     "text": "COMPARATORS"
                   }
                 ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7212,7 +7153,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7225,7 +7166,7 @@
             "tags": [],
             "label": "[COMPARATORS.LESS_THAN_OR_EQUALS]",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7236,7 +7177,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7249,14 +7190,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "triggersActionsUi",
-                    "scope": "public",
-                    "docId": "kibTriggersActionsUiPluginApi",
-                    "section": "def-public.COMPARATORS",
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
                     "text": "COMPARATORS"
                   }
                 ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7267,7 +7208,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7280,7 +7221,7 @@
             "tags": [],
             "label": "[COMPARATORS.BETWEEN]",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7291,7 +7232,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7304,14 +7245,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "triggersActionsUi",
-                    "scope": "public",
-                    "docId": "kibTriggersActionsUiPluginApi",
-                    "section": "def-public.COMPARATORS",
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
                     "text": "COMPARATORS"
                   }
                 ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7322,7 +7263,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7335,7 +7276,7 @@
             "tags": [],
             "label": "[COMPARATORS.NOT_BETWEEN]",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -7346,7 +7287,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7359,14 +7300,14 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "triggersActionsUi",
-                    "scope": "public",
-                    "docId": "kibTriggersActionsUiPluginApi",
-                    "section": "def-public.COMPARATORS",
+                    "pluginId": "@kbn/alerting-comparators",
+                    "scope": "common",
+                    "docId": "kibKbnAlertingComparatorsPluginApi",
+                    "section": "def-common.COMPARATORS",
                     "text": "COMPARATORS"
                   }
                 ],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -7377,7 +7318,7 @@
                 "tags": [],
                 "label": "requiredValues",
                 "description": [],
-                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -7721,9 +7662,9 @@
             "ActionAccordionFormProps",
             ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleAction",
               "text": "RuleAction"
             },
@@ -7747,9 +7688,9 @@
                 "ActionAccordionFormProps",
                 ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
                 {
-                  "pluginId": "alerting",
+                  "pluginId": "@kbn/alerting-types",
                   "scope": "common",
-                  "docId": "kibAlertingPluginApi",
+                  "docId": "kibKbnAlertingTypesPluginApi",
                   "section": "def-common.RuleAction",
                   "text": "RuleAction"
                 },
@@ -7849,17 +7790,17 @@
           "signature": [
             "<Params extends ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
             " = ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -7919,17 +7860,17 @@
           "signature": [
             "<Params extends ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
             " = ",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -8586,9 +8527,9 @@
             },
             "<",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -8602,9 +8543,9 @@
             },
             "<",
             {
-              "pluginId": "alerting",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibAlertingPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.RuleTypeParams",
               "text": "RuleTypeParams"
             },
@@ -8631,9 +8572,9 @@
                 },
                 "<",
                 {
-                  "pluginId": "alerting",
+                  "pluginId": "@kbn/alerting-types",
                   "scope": "common",
-                  "docId": "kibAlertingPluginApi",
+                  "docId": "kibKbnAlertingTypesPluginApi",
                   "section": "def-common.RuleTypeParams",
                   "text": "RuleTypeParams"
                 },
