@@ -7,8 +7,6 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { createCustomRule } from './detection_rules_client';
-
 import {
   getCreateRulesSchemaMock,
   getCreateMachineLearningRulesSchemaMock,
@@ -17,23 +15,28 @@ import {
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
+import { createDetectionRulesClient } from './detection_rules_client';
+import type { IDetectionRulesClient } from './detection_rules_client';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 
 describe('DetectionRulesClient.createCustomRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let detectionRulesClient: IDetectionRulesClient;
+
   const mlAuthz = (buildMlAuthz as jest.Mock)();
 
   beforeEach(() => {
     jest.resetAllMocks();
     rulesClient = rulesClientMock.create();
+    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
   });
 
   it('should create a rule with the correct parameters and options', async () => {
     const params = getCreateRulesSchemaMock();
 
-    await createCustomRule(rulesClient, { params }, mlAuthz);
+    await detectionRulesClient.createCustomRule({ params });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -44,8 +47,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -56,18 +57,16 @@ describe('DetectionRulesClient.createCustomRule', () => {
     });
 
     await expect(
-      createCustomRule(rulesClient, { params: getCreateMachineLearningRulesSchemaMock() }, mlAuthz)
+      detectionRulesClient.createCustomRule({ params: getCreateMachineLearningRulesSchemaMock() })
     ).rejects.toThrow('mocked MLAuth error');
 
     expect(rulesClient.create).not.toHaveBeenCalled();
   });
 
   it('calls the rulesClient with legacy ML params', async () => {
-    await createCustomRule(
-      rulesClient,
-      { params: getCreateMachineLearningRulesSchemaMock() },
-      mlAuthz
-    );
+    await detectionRulesClient.createCustomRule({
+      params: getCreateMachineLearningRulesSchemaMock(),
+    });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -78,23 +77,17 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
 
   it('calls the rulesClient with ML params', async () => {
-    await createCustomRule(
-      rulesClient,
-      {
-        params: {
-          ...getCreateMachineLearningRulesSchemaMock(),
-          machine_learning_job_id: ['new_job_1', 'new_job_2'],
-        },
+    await detectionRulesClient.createCustomRule({
+      params: {
+        ...getCreateMachineLearningRulesSchemaMock(),
+        machine_learning_job_id: ['new_job_1', 'new_job_2'],
       },
-      mlAuthz
-    );
+    });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -105,8 +98,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
@@ -115,13 +106,9 @@ describe('DetectionRulesClient.createCustomRule', () => {
     const params = getCreateThreatMatchRulesSchemaMock();
     delete params.threat_indicator_path;
 
-    await createCustomRule(
-      rulesClient,
-      {
-        params,
-      },
-      mlAuthz
-    );
+    await detectionRulesClient.createCustomRule({
+      params,
+    });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -131,14 +118,13 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });
 
   it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
-    await createCustomRule(rulesClient, { params: getCreateRulesSchemaMock() }, mlAuthz);
+    await detectionRulesClient.createCustomRule({ params: getCreateRulesSchemaMock() });
+
     expect(rulesClient.create).not.toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -147,8 +133,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             immutable: false,
           }),
         }),
-        options: {},
-        allowMissingConnectorSecrets: undefined,
       })
     );
   });

@@ -29,6 +29,16 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
   } as ActionType,
+  {
+    id: '.gemini',
+    name: 'Gemini',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+    minimumLicenseRequired: 'basic',
+    isSystemActionType: true,
+    supportedFeatureIds: ['generativeAI'],
+  } as ActionType,
 ];
 
 export const mockConnectors: AIConnector[] = [
