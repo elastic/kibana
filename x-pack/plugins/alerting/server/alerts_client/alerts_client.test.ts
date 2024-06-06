@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit } from 'lodash';
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -251,13 +251,14 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
 });
 
 const getOngoingIndexedAlertDoc = (overrides = {}) => ({
-  ...omit(getNewIndexedAlertDoc(), ALERT_SEVERITY_IMPROVING),
+  ...getNewIndexedAlertDoc(),
   [EVENT_ACTION]: 'active',
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
   [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_SEVERITY_IMPROVING]: undefined,
   ...overrides,
 });
 
