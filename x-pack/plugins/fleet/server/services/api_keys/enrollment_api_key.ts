@@ -12,7 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import { toElasticsearchQuery } from '@kbn/es-query';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
@@ -106,13 +106,24 @@ export async function hasEnrollementAPIKeysForPolicy(
 
 export async function getEnrollmentAPIKey(
   esClient: ElasticsearchClient,
-  id: string
+  id: string,
+  spaceId?: string
 ): Promise<EnrollmentAPIKey> {
   try {
     const body = await esClient.get<FleetServerEnrollmentAPIKey>({
       index: ENROLLMENT_API_KEYS_INDEX,
       id,
     });
+
+    if (spaceId) {
+      if (spaceId === DEFAULT_SPACE_ID) {
+        if (body._source?.namespaces && !body._source?.namespaces.includes(DEFAULT_SPACE_ID)) {
+          throw new EnrollmentKeyNotFoundError(`Enrollment api key ${id} not found in namespace`);
+        }
+      } else if (!body._source?.namespaces?.includes(spaceId)) {
+        throw new EnrollmentKeyNotFoundError(`Enrollment api key ${id} not found in namespace`);
+      }
+    }
 
     // @ts-expect-error esDocToEnrollmentApiKey doesn't accept optional _source
     return esDocToEnrollmentApiKey(body);
@@ -132,12 +143,13 @@ export async function getEnrollmentAPIKey(
 export async function deleteEnrollmentApiKey(
   esClient: ElasticsearchClient,
   id: string,
-  forceDelete = false
+  forceDelete = false,
+  spaceId?: string
 ) {
   const logger = appContextService.getLogger();
   logger.debug(`Deleting enrollment API key ${id}`);
 
-  const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
+  const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id, spaceId);
 
   auditLoggingService.writeCustomAuditLog({
     message: `User deleting enrollment API key [id=${enrollmentApiKey.id}] [api_key_id=${enrollmentApiKey.api_key_id}]`,
