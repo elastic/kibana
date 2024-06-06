@@ -42,6 +42,7 @@ pageLoadAssetSize:
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
+  esqlDataGrid: 24598
   esUiShared: 326654
   eventAnnotation: 30000
   eventAnnotationListing: 25841
@@ -62,6 +63,7 @@ pageLoadAssetSize:
   expressionXY: 45000
   features: 21723
   fieldFormats: 65209
+  fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
