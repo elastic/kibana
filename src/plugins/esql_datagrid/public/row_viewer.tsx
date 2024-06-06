@@ -118,7 +118,7 @@ export function RowViewer({
       onAddColumn(columnName);
       toastNotifications?.toasts?.addSuccess?.(
         i18n.translate('esqlDataGrid.grid.flyout.toastColumnAdded', {
-          defaultMessage: `Column '{columnName}' was added`,
+          defaultMessage: `Column ''{columnName}'' was added`,
           values: { columnName },
         })
       );
@@ -131,7 +131,7 @@ export function RowViewer({
       onRemoveColumn(columnName);
       toastNotifications?.toasts?.addSuccess?.(
         i18n.translate('esqlDataGrid.grid.flyout.toastColumnRemoved', {
-          defaultMessage: `Column '{columnName}' was removed`,
+          defaultMessage: `Column ''{columnName}'' was removed`,
           values: { columnName },
         })
       );
@@ -149,6 +149,7 @@ export function RowViewer({
         onAddColumn={addColumn}
         onRemoveColumn={removeColumn}
         textBasedHits={hits}
+        decreaseAvailableHeightBy={80} // flyout footer height
       />
     ),
     [actualHit, addColumn, columns, columnsMeta, dataView, hits, removeColumn]
