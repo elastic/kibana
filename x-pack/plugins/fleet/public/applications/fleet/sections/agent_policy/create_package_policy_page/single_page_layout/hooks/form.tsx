@@ -31,10 +31,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
-import {
-  getMaxPackageName,
-  isRootPrivilegesRequired,
-} from '../../../../../../../../common/services';
+import { getMaxPackageName } from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -262,18 +259,12 @@ export function useOnSubmit({
         setFormState('INVALID');
         return;
       }
-      if (agentCount !== 0 && !isAgentlessIntegration(packageInfo) && formState !== 'CONFIRM') {
-        setFormState('CONFIRM');
-        return;
-      }
       if (
-        packageInfo &&
-        isRootPrivilegesRequired(packageInfo) &&
-        (agentPolicy?.unprivileged_agents ?? 0) > 0 &&
-        formState !== 'CONFIRM' &&
-        formState !== 'CONFIRM_UNPRIVILEGED'
+        agentCount !== 0 &&
+        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
+        formState !== 'CONFIRM'
       ) {
-        setFormState('CONFIRM_UNPRIVILEGED');
+        setFormState('CONFIRM');
         return;
       }
       let createdPolicy = overrideCreatedAgentPolicy;
@@ -297,7 +288,6 @@ export function useOnSubmit({
               await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
             }
           }
-
           createdPolicy = await createAgentPolicy({
             newAgentPolicy,
             packagePolicy,
@@ -395,7 +385,7 @@ export function useOnSubmit({
           }),
           text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy.`,
                 values: {
                   agentPolicyName: agentPolicy!.name,
                 },
