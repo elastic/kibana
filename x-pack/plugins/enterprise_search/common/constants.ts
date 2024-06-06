@@ -186,7 +186,7 @@ export const INFERENCE_ENDPOINTS_PLUGIN = {
     defaultMessage: 'Relevance',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
-    defaultMessage: 'View for managing inference endpoints.', // TODO: Make sure this content is correct.
+    defaultMessage: 'View for managing inference endpoints.',
   }),
   URL: '/app/enterprise_search/relevance',
   LOGO: 'logoEnterpriseSearch',
