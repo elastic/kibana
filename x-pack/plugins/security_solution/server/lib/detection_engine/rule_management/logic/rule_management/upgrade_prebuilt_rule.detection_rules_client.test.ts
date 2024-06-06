@@ -7,8 +7,6 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-import { upgradePrebuiltRule } from './detection_rules_client';
-
 import {
   getCreateEqlRuleSchemaMock,
   getCreateRulesSchemaMock,
@@ -21,6 +19,8 @@ import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks
 
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
+import { createDetectionRulesClient } from './detection_rules_client';
+import type { IDetectionRulesClient } from './detection_rules_client';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -28,10 +28,13 @@ jest.mock('./read_rules');
 
 describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  let detectionRulesClient: IDetectionRulesClient;
+
   const mlAuthz = (buildMlAuthz as jest.Mock)();
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
+    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
   });
 
   it('throws if no matching rule_id is found', async () => {
@@ -42,7 +45,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     };
 
     (readRules as jest.Mock).mockResolvedValue(null);
-    await expect(upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz)).rejects.toThrow(
+    await expect(detectionRulesClient.upgradePrebuiltRule({ ruleAsset })).rejects.toThrow(
       `Failed to find rule ${ruleAsset.rule_id}`
     );
   });
@@ -58,7 +61,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       rule_id: 'rule-id',
     };
 
-    await expect(upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz)).rejects.toThrow(
+    await expect(detectionRulesClient.upgradePrebuiltRule({ ruleAsset })).rejects.toThrow(
       'mocked MLAuth error'
     );
 
@@ -100,12 +103,12 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     });
 
     it('deletes the old rule ', async () => {
-      await upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz);
+      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
       expect(rulesClient.delete).toHaveBeenCalled();
     });
 
     it('creates a new rule with the new type and expected params of the original rules', async () => {
-      await upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz);
+      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
       expect(rulesClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -127,7 +130,6 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
           options: {
             id: installedRule.id, // id is maintained
           },
-          allowMissingConnectorSecrets: undefined,
         })
       );
     });
@@ -151,7 +153,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     });
 
     it('patches the existing rule with the new params from the rule asset', async () => {
-      await upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz);
+      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
