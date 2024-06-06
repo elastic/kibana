@@ -26,15 +26,12 @@ import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../.
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 
 const customisationService = createCustomizationService();
-const { profilesManagerMock } = createContextAwarenessMocks();
 
 async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
 
-  services.profilesManager = profilesManagerMock;
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
@@ -146,7 +143,7 @@ describe('Discover documents layout', () => {
         id: 'data_table',
         logsEnabled: true,
       });
-      await profilesManagerMock.resolveRootProfile({ solutionNavId: 'test' });
+      await discoverServiceMock.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
       const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
       const discoverGridComponent = component.find(DiscoverGrid);
       expect(discoverGridComponent.exists()).toBeTruthy();

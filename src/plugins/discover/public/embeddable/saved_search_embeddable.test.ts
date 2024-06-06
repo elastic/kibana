@@ -28,7 +28,6 @@ import { getDiscoverLocatorParams } from './get_discover_locator_params';
 import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_embeddable';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { DiscoverGrid } from '../components/discover_grid';
-import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 
 jest.mock('./get_discover_locator_params', () => {
   const actual = jest.requireActual('./get_discover_locator_params');
@@ -157,9 +156,6 @@ describe('saved search embeddable', () => {
       }
     );
 
-    const { profilesManagerMock } = createContextAwarenessMocks();
-
-    servicesMock.profilesManager = profilesManagerMock;
     servicesMock.core.chrome.getActiveSolutionNavId$ = () => new BehaviorSubject('test');
   });
 
