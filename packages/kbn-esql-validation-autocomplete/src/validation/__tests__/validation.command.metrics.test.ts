@@ -205,6 +205,7 @@ describe('validation', () => {
             'metrics a_index avg(numberField), percentile(numberField, 50) + 1 by ipField',
             []
           );
+          await expectErrors('metrics a_index avg(numberField) by stringField | limit 100', []);
           for (const op of ['+', '-', '*', '/', '%']) {
             await expectErrors(
               `metrics a_index avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
