@@ -14,6 +14,13 @@ export const ERROR_GENERATING_ATTACK_DISCOVERIES = i18n.translate(
   }
 );
 
+export const CONNECTOR_ERROR = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.errorConnector',
+  {
+    defaultMessage: 'No connector selected, select a connector to use attack discovery',
+  }
+);
+
 export const SHOW_REAL_VALUES = i18n.translate(
   'xpack.securitySolution.attackDiscovery.showRealValuesLabel',
   {

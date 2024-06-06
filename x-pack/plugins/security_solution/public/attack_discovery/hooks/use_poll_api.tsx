@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as uuid from 'uuid';
 import type { AttackDiscoveryStatus, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
 import {
@@ -23,6 +23,7 @@ export interface Props {
   http: HttpSetup;
   setApproximateFutureTime: (date: Date | null) => void;
   toasts?: IToasts;
+  connectorId?: string;
 }
 
 export interface AttackDiscoveryData extends AttackDiscoveryResponse {
@@ -33,15 +34,27 @@ export const usePollApi = ({
   http,
   setApproximateFutureTime,
   toasts,
+  connectorId,
 }: Props): {
   status: AttackDiscoveryStatus | null;
   data: AttackDiscoveryData | null;
-  pollApi: (connectorId: string) => void;
+  pollApi: () => void;
 } => {
   const [status, setStatus] = useState<AttackDiscoveryStatus | null>(null);
   const [data, setData] = useState<AttackDiscoveryData | null>(null);
+  const currentConnectorId = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    currentConnectorId.current = connectorId; // Will set it to true on mount ...
+    return () => {
+      currentConnectorId.current = undefined;
+    }; // ... and to false on unmount
+  }, [connectorId]);
   const handleResponse = useCallback(
-    (responseData: AttackDiscoveryResponse, connectorId: string) => {
+    (responseData: AttackDiscoveryResponse) => {
+      if (connectorId == null || connectorId === '') {
+        throw new Error('Invalid connector id');
+      }
       setStatus(responseData.status);
       setApproximateFutureTime(
         moment(responseData.updatedAt).add(responseData.averageIntervalMs, 'milliseconds').toDate()
@@ -58,52 +71,55 @@ export const usePollApi = ({
         })),
       });
     },
-    [setApproximateFutureTime]
+    [connectorId, setApproximateFutureTime]
   );
-  const pollApi = useCallback(
-    async (connectorId: string) => {
-      try {
-        // call the internal API to generate attack discoveries:
-        const rawResponse = await http.fetch(
-          `/internal/elastic_assistant/attack_discovery/${connectorId}`,
-          {
-            method: 'GET',
-            version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-          }
-        );
-
-        const parsedResponse = AttackDiscoveryGetResponse.safeParse(rawResponse);
-
-        if (!parsedResponse.success) {
-          throw new Error('Failed to parse the attack discovery GET response');
+  const pollApi = useCallback(async () => {
+    try {
+      if (connectorId == null || connectorId === '') {
+        throw new Error('Invalid connector id');
+      }
+      // call the internal API to generate attack discoveries:
+      const rawResponse = await http.fetch(
+        `/internal/elastic_assistant/attack_discovery/${connectorId}`,
+        {
+          method: 'GET',
+          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         }
-        if (parsedResponse.data.entryExists === false || parsedResponse.data.data == null) {
-          setStatus(null);
-          setData(null);
-        } else if (
-          parsedResponse.data.data.status === attackDiscoveryStatus.succeeded ||
-          parsedResponse.data.data.status === attackDiscoveryStatus.failed
-        ) {
-          handleResponse(parsedResponse.data.data, connectorId);
-        } else if (parsedResponse.data.data.status === attackDiscoveryStatus.running) {
-          handleResponse(parsedResponse.data.data, connectorId);
-          // poll every 3 seconds if attack discovery is running
-          setTimeout(() => pollApi(connectorId), 3000);
-        } else {
-          throw new Error('Invalid status from attack discovery GET response');
-        }
-      } catch (error) {
+      );
+
+      const parsedResponse = AttackDiscoveryGetResponse.safeParse(rawResponse);
+
+      if (!parsedResponse.success) {
+        throw new Error('Failed to parse the attack discovery GET response');
+      }
+      if (parsedResponse.data.entryExists === false || parsedResponse.data.data == null) {
         setStatus(null);
         setData(null);
-
-        toasts?.addDanger(error, {
-          title: ERROR_GENERATING_ATTACK_DISCOVERIES,
-          text: getErrorToastText(error),
-        });
+      } else if (
+        parsedResponse.data.data.status === attackDiscoveryStatus.succeeded ||
+        parsedResponse.data.data.status === attackDiscoveryStatus.failed
+      ) {
+        handleResponse(parsedResponse.data.data);
+      } else if (parsedResponse.data.data.status === attackDiscoveryStatus.running) {
+        handleResponse(parsedResponse.data.data);
+        // poll every 3 seconds if attack discovery is running
+        setTimeout(() => {
+          // react is being annoying and the setTimeout is still running after the connectorId changes
+          if (currentConnectorId.current === connectorId) pollApi();
+        }, 3000);
+      } else {
+        throw new Error('Invalid status from attack discovery GET response');
       }
-    },
-    [handleResponse, http, toasts]
-  );
+    } catch (error) {
+      setStatus(null);
+      setData(null);
+
+      toasts?.addDanger(error, {
+        title: ERROR_GENERATING_ATTACK_DISCOVERIES,
+        text: getErrorToastText(error),
+      });
+    }
+  }, [connectorId, handleResponse, http, toasts]);
 
   return { status, data, pollApi };
 };

@@ -21,7 +21,7 @@ import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assista
 import { usePollApi } from '../hooks/use_poll_api';
 import { useKibana } from '../../common/lib/kibana';
 import { getErrorToastText, getFallbackActionTypeId } from '../pages/helpers';
-import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
+import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import { getRequestBody } from './helpers';
 
 export interface UseAttackDiscovery {
@@ -62,7 +62,7 @@ export const useAttackDiscovery = ({
     status: pollStatus,
     pollApi,
     data: pollData,
-  } = usePollApi({ http, setApproximateFutureTime, toasts });
+  } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -103,13 +103,15 @@ export const useAttackDiscovery = ({
   ]);
 
   useEffect(() => {
-    pollApi(requestBody.connectorId);
-    setAlertsContextCount(null);
-    setLastUpdated(null);
-    setReplacements({});
-    setAttackDiscoveries([]);
-    setGenerationIntervals([]);
-  }, [pollApi, requestBody.connectorId]);
+    if (connectorId !== null && connectorId !== '') {
+      pollApi();
+      setAlertsContextCount(null);
+      setLastUpdated(null);
+      setReplacements({});
+      setAttackDiscoveries([]);
+      setGenerationIntervals([]);
+    }
+  }, [pollApi, connectorId]);
 
   useEffect(() => {
     setIsLoading(pollStatus === 'running');
@@ -128,6 +130,9 @@ export const useAttackDiscovery = ({
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(async () => {
     try {
+      if (requestBody.connectorId === '') {
+        throw new Error(CONNECTOR_ERROR);
+      }
       setLoadingConnectorId?.(connectorId ?? null);
       setIsLoading(true);
       setApproximateFutureTime(null);
@@ -145,7 +150,7 @@ export const useAttackDiscovery = ({
       }
 
       if (parsedResponse.data.status === 'running') {
-        await pollApi(requestBody.connectorId);
+        await pollApi();
       }
     } catch (error) {
       toasts?.addDanger(error, {
