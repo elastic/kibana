@@ -6,11 +6,11 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { generateTransform } from './generate_transform';
+import { generateHistoryProcessors } from './generate_history_processors';
 
-describe('generateTransform(definition)', () => {
-  it('should generate a valid summary transform', () => {
-    const transform = generateTransform(entityDefinition);
-    expect(transform).toMatchSnapshot();
+describe('generateHistoryProcessors(definition)', () => {
+  it('should genearte a valid pipeline', () => {
+    const processors = generateHistoryProcessors(entityDefinition, 'default');
+    expect(processors).toMatchSnapshot();
   });
 });
