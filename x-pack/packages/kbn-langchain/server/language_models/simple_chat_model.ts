@@ -17,6 +17,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { parseGeminiStream } from '../utils/gemini';
 import { parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
 
@@ -71,8 +72,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.llmType = llmType ?? 'ActionsClientSimpleChatModel';
     this.model = model;
     this.temperature = temperature;
-    // only enable streaming for bedrock
-    this.streaming = streaming && llmType === 'bedrock';
+    this.streaming = streaming;
   }
 
   _llmType() {
@@ -162,9 +162,11 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     let streamingFinished = false;
     const finalOutputStopRegex = /(?<!\\)\"/;
     const handleLLMNewToken = async (token: string) => {
+      console.log('stephhh handleLlMNewToken', token);
       if (finalOutputIndex === -1) {
         // Remove whitespace to simplify parsing
         currentOutput += token.replace(/\s/g, '');
+        console.log('stephhh currentOutput', currentOutput);
         if (currentOutput.includes(finalOutputStartToken)) {
           finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
         }
@@ -173,17 +175,14 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         if (finalOutputEndIndex !== -1) {
           streamingFinished = true;
         } else {
+          console.log('stephhh PUSH THIS TOKEN', token);
           await runManager?.handleLLMNewToken(token);
         }
       }
     };
+    const streamParser = this.llmType === 'bedrock' ? parseBedrockStream : parseGeminiStream;
 
-    const parsed = await parseBedrockStream(
-      readable,
-      this.#logger,
-      this.#signal,
-      handleLLMNewToken
-    );
+    const parsed = await streamParser(readable, this.#logger, this.#signal, handleLLMNewToken);
 
     return parsed; // per the contact of _call, return a string
   }
