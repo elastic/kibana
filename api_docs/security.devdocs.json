@@ -231,6 +231,28 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthorizationServiceSetup.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nA set of methods to work with Kibana user roles."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.RolesAPIClient",
+                "text": "RolesAPIClient"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
