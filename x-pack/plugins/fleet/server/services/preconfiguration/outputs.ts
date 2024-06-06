@@ -129,9 +129,9 @@ export async function createOrUpdatePreconfiguredOutputs(
           });
           // Bump revision of all policies using that output
           if (outputData.is_default || outputData.is_default_monitoring) {
-            await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+            await agentPolicyService.bumpAllAgentPolicies(esClient);
           } else {
-            await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+            await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
           }
         }
       }

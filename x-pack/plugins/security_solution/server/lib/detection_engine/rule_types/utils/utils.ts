@@ -31,6 +31,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -1005,4 +1006,27 @@ export const getMaxSignalsWarning = (): string => {
 
 export const getSuppressionMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
+};
+
+export const getDisabledActionsWarningText = ({
+  alertsCreated,
+  disabledActions,
+}: {
+  alertsCreated: boolean;
+  disabledActions: SanitizedRuleAction[];
+}) => {
+  const uniqueActionTypes = new Set(disabledActions.map((action) => action.actionTypeId));
+
+  const actionTypesJoined = [...uniqueActionTypes].join(', ');
+
+  // This rule generated alerts but did not send external notifications because rule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics tier.
+  const alertsGeneratedText = alertsCreated
+    ? 'This rule generated alerts but did not send external notifications because rule action'
+    : 'Rule action';
+
+  if (uniqueActionTypes.size > 1) {
+    return `${alertsGeneratedText} connectors ${actionTypesJoined} are not enabled. To send notifications, you need a higher Security Analytics license / tier`;
+  } else {
+    return `${alertsGeneratedText} connector ${actionTypesJoined} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
+  }
 };
