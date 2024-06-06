@@ -409,31 +409,40 @@ export const ModelsList: FC<Props> = ({
   /**
    * Updates model list with download status
    */
-  const fetchDownloadStatus = useCallback(async () => {
-    try {
-      const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
+  const fetchDownloadStatus = useCallback(
+    async (fetchInProgress = new Set<string>()) => {
+      try {
+        const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
 
-      setItems((prevItems) => {
-        return prevItems.map((item) => {
-          const newItem = { ...item };
-          if (downloadStatus?.[item.model_id]) {
-            newItem.downloadState = downloadStatus?.[item.model_id];
-          } else {
-            delete newItem.downloadState;
-          }
-          return newItem;
+        setItems((prevItems) => {
+          return prevItems.map((item) => {
+            const newItem = { ...item };
+            if (downloadStatus?.[item.model_id]) {
+              fetchInProgress.add(item.model_id);
+              newItem.downloadState = downloadStatus?.[item.model_id];
+            } else {
+              if (fetchInProgress.has(item.model_id)) {
+                // Change downloading state to downloaded
+                delete newItem.downloadState;
+                newItem.state = MODEL_STATE.DOWNLOADED;
+                fetchInProgress.delete(item.model_id);
+              }
+            }
+            return newItem;
+          });
         });
-      });
 
-      if (!downloadStatus) return;
+        if (!downloadStatus) return;
 
-      // Wait for one second
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await fetchDownloadStatus();
-    } catch (e) {
-      // Fail silently
-    }
-  }, [setItems, trainedModelsApiService]);
+        // Wait for one second
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await fetchDownloadStatus(fetchInProgress);
+      } catch (e) {
+        // Fail silently
+      }
+    },
+    [setItems, trainedModelsApiService]
+  );
 
   /**
    * Unique inference types from models
