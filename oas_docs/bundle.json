@@ -499,8 +499,7 @@
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
                 }
               }
-            },
-            "description": "Get Kibana's current status."
+            }
           },
           "503": {
             "content": {
@@ -517,11 +516,11 @@
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
                 }
               }
-            },
-            "description": "Get Kibana's current status."
+            }
           }
         },
-        "summary": "Get Kibana's current status."
+        "summary": "Get Kibana's current status",
+        "tags": []
       }
     }
   },
@@ -534,5 +533,6 @@
     {
       "url": "http://localhost:5622"
     }
-  ]
+  ],
+  "tags": []
 }
