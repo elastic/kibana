@@ -58,9 +58,9 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
 
   const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
 
-  const { params, schedule, alertDelay, notifyWhen, consumer } = formData;
+  const { params, schedule, notifyWhen, consumer } = formData;
 
-  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
+  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
   const authorizedConsumers = useMemo(() => {
     if (!validConsumers?.length) {
@@ -94,10 +94,6 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
     }
     return documentationUrl;
   }, [selectedRuleTypeModel, docLinks]);
-
-  const onToggleAdvancedOptions = useCallback((isOpen) => {
-    setIsAdvancedOptionsVisible(isOpen);
-  }, []);
 
   const onChangeMetaData = useCallback(
     (newMetadata) => {
@@ -136,7 +132,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
   );
 
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
       <EuiSplitPanel.Inner color="subdued">
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
@@ -226,9 +222,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
             title={<h3>{SCOPE_TITLE}</h3>}
             description={<p>{SCOPE_DESCRIPTION_TEXT}</p>}
           >
-            <RuleConsumerSelection
-              validConsumers={authorizedConsumers}
-            />
+            <RuleConsumerSelection validConsumers={authorizedConsumers} />
           </EuiDescribedFormGroup>
         )}
         <EuiFlexItem>

@@ -48,8 +48,6 @@ const getHelpTextForInterval = (
   }
 };
 
-const labelForRuleChecked = [SCHEDULE_TITLE_PREFIX];
-
 export const RuleSchedule = () => {
   const { formData, errors = {}, minimumScheduleInterval } = useRuleFormState();
 
