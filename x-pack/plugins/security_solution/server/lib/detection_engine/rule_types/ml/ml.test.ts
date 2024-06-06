@@ -62,7 +62,7 @@ describe('ml_executor', () => {
     });
     (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
       success: true,
-      bulkCreateDuration: 0,
+      bulkCreateDuration: 21,
       createdItemsCount: 0,
       errors: [],
       createdItems: [],
@@ -178,5 +178,38 @@ describe('ml_executor', () => {
     expect(result.errors).toEqual(['my_test_job_name missing']);
   });
 
-  it.todo('returns timing information as part of the result');
+  it('returns some timing information as part of the result', async () => {
+    // ensure our mock corresponds to the job that the rule uses
+    jobsSummaryMock.mockResolvedValue(
+      mlCompleteRule.ruleParams.machineLearningJobId.map((jobId) => ({
+        id: jobId,
+        jobState: 'opened',
+        datafeedState: 'started',
+      }))
+    );
+
+    const result = await mlExecutor({
+      completeRule: mlCompleteRule,
+      tuple,
+      ml: mlMock,
+      services: alertServices,
+      ruleExecutionLogger,
+      listClient,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
+      exceptionFilter: undefined,
+      unprocessedExceptions: [],
+      wrapSuppressedHits: jest.fn(),
+      alertTimestampOverride: undefined,
+      alertWithSuppression: jest.fn(),
+      isAlertSuppressionActive: true,
+      experimentalFeatures: mockExperimentalFeatures,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        bulkCreateTimes: expect.arrayContaining([expect.any(Number)]),
+      })
+    );
+  });
 });
