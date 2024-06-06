@@ -31,6 +31,7 @@ import { OperatingSystem, validateHasWildcardWithWrongOperator } from '@kbn/secu
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import { ENTIRE_PROCESS_TREE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 import {
@@ -163,6 +164,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       indexNames,
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
+    );
+
+    const isFilterEntireProcessTreeFeatureEnabled = useIsExperimentalFeatureEnabled(
+      'filterEntireProcessTreeForEventFiltersEnabled'
     );
 
     const isEntireTreeEnabled = useMemo(
@@ -627,17 +632,19 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             </EuiText>
           </>
         )}
-        <EuiSwitch
-          checked={isEntireTreeEnabled}
-          onChange={handleFilterEntireProcessTreeOnChange}
-          label={
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.filterEntireProcessTree"
-              defaultMessage="Filter entire process tree"
-            />
-          }
-          data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
-        />
+        {isFilterEntireProcessTreeFeatureEnabled && (
+          <EuiSwitch
+            checked={isEntireTreeEnabled}
+            onChange={handleFilterEntireProcessTreeOnChange}
+            label={
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.filterEntireProcessTree"
+                defaultMessage="Filter entire process tree"
+              />
+            }
+            data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
+          />
+        )}
         {showAssignmentSection && (
           <>
             <EuiHorizontalRule />

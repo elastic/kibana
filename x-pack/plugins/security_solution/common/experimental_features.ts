@@ -257,6 +257,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the manual rule run
    */
   manualRuleRunEnabled: false,
+
+  /**
+   * Adds a new option to filter entire process tree for Management / Event Filters
+   */
+  filterEntireProcessTreeForEventFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -419,6 +419,19 @@ describe('Event filter form', () => {
   });
 
   describe('Filter entire process tree', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ filterEntireProcessTreeForEventFiltersEnabled: true });
+    });
+
+    it('should not be displayed when feature flag is disabled', () => {
+      mockedContext.setExperimentalFlag({ filterEntireProcessTreeForEventFiltersEnabled: false });
+      render();
+
+      expect(
+        renderResult.queryByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)
+      ).not.toBeInTheDocument();
+    });
+
     it('should display unchecked toggle when tags are missing', () => {
       delete formProps.item.tags;
       render();
