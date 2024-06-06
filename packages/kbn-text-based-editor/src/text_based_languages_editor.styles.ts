@@ -22,10 +22,11 @@ export const textBasedLanguageEditorStyles = (
   isCodeEditorExpandedFocused: boolean,
   hasReference: boolean,
   editorIsInline: boolean,
-  historyIsOpen: boolean
+  historyIsOpen: boolean,
+  isOnEmptyState: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
-  if (isCodeEditorExpanded) {
+  if (isCodeEditorExpanded || isOnEmptyState) {
     position = 'relative' as 'relative';
   }
   const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
