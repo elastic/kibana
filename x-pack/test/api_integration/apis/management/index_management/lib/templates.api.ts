@@ -36,7 +36,9 @@ export function templatesApi(getService: FtrProviderContext['getService']) {
       .send(payload);
 
   // Delete all templates created during tests
-  const cleanUpTemplates = async (additionalRequestHeaders: object = {}) => {
+  const cleanUpTemplates = async (
+    additionalRequestHeaders: Record<string, string | string[]> = {}
+  ) => {
     try {
       await deleteTemplates(templatesCreated).set(additionalRequestHeaders);
       templatesCreated = [];

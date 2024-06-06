@@ -7,6 +7,8 @@
 
 import {
   DEFAULT_DATASET_TYPE,
+  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
   DEFAULT_SORT_DIRECTION,
   DEFAULT_SORT_FIELD,
 } from '../../../../common/constants';
@@ -39,6 +41,19 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     namespaces: [],
     qualities: [],
   },
-  flyout: {},
+  flyout: {
+    degradedFields: {
+      table: {
+        page: 0,
+        rowsPerPage: 10,
+        sort: {
+          field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+          direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+        },
+      },
+    },
+  },
   datasets: [],
+  isSizeStatsAvailable: true,
+  nonAggregatableDatasets: [],
 };

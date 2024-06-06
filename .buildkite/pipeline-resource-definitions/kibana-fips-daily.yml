@@ -19,7 +19,7 @@ spec:
       description: Run Kibana FIPS smoke tests
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
+        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-fips-ftr-errors"
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
       repository: elastic/kibana
       branch_configuration: main
@@ -30,7 +30,7 @@ spec:
       schedules:
         daily:
           branch: main
-          cronline: 0 9 * * * America/New_York
+          cronline: 0 5 * * * America/New_York
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

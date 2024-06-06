@@ -34,6 +34,7 @@ import {
   SCOPE_DESCRIPTION_TEXT,
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
+  ALERT_DELAY_HELP_TEXT,
 } from '../translations';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
@@ -57,9 +58,9 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
 
   const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
 
-  const { params, schedule, alertDelay, notifyWhen, consumer } = formData;
+  const { params, schedule, notifyWhen, consumer } = formData;
 
-  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
+  const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
   const authorizedConsumers = useMemo(() => {
     if (!validConsumers?.length) {
@@ -135,7 +136,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
   );
 
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
       <EuiSplitPanel.Inner color="subdued">
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
@@ -238,6 +239,9 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
             data-test-subj="advancedOptionsAccordion"
             onToggle={onToggleAdvancedOptions}
             initialIsOpen={isAdvancedOptionsVisible}
+            buttonProps={{
+              'data-test-subj': 'advancedOptionsAccordionButton',
+            }}
             buttonContent={
               <EuiText size="s">
                 <p>{ADVANCED_OPTIONS_TITLE}</p>
@@ -251,7 +255,14 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                 title={<h4>{ALERT_DELAY_TITLE}</h4>}
                 description={
                   <EuiText size="s">
-                    <p>{ALERT_DELAY_DESCRIPTION_TEXT}</p>
+                    <p>
+                      {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
+                      <EuiIconTip
+                        position="right"
+                        type="questionInCircle"
+                        content={ALERT_DELAY_HELP_TEXT}
+                      />
+                    </p>
                   </EuiText>
                 }
               >

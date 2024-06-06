@@ -33,7 +33,7 @@ import {
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { IntegrationIcon } from '../../common';
-import { useLinkToLogsExplorer } from '../../../hooks';
+import { useRedirectLink } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 
@@ -162,6 +162,7 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
+  isSizeStatsAvailable,
   isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
@@ -169,6 +170,7 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
+  isSizeStatsAvailable: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
@@ -228,22 +230,31 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    {
-      name: sizeColumnName,
-      field: 'sizeBytes',
-      sortable: true,
-      render: (_, dataStreamStat: DataStreamStat) => (
-        <EuiSkeletonRectangle
-          width="60px"
-          height="20px"
-          borderRadius="m"
-          isLoading={loadingDataStreamStats}
-        >
-          {formatNumber(dataStreamStat.sizeBytes || 0, BYTE_NUMBER_FORMAT)}
-        </EuiSkeletonRectangle>
-      ),
-      width: '100px',
-    },
+    ...(isSizeStatsAvailable
+      ? [
+          {
+            name: sizeColumnName,
+            field: 'sizeBytes',
+            sortable: true,
+            render: (_: any, dataStreamStat: DataStreamStat) => {
+              return (
+                <EuiSkeletonRectangle
+                  width="60px"
+                  height="20px"
+                  borderRadius="m"
+                  isLoading={loadingDataStreamStats || loadingDegradedStats}
+                >
+                  {formatNumber(
+                    DataStreamStat.calculateFilteredSize(dataStreamStat),
+                    BYTE_NUMBER_FORMAT
+                  )}
+                </EuiSkeletonRectangle>
+              );
+            },
+            width: '100px',
+          },
+        ]
+      : []),
     {
       name: (
         <EuiToolTip content={datasetQualityColumnTooltip}>
@@ -309,24 +320,24 @@ export const getDatasetQualityTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LogsExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <RedirectLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
 };
 
-const LogsExplorerLink = ({
+const RedirectLink = ({
   dataStreamStat,
   title,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
+  const redirectLinkProps = useRedirectLink({ dataStreamStat });
 
   return (
-    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...logsExplorerLinkProps}>
+    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...redirectLinkProps}>
       {title}
     </EuiLink>
   );

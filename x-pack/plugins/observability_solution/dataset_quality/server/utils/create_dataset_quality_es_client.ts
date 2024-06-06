@@ -7,7 +7,7 @@
 
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { Indices } from '@elastic/elasticsearch/lib/api/types';
+import { FieldCapsRequest, FieldCapsResponse, Indices } from '@elastic/elasticsearch/lib/api/types';
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
   size: number;
@@ -31,6 +31,9 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
       return esClient.msearch({
         searches: searches.map((search) => [index, search]).flat(),
       }) as Promise<any>;
+    },
+    async fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
+      return esClient.fieldCaps(params) as Promise<any>;
     },
   };
 }

@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
-      await PageObjects.dashboard.clickClone();
+      await PageObjects.dashboard.duplicateDashboard();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });

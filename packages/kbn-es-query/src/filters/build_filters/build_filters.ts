@@ -14,7 +14,7 @@ import { buildPhrasesFilter } from './phrases_filter';
 import { buildRangeFilter, RangeFilterParams } from './range_filter';
 import { buildExistsFilter } from './exists_filter';
 
-import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBase, DataViewBaseNoFields } from '../../es_query';
 import { FilterStateStore } from './types';
 
 /**
@@ -52,7 +52,7 @@ export function buildFilter(
 }
 
 function buildBaseFilter(
-  indexPattern: DataViewBase,
+  indexPattern: DataViewBaseNoFields,
   field: DataViewFieldBase,
   type: FILTERS,
   params: Serializable

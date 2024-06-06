@@ -25,8 +25,9 @@ describe('useGetCurrentUserProfile', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+
+    appMockRender = createAppMockRenderer();
     useKibanaMock.mockReturnValue({
       services: { ...createStartServicesMock() },
     });
@@ -35,11 +36,13 @@ describe('useGetCurrentUserProfile', () => {
   it('calls getCurrentUserProfile with correct arguments', async () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
 
-    const { result, waitFor } = renderHook(() => useGetCurrentUserProfile(), {
+    const { waitFor } = renderHook(() => useGetCurrentUserProfile(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => {
+      expect(spyOnGetCurrentUserProfile).toBeCalled();
+    });
 
     expect(spyOnGetCurrentUserProfile).toBeCalledWith({
       security: expect.anything(),
@@ -56,13 +59,13 @@ describe('useGetCurrentUserProfile', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { result, waitFor } = renderHook(() => useGetCurrentUserProfile(), {
+    const { waitFor } = renderHook(() => useGetCurrentUserProfile(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isError);
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('does not show a toast error message when a 404 error is returned', async () => {
@@ -75,13 +78,13 @@ describe('useGetCurrentUserProfile', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { result, waitFor } = renderHook(() => useGetCurrentUserProfile(), {
+    const { waitFor } = renderHook(() => useGetCurrentUserProfile(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitFor(() => result.current.isError);
-
-    expect(addError).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).not.toHaveBeenCalled();
+    });
   });
 });
 

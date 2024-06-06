@@ -212,10 +212,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return testSubjects.click('goToPods');
     },
 
-    async goToDocker() {
+    async goToContainer() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return testSubjects.click('goToDocker');
+      return testSubjects.click('goToContainer');
     },
 
     async goToSettings() {
@@ -477,6 +477,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
+    },
+
+    async clickCloseFlyoutButton() {
+      return testSubjects.click('euiFlyoutCloseButton');
     },
   };
 }

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  fetchHistoricalSummaryParamsSchema,
+  FetchHistoricalSummaryResponse,
+} from '@kbn/slo-schema';
+import * as t from 'io-ts';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
@@ -58,6 +63,10 @@ interface SloParams {
   groupBy: string;
 }
 
+type FetchHistoricalSummaryParams = t.OutputOf<
+  typeof fetchHistoricalSummaryParamsSchema.props.body
+>;
+
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -82,6 +91,18 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .set('x-elastic-internal-origin', 'foo');
       return response;
+    },
+
+    async fetchHistoricalSummary(
+      params: FetchHistoricalSummaryParams
+    ): Promise<FetchHistoricalSummaryResponse> {
+      const { body } = await supertest
+        .post(`/internal/observability/slos/_historical_summary`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo')
+        .send(params);
+
+      return body;
     },
 
     async waitForSloToBeDeleted(sloId: string) {

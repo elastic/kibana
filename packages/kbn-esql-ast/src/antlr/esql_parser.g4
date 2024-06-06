@@ -32,6 +32,7 @@ sourceCommand
     : explainCommand
     | fromCommand
     | rowCommand
+    | metricsCommand
     | showCommand
     | metaCommand
     ;
@@ -40,6 +41,7 @@ processingCommand
     : evalCommand
     | inlinestatsCommand
     | limitCommand
+    | lookupCommand
     | keepCommand
     | sortCommand
     | statsCommand
@@ -113,19 +115,11 @@ field
     ;
 
 fromCommand
-    : FROM fromIdentifier (COMMA fromIdentifier)* metadata? fromOptions?
+    : FROM indexIdentifier (COMMA indexIdentifier)* metadata?
     ;
 
-fromIdentifier
-    : FROM_UNQUOTED_IDENTIFIER
-    ;
-
-fromOptions
-    : OPTIONS configOption (COMMA configOption)*
-    ;
-
-configOption
-    : string ASSIGN string
+indexIdentifier
+    : INDEX_UNQUOTED_IDENTIFIER
     ;
 
 metadata
@@ -134,11 +128,15 @@ metadata
     ;
 
 metadataOption
-    : METADATA fromIdentifier (COMMA fromIdentifier)*
+    : METADATA indexIdentifier (COMMA indexIdentifier)*
     ;
 
 deprecated_metadata
     : OPENING_BRACKET metadataOption CLOSING_BRACKET
+    ;
+
+metricsCommand
+    : METRICS indexIdentifier (COMMA indexIdentifier)* aggregates=fields? (BY grouping=fields)?
     ;
 
 evalCommand
@@ -160,6 +158,10 @@ qualifiedName
 
 qualifiedNamePattern
     : identifierPattern (DOT identifierPattern)*
+    ;
+
+qualifiedNamePatterns
+    : qualifiedNamePattern (COMMA qualifiedNamePattern)*
     ;
 
 identifier
@@ -197,11 +199,11 @@ orderExpression
     ;
 
 keepCommand
-    :  KEEP qualifiedNamePattern (COMMA qualifiedNamePattern)*
+    :  KEEP qualifiedNamePatterns
     ;
 
 dropCommand
-    : DROP qualifiedNamePattern (COMMA qualifiedNamePattern)*
+    : DROP qualifiedNamePatterns
     ;
 
 renameCommand
@@ -279,4 +281,8 @@ enrichCommand
 
 enrichWithClause
     : (newName=qualifiedNamePattern ASSIGN)? enrichField=qualifiedNamePattern
+    ;
+
+lookupCommand
+    : LOOKUP tableName=INDEX_UNQUOTED_IDENTIFIER ON matchFields=qualifiedNamePatterns
     ;

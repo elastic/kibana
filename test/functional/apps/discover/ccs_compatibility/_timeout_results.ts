@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/181493
-  describe.skip('discover search CCS timeout', () => {
+  describe('discover search CCS timeout', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await remoteEsArchiver.loadIfNeeded(

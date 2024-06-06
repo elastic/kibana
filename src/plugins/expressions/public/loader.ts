@@ -151,6 +151,7 @@ export class ExpressionLoader {
       executionContext: params.executionContext,
       partial: params.partial,
       throttle: params.throttle,
+      allowCache: params.allowCache,
     });
     this.subscription = this.execution
       .getData()
@@ -190,6 +191,7 @@ export class ExpressionLoader {
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);
+    this.params.allowCache = params.allowCache;
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||
       this.execution?.inspect()) as Adapters;

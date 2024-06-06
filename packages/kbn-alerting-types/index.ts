@@ -14,3 +14,4 @@ export * from './rule_notify_when_type';
 export * from './r_rule_types';
 export * from './rule_types';
 export * from './alerting_framework_health_types';
+export * from './action_variable';

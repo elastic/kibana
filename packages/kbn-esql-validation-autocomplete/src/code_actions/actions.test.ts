@@ -57,7 +57,6 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
-    getMetaFields: jest.fn(async () => ['_index', '_id', '_source', '_score']),
   };
 }
 
@@ -420,7 +419,6 @@ describe('quick fixes logic', () => {
           getFieldsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
-          getMetaFields: undefined,
         });
       } catch {
         fail('Should not throw');
@@ -446,7 +444,6 @@ describe('quick fixes logic', () => {
             getFieldsFor: undefined,
             getSources: undefined,
             getPolicies: undefined,
-            getMetaFields: undefined,
           }
         );
       } catch {

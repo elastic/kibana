@@ -612,6 +612,7 @@ describe('Textbased Data Source', () => {
             "longMessage": "error 1",
             "severity": "error",
             "shortMessage": "error 1",
+            "uniqueId": "text_based_lang_error",
           },
           Object {
             "displayLocations": Array [
@@ -626,6 +627,7 @@ describe('Textbased Data Source', () => {
             "longMessage": "error 2",
             "severity": "error",
             "shortMessage": "error 2",
+            "uniqueId": "text_based_lang_error",
           },
         ]
       `);
@@ -835,6 +837,47 @@ describe('Textbased Data Source', () => {
           isBucketed: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
+          scale: 'ratio',
+        });
+      });
+
+      it('should get an operation for col2', () => {
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'col1',
+                  fieldName: 'Test 1',
+                  meta: {
+                    type: 'number',
+                  },
+                },
+                {
+                  columnId: 'col2',
+                  fieldName: 'Test 2',
+                  meta: {
+                    type: 'date',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+        });
+        expect(publicAPI.getOperationForColumnId('col2')).toEqual({
+          label: 'Test 2',
+          dataType: 'date',
+          isBucketed: true,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'interval',
         });
       });
 

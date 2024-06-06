@@ -23,6 +23,7 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  FLEET_SETUP_LOCK_TYPE,
 } from '../constants';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -85,6 +86,8 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
+import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
+import { migratePackagePolicySetRequiresRootToV8150 } from './migrations/to_v8_15_0';
 
 /*
  * Saved object types and mappings
@@ -98,6 +101,22 @@ export const getSavedObjectTypes = (
   const { useSpaceAwareness } = options;
 
   return {
+    [FLEET_SETUP_LOCK_TYPE]: {
+      name: FLEET_SETUP_LOCK_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'agnostic',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        properties: {
+          status: { type: 'keyword' },
+          uuid: { type: 'text' },
+          started_at: { type: 'date' },
+        },
+      },
+    },
     // Deprecated
     [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
       name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -165,6 +184,7 @@ export const getSavedObjectTypes = (
           keep_monitoring_alive: { type: 'boolean' },
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
+          global_data_tags: { type: 'flattened', index: false },
         },
       },
       migrations: {
@@ -191,6 +211,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 supports_agentless: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                global_data_tags: { type: 'flattened', index: false },
               },
             },
           ],
@@ -432,6 +462,7 @@ export const getSavedObjectTypes = (
               name: { type: 'keyword' },
               title: { type: 'keyword' },
               version: { type: 'keyword' },
+              requires_root: { type: 'boolean' },
             },
           },
           elasticsearch: {
@@ -540,6 +571,28 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '10': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV10OnWriteScanFix,
+            },
+          ],
+        },
+        '11': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package: { properties: { requires_root: { type: 'boolean' } } },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: migratePackagePolicySetRequiresRootToV8150,
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -562,7 +615,7 @@ export const getSavedObjectTypes = (
       name: PACKAGES_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -655,7 +708,7 @@ export const getSavedObjectTypes = (
       name: ASSETS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -689,7 +742,7 @@ export const getSavedObjectTypes = (
       name: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },

@@ -11,7 +11,6 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
@@ -23,10 +22,9 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
-import { ESQLSearchReponse } from '@kbn/es-types';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
-import { validateEsqlQuery } from './validate_esql_query';
+import { runAndValidateEsqlQuery } from './validate_esql_query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -82,6 +80,8 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
   DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
 
+  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
+
   Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
   even if it has been called before.
 
@@ -94,8 +94,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
     {
       name: 'execute_query',
       visibility: FunctionVisibility.UserOnly,
-      description:
-        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
+      description: 'Display the results of an ES|QL query.',
       parameters: {
         type: 'object',
         properties: {
@@ -108,7 +107,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
     },
     async ({ arguments: { query } }) => {
       const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
-      const { error, errorMessages } = await validateEsqlQuery({
+      const { error, errorMessages, rows, columns } = await runAndValidateEsqlQuery({
         query,
         client,
       });
@@ -122,17 +121,12 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
           },
         };
       }
-      const response = (await client.transport.request({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query,
-          version: ESQL_LATEST_VERSION,
-        },
-      })) as ESQLSearchReponse;
 
       return {
-        content: response,
+        content: {
+          columns,
+          rows,
+        },
       };
     }
   );
@@ -150,17 +144,30 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
           '@timestamp': new Date().toISOString(),
           message: { role: MessageRole.System, content: `${systemMessage}\n${message ?? ''}` },
         },
-        ...messages.slice(1),
+        // remove the query function request
+        ...messages.filter((msg) => msg.message.role !== MessageRole.System),
       ];
+
+      const userQuestion = messages
+        .concat()
+        .reverse()
+        .find((message) => message.message.role === MessageRole.User && !message.message.name);
+
+      const abbreviatedUserQuestion = userQuestion!.message.content!.substring(0, 50);
 
       const source$ = (
         await chat('classify_esql', {
-          messages: withEsqlSystemMessage().concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              content: `Use the classify_esql function to classify the user's request
-              in the user message before this.
+          messages: withEsqlSystemMessage().concat(
+            createFunctionResponseMessage({
+              name: 'query',
+              content: {},
+            }).message,
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                content: `Use the classify_esql tool attached to this conversation
+              to classify the user's request in the user message before this ("${abbreviatedUserQuestion}...").
               and get more information about specific functions and commands
               you think are candidates for answering the question.
               
@@ -214,8 +221,9 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
               "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
               "I want to see a heat map of ..." => ${VisualizeESQLUserIntention.visualizeHeatmap}
               `,
-            },
-          }),
+              },
+            }
+          ),
           signal,
           functions: [
             {
@@ -243,14 +251,16 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
                     items: {
                       type: 'string',
                     },
-                    description: 'A list of processing or source commands',
+                    description:
+                      'A list of processing or source commands that are referenced in the list of commands in this conversation',
                   },
                   functions: {
                     type: 'array',
                     items: {
                       type: 'string',
                     },
-                    description: 'A list of functions.',
+                    description:
+                      'A list of functions that are referenced in the list of functions in this conversation',
                   },
                   intention: {
                     type: 'string',
@@ -269,7 +279,14 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       const response = await lastValueFrom(source$);
 
       if (!response.message.function_call.arguments) {
-        throw new Error('LLM did not call classify_esql function');
+        resources.logger.debug(
+          `LLM should have called "classify_esql", but instead responded with the following message: ${JSON.stringify(
+            response.message
+          )}`
+        );
+        throw new Error(
+          'LLM did not call classify_esql function during query generation, execute the "query" function and try again'
+        );
       }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
@@ -305,9 +322,22 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
           break;
       }
 
+      const queryFunctionResponseMessage = createFunctionResponseMessage({
+        name: 'query',
+        content: {},
+        data: {
+          // add the included docs for debugging
+          documentation: {
+            intention: args.intention,
+            keywords,
+            files: messagesToInclude,
+          },
+        },
+      });
+
       const esqlResponse$ = await chat('answer_esql_question', {
         messages: [
-          ...withEsqlSystemMessage(),
+          ...withEsqlSystemMessage().concat(queryFunctionResponseMessage.message),
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -333,8 +363,15 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
           {
             '@timestamp': new Date().toISOString(),
             message: {
+              role: MessageRole.Assistant,
+              content: 'Thank you for providing the ES|QL info. What can I help you with?',
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
               role: MessageRole.User,
-              content: `Answer the user's question that was previously asked using the attached documentation.
+              content: `Answer the user's question that was previously asked ("${abbreviatedUserQuestion}...") using the attached documentation. Take into account any previous errors from the \`execute_query\` or \`visualize_query\` function.
 
                 Format any ES|QL query as follows:
                 \`\`\`esql
@@ -343,7 +380,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
 
                 Respond in plain text. Do not attempt to use a function.
   
-                Prefer to use commands and functions for which you have requested documentation.
+                You must use commands and functions for which you have requested documentation.
   
                 ${
                   args.intention !== VisualizeESQLUserIntention.generateQueryOnly
@@ -429,20 +466,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             },
           };
         }),
-        startWith(
-          createFunctionResponseMessage({
-            name: 'query',
-            content: {},
-            data: {
-              // add the included docs for debugging
-              documentation: {
-                intention: args.intention,
-                keywords,
-                files: messagesToInclude,
-              },
-            },
-          })
-        )
+        startWith(queryFunctionResponseMessage)
       );
     }
   );

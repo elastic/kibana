@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ClassNames } from '@emotion/react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
@@ -25,10 +24,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -63,29 +61,21 @@ interface EditConnectorProps {
   isFix?: boolean;
 }
 
-const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
+const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
-    <ClassNames>
-      {({ css }) => (
-        <EuiIconTip
-          anchorClassName={css({
-            /**
-             * Adds some spacing to the left of the warning icon for deprecated connectors
-             */
-            marginLeft: theme.eui.euiSizeS,
-            marginBottom: '0 !important',
-          })}
-          aria-label="Warning"
-          size="m"
-          type="warning"
-          color="warning"
-          content={connectorDeprecatedMessage}
-          position="right"
-        />
-      )}
-    </ClassNames>
+    <EuiIconTip
+      aria-label="Warning"
+      size="m"
+      type="warning"
+      color="warning"
+      content={connectorDeprecatedMessage}
+      position="right"
+      iconProps={{
+        style: { verticalAlign: 'text-top' },
+      }}
+    />
   );
-});
+};
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -246,30 +236,41 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         const name = getConnectorName(value, item);
 
         const link = (
-          <>
-            <EuiLink
-              data-test-subj={`edit${item.id}`}
-              title={name}
-              onClick={() => editItem(item, EditConnectorTabs.Configuration)}
-              key={item.id}
-              disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
-            >
-              {name}
-            </EuiLink>
+          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj={`edit${item.id}`}
+                title={name}
+                onClick={() => editItem(item, EditConnectorTabs.Configuration)}
+                key={item.id}
+                disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
+              >
+                {name}
+              </EuiLink>
+            </EuiFlexItem>
             {item.isMissingSecrets ? (
-              <EuiIconTip
-                iconProps={{ 'data-test-subj': `missingSecrets_${item.id}` }}
-                type="warning"
-                color="warning"
-                content={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
-                  { defaultMessage: 'Sensitive information was not imported' }
-                )}
-                position="right"
-              />
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  iconProps={{
+                    'data-test-subj': `missingSecrets_${item.id}`,
+                    style: { verticalAlign: 'text-top' },
+                  }}
+                  type="warning"
+                  color="warning"
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
+                    { defaultMessage: 'Sensitive information was not imported' }
+                  )}
+                  position="right"
+                />
+              </EuiFlexItem>
             ) : null}
-            {showDeprecatedTooltip && <ConnectorIconTipWithSpacing />}
-          </>
+            {showDeprecatedTooltip && (
+              <EuiFlexItem grow={false}>
+                <ConnectorIconTipWithSpacing />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         );
 
         return checkEnabledResult.isEnabled ? (

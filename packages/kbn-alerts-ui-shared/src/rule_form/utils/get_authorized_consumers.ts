@@ -8,7 +8,6 @@
 
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { RuleTypeWithDescription } from '../../common/types';
-import { ALERTING_FEATURE_ID } from '../constants';
 
 export const getAuthorizedConsumers = ({
   consumer,
@@ -19,12 +18,6 @@ export const getAuthorizedConsumers = ({
   ruleType: RuleTypeWithDescription;
   validConsumers: RuleCreationValidConsumer[];
 }) => {
-  // If the app context provides a consumer, we assume that consumer is
-  // is what we set for all rules that is created in that context
-  if (consumer !== ALERTING_FEATURE_ID) {
-    return [];
-  }
-
   if (!ruleType.authorizedConsumers) {
     return [];
   }

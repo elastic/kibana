@@ -15,6 +15,10 @@ import type { configureApiV1 } from '../../../../common/types/api';
 export const patchCaseConfigureRoute = createCasesRoute({
   method: 'patch',
   path: CASE_CONFIGURE_DETAILS_URL,
+  routerOptions: {
+    access: 'public',
+    description: `Update case settings`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const params = decodeWithExcessOrThrow(CaseConfigureRequestParamsRt)(request.params);

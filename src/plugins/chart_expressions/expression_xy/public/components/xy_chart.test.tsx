@@ -731,10 +731,10 @@ describe('XYChart component', () => {
     });
   });
 
-  test('disabled legend extra by default', () => {
+  test('disabled legend values by default', () => {
     const { args } = sampleArgs();
     const component = shallow(<XYChart {...defaultProps} args={args} />);
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('ignores legend extra for ordinal chart', () => {
@@ -748,7 +748,7 @@ describe('XYChart component', () => {
         }}
       />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('shows legend extra for histogram chart', () => {
@@ -766,7 +766,9 @@ describe('XYChart component', () => {
         }}
       />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([
+      XYLegendValue.CurrentAndLastValue,
+    ]);
   });
 
   test('applies the mark size ratio', () => {

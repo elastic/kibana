@@ -8,7 +8,7 @@
 
 import React, { useMemo } from 'react';
 import { css, CSSObject } from '@emotion/react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
@@ -105,12 +105,14 @@ export const DataTableTimeColumnHeader = ({
   dataView,
   dataViewField,
   headerRowHeight = 1,
+  columnLabel,
 }: {
   dataView: DataView;
   dataViewField?: DataViewField;
   headerRowHeight?: number;
+  columnLabel?: string;
 }) => {
-  const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
+  const timeFieldName = columnLabel || (dataViewField?.customLabel ?? dataView.timeFieldName);
   const primaryTimeAriaLabel = i18n.translate(
     'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
     {
@@ -129,11 +131,9 @@ export const DataTableTimeColumnHeader = ({
         text-align: left;
       `}
     >
-      <EuiToolTip content={primaryTimeTooltip}>
-        <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-          {timeFieldName} <EuiIcon type="clock" />
-        </ColumnHeaderTruncateContainer>
-      </EuiToolTip>
+      <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+        {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
+      </ColumnHeaderTruncateContainer>
     </div>
   );
 };
