@@ -128,7 +128,6 @@ const TopNav = ({
           originatingPath,
           visInstance,
           stateContainer,
-          visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
           displayEditInLensItem,
@@ -154,7 +153,6 @@ const TopNav = ({
     originatingPath,
     visInstance,
     stateContainer,
-    visualizationIdFromUrl,
     services,
     embeddableId,
     displayEditInLensItem,
@@ -163,6 +161,7 @@ const TopNav = ({
     eventEmitter,
     openInspectorFn,
     navigateToLensFn,
+    serializeStateFn,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {

@@ -10,7 +10,7 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SerializedPanelState } from '@kbn/presentation-containers';
 import { useState } from 'react';
-import type { VisualizeSavedVisInputState } from '../../../react_embeddable/types';
+import type { VisualizeOutputState } from '../../../react_embeddable/types';
 import { NavigateToLensContext } from '../../../../common';
 import type Vis from '../../../vis';
 
@@ -19,7 +19,7 @@ export type NavigateToLensFn = (
   vis: Vis,
   timefilter: TimefilterContract
 ) => Promise<NavigateToLensContext | undefined | null> | undefined;
-export type SerializeStateFn = () => SerializedPanelState<VisualizeSavedVisInputState>;
+export type SerializeStateFn = () => SerializedPanelState<VisualizeOutputState>;
 export type GetVisFn = () => Vis;
 
 export interface EmbeddableApiHandler {

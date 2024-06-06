@@ -22,6 +22,7 @@ import {
   getSpaces,
   getTheme,
 } from '../services';
+import { VisSavedObject } from '../types';
 import {
   deserializeReferences,
   serializeReferences,
@@ -35,6 +36,8 @@ import {
   VisualizeSerializedState,
   VisualizeRuntimeState,
   VisualizeSavedVisInputState,
+  VisualizeOutputState,
+  ExtraSavedObjectProperties,
 } from './types';
 
 export const deserializeState = async (
@@ -50,12 +53,10 @@ export const deserializeState = async (
   if (isVisualizeSavedObjectState(serializedState)) {
     serializedState = await deserializeSavedObjectState(serializedState);
   }
-  console.log('STATE', state.rawState, state.references);
 
   const references: Reference[] = state.references ?? [];
 
   const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
-  console.log('DESERIALIZED SAVED VIS', deserializedSavedVis);
   const vis = await createVisInstance(deserializedSavedVis);
   return {
     ...serializedState,
@@ -108,20 +109,27 @@ export const deserializeSavedVisState = (
 };
 
 export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInputState) => {
-  const { title, description, visState, searchSource, searchSourceFields, savedSearchId } =
-    await getSavedVisualization(
-      {
-        dataViews: getDataViews(),
-        search: getSearch(),
-        savedObjectsTagging: getSavedObjectTagging().getTaggingApi(),
-        spaces: getSpaces(),
-        i18n: getI18n(),
-        overlays: getOverlays(),
-        analytics: getAnalytics(),
-        theme: getTheme(),
-      },
-      state.savedObjectId
-    );
+  const {
+    title,
+    description,
+    visState,
+    searchSource,
+    searchSourceFields,
+    savedSearchId,
+    ...savedObjectProperties
+  } = await getSavedVisualization(
+    {
+      dataViews: getDataViews(),
+      search: getSearch(),
+      savedObjectsTagging: getSavedObjectTagging().getTaggingApi(),
+      spaces: getSpaces(),
+      i18n: getI18n(),
+      overlays: getOverlays(),
+      analytics: getAnalytics(),
+      theme: getTheme(),
+    },
+    state.savedObjectId
+  );
 
   return {
     savedVis: {
@@ -137,22 +145,34 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
     title,
     description,
     savedObjectId: state.savedObjectId,
+    savedObjectProperties,
   } as VisualizeSavedVisInputState;
 };
 
 export const serializeState = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
+  id,
+  savedObjectProperties,
 }: {
   serializedVis: SerializedVis;
   titles: SerializedTitles;
+  id?: string;
+  savedObjectProperties?: ExtraSavedObjectProperties;
 }) => {
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
+  const titlesWithDefaults = {
+    title: '',
+    description: '',
+    ...titles,
+  };
   return {
     rawState: {
-      ...titles,
+      ...titlesWithDefaults,
+      ...savedObjectProperties,
       savedVis: {
         ...serializedVis,
+        id,
         data: {
           ...omit(serializedVis.data, 'savedSearchId'),
           searchSource: serializedSearchSource,

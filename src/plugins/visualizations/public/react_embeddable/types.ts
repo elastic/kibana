@@ -11,13 +11,19 @@ import type { TimeRange } from '@kbn/es-query';
 import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
 import { DeepPartial } from '@kbn/utility-types';
 import { HasVisualizeConfig } from '../embeddable';
-import type { Vis, VisParams } from '../types';
+import type { Vis, VisParams, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
 import { NavigateToLensFn } from '../visualize_app/utils/use/use_embeddable_api_handler';
+
+export type ExtraSavedObjectProperties = Pick<
+  VisSavedObject,
+  'lastSavedTitle' | 'displayName' | 'getDisplayName' | 'getEsType' | 'managed'
+>;
 
 export type VisualizeRuntimeState = SerializedTitles & {
   vis: Vis<VisParams>;
   savedObjectId?: string;
+  savedObjectProperties?: ExtraSavedObjectProperties;
 };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
@@ -35,6 +41,9 @@ export type VisualizeSavedVisInputState = SerializedTitles & {
 };
 
 export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;
+export type VisualizeOutputState = VisualizeSavedVisInputState &
+  Required<Omit<SerializedTitles, 'hidePanelTitles'>> &
+  ExtraSavedObjectProperties;
 
 export const isVisualizeSavedObjectState = (
   state: unknown

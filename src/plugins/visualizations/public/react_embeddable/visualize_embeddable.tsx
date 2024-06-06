@@ -30,6 +30,7 @@ import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getTimeFilter, getUiActions } from '../services';
+import { VisSavedObject } from '../types';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisInstance } from './create_vis_instance';
@@ -52,6 +53,7 @@ export const getVisualizeEmbeddableFactory: (
 
     const vis$ = new BehaviorSubject<Vis>(state.vis);
     const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
+    const savedObjectProperties$ = new BehaviorSubject<Partial<VisSavedObject> | undefined>({});
     const visData$ = new BehaviorSubject<unknown>({});
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
@@ -83,6 +85,8 @@ export const getVisualizeEmbeddableFactory: (
           return serializeState({
             serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
+            id: savedObjectId$.getValue(),
+            savedObjectProperties: savedObjectProperties$.getValue(),
           });
         },
         getVis: () => vis$.getValue(),
@@ -126,14 +130,6 @@ export const getVisualizeEmbeddableFactory: (
               ...visUpdates.data,
             },
           } as SerializedVis;
-          console.log(
-            'prev',
-            currentSerializedVis,
-            'visUpdates',
-            visUpdates,
-            'newSerializedVis:',
-            newSerializedVis
-          );
           vis$.next(await createVisInstance(newSerializedVis));
           await updateExpressionParams();
         },
@@ -197,7 +193,11 @@ export const getVisualizeEmbeddableFactory: (
           },
           (a, b) => isEqual(a, b),
         ],
-        savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
+        savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
+        savedObjectProperties: [
+          savedObjectProperties$,
+          (value) => savedObjectProperties$.next(value),
+        ],
       }
     );
 
@@ -219,7 +219,6 @@ export const getVisualizeEmbeddableFactory: (
       .pipe(
         switchMap((data) => {
           return (async () => {
-            console.log('DATA', data);
             const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
               ? {
                   query: data.query,

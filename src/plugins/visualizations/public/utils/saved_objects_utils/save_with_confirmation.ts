@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
-import type { StartServices, VisSavedObject } from '../../types';
+import type { StartServices } from '../../types';
 import { visualizationsClient } from '../../content_management';
 import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
+import { VisualizeOutputState } from '../../react_embeddable/types';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already
@@ -30,7 +31,7 @@ import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '..
  */
 export async function saveWithConfirmation(
   source: VisualizationSavedObjectAttributes,
-  savedObject: Pick<VisSavedObject, 'title' | 'getEsType' | 'displayName'>,
+  savedObject: Pick<VisualizeOutputState, 'title' | 'displayName'>,
   options: SavedObjectsCreateOptions,
   services: StartServices
 ): Promise<{ item: VisualizationSavedObject }> {

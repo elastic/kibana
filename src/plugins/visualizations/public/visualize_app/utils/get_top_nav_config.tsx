@@ -63,7 +63,6 @@ export interface TopNavConfigParams {
   hasUnappliedChanges: boolean;
   visInstance: VisualizeEditorVisInstance;
   stateContainer: VisualizeAppStateContainer;
-  visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
   displayEditInLensItem: boolean;
@@ -97,7 +96,6 @@ export const getTopNavConfig = (
     hasUnappliedChanges,
     visInstance,
     stateContainer,
-    visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
     displayEditInLensItem,
@@ -134,10 +132,16 @@ export const getTopNavConfig = (
   async function doSave(
     saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
   ) {
-    const serializedVis = serializeState().rawState.savedVis;
+    const {
+      savedVis: serializedVis,
+      lastSavedTitle,
+      displayName,
+      getDisplayName,
+      getEsType,
+      managed,
+    } = serializeState().rawState;
 
-    const newlyCreated =
-      !Boolean(serializedVis.id ?? visualizationIdFromUrl) || saveOptions.copyOnSave;
+    const newlyCreated = !Boolean(serializedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
       title: serializedVis.title,
@@ -145,7 +149,7 @@ export const getTopNavConfig = (
 
     setHasUnsavedChanges(false);
     const visSavedObjectAttributes = {
-      id: serializedVis.id ?? visualizationIdFromUrl,
+      id: serializedVis.id,
       title: serializedVis.title,
       description: serializedVis.description,
       visState: {
@@ -158,6 +162,11 @@ export const getTopNavConfig = (
       savedSearchRefName: String(serializedVis.data.savedSearchRefName),
       searchSourceFields: serializedVis.data.searchSource,
       uiStateJSON: vis.uiState.toString(),
+      lastSavedTitle: lastSavedTitle ?? '',
+      displayName: displayName ?? serializedVis.title,
+      getDisplayName,
+      getEsType,
+      managed,
     };
 
     try {
@@ -226,17 +235,16 @@ export const getTopNavConfig = (
             stateTransfer.clearEditorState(VisualizeConstants.APP_ID);
           }
 
-          // TODO: Fix this
-          chrome.docTitle.change(serializedVis.lastSavedTitle);
-          if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(
-              getEditServerlessBreadcrumbs({}, serializedVis.lastSavedTitle)
-            );
-          } else {
-            chrome.setBreadcrumbs(getEditBreadcrumbs({}, serializedVis.lastSavedTitle));
+          if (lastSavedTitle) {
+            chrome.docTitle.change(lastSavedTitle);
+            if (serverless?.setBreadcrumbs) {
+              serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, lastSavedTitle));
+            } else {
+              chrome.setBreadcrumbs(getEditBreadcrumbs({}, lastSavedTitle));
+            }
           }
 
-          if (id !== visualizationIdFromUrl) {
+          if (id !== serializedVis.id) {
             history.replace({
               ...history.location,
               pathname: `${VisualizeConstants.EDIT_PATH}/${id}`,
@@ -400,7 +408,7 @@ export const getTopNavConfig = (
           const searchParams = parse(history.location.search);
           const serializedVis = serializeState().rawState.savedVis;
           const params: VisualizeLocatorParams = {
-            visId: visualizationIdFromUrl,
+            visId: serializedVis.id,
             filters: currentState.filters,
             refreshInterval: undefined,
             timeRange: data.query.timefilter.timefilter.getTime(),
@@ -419,7 +427,7 @@ export const getTopNavConfig = (
             allowEmbed: true,
             allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
             shareableUrl: unhashUrl(window.location.href),
-            objectId: visualizationIdFromUrl,
+            objectId: serializedVis.id,
             objectType: 'visualization',
             objectTypeMeta: {
               title: i18n.translate('visualizations.share.shareModal.title', {
@@ -617,9 +625,7 @@ export const getTopNavConfig = (
                 saveModal = (
                   <SavedObjectSaveModalDashboard
                     documentInfo={{
-                      id: visualizeCapabilities.save
-                        ? serializedVis?.id ?? visualizationIdFromUrl
-                        : undefined,
+                      id: visualizeCapabilities.save ? serializedVis?.id : undefined,
                       title: serializedVis?.title || '',
                       description: serializedVis?.description || '',
                     }}
@@ -681,7 +687,8 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              if (!visualizationIdFromUrl) {
+              const serializedVis = serializeState().rawState.savedVis;
+              if (!serializedVis.id) {
                 return createVisReference();
               }
               const saveOptions = {
