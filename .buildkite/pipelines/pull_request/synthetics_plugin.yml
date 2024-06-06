@@ -3,7 +3,7 @@ steps:
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717669216
+      imagePrefix: kibana-ubuntu-2004-1717679530
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
