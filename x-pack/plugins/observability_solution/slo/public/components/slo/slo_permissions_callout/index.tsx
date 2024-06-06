@@ -54,7 +54,7 @@ export function SloPermissionsCallout() {
 
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.slo.permissionsCallout.minimumReadPermissionsRequired"
+              id="xpack.slo.permissionsCallout.minimumManagePermissionsRequired"
               defaultMessage="In order to create and manage SLO definitions, you need at least the following permissions on your user's role:"
             />
 
