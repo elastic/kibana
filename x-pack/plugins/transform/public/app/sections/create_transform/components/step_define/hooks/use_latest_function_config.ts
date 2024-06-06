@@ -49,15 +49,7 @@ function getOptions(
         .filter((ip) => ip.runtimeField === undefined)
     : [];
 
-  const ignoreFieldNames = new Set([
-    '_source',
-    '_type',
-    '_index',
-    '_id',
-    '_version',
-    '_score',
-    '_ignored',
-  ]);
+  const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
 
   const runtimeFieldsOptions = runtimeMappings
     ? Object.entries(runtimeMappings).map(([fieldName, fieldMapping]) => ({
