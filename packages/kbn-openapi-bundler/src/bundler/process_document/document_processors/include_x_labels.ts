@@ -13,7 +13,7 @@ import { DocumentNode } from '../types/node';
 import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
- * Creates a node processor to include OAS operation object labeled with one of the provided labels.
+ * Creates a node processor to only include OAS operation object labeled with one of the provided labels.
  */
 export function createIncludeXLabelsProcessor(labelsToInclude: string[]): DocumentNodeProcessor {
   if (labelsToInclude.length === 0) {
@@ -45,19 +45,21 @@ export function createIncludeXLabelsProcessor(labelsToInclude: string[]): Docume
 
   return {
     shouldRemove(node, { parentKey }) {
-      if (!(X_LABELS in node)) {
-        // No x-labels - no problem. The node should be included.
+      const isValidNode = canNodeHaveLabels(node);
+      const hasLabels = X_LABELS in node;
+
+      if (!isValidNode) {
+        if (hasLabels) {
+          // x-labels can't be applied to this node.
+          // We log a warning, but the node should still be included.
+          logUnsupportedNodeWarning(parentKey.toString(), node[X_LABELS]);
+        }
+
         return false;
       }
 
-      const isValidNode = canNodeHaveLabels(node);
-
-      if (!isValidNode) {
-        // x-labels can't be applied to this node.
-        // We log a warning, but the node should still be included.
-        logUnsupportedNodeWarning(parentKey.toString(), node[X_LABELS]);
-
-        return false;
+      if (!hasLabels) {
+        return true;
       }
 
       if (!Array.isArray(node[X_LABELS])) {

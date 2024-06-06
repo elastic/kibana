@@ -3,9 +3,8 @@ info:
   title: Test endpoint
   version: '2023-10-31'
 paths:
-  /api/another_api:
+  /api/missing_label_should_not_be_in_bundle:
     post:
-      x-labels: 10
       operationId: AnotherTestEndpointPost
       responses:
         '200':
