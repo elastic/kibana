@@ -84,6 +84,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
+    esStore,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
     llm: model,

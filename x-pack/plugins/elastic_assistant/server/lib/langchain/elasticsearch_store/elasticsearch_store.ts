@@ -214,6 +214,7 @@ export class ElasticsearchStore extends VectorStore {
    * @param k Number of similar documents to return
    * @param filter Optional filter to apply to the search
    * @param _callbacks Optional callbacks
+   * @param filterRequiredDocs Optional whether or not to exclude the required docs filter
    *
    * Fun facts:
    * - This function is called by LangChain's `VectorStoreRetriever._getRelevantDocuments`
@@ -224,10 +225,11 @@ export class ElasticsearchStore extends VectorStore {
     query: string,
     k?: number,
     filter?: this['FilterType'] | undefined,
-    _callbacks?: Callbacks | undefined
+    _callbacks?: Callbacks | undefined,
+    filterRequiredDocs = true
   ): Promise<Document[]> => {
     // requiredDocs is an array of filters that can be used in a `bool` Elasticsearch DSL query to filter in/out required KB documents:
-    const requiredDocs = getRequiredKbDocsTermsQueryDsl(this.kbResource);
+    const requiredDocs = filterRequiredDocs ? getRequiredKbDocsTermsQueryDsl(this.kbResource) : [];
 
     // The `k` parameter is typically provided by LangChain's `VectorStoreRetriever._getRelevantDocuments`, which calls this function:
     const vectorSearchQuerySize = k ?? FALLBACK_SIMILARITY_SEARCH_SIZE;
