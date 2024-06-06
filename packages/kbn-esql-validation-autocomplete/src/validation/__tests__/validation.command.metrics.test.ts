@@ -179,10 +179,11 @@ describe('validation', () => {
       });
 
       describe('... BY <grouping>', () => {
-        test.skip('syntax does not allow BY *grouping* clause without *aggregates*', async () => {
+        test('syntax does not allow BY *grouping* clause without *aggregates*', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('metrics a_index BY stringField', [
+            'Expected an aggregate function or group but got [BY] of type [FieldAttribute]',
             "SyntaxError: extraneous input 'stringField' expecting <EOF>",
           ]);
         });
@@ -196,10 +197,9 @@ describe('validation', () => {
           await expectErrors('metrics a_index avg(numberField) by wrongField + 1', [
             'Unknown column [wrongField]',
           ]);
-          // TODO: Fix this test
-          // await expectErrors('metrics a_index avg(numberField) by var0 = wrongField + 1', [
-          //   'Unknown column [wrongField]',
-          // ]);
+          await expectErrors('metrics a_index avg(numberField) by var0 = wrongField + 1', [
+            'Unknown column [wrongField]',
+          ]);
         });
       });
     });
