@@ -28,7 +28,7 @@ export const ElserPrompt: React.FC<ElserPromptProps> = ({
       'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.elserDescription',
       {
         defaultMessage:
-          "ELSER is a sparse vector NLP model trained by Elastic for semantic search. Recommended for English language.",
+          'ELSER is a sparse vector NLP model trained by Elastic for semantic search. Recommended for English language.',
       }
     )}
     title={i18n.translate(
