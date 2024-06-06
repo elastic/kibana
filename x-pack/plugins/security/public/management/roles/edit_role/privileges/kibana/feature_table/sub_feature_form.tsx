@@ -36,9 +36,7 @@ interface Props {
 }
 
 export const SubFeatureForm = (props: Props) => {
-  const groupsWithPrivileges = props.subFeature
-    .getPrivilegeGroups()
-    .filter((group) => group.privileges.length > 0);
+  const groupsWithPrivileges = props.subFeature.getPrivilegeGroups();
 
   const getTooltip = () => {
     if (!props.subFeature.privilegesTooltip) {
