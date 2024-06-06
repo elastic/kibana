@@ -85,7 +85,7 @@ export class EventsQuery extends BaseResolverQuery {
             {
               term: { 'process.entity_id': id },
             },
-            ...(agentId ? [{ term: { 'agent.id': agentId } }] : []),
+            ...(this.schema.agentId ? [{ term: { 'agent.id': agentId } }] : []),
             ...this.getRangeFilter(),
           ],
         },

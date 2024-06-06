@@ -55,7 +55,7 @@ export class DescendantsQuery extends BaseResolverQuery {
             {
               terms: { [this.schema.parent]: nodes },
             },
-            ...(this.agentId ? [{ term: { 'agent.id': this.agentId } }] : []),
+            ...(this.schema.agentId ? [{ term: { 'agent.id': this.agentId } }] : []),
             {
               exists: {
                 field: this.schema.id,
@@ -137,7 +137,7 @@ export class DescendantsQuery extends BaseResolverQuery {
                 [ancestryField]: nodes,
               },
             },
-            ...(this.agentId ? [{ term: { 'agent.id': this.agentId } }] : []),
+            ...(this.schema.agentId ? [{ term: { 'agent.id': this.agentId } }] : []),
             {
               exists: {
                 field: this.schema.id,
