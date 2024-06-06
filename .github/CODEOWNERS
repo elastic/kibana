@@ -1249,6 +1249,10 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 
 # Core
 /config/ @elastic/kibana-core
+/config/serverless.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /packages/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
@@ -1307,6 +1311,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/common/platform_security/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/search/platform_security/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/security/platform_security/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/observability/platform_security/ @elastic/kibana-security
 /packages/core/http/core-http-server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
