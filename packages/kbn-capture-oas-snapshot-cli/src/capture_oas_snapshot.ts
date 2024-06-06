@@ -8,13 +8,16 @@
 
 import fs from 'node:fs/promises';
 import { encode } from 'node:querystring';
+import type { ChildProcess } from 'node:child_process';
 import fetch from 'node-fetch';
 import * as Rx from 'rxjs';
 import { startTSWorker } from '@kbn/dev-utils';
 import { createTestEsCluster } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import type { Result } from './kibana_worker';
 import { sortAndPrettyPrint } from './run_capture_oas_snapshot_cli';
+import { buildFlavourEnvArgName } from './common';
 
 interface CaptureOasSnapshotArgs {
   log: ToolingLog;
@@ -47,38 +50,40 @@ export async function captureOasSnapshot({
     '/XXXXXXXXXXXX/'
   );
 
-  log.info('Starting es...');
-  const esCluster = await log.indent(4, async () => {
-    const cluster = createTestEsCluster({ log });
-    await cluster.start();
-    return cluster;
-  });
-
-  log.info('Starting Kibana...');
-  const kbWorker = await log.indent(4, async () => {
-    log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
-    const { msg$, proc } = startTSWorker<Result>({
-      log,
-      src: require.resolve('./kibana_worker'),
-      execArgv: [`--${buildFlavour}`],
-    });
-    await Rx.firstValueFrom(
-      msg$.pipe(
-        Rx.map((msg) => {
-          if (msg !== 'ready')
-            throw new Error(`received unexpected message from worker (expected "ready"): ${msg}`);
-        })
-      )
-    );
-    return proc;
-  });
-
-  addCleanupTask(async () => {
-    await esCluster.cleanup();
-    kbWorker.kill('SIGILL');
-  });
+  let esCluster: undefined | { stop(): Promise<void> };
+  let kbWorker: undefined | ChildProcess;
 
   try {
+    log.info('Starting es...');
+    esCluster = await log.indent(4, async () => {
+      if (buildFlavour === 'serverless') {
+        const { startES } = createTestServerlessInstances();
+        return await startES();
+      }
+      const cluster = createTestEsCluster({ log });
+      await cluster.start();
+      return { stop: () => cluster.cleanup() };
+    });
+
+    log.info('Starting Kibana...');
+    kbWorker = await log.indent(4, async () => {
+      log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
+      const { msg$, proc } = startTSWorker<Result>({
+        log,
+        src: require.resolve('./kibana_worker'),
+        env: { ...process.env, [buildFlavourEnvArgName]: buildFlavour },
+      });
+      await Rx.firstValueFrom(
+        msg$.pipe(
+          Rx.map((msg) => {
+            if (msg !== 'ready')
+              throw new Error(`received unexpected message from worker (expected "ready"): ${msg}`);
+          })
+        )
+      );
+      return proc;
+    });
+
     const qs = encode({
       access: 'public',
       version: '2023-10-31', // hard coded for now, we can make this configurable later
@@ -113,5 +118,8 @@ export async function captureOasSnapshot({
   } catch (err) {
     log.error(`Failed to capture OAS: ${JSON.stringify(err, null, 2)}`);
     throw err;
+  } finally {
+    kbWorker?.kill('SIGILL');
+    await esCluster?.stop();
   }
 }

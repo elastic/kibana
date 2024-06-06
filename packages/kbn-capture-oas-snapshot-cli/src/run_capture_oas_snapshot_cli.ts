@@ -32,16 +32,19 @@ run(
     const excludePathsMatching = flagsReader.arrayOfStrings('exclude-path') ?? [];
 
     if (traditional) {
+      log.info('Capturing OAS for traditional Kibana...');
       await captureOasSnapshot({
         log,
-        buildFlavour: 'serverless',
+        buildFlavour: 'traditional',
         outputFile: path.resolve(OAS_OUTPUT_DIR, 'bundle.json'),
         filters: { pathStartsWith, excludePathsMatching },
         update,
       });
+      log.success('Captured OAS for traditional Kibana.');
     }
 
     if (serverless) {
+      log.info('Capturing OAS for serverless Kibana...');
       await captureOasSnapshot({
         log,
         buildFlavour: 'serverless',
@@ -49,6 +52,7 @@ run(
         filters: { pathStartsWith, excludePathsMatching },
         update,
       });
+      log.success('Captured OAS for serverless Kibana.');
     }
   },
   {
@@ -56,7 +60,7 @@ run(
       Get the current OAS from Kibana's /api/oas API
     `,
     flags: {
-      boolean: ['update'],
+      boolean: ['update', 'serverless', 'traditional'],
       string: ['include-path', 'exclude-path', 'build-flavor'],
       default: {
         fix: false,
