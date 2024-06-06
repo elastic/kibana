@@ -129,6 +129,7 @@ export class AssetManagerServerPlugin
         const soClient = core.savedObjects.getScopedClient(fakeRequest);
         const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
+        this.logger.info(`Starting installation of builtin definitions`);
         await Promise.all(
           builtInEntityDefinitions.map(async (builtInDefinition) => {
             const definition = await installEntityDefinition({
@@ -140,7 +141,9 @@ export class AssetManagerServerPlugin
             });
             await startTransform(esClient, definition, this.logger);
           })
-        );
+        )
+          .then(() => this.logger.info(`Builtin definitions are running`))
+          .catch((e) => this.logger.error(`Failed to install builtin definitions: ${e}`));
       });
     }
 
