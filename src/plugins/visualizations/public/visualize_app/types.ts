@@ -120,6 +120,7 @@ export interface VisualizeServices extends CoreStart {
 export interface VisInstance {
   vis: Vis;
   savedVis: SerializedVis;
+  references?: Reference[];
   savedSearch?: SavedSearch;
   panelTitle?: string;
   panelDescription?: string;

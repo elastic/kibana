@@ -145,7 +145,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
-      {visInstance && appState && currentAppState && (
+      {visInstance && serializeStateFn && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
           hasUnsavedChanges={hasUnsavedChanges}

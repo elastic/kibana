@@ -342,7 +342,7 @@ export async function saveVisualization(
     uiStateJSON: savedObject.uiStateJSON,
     description: savedObject.description,
     savedSearchId: savedObject.savedSearchId,
-    version: savedObject.version,
+    version: savedObject.version ?? '1',
     kibanaSavedObjectMeta: {},
   };
   let references: SavedObjectReference[] = baseReferences;
@@ -388,6 +388,7 @@ export async function saveVisualization(
       migrationVersion: savedObject.migrationVersion,
       references: extractedRefs.references,
     };
+
     const resp = confirmOverwrite
       ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
       : savedObject.id
