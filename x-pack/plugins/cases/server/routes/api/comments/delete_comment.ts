@@ -22,7 +22,7 @@ export const deleteCommentRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Delete an alert or comment from a case`,
+    summary: `Delete an alert or comment from a case`,
   },
   handler: async ({ context, request, response }) => {
     try {
