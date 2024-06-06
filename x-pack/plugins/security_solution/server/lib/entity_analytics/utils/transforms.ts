@@ -142,8 +142,6 @@ export const scheduleTransformNow = async ({
 
 /**
  * Whenever we change the latest transform configuration, we must ensure we update the transform in environments where it has already been installed.
- *
- * We updates the delay and unattended properties on this PR: https://github.com/elastic/kibana/pull/184797
  */
 const upgradeLatestTransformIfNeeded = async ({
   esClient,
@@ -201,7 +199,11 @@ export const scheduleLatestTransformNow = async ({
   await scheduleTransformNow({ esClient, transformId });
 };
 
+/**
+ * Whitelist the transform fields that we can update.
+ */
 const UPDATED_TRANSFORM_PROPERTIES = ['sync', 'settings', 'frequency', 'dest', 'source.index'];
+
 const isTransformOutdated = (
   transform: TransformGetTransformTransformSummary,
   newConfig: object
