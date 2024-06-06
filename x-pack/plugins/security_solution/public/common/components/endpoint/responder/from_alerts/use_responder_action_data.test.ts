@@ -177,4 +177,57 @@ describe('#useResponderActionData', () => {
       expect(result.current.isDisabled).toEqual(false);
     });
   });
+  describe('when agentType is `crowdstrike`', () => {
+    const createEventDataMock = (): TimelineEventsDetailsItem[] => {
+      return [
+        {
+          category: 'crowdstrike',
+          field: 'crowdstrike.event.DeviceId',
+          values: ['mockedAgentId'],
+          originalValue: ['mockedAgentId'],
+          isObjectArray: false,
+        },
+      ];
+    };
+
+    it('should return `responder` menu item as `disabled` if agentType is `crowdstrike` and feature flag is disabled', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: 'crowdstrike-id',
+          agentType: 'crowdstrike',
+          eventData: createEventDataMock(),
+        })
+      );
+      expect(result.current.isDisabled).toEqual(true);
+    });
+
+    it('should return responder menu item as disabled with tooltip if agent id property is missing from event data', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: 'crowdstrike-id',
+          agentType: 'crowdstrike',
+          eventData: [],
+        })
+      );
+      expect(result.current.isDisabled).toEqual(true);
+      expect(result.current.tooltip).toEqual(
+        'Event data missing Crowdstrike agent identifier (crowdstrike.event.DeviceId)'
+      );
+    });
+
+    it('should return `responder` menu item as `enabled `if agentType is `crowdstrike` and feature flag is enabled', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: 'crowdstrike-id',
+          agentType: 'crowdstrike',
+          eventData: createEventDataMock(),
+        })
+      );
+      expect(result.current.isDisabled).toEqual(false);
+    });
+  });
 });
