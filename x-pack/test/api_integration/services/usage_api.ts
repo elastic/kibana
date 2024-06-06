@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import type { RoleCredentials } from '../../../test_serverless/shared/services';
 
 export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
@@ -47,7 +47,9 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
     },
     opts?: GetTelemetryStatsOpts
   ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
-    const client = opts?.roleAuthc ? supertestWithoutAuth.set(roleAuthc.apiKeyHeader) : supertest;
+    const client = opts?.roleAuthc
+      ? supertestWithoutAuth.set(opts.roleAuthc.apiKeyHeader)
+      : supertest;
 
     const { body } = await client
       .post('/internal/telemetry/clusters/_stats')
