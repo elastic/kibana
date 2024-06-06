@@ -55,7 +55,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   enableQueryVersion?: boolean;
 
   /**
-   * Human-friendly summary of this route, used for (OAS) documentation
+   * Short summary of this route. Required for all routes used in OAS documentation.
    *
    * @example
    * ```ts
@@ -69,8 +69,17 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   summary?: string;
 
   /**
-   * A description of this API. [CommonMark syntax](https://spec.commonmark.org)
-   * may be used for rich text
+   * Optional API description, which supports [CommonMark](https://spec.commonmark.org) markdown formatting
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   *  description: `Foo resources require **X** and **Y** `read` permissions to access.`,
+   * })
+   * ```
    */
   description?: string;
 };

@@ -161,7 +161,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   };
 
   /**
-   * Required short summary of this route, used for OAS documentation
+   * Short summary of this route. Required for all routes used in OAS documentation.
    *
    * @example
    * ```ts
