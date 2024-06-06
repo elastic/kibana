@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(role);
     });
 
-    it('uses the datastream configuration with set ILM policy', async () => {
+    it('uses the datastream configuration', async () => {
       const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set(svlCommonApi.getInternalRequestHeader())
