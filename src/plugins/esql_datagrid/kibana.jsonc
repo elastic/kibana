@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/esql-datagrid",
+  "owner": "@elastic/kibana-esql",
+  "plugin": {
+    "id": "esqlDataGrid",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "uiActions",
+      "fieldFormats"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "dataViews",
+      "unifiedDocViewer"
+    ]
+  }
+}
