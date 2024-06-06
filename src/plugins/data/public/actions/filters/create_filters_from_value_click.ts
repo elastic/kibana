@@ -158,13 +158,13 @@ export const createFiltersFromValueClickAction = async ({
 };
 
 /** @public */
-export const appendFilterToESQLQueryFromValueClickAction = async ({
+export const appendFilterToESQLQueryFromValueClickAction = ({
   data,
   query,
 }: ValueClickDataContext) => {
   let queryWithFilter: string | undefined;
 
-  await Promise.all(
+  Promise.all(
     data
       .filter((point) => point)
       .map(async (val) => {

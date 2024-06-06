@@ -55,7 +55,7 @@ export function createValueClickActionDefinition(
         if (context.data.query && isOfAggregateQueryType(context.data.query)) {
           // ES|QL charts have a different way of applying filters,
           // they are appending a where clause to the query
-          const queryString = await appendFilterToESQLQueryFromValueClickAction(context.data);
+          const queryString = appendFilterToESQLQueryFromValueClickAction(context.data);
           await getStartServices().uiActions.getTrigger('UPDATE_ESQL_QUERY_TRIGGER').exec({
             embeddable: context.embeddable,
             queryString,
