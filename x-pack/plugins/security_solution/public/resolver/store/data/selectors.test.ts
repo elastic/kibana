@@ -174,7 +174,7 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}
         requires a pending request to be aborted: null"
       `);
     });
@@ -204,7 +204,7 @@ describe('data state', () => {
         has more children: false
         has more ancestors: false
         parameters to fetch: null
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}"
       `);
     });
   });
@@ -336,8 +336,8 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
-        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
+        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}"
       `);
     });
     describe('and when the old request was aborted', () => {
@@ -371,7 +371,7 @@ describe('data state', () => {
           has an error: false
           has more children: false
           has more ancestors: false
-          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{},\\"agentId\\":\\"\\"}
           requires a pending request to be aborted: null"
         `);
       });

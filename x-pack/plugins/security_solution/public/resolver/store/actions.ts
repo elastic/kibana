@@ -102,6 +102,4 @@ export const appReceivedNewExternalProperties = actionCreator<{
     from?: string;
     to?: string;
   };
-  // TODO: TC - check if this is required
-  agentId?: string;
 }>('APP_RECEIVED_NEW_EXTERNAL_PROPERTIES');
