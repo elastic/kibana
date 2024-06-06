@@ -8,7 +8,7 @@
 import {
   Aggregators,
   CustomThresholdExpressionMetric,
-} from '../../../../../common/custom_threshold_rule/types';
+} from '../../../common/custom_threshold_rule/types';
 
 export const getLensOperationFromRuleMetric = (metric: CustomThresholdExpressionMetric): string => {
   const { aggType, field, filter } = metric;

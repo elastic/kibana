@@ -26,10 +26,13 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { EventsAsUnit } from '../../../../../common/constants';
-import { CustomThresholdSearchSourceFields } from '../../../../../common/custom_threshold_rule/types';
-import { useKibana } from '../../../../utils/kibana_react';
-import { MetricExpression } from '../../types';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Aggregators as MetricRuleAgg } from '@kbn/infra-plugin/common/alerting/metrics';
+import { TimeUnitChar } from '../../../common';
+import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
+import { EventsAsUnit } from '../../../common/constants';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
+import { useKibana } from '../../utils/kibana_react';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 import {
   lensFieldFormatter,
@@ -38,15 +41,30 @@ import {
   isRate,
   LensFieldFormat,
 } from './helpers';
-
 interface ChartOptions {
   seriesType?: SeriesType;
   interval?: string;
 }
 
+interface GenericSearchSourceFields extends SerializedSearchSourceFields {
+  query?: Query;
+  filter?: Array<Pick<Filter, 'meta' | 'query'>>;
+}
+interface GenericMetric {
+  aggType: Aggregators | MetricRuleAgg;
+  name: string;
+  field?: string;
+}
 interface RuleConditionChartProps {
-  metricExpression: MetricExpression;
-  searchConfiguration: CustomThresholdSearchSourceFields;
+  metricExpression: {
+    metrics: GenericMetric[];
+    threshold: number[];
+    comparator: COMPARATORS | LEGACY_COMPARATORS;
+    timeSize?: number;
+    timeUnit?: TimeUnitChar;
+    equation?: string;
+  };
+  searchConfiguration: GenericSearchSourceFields;
   dataView?: DataView;
   groupBy?: string | string[];
   error?: IErrorObject;
@@ -225,7 +243,7 @@ export function RuleConditionChart({
     const baseLayer = {
       type: 'formula',
       value: formula,
-      label: 'Custom Threshold',
+      label: 'Rule name',
       groupBy,
       format: {
         id: formatId,
@@ -345,7 +363,8 @@ export function RuleConditionChart({
       </div>
     );
   }
-
+  console.log('additionalFilters', additionalFilters);
+  console.log('searchConfig', searchConfiguration);
   return (
     <div>
       <lens.EmbeddableComponent

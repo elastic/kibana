@@ -13,13 +13,13 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
   CustomThresholdSearchSourceFields,
-} from '../../../../../common/custom_threshold_rule/types';
-import { useKibana } from '../../../../utils/kibana_react';
-import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
-import { MetricExpression } from '../../types';
+} from '../../../common/custom_threshold_rule/types';
+import { useKibana } from '../../utils/kibana_react';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { MetricExpression } from '../custom_threshold/types';
 import { RuleConditionChart } from './rule_condition_chart';
 
-jest.mock('../../../../utils/kibana_react');
+jest.mock('../../utils/kibana_react');
 
 const useKibanaMock = useKibana as jest.Mock;
 
