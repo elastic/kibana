@@ -108,6 +108,7 @@ export const parseGeminiStream: StreamParser = async (stream, logger, abortSigna
     if (abortSignal) {
       abortSignal.addEventListener('abort', () => {
         stream.destroy();
+        logger.info('Gemini stream parsing was aborted.');
         resolve(parseGeminiResponse(responseBody));
       });
     }
