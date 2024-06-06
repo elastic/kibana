@@ -58,7 +58,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
             filter: JSON.stringify({
               bool: {
                 filter: [
-                  { term: { 'agent.id': agentId } },
+                  ...(agentId ? [{ term: { 'agent.id': agentId } }] : []),
                   { term: { 'process.entity_id': entityID } },
                   { bool: { must_not: { term: { 'event.category': 'process' } } } },
                 ],
@@ -118,7 +118,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
                 filter: [
                   { term: { 'process.entity_id': entityID } },
                   { term: { 'event.category': category } },
-                  { term: { 'agent.id': agentId } },
+                  ...(agentId ? [{ term: { 'agent.id': agentId } }] : []),
                 ],
               },
             }),
@@ -155,7 +155,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
               filter: [
                 { terms: { 'process.entity_id': ids } },
                 { term: { 'event.category': 'process' } },
-                { term: { 'agent.id': agentId } },
+                ...(agentId ? [{ term: { 'agent.id': agentId } }] : []),
               ],
             },
           }),
@@ -196,7 +196,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
           ? {
               bool: {
                 filter: [
-                  { term: { 'agent.id': agentId } },
+                  ...(agentId ? [{ term: { 'agent.id': agentId } }] : []),
                   { terms: { 'event.category': eventCategory } },
                   { term: { 'process.entity_id': nodeID } },
                   { term: { '@timestamp': eventTimestamp } },

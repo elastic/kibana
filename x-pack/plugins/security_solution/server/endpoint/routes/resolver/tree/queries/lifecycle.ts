@@ -54,9 +54,7 @@ export class LifecycleQuery extends BaseResolverQuery {
             {
               terms: { [this.schema.id]: nodes },
             },
-            {
-              term: { 'agent.id': this.agentId },
-            },
+            ...(this.agentId ? [{ term: { 'agent.id': this.agentId } }] : []),
             {
               exists: {
                 field: this.schema.id,
