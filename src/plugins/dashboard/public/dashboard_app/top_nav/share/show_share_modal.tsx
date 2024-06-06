@@ -157,10 +157,9 @@ export function ShowShareModal({
         }, {} as DashboardPanelMap)
       : {};
 
-    // this dashboard has unsaved panels.
+    //
     const allUnsavedPanelsMap = {
       ...latestPanels,
-      ...(unsavedDashboardState?.panels ?? {}),
       ...modifiedPanels,
     };
     return convertPanelMapToSavedPanels(allUnsavedPanelsMap);

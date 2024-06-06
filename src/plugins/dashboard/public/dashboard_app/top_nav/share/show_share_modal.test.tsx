@@ -124,6 +124,20 @@ describe('ShowShareModal', () => {
       query: { query: 'bye', language: 'kuery' },
     } as unknown as DashboardContainerInput;
     const showModalProps = getPropsAndShare(unsavedDashboardState);
+    showModalProps.getDashboardState = () => {
+      return {
+        panels: {
+          panel_1: {
+            type: 'panel_type',
+            gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+            panelRefName: 'superPanel',
+            explicitInput: {
+              id: 'superPanel',
+            },
+          },
+        },
+      } as unknown as DashboardContainerInput;
+    };
     ShowShareModal(showModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
