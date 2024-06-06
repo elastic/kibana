@@ -606,6 +606,9 @@
           },
           "400": {
             "$ref": "#/components/responses/error"
+          },
+          "429": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "install-package-by-upload",
@@ -1621,6 +1624,14 @@
           },
           "name": "prerelease",
           "description": "Specify if version is prerelease",
+          "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
           "in": "query"
         }
       ]

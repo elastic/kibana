@@ -9,15 +9,13 @@ import expect from '@kbn/expect';
 import path from 'path';
 import fs from 'fs';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const experimentalPkgName = 'experimental';
@@ -64,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     before(async () => {
-      if (!server.enabled) return;
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await installPackages([
         { name: pkgName, version: pkgVersion },
         { name: experimentalPkgName, version: pkgVersion },
@@ -73,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
       await installUploadPackage(uploadPkgName);
     });
     after(async () => {
-      if (!server.enabled) return;
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await uninstallPackages([
         { name: pkgName, version: pkgVersion },
         { name: experimentalPkgName, version: pkgVersion },
