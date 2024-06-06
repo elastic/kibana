@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resetMetrics?.task_claim?.value).not.to.be(null);
       });
 
-      it('should reset task claim success/total counters on request', async () => {
+      it('should increment task run framework_error counter', async () => {
         const initialCounterValue = 1;
         const initialMetrics = (
           await getMetrics(

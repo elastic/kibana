@@ -104,8 +104,8 @@ export function createTaskPoller<T, H>({
         pollIntervalDelay = delay;
         logger.debug(`Task poller now delaying emission by ${delay}ms`);
       });
-      hasSubscribed = true;
     }
+    hasSubscribed = true;
   }
 
   return {

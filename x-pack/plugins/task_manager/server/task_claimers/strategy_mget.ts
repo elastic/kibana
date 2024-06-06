@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+// Basic operation of this task claimer:
+// - search for candidate tasks to run, more than we actually can run
+// - for each task found, do an mget to get the current seq_no and primary_term
+// - if the mget result doesn't match the search result, the task is stale
+// - from the non-stale search results, return as many as we can run
+
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimerOpts, ClaimOwnershipResult } from '.';
-import {
-  TaskPriority,
-  ConcreteTaskInstance,
-  TaskStatus,
-  ConcreteTaskInstanceVersion,
-} from '../task';
+import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
+import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import {
   isLimited,
@@ -32,7 +32,7 @@ import {
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  SortByRunAtAndRetryAt,
+  getClaimSort,
   EnabledTask,
   OneOfTaskTypes,
   RecognizedTask,
@@ -99,6 +99,8 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
   const excludedTypes = new Set(excludedTaskTypes); // excluded via config
+
+  // get a list of candidate tasks to claim, with their version info
   const { docs, versionMap } = await searchAvailableTasks({
     definitions,
     taskTypes: new Set(definitions.getAllTypes()),
@@ -111,25 +113,31 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     taskMaxAttempts,
   });
 
-  if (docs.length === 0) return emptyClaimOwnershipResult();
+  if (docs.length === 0)
+    return {
+      ...getEmptyClaimOwnershipResult(),
+      timing: stopTaskTimer(),
+    };
 
-  const currentTasks = new Set<ConcreteTaskInstance>();
-  const staleTasks = new Set<ConcreteTaskInstance>();
-  const missingTasks = new Set<ConcreteTaskInstance>();
-  const removedTasks = new Set<ConcreteTaskInstance>();
-
+  // use mget to get the latest version of each task
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
+
+  // filter out stale, missing and removed tasks
+  const currentTasks: ConcreteTaskInstance[] = [];
+  const staleTasks: ConcreteTaskInstance[] = [];
+  const missingTasks: ConcreteTaskInstance[] = [];
+  const removedTasks: ConcreteTaskInstance[] = [];
 
   for (const searchDoc of docs) {
     if (removedTypes.has(searchDoc.taskType)) {
-      removedTasks.add(searchDoc);
+      removedTasks.push(searchDoc);
       continue;
     }
 
     const searchVersion = versionMap.get(searchDoc.id);
     const latestVersion = docLatestVersions.get(`task:${searchDoc.id}`);
     if (!searchVersion || !latestVersion) {
-      missingTasks.add(searchDoc);
+      missingTasks.push(searchDoc);
       continue;
     }
 
@@ -137,15 +145,17 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       searchVersion.seqNo === latestVersion.seqNo &&
       searchVersion.primaryTerm === latestVersion.primaryTerm
     ) {
-      currentTasks.add(searchDoc);
+      currentTasks.push(searchDoc);
       continue;
     } else {
-      staleTasks.add(searchDoc);
+      staleTasks.push(searchDoc);
       continue;
     }
   }
-
+  // apply limited concurrency limits (TODO: can currently starve other tasks)
   const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
+
+  // build the updated task objects we'll claim
   const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
     .slice(0, initialCapacity)
     .map((task) => {
@@ -161,8 +171,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       return task;
     });
 
+  // perform the task object updates, deal with errors
   const finalResults: ConcreteTaskInstance[] = [];
-  let conflicts = staleTasks.size;
+  let conflicts = staleTasks.length;
   let bulkErrors = 0;
 
   try {
@@ -197,7 +208,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // separate update for removed tasks; shouldn't happen often, so unlikely
   // a performance concern, and keeps the rest of the logic simpler
   let removedCount = 0;
-  if (removedTasks.size > 0) {
+  if (removedTasks.length > 0) {
     const tasksToRemove = Array.from(removedTasks);
     for (const task of tasksToRemove) {
       task.status = TaskStatus.Unrecognized;
@@ -222,9 +233,11 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
   }
 
-  const message = `task claimer claimed: ${finalResults.length}; stale: ${staleTasks.size}; conflicts: ${conflicts}; missing: ${missingTasks.size}; updateErrors: ${bulkErrors}; removed: ${removedCount};`;
+  // TODO: need a better way to generate stats
+  const message = `task claimer claimed: ${finalResults.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; updateErrors: ${bulkErrors}; removed: ${removedCount};`;
   logger.debug(message, logMeta);
 
+  // build results
   const finalResult = {
     stats: {
       tasksUpdated: finalResults.length,
@@ -253,7 +266,6 @@ async function searchAvailableTasks({
   removedTypes,
   excludedTypes,
   taskStore,
-  claimOwnershipUntil,
   size,
   taskMaxAttempts,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
@@ -283,62 +295,10 @@ async function searchAvailableTasks({
   });
 }
 
-function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
-  // Sort by descending priority, then by ascending runAt/retryAt time
-  if (definitions.size() === 0) {
-    return [SortByRunAtAndRetryAt];
-  }
-
-  return [
-    {
-      _script: {
-        type: 'number',
-        order: 'desc',
-        script: {
-          lang: 'painless',
-          // Use priority if explicitly specified in task definition, otherwise default to 50 (Normal)
-          // TODO: we could do this locally as well, but they may starve
-          source: `
-            String taskType = doc['task.taskType'].value;
-            if (params.priority_map.containsKey(taskType)) {
-              return params.priority_map[taskType];
-            } else {
-              return ${TaskPriority.Normal};
-            }
-          `,
-          params: {
-            priority_map: definitions
-              .getAllDefinitions()
-              .reduce<Record<string, TaskPriority>>((acc, taskDefinition) => {
-                if (taskDefinition.priority) {
-                  acc[taskDefinition.type] = taskDefinition.priority;
-                }
-                return acc;
-              }, {}),
-          },
-        },
-      },
-    },
-    SortByRunAtAndRetryAt,
-  ];
-}
-
-function emptyClaimOwnershipResult() {
-  return {
-    stats: {
-      tasksUpdated: 0,
-      tasksConflicted: 0,
-      tasksClaimed: 0,
-      tasksRejected: 0,
-    },
-    docs: [],
-  };
-}
-
 function applyLimitedConcurrency(
-  tasks: Set<ConcreteTaskInstance>,
+  tasks: ConcreteTaskInstance[],
   batches: TaskClaimingBatches
-): Set<ConcreteTaskInstance> {
+): ConcreteTaskInstance[] {
   // create a map of task type - concurrency
   const limitedBatches = batches.filter(isLimited);
   const limitedMap = new Map<string, number>();
@@ -348,16 +308,16 @@ function applyLimitedConcurrency(
   }
 
   // apply the limited concurrency
-  const result = new Set<ConcreteTaskInstance>();
+  const result: ConcreteTaskInstance[] = [];
   for (const task of tasks) {
     const concurrency = limitedMap.get(task.taskType);
     if (concurrency == null) {
-      result.add(task);
+      result.push(task);
       continue;
     }
 
     if (concurrency > 0) {
-      result.add(task);
+      result.push(task);
       limitedMap.set(task.taskType, concurrency - 1);
     }
   }

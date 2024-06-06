@@ -364,13 +364,13 @@ describe('TaskClaiming', () => {
                 },
               },
               source: `
-            String taskType = doc['task.taskType'].value;
-            if (params.priority_map.containsKey(taskType)) {
-              return params.priority_map[taskType];
-            } else {
-              return 50;
-            }
-          `,
+          String taskType = doc['task.taskType'].value;
+          if (params.priority_map.containsKey(taskType)) {
+            return params.priority_map[taskType];
+          } else {
+            return 50;
+          }
+        `,
             },
           },
         },
