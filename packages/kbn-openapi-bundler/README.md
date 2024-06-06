@@ -676,3 +676,19 @@ paths:
               schema:
                 type: object
 ```
+
+## Contribution
+
+In case you decide to contribute to the `kbn-openapi-bundler` package please make sure to add and/or update existing e2e test in `kbn-openapi-bundler/tests` folder.
+
+To run package tests use the following command in the repo root folder
+
+```bash
+yarn test:jest packages/kbn-openapi-bundler
+```
+
+Jest watch mode can be enabled by passing `--watch` flag
+
+```bash
+yarn test:jest packages/kbn-openapi-bundler --watch
+```
