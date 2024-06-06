@@ -92,7 +92,6 @@ export const getSearchEmbeddableFactory = ({
       };
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
-      console.log('initialState', initialState);
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
       const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectTitle
@@ -132,14 +131,13 @@ export const getSearchEmbeddableFactory = ({
       };
 
       const serializeState = async (
-        forceByValue: boolean = false
+        forceByValue: boolean = false // TODO: Remove this
       ): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
         const savedObjectId = savedObjectId$.getValue();
 
         if (savedObjectId && !forceByValue) {
           return { rawState: { savedObjectId, ...serializeTitles() }, references: [] };
         } else {
-          console.log('getByValueState', getByValueState());
           return getByValueState();
         }
       };
@@ -270,7 +268,6 @@ export const getSearchEmbeddableFactory = ({
           dataLoading: dataLoading$,
           blockingError: blockingError$,
           fetchContext$,
-          rows$: searchEmbeddableApi.rows$,
         },
         discoverServices,
       });
@@ -278,7 +275,6 @@ export const getSearchEmbeddableFactory = ({
       return {
         api,
         Component: () => {
-          // const searchSource = useStateFromPublishingSubject(searchEmbeddableApi.dataViews);
           const [dataViews, columns, searchSource, savedSearchViewMode] =
             useBatchedPublishingSubjects(
               searchEmbeddableApi.dataViews,
@@ -317,6 +313,7 @@ export const getSearchEmbeddableFactory = ({
                 ...filter,
                 $state: { store: FilterStateStore.APP_STATE },
               }));
+              console.log('newFilters', newFilters);
 
               await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
                 embeddable: api,

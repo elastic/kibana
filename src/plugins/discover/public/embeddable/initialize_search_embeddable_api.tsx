@@ -46,14 +46,14 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices.data.search.searchSource.create(initialState.serializedSearchSource),
     discoverServices.data.search.searchSource.create(),
   ]);
-  searchSource?.setParent(parentSearchSource);
-  const dataView = searchSource?.getField('index');
-
+  searchSource.setParent(parentSearchSource);
   const searchSource$ = new BehaviorSubject(searchSource);
   const serializedSearchSource$ = new BehaviorSubject(initialState.serializedSearchSource);
-  const managed$ = new BehaviorSubject(initialState.managed);
+
+  const dataView = searchSource.getField('index');
   const dataViews = new BehaviorSubject(dataView ? [dataView] : undefined);
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  const managed$ = new BehaviorSubject(initialState.managed);
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
   const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
@@ -126,12 +126,15 @@ export const initializeSearchEmbeddableApi = async (
       rowsPerPage$,
       savedSearchViewMode$,
       getSavedSearch: (): SavedSearch => {
-        return Object.keys(stateManager).reduce((prev, key) => {
-          return {
-            ...prev,
-            [key]: stateManager[key as keyof SavedSearchAttributesManager].getValue(),
-          };
-        }, {} as SavedSearch);
+        return {
+          ...Object.keys(stateManager).reduce((prev, key) => {
+            return {
+              ...prev,
+              [key]: stateManager[key as keyof SavedSearchAttributesManager].getValue(),
+            };
+          }, {} as SavedSearch),
+          searchSource: searchSource$.getValue(),
+        };
       },
     },
     searchEmbeddableStateManager: stateManager,
