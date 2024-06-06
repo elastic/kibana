@@ -8,14 +8,15 @@
 import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import type { OnBoardingDefaultSolution } from '../common/types';
 import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
-import type { CloudSetup, CloudStart } from './types';
 import { getFullCloudUrl } from '../common/utils';
+import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
+import type { CloudSetup, CloudStart } from './types';
 import { getSupportUrl } from './utils';
 
 export interface CloudConfigType {
@@ -33,7 +34,7 @@ export interface CloudConfigType {
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
   onboarding?: {
-    default_solution?: OnBoardingDefaultSolution;
+    default_solution?: string;
   };
   serverless?: {
     project_id: string;
@@ -100,7 +101,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       onboarding: {
-        defaultSolution: this.config.onboarding?.default_solution,
+        defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
       },
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {

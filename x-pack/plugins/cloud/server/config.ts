@@ -35,9 +35,7 @@ const configSchema = schema.object({
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
   onboarding: schema.maybe(
     schema.object({
-      default_solution: schema.maybe(
-        schema.oneOf([schema.literal('es'), schema.literal('oblt'), schema.literal('security')])
-      ),
+      default_solution: schema.maybe(schema.string()),
     })
   ),
   serverless: schema.maybe(

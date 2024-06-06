@@ -125,10 +125,10 @@ describe('Cloud Plugin', () => {
       it('exposes `onboarding.default_solution`', () => {
         const { setup } = setupPlugin({
           onboarding: {
-            default_solution: 'oblt',
+            default_solution: 'Elasticsearch',
           },
         });
-        expect(setup.onboarding.defaultSolution).toBe('oblt');
+        expect(setup.onboarding.defaultSolution).toBe('es');
       });
 
       describe('isServerlessEnabled', () => {
