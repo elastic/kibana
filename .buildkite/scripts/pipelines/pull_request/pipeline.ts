@@ -27,16 +27,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
-const uploadPipeline = (pipelineContent: string | object) => {
-  const str =
-    typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
-
-  execSync('buildkite-agent pipeline upload', {
-    input: str,
-    stdio: ['pipe', 'inherit', 'inherit'],
-  });
-};
-
 (async () => {
   try {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
@@ -329,9 +319,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps
-    uploadPipeline([...new Set(pipeline)].join('\n'));
+    console.log([...new Set(pipeline)].join('\n'));
   } catch (ex) {
-    console.error('PR pipeline generation error', ex.message);
+    console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);
   }
 })();

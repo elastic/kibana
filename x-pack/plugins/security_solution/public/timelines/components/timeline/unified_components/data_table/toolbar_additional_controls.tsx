@@ -16,7 +16,7 @@ import {
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
 import * as i18n from './translations';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../../../common/components/exit_full_screen';
-import { FixedWidthLastUpdatedContainer } from '../../footer/last_updated';
+import { LastUpdatedContainer } from '../../footer/last_updated';
 
 export const isFullScreen = ({
   globalFullScreen,
@@ -68,8 +68,8 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
 
   return (
     <>
-      <StatefulRowRenderersBrowser data-test-subj="row-renderers-browser" timelineId={timelineId} />
-      <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
+      <StatefulRowRenderersBrowser timelineId={timelineId} />
+      <LastUpdatedContainer updatedAt={updatedAt} />
       <span className="rightPosition">
         <EuiToolTip
           ref={toolTipRef}
