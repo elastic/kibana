@@ -29,7 +29,8 @@ const DEFAULT_SCENARIO_OPTS = {
   numServices: 10,
   numHosts: 10,
   numAgents: 5,
-  numDatasets: 6,
+  numDatasets: 6, // Won't be used if `datasets` option is provided
+  datasets: undefined, // Provide a list of datasets --scenarioOpts.datasets="apache.access" --scenarioOpts.datasets="nginx.error" to override the default list
   degradedRatio: 0.25, // Percentage of logs that are malformed (over limit or mapping conflict)
   numCustomFields: 50, // Number of custom field (e.g. `log.custom.field-1: "abc"`) per document
   customFieldPrefix: 'field', // Prefix for custom fields (e.g. `log.custom.field-1: "abc"`)
@@ -48,6 +49,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         numHosts,
         numAgents,
         numDatasets,
+        datasets,
         degradedRatio,
         numCustomFields,
         customFieldPrefix,
@@ -168,6 +170,8 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
       };
 
       // Logs
+      const logDatasets = datasets ? (Array.isArray(datasets) ? datasets : [datasets]) : DATASETS;
+      const numLogDatasets = datasets ? logDatasets.length : numDatasets;
       const cloudProjectId = `cloud-project-${generateShortId()}`;
       const logs = range
         .interval(logsInterval)
@@ -175,7 +179,7 @@ const scenario: Scenario<LogDocument | InfraDocument | ApmFields> = async (runOp
         .generator((timestamp, index) => {
           const isMalformed = index > 0 && Math.random() < degradedRatio; // `index > 0` to wait for dynamic templates
           const cloudRegion = getRotatedItem(timestamp, CLOUD_REGION, 3);
-          const dataset = getRotatedItem(timestamp, DATASETS, numDatasets);
+          const dataset = getRotatedItem(timestamp, logDatasets, numLogDatasets);
           const space = getRotatedItem(timestamp, NAMESPACES, numSpaces);
           const hostName = getRotatedItem(timestamp, HOSTS, numHosts);
           const agent = getRotatedItem(timestamp, AGENTS, numAgents);
