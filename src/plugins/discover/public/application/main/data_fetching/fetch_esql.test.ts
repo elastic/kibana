@@ -46,14 +46,14 @@ describe('fetchEsql', () => {
       'resolveDocumentProfile'
     );
     expect(
-      await fetchEsql(
-        { esql: 'from *' },
-        dataViewWithTimefieldMock,
-        discoverServiceMock.data,
-        discoverServiceMock.expressions,
-        { requests: new RequestAdapter() },
-        discoverServiceMock.profilesManager
-      )
+      await fetchEsql({
+        query: { esql: 'from *' },
+        dataView: dataViewWithTimefieldMock,
+        inspectorAdapters: { requests: new RequestAdapter() },
+        data: discoverServiceMock.data,
+        expressions: discoverServiceMock.expressions,
+        profilesManager: discoverServiceMock.profilesManager,
+      })
     ).toEqual({
       records,
       esqlQueryColumns: ['_id', 'foo'],
