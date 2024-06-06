@@ -21,7 +21,6 @@ import { useAssistantContext } from '../../assistant_context';
 import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
 import {
   AnonymizationSettings,
-  ConversationSettings,
   EvaluationSettings,
   KnowledgeBaseSettings,
   QuickPromptSettings,
@@ -31,6 +30,7 @@ import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 import { ConnectorsSettings } from '../../connectorland/connector_settings';
+import { ConversationSettingsManagement } from '../conversations/converstaion_settings_management';
 
 export const CONNECTORS_TAB = 'CONNECTORS_TAB' as const;
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
@@ -70,7 +70,11 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const { data: anonymizationFields } = useFetchAnonymizationFields();
 
     // Connector details
-    const { data: connectors } = useLoadConnectors({
+    const {
+      data: connectors,
+      refetch: refetchConnectors,
+      isFetchedAfterMount: areConnectorsFetched,
+    } = useLoadConnectors({
       http,
     });
     const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
@@ -108,10 +112,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         return conversationSettings[defaultSelectedConversation.title];
       }
     );
-
-    const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
-      setSelectedConversation(conversation);
-    }, []);
 
     useEffect(() => {
       if (selectedConversation != null) {
@@ -245,25 +245,31 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             padding-right: 0;
           `}
         >
-          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettings />}
+          {selectedSettingsTab === CONNECTORS_TAB && (
+            <ConnectorsSettings
+              connectors={connectors}
+              refetchConnectors={refetchConnectors}
+              areConnectorsFetched={areConnectorsFetched}
+            />
+          )}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
-            <ConversationSettings
+            <ConversationSettingsManagement
               actionTypeRegistry={actionTypeRegistry}
-              defaultConnector={defaultConnector}
+              allSystemPrompts={systemPromptSettings}
+              areConnectorsFetched={areConnectorsFetched}
+              assistantStreamingEnabled={assistantStreamingEnabled}
+              connectors={connectors}
+              conversations={conversations}
               conversationSettings={conversationSettings}
+              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+              handleSave={handleSave}
+              isFlyoutMode={isFlyoutMode}
+              resetSettings={resetSettings}
+              setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
+              setConversationSettings={handleChange(setConversationSettings)}
               setConversationsSettingsBulkActions={handleChange(
                 setConversationsSettingsBulkActions
               )}
-              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-              setConversationSettings={handleChange(setConversationSettings)}
-              allSystemPrompts={systemPromptSettings}
-              selectedConversation={selectedConversation}
-              isDisabled={selectedConversation == null}
-              assistantStreamingEnabled={assistantStreamingEnabled}
-              setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
-              onSelectedConversationChange={onHandleSelectedConversationChange}
-              http={http}
-              isFlyoutMode={isFlyoutMode}
             />
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && (

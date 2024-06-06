@@ -119,6 +119,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const {
     http,
     notifications,
+    settings,
     storage,
     triggersActionsUi: {
       actionTypeRegistry,
@@ -178,6 +179,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       getEditConnectorFlyout={getEditConnectorFlyout}
       getComments={getComments}
       http={http}
+      settings={settings}
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

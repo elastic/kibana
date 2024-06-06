@@ -7,33 +7,33 @@
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { ActionConnectorTableItem } from './types';
 
-import { DELETE_CONNECTOR_BUTTON, EDIT_CONNECTOR_BUTTON } from '../translations';
+import {
+  DELETE_CONNECTOR_BUTTON,
+  EDIT_CONNECTOR_BUTTON,
+} from '../../../connectorland/translations';
 
-interface Props {
-  connector: ActionConnectorTableItem;
-  onClickEditConnector: (connector: ActionConnectorTableItem) => void;
-  onClickDeleteConnector: (connector: ActionConnectorTableItem) => void;
+interface Props<T> {
+  rowItem: T;
+  onEdit: (rowItem: T) => void;
+  onDelete: (rowItem: T) => void;
 }
 
-const ConnectorRowActionsComponent: React.FC<Props> = ({
-  connector,
-  onClickEditConnector,
-  onClickDeleteConnector,
-}) => {
+type RowActionsComponentType = <T>(props: Props<T>) => JSX.Element;
+
+const RowActionsComponent = <T,>({ rowItem, onEdit, onDelete }: Props<T>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const handleEditConnector = useCallback(() => {
     closePopover();
-    onClickEditConnector(connector);
-  }, [closePopover, onClickEditConnector, connector]);
+    onEdit(rowItem);
+  }, [closePopover, onEdit, rowItem]);
 
   const handleDeleteConnector = useCallback(() => {
     closePopover();
-    onClickDeleteConnector(connector);
-  }, [closePopover, onClickDeleteConnector, connector]);
+    onDelete(rowItem);
+  }, [closePopover, onDelete, rowItem]);
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((prevState) => !prevState), []);
   return (
@@ -42,7 +42,7 @@ const ConnectorRowActionsComponent: React.FC<Props> = ({
         <EuiButtonIcon
           color="success"
           iconType="boxesHorizontal"
-          disabled={connector == null}
+          disabled={rowItem == null}
           onClick={onButtonClick}
         />
       }
@@ -66,5 +66,5 @@ const ConnectorRowActionsComponent: React.FC<Props> = ({
   );
 };
 
-export const ConnectorRowActions = React.memo(ConnectorRowActionsComponent);
-ConnectorRowActions.displayName = 'ConnectorRowActions';
+// casting to correctly infer the param of onEdit and onDelete when reusing this component
+export const RowActions = React.memo(RowActionsComponent) as RowActionsComponentType;

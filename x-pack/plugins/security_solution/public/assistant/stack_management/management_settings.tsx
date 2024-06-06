@@ -37,11 +37,9 @@ export const ManagementSettings = React.memo(() => {
     onFetch: onFetchedConversations,
     isAssistantEnabled,
   });
-
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
     WELCOME_CONVERSATION_TITLE
   );
-
   const { getDefaultConversation } = useConversation();
 
   const currentConversation = useMemo(

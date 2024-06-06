@@ -17,6 +17,7 @@ import {
 import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -89,6 +90,7 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
+  settings: SettingsStart;
   title?: string;
   toasts?: IToasts;
 }
@@ -147,6 +149,7 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
+  settings: SettingsStart;
   setTraceOptions: (traceOptions: {
     apmUrl: string;
     langSmithProject: string;
@@ -179,6 +182,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   http,
   baseConversations,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  settings,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
 }) => {
@@ -322,6 +326,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
+      settings,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
@@ -361,6 +366,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
       setLocalStorageKnowledgeBase,
+      settings,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,

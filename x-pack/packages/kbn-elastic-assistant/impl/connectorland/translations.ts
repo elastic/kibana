@@ -226,3 +226,10 @@ export const DELETE_CONNECTOR_CONFIRMATION_MULTIPLE_TITLE = i18n.translate(
     defaultMessage: 'connectors',
   }
 );
+
+export const SEARCH_CONNECTOR_PLACEHOLDER = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.searchConnectorPlaceholder',
+  {
+    defaultMessage: 'Search for connectors',
+  }
+);
