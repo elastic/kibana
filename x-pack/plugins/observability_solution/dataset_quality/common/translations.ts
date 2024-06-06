@@ -147,7 +147,7 @@ export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShow
 export const flyoutImprovementText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
   {
-    defaultMessage: 'Degraded Fields',
+    defaultMessage: 'Degraded fields',
   }
 );
 

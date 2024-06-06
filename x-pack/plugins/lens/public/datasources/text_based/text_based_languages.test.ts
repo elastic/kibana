@@ -612,6 +612,7 @@ describe('Textbased Data Source', () => {
             "longMessage": "error 1",
             "severity": "error",
             "shortMessage": "error 1",
+            "uniqueId": "text_based_lang_error",
           },
           Object {
             "displayLocations": Array [
@@ -626,6 +627,7 @@ describe('Textbased Data Source', () => {
             "longMessage": "error 2",
             "severity": "error",
             "shortMessage": "error 2",
+            "uniqueId": "text_based_lang_error",
           },
         ]
       `);

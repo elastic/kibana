@@ -13,26 +13,26 @@ import { copyRole } from '../../../common/model';
 export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}
 
-  public async getRoles() {
+  public getRoles = async () => {
     return await this.http.get<Role[]>('/api/security/role');
-  }
+  };
 
-  public async getRole(roleName: string) {
+  public getRole = async (roleName: string) => {
     return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`);
-  }
+  };
 
-  public async deleteRole(roleName: string) {
+  public deleteRole = async (roleName: string) => {
     await this.http.delete(`/api/security/role/${encodeURIComponent(roleName)}`);
-  }
+  };
 
-  public async saveRole({ role, createOnly = false }: { role: Role; createOnly?: boolean }) {
+  public saveRole = async ({ role, createOnly = false }: { role: Role; createOnly?: boolean }) => {
     await this.http.put(`/api/security/role/${encodeURIComponent(role.name)}`, {
       body: JSON.stringify(this.transformRoleForSave(copyRole(role))),
       query: { createOnly },
     });
-  }
+  };
 
-  private transformRoleForSave(role: Role) {
+  private transformRoleForSave = (role: Role) => {
     // Remove any placeholder index privileges
     const isPlaceholderPrivilege = (
       indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege
@@ -71,5 +71,5 @@ export class RolesAPIClient {
     delete role._transform_error;
 
     return role;
-  }
+  };
 }

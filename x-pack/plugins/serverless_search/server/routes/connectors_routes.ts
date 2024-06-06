@@ -73,7 +73,6 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
       const { client } = (await context.core).elasticsearch;
       const connector = await createConnector(client.asCurrentUser, {
         indexName: null,
-        instant_response: true,
         isNative: false,
         language: null,
       });
