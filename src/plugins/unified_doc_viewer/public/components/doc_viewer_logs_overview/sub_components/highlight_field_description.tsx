@@ -7,14 +7,16 @@
  */
 
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import { EcsFlat } from '@elastic/ecs';
+import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
-export function HighlightFieldDescription({ fieldName }: { fieldName: string }) {
-  const { short, type } = EcsFlat[fieldName as keyof typeof EcsFlat] ?? {};
-
-  if (!short) return null;
+export function HighlightFieldDescription({
+  fieldMetadata,
+}: {
+  fieldMetadata: PartialFieldMetadataPlain;
+}) {
+  const { flat_name: fieldName, short, type } = fieldMetadata;
 
   const title = (
     <EuiFlexGroup alignItems="center" gutterSize="s">
