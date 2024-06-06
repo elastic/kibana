@@ -85,6 +85,22 @@ describe('getAddPanelActionMenuItems', () => {
           },
         ],
       },
+      other: {
+        id: 'other',
+        title: 'Other',
+        placementPriority: -1,
+        'data-test-subj': 'dashboardEditorMenu-otherGroup',
+        items: [
+          {
+            id: 'ACTION_CREATE_ESQL_CHART',
+            name: 'Action name',
+            icon: 'pencil',
+            description: 'Action tooltip',
+            onClick: expect.any(Function),
+            'data-test-subj': 'create-action-Action name',
+          },
+        ],
+      },
     });
   });
 

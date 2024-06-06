@@ -15,7 +15,7 @@ export const COMMON_EMBEDDABLE_GROUPING = {
       i18n.translate('embeddableApi.common.constants.grouping.legacy', {
         defaultMessage: 'Legacy',
       }),
-    order: -1,
+    order: -2,
   },
   annotation: {
     id: 'annotation-and-navigation',
@@ -23,5 +23,14 @@ export const COMMON_EMBEDDABLE_GROUPING = {
       i18n.translate('embeddableApi.common.constants.grouping.annotations', {
         defaultMessage: 'Annotations and Navigation',
       }),
+  },
+  other: {
+    id: 'other',
+    getDisplayName: () =>
+      i18n.translate('embeddableApi.common.constants.grouping.other', {
+        defaultMessage: 'Other',
+      }),
+    getIconType: () => 'empty',
+    order: -1,
   },
 };

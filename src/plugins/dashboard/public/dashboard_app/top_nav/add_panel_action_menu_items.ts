@@ -12,6 +12,7 @@ import {
   addPanelMenuTrigger,
 } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import type { IconType, CommonProps } from '@elastic/eui';
 import React, { type MouseEventHandler } from 'react';
 
@@ -96,6 +97,21 @@ export const getAddPanelActionMenuItemsGroup = (
 
         grouped[group.id]!.items!.push(getMenuItem(item));
       });
+    } else {
+      // use other group as the default for definitions that don't have a group
+      const fallbackGroup = COMMON_EMBEDDABLE_GROUPING.other;
+
+      if (!grouped[fallbackGroup.id]) {
+        grouped[fallbackGroup.id] = {
+          id: fallbackGroup.id,
+          title: fallbackGroup.getDisplayName?.() || '',
+          'data-test-subj': `dashboardEditorMenu-${fallbackGroup.id}Group`,
+          placementPriority: fallbackGroup.order,
+          items: [],
+        };
+      }
+
+      grouped[fallbackGroup.id].items.push(getMenuItem(item));
     }
   });
 

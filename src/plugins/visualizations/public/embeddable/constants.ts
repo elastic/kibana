@@ -15,5 +15,6 @@ export const COMMON_VISUALIZATION_GROUPING = [
     getIconType: () => {
       return 'visGauge';
     },
+    order: 1000,
   },
 ];

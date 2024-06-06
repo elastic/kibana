@@ -228,6 +228,20 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
           };
         }
       });
+    } else {
+      const fallbackGroup = COMMON_EMBEDDABLE_GROUPING.other;
+
+      if (!factoryGroupMap[fallbackGroup.id]) {
+        factoryGroupMap[fallbackGroup.id] = {
+          id: fallbackGroup.id,
+          appName: fallbackGroup.getDisplayName ? fallbackGroup.getDisplayName() : fallbackGroup.id,
+          icon: fallbackGroup.getIconType(),
+          factories: [],
+          placementPriority: fallbackGroup.order ?? 0,
+        };
+      }
+
+      factoryGroupMap[fallbackGroup.id].factories.push(factory);
     }
   });
 
