@@ -39,10 +39,15 @@ export async function queryToFields({
   if (filters) {
     const filtersArr = Array.isArray(filters) ? filters : [filters];
     for (const f of filtersArr) {
-      fields = fields.concat(f?.meta?.key);
+      // unified search bar filters have meta object and key (regular filters)
+      // unified search bar "custom" filters ("Edit as query DSL", where meta.key is not present but meta is)
+      // Any other Elasticsearch query DSL filter that gets passed in by consumers (not coming from unified search, and these probably won't have a meta key at all)
+      if (f?.meta?.key && f.meta.disabled !== true) {
+        fields.push(f.meta.key);
+      }
     }
   }
-  fields = fields.filter((f) => Boolean(f));
+  // fields = fields.filter((f) => Boolean(f));
   if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
     // if source filtering is enabled, we need to fetch all the fields
     return (await dataView.getFields({ fieldName: ['*'] })).getFieldMapSorted();
