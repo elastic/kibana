@@ -191,9 +191,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                             <FormattedMessage
                               defaultMessage="+ Integrations"
                               id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
-                              description={
-                                'A badge indicating that the user can add additional observability integrations to their deployment via this option'
-                              }
+                              description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
                             />
                           </EuiBadge>
                         )}
