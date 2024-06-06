@@ -50,22 +50,26 @@ export async function installEntityDefinition({
   };
 
   try {
+    logger.debug(`Installing definition ${JSON.stringify(definition)}`);
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
 
     // install ingest pipelines
+    logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
     await createAndInstallHistoryIngestPipeline(esClient, entityDefinition, logger, spaceId);
     installState.ingestPipelines.history = true;
     await createAndInstallLatestIngestPipeline(esClient, entityDefinition, logger, spaceId);
     installState.ingestPipelines.latest = true;
 
     // install transforms
+    logger.debug(`Installing transforms for definition ${definition.id}`);
     await createAndInstallHistoryTransform(esClient, entityDefinition, logger);
     installState.transforms.history = true;
     await createAndInstallLatestTransform(esClient, entityDefinition, logger);
 
     return entityDefinition;
   } catch (e) {
+    logger.error(`Failed to install entity definition ${definition.id}`, e);
     // Clean up anything that was successful.
     if (installState.definition) {
       await deleteEntityDefinition(soClient, definition, logger);
@@ -92,7 +96,12 @@ export async function installEntityDefinitions({
   logger,
   definitions,
   spaceId,
-}: Omit<InstallDefinitionParams, 'definition'> & { definitions: EntityDefinition[] }) {
+}: Omit<InstallDefinitionParams, 'definition'> & { definitions: EntityDefinition[] }): Promise<
+  EntityDefinition[]
+> {
+  if (definitions.length === 0) return [];
+
+  logger.debug(`Starting installation of ${definitions.length} definitions`);
   const installPromises = definitions.map(async (definition) =>
     installEntityDefinition({ esClient, soClient, definition, logger, spaceId })
   );
