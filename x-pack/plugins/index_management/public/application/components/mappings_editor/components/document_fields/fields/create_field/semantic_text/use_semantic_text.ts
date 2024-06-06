@@ -11,11 +11,10 @@ import { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { useComponentTemplatesContext } from '../../../../../../component_templates/component_templates_context';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, DefaultInferenceModels, Field } from '../../../../../types';
-import { NotificationToasts } from '../../../field_parameters/notification_toasts';
+import { NotificationToasts } from '../../../notification_toasts';
 
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
@@ -30,7 +29,6 @@ interface DefaultInferenceEndpointConfig {
 export function useSemanticText(props: UseSemanticTextProps) {
   const { form, setErrorsInTrainedModelDeployment, ml } = props;
   const { inferenceToModelIdMap } = useMappingsState();
-  const { toasts } = useComponentTemplatesContext();
   const dispatch = useDispatch();
 
   const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<string>();
@@ -40,6 +38,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const [inferenceValue, setInferenceValue] = useState<string>(
     DefaultInferenceModels.elser_model_2
   );
+  const { showSuccessToasts, showErrorToasts } = NotificationToasts();
 
   const useFieldEffect = (
     semanticTextform: FormHook,
@@ -138,7 +137,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
 
     const { trainedModelId } = inferenceData;
     dispatch({ type: 'field.addSemanticText', value: data });
-    NotificationToasts({ toasts });
+    showSuccessToasts();
 
     try {
       await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
@@ -147,7 +146,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (trainedModelId) {
         setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
       }
-      NotificationToasts({ toasts, error });
+      showErrorToasts(error);
     }
   };
 

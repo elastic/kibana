@@ -43,8 +43,7 @@ import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
-import { NotificationToasts } from './notification_toasts';
-import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
+import { NotificationToasts } from '../notification_toasts';
 import {
   CustomInferenceEndpointConfig,
   DefaultInferenceModels,
@@ -154,8 +153,7 @@ export const SelectInferenceId = ({
     setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
 
-  const { toasts } = useComponentTemplatesContext();
-
+  const { showSuccessToasts, showErrorToasts } = NotificationToasts();
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
@@ -163,7 +161,7 @@ export const SelectInferenceId = ({
       try {
         const isDeployable =
           modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
-        if (isDeployable) NotificationToasts({ toasts });
+        if (isDeployable) showSuccessToasts();
 
         const combined: EuiSelectableOption[] = [
           {
@@ -188,14 +186,21 @@ export const SelectInferenceId = ({
           modelConfig,
         };
         setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
-        NotificationToasts({ toasts });
+        showSuccessToasts();
       } catch (error) {
-        NotificationToasts({ toasts, error });
+        showErrorToasts(error);
         // reset options
         setOptions([...oldOptions]);
       }
     },
-    [isInferenceFlyoutVisible, ml, setNewInferenceEndpoint, options, toasts]
+    [
+      isInferenceFlyoutVisible,
+      ml,
+      setNewInferenceEndpoint,
+      options,
+      showSuccessToasts,
+      showErrorToasts,
+    ]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {
