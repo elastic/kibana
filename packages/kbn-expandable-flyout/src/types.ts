@@ -49,6 +49,10 @@ export interface ExpandableFlyoutApi {
    * Close all panels and closes flyout
    */
   closeFlyout: () => void;
+  /**
+   * Go back to the previous flyout
+   */
+  goBack: () => void;
 }
 
 export interface PanelPath {
@@ -67,6 +71,10 @@ export interface FlyoutPanelProps {
    * Unique key to identify the panel
    */
   id: string;
+  /**
+   * Name of the flyout for history
+   */
+  title?: string;
   /**
    * Any parameters necessary for the initial requests within the flyout
    */
