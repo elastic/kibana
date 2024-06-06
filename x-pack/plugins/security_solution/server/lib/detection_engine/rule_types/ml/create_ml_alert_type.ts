@@ -58,7 +58,6 @@ export const createMlAlertType = (
           wrapHits,
           exceptionFilter,
           unprocessedExceptions,
-          inputIndex,
           mergeStrategy,
           alertTimestampOverride,
           publicBaseUrl,
