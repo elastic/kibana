@@ -6,17 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { SearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { SavedSearch, SavedSearchAttributes } from '.';
+import { SerializableSavedSearch } from './types';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
-  searchSource: SavedSearch['searchSource'],
+  searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   managed: boolean
-): SavedSearch => ({
+): SavedSearch | SerializableSavedSearch => ({
   id,
-  searchSource,
+  ...(searchSource instanceof SearchSource
+    ? { searchSource }
+    : { serializedSearchSource: searchSource as SerializedSearchSourceFields }),
   title: attributes.title,
   sort: attributes.sort,
   columns: attributes.columns,

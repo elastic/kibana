@@ -13,7 +13,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedSearch, SavedSearchAttributes } from '../types';
+import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
@@ -72,7 +72,8 @@ export const convertToSavedSearch = async (
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
     managed: boolean | undefined;
   },
-  { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies
+  { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies,
+  serializable: boolean = false
 ) => {
   const parsedSearchSourceJSON = parseSearchSourceJSON(
     attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
@@ -88,12 +89,16 @@ export const convertToSavedSearch = async (
     ? savedObjectsTagging.ui.getTagIdsFromReferences(references)
     : undefined;
 
+  const searchSource = serializable
+    ? searchSourceValues
+    : await searchSourceCreate(searchSourceValues);
+
   const returnVal = fromSavedSearchAttributes(
     savedSearchId,
     attributes,
     tags,
     references,
-    await searchSourceCreate(searchSourceValues),
+    searchSource,
     sharingSavedObjectProps,
     Boolean(managed)
   );
@@ -101,7 +106,11 @@ export const convertToSavedSearch = async (
   return returnVal;
 };
 
-export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearchDependencies) => {
+export const getSavedSearch = async (
+  savedSearchId: string,
+  deps: GetSavedSearchDependencies,
+  serializable: boolean = false
+): Promise<SavedSearch | SerializableSavedSearch> => {
   const so = await getSearchSavedObject(savedSearchId, deps);
   const savedSearch = await convertToSavedSearch(
     {
@@ -111,7 +120,8 @@ export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearch
       sharingSavedObjectProps: so.meta,
       managed: so.item.managed,
     },
-    deps
+    deps,
+    serializable
   );
 
   return savedSearch;

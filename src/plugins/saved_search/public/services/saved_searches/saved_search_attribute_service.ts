@@ -34,7 +34,8 @@ export const savedObjectToEmbeddableAttributes = (
 export const toSavedSearch = async (
   id: string | undefined,
   result: SavedSearchUnwrapResult,
-  services: SavedSearchesServiceDeps
+  services: SavedSearchesServiceDeps,
+  serializable?: boolean
 ) => {
   const { sharingSavedObjectProps, managed } = result.metaInfo ?? {};
 
@@ -45,7 +46,8 @@ export const toSavedSearch = async (
       sharingSavedObjectProps,
       managed,
     },
-    createGetSavedSearchDeps(services)
+    createGetSavedSearchDeps(services),
+    serializable
   );
 };
 

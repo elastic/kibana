@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { pick } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import type { SavedSearchAttributes, SavedSearch } from '..';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { pick } from 'lodash';
+import type { SavedSearch, SavedSearchAttributes } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
 
-export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '..';
+export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '..';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
   references: SavedObjectReference[] | undefined,
-  searchSource: SavedSearch['searchSource'],
+  searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
   managed: boolean
 ): SavedSearch => ({

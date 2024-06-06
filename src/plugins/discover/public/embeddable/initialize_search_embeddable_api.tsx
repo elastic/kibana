@@ -25,9 +25,9 @@ import {
 } from './types';
 
 export type SavedSearchAttributesManager = {
-  [key in keyof Required<SearchEmbeddableAttributes>]: BehaviorSubject<
-    SearchEmbeddableAttributes[key]
-  >;
+  [key in keyof Required<
+    Omit<SearchEmbeddableAttributes, 'serializedSearchSource'>
+  >]: BehaviorSubject<Omit<SearchEmbeddableAttributes, 'serializedSearchSource'>[key]>;
 };
 
 export const initializeSearchEmbeddableApi = async (
@@ -42,11 +42,15 @@ export const initializeSearchEmbeddableApi = async (
   searchEmbeddableStateManager: SavedSearchAttributesManager;
   searchEmbeddableComparators: StateComparators<SearchEmbeddableAttributes>;
 }> => {
-  const parentSearchSource = await discoverServices.data.search.searchSource.create();
-  initialState.searchSource?.setParent(parentSearchSource);
-  const dataView = initialState.searchSource?.getField('index');
+  const [searchSource, parentSearchSource] = await Promise.all([
+    discoverServices.data.search.searchSource.create(initialState.serializedSearchSource),
+    discoverServices.data.search.searchSource.create(),
+  ]);
+  searchSource?.setParent(parentSearchSource);
+  const dataView = searchSource?.getField('index');
 
-  const searchSource$ = new BehaviorSubject(initialState.searchSource);
+  const searchSource$ = new BehaviorSubject(searchSource);
+  const serializedSearchSource$ = new BehaviorSubject(initialState.serializedSearchSource);
   const managed$ = new BehaviorSubject(initialState.managed);
   const dataViews = new BehaviorSubject(dataView ? [dataView] : undefined);
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
@@ -69,7 +73,6 @@ export const initializeSearchEmbeddableApi = async (
     breakdownField: breakdownField$,
     viewMode: savedSearchViewMode$,
     managed: managed$,
-    searchSource: searchSource$,
   };
 
   const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
@@ -79,7 +82,10 @@ export const initializeSearchEmbeddableApi = async (
   const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableAttributes> => {
     return {
       managed: [managed$, (value) => managed$.next(value)],
-      searchSource: [searchSource$, (value) => searchSource$.next(value)],
+      serializedSearchSource: [
+        serializedSearchSource$,
+        (value) => serializedSearchSource$.next(value),
+      ],
       breakdownField: [breakdownField$, (value) => breakdownField$.next(value)],
       viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
       sort: [sort$, (value) => sort$.next(value), (a, b) => deepEqual(a, b)],

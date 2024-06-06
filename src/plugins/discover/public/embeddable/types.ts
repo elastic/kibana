@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource, SearchSource } from '@kbn/data-plugin/common';
+import { ISearchSource } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
-  HasExecutionContext,
   HasInPlaceLibraryTransforms,
-  HasLibraryTransforms,
-  HasParentApi,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesSavedObjectId,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/common/types';
+import {
+  SavedSearch,
+  SerializableSavedSearch,
+  SortOrder,
+} from '@kbn/saved-search-plugin/common/types';
 import type { SavedSearchByValueAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 
@@ -39,8 +40,8 @@ export type SearchEmbeddableSerializedState = SerializedTitles & {
 };
 
 export type SearchEmbeddableAttributes = Pick<
-  SavedSearch,
-  | 'searchSource'
+  SerializableSavedSearch,
+  | 'serializedSearchSource'
   | 'managed'
   | 'rowHeight'
   | 'rowsPerPage'

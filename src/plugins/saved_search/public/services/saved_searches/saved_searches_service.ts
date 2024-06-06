@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedSearch, saveSavedSearch, SaveSavedSearchOptions, getNewSavedSearch } from '.';
-import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { getNewSavedSearch, getSavedSearch, saveSavedSearch, SaveSavedSearchOptions } from '.';
 import { SavedSearchType } from '../../../common';
+import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import { getSearchSavedObject } from '../../../common/service/get_saved_searches';
 import type { SavedSearch } from '../../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
@@ -26,8 +27,8 @@ export interface SavedSearchesServiceDeps {
 export class SavedSearchesService {
   constructor(private deps: SavedSearchesServiceDeps) {}
 
-  get = (savedSearchId: string) => {
-    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps));
+  get = (savedSearchId: string, serializable: boolean = false) => {
+    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps), serializable);
   };
   getAll = async () => {
     const { contentManagement } = this.deps;

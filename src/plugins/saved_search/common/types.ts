@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type {
+  ISearchSource,
+  RefreshInterval,
+  SerializedSearchSourceFields,
+  TimeRange,
+} from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -81,4 +86,9 @@ export type SavedSearch = Partial<SavedSearchAttributes> & {
     aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
+};
+
+/** @internal **/
+export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
+  serializedSearchSource?: SerializedSearchSourceFields;
 };
