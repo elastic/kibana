@@ -13,8 +13,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { getNewSavedSearch, getSavedSearch, saveSavedSearch, SaveSavedSearchOptions } from '.';
 import { SavedSearchType } from '../../../common';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
-import { getSearchSavedObject } from '../../../common/service/get_saved_searches';
-import type { SavedSearch } from '../../../common/types';
+import type { SavedSearch, SerializableSavedSearch } from '../../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
 export interface SavedSearchesServiceDeps {
@@ -27,8 +26,11 @@ export interface SavedSearchesServiceDeps {
 export class SavedSearchesService {
   constructor(private deps: SavedSearchesServiceDeps) {}
 
-  get = (savedSearchId: string, serializable: boolean = false) => {
-    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps), serializable);
+  get = <Serialized extends boolean = boolean>(
+    savedSearchId: string,
+    serialized?: Serialized
+  ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {
+    return getSavedSearch(savedSearchId, createGetSavedSearchDeps(this.deps), serialized);
   };
   getAll = async () => {
     const { contentManagement } = this.deps;

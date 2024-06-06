@@ -9,7 +9,11 @@
 import React, { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  isLegacyTableEnabled,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '@kbn/discover-utils';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import {
   useBatchedOptionalPublishingSubjects,
@@ -27,6 +31,7 @@ import { SavedSearchAttributesManager } from '../initialize_search_embeddable_ap
 import type { EmbeddableComponentSearchProps, SearchEmbeddableApi } from '../types';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
 import { getSortForEmbeddable } from '../../utils';
+import { isEsqlMode } from '../initialize_fetch';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi;
@@ -142,16 +147,16 @@ export function SearchEmbeddableGridComponent({
     discoverServices.uiSettings,
   ]);
 
-  // const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
-
-  // const useLegacyTable = useMemo(
-  //   () =>
-  //     isLegacyTableEnabled({
-  //       uiSettings: discoverServices.uiSettings,
-  //       isEsqlMode: isEsql,
-  //     }),
-  //   [discoverServices, isEsql]
-  // );
+  const isEsql = useMemo(() => isEsqlMode(api.getSavedSearch()), [api]);
+  console.log('isEsql', isEsql);
+  const useLegacyTable = useMemo(
+    () =>
+      isLegacyTableEnabled({
+        uiSettings: discoverServices.uiSettings,
+        isEsqlMode: isEsql,
+      }),
+    [discoverServices, isEsql]
+  );
 
   // const useLegacyTable = false;
 
@@ -180,15 +185,15 @@ export function SearchEmbeddableGridComponent({
     return <></>;
   }
 
-  // if (useLegacyTable) {
-  //   return (
-  //     <DiscoverDocTableEmbeddableMemoized
-  //       {...searchProps}
-  //       sampleSizeState={fetchedSampleSize}
-  //       isPlainRecord={isTextBasedQueryMode}
-  //     />
-  //   );
-  // }
+  if (useLegacyTable) {
+    return (
+      <DiscoverDocTableEmbeddableMemoized
+        {...searchProps}
+        sampleSizeState={fetchedSampleSize}
+        isEsqlMode={isEsql}
+      />
+    );
+  }
 
   return (
     <DiscoverGridEmbeddableMemoized

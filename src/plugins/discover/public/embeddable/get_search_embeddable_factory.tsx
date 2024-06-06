@@ -313,7 +313,6 @@ export const getSearchEmbeddableFactory = ({
                 ...filter,
                 $state: { store: FilterStateStore.APP_STATE },
               }));
-              console.log('newFilters', newFilters);
 
               await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
                 embeddable: api,

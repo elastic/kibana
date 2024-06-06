@@ -25,7 +25,6 @@ import { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../
 import { getKibanaContext } from './expressions/kibana_context';
 import {
   getNewSavedSearch,
-  getSavedSearch,
   SavedSearchUnwrapResult,
   saveSavedSearch,
   SaveSavedSearchOptions,
@@ -44,10 +43,10 @@ export interface SavedSearchPublicPluginSetup {}
  * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicPluginStart {
-  get: <Serializable extends boolean = boolean>(
+  get: <Serialized extends boolean = boolean>(
     savedSearchId: string,
-    serializable?: Serializable
-  ) => Promise<Serializable extends true ? SerializableSavedSearch : SavedSearch>;
+    serialized?: Serialized
+  ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
   getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
   save: (
@@ -58,11 +57,11 @@ export interface SavedSearchPublicPluginStart {
     props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
   ) => Promise<void>;
   byValue: {
-    toSavedSearch: <Serializable extends boolean = boolean>(
+    toSavedSearch: <Serialized extends boolean = boolean>(
       id: string | undefined,
       result: SavedSearchUnwrapResult,
-      serializable?: Serializable
-    ) => Promise<Serializable extends true ? SerializableSavedSearch : SavedSearch>;
+      serialized?: Serialized
+    ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
   };
 }
 
@@ -137,8 +136,11 @@ export class SavedSearchPublicPlugin
     const service = new SavedSearchesService(deps);
 
     return {
-      get: (savedSearchId: string, serializable: boolean = false) =>
-        service.get(savedSearchId, serializable),
+      get: <Serialized extends boolean = boolean>(
+        savedSearchId: string,
+        serialized?: Serialized
+      ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> =>
+        service.get(savedSearchId, serialized),
       getAll: () => service.getAll(),
       getNew: () => service.getNew(),
       save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
@@ -158,9 +160,9 @@ export class SavedSearchPublicPlugin
         toSavedSearch: async (
           id: string | undefined,
           result: SavedSearchUnwrapResult,
-          serializable: boolean = false
+          serialized: boolean = false
         ) => {
-          return toSavedSearch(id, result, deps, serializable);
+          return toSavedSearch(id, result, deps, serialized);
         },
       },
     };

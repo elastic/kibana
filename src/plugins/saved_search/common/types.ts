@@ -73,7 +73,7 @@ export type SortOrder = [string, string];
 
 /** @public **/
 export type SavedSearch = Partial<SavedSearchAttributes> & {
-  searchSource?: ISearchSource;
+  searchSource: ISearchSource;
   id?: string;
   tags?: string[] | undefined;
 

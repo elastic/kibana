@@ -106,11 +106,11 @@ export const convertToSavedSearch = async (
   return returnVal;
 };
 
-export const getSavedSearch = async (
+export const getSavedSearch = async <Serialized extends boolean = boolean>(
   savedSearchId: string,
   deps: GetSavedSearchDependencies,
-  serializable: boolean = false
-): Promise<SavedSearch | SerializableSavedSearch> => {
+  serialized: boolean = false
+): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {
   const so = await getSearchSavedObject(savedSearchId, deps);
   const savedSearch = await convertToSavedSearch(
     {
@@ -121,7 +121,7 @@ export const getSavedSearch = async (
       managed: so.item.managed,
     },
     deps,
-    serializable
+    serialized
   );
 
   return savedSearch;
