@@ -92,6 +92,10 @@ function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClus
       ...rest,
       esClient: scopedClusterClient.asCurrentUser,
     }),
+    asSecondaryAuth: wrapEsClient({
+      ...rest,
+      esClient: scopedClusterClient.asSecondaryAuth,
+    }),
   };
 }
 
