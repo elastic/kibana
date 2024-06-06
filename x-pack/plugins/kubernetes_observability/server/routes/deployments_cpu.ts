@@ -57,6 +57,15 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
               },
             }
           )
+          const filter = [
+            {
+                range: {
+                    "@timestamp": {
+                        "gte": period
+                    }
+                }
+            }
+          ]
           const dslDeploys: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
             _source: false,
@@ -65,7 +74,8 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             ],
             query: {
               bool: {
-                must: musts
+                must: musts,
+                filter: filter
               },
             },
             aggs: {

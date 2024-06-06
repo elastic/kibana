@@ -55,6 +55,15 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
                 },
             )
           };
+          const filter = [
+            {
+                range: {
+                    "@timestamp": {
+                        "gte": "now-5m"
+                    }
+                }
+            }
+          ]
           const dslDeploys: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
             _source: false,
@@ -64,6 +73,7 @@ export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
             query: {
               bool: {
                   must: deploymusts,
+                  filter: filter
               },
             },
             aggs: {
@@ -252,14 +262,13 @@ export async function getDeployPods(client: any, deployName: string, namespace: 
   console.log(esResponsePods);
   const hits = esResponsePods.hits.hits;
   var notRunningPods = new Array();
-  var message = '';
+  const message = `Deployment ${namespace}/${deployName} has ${replicasdesired} replicas desired but ${replicasAvailable} are available`;
   var reason = '';
   var deploy = {} as Deployment;
   for (const hit of hits) {
     const { fields = {} } = hit;
     const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
     const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
-    message = `Deployment ${namespace}/${deployName} has ${replicasdesired} replicas desired but ${replicasAvailable} are available`;
     var state = phaseToState(podPhase)
     if (podPhase !== 2 && podPhase !== 3) {
       reason = `Pod ${namespace}/${podName} is in ${state} state`;
@@ -276,12 +285,11 @@ export async function getDeployPods(client: any, deployName: string, namespace: 
       notRunningPods.push(pod);
     } else {
         const [podContainerStatus, container, conTime] = await getPodContainersStatus(client, podName, namespace);
-        state = podContainerStatus === 'Not Ready' ? 'Failed' : state;
+        state = podContainerStatus === 'Not Ready' ? 'Not Ready' : state;
         if (podContainerStatus === 'Not Ready') {
           const failingMessage = `Pod ${namespace}/${podName} is in ${state} state because container ${container} is not Ready. Check the container's logs for more details`
-          message = podContainerStatus === 'Not Ready' ? failingMessage : message;
           failingReason = {
-            note: `Container ${container} is not Ready. Check the container's logs for more details`,
+            note: failingMessage,
             reason: `Container ${container} may be crashing`,
             type: 'Warning',
             time: conTime,

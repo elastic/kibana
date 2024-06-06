@@ -74,6 +74,15 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
               },
             )
           };
+          const filter = [
+            {
+                range: {
+                    "@timestamp": {
+                        "gte": "now-5m"
+                    }
+                }
+            }
+          ]
           const dslPods: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
             _source: false,
@@ -83,6 +92,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
             query: {
               bool: {
                   must: podmusts,
+                  filter: filter
               },
             },
             aggs: {

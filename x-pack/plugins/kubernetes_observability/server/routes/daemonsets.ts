@@ -55,6 +55,15 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
                 },
             )
           };
+          const filter = [
+            {
+                range: {
+                    "@timestamp": {
+                        "gte": "now-5m"
+                    }
+                }
+            }
+          ]
           const dslDaemons: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
             _source: false,
@@ -64,6 +73,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
             query: {
               bool: {
                   must: daemonmusts,
+                  filter: filter,
               },
             },
             aggs: {
@@ -160,7 +170,15 @@ export async function getDaemonStatus(client: any, daemonName: string, namespace
       }
     )
   }
-
+  const filter = [
+    {
+        range: {
+            "@timestamp": {
+                "gte": "now-5m"
+            }
+        }
+    }
+  ]
   const dsl: estypes.SearchRequest = {
     index: ["metrics-otel.*"],
     size: 1,
@@ -175,6 +193,7 @@ export async function getDaemonStatus(client: any, daemonName: string, namespace
     query: {
       bool: {
         must: musts,
+        filter: filter
       },
     },
   };
@@ -253,14 +272,13 @@ export async function getDaemonPods(client: any, daemonName: string, namespace: 
   console.log(esResponsePods);
   const hits = esResponsePods.hits.hits;
   var notRunningPods = new Array();
-  var message = '';
+  const message = `Daemonset ${namespace}/${daemonName} has ${desiredNodes} nodes desired but ${readyNodes} are ready`;
   var reason = '';
   var daemonset = {} as Daemonset;
   for (const hit of hits) {
     const { fields = {} } = hit;
     const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
     const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
-    message = `Daemonset ${namespace}/${daemonName} has ${desiredNodes} desired nodes desired but ${readyNodes} are ready`;
     var state = phaseToState(podPhase)
     if (podPhase !== 2 && podPhase !== 3) {
       reason = `Pod ${namespace}/${podName} is in ${state} state`;
@@ -277,12 +295,11 @@ export async function getDaemonPods(client: any, daemonName: string, namespace: 
       notRunningPods.push(pod);
     } else {
         const [podContainerStatus, container, conTime] = await getPodContainersStatus(client, podName, namespace);
-        state = podContainerStatus === 'Not Ready' ? 'Failed' : state;
+        state = podContainerStatus === 'Not Ready' ? 'Not Ready' : state;
         if (podContainerStatus === 'Not Ready') {
           const failingMessage = `Pod ${namespace}/${podName} is in ${state} state because container ${container} is not Ready. Check the container's logs for more details`
-          message = podContainerStatus === 'Not Ready' ? failingMessage : message;
           failingReason = {
-            note: `Container ${container} is not Ready. Check the container's logs for more details`,
+            note: failingMessage,
             reason: `Container ${container} may be crashing`,
             type: 'Warning',
             time: conTime,

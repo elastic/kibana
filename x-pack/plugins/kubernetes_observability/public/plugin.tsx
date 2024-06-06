@@ -239,8 +239,13 @@ export class PublicKubernetesObservabilityClient {
       return results;
     }
 
-    async getPodsCpu(pod: any, namespace: any, deployment: any) {
+    async getPodsCpu(pod: any, namespace: any, deployment: any, daemonset: any) {
       console.log("CALLED TO GET PODS CPU")
+      console.log(pod)
+      console.log(namespace)
+      console.log(deployment)
+      console.log(daemonset)
+      
       var query = {} as Query;
       if (pod !== undefined) {
         query['name'] = pod
@@ -251,12 +256,18 @@ export class PublicKubernetesObservabilityClient {
       if (deployment !== undefined) {
         query['deployment'] = deployment
       }
+      if (daemonset !== undefined) {
+        query['daemonset'] = daemonset
+      }
+      console.log("getPodsCpu query")
+      console.log(query);
       const results = await this.http.get('/api/kubernetes/pods/cpu', {version: '1', query});
+      console.log("PODS CPU results")
       console.log(results);
       return results;
     }
 
-    async getPodsMemory(pod: any, namespace: any, deployment: any) {
+    async getPodsMemory(pod: any, namespace: any, deployment: any, daemonset: any) {
       console.log("CALLED TO GET PODS MEMORY")
       var query = {} as Query;
       if (pod !== undefined) {
@@ -267,6 +278,9 @@ export class PublicKubernetesObservabilityClient {
       }
       if (deployment !== undefined) {
         query['deployment'] = deployment
+      }
+      if (daemonset !== undefined) {
+        query['daemonset'] = daemonset
       }
       const results = await this.http.get('/api/kubernetes/pods/memory', {version: '1', query});
       console.log(results);
@@ -307,6 +321,9 @@ const  KubernetesObservabilityComp = ({
   const [service, setService] = useState('all');
   const [svcIsDeploy, setSvcIsDeploy] = useState(false);
   const [svcIsDaemon, setSvcIsDaemon] = useState(false);
+  const [triggerPodStatus, setTriggerPodStatus] = useState(true);
+  const [triggerPodCpu, setTriggerPodCpu] = useState(true);
+  const [triggerPodMem, setTriggerPodMem] = useState(true);
   // useEffect(() => {
   //   const timer = setInterval(() => {
   //     console.log('This will run after 10 second!')
@@ -434,6 +451,13 @@ const  KubernetesObservabilityComp = ({
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
     const svc = service === 'all' ? undefined : service;
+    if (service === 'all') {
+      setSvcIsDaemon(false);
+      setSvcIsDeploy(false);
+      setTriggerPodStatus(true)
+      setTriggerPodCpu(true)
+      setTriggerPodMem(true)
+    }
     client.getDeploymentsCpu(svc, ns).then(data => {
       console.log(data);
       setDeploysCpuTime(data.time);
@@ -445,10 +469,15 @@ const  KubernetesObservabilityComp = ({
       if (found){
         setSvcIsDeploy(true);
         setSvcIsDaemon(false);
-        const podsArray = data.deployments[0].pods;
-        const podkeys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
-        const pods = podsArray.map(item => podkeys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-        setPodsCpu(pods);
+        setTriggerPodStatus(true)
+        setTriggerPodCpu(true)
+        setTriggerPodMem(true)
+        // const podsArray = data.deployments[0].pods;
+        // const podkeys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
+        // const pods = podsArray.map(item => podkeys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        // setPodsCpu(pods);
+      } else {
+        setSvcIsDeploy(false);
       }
       setDeploysCpu(deploys);
       })
@@ -458,6 +487,9 @@ const  KubernetesObservabilityComp = ({
   }, [client, namespace, hasTimeElapsed, service]); // *** Note the dependency
 
   useEffect(() => {
+    console.log("Triggered to get daemonsets memory");
+    console.log(namespace)
+    console.log(service)
     const ns = namespace === 'all' ? undefined : namespace;
     const svc = service === 'all' ? undefined : service;
     client.getDaemonsetsMemory(svc, ns).then(data => {
@@ -468,6 +500,9 @@ const  KubernetesObservabilityComp = ({
       
       const daemons = daemonArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
       const found = daemons.some(el => el.name === service);
+      console.log("daemon found");
+      console.log(found);
+      console.log(daemons);
       if (found){
         const podsArray = data.daemonsets[0].pods;
         const keys = ['name', 'namespace',  'node', 'memory_utilization', 'message', 'alarm'];
@@ -495,10 +530,16 @@ const  KubernetesObservabilityComp = ({
       if (found){
         setSvcIsDeploy(false);
         setSvcIsDaemon(true);
-        const podsArray = data.daemonsets[0].pods;
-        const podkeys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
-        const pods = podsArray.map(item => podkeys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-        setPodsCpu(pods);
+        setTriggerPodStatus(true)
+        setTriggerPodCpu(true)
+        setTriggerPodMem(true)
+        // setTriggerPodStatus(true)
+        // const podsArray = data.daemonsets[0].pods;
+        // const podkeys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
+        // const pods = podsArray.map(item => podkeys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        // setPodsCpu(pods);
+      } else {
+        setSvcIsDaemon(false);
       }
       setDaemonsCpu(daemons);
       })
@@ -509,62 +550,90 @@ const  KubernetesObservabilityComp = ({
 
   useEffect(() => {
     const ns = namespace === 'all' ? undefined : namespace;
-    const svc = service === 'all' ? undefined : service;
-    client.getPodsMemory(undefined, ns, svc).then(data => {
-      console.log(data);
-      setPodsMemTime(data.time);
-      const podsArray = data.pods;
-      const keys = ['name', 'namespace',  'node', 'memory_utilization', 'message', 'alarm'];
-      
-      const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-      setPodsMem(pods);
-      })
-      .catch(error => {
-          console.log(error)
-      });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
-
-  useEffect(() => {
-    const ns = namespace === 'all' ? undefined : namespace;
-    const svc = service === 'all' ? undefined : service;
-    client.getPodsCpu(undefined, ns, svc).then(data => {
-      console.log(data);
-      setPodsCpuTime(data.time);
-      const podsArray = data.pods;
-      const keys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
-      
-      const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-      setPodsCpu(pods);
-      })
-      .catch(error => {
-          console.log(error)
-      });
-  }, [client, namespace, hasTimeElapsed]); // *** Note the dependency
-
-  useEffect(() => {
-    const ns = namespace === 'all' ? undefined : namespace;
+    console.log("Get pod memory before");
+    console.log(svcIsDeploy);
+    console.log(svcIsDaemon);
+    console.log(service);
     const deploy = svcIsDeploy ? service : undefined;
     const daemon = svcIsDaemon ? service : undefined;
-    client.getPodsStatus(undefined, ns, deploy, daemon).then(data => {
-      console.log(data);
-      setPodsStatusTime(data.time);
-      const podsArray = data.pods;
-      const keys = ['name', 'namespace', 'status', 'message', 'node', 'failingReason'];
-      podsArray.map((pod: any) => {
-        const reason = pod.failingReason;
-        if (Object.keys(reason).length === 0) {
-          pod["status"] = "OK"
-        } else {
-          pod["status"] = "Warning"
-        }
-      });
-      const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-      setPodsStatus(pods);
-      })
-      .catch(error => {
-          console.log(error)
-      });
-  }, [client, namespace, hasTimeElapsed, svcIsDaemon, svcIsDeploy]); // *** Note the dependency
+    if (triggerPodMem) {
+      client.getPodsMemory(undefined, ns, deploy, daemon).then(data => {
+        console.log(data);
+        setPodsMemTime(data.time);
+        const podsArray = data.pods;
+        const keys = ['name', 'namespace',  'node', 'memory_utilization', 'message', 'alarm'];
+        
+        const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setTriggerPodMem(false)
+        setPodsMem(pods);
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [client, namespace, hasTimeElapsed, triggerPodMem]); // *** Note the dependency
+
+  useEffect(() => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    console.log("Get pod cpu before");
+    console.log(svcIsDeploy);
+    console.log(svcIsDaemon);
+    console.log(service);
+    console.log(triggerPodCpu);
+    const deploy = svcIsDeploy ? service : undefined;
+    const daemon = svcIsDaemon ? service : undefined;
+    console.log(ns)
+    console.log(deploy)
+    console.log(daemon)
+    if (triggerPodCpu) {
+      client.getPodsCpu(undefined, ns, deploy, daemon).then(data => {
+        console.log(data);
+        setPodsCpuTime(data.time);
+        const podsArray = data.pods;
+        const keys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
+        
+        const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setTriggerPodCpu(false)
+        setPodsCpu(pods);
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+  }, [client, namespace, hasTimeElapsed, triggerPodCpu]); // *** Note the dependency
+
+  useEffect(() => {
+    const ns = namespace === 'all' ? undefined : namespace;
+    console.log("Get pod status before");
+    console.log(svcIsDeploy);
+    console.log(svcIsDaemon);
+    console.log(service);
+    const deploy = svcIsDeploy ? service : undefined;
+    const daemon = svcIsDaemon ? service : undefined;
+    if (triggerPodStatus){
+      client.getPodsStatus(undefined, ns, deploy, daemon).then(data => {
+        console.log(data);
+        setPodsStatusTime(data.time);
+        const podsArray = data.pods;
+        const keys = ['name', 'namespace', 'status', 'message', 'node', 'failingReason'];
+        podsArray.map((pod: any) => {
+          const reason = pod.failingReason;
+          if (Object.keys(reason).length === 0) {
+            pod["status"] = "OK"
+          } else {
+            pod["status"] = "Warning"
+          }
+        });
+        const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+        setPodsStatus(pods);
+        setTriggerPodStatus(false)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+    
+  }, [client, namespace, hasTimeElapsed, triggerPodStatus]); // *** Note the dependency
 
   const nodeMemcolumns: Array<EuiBasicTableColumn<any>> = [
     {
