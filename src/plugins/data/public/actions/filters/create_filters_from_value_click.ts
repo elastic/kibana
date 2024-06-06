@@ -182,7 +182,7 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
           const queryString = query.esql;
           queryWithFilter = appendWhereClauseToESQLQuery(
             queryString,
-            column.id,
+            column.name,
             value,
             '+',
             column.meta?.type
