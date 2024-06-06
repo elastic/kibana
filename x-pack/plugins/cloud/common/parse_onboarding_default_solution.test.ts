@@ -7,7 +7,7 @@
 
 import { parseOnboardingSolution } from './parse_onboarding_default_solution';
 
-describe('parseDeploymentIdFromDeploymentUrl', () => {
+describe('parseOnboardingSolution', () => {
   it('should return undefined if there is no default solution defined', () => {
     expect(parseOnboardingSolution()).toBeUndefined();
   });

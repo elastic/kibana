@@ -18,9 +18,7 @@ export function parseOnboardingSolution(value?: string): OnBoardingDefaultSoluti
   if (!value) return;
 
   const solutions: Array<{
-    /** The known value passed by cloud. */
     cloudValue: 'elasticsearch' | 'observability' | 'security';
-    /**  */
     kibanaValue: OnBoardingDefaultSolution;
   }> = [
     {
