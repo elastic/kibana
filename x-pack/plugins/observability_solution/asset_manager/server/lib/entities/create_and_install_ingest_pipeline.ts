@@ -7,34 +7,57 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateProcessors } from './ingest_pipeline/generate_processors';
 import { retryTransientEsErrors } from './helpers/retry';
-import { EntitySecurityException } from './errors/entity_security_exception';
-import { generateIngestPipelineId } from './ingest_pipeline/generate_ingest_pipeline_id';
+import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
+import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
+import { generateHistoryProcessors } from './ingest_pipeline/generate_history_processors';
+import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
 
-export async function createAndInstallIngestPipeline(
+export async function createAndInstallHistoryIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger,
   spaceId: string
 ) {
-  const processors = generateProcessors(definition, spaceId);
-  const id = generateIngestPipelineId(definition);
   try {
+    const historyProcessors = generateHistoryProcessors(definition, spaceId);
+    const historyId = generateHistoryIngestPipelineId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline({
-          id,
-          processors,
+          id: historyId,
+          processors: historyProcessors,
         }),
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot create entity ingest pipeline for [${definition.id}] entity definition`);
-    if (e.meta?.body?.error?.type === 'security_exception') {
-      throw new EntitySecurityException(e.meta.body.error.reason, definition);
-    }
+    logger.error(
+      `Cannot create entity history ingest pipelines for [${definition.id}] entity defintion`
+    );
     throw e;
   }
-  return id;
+}
+export async function createAndInstallLatestIngestPipeline(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger,
+  spaceId: string
+) {
+  try {
+    const latestProcessors = generateLatestProcessors(definition, spaceId);
+    const latestId = generateLatestIngestPipelineId(definition);
+    await retryTransientEsErrors(
+      () =>
+        esClient.ingest.putPipeline({
+          id: latestId,
+          processors: latestProcessors,
+        }),
+      { logger }
+    );
+  } catch (e) {
+    logger.error(
+      `Cannot create entity latest ingest pipelines for [${definition.id}] entity defintion`
+    );
+    throw e;
+  }
 }
