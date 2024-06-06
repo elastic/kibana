@@ -38,24 +38,27 @@ export type Result = 'ready';
   };
   set(settings, PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH, true);
 
+  const cliArgs = {
+    serverless,
+    basePath: false,
+    cache: false,
+    dev: true,
+    disableOptimizer: true,
+    silent: false,
+    dist: false,
+    oss: false,
+    runExamples: false,
+    watch: false,
+  };
+
   if (serverless) {
+    // Satisfy spaces config for serverless:
+    set(settings, 'xpack.spaces.allowFeatureVisibility', false);
     const { startKibana } = createTestServerlessInstances({
-      kibana: { settings },
+      kibana: { settings, cliArgs },
     });
-    await startKibana();
+    const {} = await startKibana();
   } else {
-    const cliArgs = {
-      serverless,
-      basePath: false,
-      cache: false,
-      dev: true,
-      disableOptimizer: true,
-      silent: false,
-      dist: false,
-      oss: false,
-      runExamples: false,
-      watch: false,
-    };
     const root = createRootWithCorePlugins(settings, cliArgs);
     await root.preboot();
     await root.setup();
