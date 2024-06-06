@@ -49,6 +49,9 @@ describe('GetSLO', () => {
             remaining: 0.9,
             isEstimated: false,
           },
+          fiveMinuteBurnRate: 0,
+          oneHourBurnRate: 0,
+          oneDayBurnRate: 0,
         },
       });
 
@@ -91,6 +94,9 @@ describe('GetSLO', () => {
             remaining: 0.9,
             isEstimated: false,
           },
+          fiveMinuteBurnRate: 0,
+          oneHourBurnRate: 0,
+          oneDayBurnRate: 0,
         },
         tags: ['critical', 'k8s'],
         createdAt: slo.createdAt.toISOString(),
