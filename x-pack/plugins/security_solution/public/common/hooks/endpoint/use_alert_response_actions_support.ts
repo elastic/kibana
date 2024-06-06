@@ -142,12 +142,28 @@ export const useAlertResponseActionsSupport = (
   }, [agentType, isFeatureEnabled]);
 
   const hostName = useMemo(() => {
+    // TODO:PT need to check if crowdstrike event has `host.name`
+    if (agentType === 'crowdstrike') {
+      return getAlertDetailsFieldValue(
+        { category: 'crowdstrike', field: 'crowdstrike.event.HostName' },
+        eventData
+      );
+    }
+
     return getAlertDetailsFieldValue({ category: 'host', field: 'host.name' }, eventData);
-  }, [eventData]);
+  }, [agentType, eventData]);
 
   const platform = useMemo(() => {
+    // TODO:PT need to check if crowdstrike event has `host.os.family`
+    if (agentType === 'crowdstrike') {
+      return getAlertDetailsFieldValue(
+        { category: 'crowdstrike', field: 'crowdstrike.event.Platform' },
+        eventData
+      );
+    }
+
     return getAlertDetailsFieldValue({ category: 'host', field: 'host.os.family' }, eventData);
-  }, [eventData]);
+  }, [agentType, eventData]);
 
   return useMemo<AlertResponseActionsSupport>(() => {
     return {

@@ -514,18 +514,19 @@ export const getEndpointConsoleCommands = ({
 };
 
 /** @private */
+const disableCommand = (command: CommandDefinition, agentType: ResponseActionAgentType) => {
+  command.helpDisabled = true;
+  command.helpHidden = true;
+  command.validate = () =>
+    UPGRADE_AGENT_FOR_RESPONDER(agentType, command.name as ConsoleResponseActionCommands);
+};
+
+/** @private */
 const adjustCommandsForSentinelOne = ({
   commandList,
 }: {
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
-  const disableCommand = (command: CommandDefinition) => {
-    command.helpDisabled = true;
-    command.helpHidden = true;
-    command.validate = () =>
-      UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', command.name as ConsoleResponseActionCommands);
-  };
-
   return commandList.map((command) => {
     if (
       command.name === 'status' ||
@@ -535,7 +536,7 @@ const adjustCommandsForSentinelOne = ({
         'manual'
       )
     ) {
-      disableCommand(command);
+      disableCommand(command, 'sentinel_one');
     }
 
     return command;
@@ -548,35 +549,16 @@ const adjustCommandsForCrowdstrike = ({
 }: {
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
-  const featureFlags = ExperimentalFeaturesService.get();
-  const isHostIsolationEnabled = featureFlags.responseActionsCrowdstrikeManualHostIsolationEnabled;
-
-  const disableCommand = (command: CommandDefinition) => {
-    command.helpDisabled = true;
-    command.helpHidden = true;
-    command.validate = () =>
-      UPGRADE_AGENT_FOR_RESPONDER('crowdstrike', command.name as ConsoleResponseActionCommands);
-  };
-
   return commandList.map((command) => {
-    const agentSupportsResponseAction =
-      command.name === 'status'
-        ? false
-        : isActionSupportedByAgentType(
-            'crowdstrike',
-            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
-              command.name as ConsoleResponseActionCommands
-            ],
-            'manual'
-          );
-
-    // If command is not supported by Crowdstrike - disable it
     if (
-      !agentSupportsResponseAction ||
-      (command.name === 'isolate' && !isHostIsolationEnabled) ||
-      (command.name === 'release' && !isHostIsolationEnabled)
+      command.name === 'status' ||
+      !isAgentTypeAndActionSupported(
+        'crowdstrike',
+        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+        'manual'
+      )
     ) {
-      disableCommand(command);
+      disableCommand(command, 'crowdstrike');
     }
 
     return command;
