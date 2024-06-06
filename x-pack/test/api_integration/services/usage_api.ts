@@ -55,7 +55,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
     if (opts?.authorization) {
-      client.set({ Authorization: opts.authorization });
+      request.set({ Authorization: opts.authorization });
     }
 
     const { body } = await request.send({ refreshCache: true, ...payload }).expect(200);
