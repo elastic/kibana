@@ -39,7 +39,7 @@ export function SloPermissionsCallout() {
           <EuiFlexItem>
             <FormattedMessage
               id="xpack.slo.permissionsCallout.minimumReadPermissionsRequired"
-              defaultMessage="In order to view SLO dashboards and details, you need at least the following permissions on your user or role account:"
+              defaultMessage="In order to view SLO dashboards and details, you need at least the following permissions on your user's role:"
             />
 
             <ul>
@@ -55,7 +55,7 @@ export function SloPermissionsCallout() {
           <EuiFlexItem>
             <FormattedMessage
               id="xpack.slo.permissionsCallout.minimumReadPermissionsRequired"
-              defaultMessage="In order to create and manage SLO definitions, you need at least the following permissions on your user or role account:"
+              defaultMessage="In order to create and manage SLO definitions, you need at least the following permissions on your user's role:"
             />
 
             <ul>
