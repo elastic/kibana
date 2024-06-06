@@ -61,19 +61,7 @@ export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}) => 
       );
     });
   }
-  return {
-    server,
-    mockGetRequest: (path: string, response: JsonBodyType) =>
-      mockServerGetRequest(server, path, response),
-  };
-};
-
-export const mockServerGetRequest = (
-  server: SetupServerApi,
-  path: string,
-  response: JsonBodyType
-) => {
-  server.use(http.get(path, () => HttpResponse.json(response)));
+  return server;
 };
 
 /**
@@ -179,4 +167,8 @@ export const getMockServerDependencies = () => {
       },
     } as unknown as CoreStart,
   };
+};
+
+export const mockGetRequest = (path: string, response: JsonBodyType) => {
+  return http.get(path, () => HttpResponse.json(response));
 };
