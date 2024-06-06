@@ -1,7 +1,4 @@
 disabled:
-  # TODO: Enable once RBAC timeline search strategy test updated
-  - x-pack/test/timeline/security_and_spaces/config_basic.ts
-
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
   - test/functional/firefox/config.base.ts
@@ -16,6 +13,8 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
   - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
@@ -311,7 +310,6 @@ enabled:
   - x-pack/test/functional/apps/ml/short_tests/config.ts
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
-  - x-pack/test/functional/apps/navigation/config.ts
   - x-pack/test/functional/apps/observability_logs_explorer/config.ts
   - x-pack/test/functional/apps/dataset_quality/config.ts
   - x-pack/test/functional/apps/painless_lab/config.ts
@@ -325,7 +323,6 @@ enabled:
   - x-pack/test/functional/apps/search_playground/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
-  - x-pack/test/functional/apps/spaces/in_solution_navigation/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
@@ -401,21 +398,12 @@ enabled:
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
-  - x-pack/test/security_solution_endpoint_api_int/config.ts
-  - x-pack/test/security_solution_endpoint_api_int/serverless.config.ts
-  - x-pack/test/security_solution_endpoint/endpoint.config.ts
-  - x-pack/test/security_solution_endpoint/serverless.endpoint.config.ts
-  - x-pack/test/security_solution_endpoint/integrations.config.ts
-  - x-pack/test/security_solution_endpoint/integrations_feature_flag.config.ts
-  - x-pack/test/security_solution_endpoint/serverless.integrations.config.ts
-  - x-pack/test/security_solution_endpoint/serverless.integrations_feature_flag.config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
-  - x-pack/test/timeline/security_and_spaces/config_trial.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
@@ -567,5 +555,16 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/investigation/saved_objects/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/security_and_spaces/configs/ess.basic.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/security_and_spaces/configs/ess.trial.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/endpoint.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations_feature_flag.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations_feature_flag.config.ts
+

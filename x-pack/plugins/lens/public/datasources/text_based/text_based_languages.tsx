@@ -54,6 +54,7 @@ import {
   addColumnsToCache,
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
+import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -308,6 +309,7 @@ export function getTextBasedDatasource({
       });
       return errors.map((err) => {
         const message: UserMessage = {
+          uniqueId: TEXT_BASED_LANGUAGE_ERROR,
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],

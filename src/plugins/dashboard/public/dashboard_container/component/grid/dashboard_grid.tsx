@@ -20,7 +20,6 @@ import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
-import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
 import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
@@ -47,10 +46,6 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       setTimeout(() => setDelayedIsPanelMaximized(false), 0);
     }
   }, [expandedPanelId]);
-
-  const { onPanelStatusChange } = useDashboardPerformanceTracker({
-    panelCount: Object.keys(panels).length,
-  });
 
   const panelsInOrder: string[] = useMemo(() => {
     return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
@@ -80,11 +75,10 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
           type={type}
           expandedPanelId={expandedPanelId}
           focusedPanelId={focusedPanelId}
-          onPanelStatusChange={onPanelStatusChange}
         />
       );
     });
-  }, [expandedPanelId, onPanelStatusChange, panels, panelsInOrder, focusedPanelId]);
+  }, [expandedPanelId, panels, panelsInOrder, focusedPanelId]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {

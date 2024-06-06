@@ -216,7 +216,11 @@ describe('RulesPage with show only capability', () => {
       },
     });
 
-    return render(<RulesPage />);
+    return render(
+      <IntlProvider>
+        <RulesPage />
+      </IntlProvider>
+    );
   }
 
   it('renders a create rule button which is not disabled', async () => {
