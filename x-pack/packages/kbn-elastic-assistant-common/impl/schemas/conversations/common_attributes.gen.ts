@@ -116,6 +116,10 @@ export const ApiConfig = z.object({
    */
   actionTypeId: z.string(),
   /**
+   * defaultSystemPromptId
+   */
+  defaultSystemPromptId: z.string().optional(),
+  /**
    * Provider
    */
   provider: Provider.optional(),

@@ -8,10 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
-import type { GenerationInterval } from '../../../../types';
 import { GenerationTiming } from './generation_timing';
 
 interface Props {

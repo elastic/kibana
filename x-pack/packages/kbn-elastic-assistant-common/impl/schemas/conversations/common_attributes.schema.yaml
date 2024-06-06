@@ -97,6 +97,9 @@ components:
         actionTypeId:
           type: string
           description: action type id
+        defaultSystemPromptId:
+          type: string
+          description: defaultSystemPromptId
         provider:
           $ref: '#/components/schemas/Provider'
           description: Provider

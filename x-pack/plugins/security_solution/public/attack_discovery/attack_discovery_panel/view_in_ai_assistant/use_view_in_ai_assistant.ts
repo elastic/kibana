@@ -38,7 +38,7 @@ export const useViewInAiAssistant = ({
     attackDiscovery.title, // conversation title
     attackDiscovery.title, // description used in context pill
     getPromptContext,
-    attackDiscovery.id, // accept the UUID default for this prompt context
+    attackDiscovery.id ?? null, // accept the UUID default for this prompt context
     null, // suggestedUserPrompt
     null, // tooltip
     isAssistantEnabled,

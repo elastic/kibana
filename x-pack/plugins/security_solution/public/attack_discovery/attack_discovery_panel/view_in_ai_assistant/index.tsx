@@ -6,12 +6,11 @@
  */
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from './translations';
-import type { AttackDiscovery } from '../../types';
 import { useViewInAiAssistant } from './use_view_in_ai_assistant';
 
 interface Props {

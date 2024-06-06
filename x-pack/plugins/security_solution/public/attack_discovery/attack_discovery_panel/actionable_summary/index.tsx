@@ -6,11 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
-import type { AttackDiscovery } from '../../types';
 import { ViewInAiAssistant } from '../view_in_ai_assistant';
 
 interface Props {
