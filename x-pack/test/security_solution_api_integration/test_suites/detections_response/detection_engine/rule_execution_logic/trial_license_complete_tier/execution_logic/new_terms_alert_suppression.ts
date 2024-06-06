@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should deduplicate existing alert created without suppression', async () => {
+    it('deduplicates new alerts if they were previously created without suppression', async () => {
       const id = uuidv4();
       const firstTimestamp = new Date().toISOString();
 
