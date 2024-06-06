@@ -27,7 +27,7 @@ export const getActionRoute = (
       path: `${BASE_ACTION_API_PATH}/action/{id}`,
       options: {
         access: 'public',
-        description: `Get connector information`,
+        summary: `Get connector information`,
       },
       validate: {
         params: paramSchema,
