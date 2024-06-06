@@ -58,7 +58,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   // These hooks are used when on chromeStyle set to 'project'
   const [isVisible, setIsVisible] = useState(false);
-  const [focus, setFocus] = useState<boolean>(true);
+  const [focus, setFocus] = useState<boolean>(false);
   const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // General hooks
@@ -208,6 +208,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
+      setFocus(true);
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
         if (isChecked) {
