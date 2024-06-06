@@ -45,27 +45,6 @@ export const findAttackDiscoveryByConnectorId = async ({
     },
   ];
   try {
-    console.log(
-      'stephhhh query',
-      JSON.stringify({
-        bool: {
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      'api_config.connector_id': connectorId,
-                    },
-                  },
-                ],
-              },
-            },
-            ...filterByUser,
-          ],
-        },
-      })
-    );
     const response = await esClient.search<EsAttackDiscoverySchema>({
       query: {
         bool: {
