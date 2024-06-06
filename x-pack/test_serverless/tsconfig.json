@@ -103,5 +103,6 @@
     "@kbn/search-types",
     "@kbn/reporting-server",
     "@kbn/config-schema"
+    "@kbn/features-plugin"
   ]
 }
