@@ -17,6 +17,7 @@ import {
   createLatencyThresholdRule,
   createEsQueryRule,
 } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
@@ -29,6 +30,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   async function refreshRulesList() {
     const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
@@ -50,7 +56,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     numAttempts: number;
   }) {
     for (let i = 0; i < numAttempts; i++) {
-      await runRule({ supertest, ruleId });
+      await runRule({ supertestWithoutAuth, roleAuthc, internalReqHeader, ruleId });
       await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
 
       await disableRule({ supertest, ruleId });
@@ -76,6 +82,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     };
 
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await svlCommonPage.login();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
@@ -95,11 +103,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await svlCommonPage.forceLogout();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('should create an ES Query Rule and display it when consumer is observability', async () => {
       const esQuery = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         name: 'ES Query',
         consumer: 'observability',
         ruleTypeId: '.es-query',
@@ -124,7 +135,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('should create an ES Query rule but not display it when consumer is stackAlerts', async () => {
       const esQuery = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         name: 'ES Query',
         consumer: 'stackAlerts',
         ruleTypeId: '.es-query',
@@ -840,7 +853,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('should not prevent rules with action execution capabilities from being edited', async () => {
       const action = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: '.alerts-observability.apm.alerts-default',
       });

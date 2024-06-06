@@ -13,7 +13,6 @@ import {
   concat,
   EMPTY,
   from,
-  identity,
   isObservable,
   Observable,
   of,
@@ -219,10 +218,7 @@ export function continueConversation({
         messages: messagesWithUpdatedSystemMessage,
         functions: definitions,
         tracer,
-      }).pipe(
-        emitWithConcatenatedMessage(),
-        functionLimitExceeded ? catchFunctionNotFoundError() : identity
-      );
+      }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
     }
 
     const functionCallName = lastMessage.function_call?.name;
