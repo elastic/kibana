@@ -87,7 +87,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       );
 
       /** TODO: Handle loading; loading should be true if any child is loading */
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
       /** TODO: Handle unsaved changes
        * - Each child has an unsaved changed behaviour subject it pushes to
