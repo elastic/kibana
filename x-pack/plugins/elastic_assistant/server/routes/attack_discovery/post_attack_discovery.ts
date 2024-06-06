@@ -7,10 +7,12 @@
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { uniq } from 'lodash/fp';
 import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
   AttackDiscoveryResponse,
+  AttackDiscovery,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   Replacements,
 } from '@kbn/elastic-assistant-common';
@@ -18,6 +20,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import moment from 'moment/moment';
+import {
+  ATTACK_DISCOVERY_ERROR_EVENT,
+  ATTACK_DISCOVERY_SUCCESS_EVENT,
+} from '../../lib/telemetry/event_based_telemetry';
 import { ATTACK_DISCOVERY } from '../../../common/constants';
 import { addGenerationInterval, attackDiscoveryStatus, getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
@@ -63,6 +69,7 @@ export const postAttackDiscoveryRoute = (
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
+        const telemetry = assistantContext.telemetry;
 
         try {
           // get the actions plugin start contract from the request context:
@@ -199,35 +206,51 @@ export const postAttackDiscoveryRoute = (
 
               const endTime = moment();
               const durationMs = endTime.diff(startTime);
-              const dependentProps =
-                rawAttackDiscoveries == null
-                  ? {
-                      attackDiscoveries: [],
-                      status: attackDiscoveryStatus.failed,
-                    }
-                  : {
-                      attackDiscoveries: getDataFromJSON().attackDiscoveries,
-                      alertsContextCount: getDataFromJSON().alertsContextCount,
-                      status: attackDiscoveryStatus.succeeded,
-                      generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
-                        durationMs,
-                        date: new Date().toISOString(),
-                      }),
-                    };
+
+              if (rawAttackDiscoveries == null) {
+                throw new Error('tool returned no attack discoveries');
+              }
+              const updateProps = {
+                ...getDataFromJSON(),
+                status: attackDiscoveryStatus.succeeded,
+                generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
+                  durationMs,
+                  date: new Date().toISOString(),
+                }),
+                id: attackDiscoveryId,
+                replacements: latestReplacements,
+                backingIndex: currentAd.backingIndex,
+              };
 
               await dataClient?.updateAttackDiscovery({
-                attackDiscoveryUpdateProps: {
-                  ...dependentProps,
-                  id: attackDiscoveryId,
-                  replacements: latestReplacements,
-                  backingIndex: currentAd.backingIndex,
-                },
+                attackDiscoveryUpdateProps: updateProps,
                 authenticatedUser,
               });
-              // TODO implement success telemetry here
+
+              telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
+                actionTypeId: apiConfig.actionTypeId,
+                alertsContextCount: updateProps.alertsContextCount,
+                alertsCount: uniq(
+                  updateProps.attackDiscoveries.flatMap(
+                    (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
+                  )
+                ).length,
+                configuredAlertsCount: size,
+                discoveriesGenerated: updateProps.attackDiscoveries.length,
+                durationMs,
+                model: apiConfig.model,
+                provider: apiConfig.provider,
+              });
             })
-            .catch(async (e) => {
-              // TODO implement failed telemetry here
+            .catch(async (err) => {
+              logger.error(err);
+              const error = transformError(err);
+              telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
+                actionTypeId: apiConfig.actionTypeId,
+                errorMessage: error.message,
+                model: apiConfig.model,
+                provider: apiConfig.provider,
+              });
               await dataClient?.updateAttackDiscovery({
                 attackDiscoveryUpdateProps: {
                   attackDiscoveries: [],
