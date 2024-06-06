@@ -10,7 +10,8 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { getScopeFromPath, useSourcererDataView } from '.';
+import { useSourcererDataView } from '.';
+import { getScopeFromPath } from './sourcerer_paths';
 import { mockPatterns } from './mocks';
 import type { RouteSpyState } from '../../common/utils/route/types';
 import {

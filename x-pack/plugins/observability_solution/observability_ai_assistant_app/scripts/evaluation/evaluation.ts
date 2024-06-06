@@ -208,6 +208,15 @@ function runEvaluations() {
                 score.reasoning,
               ]);
             });
+
+            if (result.errors.length) {
+              output.push(['Errors', '', '']);
+
+              result.errors.forEach((error) => {
+                output.push([error.error.message, '', '']);
+              });
+            }
+
             log.write(table.table(output, tableConfig));
 
             const totalResults = result.scores.length;

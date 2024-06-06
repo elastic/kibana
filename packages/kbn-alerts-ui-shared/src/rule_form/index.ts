@@ -7,5 +7,7 @@
  */
 
 export * from './rule_definition';
+export * from './rule_actions';
+export * from './rule_details';
 export * from './utils';
 export * from './types';
