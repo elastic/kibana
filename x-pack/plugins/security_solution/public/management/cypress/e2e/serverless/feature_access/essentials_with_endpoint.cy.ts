@@ -62,9 +62,10 @@ describe(
         });
       }
 
+      // TODO: update tests when `scan` is included in PLIs
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
-      )) {
+        (apiName) => apiName !== 'scan'
+      ).filter((apiName) => apiName !== 'unisolate')) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });
@@ -91,9 +92,10 @@ describe(
         });
       });
 
+      // TODO: update tests when `scan` is included in PLIs
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
-      )) {
+        (apiName) => apiName !== 'scan'
+      ).filter((apiName) => apiName !== 'unisolate')) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });
