@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { postKnowledgeBase } from '../assistant/api';
+import { postKnowledgeBase } from './api';
 import { useInvalidateKnowledgeBaseStatus } from './use_knowledge_base_status';
 
 const SETUP_KNOWLEDGE_BASE_MUTATION_KEY = ['elastic-assistant', 'post-knowledge-base'];

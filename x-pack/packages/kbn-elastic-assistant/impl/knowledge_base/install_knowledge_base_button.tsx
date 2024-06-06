@@ -10,8 +10,8 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useAssistantContext } from '../..';
-import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
-import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
+import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
+import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 
 const ESQL_RESOURCE = 'esql';
 
