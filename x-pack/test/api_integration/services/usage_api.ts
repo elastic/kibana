@@ -11,7 +11,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import type { RoleCredentials } from '../../../test_serverless/shared/services';
 
 export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
   // Overwriting the `object` type to a more test-friendly type
@@ -19,7 +18,7 @@ export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
 }
 
 export interface GetTelemetryStatsOpts {
-  roleAuthc: RoleCredentials;
+  authorization: string;
 }
 
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
@@ -47,17 +46,19 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
     },
     opts?: GetTelemetryStatsOpts
   ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
-    const client = opts?.roleAuthc
-      ? supertestWithoutAuth.set(opts.roleAuthc.apiKeyHeader)
-      : supertest;
+    const client = opts?.authorization ? supertestWithoutAuth : supertest;
 
-    const { body } = await client
+    const request = client
       .post('/internal/telemetry/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send({ refreshCache: true, ...payload })
-      .expect(200);
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+    if (opts?.authorization) {
+      client.set({ Authorization: opts.authorization });
+    }
+
+    const { body } = await request.send({ refreshCache: true, ...payload }).expect(200);
     return body;
   }
 

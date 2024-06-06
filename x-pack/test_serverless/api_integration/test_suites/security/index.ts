@@ -11,8 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless security API', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./telemetry/snapshot_telemetry'));
-    loadTestFile(require.resolve('./telemetry/telemetry_config'));
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./cloud_security_posture'));
   });

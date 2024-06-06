@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       const [unencryptedPayload] = await usageApi.getTelemetryStats(
         { unencrypted: true },
-        { roleAuthc }
+        { authorization: roleAuthc.apiKeyHeader.Authorization }
       );
       stats = unencryptedPayload.stats;
     });
