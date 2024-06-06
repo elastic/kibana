@@ -190,12 +190,14 @@ const createClientMock = (res?: Promise<unknown>): ElasticsearchClientMock =>
 export interface ScopedClusterClientMock {
   asInternalUser: ElasticsearchClientMock;
   asCurrentUser: ElasticsearchClientMock;
+  asSecondaryAuth: ElasticsearchClientMock;
 }
 
 const createScopedClusterClientMock = () => {
   const mock: ScopedClusterClientMock = {
     asInternalUser: createClientMock(),
     asCurrentUser: createClientMock(),
+    asSecondaryAuth: createClientMock(),
   };
 
   return mock;
