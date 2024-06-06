@@ -7,13 +7,18 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
 } from '../../../../../lib/kb';
-import { AutoCompleteContext, ResultTerm } from '../../../../../lib/autocomplete/types';
+import {
+  AutoCompleteContext,
+  type DataAutoCompleteRulesOneOf,
+  ResultTerm,
+} from '../../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
@@ -133,8 +138,8 @@ export const getUrlPathCompletionItems = (
         // map autocomplete items to completion items
         .map((item) => {
           return {
-            label: item.name!,
-            insertText: item.name!,
+            label: item.name + '',
+            insertText: item.name + '',
             detail: item.meta ?? i18nTexts.endpoint,
             // the kind is only used to configure the icon
             kind: monaco.languages.CompletionItemKind.Constant,
@@ -195,8 +200,8 @@ export const getUrlParamsCompletionItems = (
         // map autocomplete items to completion items
         .map((item) => {
           return {
-            label: item.name!,
-            insertText: item.name!,
+            label: item.name + '',
+            insertText: item.name + '',
             detail: item.meta ?? i18nTexts.param,
             // the kind is only used to configure the icon
             kind: monaco.languages.CompletionItemKind.Constant,
@@ -211,11 +216,12 @@ export const getUrlParamsCompletionItems = (
 /*
  * This function returns an array of completion items for the request body params
  */
-export const getBodyCompletionItems = (
+export const getBodyCompletionItems = async (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
-  requestStartLineNumber: number
-): monaco.languages.CompletionItem[] => {
+  requestStartLineNumber: number,
+  editor: MonacoEditorActionsProvider
+): Promise<monaco.languages.CompletionItem[]> => {
   const { lineNumber, column } = position;
 
   // get the content on the method+url line
@@ -244,62 +250,91 @@ export const getBodyCompletionItems = (
   } else {
     components = getUnmatchedEndpointComponents();
   }
-  populateContext(bodyTokens, context, undefined, true, components);
-
-  if (context.autoCompleteSet && context.autoCompleteSet.length > 0) {
-    const wordUntilPosition = model.getWordUntilPosition(position);
-    // if there is " after the cursor, replace it
-    let endColumn = position.column;
-    const charAfterPosition = model.getValueInRange({
-      startLineNumber: position.lineNumber,
-      startColumn: position.column,
-      endLineNumber: position.lineNumber,
-      endColumn: position.column + 1,
-    });
-    if (charAfterPosition === '"') {
-      endColumn = endColumn + 1;
-    }
-    const range = {
-      startLineNumber: position.lineNumber,
-      // replace the whole word with the suggestion
-      startColumn: wordUntilPosition.startColumn,
-      endLineNumber: position.lineNumber,
-      endColumn,
-    };
-    return (
-      context.autoCompleteSet
-        // filter autocomplete items without a name
-        .filter(({ name }) => Boolean(name))
-        // map autocomplete items to completion items
-        .map((item) => {
-          const suggestion = {
-            // convert name to a string
-            label: item.name + '',
-            insertText: getInsertText(item, bodyContent),
-            detail: i18nTexts.api,
-            // the kind is only used to configure the icon
-            kind: monaco.languages.CompletionItemKind.Constant,
-            range,
-            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          };
-          return suggestion;
-        })
-    );
+  context.editor = editor;
+  context.requestStartRow = requestStartLineNumber;
+  populateContext(bodyTokens, context, editor, true, components);
+  if (!context) {
+    return [];
   }
-  return [];
+  if (context.asyncResultsState?.isLoading && context.asyncResultsState) {
+    const results = await context.asyncResultsState.results;
+    return getSuggestions(model, position, results, context, bodyContent);
+  }
+
+  return getSuggestions(model, position, context.autoCompleteSet ?? [], context, bodyContent);
 };
 
+const getSuggestions = (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  autocompleteSet: ResultTerm[],
+  context: AutoCompleteContext,
+  bodyContent: string
+) => {
+  const wordUntilPosition = model.getWordUntilPosition(position);
+  // if there is " after the cursor, replace it
+  let endColumn = position.column;
+  const charAfterPosition = model.getValueInRange({
+    startLineNumber: position.lineNumber,
+    startColumn: position.column,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column + 1,
+  });
+  if (charAfterPosition === '"') {
+    endColumn = endColumn + 1;
+  }
+  const range = {
+    startLineNumber: position.lineNumber,
+    // replace the whole word with the suggestion
+    startColumn: wordUntilPosition.startColumn,
+    endLineNumber: position.lineNumber,
+    endColumn,
+  };
+  return (
+    autocompleteSet
+      // filter out items that don't have name
+      .filter(({ name }) => name !== undefined)
+      // map autocomplete items to completion items
+      .map((item) => {
+        const suggestion = {
+          // convert name to a string
+          label: item.name + '',
+          insertText: getInsertText(item, bodyContent, context),
+          detail: i18nTexts.api,
+          // the kind is only used to configure the icon
+          kind: monaco.languages.CompletionItemKind.Constant,
+          range,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        };
+        return suggestion;
+      })
+  );
+};
 const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
-  bodyContent: string
+  bodyContent: string,
+  context: AutoCompleteContext
 ): string => {
-  let insertText = bodyContent.endsWith('"') ? '' : '"';
-  if (insertValue && insertValue !== '{' && insertValue !== '[') {
-    insertText += `${insertValue}"`;
-  } else {
-    insertText += `${name}"`;
+  if (name === undefined) {
+    return '';
   }
+  let insertText = '';
+  if (typeof name === 'string') {
+    insertText = bodyContent.endsWith('"') ? '' : '"';
+    if (insertValue && insertValue !== '{' && insertValue !== '[') {
+      insertText += `${insertValue}"`;
+    } else {
+      insertText += `${name}"`;
+    }
+  } else {
+    insertText = name + '';
+  }
+
   // check if there is template to add
+  const conditionalTemplate = getConditionalTemplate(name, bodyContent, context.endpoint);
+  if (conditionalTemplate) {
+    template = conditionalTemplate;
+  }
   if (template !== undefined) {
     let templateLines;
     const { __raw, value: templateValue } = template;
@@ -314,5 +349,42 @@ const getInsertText = (
   } else if (value === '[') {
     insertText += '[]';
   }
+  // the string $0 is used to move the cursor between empty curly/square brackets
+  if (insertText.endsWith('{}')) {
+    insertText = insertText.substring(0, insertText.length - 2) + '{$0}';
+  }
+  if (insertText.endsWith('[]')) {
+    insertText = insertText.substring(0, insertText.length - 2) + '[$0]';
+  }
   return insertText;
+};
+
+const getConditionalTemplate = (
+  name: string | boolean,
+  bodyContent: string,
+  endpoint: AutoCompleteContext['endpoint']
+) => {
+  if (typeof name !== 'string' || !endpoint || !endpoint.data_autocomplete_rules) {
+    return;
+  }
+  // get the autocomplete rules for the request body
+  const { data_autocomplete_rules: autocompleteRules } = endpoint;
+  // get the rules for this property name
+  const rules = autocompleteRules[name];
+  // check if the rules have "__one_of" property
+  if (!rules || typeof rules !== 'object' || !('__one_of' in rules)) {
+    return;
+  }
+  const oneOfRules = rules.__one_of as DataAutoCompleteRulesOneOf[];
+  // try to match one of the rules to the body content
+  const matchedRule = oneOfRules.find((rule) => {
+    if (rule.__condition && rule.__condition.lines_regex) {
+      return new RegExp(rule.__condition.lines_regex, 'm').test(bodyContent);
+    }
+    return false;
+  });
+  // use the template from the matched rule
+  if (matchedRule && matchedRule.__template) {
+    return matchedRule.__template;
+  }
 };
