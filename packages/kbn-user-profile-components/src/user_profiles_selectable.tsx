@@ -18,7 +18,6 @@ import {
   EuiText,
   EuiCallOut,
   EuiHighlight,
-  EuiTextColor,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -26,7 +25,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getUserDisplayName } from './user_profile';
+import { getUserDisplayLabel, getUserDisplayName } from './user_profile';
 import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
@@ -326,40 +325,33 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         id: searchInputId,
       }}
       isPreFiltered
-      listProps={{ onFocusBadge: false }}
+      listProps={{ onFocusBadge: false, rowHeight: 48 }}
       loadingMessage={loadingMessage}
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
       errorMessage={errorMessage}
       renderOption={(option, searchValue) => {
         if (option.user) {
+          const displayName = getUserDisplayName(option.user);
           return (
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem css={{ maxWidth: '100%' }}>
-                <EuiHighlight className="eui-textTruncate" search={searchValue}>
-                  {option.label}
-                </EuiHighlight>
-              </EuiFlexItem>
-              {option.user.email && option.user.email !== option.label ? (
-                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                  <EuiTextColor
-                    color={option.disabled ? 'disabled' : 'subdued'}
-                    className="eui-textTruncate"
-                  >
-                    {searchValue ? (
-                      <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
-                    ) : (
-                      option.user.email
-                    )}
-                  </EuiTextColor>
-                </EuiFlexItem>
+            <>
+              <div className="eui-textTruncate">
+                <EuiHighlight search={searchValue}>{displayName}</EuiHighlight>
+              </div>
+              {option.user.email && option.user.email !== displayName ? (
+                <EuiText
+                  size={'xs'}
+                  color={option.disabled ? 'disabled' : 'subdued'}
+                  className="eui-textTruncate"
+                >
+                  {searchValue ? (
+                    <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
+                  ) : (
+                    option.user.email
+                  )}
+                </EuiText>
               ) : undefined}
-            </EuiFlexGroup>
+            </>
           );
         }
         return <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>;
@@ -451,7 +443,7 @@ function toSelectableOption(
   if (userProfile) {
     return {
       key: userProfile.uid,
-      label: getUserDisplayName(userProfile.user),
+      label: getUserDisplayLabel(userProfile.user),
       data: userProfile,
       'data-test-subj': `userProfileSelectableOption-${userProfile.user.username}`,
     };
