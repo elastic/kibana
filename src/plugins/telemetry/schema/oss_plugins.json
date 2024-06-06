@@ -9630,12 +9630,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "securitySolution:enableExpandableFlyout": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "securitySolution:enableAssetCriticality": {
           "type": "boolean",
           "_meta": {
@@ -10410,7 +10404,7 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableInfrastructureContainerAssetView":{
+        "observability:enableInfrastructureContainerAssetView": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
