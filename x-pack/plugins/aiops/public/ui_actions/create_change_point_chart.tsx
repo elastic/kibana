@@ -34,7 +34,7 @@ export function createAddChangePointChartAction(
         id: 'ml',
         getDisplayName: () =>
           i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
-            defaultMessage: 'Machine Learning',
+            defaultMessage: 'Machine Learning and Analytics',
           }),
         getIconType: () => 'machineLearningApp',
       },
