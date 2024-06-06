@@ -9,9 +9,58 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
 
+/**
+ * Provide overrides for data `fields`. If a field is set to `undefined`, then it will be removed
+ * from the array.  If an override field name is not currently in the array, it will be added.
+ */
+interface AlertDetailsItemDataOverrides {
+  [field: string]: Partial<TimelineEventsDetailsItem> | undefined;
+}
+
+/**
+ * Will update (mutate) the data passed in with the override data defined
+ * @param data
+ * @param overrides
+ */
+const setAlertDetailsItemDataOverrides = (
+  data: TimelineEventsDetailsItem[],
+  overrides: AlertDetailsItemDataOverrides
+): TimelineEventsDetailsItem[] => {
+  if (Object.keys(overrides).length > 0) {
+    const definedFields: string[] = [];
+
+    // Override current fields' values
+    data.forEach((item) => {
+      definedFields.push(item.field);
+
+      if (overrides[item.field]) {
+        Object.assign(item, overrides[item.field]);
+      }
+    });
+
+    // Add any new fields to the data
+    Object.entries(overrides).forEach(([field, fieldData]) => {
+      if (!definedFields.includes(field)) {
+        data.push({
+          category: 'unknown',
+          field: 'unknonwn',
+          values: [],
+          originalValue: [],
+          isObjectArray: false,
+          ...fieldData,
+        });
+      }
+    });
+  }
+
+  return data;
+};
+
 /** @private */
-const generateEndpointAlertDetailsItemDataMock = (): TimelineEventsDetailsItem[] => {
-  return [
+const generateEndpointAlertDetailsItemDataMock = (
+  overrides: AlertDetailsItemDataOverrides = {}
+): TimelineEventsDetailsItem[] => {
+  const data = [
     {
       category: 'kibana',
       field: 'kibana.alert.rule.uuid',
@@ -55,11 +104,17 @@ const generateEndpointAlertDetailsItemDataMock = (): TimelineEventsDetailsItem[]
       isObjectArray: false,
     },
   ];
+
+  setAlertDetailsItemDataOverrides(data, overrides);
+
+  return data;
 };
 
 /** @private */
-const generateSentinelOneAlertDetailsItemDataMock = (): TimelineEventsDetailsItem[] => {
-  const data = generateEndpointAlertDetailsItemDataMock();
+const generateSentinelOneAlertDetailsItemDataMock = (
+  overrides: AlertDetailsItemDataOverrides = {}
+): TimelineEventsDetailsItem[] => {
+  const data = generateEndpointAlertDetailsItemDataMock(overrides);
 
   data.forEach((itemData) => {
     switch (itemData.field) {
@@ -83,11 +138,15 @@ const generateSentinelOneAlertDetailsItemDataMock = (): TimelineEventsDetailsIte
     isObjectArray: false,
   });
 
+  setAlertDetailsItemDataOverrides(data, overrides);
+
   return data;
 };
 
 /** @private */
-const generateCrowdStrikeAlertDetailsItemDataMock = (): TimelineEventsDetailsItem[] => {
+const generateCrowdStrikeAlertDetailsItemDataMock = (
+  overrides: AlertDetailsItemDataOverrides = {}
+): TimelineEventsDetailsItem[] => {
   const data = generateEndpointAlertDetailsItemDataMock();
 
   data.forEach((itemData) => {
@@ -112,19 +171,34 @@ const generateCrowdStrikeAlertDetailsItemDataMock = (): TimelineEventsDetailsIte
     isObjectArray: false,
   });
 
+  setAlertDetailsItemDataOverrides(data, overrides);
+
   return data;
 };
 
+/**
+ * Will return alert details item data for a known agent type or if unknown agent type is
+ * pass, then data will be for `filebeat`
+ * @param agentType
+ * @param overrides
+ */
 const generateAlertDetailsItemDataForAgentTypeMock = (
-  agentType: ResponseActionAgentType
+  agentType?: ResponseActionAgentType | string,
+  overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {
   switch (agentType) {
     case 'endpoint':
-      return generateEndpointAlertDetailsItemDataMock();
+      return generateEndpointAlertDetailsItemDataMock(overrides);
     case 'sentinel_one':
-      return generateSentinelOneAlertDetailsItemDataMock();
+      return generateSentinelOneAlertDetailsItemDataMock(overrides);
     case 'crowdstrike':
-      return generateCrowdStrikeAlertDetailsItemDataMock();
+      return generateCrowdStrikeAlertDetailsItemDataMock(overrides);
+    default:
+      return generateEndpointAlertDetailsItemDataMock({
+        'agent.type': { values: ['filebeat'], originalValue: ['filebeat'] },
+        'event.module': { values: ['filebeat'], originalValue: ['filebeat'] },
+        ...overrides,
+      });
   }
 };
 
