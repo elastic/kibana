@@ -14,21 +14,27 @@ import {
   PluginConfigDescriptor,
   Logger,
 } from '@kbn/core/server';
+import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 
 import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
 import { AssetClient } from './lib/asset_client';
-import { AssetManagerPluginSetupDependencies, AssetManagerPluginStartDependencies, AssetManagerServerSetup } from './types';
+import {
+  AssetManagerPluginSetupDependencies,
+  AssetManagerPluginStartDependencies,
+  AssetManagerServerSetup,
+} from './types';
 import { AssetManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { entitiesBaseComponentTemplateConfig } from './templates/components/base';
 import { entitiesEventComponentTemplateConfig } from './templates/components/event';
 import { entitiesIndexTemplateConfig } from './templates/entities_template';
-import { 
-  entityDefinition, 
-  EntityDiscoveryApiKeyType,
-} from './saved_objects';
+import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
 import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
+import { readEntityDiscoveryAPIKey } from './lib/auth';
+import { builtInEntityDefinitions } from './lib/entities/built_in';
+import { installEntityDefinition } from './lib/entities/install_entity_definition';
+import { startTransform } from './lib/entities/start_transform';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
@@ -106,10 +112,36 @@ export class AssetManagerServerPlugin
     }
 
     if (this.server) {
-      this.server.core = core
+      this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+
+      readEntityDiscoveryAPIKey(this.server).then(async (apiKey) => {
+        if (!apiKey) {
+          this.logger.info(
+            'No API key found for entity discovery, skipping builtin definition installation'
+          );
+          return;
+        }
+
+        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
+        const soClient = core.savedObjects.getScopedClient(fakeRequest);
+        const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+
+        await Promise.all(
+          builtInEntityDefinitions.map(async (builtInDefinition) => {
+            const definition = await installEntityDefinition({
+              esClient,
+              soClient,
+              definition: builtInDefinition,
+              logger: this.logger,
+              spaceId: 'default',
+            });
+            await startTransform(esClient, definition, this.logger);
+          })
+        );
+      });
     }
 
     const esClient = core.elasticsearch.client.asInternalUser;
