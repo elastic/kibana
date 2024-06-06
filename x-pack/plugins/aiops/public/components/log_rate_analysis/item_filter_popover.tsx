@@ -76,7 +76,8 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
     } else {
       updatedSkippedItems = skippedItems.filter((d) => !itemNames.includes(d));
     }
-    setSkippedItems(updatedSkippedItems);
+    // Ensure there are no duplicates
+    setSkippedItems([...new Set(updatedSkippedItems)]);
     setIsTouched(true);
   };
 
