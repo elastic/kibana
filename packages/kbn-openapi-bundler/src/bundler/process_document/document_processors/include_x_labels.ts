@@ -13,14 +13,13 @@ import { DocumentNode } from '../types/node';
 import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
- * Creates a node processor to only include OAS operation object labeled with one of the provided labels.
+ * Creates a node processor to include only OAS operation objects labeled
+ * with one or more of the provided via `labelsToInclude` labels.
  */
 export function createIncludeXLabelsProcessor(labelsToInclude: string[]): DocumentNodeProcessor {
   if (labelsToInclude.length === 0) {
     throw new Error('"labelsToInclude" must have at least one label.');
   }
-
-  const labelsToIncludeSet = new Set(labelsToInclude);
 
   const canNodeHaveLabels = (node: Readonly<DocumentNode>): boolean => {
     // Currently, x-labels can be applied only to operations (path + method).
@@ -46,31 +45,35 @@ export function createIncludeXLabelsProcessor(labelsToInclude: string[]): Docume
   return {
     shouldRemove(node, { parentKey }) {
       const isValidNode = canNodeHaveLabels(node);
-      const hasLabels = X_LABELS in node;
+      const nodeLabels = X_LABELS in node ? node[X_LABELS] : undefined;
 
       if (!isValidNode) {
-        if (hasLabels) {
+        if (nodeLabels) {
           // x-labels can't be applied to this node.
           // We log a warning, but the node should still be included.
-          logUnsupportedNodeWarning(parentKey.toString(), node[X_LABELS]);
+          logUnsupportedNodeWarning(parentKey.toString(), nodeLabels);
         }
 
         return false;
       }
 
-      if (!hasLabels) {
+      if (!nodeLabels) {
         return true;
       }
 
-      if (!Array.isArray(node[X_LABELS])) {
+      if (!Array.isArray(nodeLabels)) {
         // x-labels value is not valid.
         // We log a warning and remove the node because it doesn't contain the needed labels.
-        logInvalidLabelsValueWarning(parentKey.toString(), node[X_LABELS]);
+        logInvalidLabelsValueWarning(parentKey.toString(), nodeLabels);
 
         return true;
       }
 
-      return node[X_LABELS].every((label) => !labelsToIncludeSet.has(label));
+      const hasAllExpectedLabels = labelsToInclude.every((label) => nodeLabels.includes(label));
+
+      // if an operation object has all labels from labelsToInclude
+      // leave it in the resulting bundle by returning `false`
+      return !hasAllExpectedLabels;
     },
     // Empty path objects after excluding all operation objects by `shouldRemove` have to be removed
     onNodeLeave(node, { isRootNode }) {

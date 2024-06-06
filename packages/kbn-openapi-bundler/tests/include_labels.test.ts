@@ -93,6 +93,105 @@ describe('OpenAPI Bundler - include labeled operations', () => {
     }
   });
 
+  it('includes operation objects with multiple labels', async () => {
+    const spec = createOASDocument({
+      paths: {
+        '/api/some_api': {
+          get: {
+            // @ts-expect-error custom property is unexpected here
+            'x-labels': ['labelA', 'labelB'],
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const [bundledSpec] = Object.values(
+      await bundleSpecs(
+        {
+          1: spec,
+        },
+        {
+          includeXLabels: ['labelA', 'labelB'],
+        }
+      )
+    );
+
+    expect(bundledSpec.paths).toEqual({
+      '/api/some_api': {
+        get: expect.anything(),
+      },
+    });
+  });
+
+  it('does NOT include operation objects with incomplete labels set', async () => {
+    const spec = createOASDocument({
+      paths: {
+        '/api/some_api': {
+          get: {
+            // @ts-expect-error custom property is unexpected here
+            'x-labels': ['labelA', 'labelB', 'labelC'],
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          put: {
+            'x-labels': ['labelA', 'labelC'],
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const [bundledSpec] = Object.values(
+      await bundleSpecs(
+        {
+          1: spec,
+        },
+        {
+          includeXLabels: ['labelA', 'labelB'],
+        }
+      )
+    );
+
+    expect(bundledSpec.paths).toEqual({
+      '/api/some_api': {
+        get: expect.anything(),
+      },
+    });
+  });
+
   it('does NOT include operation objects without labels', async () => {
     const spec = createOASDocument({
       paths: {
@@ -151,7 +250,7 @@ describe('OpenAPI Bundler - include labeled operations', () => {
     });
   });
 
-  it('does NOT include operation objects when labels are not not an array', async () => {
+  it('does NOT include operation objects when labels are not an array', async () => {
     const spec = createOASDocument({
       paths: {
         '/api/some_api': {
