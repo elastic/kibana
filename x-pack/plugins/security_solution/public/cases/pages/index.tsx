@@ -9,8 +9,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
@@ -22,12 +22,7 @@ import { TimelineId } from '../../../common/types/timeline';
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
 import { useKibana, useNavigation } from '../../common/lib/kibana';
-import {
-  APP_ID,
-  CASES_PATH,
-  ENABLE_EXPANDABLE_FLYOUT_SETTING,
-  SecurityPageName,
-} from '../../../common/constants';
+import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { SourcererScopeName } from '../../sourcerer/store/model';
@@ -63,7 +58,7 @@ const CaseContainerComponent: React.FC = () => {
     SecurityPageName.rules
   );
   const { openFlyout } = useExpandableFlyoutApi();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
 
   const getDetectionsRuleDetailsHref = useCallback(
     (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
@@ -74,7 +69,7 @@ const CaseContainerComponent: React.FC = () => {
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      if (isSecurityFlyoutEnabled) {
+      if (!expandableFlyoutDisabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -105,7 +100,7 @@ const CaseContainerComponent: React.FC = () => {
         );
       }
     },
-    [dispatch, isSecurityFlyoutEnabled, openFlyout, telemetry]
+    [dispatch, expandableFlyoutDisabled, openFlyout, telemetry]
   );
 
   const endpointDetailsHref = (endpointId: string) =>
