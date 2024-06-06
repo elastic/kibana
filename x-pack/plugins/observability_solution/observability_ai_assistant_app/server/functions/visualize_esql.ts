@@ -28,7 +28,10 @@ export function registerVisualizeESQLFunction({
   resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(visualizeESQLFunction, async ({ arguments: { query, intention } }) => {
-    const { columns, errorMessages, rows } = await runAndValidateEsqlQuery({
+    // errorMessages contains the syntax errors from the client side valdation
+    // error contains the error from the server side validation, it is always one error
+    // and help us identify errors like index not found, field not found etc.
+    const { columns, errorMessages, rows, error } = await runAndValidateEsqlQuery({
       query,
       client: (await resources.context.core).elasticsearch.client.asCurrentUser,
     });
@@ -42,7 +45,7 @@ export function registerVisualizeESQLFunction({
       },
       content: {
         message,
-        errorMessages,
+        errorMessages: [...(errorMessages ? errorMessages : []), ...(error ? [error.message] : [])],
       },
     };
   });
