@@ -13,17 +13,19 @@ import { DocumentNode } from '../types/node';
 import { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
- * Creates a node processor to exclude nodes having only one of provided tags.
+ * Creates a node processor to include OAS operation object labeled with one of the provided labels.
  */
 export function createIncludeXLabelsProcessor(labelsToInclude: string[]): DocumentNodeProcessor {
   if (labelsToInclude.length === 0) {
-    throw new Error('"labelsToInclude" must have as minimum one label.');
+    throw new Error('"labelsToInclude" must have at least one label.');
   }
 
   const labelsToIncludeSet = new Set(labelsToInclude);
-  // Labels are only restricted to operations objects.
-  // An operation object must have `responses` field.
-  const canHaveLabels = (node: Readonly<DocumentNode>): boolean => {
+
+  const canNodeHaveLabels = (node: Readonly<DocumentNode>): boolean => {
+    // Currently, x-labels can be applied only to operations (path + method).
+    // Each operation object has a `responses` field.
+    // https://swagger.io/docs/specification/paths-and-operations/
     return 'responses' in node;
   };
   const logUnsupportedNodeWarning = (location: string, xLabelsValue: unknown): void => {
@@ -33,20 +35,40 @@ export function createIncludeXLabelsProcessor(labelsToInclude: string[]): Docume
       `"${X_LABELS}: ${value}" in ${location} is ignored since "${X_LABELS}" is supported only for Operation objects.`
     );
   };
+  const logInvalidLabelsValueWarning = (location: string, xLabelsValue: unknown) => {
+    logger.warning(
+      `"${X_LABELS}" in ${location} is ignored since an array of labels is expected but got "${JSON.stringify(
+        xLabelsValue
+      )}".`
+    );
+  };
 
   return {
     shouldRemove(node, { parentKey }) {
-      const isValidNode = canHaveLabels(node);
-
-      if (!isValidNode && X_LABELS in node) {
-        logUnsupportedNodeWarning(parentKey.toString(), node[X_LABELS]);
-      }
-
-      if (!isValidNode || !(X_LABELS in node) || !Array.isArray(node[X_LABELS])) {
+      if (!(X_LABELS in node)) {
+        // No x-labels - no problem. The node should be included.
         return false;
       }
 
-      return node[X_LABELS].every((tag) => !labelsToIncludeSet.has(tag));
+      const isValidNode = canNodeHaveLabels(node);
+
+      if (!isValidNode) {
+        // x-labels can't be applied to this node.
+        // We log a warning, but the node should still be included.
+        logUnsupportedNodeWarning(parentKey.toString(), node[X_LABELS]);
+
+        return false;
+      }
+
+      if (!Array.isArray(node[X_LABELS])) {
+        // x-labels value is not valid.
+        // We log a warning and remove the node because it doesn't contain the needed labels.
+        logInvalidLabelsValueWarning(parentKey.toString(), node[X_LABELS]);
+
+        return true;
+      }
+
+      return node[X_LABELS].every((label) => !labelsToIncludeSet.has(label));
     },
     // Empty path objects after excluding all operation objects by `shouldRemove` have to be removed
     onNodeLeave(node, { isRootNode }) {
