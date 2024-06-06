@@ -176,13 +176,29 @@ const generateCrowdStrikeAlertDetailsItemDataMock = (
     }
   });
 
-  data.push({
-    category: 'crowdstrike',
-    field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
-    values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
-    originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
-    isObjectArray: false,
-  });
+  data.push(
+    {
+      category: 'crowdstrike',
+      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
+      values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+      originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+      isObjectArray: false,
+    },
+    {
+      category: 'crowdstrike',
+      field: 'crowdstrike.event.HostName',
+      values: ['elastic-host-win'],
+      originalValue: ['windows-native'],
+      isObjectArray: false,
+    },
+    {
+      category: 'crowdstrike',
+      field: 'crowdstrike.event.Platform',
+      values: ['windows'],
+      originalValue: ['windows'],
+      isObjectArray: false,
+    }
+  );
 
   setAlertDetailsItemDataOverrides(data, overrides);
 
