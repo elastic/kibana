@@ -170,7 +170,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       'filterEntireProcessTreeForEventFiltersEnabled'
     );
 
-    const isEntireTreeEnabled = useMemo(
+    const isFilterEntireProcessTreeToggleEnabled = useMemo(
       () => isFilterEntireProcessTreeEnabled(exception),
       [exception]
     );
@@ -634,7 +634,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         )}
         {isFilterEntireProcessTreeFeatureEnabled && (
           <EuiSwitch
-            checked={isEntireTreeEnabled}
+            checked={isFilterEntireProcessTreeToggleEnabled}
             onChange={handleFilterEntireProcessTreeOnChange}
             label={
               <FormattedMessage
