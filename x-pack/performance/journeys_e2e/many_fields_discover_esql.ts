@@ -15,7 +15,7 @@ export const journey = new Journey({
   .step('Go to Discover Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(
       kbnUrl.get(
-        `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(),filters:!(),dataSource:(type:esql),hideChart:!t,interval:auto,query:(esql:'from%20indices-stats*%20%7C%20limit%2010'),sort:!())`
+        `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(),filters:!(),dataSource:(type:esql),hideChart:!t,interval:auto,query:(esql:'from%20indices-stats*%20%7C%20limit%20500'),sort:!())`
       )
     );
     await kibanaPage.waitForHeader();
