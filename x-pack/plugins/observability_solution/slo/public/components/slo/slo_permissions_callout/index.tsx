@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiLink, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -30,21 +30,66 @@ export function SloPermissionsCallout() {
           defaultMessage: 'Insufficient Permissions',
         })}
       >
-        <p>
+        <EuiFlexGroup gutterSize="m" direction="column">
           <FormattedMessage
             id="xpack.slo.permissionsCallout.message"
-            defaultMessage="You do not have sufficient permissions to view or edit SLO definitions. Please contact your system administrator."
+            defaultMessage="You do not have sufficient permissions to view or edit SLO definitions."
           />
-        </p>
-        <EuiLink
-          data-test-subj="sloSloPermissionsCalloutReadTheDocumentationLink"
-          href="https://www.elastic.co/guide/en/observability/current/slo-privileges.html"
-          target="_blank"
-        >
-          {i18n.translate('xpack.slo.permissionsCallout.readDocumentation', {
-            defaultMessage: 'Read the documentation',
-          })}
-        </EuiLink>
+
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.slo.permissionsCallout.minimumReadPermissionsRequired"
+              defaultMessage="In order to view SLO dashboards and details, you need at least the following permissions on your user or role account:"
+            />
+
+            <ul>
+              <li>
+                <FormattedMessage
+                  id="xpack.slo.permissionsCallout.readSloPermission"
+                  defaultMessage="'read' permission on index pattern: .slo-*"
+                />
+              </li>
+            </ul>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.slo.permissionsCallout.minimumReadPermissionsRequired"
+              defaultMessage="In order to create and manage SLO definitions, you need at least the following permissions on your user or role account:"
+            />
+
+            <ul>
+              <li>
+                <FormattedMessage
+                  id="xpack.slo.permissionsCallout.writeSloPermission"
+                  defaultMessage="'all' permission on index pattern: .slo-*"
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.slo.permissionsCallout.writeClusterPermission"
+                  defaultMessage="'manage_transform' and 'manage_ingest_pipelines' cluster permissions"
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.slo.permissionsCallout.readIndexPermission"
+                  defaultMessage="'read' and 'view_index_metadata' index permissions on any index patterns you want to use for creating SLOs"
+                />
+              </li>
+            </ul>
+          </EuiFlexItem>
+
+          <EuiLink
+            data-test-subj="sloSloPermissionsCalloutReadTheDocumentationLink"
+            href="https://www.elastic.co/guide/en/observability/current/slo-privileges.html"
+            target="_blank"
+          >
+            {i18n.translate('xpack.slo.permissionsCallout.readDocumentation', {
+              defaultMessage: 'Read the documentation for more details',
+            })}
+          </EuiLink>
+        </EuiFlexGroup>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
