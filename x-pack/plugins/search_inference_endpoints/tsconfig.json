@@ -20,7 +20,6 @@
     "@kbn/ml-plugin",
     "@kbn/ml-trained-models-utils",
     "@kbn/shared-ux-router",
-    "@kbn/shared-ux-page-kibana-template",
     "@kbn/core-http-server",
     "@kbn/share-plugin",
     "@kbn/actions-plugin",
@@ -29,7 +28,9 @@
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
-    "@kbn/console-plugin"
+    "@kbn/console-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/ml-error-utils"
   ],
   "exclude": [
     "target/**/*",
