@@ -155,11 +155,13 @@ kibana_vars=(
     server.customResponseHeaders
     server.defaultRoute
     server.host
+    server.http2.allowUnsecure
     server.keepAliveTimeout
     server.maxPayload
     server.maxPayloadBytes
     server.name
     server.port
+    server.protocol
     server.publicBaseUrl
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist

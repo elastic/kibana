@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { twoMinute } from '../fixtures/duration';
 import {
   createMetricCustomIndicator,
   createSLO,
@@ -214,5 +215,29 @@ describe('Metric Custom Transform Generator', () => {
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createMetricCustomIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        log_timestamp: {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
+      },
+    });
   });
 });

@@ -6,64 +6,101 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
   EuiFieldNumber,
   EuiFieldText,
-  EuiModal,
+  EuiSpacer,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnomalyChartsEmbeddableInput } from '..';
+import type { AnomalyChartsEmbeddableState } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
+import { JobSelectorControl } from '../../alerting/job_selector';
+import { ML_PAGES } from '../../../common/constants/locator';
+import { getDefaultExplorerChartsPanelTitle } from './utils';
+import { useMlLink } from '../../application/contexts/kibana';
+import { getJobSelectionErrors } from '../utils';
+import type { MlApiServices } from '../../application/services/ml_api_service';
 
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface AnomalyChartsInitializerProps {
-  defaultTitle: string;
-  initialInput?: Partial<Pick<AnomalyChartsEmbeddableInput, 'jobIds' | 'maxSeriesToPlot'>>;
-  onCreate: (props: { panelTitle: string; maxSeriesToPlot?: number }) => void;
+  initialInput?: Partial<
+    Pick<AnomalyChartsEmbeddableState, 'title' | 'jobIds' | 'maxSeriesToPlot'>
+  >;
+  onCreate: (props: {
+    jobIds: AnomalyChartsEmbeddableState['jobIds'];
+    title: string;
+    maxSeriesToPlot?: number;
+  }) => void;
   onCancel: () => void;
+  adJobsApiService: MlApiServices['jobs'];
 }
 
 export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
-  defaultTitle,
   initialInput,
   onCreate,
   onCancel,
+  adJobsApiService,
 }) => {
-  const [panelTitle, setPanelTitle] = useState(defaultTitle);
+  const titleManuallyChanged = useRef(!!initialInput?.title);
+
+  const [panelTitle, setPanelTitle] = useState(initialInput?.title ?? '');
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(
     initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
-
-  const isPanelTitleValid = panelTitle.length > 0;
+  const isPanelTitleValid = panelTitle?.length > 0;
   const isMaxSeriesToPlotValid =
     maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
-  const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid;
+  const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+
+  const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
+  const jobIdsErrors = getJobSelectionErrors(jobIds);
+
+  const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid && jobIdsErrors === undefined;
+
+  useEffect(
+    function updateDefaultTitle() {
+      if (!titleManuallyChanged.current) {
+        setPanelTitle(getDefaultExplorerChartsPanelTitle(jobIds));
+      }
+    },
+    [initialInput?.title, jobIds]
+  );
 
   return (
-    <EuiModal
-      initialFocus="[name=panelTitle]"
-      onClose={onCancel}
-      data-test-subj={'mlAnomalyChartsEmbeddableInitializer'}
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
-            defaultMessage="Anomaly explorer charts configuration"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
+    <>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
+              defaultMessage="Anomaly explorer charts configuration"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-      <EuiModalBody>
+      <EuiFlyoutBody>
+        <JobSelectorControl
+          createJobUrl={newJobUrl}
+          multiSelect
+          jobsAndGroupIds={jobIds}
+          adJobsApiService={adJobsApiService}
+          onChange={(update) => {
+            setJobIds([...(update?.jobIds ?? []), ...(update?.groupIds ?? [])]);
+          }}
+          errors={jobIdsErrors}
+        />
+        <EuiSpacer size="s" />
         <EuiForm>
           <EuiFormRow
             label={
@@ -79,7 +116,10 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
               id="panelTitle"
               name="panelTitle"
               value={panelTitle}
-              onChange={(e) => setPanelTitle(e.target.value)}
+              onChange={(e) => {
+                titleManuallyChanged.current = true;
+                setPanelTitle(e.target.value);
+              }}
               isInvalid={!isPanelTitleValid}
             />
           </EuiFormRow>
@@ -112,31 +152,37 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
             />
           </EuiFormRow>
         </EuiForm>
-      </EuiModalBody>
+      </EuiFlyoutBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="mlAnomalyChartsInitializerCancelButton">
-          <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent={'spaceBetween'}>
+          <EuiButtonEmpty
+            onClick={onCancel}
+            data-test-subj="mlAnomalyChartsInitializerCancelButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-        <EuiButton
-          data-test-subj="mlAnomalyChartsInitializerConfirmButton"
-          isDisabled={!isFormValid}
-          onClick={onCreate.bind(null, {
-            panelTitle,
-            maxSeriesToPlot,
-          })}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+          <EuiButton
+            data-test-subj="mlAnomalyChartsInitializerConfirmButton"
+            isDisabled={!isFormValid}
+            onClick={onCreate.bind(null, {
+              title: panelTitle,
+              maxSeriesToPlot,
+              jobIds,
+            })}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.ml.anomalyChartsEmbeddable.setupFlyout.confirmButtonLabel"
+              defaultMessage="Confirm"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
   );
 };
