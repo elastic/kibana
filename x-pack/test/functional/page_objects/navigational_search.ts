@@ -57,6 +57,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async clickOnOption(index: number) {
+    await this.waitForResultsLoaded();
     const options = await this.testSubjects.findAll('nav-search-option');
     await options[index].click();
   }

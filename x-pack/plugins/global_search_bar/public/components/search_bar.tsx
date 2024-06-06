@@ -213,10 +213,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (isChecked) {
           selectedRank = rank + 1;
         }
+        setFocus(false);
         return isChecked;
       });
 
       if (!selected) {
+        setFocus(false);
         return;
       }
 
@@ -228,8 +230,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       // if the type is a suggestion, we change the query on the input and trigger a new search
       // by setting the searchValue (only setting the field value does not trigger a search)
       if (type === '__suggestion__') {
-        setSearchValue(suggestion);
         setFocus(false);
+        setSearchValue(suggestion);
         return;
       }
 
@@ -238,6 +240,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         if (type === 'application') {
           const key = selected.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
+          setFocus(false);
           reportEvent.navigateToApplication({
             application,
             searchValue,
@@ -245,6 +248,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             selectedRank,
           });
         } else {
+          setFocus(false);
           reportEvent.navigateToSavedObject({
             type,
             searchValue,
@@ -252,29 +256,28 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
             selectedRank,
           });
         }
-        setFocus(false);
       } catch (err) {
+        setFocus(false);
         reportEvent.error({ message: err, searchValue });
         // eslint-disable-next-line no-console
         console.log('Error trying to track searchbar metrics', err);
-        setFocus(false);
       }
 
       if (event.shiftKey) {
         window.open(url);
       } else if (event.ctrlKey || event.metaKey) {
+        setFocus(false);
         window.open(url, '_blank');
-        setFocus(false);
       } else {
-        navigateToUrl(url);
         setFocus(false);
+        navigateToUrl(url);
       }
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
         clearField();
-        searchRef.dispatchEvent(blurEvent);
         setFocus(false);
+        searchRef.dispatchEvent(blurEvent);
       }
     },
     [reportEvent, navigateToUrl, searchRef, searchValue, setFocus]
