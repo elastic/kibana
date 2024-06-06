@@ -180,7 +180,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   {(option.logos || option.showIntegrationsBadge) && (
                     <>
                       <EuiSpacer size="m" />
-                      <EuiFlexGroup gutterSize="s">
+                      <EuiFlexGroup gutterSize="s" responsive={false}>
                         {option.logos?.map((logo) => (
                           <EuiFlexItem key={logo} grow={false}>
                             <LogoIcon logo={logo} />
