@@ -67,7 +67,7 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
 
   return (
     <LensChart
-      {...chartProps}
+      lensAttributes={chartProps}
       id={`hostsView-metricChart-${id}`}
       borderRadius="m"
       dateRange={afterLoadedState.dateRange}

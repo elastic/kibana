@@ -63,10 +63,11 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
         <ChartsGrid columns={2}>
           {charts.map((chart) => (
             <Chart
+              id={chart.id}
               key={chart.id}
-              {...chart}
               assetId={assetId}
               dateRange={dateRange}
+              lensAttributes={chart}
               queryField={findInventoryFields('host').id}
             />
           ))}
@@ -127,8 +128,9 @@ export const KubernetesContainerCharts = React.forwardRef<
       <ChartsGrid columns={2}>
         {charts.map((chart) => (
           <Chart
+            id={chart.id}
             key={chart.id}
-            {...chart}
+            lensAttributes={chart}
             assetId={assetId}
             dateRange={dateRange}
             queryField={findInventoryFields('container').id}
