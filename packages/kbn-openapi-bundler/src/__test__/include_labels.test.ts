@@ -79,7 +79,7 @@ describe('OpenAPI Bundler - include labeled operations', () => {
           1: spec,
         },
         {
-          includeLabels: [label],
+          includeXLabels: [label],
         }
       )
     );
@@ -121,7 +121,7 @@ describe('OpenAPI Bundler - include labeled operations', () => {
           1: spec,
         },
         {
-          includeLabels: ['labelA'],
+          includeXLabels: ['labelA'],
         }
       )
     );
@@ -178,7 +178,7 @@ describe('OpenAPI Bundler - include labeled operations', () => {
           1: spec,
         },
         {
-          includeLabels: ['labelA'],
+          includeXLabels: ['labelA'],
         }
       )
     );
