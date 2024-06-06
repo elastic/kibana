@@ -127,7 +127,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current.unsubscribe();
           searchSubscription.current = null;
         }
-
+        setFocus(true);
         setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
         setIsLoading(false);
@@ -157,6 +157,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
         setSearchTerm(rawParams.term ?? '');
         setIsLoading(true);
+        setFocus(true);
         searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
           next: ({ results }) => {
             if (searchValue.length > 0) {
@@ -208,7 +209,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
-      setFocus(true);
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
         if (isChecked) {
