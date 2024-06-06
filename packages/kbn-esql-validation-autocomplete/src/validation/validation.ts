@@ -307,15 +307,7 @@ function validateFunction(
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownFunction',
-          values: {
-            name: astFunction.name,
-          },
-          locations: astFunction.location,
-        })
-      );
+      messages.push(errors.unknownFunction(astFunction));
     }
     // for nested functions skip this check and make the nested check fail later on
     if (isFnSupported.reason === 'unsupportedFunction' && !isNested) {
@@ -594,10 +586,7 @@ const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[], re
       walk(aggregate, {
         visitFunction: (fn) => {
           const definition = getFunctionDefinition(fn.name);
-          if (!definition) {
-            messages.push(errors.unknownFunction(fn));
-            return;
-          }
+          if (!definition) return;
           if (definition.type === 'agg') hasAggregationFunction = true;
         },
       });
