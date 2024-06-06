@@ -157,7 +157,7 @@ export function ShowShareModal({
         }, {} as DashboardPanelMap)
       : {};
 
-    //
+    // The latest state of panels to share. This will overwrite panels from the saved object on Dashboard load.
     const allUnsavedPanelsMap = {
       ...latestPanels,
       ...modifiedPanels,
