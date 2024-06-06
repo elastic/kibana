@@ -5,6 +5,7 @@ info:
 paths:
   /api/some_api:
     put:
+      x-labels: [labelA, labelB, labelC]
       x-codegen-enabled: true
       operationId: TestEndpointPut
       responses:

@@ -5,6 +5,7 @@ info:
 paths:
   /api/some_api:
     post:
+      x-labels: [labelA, labelB]
       operationId: TestEndpointPost
       responses:
         '200':

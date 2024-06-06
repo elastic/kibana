@@ -9,7 +9,7 @@
 import { isAbsolute } from 'path';
 import { RefResolver } from './ref_resolver/ref_resolver';
 import { processDocument } from './process_document/process_document';
-import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
+import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_LABELS, X_MODIFY } from './known_custom_props';
 import { isPlainObjectType } from '../utils/is_plain_object_type';
 import { ResolvedDocument } from './ref_resolver/resolved_document';
 import { ResolvedRef } from './ref_resolver/resolved_ref';
@@ -83,7 +83,7 @@ export async function bundleDocument(
     createSkipInternalPathProcessor('/internal'),
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
-    createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED]),
+    createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED, X_LABELS]),
     createFlattenFoldedAllOfItemsProcessor(),
     createMergeNonConflictingAllOfItemsProcessor(),
     createUnfoldSingleAllOfItemProcessor(),

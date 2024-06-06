@@ -3,10 +3,10 @@ info:
   title: Test endpoint
   version: '2023-10-31'
 paths:
-  /api/some_api:
-    get:
-      x-labels: [labelA]
-      operationId: TestEndpointGet
+  /api/another_api:
+    post:
+      x-labels: 10
+      operationId: AnotherTestEndpointPost
       responses:
         '200':
           description: Successful response
