@@ -24,6 +24,7 @@ import {
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
@@ -145,7 +146,7 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.getFunctions.mockReturnValue([]);
     functionClientMock.hasFunction.mockImplementation((name) => {
-      return name !== 'context';
+      return name !== CONTEXT_FUNCTION_NAME;
     });
 
     functionClientMock.hasAction.mockReturnValue(false);
@@ -1230,7 +1231,7 @@ describe('Observability AI Assistant client', () => {
             content: '',
             role: MessageRole.Assistant,
             function_call: {
-              name: 'context',
+              name: CONTEXT_FUNCTION_NAME,
               arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
@@ -1248,7 +1249,7 @@ describe('Observability AI Assistant client', () => {
           message: {
             content: JSON.stringify([{ id: 'my_document', text: 'My document' }]),
             role: MessageRole.User,
-            name: 'context',
+            name: CONTEXT_FUNCTION_NAME,
           },
         },
       });
@@ -1440,7 +1441,7 @@ describe('Observability AI Assistant client', () => {
 
     it('executes the context function', async () => {
       expect(functionClientMock.executeFunction).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'context' })
+        expect.objectContaining({ name: CONTEXT_FUNCTION_NAME })
       );
     });
 
@@ -1454,7 +1455,7 @@ describe('Observability AI Assistant client', () => {
             content: '',
             role: MessageRole.Assistant,
             function_call: {
-              name: 'context',
+              name: CONTEXT_FUNCTION_NAME,
               arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },

@@ -8,6 +8,59 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
 
+## Fine-tune the feature privileges.
+xpack.features.overrides:
+  dashboard:
+    privileges:
+      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
+      all.composedOf:
+        - feature: "maps"
+          privileges: [ "all" ]
+        - feature: "visualize"
+          privileges: [ "all" ]
+      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
+      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
+      read.composedOf:
+        - feature: "maps"
+          privileges: [ "read" ]
+        - feature: "visualize"
+          privileges: [ "read" ]
+    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      download_csv_report.disabled: true
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
+  discover:
+    ### All Discover sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
+  ### Shared images feature is hidden in Role management since it's not needed.
+  filesSharedImage.hidden: true
+  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
+  maps.hidden: true
+  ### Reporting feature is supposed to give access to reporting capabilities across different features.
+  reporting:
+    privileges:
+      all.composedOf:
+        - feature: "dashboard"
+          privileges: [ "download_csv_report" ]
+        - feature: "discover"
+          privileges: [ "generate_report" ]
+  ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
+  visualize:
+    hidden: true
+    ### The short URL sub-feature privilege should be always granted.
+    subFeatures.privileges.url_create.includeIn: "read"
+
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
 
