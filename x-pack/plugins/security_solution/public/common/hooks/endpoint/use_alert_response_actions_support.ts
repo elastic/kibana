@@ -163,9 +163,6 @@ export const useAlertResponseActionsSupport = (
   return useMemo<AlertResponseActionsSupport>(() => {
     return {
       isSupported: Boolean(isFeatureEnabled && isAlert && agentId && agentType),
-
-      // TODO:PT maybe also return an `unSupportedReason` property here?
-
       isAlert,
       details: {
         agentType: agentType || 'endpoint',

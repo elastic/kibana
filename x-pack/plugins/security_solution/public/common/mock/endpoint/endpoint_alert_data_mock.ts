@@ -6,6 +6,8 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
 
 /** @private */
 const generateEndpointAlertDetailsItemDataMock = (): TimelineEventsDetailsItem[] => {
@@ -41,7 +43,7 @@ const generateEndpointAlertDetailsItemDataMock = (): TimelineEventsDetailsItem[]
     {
       category: 'host',
       field: 'host.name',
-      values: ['windows-native'],
+      values: ['elastic-host-win'],
       originalValue: ['windows-native'],
       isObjectArray: false,
     },
@@ -62,6 +64,35 @@ const generateSentinelOneAlertDetailsItemDataMock = (): TimelineEventsDetailsIte
   data.forEach((itemData) => {
     switch (itemData.field) {
       case 'event.module':
+        itemData.values = ['sentinel_one'];
+        itemData.originalValue = ['sentinel_one'];
+        break;
+
+      case 'agent.type':
+        itemData.values = ['filebeat'];
+        itemData.originalValue = ['filebeat'];
+        break;
+    }
+  });
+
+  data.push({
+    category: 'observer',
+    field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
+    values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+    originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+    isObjectArray: false,
+  });
+
+  return data;
+};
+
+/** @private */
+const generateCrowdStrikeAlertDetailsItemDataMock = (): TimelineEventsDetailsItem[] => {
+  const data = generateEndpointAlertDetailsItemDataMock();
+
+  data.forEach((itemData) => {
+    switch (itemData.field) {
+      case 'event.module':
         itemData.values = ['crowdstrike'];
         itemData.originalValue = ['crowdstrike'];
         break;
@@ -73,10 +104,33 @@ const generateSentinelOneAlertDetailsItemDataMock = (): TimelineEventsDetailsIte
     }
   });
 
+  data.push({
+    category: 'crowdstrike',
+    field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
+    values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+    originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
+    isObjectArray: false,
+  });
+
   return data;
+};
+
+const generateAlertDetailsItemDataForAgentTypeMock = (
+  agentType: ResponseActionAgentType
+): TimelineEventsDetailsItem[] => {
+  switch (agentType) {
+    case 'endpoint':
+      return generateEndpointAlertDetailsItemDataMock();
+    case 'sentinel_one':
+      return generateSentinelOneAlertDetailsItemDataMock();
+    case 'crowdstrike':
+      return generateCrowdStrikeAlertDetailsItemDataMock();
+  }
 };
 
 export const endpointAlertDataMock = Object.freeze({
   generateEndpointAlertDetailsItemData: generateEndpointAlertDetailsItemDataMock,
   generateSentinelOneAlertDetailsItemData: generateSentinelOneAlertDetailsItemDataMock,
+  generateCrowdStrikeAlertDetailsItemData: generateCrowdStrikeAlertDetailsItemDataMock,
+  generateAlertDetailsItemDataForAgentType: generateAlertDetailsItemDataForAgentTypeMock,
 });
