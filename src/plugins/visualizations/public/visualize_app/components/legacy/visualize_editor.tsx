@@ -6,62 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
-import { EventEmitter } from 'events';
-import React, { useEffect, useState, useMemo } from 'react';
+import '../visualize_editor.scss';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { parse } from 'query-string';
-import './visualize_editor.scss';
+import { EventEmitter } from 'events';
 
-import { Query } from '@kbn/es-query';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import { DefaultEditor } from '@kbn/vis-default-editor-plugin/public';
-import { TSVBVisEditor } from '@kbn/vis-type-timeseries-plugin/public';
-import { VisualizeConstants } from '../../../common/constants';
-import { VisualizeAppProps } from '../app';
-import { VisualizeServices } from '../types';
 import {
   useChromeVisibility,
-  useDataViewUpdates,
-  useEditorUpdates,
-  useEmbeddableApiHandler,
-  useLinkedSearchUpdates,
+  useSavedVisInstance,
   useVisualizeAppState,
-} from '../utils';
-import { useInitialVisState } from '../utils/use/use_initial_vis_state';
+  useLegacyEditorUpdates,
+  useLinkedSearchUpdates,
+  useDataViewUpdates,
+  useEmbeddableApiHandler,
+} from '../../utils';
+import { VisualizeServices } from '../../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { useVisEditorBreadcrumbs } from '../utils/use/use_vis_editor_breadcrumbs';
+import { VisualizeAppProps } from '../../app';
+import { VisualizeConstants } from '../../../../common/constants';
+import { VisualizeEditorInput } from '../../../react_embeddable/types';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
+  const [embeddableInput, setEmbeddableInput] = useState<VisualizeEditorInput>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
-  const { search } = services.history.location;
-  const searchParams = useMemo(() => parse(search), [search]);
-
-  const VisEditor = useMemo(
-    () => (searchParams.type === 'metrics' ? TSVBVisEditor : DefaultEditor),
-    [searchParams]
-  );
-
-  const {
-    timefilter: { timefilter },
-    filterManager,
-    queryString,
-  } = services.data.query;
-
   const embeddableApiHandler = useEmbeddableApiHandler();
-  const {
-    openInspector: [openInspectorFn],
-    navigateToLens: [navigateToLensFn],
-    serializeState: [serializeStateFn],
-    getVis: [getVis],
-  } = embeddableApiHandler;
+  const [openInspectorFn] = embeddableApiHandler.openInspector;
+  const [navigateToLensFn] = embeddableApiHandler.navigateToLens;
 
   const isChromeVisible = useChromeVisibility(services.chrome);
   useEffect(() => {
@@ -71,6 +49,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       searchSessionId,
       embeddableId,
       originatingPath: pathValue,
+      valueInput: valueInputValue,
     } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
     if (searchSessionId) {
@@ -78,18 +57,21 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     } else {
       data.search.session.start();
     }
+    setEmbeddableInput(valueInputValue as VisualizeEditorInput | undefined);
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
     setOriginatingPath(pathValue);
   }, [services]);
+  const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
+    services,
+    eventEmitter,
+    isChromeVisible,
+    embeddableApiHandler,
+    originatingApp,
+    visualizationIdFromUrl,
+    embeddableInput
+  );
 
-  const savedVisInstance = useMemo(() => {
-    if (!getVis || !serializeStateFn) return;
-    return {
-      vis: getVis?.(),
-      savedVis: serializeStateFn?.().rawState.savedVis,
-    };
-  }, [getVis, serializeStateFn]);
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
   useExecutionContext(services.executionContext, {
     type: 'application',
@@ -102,22 +84,16 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     eventEmitter,
     savedVisInstance
   );
-  const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
+  const { isEmbeddableRendered, currentAppState } = useLegacyEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
-    savedVisInstance
+    savedVisInstance,
+    visEditorController
   );
-  const [initialState, references] = useInitialVisState({ visualizationIdFromUrl, services });
-
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, savedVisInstance);
-  useVisEditorBreadcrumbs({
-    services,
-    originatingApp,
-    visTitle: savedVisInstance?.vis.title,
-  });
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -140,25 +116,12 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingPath={originatingPath}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
+      visEditorRef={visEditorRef}
       onAppLeave={onAppLeave}
       embeddableId={embeddableIdValue}
       eventEmitter={eventEmitter}
       openInspectorFn={openInspectorFn}
       navigateToLensFn={navigateToLensFn}
-      serializeStateFn={serializeStateFn}
-    >
-      <EuiErrorBoundary>
-        <DefaultEditor
-          initialState={initialState}
-          references={references}
-          embeddableApiHandler={embeddableApiHandler}
-          eventEmitter={eventEmitter}
-          timeRange={timefilter.getTime()}
-          filters={filterManager.getFilters()}
-          query={queryString.getQuery() as Query}
-          dataView={currentAppState?.dataView}
-        />
-      </EuiErrorBoundary>
-    </VisualizeEditorCommon>
+    />
   );
 };

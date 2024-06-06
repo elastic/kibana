@@ -21,10 +21,10 @@ import type {
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
-} from '../types';
-import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig, isFallbackDataView } from '../utils';
-import { NavigateToLensFn, OpenInspectorFn } from '../utils/use/use_embeddable_api_handler';
+} from '../../types';
+import { VISUALIZE_APP_NAME } from '../../../../common/constants';
+import { getTopNavConfig, isFallbackDataView } from '../../utils';
+import { NavigateToLensFn, OpenInspectorFn } from '../../utils/use/use_embeddable_api_handler';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 

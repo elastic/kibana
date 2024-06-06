@@ -36,7 +36,14 @@
       "serverless",
       "noDataPage"
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "charts", "savedObjects", "visDefaultEditor"],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "charts",
+      "savedObjects",
+      "visDefaultEditor",
+      "visTypeTimeseries"
+    ],
     "extraPublicDirs": [
       "common/constants",
       "common/utils",

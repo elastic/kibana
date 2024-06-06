@@ -6,37 +6,33 @@
  * Side Public License, v 1.
  */
 
-import './visualize_editor.scss';
+import '../visualize_editor.scss';
 import { EventEmitter } from 'events';
-import React, { useCallback, useEffect } from 'react';
+import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeTopNav } from './visualize_top_nav';
-import { ExperimentalVisInfo } from './experimental_vis_info';
-import { urlFor } from '../..';
-import { getUISettings } from '../../services';
-import { VizChartWarning } from './viz_chart_warning';
+import { ExperimentalVisInfo } from '../experimental_vis_info';
+import { urlFor } from '../../..';
+import { getUISettings } from '../../../services';
+import { VizChartWarning } from '../viz_chart_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
-} from '../types';
+} from '../../types';
 import {
   CHARTS_CONFIG_TOKENS,
   CHARTS_WITHOUT_SMALL_MULTIPLES,
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
-} from '../utils/split_chart_warning_helpers';
-import {
-  NavigateToLensFn,
-  OpenInspectorFn,
-  SerializeStateFn,
-} from '../utils/use/use_embeddable_api_handler';
+} from '../../utils/split_chart_warning_helpers';
+import { NavigateToLensFn, OpenInspectorFn } from '../../utils/use/use_embeddable_api_handler';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -48,6 +44,7 @@ interface VisualizeEditorCommonProps {
   hasUnappliedChanges: boolean;
   isEmbeddableRendered: boolean;
   onAppLeave: AppMountParameters['onAppLeave'];
+  visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   originatingPath?: string;
@@ -56,10 +53,10 @@ interface VisualizeEditorCommonProps {
   eventEmitter?: EventEmitter;
   openInspectorFn?: OpenInspectorFn;
   navigateToLensFn?: NavigateToLensFn;
-  serializeStateFn?: SerializeStateFn;
 }
 
-export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
+export const VisualizeEditorCommon = ({
+  visInstance,
   appState,
   currentAppState,
   isChromeVisible,
@@ -73,13 +70,11 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
   setOriginatingApp,
   visualizationIdFromUrl,
   embeddableId,
+  visEditorRef,
   eventEmitter,
   openInspectorFn,
   navigateToLensFn,
-  serializeStateFn,
-  visInstance,
-  children,
-}) => {
+}: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
   useEffect(() => {
@@ -164,7 +159,6 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
           eventEmitter={eventEmitter}
           openInspectorFn={openInspectorFn}
           navigateToLensFn={navigateToLensFn}
-          serializeStateFn={serializeStateFn}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&
@@ -210,7 +204,7 @@ export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
           </h1>
         </EuiScreenReaderOnly>
       )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'}>{children}</div>
+      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
     </div>
   );
 };

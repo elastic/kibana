@@ -18,7 +18,7 @@ const INDEX_REF_NAME = 'kibanaSavedObjectMeta.searchSourceJSON.index';
 
 export const useInitialVisState: (opts: {
   services: VisualizeServices;
-  visualizationIdFromUrl: string | undefined;
+  visualizationIdFromUrl?: string;
 }) => [VisualizeSerializedState, Reference[]] = ({ visualizationIdFromUrl, services }) =>
   useMemo(() => {
     const { history } = services;

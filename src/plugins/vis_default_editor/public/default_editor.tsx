@@ -34,9 +34,15 @@ import { SerializeStateFn } from '@kbn/visualizations-plugin/public/visualize_ap
 import { BehaviorSubject } from 'rxjs';
 import { DefaultEditorSideBar } from './components/sidebar';
 
+export type DefaultEditorProps = EditorRenderProps & {
+  initialState: VisualizeSerializedState;
+  eventEmitter: EventEmitter;
+  embeddableApiHandler: EmbeddableApiHandler;
+  dataView?: string;
+  references: Reference[];
+};
+
 function DefaultEditor({
-  core,
-  data,
   initialState,
   uiState,
   timeRange,
@@ -48,13 +54,7 @@ function DefaultEditor({
   linked,
   savedSearch,
   references = [],
-}: EditorRenderProps & {
-  initialState: VisualizeSerializedState;
-  eventEmitter: EventEmitter;
-  embeddableApiHandler: EmbeddableApiHandler;
-  dataView?: string;
-  references: Reference[];
-}) {
+}: DefaultEditorProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [parentApi] = useState({
     timeRange$: new BehaviorSubject(timeRange),

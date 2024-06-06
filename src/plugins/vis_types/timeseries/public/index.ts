@@ -15,3 +15,5 @@ export function plugin(
 ) {
   return new Plugin(initializerContext);
 }
+
+export { VisEditor as TSVBVisEditor } from './application/components/vis_editor_lazy';

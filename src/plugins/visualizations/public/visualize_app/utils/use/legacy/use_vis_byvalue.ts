@@ -8,15 +8,15 @@
 
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
-import { VisualizeEditorInput } from '../../../react_embeddable/types';
 import {
   ByValueVisInstance,
   EmbeddableApiHandler,
   IEditorController,
   VisualizeServices,
-} from '../../types';
-import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../breadcrumbs';
-import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
+} from '../../../types';
+import { VisualizeEditorInput } from '../../../../react_embeddable/types';
+import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../../breadcrumbs';
+import { getVisualizationInstanceFromInput } from '../../get_visualization_instance';
 
 export const useVisByValue = (
   services: VisualizeServices,

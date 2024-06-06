@@ -7,29 +7,24 @@
  */
 
 import { EventEmitter } from 'events';
-import React, { useEffect, useState, useMemo } from 'react';
-import './visualize_editor.scss';
+import React, { useEffect, useState } from 'react';
+import '../visualize_editor.scss';
 
-import { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { VisByValueEditor } from '@kbn/vis-type-timeseries-plugin/public';
-import { VisualizeConstants } from '../../../common/constants';
-import { VisualizeAppProps } from '../app';
-import { VisualizeServices } from '../types';
+import { VisualizeConstants } from '../../../../common/constants';
+import { VisualizeAppProps } from '../../app';
+import { VisualizeServices } from '../../types';
 import {
   useChromeVisibility,
   useDataViewUpdates,
-  useEditorUpdates,
-  useEmbeddableApiHandler,
+  useLegacyEditorUpdates,
   useLinkedSearchUpdates,
+  useVisByValue,
   useVisualizeAppState,
-} from '../utils';
+  useEmbeddableApiHandler,
+} from '../../utils';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { useVisEditorBreadcrumbs } from '../utils/use/use_vis_editor_breadcrumbs';
-import type {
-  VisualizeSavedVisInputState,
-  VisualizeSerializedState,
-} from '../../react_embeddable/types';
+import { VisualizeEditorInput } from '../../../react_embeddable/types';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -38,23 +33,11 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [embeddableId, setEmbeddableId] = useState<string>();
-  const [initialState, setInitialState] = useState<VisualizeSavedVisInputState>();
-
-  const {
-    timefilter: { timefilter },
-    filterManager,
-    queryString,
-  } = services.data.query;
+  const [valueInput, setValueInput] = useState<VisualizeEditorInput>();
 
   const embeddableApiHandler = useEmbeddableApiHandler();
-  const {
-    openInspector: [openInspectorFn],
-    navigateToLens: [navigateToLensFn],
-    serializeState: [serializeStateFn],
-    getVis: [getVis],
-  } = embeddableApiHandler;
-  console.log('BY VALUE EDITOR');
-
+  const [openInspectorFn] = embeddableApiHandler.openInspector;
+  const [navigateToLensFn] = embeddableApiHandler.navigateToLens;
   useEffect(() => {
     const { stateTransferService, history, data } = services;
     const {
@@ -67,16 +50,13 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
     setOriginatingPath(pathValue);
     setOriginatingApp(value);
+    setValueInput(valueInputValue as VisualizeEditorInput | undefined);
     setEmbeddableId(embeddableIdValue);
-
-    console.log('VALUE INPUT', valueInputValue);
 
     if (!valueInputValue) {
       // if there is no value input to load, redirect to the visualize listing page.
       history.replace(VisualizeConstants.LANDING_PAGE_PATH);
     }
-
-    setInitialState(valueInputValue as VisualizeSavedVisInputState);
 
     if (searchSessionId) {
       data.search.session.continue(searchSessionId);
@@ -87,33 +67,30 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   const isChromeVisible = useChromeVisibility(services.chrome);
 
-  const byValueVisInstance = useMemo(() => {
-    if (!getVis || !serializeStateFn) return;
-    return {
-      vis: getVis?.(),
-      savedVis: serializeStateFn?.().rawState.savedVis,
-    };
-  }, [getVis, serializeStateFn]);
-
+  const { byValueVisInstance, visEditorRef, visEditorController } = useVisByValue(
+    services,
+    eventEmitter,
+    isChromeVisible,
+    embeddableApiHandler,
+    valueInput,
+    originatingApp,
+    originatingPath
+  );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
     byValueVisInstance
   );
-  const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
+  const { isEmbeddableRendered, currentAppState } = useLegacyEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
-    byValueVisInstance
+    byValueVisInstance,
+    visEditorController
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, byValueVisInstance);
-  useVisEditorBreadcrumbs({
-    services,
-    originatingApp,
-    visTitle: byValueVisInstance?.vis.title,
-  });
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -122,7 +99,6 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     };
   }, [eventEmitter]);
 
-  console.log('INITIAL STATE', initialState);
   return (
     <VisualizeEditorCommon
       visInstance={byValueVisInstance}
@@ -136,24 +112,12 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
       setHasUnsavedChanges={setHasUnsavedChanges}
+      visEditorRef={visEditorRef}
       embeddableId={embeddableId}
       onAppLeave={onAppLeave}
       eventEmitter={eventEmitter}
       openInspectorFn={openInspectorFn}
       navigateToLensFn={navigateToLensFn}
-      serializeStateFn={serializeStateFn}
-    >
-      {initialState && (
-        <VisByValueEditor
-          eventEmitter={eventEmitter}
-          timeRange={timefilter.getTime()}
-          filters={filterManager.getFilters()}
-          query={queryString.getQuery() as Query}
-          defaultIndexPattern={currentAppState?.dataView}
-          embeddableApiHandler={embeddableApiHandler}
-          initialState={initialState}
-        />
-      )}
-    </VisualizeEditorCommon>
+    />
   );
 };

@@ -11,27 +11,25 @@ import { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { useEffect, useRef, useState } from 'react';
 
-import { convertSavedObjectAttributesToReferences } from '../../..';
-import { VisualizeEditorInput } from '../../../react_embeddable/types';
-import { VisualizeConstants } from '../../../../common/constants';
-import { getTypes } from '../../../services';
+import { VisualizeEditorInput } from '../../../../react_embeddable/types';
+import { VisualizeConstants } from '../../../../../common/constants';
+import { getTypes } from '../../../../services';
 import {
   EmbeddableApiHandler,
   IEditorController,
   SavedVisInstance,
   VisualizeServices,
-} from '../../types';
+} from '../../../types';
 import {
   getCreateBreadcrumbs,
   getCreateServerlessBreadcrumbs,
   getEditBreadcrumbs,
   getEditServerlessBreadcrumbs,
-} from '../breadcrumbs';
-import { getVisualizationInstance } from '../get_visualization_instance';
-import { redirectToSavedObjectPage } from '../utils';
+} from '../../breadcrumbs';
+import { getVisualizationInstance } from '../../get_visualization_instance';
+import { redirectToSavedObjectPage } from '../../utils';
 
 /**
- * @deprecated
  * This effect is responsible for instantiating a saved vis or creating a new one
  * using url parameters, embedding and destroying it in DOM
  */
@@ -46,7 +44,7 @@ export const useSavedVisInstance = (
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
-    VisEditor?: React.FC;
+    visEditorController?: IEditorController;
   }>({});
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
@@ -111,7 +109,6 @@ export const useSavedVisInstance = (
           savedVisInstance.panelTimeRange = embeddableInput.timeRange;
         }
         const { savedVis, vis } = savedVisInstance;
-        const references = convertSavedObjectAttributesToReferences(savedVis);
 
         const originatingAppName = originatingApp
           ? stateTransferService.getAppNameFromId(originatingApp)
@@ -150,29 +147,38 @@ export const useSavedVisInstance = (
           }
         }
 
-        let VisEditor;
+        let visEditorController;
         // do not create editor in embeded mode
-        if (isChromeVisible) {
-          const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
-          console.log('Editor:', Editor);
-        }
+        if (visEditorRef.current) {
+          if (isChromeVisible) {
+            const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
 
+            if (Editor) {
+              visEditorController = new Editor(
+                visEditorRef.current,
+                vis,
+                eventEmitter,
+                embeddableApiHandler
+              );
+            }
+          }
+        }
         setState({
           savedVisInstance,
-          VisEditor,
+          visEditorController,
         });
       } catch (error) {
-        // try {
-        //   redirectToSavedObjectPage(services, error, visualizationIdFromUrl);
-        // } catch (e) {
-        //   toastNotifications.addWarning({
-        //     title: i18n.translate('visualizations.createVisualization.failedToLoadErrorMessage', {
-        //       defaultMessage: 'Failed to load the visualization',
-        //     }),
-        //     text: e.message,
-        //   });
-        //   history.replace(VisualizeConstants.LANDING_PAGE_PATH);
-        // }
+        try {
+          redirectToSavedObjectPage(services, error, visualizationIdFromUrl);
+        } catch (e) {
+          toastNotifications.addWarning({
+            title: i18n.translate('visualizations.createVisualization.failedToLoadErrorMessage', {
+              defaultMessage: 'Failed to load the visualization',
+            }),
+            text: e.message,
+          });
+          history.replace(VisualizeConstants.LANDING_PAGE_PATH);
+        }
       }
     };
 
@@ -200,10 +206,18 @@ export const useSavedVisInstance = (
     isChromeVisible,
     visualizationIdFromUrl,
     state.savedVisInstance,
-    state.VisEditor,
+    state.visEditorController,
     embeddableInput,
     embeddableApiHandler,
   ]);
+
+  useEffect(() => {
+    return () => {
+      if (state.visEditorController) {
+        state.visEditorController.destroy();
+      }
+    };
+  }, [state]);
 
   return {
     ...state,
