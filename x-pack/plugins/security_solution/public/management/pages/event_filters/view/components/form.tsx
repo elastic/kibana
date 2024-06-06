@@ -632,20 +632,44 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       );
 
       return (
-        <EuiSwitch
-          checked={isFilterEntireProcessTreeSwitchEnabled}
-          onChange={handleFilterEntireProcessTreeOnChange}
-          data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
-          label={
-            <>
+        <>
+          <EuiHorizontalRule />
+          <EuiText size="s">
+            <h3>
               <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterEntireProcessTree.switchLabel"
-                defaultMessage="Filter entire process tree"
-              />{' '}
-              {tooltip}
-            </>
-          }
-        />
+                id="xpack.securitySolution.eventFilters.filterEntireProcessTree.sectionTitle"
+                defaultMessage="Filtering events from entire process tree"
+              />
+            </h3>
+
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.filterEntireProcessTree.details"
+                defaultMessage={
+                  `Select to omit events from the matched process' descendants, while ingesting the events ` +
+                  `coming from the matched process itself.`
+                }
+              />
+            </p>
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
+          <EuiSwitch
+            checked={isFilterEntireProcessTreeSwitchEnabled}
+            onChange={handleFilterEntireProcessTreeOnChange}
+            data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
+            label={
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.filterEntireProcessTree.switchLabel"
+                  defaultMessage="Filter entire process tree"
+                />{' '}
+                {tooltip}
+              </>
+            }
+          />
+        </>
       );
     }, [getTestId, handleFilterEntireProcessTreeOnChange, isFilterEntireProcessTreeSwitchEnabled]);
 
