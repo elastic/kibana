@@ -81,7 +81,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
               {i18n.translate(
                 'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.startWithPreparedEndpointsLabel',
                 {
-                  defaultMessage: 'Quickly start with our prepared endpoints:',
+                  defaultMessage: 'Get started quickly with our prepared endpoints:',
                 }
               )}
             </strong>
