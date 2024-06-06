@@ -137,7 +137,7 @@ export const InferenceEndpoints: React.FC = () => {
             'xpack.searchInferenceEndpoints.inferenceEndpoints.allInferenceEndpoints.description',
             {
               defaultMessage:
-                'Manage your Elastic and third-party endpoints generated from the Inference API.',
+                'Manage your inference endpoints.',
             }
           )}
           rightSideItems={[
