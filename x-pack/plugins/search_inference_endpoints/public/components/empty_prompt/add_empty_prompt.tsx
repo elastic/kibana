@@ -55,7 +55,7 @@ export const AddEmptyPrompt: React.FC<AddEmptyPromptProps> = ({
               'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.createFirstInferenceEndpointDescription',
               {
                 defaultMessage:
-                  'Connect to your third-party model provider of choice to setup a single entity for semantic search.',
+                  'Connect to your third-party model provider to create an inference endpoint for semantic search.',
               }
             )}
           </EuiFlexItem>
