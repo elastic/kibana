@@ -172,7 +172,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       'filterEntireProcessTreeForEventFiltersEnabled'
     );
 
-    const isFilterEntireProcessTreeToggleEnabled = useMemo(
+    const isFilterEntireProcessTreeSwitchEnabled = useMemo(
       () => isFilterEntireProcessTreeEnabled(exception),
       [exception]
     );
@@ -609,6 +609,46 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [getTagsUpdatedBy, processChanged]
     );
 
+    const filterEntireProcessTreeSwitch = useMemo(() => {
+      const tooltip = (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.filterEntireProcessTree.tooltip"
+              defaultMessage={
+                `Filtering entire process tree means that events from the matched process are still ingested, ` +
+                `but the ones from its descendant processes will be omitted.`
+              }
+            />
+          }
+          data-test-subj={getTestId('filterEntireProcessTreeTooltipText')}
+        >
+          <EuiIcon
+            color="subdued"
+            type="iInCircle"
+            data-test-subj={getTestId('filterEntireProcessTreeTooltipIcon')}
+          />
+        </EuiToolTip>
+      );
+
+      return (
+        <EuiSwitch
+          checked={isFilterEntireProcessTreeSwitchEnabled}
+          onChange={handleFilterEntireProcessTreeOnChange}
+          data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
+          label={
+            <>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.filterEntireProcessTree.switchLabel"
+                defaultMessage="Filter entire process tree"
+              />{' '}
+              {tooltip}
+            </>
+          }
+        />
+      );
+    }, [getTestId, handleFilterEntireProcessTreeOnChange, isFilterEntireProcessTreeSwitchEnabled]);
+
     useEffect(() => {
       processChanged();
     }, [processChanged]);
@@ -634,39 +674,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             </EuiText>
           </>
         )}
-        {isFilterEntireProcessTreeFeatureEnabled && (
-          <EuiSwitch
-            checked={isFilterEntireProcessTreeToggleEnabled}
-            onChange={handleFilterEntireProcessTreeOnChange}
-            label={
-              <>
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterEntireProcessTree.toggleLabel"
-                  defaultMessage="Filter entire process tree"
-                />{' '}
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.securitySolution.eventFilters.filterEntireProcessTree.tooltip"
-                      defaultMessage={
-                        `Filtering entire process tree means that events from the matched process are still ingested, ` +
-                        `but the ones from its descendant processes will be omitted.`
-                      }
-                    />
-                  }
-                  data-test-subj={getTestId('filterEntireProcessTreeTooltipText')}
-                >
-                  <EuiIcon
-                    color="subdued"
-                    type="iInCircle"
-                    data-test-subj={getTestId('filterEntireProcessTreeTooltipIcon')}
-                  />
-                </EuiToolTip>
-              </>
-            }
-            data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
-          />
-        )}
+        {isFilterEntireProcessTreeFeatureEnabled && filterEntireProcessTreeSwitch}
         {showAssignmentSection && (
           <>
             <EuiHorizontalRule />

@@ -432,7 +432,7 @@ describe('Event filter form', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('should display unchecked toggle when tags are missing', () => {
+    it('should display unchecked switch when tags are missing', () => {
       delete formProps.item.tags;
       render();
 
@@ -441,7 +441,7 @@ describe('Event filter form', () => {
       ).not.toBeChecked();
     });
 
-    it('should display unchecked toggle when filtering entire process tree is disabled', () => {
+    it('should display unchecked switch when filtering entire process tree is disabled', () => {
       formProps.item.tags = [];
       render();
 
@@ -450,7 +450,7 @@ describe('Event filter form', () => {
       ).not.toBeChecked();
     });
 
-    it('should display checked toggle when filtering entire process tree is enabled', () => {
+    it('should display checked switch when filtering entire process tree is enabled', () => {
       formProps.item.tags = [ENTIRE_PROCESS_TREE_TAG];
       render();
 
