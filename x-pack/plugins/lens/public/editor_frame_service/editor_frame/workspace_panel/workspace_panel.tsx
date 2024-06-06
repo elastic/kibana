@@ -43,7 +43,6 @@ import {
   UserMessage,
   UserMessagesGetter,
   AddUserMessages,
-  isMessageRemovable,
   VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -267,9 +266,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
 
         if (requestWarnings.length) {
-          removeSearchWarningMessagesRef.current = addUserMessages(
-            requestWarnings.filter(isMessageRemovable)
-          );
+          removeSearchWarningMessagesRef.current = addUserMessages(requestWarnings);
         } else if (removeSearchWarningMessagesRef.current) {
           removeSearchWarningMessagesRef.current();
           removeSearchWarningMessagesRef.current = undefined;
