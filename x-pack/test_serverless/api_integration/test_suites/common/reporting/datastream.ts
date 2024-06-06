@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
       // for this test, we don't need to wait for the job to finish or verify the result
-      await reportingAPI.createReportJobInternalUsingRole(
+      await reportingAPI.createReportJobInternal(
         'csv_searchsource',
         {
           browserTimezone: 'UTC',
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await reportingAPI.deleteAllReportsUsingRole(role);
+      await reportingAPI.deleteAllReports(role);
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       await svlUserManager.invalidateApiKeyForRole(role);

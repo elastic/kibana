@@ -11,6 +11,7 @@ import {
   JobParamsCsvFromSavedObject,
 } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -19,7 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
-  const config = getService('config');
+  const svlUserManager = getService('svlUserManager');
+  let role: RoleCredentials;
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -51,23 +53,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     // Kibana CI and MKI use different users
-    const TEST_USERNAME = config.get('servers.kibana.username');
-    const TEST_PASSWORD = config.get('servers.kibana.password');
-
     before('initialize saved object archive', async () => {
+      role = await svlUserManager.createApiKeyForRole('admin');
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
+      await svlUserManager.invalidateApiKeyForRole(role);
     });
 
     // Cant auth into the route as it's structured currently
     xit(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job);
+      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, role);
 
       await navigateToReportingManagement();
       await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
@@ -75,16 +76,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Skipping test for now because functionality is not yet possible to test
     xit(`user doesn't see a job another user has created`, async () => {
-      log.debug(`creating a csv report job as '${TEST_USERNAME}'`);
+      log.debug(`creating a csv report job using api keys for role`);
 
       const {
         job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(
-        CSV_REPORT_TYPE_V2,
-        job,
-        TEST_USERNAME,
-        TEST_PASSWORD
-      );
+      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job, role);
 
       await navigateToReportingManagement();
       await testSubjects.missingOrFail(`viewReportingLink-${jobId}`);
