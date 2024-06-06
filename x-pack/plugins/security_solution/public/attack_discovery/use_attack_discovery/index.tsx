@@ -20,9 +20,9 @@ import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assista
 
 import { usePollApi } from '../hooks/use_poll_api';
 import { useKibana } from '../../common/lib/kibana';
-import { getErrorToastText, getFallbackActionTypeId } from '../pages/helpers';
+import { getErrorToastText } from '../pages/helpers';
 import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
-import { getRequestBody } from './helpers';
+import { getGenAiConfig, getRequestBody } from './helpers';
 
 export interface UseAttackDiscovery {
   alertsContextCount: number | null;
@@ -84,13 +84,13 @@ export const useAttackDiscovery = ({
 
   const requestBody = useMemo(() => {
     const selectedConnector = aiConnectors?.find((connector) => connector.id === connectorId);
-    const actionTypeId = getFallbackActionTypeId(selectedConnector?.actionTypeId);
+    const genAiConfig = getGenAiConfig(selectedConnector);
     return getRequestBody({
-      actionTypeId,
       alertsIndexPattern,
       anonymizationFields,
-      connectorId,
+      genAiConfig,
       knowledgeBase,
+      selectedConnector,
       traceOptions,
     });
   }, [
@@ -130,7 +130,7 @@ export const useAttackDiscovery = ({
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(async () => {
     try {
-      if (requestBody.connectorId === '') {
+      if (requestBody.apiConfig.connectorId === '' || requestBody.apiConfig.actionTypeId === '') {
         throw new Error(CONNECTOR_ERROR);
       }
       setLoadingConnectorId?.(connectorId ?? null);
@@ -153,6 +153,7 @@ export const useAttackDiscovery = ({
         await pollApi();
       }
     } catch (error) {
+      setIsLoading(false);
       toasts?.addDanger(error, {
         title: ERROR_GENERATING_ATTACK_DISCOVERIES,
         text: getErrorToastText(error),

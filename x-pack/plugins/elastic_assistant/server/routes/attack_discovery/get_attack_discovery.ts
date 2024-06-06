@@ -45,16 +45,17 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
-        const dataClient = await assistantContext.getAttackDiscoveryDataClient();
-        const authenticatedUser = assistantContext.getCurrentUser();
-        const connectorId = decodeURIComponent(request.params.connectorId);
-        if (authenticatedUser == null) {
-          return resp.error({
-            body: `Authenticated user not found`,
-            statusCode: 401,
-          });
-        }
         try {
+          const dataClient = await assistantContext.getAttackDiscoveryDataClient();
+
+          const authenticatedUser = assistantContext.getCurrentUser();
+          const connectorId = decodeURIComponent(request.params.connectorId);
+          if (authenticatedUser == null) {
+            return resp.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
           const attackDiscovery = await dataClient?.findAttackDiscoveryByConnectorId({
             connectorId,
             authenticatedUser,

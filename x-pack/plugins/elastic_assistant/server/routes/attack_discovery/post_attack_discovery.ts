@@ -83,9 +83,8 @@ export const postAttackDiscoveryRoute = (
 
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
-          const connectorId = decodeURIComponent(request.body.connectorId);
           const {
-            actionTypeId,
+            apiConfig,
             anonymizationFields,
             langSmithApiKey,
             langSmithProject,
@@ -122,8 +121,8 @@ export const postAttackDiscoveryRoute = (
 
           const llm = new ActionsClientLlm({
             actions,
-            connectorId,
-            llmType: getLlmType(actionTypeId),
+            connectorId: apiConfig.connectorId,
+            llmType: getLlmType(apiConfig.actionTypeId),
             logger,
             request,
             temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
@@ -147,7 +146,7 @@ export const postAttackDiscoveryRoute = (
           const toolInstance = assistantTool.getTool(assistantToolParams);
 
           const foundAttackDiscovery = await dataClient?.findAttackDiscoveryByConnectorId({
-            connectorId,
+            connectorId: apiConfig.connectorId,
             authenticatedUser,
           });
           let currentAd: AttackDiscoveryResponse;
@@ -156,18 +155,16 @@ export const postAttackDiscoveryRoute = (
             const ad = await dataClient?.createAttackDiscovery({
               attackDiscoveryCreate: {
                 attackDiscoveries: [],
-                apiConfig: {
-                  connectorId,
-                  // TODO connect this
-                  actionTypeId: 'todo',
-                },
+                apiConfig,
                 status: attackDiscoveryStatus.running,
                 replacements: latestReplacements,
               },
               authenticatedUser,
             });
             if (ad == null) {
-              throw new Error(`Could not create attack discovery for connectorId: ${connectorId}`);
+              throw new Error(
+                `Could not create attack discovery for connectorId: ${apiConfig.connectorId}`
+              );
             } else {
               currentAd = ad;
             }
@@ -184,7 +181,9 @@ export const postAttackDiscoveryRoute = (
               authenticatedUser,
             });
             if (ad == null) {
-              throw new Error(`Could not update attack discovery for connectorId: ${connectorId}`);
+              throw new Error(
+                `Could not update attack discovery for connectorId: ${apiConfig.connectorId}`
+              );
             } else {
               currentAd = ad;
             }

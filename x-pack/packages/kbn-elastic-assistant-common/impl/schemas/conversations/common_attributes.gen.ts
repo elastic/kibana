@@ -108,17 +108,13 @@ export const Message = z.object({
 export type ApiConfig = z.infer<typeof ApiConfig>;
 export const ApiConfig = z.object({
   /**
-   * connector Id
+   * connector id
    */
   connectorId: z.string(),
   /**
-   * action type Id
+   * action type id
    */
   actionTypeId: z.string(),
-  /**
-   * defaultSystemPromptId
-   */
-  defaultSystemPromptId: z.string().optional(),
   /**
    * Provider
    */

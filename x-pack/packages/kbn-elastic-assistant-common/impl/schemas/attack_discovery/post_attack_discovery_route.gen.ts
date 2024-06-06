@@ -17,15 +17,17 @@ import { z } from 'zod';
  */
 
 import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { Replacements } from '../conversations/common_attributes.gen';
+import { ApiConfig, Replacements } from '../conversations/common_attributes.gen';
 import { AttackDiscoveryResponse } from './common_attributes.gen';
 
 export type AttackDiscoveryPostRequestBody = z.infer<typeof AttackDiscoveryPostRequestBody>;
 export const AttackDiscoveryPostRequestBody = z.object({
   alertsIndexPattern: z.string(),
   anonymizationFields: z.array(AnonymizationFieldResponse),
-  connectorId: z.string(),
-  actionTypeId: z.string(),
+  /**
+   * LLM API configuration.
+   */
+  apiConfig: ApiConfig,
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),
   model: z.string().optional(),

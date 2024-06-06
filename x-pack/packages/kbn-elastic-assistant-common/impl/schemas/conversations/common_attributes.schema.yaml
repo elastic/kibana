@@ -93,13 +93,10 @@ components:
       properties:
         connectorId:
           type: string
-          description: connector Id
+          description: connector id
         actionTypeId:
           type: string
-          description: action type Id
-        defaultSystemPromptId:
-          type: string
-          description: defaultSystemPromptId
+          description: action type id
         provider:
           $ref: '#/components/schemas/Provider'
           description: Provider
