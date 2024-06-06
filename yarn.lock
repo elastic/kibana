@@ -1650,10 +1650,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@65.1.0":
-  version "65.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-65.1.0.tgz#ff0c7f71ce7da76472813c9bf5cd3ec16df887ae"
-  integrity sha512-rIvsoCZH6YUb+w3dqelp8geujEMwdiJLuxi/Y+9UVJm+7QrhkK4uob7QEFgPv79p2NeBngZIyetZCYGEE3FMzw==
+"@elastic/charts@65.2.0":
+  version "65.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-65.2.0.tgz#203496b6471e4845807cb70c48b0990676882ef4"
+  integrity sha512-yeqascGqvnDABvtYOHgd7sr6cEq5kivFWKaS3UWeb/GpOxk+O4Ef1PlbBxpchgDyInP957SWlhKDmhUFF1Ttzg==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -4797,6 +4797,10 @@
   uid ""
 
 "@kbn/esql-ast@link:packages/kbn-esql-ast":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-datagrid@link:src/plugins/esql_datagrid":
   version "0.0.0"
   uid ""
 
@@ -16175,10 +16179,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.5.4:
-  version "4.5.4"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.5.4.tgz#add7c5a53f8a4ec29989e3365c9f2053ec64a20d"
-  integrity sha512-PqX8a5PdWo+mtH1Vn+xjmhJpa2RE9zbKDKFkKoENKG118KVgukxhFlVIpb3qrht9aeRkPxHqQsPNtNV3ljPjew==
+elastic-apm-node@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.6.0.tgz#9de3b758158c85dee5932857eb93e21cf204c45a"
+  integrity sha512-mieujz8IA30wkavF8JG/mSBep2DG2zGMblQAh1uEkeXIjb8njrW3Ef+cqKPEdaFPN/Iqm2LZzZuy+Fu20MsfkA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -16198,7 +16202,7 @@ elastic-apm-node@^4.5.4:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.7.4"
+    import-in-the-middle "1.8.0"
     json-bigint "^1.0.0"
     lru-cache "^10.0.1"
     measured-reporting "^1.51.1"
@@ -19527,10 +19531,10 @@ import-in-the-middle@1.7.1:
     cjs-module-lexer "^1.2.2"
     module-details-from-path "^1.0.3"
 
-import-in-the-middle@1.7.4:
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.7.4.tgz#508da6e91cfa84f210dcdb6c0a91ab0c9e8b3ebc"
-  integrity sha512-Lk+qzWmiQuRPPulGQeK5qq0v32k2bHnWrRPFgqyvhw7Kkov5L6MOLOIU3pcWeujc9W4q54Cp3Q2WV16eQkc7Bg==
+import-in-the-middle@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.8.0.tgz#c94d88d53701de9a248f9710b41f533e67f598a4"
+  integrity sha512-/xQjze8szLNnJ5rvHSzn+dcVXqCAU6Plbk4P24U/jwPmg1wy7IIp9OjKIO5tYue8GSPhDpPDiApQjvBUmWwhsQ==
   dependencies:
     acorn "^8.8.2"
     acorn-import-attributes "^1.9.5"
