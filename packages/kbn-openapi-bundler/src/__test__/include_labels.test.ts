@@ -10,13 +10,19 @@ import { bundleSpecs } from './bundle_specs';
 import { createOASDocument } from './create_oas_document';
 
 describe('OpenAPI Bundler - include labeled operations', () => {
-  it('includes Serverless endpoints', async () => {
+  it.each([
+    {
+      label: 'labelA',
+      expectedPathObjects: { '/api/some_api': ['post'], '/api/another_api': ['get'] },
+    },
+    { label: 'labelB', expectedPathObjects: { '/api/some_api': ['get'] } },
+  ])('includes operation objects with "$label" label', async ({ label, expectedPathObjects }) => {
     const spec = createOASDocument({
       paths: {
         '/api/some_api': {
           get: {
             // @ts-expect-error custom property is unexpected here
-            'x-labels': ['serverless'],
+            'x-labels': ['labelB'],
             responses: {
               '200': {
                 description: 'Successful response',
@@ -31,7 +37,7 @@ describe('OpenAPI Bundler - include labeled operations', () => {
             },
           },
           post: {
-            'x-labels': ['ess'],
+            'x-labels': ['labelA'],
             responses: {
               '200': {
                 description: 'Successful response',
@@ -49,7 +55,7 @@ describe('OpenAPI Bundler - include labeled operations', () => {
         '/api/another_api': {
           get: {
             // @ts-expect-error custom property is unexpected here
-            'x-labels': ['ess'],
+            'x-labels': ['labelA'],
             responses: {
               '200': {
                 description: 'Successful response',
@@ -73,25 +79,67 @@ describe('OpenAPI Bundler - include labeled operations', () => {
           1: spec,
         },
         {
-          includeLabels: ['serverless'],
+          includeLabels: [label],
+        }
+      )
+    );
+
+    expect(Object.keys(bundledSpec.paths)).toEqual(
+      expect.arrayContaining(Object.keys(expectedPathObjects))
+    );
+
+    for (const [path, verbs] of Object.entries(expectedPathObjects)) {
+      expect(Object.keys(bundledSpec.paths[path]!)).toEqual(expect.arrayContaining(verbs));
+    }
+  });
+
+  it('includes operation objects without labels', async () => {
+    const spec = createOASDocument({
+      paths: {
+        '/api/some_api': {
+          put: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const [bundledSpec] = Object.values(
+      await bundleSpecs(
+        {
+          1: spec,
+        },
+        {
+          includeLabels: ['labelA'],
         }
       )
     );
 
     expect(bundledSpec.paths).toEqual({
       '/api/some_api': {
-        get: expect.objectContaining({}),
+        put: expect.anything(),
       },
     });
   });
 
-  it('includes ESS endpoints', async () => {
+  it('does NOT include operation objects when labels is not an array', async () => {
     const spec = createOASDocument({
       paths: {
         '/api/some_api': {
           get: {
             // @ts-expect-error custom property is unexpected here
-            'x-labels': ['serverless'],
+            'x-labels': 10,
             responses: {
               '200': {
                 description: 'Successful response',
@@ -105,26 +153,8 @@ describe('OpenAPI Bundler - include labeled operations', () => {
               },
             },
           },
-          post: {
-            'x-labels': ['ess'],
-            responses: {
-              '200': {
-                description: 'Successful response',
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        '/api/another_api': {
-          // @ts-expect-error custom property is unexpected here
-          'x-labels': ['ess'],
-          get: {
+          put: {
+            'x-labels': ['labelA'],
             responses: {
               '200': {
                 description: 'Successful response',
@@ -148,17 +178,14 @@ describe('OpenAPI Bundler - include labeled operations', () => {
           1: spec,
         },
         {
-          includeLabels: ['ess'],
+          includeLabels: ['labelA'],
         }
       )
     );
 
     expect(bundledSpec.paths).toEqual({
       '/api/some_api': {
-        post: expect.objectContaining({}),
-      },
-      '/api/another_api': {
-        get: expect.objectContaining({}),
+        put: expect.anything(),
       },
     });
   });
