@@ -26,7 +26,7 @@ describe('When empty prompt is loaded', () => {
   it('should display the description for creation of the first inference endpoint', () => {
     expect(
       screen.getByText(
-        /Connect to your third-party model provider of choice to setup a single entity for semantic search./
+        /Connect to your third-party model provider to create an inference endpoint for semantic search./
       )
     ).toBeInTheDocument();
   });
