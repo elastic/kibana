@@ -24,6 +24,23 @@ import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { CreateQueryRuleAdditionalOptions, RunOpts } from '../types';
 
+const convertDataTierToFilter = ({ excluded }: { excluded: string[] }) => {
+  if (!excluded?.length) {
+    return [];
+  }
+
+  return [
+    {
+      meta: { negate: true },
+      query: {
+        terms: {
+          _tier: excluded,
+        },
+      },
+    },
+  ];
+};
+
 export const queryExecutor = async ({
   runOpts,
   experimentalFeatures,
@@ -51,7 +68,7 @@ export const queryExecutor = async ({
   return withSecuritySpan('queryExecutor', async () => {
     const esFilter = await getFilter({
       type: ruleParams.type,
-      filters: ruleParams.filters,
+      filters: [...ruleParams.filters, ...convertDataTierToFilter(ruleParams?.dataTier)],
       language: ruleParams.language,
       query: ruleParams.query,
       savedId: ruleParams.savedId,
