@@ -133,6 +133,17 @@ describe('validation', () => {
             'Unknown function [fn]',
           ]);
         });
+
+        test('semantic errors', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('from a_index | stats count(round(*))', [
+            'Using wildcards (*) in round is not allowed',
+          ]);
+          await expectErrors('from a_index | stats count(count(*))', [
+            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
+          ]);
+        });
       });
 
       describe('... BY <grouping>', () => {

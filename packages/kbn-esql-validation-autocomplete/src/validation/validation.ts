@@ -415,9 +415,9 @@ function validateFunction(
            * and each should be validated as if each were constantOnly.
            */
           allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
-          // use the nesting flag for now just for stats
+          // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
+          (parentCommand === 'stats' || parentCommand === 'metrics') ? isNested || !isAssignment(astFunction) : false
         );
 
         if (messagesFromArg.some(({ code }) => code === 'expectedConstant')) {
@@ -574,7 +574,7 @@ const isFunctionAggClosed = (fn: ESQLFunction): boolean =>
 /**
  * Validates aggregates fields: `... <aggregates> ...`.
  */
-const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[]) => {
+const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[], references: ReferenceMaps) => {
   const messages: ESQLMessage[] = [];
 
   // Should never happen.
@@ -587,6 +587,8 @@ const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[]) =>
 
   for (const aggregate of aggregates) {
     if (isFunctionItem(aggregate)) {
+      messages.push(...validateFunction(aggregate, command.name, undefined, references));
+
       let hasAggregationFunction = false;
 
       walk(aggregate, {
@@ -846,7 +848,7 @@ const validateMetricsCommand = (command: ESQLAstMetricsCommand, references: Refe
 
   // ... <aggregates> ...
   if (aggregates && aggregates.length) {
-    messages.push(...validateAggregates(command, aggregates));
+    messages.push(...validateAggregates(command, aggregates, references));
 
     // ... BY <grouping>
     if (grouping && grouping.length) {

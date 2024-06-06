@@ -176,15 +176,73 @@ describe('validation', () => {
             );
           }
         });
+
+        test('semantic function validation errors', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('metrics a_index count(round(*))', [
+            'Using wildcards (*) in round is not allowed',
+          ]);
+          await expectErrors('metrics a_index count(count(*))', [
+            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
+          ]);
+        });
       });
 
       describe('... BY <grouping>', () => {
-        test('syntax does not allow BY *grouping* clause without *aggregates*', async () => {
+        test('no errors on correct usage', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            'metrics a_index avg(numberField), percentile(numberField, 50) by ipField',
+            []
+          );
+          await expectErrors(
+            'metrics a_index avg(numberField), percentile(numberField, 50) BY ipField',
+            []
+          );
+          await expectErrors(
+            'metrics a_index avg(numberField), percentile(numberField, 50) + 1 by ipField',
+            []
+          );
+          for (const op of ['+', '-', '*', '/', '%']) {
+            await expectErrors(
+              `metrics a_index avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
+              []
+            );
+          }
+        });
+
+        test('syntax does not allow <grouping> clause without <aggregates>', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('metrics a_index BY stringField', [
             'Expected an aggregate function or group but got [BY] of type [FieldAttribute]',
             "SyntaxError: extraneous input 'stringField' expecting <EOF>",
+          ]);
+        });
+
+        test('syntax errors in <aggregates>', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('metrics a_index count(* + 1) BY ipField', [
+            expect.any(String),
+            "SyntaxError: no viable alternative at input 'count(* +'",
+          ]);
+          await expectErrors('metrics a_index \n count(* + round(numberField)) BY ipField', [
+            expect.any(String),
+            "SyntaxError: no viable alternative at input 'count(* +'",
+          ]);
+        });
+
+        test('semantic errors in <aggregates>', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('metrics a_index count(round(*)) BY ipField', [
+            'Using wildcards (*) in round is not allowed',
+          ]);
+          await expectErrors('metrics a_index count(count(*)) BY ipField', [
+            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
           ]);
         });
 
