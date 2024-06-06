@@ -258,6 +258,7 @@ describe('policy details: ', () => {
         name: '',
         description: '',
         policy_id: '',
+        policy_ids: [''],
         enabled: true,
         inputs: [
           {

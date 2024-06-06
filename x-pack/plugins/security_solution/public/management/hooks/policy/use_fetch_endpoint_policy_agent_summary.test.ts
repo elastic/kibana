@@ -56,7 +56,7 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
 
     expect(apiMocks.responseProvider.agentStatus).toHaveBeenCalledWith({
       path: agentRouteService.getStatusPath(),
-      query: { policyId: policy.policy_id },
+      query: { policyId: policy.policy_ids[0] },
       version: API_VERSIONS.public.v1,
     });
     expect(data).toEqual({

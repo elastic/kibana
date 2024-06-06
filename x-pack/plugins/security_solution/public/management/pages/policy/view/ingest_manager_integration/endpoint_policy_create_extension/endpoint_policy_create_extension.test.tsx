@@ -218,6 +218,7 @@ describe('Onboarding Component new section', () => {
           name: 'someName',
           namespace: 'someNamespace',
           policy_id: 'somePolicyid',
+          policy_ids: ['somePolicyid'],
         },
       });
     });
@@ -259,6 +260,7 @@ describe('Onboarding Component new section', () => {
           name: 'someName',
           namespace: 'someNamespace',
           policy_id: 'somePolicyid',
+          policy_ids: ['somePolicyid'],
         },
       });
     });
