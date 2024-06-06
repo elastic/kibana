@@ -59,7 +59,7 @@ describe('RowViewer', () => {
       <KibanaContextProvider services={services}>
         <RowViewer
           dataView={dataView as unknown as DataView}
-          toastNotifications={
+          notifications={
             {
               toasts: {
                 addSuccess: jest.fn(),
