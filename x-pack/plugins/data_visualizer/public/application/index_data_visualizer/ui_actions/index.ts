@@ -18,13 +18,4 @@ export function registerDataVisualizerUiActions(
   const addFieldStatsAction = createAddFieldStatsTableAction(coreStart, pluginStart);
 
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addFieldStatsAction);
-
-  // uiActions.registerTrigger(categorizeFieldTrigger);
-
-  // uiActions.addTriggerAction(
-  //   CATEGORIZE_FIELD_TRIGGER,
-  //   createCategorizeFieldAction(coreStart, pluginStart)
-  // );
-
-  // uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openChangePointInMlAppAction);
 }

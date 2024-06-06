@@ -166,7 +166,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         showPreviewByDefault={showPreviewByDefault}
         onTableUpdate={updateState}
         renderFieldName={renderFieldName}
-        esql={isEsqlMode}
+        isEsqlMode={isEsqlMode}
         overridableServices={overridableServices}
       />
     </EuiFlexItem>

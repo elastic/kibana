@@ -54,7 +54,6 @@ export class DataVisualizerPlugin
     Promise.all([
       import('./application/index_data_visualizer/embeddables/field_stats'),
       import('./application/index_data_visualizer/ui_actions'),
-      // import('./cases/register_change_point_charts_attachment'),
       core.getStartServices(),
     ]).then(
       ([

@@ -65,8 +65,9 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
       isEsqlMode,
       title: defaultTitle,
       dataViewId,
-      esqlQuery,
+      query: esqlQuery,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId, viewType, esqlQuery.esql]);
 
   const canEditTextBasedQuery = true;

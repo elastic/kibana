@@ -17,22 +17,12 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  BehaviorSubject,
-  distinctUntilChanged,
-  map,
-  skipWhile,
-  Subscription,
-  skip,
-  switchMap,
-} from 'rxjs';
+import { BehaviorSubject, map, skipWhile, Subscription, skip, switchMap } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { pick } from 'lodash';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type {
   FieldStatisticsTableEmbeddableApi,
@@ -114,8 +104,6 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
-      console.log('fieldFormats', deps.fieldFormats);
-
       const {
         api: timeRangeApi,
         comparators: timeRangeComparators,
@@ -148,8 +136,6 @@ export const getFieldStatsChartEmbeddableFactory = (
             switchMap((dataViewId) => deps.data.dataViews.get(dataViewId ?? defaultDataViewId))
           )
           .subscribe((nextSelectedDataView) => {
-            // @TODO: remove
-            console.log(`--@@nextSelectedDataView`, nextSelectedDataView);
             dataViews$.next([nextSelectedDataView]);
             // fieldStatsControlsApi.filter$.next([]);
             // fieldStatsControlsApi.globalQuery$.next();
@@ -178,9 +164,8 @@ export const getFieldStatsChartEmbeddableFactory = (
                 pluginStart,
                 parentApi,
                 uuid,
-                pick(chartState, ['dataViewId', 'viewType', 'esqlQuery'])
+                chartState
               );
-              console.log(`--@@nextUpdate`, nextUpdate);
               fieldStatsControlsApi.updateUserInput(nextUpdate);
             } catch (e) {
               return Promise.reject(e);
@@ -216,16 +201,6 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       );
 
-      const globalQuery$ = fetch$(api).pipe(
-        map((fetchContext) => {
-          return fetchContext.query;
-        }),
-        distinctUntilChanged(fastIsEqual)
-      );
-      const globalFilters$ = fetch$(api).pipe(
-        map((fetchContext) => fetchContext.filters),
-        distinctUntilChanged(fastIsEqual)
-      );
       const reload$ = fetch$(api).pipe(
         skipWhile((fetchContext) => !fetchContext.isReload),
         map((fetchContext) => Date.now())
@@ -238,19 +213,19 @@ export const getFieldStatsChartEmbeddableFactory = (
             throw new Error('Parent API does not have execution context');
           }
 
-          const [dataViews, esqlQuery, viewType] = useBatchedPublishingSubjects(
-            api.dataViews,
-            api.esqlQuery$,
-            api.viewType$
-          );
+          const [dataViews, esqlQuery, globalQuery, globalFilters, viewType] =
+            useBatchedPublishingSubjects(
+              api.dataViews,
+              api.query$,
+              parentApi.query$,
+              parentApi.filters$,
+              api.viewType$
+            );
           const isEsqlMode = viewType === 'esql';
-          const query = useObservable(globalQuery$, undefined);
-          const filters = useObservable(globalFilters$, undefined);
+          // const query = useObservable(parentApi.query$, undefined);
+          // const filters = useObservable(parentApi.filters$, undefined);
           const dataView =
             Array.isArray(dataViews) && dataViews.length > 0 ? dataViews[0] : undefined;
-          console.log(`--@@esqlQuery`, esqlQuery);
-          console.log(`--@@query`, query);
-
           const lastReloadRequestTime = useObservable(reload$, Date.now());
 
           // On destroy
@@ -268,10 +243,10 @@ export const getFieldStatsChartEmbeddableFactory = (
               shouldGetSubfields={false}
               dataView={dataView}
               esqlQuery={esqlQuery}
-              query={query}
-              filters={filters}
+              query={globalQuery}
+              filters={globalFilters}
               lastReloadRequestTime={lastReloadRequestTime}
-              esql={isEsqlMode}
+              isEsqlMode={isEsqlMode}
             />
           );
         },

@@ -30,24 +30,22 @@ const EmbeddableFieldStatsTableWrapper = dynamic(() => import('./embeddable_fiel
 function isESQLFieldStatisticTableEmbeddableState(
   input: FieldStatisticTableEmbeddableProps
 ): input is ESQLDataVisualizerGridEmbeddableState {
-  return isPopulatedObject(input, ['esql']) && input.esql === true;
+  return isPopulatedObject(input, ['isEsqlMode']) && input.isEsqlMode === true;
 }
 
 function isFieldStatisticTableEmbeddableState(
   input: FieldStatisticTableEmbeddableProps
 ): input is Required<FieldStatisticTableEmbeddableProps, 'dataView'> {
-  return isPopulatedObject(input, ['dataView']) && Boolean(input.esql) === false;
+  return isPopulatedObject(input, ['dataView']) && Boolean(input.isEsqlMode) === false;
 }
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    // @TODO: remove
-    console.log(`--@@props.esqlQuery`, props.esqlQuery);
     return (
       <EmbeddableESQLFieldStatsTableWrapper
         dataView={props.dataView}
         esqlQuery={props.esqlQuery}
-        esql={props.esql}
+        isEsqlMode={props.isEsqlMode}
         filters={props.filters}
         lastReloadRequestTime={props.lastReloadRequestTime}
         onAddFilter={props.onAddFilter}
@@ -155,7 +153,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
         <DatePickerContextProvider {...datePickerDeps}>
           <FieldStatisticsWrapperContent
             dataView={props.dataView}
-            esql={props.esql}
+            isEsqlMode={props.isEsqlMode}
             esqlQuery={props.esqlQuery}
             filters={props.filters}
             lastReloadRequestTime={props.lastReloadRequestTime}

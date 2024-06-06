@@ -11,7 +11,6 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { ChangePointChartActionContext } from './change_point_action_context';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../embeddables/field_stats/constants';
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
 
@@ -23,10 +22,13 @@ const parentApiIsCompatible = async (
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
 
+interface FieldStatsActionContext {
+  embeddable: EmbeddableApiContext;
+}
 export function createAddFieldStatsTableAction(
   coreStart: CoreStart,
   pluginStart: DataVisualizerStartDependencies
-): UiActionsActionDefinition<ChangePointChartActionContext> {
+): UiActionsActionDefinition<FieldStatsActionContext> {
   return {
     id: 'create-field-stats-table',
     getDisplayName: () =>

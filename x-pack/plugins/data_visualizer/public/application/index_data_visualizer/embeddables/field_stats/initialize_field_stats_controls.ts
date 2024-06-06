@@ -22,7 +22,7 @@ type FieldStatsEmbeddableCustomState = Omit<
 export const initializeFieldStatsControls = (rawState: FieldStatsEmbeddableCustomState) => {
   const viewType$ = new BehaviorSubject<'dataView' | 'esql'>(rawState.viewType);
   const dataViewId$ = new BehaviorSubject<string>(rawState.dataViewId);
-  const esqlQuery$ = new BehaviorSubject<AggregateQuery>(rawState.esqlQuery);
+  const query$ = new BehaviorSubject<AggregateQuery>(rawState.query);
 
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -30,21 +30,21 @@ export const initializeFieldStatsControls = (rawState: FieldStatsEmbeddableCusto
   const updateUserInput = (update: FieldStatsEmbeddableCustomState) => {
     viewType$.next(update.viewType);
     dataViewId$.next(update.dataViewId);
-    esqlQuery$.next(update.esqlQuery);
+    query$.next(update.query);
   };
 
   const serializeFieldStatsChartState = (): FieldStatsEmbeddableCustomState => {
     return {
       viewType: viewType$.getValue(),
       dataViewId: dataViewId$.getValue(),
-      esqlQuery: esqlQuery$.getValue(),
+      query: query$.getValue(),
     };
   };
 
   const fieldStatsControlsComparators: StateComparators<FieldStatsEmbeddableCustomState> = {
     viewType: [viewType$, (arg) => viewType.next(arg)],
     dataViewId: [dataViewId$, (arg) => dataViewId.next(arg)],
-    esqlQuery: [esqlQuery$, (arg) => esqlQuery.next(arg)],
+    query: [query$, (arg) => query.next(arg)],
   };
 
   const onRenderComplete = () => dataLoading$.next(false);
@@ -55,7 +55,7 @@ export const initializeFieldStatsControls = (rawState: FieldStatsEmbeddableCusto
     fieldStatsControlsApi: {
       viewType$,
       dataViewId$,
-      esqlQuery$,
+      query$,
       updateUserInput,
     } as unknown as FieldStatsComponentApi,
     dataLoadingApi: {
@@ -69,7 +69,7 @@ export const initializeFieldStatsControls = (rawState: FieldStatsEmbeddableCusto
     onFieldStatsTableDestroy: () => {
       viewType$.complete();
       dataViewId$.complete();
-      esqlQuery$.complete();
+      query$.complete();
     },
   };
 };

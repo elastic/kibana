@@ -40,8 +40,7 @@ export async function resolveEmbeddableFieldStatsUserInput(
                 resolve(update);
 
                 if (update?.dataViewId !== input?.dataViewId) {
-                  // @TODO: remove
-                  console.log(`--@@needto reset`);
+                  // @TODO: Need to reset
                 }
 
                 flyoutSession.close();

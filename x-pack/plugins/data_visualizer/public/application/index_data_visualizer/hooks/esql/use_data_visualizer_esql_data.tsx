@@ -110,16 +110,11 @@ export const useESQLDataVisualizerData = (
   const { currentDataView, parentQuery, parentFilters, query, visibleFieldNames, indexPattern } =
     useMemo(() => {
       let q = FALLBACK_ESQL_QUERY;
-
-      console.log(`--@@input`, input);
-
       if (input?.query && isESQLQuery(input?.query)) q = input.query;
       if (input?.esqlQuery && isESQLQuery(input?.esqlQuery)) q = input?.esqlQuery;
       if (input?.savedSearch && isESQLQuery(input.savedSearch.searchSource.getField('query'))) {
         q = input.savedSearch.searchSource.getField('query') as ESQLQuery;
       }
-      // @TODO: remove
-      console.log(`--@@q`, q);
       return {
         currentDataView: input.dataView,
         query: q,
