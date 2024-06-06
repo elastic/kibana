@@ -40,6 +40,8 @@ import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
+import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
+import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
 
 const toggleViewButtons = [
   {
@@ -53,6 +55,37 @@ const toggleViewButtons = [
     label: 'View mode',
   },
 ];
+
+const searchControlId = 'searchControl1';
+const timesliderControlId = 'timesliderControl1';
+const controlGroupPanels = {
+  [searchControlId]: {
+    type: SEARCH_CONTROL_TYPE,
+    order: 0,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: searchControlId,
+      fieldName: 'message',
+      title: 'Message',
+      grow: true,
+      width: 'medium',
+      searchString: 'this',
+      enhancements: {},
+    },
+  },
+  [timesliderControlId]: {
+    type: TIMESLIDER_CONTROL_TYPE,
+    order: 0,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: timesliderControlId,
+      title: 'Time slider',
+      enhancements: {},
+    },
+  }
+};
 
 /**
  * I am mocking the dashboard API so that the data table embeddble responds to changes to the
@@ -99,7 +132,7 @@ export const ReactControlExample = ({
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
     let childrenDataLoadingSubcription: undefined | Subscription;
-    const childrenSubscription = children$.subscribe(children => {
+    const childrenSubscription = children$.subscribe((children) => {
       if (childrenDataLoadingSubcription) {
         childrenDataLoadingSubcription.unsubscribe();
         childrenDataLoadingSubcription = undefined;
@@ -109,12 +142,12 @@ export const ReactControlExample = ({
         .filter((childApi) => {
           return apiPublishesDataLoading(childApi);
         })
-        .map(childApi => {
+        .map((childApi) => {
           return (childApi as PublishesDataLoading).dataLoading;
         });
 
-      childrenDataLoadingSubcription = combineLatest(dataLoadingSubjects).subscribe(values => {
-        const isAtLeastOneChildLoading = values.some(isLoading => {
+      childrenDataLoadingSubcription = combineLatest(dataLoadingSubjects).subscribe((values) => {
+        const isAtLeastOneChildLoading = values.some((isLoading) => {
           return isLoading;
         });
         dataLoading$.next(isAtLeastOneChildLoading);
@@ -149,7 +182,7 @@ export const ReactControlExample = ({
       if (childrenDataLoadingSubcription) {
         childrenDataLoadingSubcription.unsubscribe();
       }
-    }
+    };
   });
 
   // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
@@ -257,8 +290,7 @@ export const ReactControlExample = ({
               controlStyle: 'oneLine',
               chainingSystem: 'HIERARCHICAL',
               showApplySelections: false,
-              panelsJSON:
-                '{"a957862f-beae-4f0c-8a3a-a6ea4c235651":{"type":"searchControl","order":0,"grow":true,"width":"medium","explicitInput":{"id":"a957862f-beae-4f0c-8a3a-a6ea4c235651","fieldName":"message","title":"Message","grow":true,"width":"medium","searchString": "this","enhancements":{}}}}',
+              panelsJSON: JSON.stringify(controlGroupPanels),
               ignoreParentSettingsJSON:
                 '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
             } as object,
