@@ -220,15 +220,7 @@ function validateFunctionColumnArg(
             })
           );
         } else {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownColumn',
-              values: {
-                name: actualArg.name,
-              },
-              locations: actualArg.location,
-            })
-          );
+          messages.push(errors.unknownColumn(actualArg));
         }
       } else {
         if (argDef.constantOnly) {
@@ -770,15 +762,7 @@ function validateColumnForCommand(
 
   if (commandName === 'row') {
     if (!references.variables.has(column.name)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownColumn',
-          values: {
-            name: column.name,
-          },
-          locations: column.location,
-        })
-      );
+      messages.push(errors.unknownColumn(column));
     }
   } else {
     const { hit: columnCheck, nameHit } = columnExists(column, references);
@@ -830,15 +814,7 @@ function validateColumnForCommand(
       }
     } else {
       if (column.name) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownColumn',
-            values: {
-              name: column.name,
-            },
-            locations: column.location,
-          })
-        );
+        messages.push(errors.unknownColumn(column));
       }
     }
   }

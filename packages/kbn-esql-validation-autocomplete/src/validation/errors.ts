@@ -463,6 +463,11 @@ export const errors = {
   unknownFunction: (fn: ESQLFunction): ESQLMessage =>
     errors.byId('unknownFunction', fn.location, fn),
 
+  unknownColumn: (column: ESQLColumn): ESQLMessage =>
+    errors.byId('unknownColumn', column.location, {
+      name: column.name,
+    }),
+
   noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
     errors.byId('noAggFunction', fn.location, {
       commandName: cmd.name,
