@@ -163,33 +163,26 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
   query,
 }: ValueClickDataContext) => {
   let queryWithFilter: string | undefined;
-
-  Promise.all(
-    data
-      .filter((point) => point)
-      .map(async (val) => {
-        const { table, column: columnIndex, row: rowIndex } = val;
-        if (table && table.columns && table.columns[columnIndex]) {
-          const column = table.columns[columnIndex];
-          const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-
-          // Do not append in case of time series, for now. We need to find a way to compute the interval
-          // to create the time range filter correctly. The users can brush to update the time filter instead.
-          const isDate = column.meta?.type === 'date';
-
-          if (value == null || isDate || !query) return;
-
-          const queryString = query.esql;
-          queryWithFilter = appendWhereClauseToESQLQuery(
-            queryString,
-            column.name,
-            value,
-            '+',
-            column.meta?.type
-          );
-        }
-      })
+  if (!query) {
+    return;
+  }
+  // Do not append in case of time series, for now. We need to find a way to compute the interval
+  // to create the time range filter correctly. The users can brush to update the time filter instead.
+  const metricPoints = data.filter(
+    (point) => point && point.table?.columns?.[point.column].meta?.type !== 'date'
   );
+  if (!metricPoints.length) {
+    return;
+  }
+  const { table, column: columnIndex, row: rowIndex } = metricPoints[metricPoints.length - 1];
+  if (table && table.columns && table.columns[columnIndex]) {
+    const column = table.columns[columnIndex];
+    const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+    if (value == null) {
+      return;
+    }
+    return appendWhereClauseToESQLQuery(query.esql, column.name, value, '+', column.meta?.type);
+  }
 
   return queryWithFilter;
 };
