@@ -34,7 +34,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       indexPatternId = body.id;
       expect(body.id).not.empty();
       expect(body.title).to.equal(title);
-      expect(body.fields.length).to.equal(14);
+      expect(body.fields.length).to.equal(15);
       expect(body.fieldFormatMap).to.eql(fieldFormats);
     });
 
