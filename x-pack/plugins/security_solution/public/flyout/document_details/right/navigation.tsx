@@ -8,6 +8,10 @@
 import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { Flyouts } from '../shared/constants/flyouts';
+import { SECURITY_SOLUTION_ON_CLOSE_EVENT, TIMELINE_ON_CLOSE_EVENT } from '../..';
+import { useWhichFlyoutIsOpen } from '../shared/hooks/use_which_flyout';
+import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import { HeaderActions } from './components/header_actions';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -22,9 +26,35 @@ interface PanelNavigationProps {
 }
 
 export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpandable }) => {
-  const { telemetry } = useKibana().services;
+  const { storage, telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useRightPanelContext();
+  const flyout = useWhichFlyoutIsOpen();
+
+  const localStorageLeftPanelExpanded = storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED);
+  const clearLocalStorage = useCallback(
+    (flyoutId: string) => {
+      storage.set(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED, {
+        ...localStorageLeftPanelExpanded,
+        [flyoutId]: false,
+      });
+    },
+    [storage, localStorageLeftPanelExpanded]
+  );
+
+  const eventName =
+    flyout === Flyouts.securitySolution
+      ? SECURITY_SOLUTION_ON_CLOSE_EVENT
+      : TIMELINE_ON_CLOSE_EVENT;
+  const eventHandler = useCallback(
+    (e: CustomEventInit) => {
+      clearLocalStorage(e.detail);
+      window.removeEventListener(eventName, eventHandler);
+    },
+    [clearLocalStorage, eventName]
+  );
+
+  window.addEventListener(eventName, eventHandler);
 
   const expandDetails = useCallback(() => {
     openLeftPanel({
@@ -39,12 +69,34 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
       location: scopeId,
       panel: 'left',
     });
-  }, [eventId, openLeftPanel, indexName, scopeId, telemetry]);
+    storage.set(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED, {
+      ...localStorageLeftPanelExpanded,
+      [flyout]: true,
+    });
+  }, [
+    openLeftPanel,
+    eventId,
+    indexName,
+    scopeId,
+    telemetry,
+    storage,
+    localStorageLeftPanelExpanded,
+    flyout,
+  ]);
+
+  // automatically open left panel if it was saved in local storage
+  if (
+    storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED) &&
+    storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED)[flyout]
+  ) {
+    expandDetails();
+  }
 
   return (
     <FlyoutNavigation
       flyoutIsExpandable={flyoutIsExpandable}
       expandDetails={expandDetails}
+      collapseDetails={clearLocalStorage}
       actions={<HeaderActions />}
     />
   );
