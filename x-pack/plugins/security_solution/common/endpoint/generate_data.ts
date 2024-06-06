@@ -1581,6 +1581,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   public generatePolicyPackagePolicy(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     // FIXME: remove and use new FleetPackagePolicyGenerator (#2262)
+    const policyId = this.seededUUIDv4();
     return {
       id: this.seededUUIDv4(),
       name: 'Endpoint Policy',
@@ -1589,7 +1590,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       created_by: 'elastic',
       updated_at: new Date().toISOString(),
       updated_by: 'elastic',
-      policy_ids: [this.seededUUIDv4()],
+      policy_id: policyId,
+      policy_ids: [policyId],
       enabled: true,
       inputs: [
         {
