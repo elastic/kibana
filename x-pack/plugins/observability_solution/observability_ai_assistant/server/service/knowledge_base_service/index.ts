@@ -310,8 +310,6 @@ export class KnowledgeBaseService {
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    console.log('queries22', queries);
-
     const query = {
       bool: {
         should: queries.map((text) => ({
