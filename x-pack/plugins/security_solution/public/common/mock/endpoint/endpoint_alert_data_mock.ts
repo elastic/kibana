@@ -28,15 +28,28 @@ const setAlertDetailsItemDataOverrides = (
 ): TimelineEventsDetailsItem[] => {
   if (Object.keys(overrides).length > 0) {
     const definedFields: string[] = [];
+    const deleteIndexes: number[] = [];
 
     // Override current fields' values
-    data.forEach((item) => {
+    data.forEach((item, index) => {
       definedFields.push(item.field);
 
-      if (overrides[item.field]) {
-        Object.assign(item, overrides[item.field]);
+      if (item.field in overrides) {
+        // If value is undefined, then mark item for deletion
+        if (!overrides[item.field]) {
+          deleteIndexes.unshift(index);
+        } else {
+          Object.assign(item, overrides[item.field]);
+        }
       }
     });
+
+    // Delete any items from the array
+    if (deleteIndexes.length > 0) {
+      for (const index of deleteIndexes) {
+        data.splice(index, 1);
+      }
+    }
 
     // Add any new fields to the data
     Object.entries(overrides).forEach(([field, fieldData]) => {
@@ -186,6 +199,8 @@ const generateAlertDetailsItemDataForAgentTypeMock = (
   agentType?: ResponseActionAgentType | string,
   overrides: AlertDetailsItemDataOverrides = {}
 ): TimelineEventsDetailsItem[] => {
+  const unSupportedAgentType = agentType ?? 'filebeat';
+
   switch (agentType) {
     case 'endpoint':
       return generateEndpointAlertDetailsItemDataMock(overrides);
@@ -195,8 +210,8 @@ const generateAlertDetailsItemDataForAgentTypeMock = (
       return generateCrowdStrikeAlertDetailsItemDataMock(overrides);
     default:
       return generateEndpointAlertDetailsItemDataMock({
-        'agent.type': { values: ['filebeat'], originalValue: ['filebeat'] },
-        'event.module': { values: ['filebeat'], originalValue: ['filebeat'] },
+        'agent.type': { values: [unSupportedAgentType], originalValue: [unSupportedAgentType] },
+        'event.module': { values: [unSupportedAgentType], originalValue: [unSupportedAgentType] },
         ...overrides,
       });
   }

@@ -67,10 +67,6 @@ export const useAlertResponseActionsSupport = (
   }, [eventData]);
 
   const agentType: ResponseActionAgentType | undefined = useMemo(() => {
-    if (!isAlert) {
-      return undefined;
-    }
-
     if ((find({ field: 'agent.type' }, eventData)?.values ?? []).includes('endpoint')) {
       return 'endpoint';
     }
@@ -86,16 +82,14 @@ export const useAlertResponseActionsSupport = (
     }
 
     return undefined;
-  }, [eventData, isAlert]);
+  }, [eventData]);
 
   const isFeatureEnabled: boolean = useMemo(() => {
     return agentType ? isAgentTypeAndActionSupported(agentType) : false;
   }, [agentType]);
 
   const agentId: string = useMemo(() => {
-    // We only currently support response actions on SIEM alerts, so if this is not an Alert or we
-    // can't determine the `agentType`, just exit here with blank agent ID
-    if (!isAlert || !agentType) {
+    if (!agentType) {
       return '';
     }
 
@@ -118,16 +112,11 @@ export const useAlertResponseActionsSupport = (
     }
 
     return '';
-  }, [agentType, eventData, isAlert]);
+  }, [agentType, eventData]);
 
   const agentIdField = useMemo(() => {
-    switch (agentType) {
-      case 'endpoint':
-        return 'agent.id';
-      case 'sentinel_one':
-        return RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one;
-      case 'crowdstrike':
-        return RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike;
+    if (agentType) {
+      return RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType];
     }
 
     return '';
