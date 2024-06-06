@@ -475,14 +475,10 @@ export const errors = {
       expression: fn.text,
     }),
 
-  unknownAggFunction: (col: ESQLColumn): ESQLMessage =>
-    getMessageFromId({
-      messageId: 'unknownAggregateFunction',
-      values: {
-        value: col.name,
-        type: 'FieldAttribute',
-      },
-      locations: col.location,
+  unknownAggFunction: (col: ESQLColumn, type: string = 'FieldAttribute'): ESQLMessage =>
+    errors.byId('unknownAggregateFunction', col.location, {
+      value: col.name,
+      type,
     }),
 };
 
