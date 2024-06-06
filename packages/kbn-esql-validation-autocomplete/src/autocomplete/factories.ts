@@ -152,9 +152,13 @@ export const buildSourcesDefinitions = (
     isSnippet: isIntegration,
     ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
     kind: isIntegration ? 'Class' : 'Reference',
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
-      defaultMessage: `Index`,
-    }),
+    detail: isIntegration
+      ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
+          defaultMessage: `Integration`,
+        })
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
+          defaultMessage: `Index`,
+        }),
     sortText: 'A',
   }));
 
