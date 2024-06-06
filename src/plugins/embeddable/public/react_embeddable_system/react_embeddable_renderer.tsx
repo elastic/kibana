@@ -19,7 +19,11 @@ import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switc
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { initializeReactEmbeddableState } from './react_embeddable_state';
-import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
+import {
+  DefaultEmbeddableApi,
+  SetReactEmbeddableApiRegistration,
+  BuildReactEmbeddableApiRegistration,
+} from './types';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -96,8 +100,22 @@ export const ReactEmbeddableRenderer = <
           RuntimeState
         >(uuid, factory, parentApi);
 
+        const setApi = (
+          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, Api>
+        ) => {
+          const fullApi = {
+            ...apiRegistration,
+            uuid,
+            phase$,
+            parentApi,
+            type: factory.type,
+          } as unknown as Api;
+          onApiAvailable?.(fullApi);
+          return fullApi;
+        };
+
         const buildApi = (
-          apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
+          apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
           comparators: StateComparators<RuntimeState>
         ) => {
           if (onAnyStateChange) {
@@ -131,21 +149,15 @@ export const ReactEmbeddableRenderer = <
 
           const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
             startStateDiffing(comparators);
-          const fullApi = {
+
+          const fullApi = setApi({
             ...apiRegistration,
-            uuid,
-            phase$,
-            parentApi,
             unsavedChanges,
-            type: factory.type,
             resetUnsavedChanges,
             snapshotRuntimeState,
-          } as unknown as Api;
-          cleanupFunction.current = () => {
-            subscriptions.unsubscribe();
-            cleanup();
-          };
-          onApiAvailable?.(fullApi);
+          } as unknown as SetReactEmbeddableApiRegistration<SerializedState, Api>);
+
+          cleanupFunction.current = () => cleanup();
           return fullApi;
         };
 
@@ -153,7 +165,8 @@ export const ReactEmbeddableRenderer = <
           initialState,
           buildApi,
           uuid,
-          parentApi
+          parentApi,
+          setApi
         );
 
         if (apiPublishesDataLoading(api)) {
