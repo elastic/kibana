@@ -26,7 +26,8 @@ import type { SavedIdOrUndefined } from '../../../../../common/api/detection_eng
 import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { getQueryFilter } from './get_query_filter';
+import { getQueryFilter as getQueryFilterNoLoadFields } from './get_query_filter';
+import { getQueryFilterLoadFields } from './get_query_filter_load_fields';
 
 export interface GetFilterArgs {
   type: Type;
@@ -38,6 +39,7 @@ export interface GetFilterArgs {
   index: IndexPatternArray | undefined;
   exceptionFilter: Filter | undefined;
   fields?: DataViewFieldBase[];
+  loadFields?: boolean;
 }
 
 interface QueryAttributes {
@@ -59,9 +61,14 @@ export const getFilter = async ({
   query,
   exceptionFilter,
   fields = [],
+  loadFields = false,
 }: GetFilterArgs): Promise<ESBoolQuery> => {
+  const getQueryFilter = loadFields
+    ? getQueryFilterLoadFields(services.dataViews)
+    : getQueryFilterNoLoadFields;
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
+      // todo
       return getQueryFilter({
         query,
         language,
@@ -82,6 +89,7 @@ export const getFilter = async ({
         const savedObject = await withSecuritySpan('getSavedFilter', () =>
           services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
+        // todo
         return getQueryFilter({
           query: savedObject.attributes.query.query,
           language: savedObject.attributes.query.language,
@@ -94,6 +102,7 @@ export const getFilter = async ({
         // saved object does not exist, so try and fall back if the user pushed
         // any additional language, query, filters, etc...
         if (query != null && language != null && index != null) {
+          // todo
           return getQueryFilter({
             query,
             language,

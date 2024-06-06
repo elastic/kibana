@@ -26,6 +26,7 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
+  isQueryParams,
   getDisabledActionsWarningText,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
@@ -341,7 +342,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
+          if (!isMachineLearningParams(params) && !isEsqlParams(params) && !isQueryParams(params)) {
             inputIndexFields = await getFieldsForWildcard({
               index: inputIndex,
               dataViews: services.dataViews,
