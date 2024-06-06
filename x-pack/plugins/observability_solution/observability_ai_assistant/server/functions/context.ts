@@ -182,7 +182,6 @@ async function retrieveSuggestions({
   client: ObservabilityAIAssistantClient;
   categories: Array<'apm' | 'lens'>;
 }) {
-  console.log('recall sqren 1, retrieveSuggestions');
   const recallResponse = await client.recall({
     queries,
     categories,
