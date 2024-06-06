@@ -24,6 +24,7 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
@@ -82,6 +83,7 @@ export const getSearchEmbeddableFactory = ({
           serializedState.references ?? []
         ) as SavedSearchUnwrapResult
       );
+
       return {
         ...savedSearch,
         title: serializedState?.rawState.title, // panel title
@@ -142,9 +144,12 @@ export const getSearchEmbeddableFactory = ({
       };
 
       const getAppTarget = async () => {
-        const savedObjectId = fetchContext$.getValue()?.searchSessionId;
+        const savedObjectId = savedObjectId$.getValue();
         const dataViews = searchEmbeddableApi.dataViews.getValue();
-        const locatorParams = getDiscoverLocatorParams(searchEmbeddableApi);
+        const locatorParams = getDiscoverLocatorParams({
+          ...searchEmbeddableApi,
+          savedObjectId: savedObjectId$,
+        });
 
         // We need to use a redirect URL if this is a by value saved search using
         // an ad hoc data view to ensure the data view spec gets encoded in the URL
@@ -154,6 +159,7 @@ export const getSearchEmbeddableFactory = ({
           : await discoverServices.locator.getUrl(locatorParams);
         const editPath = discoverServices.core.http.basePath.remove(editUrl);
         const editApp = useRedirect ? 'r' : 'discover';
+
         return { path: editPath, app: editApp };
       };
 
@@ -329,31 +335,31 @@ export const getSearchEmbeddableFactory = ({
           );
 
           return (
-            // <KibanaRenderContextProvider {...discoverServices.core}>
-            <KibanaContextProvider services={discoverServices}>
-              {renderAsFieldStatsTable ? (
-                <SearchEmbeddablFieldStatsTableComponent
-                  api={{
-                    ...api,
-                    fetchContext$,
-                  }}
-                  onAddFilter={onAddFilter}
-                />
-              ) : (
-                <CellActionsProvider
-                  getTriggerCompatibleActions={
-                    discoverServices.uiActions.getTriggerCompatibleActions
-                  }
-                >
-                  <SearchEmbeddableGridComponent
-                    api={api}
+            <KibanaRenderContextProvider {...discoverServices.core}>
+              <KibanaContextProvider services={discoverServices}>
+                {renderAsFieldStatsTable ? (
+                  <SearchEmbeddablFieldStatsTableComponent
+                    api={{
+                      ...api,
+                      fetchContext$,
+                    }}
                     onAddFilter={onAddFilter}
-                    stateManager={searchEmbeddableStateManager}
                   />
-                </CellActionsProvider>
-              )}
-            </KibanaContextProvider>
-            // </KibanaRenderContextProvider>
+                ) : (
+                  <CellActionsProvider
+                    getTriggerCompatibleActions={
+                      discoverServices.uiActions.getTriggerCompatibleActions
+                    }
+                  >
+                    <SearchEmbeddableGridComponent
+                      api={api}
+                      onAddFilter={onAddFilter}
+                      stateManager={searchEmbeddableStateManager}
+                    />
+                  </CellActionsProvider>
+                )}
+              </KibanaContextProvider>
+            </KibanaRenderContextProvider>
           );
         },
       };
