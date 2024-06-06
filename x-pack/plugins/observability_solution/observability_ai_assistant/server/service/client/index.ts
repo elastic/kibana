@@ -761,8 +761,6 @@ export class ObservabilityAIAssistantClient {
       this.dependencies.user
     );
 
-    console.log({ userInstructions });
-
     return userInstructions;
   };
 }
