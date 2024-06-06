@@ -234,6 +234,21 @@ export const EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT = i18n.translate(
   }
 );
 
+export const MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionDisabledLabel',
+  {
+    defaultMessage: 'Alert suppression will be disabled until the Machine Learning jobs are run.',
+  }
+);
+
+export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionIncompleteLabel',
+  {
+    defaultMessage:
+      'Alert suppression may have incomplete field options until all Machine Learning jobs are run.',
+  }
+);
+
 export const GROUP_BY_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsTechPreviewLabelAppend',
   {
