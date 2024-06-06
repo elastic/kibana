@@ -8,6 +8,7 @@
 import { findLastIndex } from 'lodash';
 import { Message, MessageAddEvent, MessageRole } from '../../../common';
 import { createFunctionRequestMessage } from '../../../common/utils/create_function_request_message';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 
 export function getContextFunctionRequestIfNeeded(
   messages: Message[]
@@ -19,14 +20,14 @@ export function getContextFunctionRequestIfNeeded(
 
   const hasContextSinceLastUserMessage = messages
     .slice(indexOfLastUserMessage)
-    .some((message) => message.message.name === 'context');
+    .some((message) => message.message.name === CONTEXT_FUNCTION_NAME);
 
   if (hasContextSinceLastUserMessage) {
     return undefined;
   }
 
   return createFunctionRequestMessage({
-    name: 'context',
+    name: CONTEXT_FUNCTION_NAME,
     args: {
       queries: [],
       categories: [],
