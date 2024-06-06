@@ -27,7 +27,7 @@ interface TableActionsProps {
   row: TableRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
 }
 
-export function isFilterInOutPairDisabled(row: TableRow): boolean {
+export function isFilterInOutPairDisabled(row: TableRow | undefined): boolean {
   if (!row) {
     return false;
   }
@@ -40,8 +40,8 @@ export function isFilterInOutPairDisabled(row: TableRow): boolean {
   return Boolean(onFilter && (!fieldMapping || !fieldMapping.filterable || ignored));
 }
 
-export function getFilterInOutPairDisabledWarning(row: TableRow): string | undefined {
-  if (!isFilterInOutPairDisabled(row)) {
+export function getFilterInOutPairDisabledWarning(row: TableRow | undefined): string | undefined {
+  if (!row || !isFilterInOutPairDisabled(row)) {
     return undefined;
   }
   const {
@@ -140,7 +140,7 @@ export const FilterOut: React.FC<TableActionsProps> = ({ Component, row }) => {
   );
 };
 
-export function isFilterExistsDisabled(row: TableRow): boolean {
+export function isFilterExistsDisabled(row: TableRow | undefined): boolean {
   if (!row) {
     return false;
   }
@@ -152,8 +152,8 @@ export function isFilterExistsDisabled(row: TableRow): boolean {
   return Boolean(onFilter && (!fieldMapping || !fieldMapping.filterable || fieldMapping.scripted));
 }
 
-export function getFilterExistsDisabledWarning(row: TableRow): string | undefined {
-  if (!isFilterExistsDisabled(row)) {
+export function getFilterExistsDisabledWarning(row: TableRow | undefined): string | undefined {
+  if (!row || !isFilterExistsDisabled(row)) {
     return undefined;
   }
   const {
