@@ -51,6 +51,10 @@ describe('validation', () => {
 
           // "or" must accept "null"
           await expectErrors('from a_index | stats count(stringField == "a" or null)', []);
+        });
+
+        test('sub-command can reference aggregated field', async () => {
+          const { expectErrors } = await setup();
 
           for (const subCommand of ['keep', 'drop', 'eval']) {
             await expectErrors(

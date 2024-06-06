@@ -166,7 +166,7 @@ describe('validation', () => {
           ]);
         });
 
-        test.skip('sub-command can reference aggregated field', async () => {
+        test('sub-command can reference aggregated field', async () => {
           const { expectErrors } = await setup();
 
           for (const subCommand of ['keep', 'drop', 'eval']) {

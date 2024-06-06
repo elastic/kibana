@@ -141,12 +141,11 @@ export function collectVariables(
 ): Map<string, ESQLVariable[]> {
   const variables = new Map<string, ESQLVariable[]>();
   for (const command of commands) {
-    if (['row', 'eval', 'stats'].includes(command.name)) {
+    if (['row', 'eval', 'stats', 'metrics'].includes(command.name)) {
       for (const arg of command.args) {
         if (isAssignment(arg)) {
           addVariableFromAssignment(arg, variables, fields);
-        }
-        if (isExpression(arg)) {
+        } else if (isExpression(arg)) {
           addVariableFromExpression(arg, queryString, variables);
         }
       }
