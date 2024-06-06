@@ -99,12 +99,17 @@ describe('validation', () => {
           ]);
         });
 
-        test('various errors', async () => {
+        test('errors when input is not an aggregate function', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('from a_index | stats numberField ', [
             'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
           ]);
+        });
+
+        test('various errors', async () => {
+          const { expectErrors } = await setup();
+
           await expectErrors('from a_index | stats numberField=', [
             "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
           ]);

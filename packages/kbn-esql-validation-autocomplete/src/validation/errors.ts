@@ -7,7 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLFunction, ESQLLocation, ESQLMessage } from '@kbn/esql-ast';
+import type {
+  ESQLColumn,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLLocation,
+  ESQLMessage,
+} from '@kbn/esql-ast';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
@@ -467,6 +473,16 @@ export const errors = {
     errors.byId('expressionNotAggClosed', fn.location, {
       commandName: cmd.name,
       expression: fn.text,
+    }),
+
+  unknownAggFunction: (col: ESQLColumn): ESQLMessage =>
+    getMessageFromId({
+      messageId: 'unknownAggregateFunction',
+      values: {
+        value: col.name,
+        type: 'FieldAttribute',
+      },
+      locations: col.location,
     }),
 };
 

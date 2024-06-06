@@ -140,21 +140,11 @@ describe('validation', () => {
           ]);
           await expectErrors('metrics a_index a = numberField + 1, stringField', [
             'At least one aggregation function required in [METRICS], found [a=numberField+1]',
+            'Expected an aggregate function or group but got [stringField] of type [FieldAttribute]',
           ]);
           await expectErrors('metrics a_index numberField + 1 by ipField', [
             'At least one aggregation function required in [METRICS], found [numberField+1]',
           ]);
-        });
-
-        test.skip('sub-command can reference aggregated field', async () => {
-          const { expectErrors } = await setup();
-
-          for (const subCommand of ['keep', 'drop', 'eval']) {
-            await expectErrors(
-              'metrics a_index count(`numberField`) | ' + subCommand + ' `count(``numberField``)` ',
-              []
-            );
-          }
         });
 
         test('errors on agg and non-agg mix', async () => {
@@ -168,12 +158,23 @@ describe('validation', () => {
           ]);
         });
 
-        test.skip('errors when input is not an aggregate function', async () => {
+        test('errors when input is not an aggregate function', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('metrics a_index numberField ', [
             'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
           ]);
+        });
+
+        test.skip('sub-command can reference aggregated field', async () => {
+          const { expectErrors } = await setup();
+
+          for (const subCommand of ['keep', 'drop', 'eval']) {
+            await expectErrors(
+              'metrics a_index count(`numberField`) | ' + subCommand + ' `count(``numberField``)` ',
+              []
+            );
+          }
         });
       });
 

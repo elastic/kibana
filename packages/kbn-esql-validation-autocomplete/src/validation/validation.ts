@@ -613,7 +613,7 @@ const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[]) =>
         messages.push(errors.noAggFunction(command, aggregate));
       }
     } else if (isColumnItem(aggregate)) {
-      // Anything to validate here?
+      messages.push(errors.unknownAggFunction(aggregate));
     } else {
       // Should never happen.
     }
@@ -929,16 +929,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
           }
           if (isColumnItem(arg)) {
             if (command.name === 'stats') {
-              messages.push(
-                getMessageFromId({
-                  messageId: 'unknownAggregateFunction',
-                  values: {
-                    value: (arg as ESQLSingleAstItem).name,
-                    type: 'FieldAttribute',
-                  },
-                  locations: (arg as ESQLSingleAstItem).location,
-                })
-              );
+              messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
             }
