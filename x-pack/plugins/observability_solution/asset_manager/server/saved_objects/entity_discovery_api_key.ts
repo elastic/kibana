@@ -16,11 +16,11 @@ export const EntityDiscoveryApiKeyType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      apiKey: { type: 'binary' }
+      apiKey: { type: 'binary' },
     },
   },
   management: {
     importableAndExportable: false,
-    displayName: "Entity discovery API key",
+    displayName: 'Entity discovery API key',
   },
 };

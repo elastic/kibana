@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-
-import { 
-  CoreStart,
-  ElasticsearchClient,
-  Logger
-} from '@kbn/core/server';
-import { AssetManagerConfig } from '../common/config';
-import { AssetClient } from './lib/asset_client';
+import { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
@@ -24,6 +17,8 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { AssetClient } from './lib/asset_client';
+import { AssetManagerConfig } from '../common/config';
 
 export interface AssetManagerServerSetup {
   core: CoreStart;
