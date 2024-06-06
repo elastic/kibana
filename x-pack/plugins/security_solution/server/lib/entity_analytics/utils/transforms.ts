@@ -124,7 +124,7 @@ export const scheduleTransformNow = async ({
   });
   if (transformStats.count <= 0) {
     throw new Error(
-      `Unable to find transform status for [${transformId}] while attempting to schedule now`
+      `Unable to find transform status for [${transformId}] while attempting to schedule`
     );
   }
 

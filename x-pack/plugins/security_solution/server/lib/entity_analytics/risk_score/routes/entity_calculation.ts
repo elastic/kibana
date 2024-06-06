@@ -146,7 +146,7 @@ export const riskScoreEntityCalculationRoute = (
             });
           }
 
-          if (result.scores_written === 1) {
+          if (result.scores_written > 0) {
             await riskScoreService.scheduleLatestTransformNow();
           }
 

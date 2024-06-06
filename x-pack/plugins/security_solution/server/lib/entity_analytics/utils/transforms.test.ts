@@ -9,7 +9,7 @@ import type {
   TransformGetTransformResponse,
   TransformGetTransformStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { scheduleLatestTransformNow, scheduleTransformNow } from './transforms';
 
 const transformId = 'test_transform_id';
@@ -34,6 +34,23 @@ const stoppedTransformsMock = {
   ],
 } as TransformGetTransformStatsResponse;
 
+const updatedTransformsMock = {
+  count: 1,
+  transforms: [
+    {
+      id: 'test_transform_id_3',
+      sync: {
+        time: {
+          delay: '0s',
+        },
+      },
+      settings: {
+        unattended: true,
+      },
+    },
+  ],
+} as TransformGetTransformResponse;
+
 const outdatedTransformsMock = {
   count: 1,
   transforms: [
@@ -47,6 +64,8 @@ const outdatedTransformsMock = {
     },
   ],
 } as TransformGetTransformResponse;
+
+const logger = loggingSystemMock.createLogger();
 
 describe('transforms utils', () => {
   beforeEach(() => {
@@ -74,14 +93,37 @@ describe('transforms utils', () => {
   });
 
   describe('scheduleLatestTransformNow', () => {
-    it('calls update the latest transform when scheduleTransformNow is called and the transform is outdated', async () => {
+    it('update the latest transform when scheduleTransformNow is called and the transform is outdated', async () => {
       const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       esClient.transform.getTransformStats.mockResolvedValueOnce(stoppedTransformsMock);
       esClient.transform.getTransform.mockResolvedValueOnce(outdatedTransformsMock);
 
-      await scheduleLatestTransformNow({ esClient, namespace: 'tests' });
+      await scheduleLatestTransformNow({ esClient, namespace: 'tests', logger });
 
       expect(esClient.transform.updateTransform).toHaveBeenCalled();
+    });
+
+    it('does not update the latest transform when scheduleTransformNow is called if the transform is updated', async () => {
+      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValueOnce(stoppedTransformsMock);
+      esClient.transform.getTransform.mockResolvedValueOnce(updatedTransformsMock);
+
+      await scheduleLatestTransformNow({ esClient, namespace: 'tests', logger });
+
+      expect(esClient.transform.updateTransform).not.toHaveBeenCalled();
+    });
+
+    it('it logs the error if update transform fails', async () => {
+      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient.transform.getTransformStats.mockResolvedValueOnce(stoppedTransformsMock);
+      esClient.transform.getTransform.mockResolvedValueOnce(outdatedTransformsMock);
+      esClient.transform.updateTransform.mockRejectedValueOnce(new Error('Test error'));
+
+      await scheduleLatestTransformNow({ esClient, namespace: 'tests', logger });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'There was an error upgrading the transform risk_score_latest_transform_tests. Continuing with transform scheduling. Test error'
+      );
     });
   });
 });
