@@ -792,21 +792,24 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       : {}),
   });
 
-  const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
-    async () => {
-      if (!options.ssl || !options.kibanaUrl) {
-        return;
-      }
-
-      await ensureSAMLRoleMapping(client);
-
-      log.success(
-        `Created role mapping for mock identity provider. You can now login using ${chalk.bold.cyan(
-          MOCK_IDP_REALM_NAME
-        )} realm`
-      );
+  const readyPromise = waitUntilClusterReady({
+    client,
+    expectedStatus: 'green',
+    log,
+    nodeNames: SERVERLESS_NODES.map((e) => e.name),
+  }).then(async () => {
+    if (!options.ssl || !options.kibanaUrl) {
+      return;
     }
-  );
+
+    await ensureSAMLRoleMapping(client);
+
+    log.success(
+      `Created role mapping for mock identity provider. You can now login using ${chalk.bold.cyan(
+        MOCK_IDP_REALM_NAME
+      )} realm`
+    );
+  });
 
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');

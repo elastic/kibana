@@ -9,6 +9,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
+import execa from 'execa';
 const DEFAULT_READY_TIMEOUT = 120 * 1000; // 2 minutes
 
 export type ClusterReadyStatus = 'green' | 'yellow';
@@ -17,6 +18,7 @@ export interface WaitOptions {
   expectedStatus: ClusterReadyStatus;
   log: ToolingLog;
   readyTimeout?: number;
+  nodeNames?: string[];
 }
 
 const checkStatus = (readyStatus: ClusterReadyStatus) => {
@@ -33,6 +35,7 @@ export async function waitUntilClusterReady({
   expectedStatus,
   log,
   readyTimeout = DEFAULT_READY_TIMEOUT,
+  nodeNames = [],
 }: WaitOptions) {
   let attempt = 0;
   const start = Date.now();
@@ -60,6 +63,17 @@ export async function waitUntilClusterReady({
       const timeSinceStart = Date.now() - start;
       if (timeSinceStart > readyTimeout) {
         const sec = readyTimeout / 1000;
+        log.error(
+          'Cluster failed to come alive within the timeout period. See the logs from the nodes:'
+        );
+        for (const nodeName of nodeNames) {
+          log.error("Node's logs for: " + nodeName);
+          // The serverless cluster has to be started detached, so we attach a logger afterwards for output
+          await execa('docker', ['logs', nodeName], {
+            // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
+            stdio: ['ignore', 'inherit', 'inherit'],
+          }).catch(() => {});
+        }
         throw new Error(`ES cluster failed to come online with the ${sec} second timeout`);
       }
 
