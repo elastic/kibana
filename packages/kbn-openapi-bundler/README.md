@@ -163,7 +163,7 @@ components:
     securitySchemes: ...
 ```
 
-## Multiple API versions declared via `info.version`
+## Multiple API versions declared via OpenAPI's `info.version`
 
 Serverless brought necessity for versioned HTTP API endpoints. We started with a single `2023-10-31` version. In some point
 in time a group of API endpoints will need to bumps its version due to incompatible changes. In this case engineers need
@@ -204,12 +204,14 @@ OpenAPI specification allows to define custom properties. They can be used to de
 
 ### `x-labels`
 
-Allows to label OpenAPI operation objects (a.k.a HTTP verbs) with custom string labels. Without specifying bundling options
-`x-labels` don't affect the resulting bundle. To tell the bundler which operation objects to include `options.includeXLables`
-containing expected labels to include should be passed to the bundler.
+`x-labels` custom property allows to label OpenAPI operation objects (a.k.a HTTP verbs) with custom string labels like `label-a` or `myLabelB`. Without specifying bundling options By itself `x-labels` don't affect the resulting bundle. It works in conjunction with bundler's `options.includeXLables`. To tell the bundler which operation objects to include `options.includeXLables` should be set to
+labels you expect to be in the resulting bundle.
 
-The primary goal of this feature is to allow producing separate ESS and Serverless bundles. Taking this into account all
+The primary goal of this feature is to make possible producing separate ESS and Serverless bundles. Taking this into account all
 operation objects should be labeled by using `x-labels` custom property and `ess` and `serverless` labels.
+
+**Important** If `options.includeXLables` bundler's option is set then bundler will include **only** operation objects having specified labels. Operation objects without `x-labels` custom property or invalid `x-labels` value (an array of strings is expected) will be excluded from the resulting bundle. For example setting `options.includeXLables: ['ess']` will include only operation objects
+having `ess` label like `x-labels: [ess]` and `x-labels: [ess, serverless, something-else]`.
 
 An example source spec looks like the following
 
