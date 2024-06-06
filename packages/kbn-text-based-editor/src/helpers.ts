@@ -9,11 +9,23 @@
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { MapCache } from 'lodash';
 
 export type MonacoMessage = monaco.editor.IMarkerData;
+
+interface FleetResponse {
+  items: Array<{
+    name: string;
+    title?: string;
+    dataStreams: Array<{
+      name: string;
+      title?: string;
+    }>;
+  }>;
+}
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -229,10 +241,27 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
   }
 };
 
-export const getESQLSources = async (dataViews: DataViewsPublicPluginStart) => {
-  const [remoteIndices, localIndices] = await Promise.all([
+export const getIntegrations = async (core: CoreStart) => {
+  const route = '/api/fleet/epm/packages/installed';
+  const response = (await core.http
+    .get(route, { query: undefined, version: '2023-10-31' })
+    .catch((error) => {
+      throw new Error(`Failed to fetch integrations": ${error}`);
+    })) as FleetResponse;
+
+  return response.items.map((source) => ({
+    name: source.name,
+    hidden: false,
+    title: source.title,
+    dataStreams: source.dataStreams,
+  }));
+};
+
+export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core: CoreStart) => {
+  const [remoteIndices, localIndices, integrations] = await Promise.all([
     getRemoteIndicesList(dataViews),
     getIndicesList(dataViews),
+    getIntegrations(core),
   ]);
-  return [...localIndices, ...remoteIndices];
+  return [...localIndices, ...remoteIndices, ...integrations];
 };

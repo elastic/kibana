@@ -16,6 +16,23 @@
   border-bottom-left-radius: 6px;
 }
 
+.TextBasedLangEditor .monaco-list {
+  background-color: white;
+}
+
+.TextBasedLangEditor .monaco-list-row.focused {
+  background-color: #00BFB3 !important;
+  color: white !important;
+}
+
+.TextBasedLangEditor .monaco-list-row.focused .monaco-icon-label > .monaco-icon-label-container > .monaco-icon-name-container > .label-name {
+  color: white !important;
+}
+.TextBasedLangEditor .monaco-icon-label > .monaco-icon-label-container > .monaco-icon-name-container > .label-name {
+  font-family: 'Inter', BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+  color: #646a77;
+}
+
 .TextBasedLangEditor--compact .monaco-editor {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -42,4 +59,28 @@
 
 .TextBasedLangEditor_errorMessage {
   @include euiTextBreakWord;
+}
+
+.dataSourceBadge {
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  padding-block: 0px;
+  padding-inline: 8px;
+  max-inline-size: 100%;
+  font-size: 0.8571rem;
+  line-height: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  text-align: start;
+  color: #000;
+  background-color: #D3DAE6;
+}
+
+div:has(> .integrationWrapper) {
+  max-height: 200px;
+  overflow-y: auto;
 }

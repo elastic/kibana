@@ -14,6 +14,7 @@ import type {
   ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
+  ESQLSource,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
@@ -89,6 +90,9 @@ import {
 import { FunctionArgSignature } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
+type GetDataSourcesFn = () => Promise<
+  Array<{ name: string; dataStreams?: Array<{ name: string; title?: string }> }>
+>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[]
@@ -203,6 +207,7 @@ export async function suggest(
     resourceRetriever
   );
   const getSources = getSourcesRetriever(resourceRetriever);
+  const getDataSourcesList = getDataSourcesListRetriever(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -223,6 +228,7 @@ export async function suggest(
       ast,
       astContext,
       getSources,
+      getDataSourcesList,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -303,7 +309,24 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   return async () => {
     const list = (await helper()) || [];
     // hide indexes that start with .
-    return buildSourcesDefinitions(list.filter(({ hidden }) => !hidden).map(({ name }) => name));
+    return buildSourcesDefinitions(
+      list
+        .filter(({ hidden }) => !hidden)
+        .map(({ name, dataStreams, title }) => {
+          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title };
+        })
+    );
+  };
+}
+
+function getDataSourcesListRetriever(resourceRetriever?: ESQLCallbacks) {
+  const helper = getSourcesHelper(resourceRetriever);
+  return async () => {
+    const list = (await helper()) || [];
+    return list.map(({ name, dataStreams }) => ({
+      name,
+      dataStreams,
+    }));
   };
 }
 
@@ -475,6 +498,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: GetSourceFn,
+  getDataSourcesList: GetDataSourcesFn,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -829,9 +853,26 @@ async function getExpressionSuggestionsByType(
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        // FROM <suggest>
-        // @TODO: filter down the suggestions here based on other existing sources defined
-        suggestions.push(...(await getSources()));
+        const sourcesDefinitions = await getSources();
+
+        const fromCommand = commands.find(({ name }) => name === 'from');
+        const args = (fromCommand?.args ?? []) as ESQLSource[];
+        const indices = args.filter((arg) => arg.sourceType === 'index');
+
+        // If there's a source defined, suggest the dataStreams
+        if (indices.length === 1 && indices[0].text) {
+          const source = indices[0].text.replace(EDITOR_MARKER, '');
+          const dataSourcesList = await getDataSourcesList();
+          const dataSource = dataSourcesList.find(({ name }) => name === source);
+          const newDefinitions = buildSourcesDefinitions(
+            dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
+          );
+          suggestions.push(...newDefinitions);
+        } else {
+          // FROM <suggest>
+          // @TODO: filter down the suggestions here based on other existing sources defined
+          suggestions.push(...sourcesDefinitions);
+        }
       }
     }
   }

@@ -11,7 +11,15 @@ type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | P
 
 /** @public **/
 export interface ESQLCallbacks {
-  getSources?: CallbackFn<{}, { name: string; hidden: boolean }>;
+  getSources?: CallbackFn<
+    {},
+    {
+      name: string;
+      hidden: boolean;
+      title?: string;
+      dataStreams?: Array<{ name: string; title?: string }>;
+    }
+  >;
   getFieldsFor?: CallbackFn<{ query: string }, { name: string; type: string }>;
   getPolicies?: CallbackFn<
     {},

@@ -7,8 +7,10 @@
  */
 
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
@@ -32,6 +34,8 @@ import {
   EuiResizeObserver,
   EuiOutsideClickDetector,
   EuiToolTip,
+  EuiPanel,
+  EuiContextMenu,
 } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
@@ -124,6 +128,17 @@ interface TextBasedEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
 }
 
+interface IntegrationsResponse {
+  items: Array<{
+    name: string;
+    title?: string;
+    dataStreams: Array<{
+      name: string;
+      title?: string;
+    }>;
+  }>;
+}
+
 const MAX_COMPACT_VIEW_LENGTH = 250;
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
@@ -161,6 +176,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideTimeFilterInfo,
   hideQueryHistory,
 }: TextBasedLanguagesEditorProps) {
+  const popoverRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
@@ -200,11 +216,57 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     warnings: [],
   });
   const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
+  const [integrations, setIntegrations] = useState<IntegrationsResponse['items']>([]);
 
   // as the duration on the history component is being calculated from
   // the isLoading property, if this property is not defined we want
   // to hide the history component
   const hideHistoryComponent = hideQueryHistory || isLoading == null;
+
+  useEffect(() => {
+    async function fetchIntegrations() {
+      // use getIntegrations instead
+      const route = '/api/fleet/epm/packages/installed';
+      const response = (await core.http
+        .get(route, { query: undefined, version: '2023-10-31' })
+        .catch((error) => {
+          throw new Error(`Failed to fetch integrations": ${error}`);
+        })) as IntegrationsResponse;
+      setIntegrations(response.items);
+    }
+    fetchIntegrations();
+  }, [core.http, dataViews]);
+
+  const integrationsPanels = [
+    {
+      id: 0,
+      title: 'Integrations',
+      items: integrations.map((integration, i) => ({
+        name: integration.title,
+        icon: 'logoElastic',
+        panel: i + 1,
+      })),
+    },
+    ...integrations.map((integration, i) => {
+      return {
+        id: i + 1,
+        title: integration.title,
+        items: integration.dataStreams.map((ds) => ({
+          name: ds.title,
+          icon: 'document',
+          onClick: () => {
+            const newCode = `from ${ds.name}`;
+            if (code !== newCode) {
+              onUpdateAndSubmit(newCode);
+            }
+            setPopoverPosition({});
+          },
+          className: 'integrationWrapper',
+        })),
+      };
+    }),
+  ];
 
   const onQueryUpdate = useCallback(
     (value: string) => {
@@ -212,6 +274,43 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       onTextLangQueryChange({ [language]: value } as AggregateQuery);
     },
     [language, onTextLangQueryChange]
+  );
+
+  const openQuickActionsPopover = useCallback(() => {
+    const currentCursorPosition = editor1.current?.getPosition();
+    const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
+    if (currentCursorPosition && editorCoords) {
+      const editorPosition = editor1.current!.getScrolledVisiblePosition(currentCursorPosition);
+      const editorTop = editorCoords.top;
+      const editorLeft = editorCoords.left;
+
+      // Calculate the absolute position of the popover
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
+      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+
+      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+    }
+  }, []);
+
+  const addSourceDecoration = useCallback(
+    (newCode?: string) => {
+      // we need to remove the previous decorations first
+      const decorations = editor1?.current?.getLineDecorations(1) ?? [];
+      editor1?.current?.removeDecorations(decorations.map((d) => d.id));
+      const pattern = getIndexPatternFromESQLQuery(newCode ?? code);
+      const range = new monaco.Range(1, 6, 1, pattern.length + 6);
+      editor1?.current?.createDecorationsCollection([
+        {
+          range,
+          options: {
+            isWholeLine: false,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            inlineClassName: 'dataSourceBadge',
+          },
+        },
+      ]);
+    },
+    [code]
   );
 
   const onQuerySubmit = useCallback(() => {
@@ -230,6 +329,20 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
   }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+
+  const onUpdateAndSubmit = useCallback(
+    (qs: string) => {
+      // update the query first
+      onQueryUpdate(qs);
+      // submit the query with some latency
+      // if I do it immediately there is some race condition until
+      // the state is updated and it won't be sumbitted correctly
+      setTimeout(() => {
+        onQuerySubmit();
+      }, 300);
+    },
+    [onQuerySubmit, onQueryUpdate]
+  );
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -360,7 +473,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
     const fn = memoize(
-      (...args: [DataViewsPublicPluginStart]) => ({
+      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args),
       }),
@@ -374,7 +487,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, queryString);
-        const sources = await memoizedSources(dataViews).result;
+        const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -414,6 +527,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     memoizedSources,
     dataSourcesCache,
     dataViews,
+    core,
     esqlFieldsCache,
     memoizedFieldsFromESQL,
     expressions,
@@ -881,6 +995,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           lines = model?.getLineCount() || 1;
                         }
 
+                        addSourceDecoration();
+
                         editor.onDidChangeModelContent((e) => {
                           if (updateLinesFromModel) {
                             lines = model?.getLineCount() || 1;
@@ -892,9 +1008,23 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             endLineNumber: currentPosition?.lineNumber ?? 1,
                             endColumn: currentPosition?.column ?? 1,
                           });
+
+                          if (currentPosition && content) {
+                            const currentWord = model?.getWordAtPosition(currentPosition);
+                            const pattern = getIndexPatternFromESQLQuery(
+                              model?.getValue() ?? content
+                            );
+                            if (currentWord?.word === pattern.trim()) {
+                              addSourceDecoration(model?.getValue() ?? content);
+                            }
+                          }
                           if (content) {
                             codeRef.current = content || editor.getValue();
                           }
+                        });
+
+                        monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                          wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
                         });
 
                         // this is fixing a bug between the EUIPopover and the monaco editor
@@ -902,10 +1032,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                         // and the user needs to click again the editor.
                         // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                        editor.onMouseDown(() => {
+                        editor.onMouseDown((e) => {
                           setTimeout(() => {
                             editor.focus();
                           }, 100);
+
+                          const mousePosition = e.target.position;
+
+                          if (mousePosition) {
+                            const currentWord = model?.getWordAtPosition(mousePosition);
+                            const pattern = getIndexPatternFromESQLQuery(
+                              editor1.current?.getValue()
+                            );
+                            if (currentWord?.word === pattern.trim()) {
+                              openQuickActionsPopover();
+                            } else {
+                              setPopoverPosition({});
+                            }
+                          }
                         });
 
                         editor.onDidFocusEditorText(() => {
@@ -914,6 +1058,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
                         editor.onKeyDown(() => {
                           onEditorFocus();
+                        });
+
+                        editor.onDidChangeCursorPosition((e) => {
+                          setPopoverPosition({});
                         });
 
                         // on CMD/CTRL + Enter submit the query
@@ -1067,6 +1215,32 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onKeyDownResizeHandler={onKeyDownResizeHandler}
           editorIsInline={editorIsInline}
         />
+      )}
+      {createPortal(
+        Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
+          <div
+            tabIndex={0}
+            style={{
+              ...popoverPosition,
+              backgroundColor: 'white',
+              position: 'absolute',
+              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+              width: 450,
+              overflow: 'auto',
+            }}
+            ref={popoverRef}
+            data-test-subj="TextBasedLangEditor-macro-menu"
+          >
+            <EuiPanel>
+              <EuiContextMenu
+                initialPanelId={0}
+                panels={integrationsPanels}
+                css={{ width: '100%' }}
+              />
+            </EuiPanel>
+          </div>
+        ),
+        document.body
       )}
     </>
   );
