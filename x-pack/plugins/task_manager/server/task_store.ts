@@ -424,13 +424,19 @@ export class TaskStore {
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
   public async bulkGetVersions(ids: string[]): Promise<ConcreteTaskInstanceVersion[]> {
-    const taskVersions = await this.esClientWithoutRetries.mget<never>({
-      index: this.index,
-      _source: false,
-      body: {
-        ids,
-      },
-    });
+    let taskVersions: estypes.MgetResponse<never>;
+    try {
+      taskVersions = await this.esClientWithoutRetries.mget<never>({
+        index: this.index,
+        _source: false,
+        body: {
+          ids,
+        },
+      });
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
 
     const result = taskVersions.docs.map((taskVersion) => {
       if (isMGetSuccess(taskVersion)) {
