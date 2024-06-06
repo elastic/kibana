@@ -731,6 +731,13 @@ export function getFormBasedDatasource({
           }
           return null;
         },
+        hasArrayValues: (columnId) => {
+          if (layer && layer.columns[columnId]) {
+            const column = layer.columns[columnId] as LastValueIndexPatternColumn;
+            return column?.params?.showArrayValues ?? false;
+          }
+          return false;
+        },
         hasDefaultTimeField: () => Boolean(indexPatterns[layer.indexPatternId].timeFieldName),
       };
     },

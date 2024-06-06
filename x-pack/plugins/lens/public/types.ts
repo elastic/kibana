@@ -569,6 +569,10 @@ export interface DatasourcePublicAPI {
    *       or 6 if the "Other" bucket is enabled)
    */
   getMaxPossibleNumValues: (columnId: string) => number | null;
+  /**
+   * Returns true if the column explicitly supports array values
+   */
+  hasArrayValues: (columnId: string) => boolean;
   hasDefaultTimeField: () => boolean;
 }
 
