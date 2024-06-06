@@ -25,9 +25,16 @@ const OAS_OUTPUT_DIR = path.resolve(REPO_ROOT, './oas_docs');
 
 run(
   async ({ log, flagsReader }) => {
-    const update = flagsReader.boolean('update');
     const serverless = flagsReader.boolean('serverless');
     const traditional = flagsReader.boolean('traditional');
+    if (!serverless && !traditional) {
+      log.error(
+        'Not capturing any OAS, remove one or both of `--no-serverless` or `--no-traditional` flags to run this CLI'
+      );
+      process.exit(1);
+    }
+
+    const update = flagsReader.boolean('update');
     const pathStartsWith = flagsReader.arrayOfStrings('include-path');
     const excludePathsMatching = flagsReader.arrayOfStrings('exclude-path') ?? [];
 
