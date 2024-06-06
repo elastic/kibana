@@ -14,9 +14,9 @@ const action = {
   config: {
     foo: 'bar',
   },
-  secrets: {
+  secrets: JSON.stringify({
     pass: 'foo',
-  },
+  }),
   isPreconfigured: false,
   isSystemAction: false,
 };
