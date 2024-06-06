@@ -6,6 +6,7 @@
  */
 
 import { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { reverseToLastUserMessage } from './chat_body';
 
 describe('<ChatBody>', () => {
@@ -38,7 +39,7 @@ describe('<ChatBody>', () => {
         message: {
           role: 'assistant',
           function_call: {
-            name: 'context',
+            name: CONTEXT_FUNCTION_NAME,
             arguments: '{"queries":[],"categories":[]}',
             trigger: 'assistant',
           },
@@ -48,7 +49,7 @@ describe('<ChatBody>', () => {
       {
         message: {
           role: 'user',
-          name: 'context',
+          name: CONTEXT_FUNCTION_NAME,
           content: '[]',
         },
       },
@@ -86,7 +87,7 @@ describe('<ChatBody>', () => {
         message: {
           role: 'assistant',
           function_call: {
-            name: 'context',
+            name: CONTEXT_FUNCTION_NAME,
             arguments: '{"queries":[],"categories":[]}',
             trigger: 'assistant',
           },
@@ -96,7 +97,7 @@ describe('<ChatBody>', () => {
       {
         message: {
           role: 'user',
-          name: 'context',
+          name: CONTEXT_FUNCTION_NAME,
           content: '[]',
         },
       },
