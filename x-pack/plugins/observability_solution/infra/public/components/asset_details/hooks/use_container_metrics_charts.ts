@@ -44,13 +44,17 @@ export const useDockerContainerPageViewMetricsCharts = ({
 
 const getDockerContainerCharts = async (metric: ContainerMetricTypes) => {
   const model = findInventoryModel('container');
-  const { cpu, memory } = await model.metrics.getCharts();
+  const { cpu, memory, network, diskIO } = await model.metrics.getCharts();
 
   switch (metric) {
     case 'cpu':
       return [cpu.xy.dockerContainerCpuUsage];
     case 'memory':
       return [memory.xy.dockerContainerMemoryUsage];
+    case 'network':
+      return [network.xy.dockerContainerRxTx];
+    case 'disk':
+      return [diskIO.xy.dockerContainerDiskIOReadWrite];
     default:
       return [];
   }
