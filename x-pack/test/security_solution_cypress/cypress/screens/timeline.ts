@@ -106,6 +106,8 @@ export const INDICATOR_MATCH_ROW_RENDER = '[data-test-subj="threat-match-row"]';
 
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
+export const ANALYZER_GRAPH_TAB_BUTTON = getDataTestSubjectSelector('timelineTabs-graph');
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
@@ -302,8 +304,6 @@ export const ESQL_TAB = getDataTestSubjectSelector('timelineTabs-esql');
 export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
   'timeline-date-picker-container'
 );
-
-export const TIMELINE_FILTER_BADGE = `[data-test-subj^='timeline-filters-container'] [data-test-subj^="filter-badge"]`;
 
 export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector(
   'timeline-modal-new-timeline-dropdown-button'
