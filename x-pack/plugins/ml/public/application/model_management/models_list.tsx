@@ -412,17 +412,19 @@ export const ModelsList: FC<Props> = ({
     try {
       const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
 
-      if (!downloadStatus) return;
-
       setItems((prevItems) => {
         return prevItems.map((item) => {
           const newItem = { ...item };
-          if (downloadStatus[item.model_id]) {
-            newItem.downloadState = downloadStatus[item.model_id];
+          if (downloadStatus?.[item.model_id]) {
+            newItem.downloadState = downloadStatus?.[item.model_id];
+          } else {
+            delete newItem.downloadState;
           }
           return newItem;
         });
       });
+
+      if (!downloadStatus) return;
 
       // Wait for one second
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -629,9 +631,13 @@ export const ModelsList: FC<Props> = ({
       render: ({ state, downloadState }: ModelItem) => {
         const config = getModelStateColor(state);
 
-        if (state === MODEL_STATE.DOWNLOADING) {
+        if (state === MODEL_STATE.DOWNLOADING && config && downloadState) {
+          const valueText =
+            ((downloadState.downloaded_parts / downloadState.total_parts) * 100).toFixed(0) + '%';
           return (
             <EuiProgress
+              label={config.name}
+              valueText={<>{valueText}</>}
               value={downloadState?.downloaded_parts}
               max={downloadState?.total_parts}
               size="xs"
