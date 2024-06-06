@@ -13,7 +13,12 @@ export const rawConnectorSchema = schema.object({
   isMissingSecrets: schema.boolean(),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   // Encrypted fields are saved as string. Decrypted version of the 'secrets' field is an object
-  secrets: schema.string(),
+  secrets: schema.conditional(
+    schema.siblingRef('isMissingSecrets'),
+    true,
+    schema.never(),
+    schema.string()
+  ),
 
   isPreconfigured: schema.maybe(schema.boolean()),
   isSystemAction: schema.maybe(schema.boolean()),

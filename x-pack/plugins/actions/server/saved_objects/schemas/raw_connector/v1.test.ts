@@ -10,7 +10,7 @@ import { rawConnectorSchema } from './v1';
 const action = {
   actionTypeId: '12345',
   name: 'test-action-name',
-  isMissingSecrets: true,
+  isMissingSecrets: false,
   config: {
     foo: 'bar',
   },
