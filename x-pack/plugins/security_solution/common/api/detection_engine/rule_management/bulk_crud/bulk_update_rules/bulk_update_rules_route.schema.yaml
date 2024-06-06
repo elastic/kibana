@@ -5,7 +5,6 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_update:
     put:
-      x-labels: [ess]
       operationId: BulkUpdateRules
       x-codegen-enabled: true
       deprecated: true

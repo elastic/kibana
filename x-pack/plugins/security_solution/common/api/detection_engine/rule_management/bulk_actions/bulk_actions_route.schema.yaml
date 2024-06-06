@@ -5,9 +5,6 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_action:
     post:
-      x-labels:
-        - ess
-        - serverless
       operationId: PerformBulkAction
       x-codegen-enabled: true
       summary: Applies a bulk action to multiple rules
