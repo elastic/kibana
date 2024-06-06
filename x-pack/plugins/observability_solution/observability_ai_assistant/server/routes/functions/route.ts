@@ -64,9 +64,8 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
   params: t.type({
     body: t.intersection([
-      t.type({
-        queries: t.array(nonEmptyStringRt),
-      }),
+      t.partial({ user_prompt: t.string }),
+      t.type({ screen_description: t.string }),
       t.partial({
         categories: t.array(t.string),
       }),
@@ -83,14 +82,14 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
     const client = await resources.service.getClient({ request: resources.request });
 
     const {
-      body: { queries, categories },
+      body: { user_prompt: userPrompt, screen_description: screenDescription, categories },
     } = resources.params;
 
     if (!client) {
       throw notImplemented();
     }
 
-    return client.recall({ queries, categories });
+    return client.recall({ userPrompt, screenDescription, categories });
   },
 });
 

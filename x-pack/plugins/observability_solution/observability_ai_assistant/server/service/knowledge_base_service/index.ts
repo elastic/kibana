@@ -298,28 +298,50 @@ export class KnowledgeBaseService {
   };
 
   private async recallFromKnowledgeBase({
-    queries,
+    userPrompt,
+    screenDescription,
     categories,
     namespace,
     user,
     modelId,
   }: {
-    queries: string[];
+    userPrompt: string | undefined;
+    screenDescription: string;
     categories?: string[];
     namespace: string;
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    const query = {
-      bool: {
-        should: queries.map((text) => ({
+    function textExpansionFilter({
+      text,
+      boost = 1,
+    }: {
+      text: string | undefined;
+      boost?: number;
+    }) {
+      if (!text) {
+        return [];
+      }
+
+      return [
+        {
           text_expansion: {
             'ml.tokens': {
               model_text: text,
               model_id: modelId,
+              boost,
             },
           },
-        })),
+        },
+      ];
+    }
+
+    const query = {
+      bool: {
+        should: [
+          ...textExpansionFilter({ text: userPrompt, boost: 3 }),
+          ...textExpansionFilter({ text: screenDescription }),
+        ],
         filter: [
           ...getAccessQuery({
             user,
@@ -381,12 +403,14 @@ export class KnowledgeBaseService {
   }
 
   private async recallFromConnectors({
-    queries,
+    userPrompt,
+    screenDescription,
     asCurrentUser,
     uiSettingsClient,
     modelId,
   }: {
-    queries: string[];
+    userPrompt: string | undefined;
+    screenDescription: string;
     asCurrentUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
     modelId: string;
@@ -411,33 +435,49 @@ export class KnowledgeBaseService {
       return [];
     }
 
-    const esQueries = fieldsWithVectors.flatMap((field) => {
-      const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
-      const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
+    function textExpansionBoolFilter({
+      vectorField,
+      modelField,
+      text,
+      boost = 1,
+    }: {
+      vectorField: string;
+      modelField: string;
+      text: string | undefined;
+      boost?: number;
+    }) {
+      if (!text) {
+        return [];
+      }
 
-      return queries.map((query) => {
-        return {
+      return [
+        {
           bool: {
             should: [
               {
                 text_expansion: {
                   [vectorField]: {
-                    model_text: query,
+                    model_text: text,
                     model_id: modelId,
+                    boost,
                   },
                 },
               },
             ],
-            filter: [
-              {
-                term: {
-                  [modelField]: modelId,
-                },
-              },
-            ],
+            filter: [{ term: { [modelField]: modelId } }],
           },
-        };
-      });
+        },
+      ];
+    }
+
+    const esQueries = fieldsWithVectors.flatMap((field) => {
+      const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
+      const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
+
+      return [
+        ...textExpansionBoolFilter({ vectorField, modelField, text: userPrompt, boost: 3 }),
+        ...textExpansionBoolFilter({ vectorField, modelField, text: screenDescription, boost: 1 }),
+      ];
     });
 
     const response = await asCurrentUser.search<unknown>({
@@ -465,13 +505,15 @@ export class KnowledgeBaseService {
 
   recall = async ({
     user,
-    queries,
+    userPrompt,
+    screenDescription,
     categories,
     namespace,
     asCurrentUser,
     uiSettingsClient,
   }: {
-    queries: string[];
+    userPrompt: string | undefined;
+    screenDescription: string;
     categories?: string[];
     user?: { name: string };
     namespace: string;
@@ -480,13 +522,16 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
+    this.dependencies.logger.debug(
+      `Recalling entries from KB for user prompt: "${userPrompt}" and screen description: "${screenDescription}"`
+    );
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
-        queries,
+        userPrompt,
+        screenDescription,
         categories,
         namespace,
         modelId,
@@ -499,7 +544,8 @@ export class KnowledgeBaseService {
       this.recallFromConnectors({
         asCurrentUser,
         uiSettingsClient,
-        queries,
+        userPrompt,
+        screenDescription,
         modelId,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');

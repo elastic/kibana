@@ -690,16 +690,19 @@ export class ObservabilityAIAssistantClient {
   };
 
   recall = async ({
-    queries,
+    userPrompt,
+    screenDescription,
     categories,
   }: {
-    queries: string[];
+    userPrompt: string | undefined;
+    screenDescription: string;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      queries,
+      userPrompt,
+      screenDescription,
       categories,
       asCurrentUser: this.dependencies.esClient.asCurrentUser,
       uiSettingsClient: this.dependencies.uiSettingsClient,
@@ -756,11 +759,9 @@ export class ObservabilityAIAssistantClient {
   };
 
   fetchKnowledgeBaseInstructions = async () => {
-    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
+    return this.dependencies.knowledgeBaseService.getInstructions(
       this.dependencies.namespace,
       this.dependencies.user
     );
-
-    return knowledgeBaseInstructions;
   };
 }
