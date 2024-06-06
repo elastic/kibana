@@ -131,8 +131,15 @@ export function DocViewerFlyout({
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
+      const nodeClasses = get(ev, 'target.className', '');
+      if (typeof nodeClasses === 'string' && nodeClasses.includes('euiDataGrid')) {
+        // ignore events triggered from the data grid
+        return;
+      }
+
       const nodeName = get(ev, 'target.nodeName', null);
       if (typeof nodeName === 'string' && nodeName.toLowerCase() === 'input') {
+        // ignore events triggered from the search input
         return;
       }
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
