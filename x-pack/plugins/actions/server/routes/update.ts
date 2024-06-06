@@ -52,6 +52,8 @@ export const updateActionRoute = (
       options: {
         access: 'public',
         summary: `Update a connector`,
+        description:
+          'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
       validate: {
         body: bodySchema,

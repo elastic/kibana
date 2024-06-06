@@ -23,6 +23,8 @@ export const getAllActionRoute = (
       options: {
         access: 'public',
         summary: `Get all connectors`,
+        description:
+          'Deprecated in 7.13.0. Instead, use the get all connectors API with the `api/actions/connectors` path.',
       },
       validate: {},
     },

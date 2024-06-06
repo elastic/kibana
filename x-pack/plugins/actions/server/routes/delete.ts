@@ -26,6 +26,8 @@ export const deleteActionRoute = (
       options: {
         access: 'public',
         summary: `Delete a connector`,
+        description:
+          'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.',
       },
       validate: {
         params: paramSchema,
