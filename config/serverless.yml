@@ -104,7 +104,12 @@ elasticsearch.ignoreVersionMismatch: true
 # Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
 elasticsearch.maxSockets: 800
 
-# Hold the DNS lookup resolution for 60s max (if the DNS server claims a shorter TTL, it'll be used instead)
+# Hold the DNS lookup resolution for 60s max (if the DNS server claims a shorter TTL, it'll be used instead).
+# This avoids making a dns.lookup request on every ES socket connection.
+# * Improves our startup stability: once the initial connectivity checks are successful,
+#   the subsequent requests will reuse the DNS resolution, making it less prone to suffer from
+#   negative caches during such a critical startup phase.
+# * Hopefully, it may improve performance in sudden bursts of requests, since it doesn't need to re-resolve the IP.
 elasticsearch.dnsCacheTtlInSeconds: 60
 
 # Enable dynamic config to be updated via the internal HTTP requests
