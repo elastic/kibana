@@ -7,14 +7,15 @@
  */
 import classNames from 'classnames';
 import React, { FC, ReactElement, useEffect, useState } from 'react';
+import { v4 } from 'uuid';
 
 import {
   panelHoverTrigger,
   PANEL_HOVER_TRIGGER,
   type EmbeddableInput,
-  type IEmbeddable,
   type ViewMode,
 } from '@kbn/embeddable-plugin/public';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
 import { pluginServices } from '../../services';
@@ -25,7 +26,7 @@ export interface FloatingActionsProps {
 
   className?: string;
   isEnabled?: boolean;
-  embeddable?: IEmbeddable;
+  api?: unknown;
   viewMode?: ViewMode;
   disabledActions?: EmbeddableInput['disabledActions'];
 }
@@ -34,7 +35,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   children,
   viewMode,
   isEnabled,
-  embeddable,
+  api,
   className = '',
   disabledActions,
 }) => {
@@ -44,12 +45,12 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
 
   useEffect(() => {
-    if (!embeddable) return;
+    if (!api) return;
 
     const getActions = async () => {
       let mounted = true;
       const context = {
-        embeddable,
+        embeddable: api,
         trigger: panelHoverTrigger,
       };
       const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
@@ -79,14 +80,16 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
 
     getActions();
-  }, [embeddable, getTriggerCompatibleActions, viewMode, disabledActions]);
+  }, [api, getTriggerCompatibleActions, viewMode, disabledActions]);
 
   return (
     <div className="presentationUtil__floatingActionsWrapper">
       {children}
       {isEnabled && floatingActions && (
         <div
-          data-test-subj={`presentationUtil__floatingActions__${embeddable?.id}`}
+          data-test-subj={`presentationUtil__floatingActions__${
+            apiHasUniqueId(api) ? api.uuid : v4()
+          }`}
           className={classNames('presentationUtil__floatingActions', className)}
         >
           {floatingActions}
