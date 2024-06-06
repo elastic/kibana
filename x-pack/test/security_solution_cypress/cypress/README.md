@@ -243,11 +243,12 @@ cy.task('esArchiverUnload', { archiveName: 'overview'});
 
 ```
 
-You can also use archives stored in `kibana/x-pack/test/functional/es_archives`. In order to do sow uste it on the tests as follow.
+You can also use archives located in `x-pack/test/functional/es_archives/security_solution` by specifying `type: 'ftr'` in the archiver tasks:
 
 ```typescript
-cy.task('esArchiverLoad', { archiveName: 'security_solution/alias', type: 'ftr'});
-cy.task('esArchiverUnload', { archiveName: 'security_solution/alias', type:'ftr'});
+// loads then unloads from x-pack/test/functional/es_archives/security_solution/alias
+cy.task('esArchiverLoad', { archiveName: 'alias', type: 'ftr'});
+cy.task('esArchiverUnload', { archiveName: 'alias', type:'ftr'});
 ```
 
 ## Serverless
@@ -349,11 +350,15 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-Store the email and password of the account you used to login in the QA Environment at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
+By default all our Serverless tests are executed with the `platform_engineer` role. 
+
+So you need to add to your organization a new user that has the required role. You can achieve that by using email aliases.
+
+Store the email and password of the account of the `platform_engineer` user at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
 
 ```json
 {
-  "admin": {
+  "platform_engineer": {
     "email": "<email>",
     "password": "<password>"
   }
@@ -379,7 +384,7 @@ If you want to execute a test using Cypress on visual mode with MKI, you need to
 
 ```json
 {
-  "admin": {
+  "platform_engineer": {
     "email": "<email>",
     "password": "<password>"
   },

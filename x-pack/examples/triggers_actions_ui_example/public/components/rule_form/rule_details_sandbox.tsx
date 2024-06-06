@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { RuleDetails } from '@kbn/alerts-ui-shared';
+import { RuleDetails } from '@kbn/alerts-ui-shared/src/rule_form';
 import { EuiCodeBlock, EuiTitle } from '@elastic/eui';
 
 export const RuleDetailsSandbox = () => {

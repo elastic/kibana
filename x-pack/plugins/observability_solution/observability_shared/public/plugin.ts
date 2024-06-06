@@ -28,6 +28,10 @@ import {
 } from './locators/infra/asset_details_locator';
 import { type HostsLocator, HostsLocatorDefinition } from './locators/infra/hosts_locator';
 import {
+  type InventoryLocator,
+  InventoryLocatorDefinition,
+} from './locators/infra/inventory_locator';
+import {
   type FlamegraphLocator,
   FlamegraphLocatorDefinition,
 } from './locators/profiling/flamegraph_locator';
@@ -69,6 +73,7 @@ interface ObservabilitySharedLocators {
     assetDetailsLocator: AssetDetailsLocator;
     assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
     hostsLocator: HostsLocator;
+    inventoryLocator: InventoryLocator;
   };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
@@ -137,6 +142,7 @@ export class ObservabilitySharedPlugin implements Plugin {
           new AssetDetailsFlyoutLocatorDefinition()
         ),
         hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
+        inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
       },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),

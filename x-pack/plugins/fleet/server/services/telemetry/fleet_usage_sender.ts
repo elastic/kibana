@@ -24,7 +24,7 @@ const FLEET_AGENTS_EVENT_TYPE = 'fleet_agents';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
-  private taskVersion = '1.1.4';
+  private taskVersion = '1.1.6';
   private taskType = 'Fleet-Usage-Sender';
   private wasStarted: boolean = false;
   private interval = '1h';
@@ -83,6 +83,7 @@ export class FleetUsageSender {
       const {
         agents_per_version: agentsPerVersion,
         agents_per_output_type: agentsPerOutputType,
+        agents_per_privileges: agentsPerPrivileges,
         upgrade_details: upgradeDetails,
         ...fleetUsageData
       } = usageData;
@@ -91,6 +92,13 @@ export class FleetUsageSender {
         .debug('Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
 
       core.analytics.reportEvent(FLEET_USAGES_EVENT_TYPE, fleetUsageData);
+
+      appContextService
+        .getLogger()
+        .debug('Agents per privileges telemetry: ' + JSON.stringify(agentsPerPrivileges));
+      core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
+        agents_per_privileges: agentsPerPrivileges,
+      });
 
       appContextService
         .getLogger()
@@ -136,7 +144,9 @@ export class FleetUsageSender {
     this.wasStarted = true;
 
     try {
-      appContextService.getLogger().info(`Task ${this.taskId} scheduled with interval 1h`);
+      appContextService
+        .getLogger()
+        .info(`Task ${this.taskId} scheduled with interval ${this.interval}`);
 
       await this.taskManager.ensureScheduled({
         id: this.taskId,

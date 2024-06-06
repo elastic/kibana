@@ -34,6 +34,7 @@ import {
   SCOPE_DESCRIPTION_TEXT,
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
+  ALERT_DELAY_HELP_TEXT,
 } from '../translations';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
@@ -223,21 +224,22 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
           <EuiDescribedFormGroup
             fullWidth
             title={<h3>{SCOPE_TITLE}</h3>}
-            description={
-              <EuiText size="s">
-                <p>{SCOPE_DESCRIPTION_TEXT}</p>
-              </EuiText>
-            }
+            description={<p>{SCOPE_DESCRIPTION_TEXT}</p>}
           >
-            <RuleConsumerSelection validConsumers={authorizedConsumers} />
+            <RuleConsumerSelection
+              validConsumers={authorizedConsumers}
+            />
           </EuiDescribedFormGroup>
         )}
         <EuiFlexItem>
           <EuiAccordion
             id="advancedOptionsAccordion"
             data-test-subj="advancedOptionsAccordion"
-            onToggle={onToggleAdvancedOptions}
+            onToggle={setIsAdvancedOptionsVisible}
             initialIsOpen={isAdvancedOptionsVisible}
+            buttonProps={{
+              'data-test-subj': 'advancedOptionsAccordionButton',
+            }}
             buttonContent={
               <EuiText size="s">
                 <p>{ADVANCED_OPTIONS_TITLE}</p>
@@ -251,7 +253,14 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                 title={<h4>{ALERT_DELAY_TITLE}</h4>}
                 description={
                   <EuiText size="s">
-                    <p>{ALERT_DELAY_DESCRIPTION_TEXT}</p>
+                    <p>
+                      {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
+                      <EuiIconTip
+                        position="right"
+                        type="questionInCircle"
+                        content={ALERT_DELAY_HELP_TEXT}
+                      />
+                    </p>
                   </EuiText>
                 }
               >

@@ -13,6 +13,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -21,7 +22,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared';
+import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared/src/rule_form';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -248,34 +249,37 @@ export const renderApp = (
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
   ReactDOM.render(
-    <KibanaContextProvider
-      services={{
-        ...core,
-        ...deps,
-        ruleTypeRegistry,
-        actionTypeRegistry,
-      }}
-    >
-      <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en">
-          <TriggersActionsUiExampleApp
-            basename={appBasePath}
-            http={http}
-            notification={notifications}
-            application={application}
-            docLinks={docLinks}
-            i18n={i18n}
-            theme={theme}
-            triggersActionsUi={deps.triggersActionsUi}
-            data={deps.data}
-            charts={deps.charts}
-            dataViews={deps.dataViews}
-            dataViewsEditor={deps.dataViewsEditor}
-            unifiedSearch={deps.unifiedSearch}
-          />
-        </IntlProvider>
-      </QueryClientProvider>
-    </KibanaContextProvider>,
+    <KibanaRenderContextProvider {...core}>
+
+      <KibanaContextProvider
+        services={{
+          ...core,
+          ...deps,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <IntlProvider locale="en">
+            <TriggersActionsUiExampleApp
+              basename={appBasePath}
+              http={http}
+              notification={notifications}
+              application={application}
+              docLinks={docLinks}
+              i18n={i18n}
+              theme={theme}
+              triggersActionsUi={deps.triggersActionsUi}
+              data={deps.data}
+              charts={deps.charts}
+              dataViews={deps.dataViews}
+              dataViewsEditor={deps.dataViewsEditor}
+              unifiedSearch={deps.unifiedSearch}
+            />
+          </IntlProvider>
+        </QueryClientProvider>
+      </KibanaContextProvider>,
+    </KibanaRenderContextProvider>,
     element
   );
 

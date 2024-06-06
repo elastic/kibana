@@ -11,14 +11,10 @@ import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import {
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  ESQL_LATEST_VERSION,
-} from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -157,7 +153,6 @@ export class ESQLSource
     const params: ESQLSearchParams = {
       query: this._descriptor.esql,
       dropNullColumns: true,
-      version: ESQL_LATEST_VERSION,
     };
 
     const query: Query[] = [];
@@ -243,7 +238,7 @@ export class ESQLSource
 
     requestResponder.ok({ json: rawResponse, requestParams });
 
-    const esqlSearchResponse = rawResponse as unknown as ESQLSearchReponse;
+    const esqlSearchResponse = rawResponse as unknown as ESQLSearchResponse;
     const resultsCount = esqlSearchResponse.values.length;
     return {
       data: convertToGeoJson(esqlSearchResponse),

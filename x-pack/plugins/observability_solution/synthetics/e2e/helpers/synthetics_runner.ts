@@ -112,7 +112,11 @@ export class SyntheticsRunner {
     let results: PromiseType<ReturnType<typeof syntheticsRun>> = {};
     for (let i = 0; i < noOfRuns; i++) {
       results = await syntheticsRun({
-        params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
+        params: {
+          kibanaUrl: this.kibanaUrl,
+          getService: this.getService,
+          elasticsearchUrl: this.elasticsearchUrl,
+        },
         playwrightOptions: {
           headless: headless ?? !CI,
           testIdAttribute: 'data-test-subj',

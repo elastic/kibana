@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleActions } from '@kbn/alerts-ui-shared';
+import { RuleActions } from '@kbn/alerts-ui-shared/src/rule_form';
 
 export const RuleActionsSandbox = () => {
   return <RuleActions onClick={() => {}} />;

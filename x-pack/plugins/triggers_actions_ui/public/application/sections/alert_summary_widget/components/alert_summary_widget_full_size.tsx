@@ -30,6 +30,7 @@ export interface AlertSummaryWidgetFullSizeProps {
   recoveredAlertCount: number;
   dateFormat?: string;
   hideChart?: boolean;
+  hideStats?: boolean;
   dependencyProps: DependencyProps;
 }
 
@@ -40,6 +41,7 @@ export const AlertSummaryWidgetFullSize = ({
   dateFormat,
   recoveredAlertCount,
   hideChart,
+  hideStats,
   dependencyProps: { baseTheme },
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartData = activeAlerts.map((alert) => alert.doc_count);
@@ -55,12 +57,14 @@ export const AlertSummaryWidgetFullSize = ({
       hasShadow={false}
       paddingSize="none"
     >
-      <EuiFlexItem>
-        <AlertCounts
-          activeAlertCount={activeAlertCount}
-          recoveredAlertCount={recoveredAlertCount}
-        />
-      </EuiFlexItem>
+      {!hideStats && (
+        <EuiFlexItem data-test-subj="alertSummaryWidgetFullSizeStats">
+          <AlertCounts
+            activeAlertCount={activeAlertCount}
+            recoveredAlertCount={recoveredAlertCount}
+          />
+        </EuiFlexItem>
+      )}
       {!hideChart && (
         <div data-test-subj="alertSummaryWidgetFullSizeChartContainer">
           <EuiSpacer size="l" />
