@@ -41,7 +41,27 @@ function isFieldStatisticTableEmbeddableState(
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    return <EmbeddableESQLFieldStatsTableWrapper {...props} />;
+    // @TODO: remove
+    console.log(`--@@props.esqlQuery`, props.esqlQuery);
+    return (
+      <EmbeddableESQLFieldStatsTableWrapper
+        dataView={props.dataView}
+        esqlQuery={props.esqlQuery}
+        esql={props.esql}
+        filters={props.filters}
+        lastReloadRequestTime={props.lastReloadRequestTime}
+        onAddFilter={props.onAddFilter}
+        onTableUpdate={props.onTableUpdate}
+        query={props.query}
+        samplingOption={props.samplingOption}
+        savedSearch={props.savedSearch}
+        sessionId={props.sessionId}
+        shouldGetSubfields={props.shouldGetSubfields}
+        showPreviewByDefault={props.showPreviewByDefault}
+        totalDocuments={props.totalDocuments}
+        visibleFieldNames={props.visibleFieldNames}
+      />
+    );
   }
   if (isFieldStatisticTableEmbeddableState(props)) {
     return <EmbeddableFieldStatsTableWrapper {...props} />;
@@ -136,6 +156,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
           <FieldStatisticsWrapperContent
             dataView={props.dataView}
             esql={props.esql}
+            esqlQuery={props.esqlQuery}
             filters={props.filters}
             lastReloadRequestTime={props.lastReloadRequestTime}
             onAddFilter={props.onAddFilter}

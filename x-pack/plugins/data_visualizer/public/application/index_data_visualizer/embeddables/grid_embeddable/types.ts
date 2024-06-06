@@ -105,8 +105,10 @@ export type ESQLDataVisualizerGridEmbeddableState = Omit<
   'query'
 > & { query?: ESQLQuery };
 
-export type FieldStatisticsTableEmbeddableState = FieldStatisticTableEmbeddableProps &
-  SerializedTitles;
+interface FieldStatsInitialState {
+  dataViewId?: string;
+}
+export type FieldStatisticsTableEmbeddableState = FieldStatsInitialState & SerializedTitles;
 interface FieldStatisticsTableEmbeddableComponentApi {
   showDistributions$?: BehaviorSubject<boolean>;
 }

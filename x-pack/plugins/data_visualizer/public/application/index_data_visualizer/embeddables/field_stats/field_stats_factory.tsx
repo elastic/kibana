@@ -33,12 +33,14 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { pick } from 'lodash';
+import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type {
   FieldStatisticsTableEmbeddableApi,
   FieldStatisticsTableEmbeddableState,
 } from '../grid_embeddable/types';
 import { FIELD_STATS_EMBEDDABLE_TYPE, FIELD_STATS_DATA_VIEW_REF_NAME } from './constants';
 import { initializeFieldStatsControls } from './initialize_field_stats_controls';
+import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 
 export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
@@ -51,7 +53,10 @@ const FieldStatisticsWrapper = dynamic(
 );
 
 export const getDependencies = async (
-  getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
+  getStartServices: StartServicesAccessor<
+    DataVisualizerStartDependencies,
+    DataVisualizerPluginStart
+  >
 ) => {
   const [
     { http, uiSettings, notifications, ...startServices },
@@ -71,12 +76,14 @@ export const getDependencies = async (
 };
 
 export const getFieldStatsChartEmbeddableFactory = (
-  getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
+  getStartServices: StartServicesAccessor<
+    DataVisualizerStartDependencies,
+    DataVisualizerPluginStart
+  >
 ) => {
   const factory: ReactEmbeddableFactory<
     FieldStatisticsTableEmbeddableState,
-    FieldStatisticsTableEmbeddableApi,
-    FieldStatsEmbeddableRuntimeState
+    FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBEDDABLE_TYPE,
     deserializeState: (state) => {
@@ -107,6 +114,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
+      console.log('fieldFormats', deps.fieldFormats);
 
       const {
         api: timeRangeApi,
@@ -126,7 +134,9 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const defaultDataViewId = await deps.data.dataViews.getDefaultId();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await deps.data.dataViews.get(state.dataViewId ?? defaultDataViewId),
+        state.dataViewId !== ''
+          ? await deps.data.dataViews.get(state.dataViewId ?? defaultDataViewId)
+          : undefined,
       ]);
 
       const subscriptions = new Subscription();
@@ -134,6 +144,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldStatsControlsApi.dataViewId$
           .pipe(
             skip(1),
+            skipWhile((dataViewId) => dataViewId === ''),
             switchMap((dataViewId) => deps.data.dataViews.get(dataViewId ?? defaultDataViewId))
           )
           .subscribe((nextSelectedDataView) => {
@@ -141,7 +152,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             console.log(`--@@nextSelectedDataView`, nextSelectedDataView);
             dataViews$.next([nextSelectedDataView]);
             // fieldStatsControlsApi.filter$.next([]);
-            // fieldStatsControlsApi.query$.next();
+            // fieldStatsControlsApi.globalQuery$.next();
           })
       );
 
@@ -167,8 +178,9 @@ export const getFieldStatsChartEmbeddableFactory = (
                 pluginStart,
                 parentApi,
                 uuid,
-                pick(chartState, ['dataViewId', 'viewType'])
+                pick(chartState, ['dataViewId', 'viewType', 'esqlQuery'])
               );
+              console.log(`--@@nextUpdate`, nextUpdate);
               fieldStatsControlsApi.updateUserInput(nextUpdate);
             } catch (e) {
               return Promise.reject(e);
@@ -204,6 +216,21 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       );
 
+      const globalQuery$ = fetch$(api).pipe(
+        map((fetchContext) => {
+          return fetchContext.query;
+        }),
+        distinctUntilChanged(fastIsEqual)
+      );
+      const globalFilters$ = fetch$(api).pipe(
+        map((fetchContext) => fetchContext.filters),
+        distinctUntilChanged(fastIsEqual)
+      );
+      const reload$ = fetch$(api).pipe(
+        skipWhile((fetchContext) => !fetchContext.isReload),
+        map((fetchContext) => Date.now())
+      );
+
       return {
         api,
         Component: () => {
@@ -211,38 +238,21 @@ export const getFieldStatsChartEmbeddableFactory = (
             throw new Error('Parent API does not have execution context');
           }
 
-          const [dataViews, query, filters] = useBatchedPublishingSubjects(
+          const [dataViews, esqlQuery, viewType] = useBatchedPublishingSubjects(
             api.dataViews,
-            api.query$,
-            api.filters$
+            api.esqlQuery$,
+            api.viewType$
           );
-          const dataView = dataViews[0];
-
-          const reload$ = useMemo(
-            () =>
-              fetch$(api).pipe(
-                skipWhile((fetchContext) => !fetchContext.isReload),
-                map((fetchContext) => Date.now())
-              ),
-            []
-          );
-
-          const timeRange$ = useMemo(
-            () =>
-              fetch$(api).pipe(
-                map((fetchContext) => fetchContext.timeRange),
-                distinctUntilChanged(fastIsEqual)
-              ),
-            []
-          );
+          const isEsqlMode = viewType === 'esql';
+          const query = useObservable(globalQuery$, undefined);
+          const filters = useObservable(globalFilters$, undefined);
+          const dataView =
+            Array.isArray(dataViews) && dataViews.length > 0 ? dataViews[0] : undefined;
+          console.log(`--@@esqlQuery`, esqlQuery);
+          console.log(`--@@query`, query);
 
           const lastReloadRequestTime = useObservable(reload$, Date.now());
-          const timeRange = useObservable(timeRange$, undefined);
 
-          let embeddingOrigin;
-          if (apiHasExecutionContext(parentApi)) {
-            embeddingOrigin = parentApi.executionContext.type;
-          }
           // On destroy
           useEffect(() => {
             return () => {
@@ -257,9 +267,11 @@ export const getFieldStatsChartEmbeddableFactory = (
             <FieldStatisticsWrapper
               shouldGetSubfields={false}
               dataView={dataView}
+              esqlQuery={esqlQuery}
               query={query}
               filters={filters}
               lastReloadRequestTime={lastReloadRequestTime}
+              esql={isEsqlMode}
             />
           );
         },

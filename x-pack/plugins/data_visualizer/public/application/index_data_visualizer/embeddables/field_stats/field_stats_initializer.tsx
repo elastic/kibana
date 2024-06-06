@@ -27,12 +27,14 @@ import {
 } from './field_stats_initializer_view_type';
 import type { ChangePointEmbeddableRuntimeState } from '../grid_embeddable/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-
+import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 export interface FieldStatsInitializerProps {
   initialInput?: Partial<ChangePointEmbeddableRuntimeState>;
   onCreate: (props: ChangePointEmbeddableRuntimeState) => void;
   onCancel: () => void;
 }
+
+const defaultESQLQuery = { esql: 'from kibana_sample_data_ecommerce | limit 10' };
 
 export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   initialInput,
@@ -47,20 +49,13 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
   const [viewType, setViewType] = useState(
-    initialInput?.viewType ?? FieldStatsInitializerViewType.DATA_VIEW
+    initialInput?.viewType ?? FieldStatsInitializerViewType.ESQL
   );
 
-  // const [formInput, setFormInput] = useState<FormControlsProps>(
-  //   pick(initialInput ?? {}, [
-  //     'fn',
-  //     'metricField',
-  //     'splitField',
-  //     'maxSeriesToPlot',
-  //     'partitions',
-  //   ]) as FormControlsProps
-  // );
-
   const [isFormValid, setIsFormValid] = useState(true);
+  const [esqlQuery, setQuery] = useState<AggregateQuery | Query>(
+    initialInput?.esqlQuery ?? defaultESQLQuery
+  );
 
   const updatedProps = useMemo(() => {
     const isEsqlMode = viewType === 'esql';
@@ -70,9 +65,11 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
       isEsqlMode,
       title: defaultTitle,
       dataViewId,
+      esqlQuery,
     };
-  }, [dataViewId, viewType]);
+  }, [dataViewId, viewType, esqlQuery.esql]);
 
+  const canEditTextBasedQuery = true;
   return (
     <>
       <EuiFlyoutHeader>
@@ -89,7 +86,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
       <EuiFlyoutBody>
         <EuiForm>
           <DataSourceTypeSelector value={viewType} onChange={setViewType} />
-          {viewType === 'dataview' ? (
+          {viewType === FieldStatsInitializerViewType.DATA_VIEW ? (
             <EuiFormRow
               fullWidth
               label={i18n.translate(
@@ -116,6 +113,9 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               />
             </EuiFormRow>
           ) : null}
+          {viewType === FieldStatsInitializerViewType.ESQL ? (
+            <FieldStatsESQLEditor query={esqlQuery} setQuery={setQuery} />
+          ) : null}
         </EuiForm>
       </EuiFlyoutBody>
 
@@ -132,7 +132,10 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="fieldStatsInitializerConfirmButton"
-              isDisabled={!isFormValid || !dataViewId}
+              isDisabled={
+                !isFormValid ||
+                (viewType === FieldStatsInitializerViewType.DATA_VIEW && dataViewId === undefined)
+              }
               onClick={onCreate.bind(null, updatedProps)}
               fill
             >

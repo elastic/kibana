@@ -82,7 +82,7 @@ export const useESQLDataVisualizerData = (
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, fieldFormats, executionContext } = services;
+  const { uiSettings, fieldFormats, executionContext, data } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -111,13 +111,18 @@ export const useESQLDataVisualizerData = (
     useMemo(() => {
       let q = FALLBACK_ESQL_QUERY;
 
+      console.log(`--@@input`, input);
+
       if (input?.query && isESQLQuery(input?.query)) q = input.query;
+      if (input?.esqlQuery && isESQLQuery(input?.esqlQuery)) q = input?.esqlQuery;
       if (input?.savedSearch && isESQLQuery(input.savedSearch.searchSource.getField('query'))) {
         q = input.savedSearch.searchSource.getField('query') as ESQLQuery;
       }
+      // @TODO: remove
+      console.log(`--@@q`, q);
       return {
         currentDataView: input.dataView,
-        query: q ?? FALLBACK_ESQL_QUERY,
+        query: q,
         // It's possible that in a dashboard setting, we will have additional filters and queries
         parentQuery: input?.query,
         parentFilters: input?.filters,
@@ -131,6 +136,7 @@ export const useESQLDataVisualizerData = (
       input?.filters,
       input?.visibleFieldNames,
       input?.indexPattern,
+      input?.esqlQuery,
     ]);
 
   const restorableDefaults = useMemo(
@@ -420,7 +426,7 @@ export const useESQLDataVisualizerData = (
           ...field,
           ...fieldData,
           loading: fieldData?.existsInDocs ?? true,
-          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
+          fieldFormat: data.fieldFormats.deserialize({ id: field.secondaryType }),
           aggregatable: true,
           deletable: false,
           type: getFieldType(field) as SupportedFieldType,
@@ -493,7 +499,7 @@ export const useESQLDataVisualizerData = (
           secondaryType: getFieldType(field) as SupportedFieldType,
           loading: fieldData?.existsInDocs ?? true,
           deletable: false,
-          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
+          fieldFormat: data.fieldFormats.deserialize({ id: field.secondaryType }),
         };
 
         // Map the field type from the Kibana index pattern to the field type
