@@ -13,6 +13,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { getAllFilters } from './get_query_filter';
 import type {
   IndexPatternArray,
   RuleQuery,
@@ -64,11 +65,3 @@ export const getQueryFilterLoadFields =
 
     return buildEsQuery(dataViewLimitedFields, initialQuery, allFilters, config);
   };
-
-export const getAllFilters = (filters: Filter[], exceptionFilter: Filter | undefined): Filter[] => {
-  if (exceptionFilter != null) {
-    return [...filters, exceptionFilter];
-  } else {
-    return [...filters];
-  }
-};

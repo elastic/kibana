@@ -68,7 +68,6 @@ export const getFilter = async ({
     : getQueryFilterNoLoadFields;
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
-      // todo
       return getQueryFilter({
         query,
         language,
@@ -89,7 +88,6 @@ export const getFilter = async ({
         const savedObject = await withSecuritySpan('getSavedFilter', () =>
           services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
-        // todo
         return getQueryFilter({
           query: savedObject.attributes.query.query,
           language: savedObject.attributes.query.language,
@@ -102,7 +100,6 @@ export const getFilter = async ({
         // saved object does not exist, so try and fall back if the user pushed
         // any additional language, query, filters, etc...
         if (query != null && language != null && index != null) {
-          // todo
           return getQueryFilter({
             query,
             language,
