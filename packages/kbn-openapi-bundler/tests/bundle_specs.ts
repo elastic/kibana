@@ -18,12 +18,12 @@ import {
 } from 'fs';
 import { dump, load } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
-import { bundle, BundlerConfig } from '../openapi_bundler';
+import { bundle, BundlerConfig } from '../src/openapi_bundler';
 
-const ROOT_PATH = join(__dirname, '..', '..');
+const ROOT_PATH = join(__dirname, '..');
 
 // Suppress bundler logging via mocking the logger
-jest.mock('../logger');
+jest.mock('../src/logger');
 
 export async function bundleSpecs(
   oasSpecs: Record<string, OpenAPIV3.Document>,
