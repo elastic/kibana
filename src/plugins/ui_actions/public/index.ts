@@ -34,6 +34,8 @@ export {
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
+  ADD_PANEL_TRIGGER,
+  addPanelMenuTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 export type { VisualizeFieldContext } from './types';
 export {

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import {
   categorizeFieldTrigger,
   CATEGORIZE_FIELD_TRIGGER,

@@ -11,13 +11,12 @@ import './editor_menu.scss';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { type IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import { type Action, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
-import { ADD_PANEL_TRIGGER } from '../../triggers';
 import {
   getAddPanelActionMenuItemsGroup,
   type GroupedAddPanelActions,

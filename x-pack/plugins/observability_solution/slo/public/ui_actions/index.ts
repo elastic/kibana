@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import { createEditSloAlertsPanelAction } from './edit_slo_alerts_panel';
 import { createEditSloOverviewPanelAction } from './edit_slo_overview_panel';

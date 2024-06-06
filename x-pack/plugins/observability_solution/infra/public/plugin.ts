@@ -21,7 +21,7 @@ import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -429,7 +429,7 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-    plugins.uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_LOG_STREAM_ACTION_ID);
+    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LOG_STREAM_ACTION_ID);
 
     const startContract: InfraClientStartExports = {
       inventoryViews,

@@ -9,9 +9,8 @@
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import {

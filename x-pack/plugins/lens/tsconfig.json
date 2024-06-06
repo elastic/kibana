@@ -111,7 +111,6 @@
     "@kbn/licensing-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/dashboard-plugin",
   ],
   "exclude": ["target/**/*"]
 }

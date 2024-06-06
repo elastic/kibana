@@ -35,5 +35,3 @@ export { getDashboardLocatorParamsFromEmbeddable } from './dashboard_app/locator
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
 }
-
-export { ADD_PANEL_TRIGGER } from './triggers';

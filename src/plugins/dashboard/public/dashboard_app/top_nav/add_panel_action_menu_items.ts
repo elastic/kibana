@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import {
+  type ActionExecutionContext,
+  type Action,
+  addPanelMenuTrigger,
+} from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import type { IconType, CommonProps } from '@elastic/eui';
 import React, { type MouseEventHandler } from 'react';
-import { addPanelMenuTrigger } from '../../triggers';
 
 export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-subj'> {
   id: string;

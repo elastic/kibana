@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
+import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,

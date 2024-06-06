@@ -9,8 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
-import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  IncompatibleActionError,
+  UiActionsStart,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorSerializedState } from './types';

@@ -30,6 +30,11 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import {
+  type UiActionsSetup,
+  type UiActionsStart,
+  addPanelMenuTrigger,
+} from '@kbn/ui-actions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
@@ -39,7 +44,6 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -70,7 +74,6 @@ import {
 import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { addPanelMenuTrigger } from './triggers';
 import { GetPanelPlacementSettings } from './dashboard_container/panel_placement';
 
 export interface DashboardFeatureFlagConfig {

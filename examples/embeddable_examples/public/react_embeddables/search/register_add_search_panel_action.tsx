@@ -8,8 +8,11 @@
 
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
-import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  IncompatibleActionError,
+  type UiActionsStart,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
 import { SearchSerializedState } from './types';

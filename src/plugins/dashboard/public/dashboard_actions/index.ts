@@ -8,8 +8,8 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 
-import { ADD_PANEL_TRIGGER } from '../triggers';
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
 import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';

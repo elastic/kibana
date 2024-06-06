@@ -14,7 +14,6 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
@@ -47,6 +46,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
+  ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import {
   VISUALIZE_EDITOR_TRIGGER,
