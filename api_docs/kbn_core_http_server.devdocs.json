@@ -10954,14 +10954,14 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.KibanaRequest.protocol",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "protocol",
             "description": [
               "\nThe protocol used by the client, inferred from the httpVersion."
             ],
             "signature": [
-              "\"http1\""
+              "\"http1\" | \"http2\""
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
@@ -13985,6 +13985,10 @@
                 "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
               },
               {
+                "plugin": "fieldsMetadata",
+                "path": "x-pack/plugins/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
@@ -16004,6 +16008,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
               },
               {
@@ -17212,10 +17220,10 @@
         "tags": [],
         "label": "HttpProtocol",
         "description": [
-          "\nDefines an http protocol.\n(Only supporting http1 for now)\n\n- http1: regroups all http/1.x protocols"
+          "\nDefines an http protocol.\n(Only supporting http1 for now)\n\n- http1: regroups all http/1.x protocols\n- http2: h2"
         ],
         "signature": [
-          "\"http1\""
+          "\"http1\" | \"http2\""
         ],
         "path": "packages/core/http/core-http-server/src/http_contract.ts",
         "deprecated": false,
