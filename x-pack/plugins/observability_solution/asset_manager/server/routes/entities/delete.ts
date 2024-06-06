@@ -11,17 +11,9 @@ import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
-import {
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from '../../lib/entities/stop_and_delete_transform';
-import {
-  deleteHistoryIngestPipeline,
-  deleteLatestIngestPipeline,
-} from '../../lib/entities/delete_ingest_pipeline';
-import { deleteEntityDefinition } from '../../lib/entities/delete_entity_definition';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
+import { uninstallEntityDefinition } from '../../lib/entities/uninstall_entity_definition';
 
 export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
@@ -43,11 +35,7 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         const definition = await readEntityDefinition(soClient, req.params.id, logger);
-        await stopAndDeleteHistoryTransform(esClient, definition, logger);
-        await stopAndDeleteLatestTransform(esClient, definition, logger);
-        await deleteHistoryIngestPipeline(esClient, definition, logger);
-        await deleteLatestIngestPipeline(esClient, definition, logger);
-        await deleteEntityDefinition(soClient, definition, logger);
+        await uninstallEntityDefinition({ definition, soClient, esClient, logger });
 
         return res.ok({ body: { acknowledged: true } });
       } catch (e) {

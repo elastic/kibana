@@ -22,19 +22,21 @@ import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delet
 import { saveEntityDefinition } from './save_entity_definition';
 import { stopAndDeleteHistoryTransform } from './stop_and_delete_transform';
 
+export interface InstallDefinitionParams {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  definition: EntityDefinition;
+  logger: Logger;
+  spaceId: string;
+}
+
 export async function installEntityDefinition({
   esClient,
   soClient,
   definition,
   logger,
   spaceId,
-}: {
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
-  definition: EntityDefinition;
-  logger: Logger;
-  spaceId: string;
-}): Promise<EntityDefinition> {
+}: InstallDefinitionParams): Promise<EntityDefinition> {
   const installState = {
     ingestPipelines: {
       history: false,
@@ -82,4 +84,18 @@ export async function installEntityDefinition({
 
     throw e;
   }
+}
+
+export async function installEntityDefinitions({
+  esClient,
+  soClient,
+  logger,
+  definitions,
+  spaceId,
+}: Omit<InstallDefinitionParams, 'definition'> & { definitions: EntityDefinition[] }) {
+  const installPromises = definitions.map(async (definition) =>
+    installEntityDefinition({ esClient, soClient, definition, logger, spaceId })
+  );
+
+  return Promise.all(installPromises);
 }
