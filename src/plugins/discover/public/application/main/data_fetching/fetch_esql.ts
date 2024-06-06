@@ -72,6 +72,9 @@ export function fetchEsql(
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row, idx) => {
+              row._id = row._id ?? '';
+              row._index = row._index ?? '';
+
               const record: DataTableRecord = {
                 id: String(idx),
                 raw: row as EsHitRecord,
