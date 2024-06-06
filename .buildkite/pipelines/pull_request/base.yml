@@ -4,7 +4,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -15,7 +15,7 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
@@ -32,7 +32,7 @@ steps:
     label: 'Quick Checks'
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -50,7 +50,7 @@ steps:
     label: Mark CI Stats as ready
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -67,7 +67,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -85,7 +85,7 @@ steps:
     label: 'Linting'
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
@@ -101,7 +101,7 @@ steps:
     label: 'Check Types'
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
@@ -117,7 +117,7 @@ steps:
     label: 'Linting (with types)'
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
@@ -134,7 +134,7 @@ steps:
     key: checks
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -149,7 +149,7 @@ steps:
     label: 'Build API Docs'
     agents:
       diskSizeGb: 50
-      imagePrefix: kibana-ubuntu-2004-1717495844
+      imagePrefix: kibana-ubuntu-2004-1717669216
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4

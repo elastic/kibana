@@ -26,7 +26,7 @@ const getAgentRule = (queueName: string = 'n2-4-spot') => {
     const [kind, cores, spot] = queueName.split('-');
     return {
       provider: 'gcp',
-      imagePrefix: 'kibana-ubuntu-2004-1717495844',
+      imagePrefix: 'kibana-ubuntu-2004-1717669216',
       imageProject: 'elastic-images-qa',
       diskSizeGb: 50,
       machineType: `${kind}-standard-${cores}`,
