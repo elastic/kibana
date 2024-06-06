@@ -51,7 +51,6 @@
     "@kbn/ml-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/core-notifications-browser"
   ],
   "exclude": ["target/**/*"]
 }
