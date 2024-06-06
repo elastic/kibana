@@ -94,13 +94,21 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage: 'DESCRIPTION',
     }),
     examples: [
+      'metrics index',
+      'metrics index, index2',
+      'metrics index avg = avg(a)',
+      'metrics index sum(b) by b',
+      'metrics index, index2 sum(b) by b % 2',
       'metrics index [, index2 ...] [aggregate [, aggregate2 ...] [by field [, field2 ...]]]',
     ],
     options: [],
     modes: [],
     signature: {
       multipleParams: true,
-      params: [{ name: 'index', type: 'source', wildcards: true }],
+      params: [
+        { name: 'index', type: 'source', wildcards: true },
+        { name: 'expression', type: 'function', optional: true },
+      ],
     },
   },
   {
