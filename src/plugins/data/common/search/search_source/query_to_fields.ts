@@ -47,7 +47,7 @@ export async function queryToFields({
       }
     }
   }
-  // fields = fields.filter((f) => Boolean(f));
+
   if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
     // if source filtering is enabled, we need to fetch all the fields
     return (await dataView.getFields({ fieldName: ['*'] })).getFieldMapSorted();
