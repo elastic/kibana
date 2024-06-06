@@ -928,7 +928,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             <EuiOutsideClickDetector
               onOutsideClick={() => {
                 restoreInitialMode();
-                setPopoverPosition({});
               }}
             >
               <div ref={resizeRef} css={styles.resizableContainer}>
