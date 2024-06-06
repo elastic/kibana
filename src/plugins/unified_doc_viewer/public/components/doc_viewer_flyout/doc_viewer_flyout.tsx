@@ -33,7 +33,7 @@ import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import UnifiedDocViewer from '../doc_viewer';
+import { UnifiedDocViewer } from '../lazy_doc_viewer';
 
 export interface UnifiedDocViewerFlyoutProps {
   'data-test-subj'?: string;
