@@ -434,6 +434,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
       },
       title: INFERENCE_ENDPOINTS_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     core.application.register({
