@@ -5,8 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { type EuiCollapsibleNavSubItemProps } from '@elastic/eui';
 
-export type EuiCollapsibleNavSubItemPropsEnhanced = EuiCollapsibleNavSubItemProps & {
-  path?: string;
-};
+export { useAccordionState, type AccordionItemsState } from './use_accordion_state';
