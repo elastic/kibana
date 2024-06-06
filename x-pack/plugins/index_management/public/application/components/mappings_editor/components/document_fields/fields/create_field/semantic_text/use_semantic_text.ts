@@ -14,7 +14,7 @@ import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, DefaultInferenceModels, Field } from '../../../../../types';
-import { NotificationToasts } from '../../../notification_toasts';
+import { MLModelNotificationToasts } from '../../../ml_model_toasts';
 
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
@@ -38,7 +38,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const [inferenceValue, setInferenceValue] = useState<string>(
     DefaultInferenceModels.elser_model_2
   );
-  const { showSuccessToasts, showErrorToasts } = NotificationToasts();
+  const { showMlSuccessToasts, showMlErrorToasts } = MLModelNotificationToasts();
 
   const useFieldEffect = (
     semanticTextform: FormHook,
@@ -137,7 +137,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
 
     const { trainedModelId } = inferenceData;
     dispatch({ type: 'field.addSemanticText', value: data });
-    showSuccessToasts();
+    showMlSuccessToasts();
 
     try {
       await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
@@ -146,7 +146,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (trainedModelId) {
         setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
       }
-      showErrorToasts(error);
+      showMlErrorToasts(error);
     }
   };
 

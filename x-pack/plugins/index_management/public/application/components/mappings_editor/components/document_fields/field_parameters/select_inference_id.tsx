@@ -43,7 +43,7 @@ import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
-import { NotificationToasts } from '../notification_toasts';
+import { MLModelNotificationToasts } from '../ml_model_toasts';
 import {
   CustomInferenceEndpointConfig,
   DefaultInferenceModels,
@@ -153,7 +153,8 @@ export const SelectInferenceId = ({
     setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
 
-  const { showSuccessToasts, showErrorToasts } = NotificationToasts();
+  const { showMlSuccessToasts, showMlErrorToasts } = MLModelNotificationToasts();
+
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
@@ -161,7 +162,7 @@ export const SelectInferenceId = ({
       try {
         const isDeployable =
           modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
-        if (isDeployable) showSuccessToasts();
+        if (isDeployable) showMlSuccessToasts();
 
         const combined: EuiSelectableOption[] = [
           {
@@ -186,9 +187,9 @@ export const SelectInferenceId = ({
           modelConfig,
         };
         setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
-        showSuccessToasts();
+        showMlSuccessToasts();
       } catch (error) {
-        showErrorToasts(error);
+        showMlErrorToasts(error);
         // reset options
         setOptions([...oldOptions]);
       }
@@ -198,8 +199,8 @@ export const SelectInferenceId = ({
       ml,
       setNewInferenceEndpoint,
       options,
-      showSuccessToasts,
-      showErrorToasts,
+      showMlSuccessToasts,
+      showMlErrorToasts,
     ]
   );
   useEffect(() => {

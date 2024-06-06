@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { useComponentTemplatesContext } from '../../../component_templates/component_templates_context';
 
-export function NotificationToasts() {
+export function MLModelNotificationToasts() {
   const { toasts } = useComponentTemplatesContext();
-  const showSuccessToasts = () => {
+  const showMlSuccessToasts = () => {
     return toasts.addSuccess({
       title: i18n.translate(
         'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
@@ -23,7 +23,7 @@ export function NotificationToasts() {
       }),
     });
   };
-  const showErrorToasts = (error: any) => {
+  const showMlErrorToasts = (error: any) => {
     return toasts.addError(
       error.body && error.body.message ? new Error(error.body.message) : error,
       {
@@ -36,5 +36,5 @@ export function NotificationToasts() {
       }
     );
   };
-  return { showSuccessToasts, showErrorToasts };
+  return { showMlSuccessToasts, showMlErrorToasts };
 }
