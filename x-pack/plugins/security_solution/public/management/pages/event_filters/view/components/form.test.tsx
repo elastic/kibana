@@ -502,6 +502,19 @@ describe('Event filter form', () => {
       userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
       expect(latestUpdatedItem.tags).toStrictEqual([...perPolicyTags, ENTIRE_PROCESS_TREE_TAG]);
     });
+
+    it('should display a tooltip to the user', async () => {
+      const tooltipIconSelector = `${formPrefix}-filterEntireProcessTreeTooltipIcon`;
+      const tooltipTextSelector = `${formPrefix}-filterEntireProcessTreeTooltipText`;
+      render();
+
+      expect(renderResult.getByTestId(tooltipIconSelector)).toBeInTheDocument();
+      expect(renderResult.queryByTestId(tooltipTextSelector)).not.toBeInTheDocument();
+
+      userEvent.hover(renderResult.getByTestId(tooltipIconSelector));
+
+      expect(await renderResult.findByTestId(tooltipTextSelector)).toBeInTheDocument();
+    });
   });
 
   describe('Warnings', () => {

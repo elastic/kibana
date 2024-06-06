@@ -12,6 +12,8 @@ import type { EuiSuperSelectOption, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiSpacer,
+  EuiToolTip,
+  EuiIcon,
   EuiForm,
   EuiFormRow,
   EuiSuperSelect,
@@ -637,10 +639,30 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             checked={isFilterEntireProcessTreeToggleEnabled}
             onChange={handleFilterEntireProcessTreeOnChange}
             label={
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterEntireProcessTree"
-                defaultMessage="Filter entire process tree"
-              />
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.filterEntireProcessTree.toggleLabel"
+                  defaultMessage="Filter entire process tree"
+                />{' '}
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.securitySolution.eventFilters.filterEntireProcessTree.tooltip"
+                      defaultMessage={
+                        `Filtering entire process tree means that events from the matched process are still ingested, ` +
+                        `but the ones from its descendant processes will be omitted.`
+                      }
+                    />
+                  }
+                  data-test-subj={getTestId('filterEntireProcessTreeTooltipText')}
+                >
+                  <EuiIcon
+                    color="subdued"
+                    type="iInCircle"
+                    data-test-subj={getTestId('filterEntireProcessTreeTooltipIcon')}
+                  />
+                </EuiToolTip>
+              </>
             }
             data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
           />
