@@ -9,11 +9,14 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import _ from 'lodash';
 
+import pMap from 'p-map';
+
 import { outputTypeSupportPresets } from '../../common/services/output_helpers';
 import type { AgentPolicy } from '../../common/types';
 
-import { SO_SEARCH_LIMIT } from '../../common';
+import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../common';
 import { agentPolicyService, outputService } from '../services';
+import { getAgentsByKuery } from '../services/agents';
 
 export interface AgentsPerOutputType {
   output_type: string;
@@ -26,6 +29,25 @@ export interface AgentsPerOutputType {
     scale: number;
     throughput: number;
   };
+}
+
+async function populateAssignedAgentsCount(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentPolicies: AgentPolicy[]
+) {
+  await pMap(
+    agentPolicies,
+    (agentPolicy: AgentPolicy) => {
+      return getAgentsByKuery(esClient, soClient, {
+        showInactive: true,
+        perPage: 0,
+        page: 1,
+        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+      }).then(({ total }) => (agentPolicy.agents = total));
+    },
+    { concurrency: 10 }
+  );
 }
 
 export async function getAgentsPerOutput(
@@ -46,10 +68,11 @@ export async function getAgentsPerOutput(
 
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     esClient,
-    withAgentCount: true,
     page: 1,
     perPage: SO_SEARCH_LIMIT,
   });
+
+  await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
 
   const outputTypes: { [key: string]: AgentsPerOutputType } = {};
 

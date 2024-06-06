@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(getSettingsRes.item.fleet_server_hosts).to.eql(['https://test.fr:443']);
     });
 
-    it("should bump all agent policy's revision in all spaces", async function () {
+    it("should bump all agent policy's revision", async function () {
       const { body: testPolicy1PostRes } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')

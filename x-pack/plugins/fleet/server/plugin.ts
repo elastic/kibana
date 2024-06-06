@@ -526,9 +526,7 @@ export class FleetPlugin
               appContextService.getEncryptedSavedObjectsStart()!.getClient({
                 includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
               }),
-              appContextService.getSavedObjects().getScopedClient(request, {
-                includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
-              })
+              appContextService.getInternalUserSOClientForSpaceId(soClient.getCurrentNamespace())
             );
 
             return {

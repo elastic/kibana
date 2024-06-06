@@ -38,8 +38,6 @@ import {
   policyHasSyntheticsIntegration,
 } from '../../common/services';
 
-import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
-
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
@@ -349,7 +347,10 @@ class AgentPolicyService {
       options
     );
 
-    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
+    await appContextService
+      .getUninstallTokenService()
+      ?.scoped(soClient.getCurrentNamespace())
+      ?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
@@ -469,7 +470,6 @@ class AgentPolicyService {
       withPackagePolicies?: boolean;
       fields?: string[];
       esClient?: ElasticsearchClient;
-      withAgentCount?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -485,8 +485,6 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
-      esClient,
-      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -538,11 +536,8 @@ class AgentPolicyService {
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     }
-    if (esClient && withAgentCount) {
-      await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
-    } else {
-      agentPolicies.forEach((item) => (item.agents = 0));
-    }
+
+    agentPolicies.forEach((item) => (item.agents = 0));
 
     return {
       items: agentPolicies,
