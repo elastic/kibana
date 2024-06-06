@@ -631,6 +631,22 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Container.getPanelCount",
+            "type": "Function",
+            "tags": [],
+            "label": "getPanelCount",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Container.removePanel",
             "type": "Function",
             "tags": [],
@@ -7937,19 +7953,45 @@
         "parentPluginId": "embeddable",
         "id": "def-public.EmbeddablePanel",
         "type": "Function",
-        "tags": [],
-        "label": "EmbeddablePanel",
-        "description": [
-          "\nLoads and renders a legacy embeddable.\n\nAncestry chain must use 'key' attribute to reset DOM and state when embeddable changes\nFor example <Parent key={embeddableId}><EmbeddablePanel/></Parent>"
+        "tags": [
+          "deprecated"
         ],
+        "label": "EmbeddablePanel",
+        "description": [],
         "signature": [
           "(props: ",
           "EmbeddablePanelProps",
           ") => JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "embeddable",
@@ -10751,6 +10793,29 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePackageState.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "\nCopy dashboard panel transfers serialized panel state for React embeddables.\nThe rawState will be passed into the input and references are passed separately\nso the container can update its references array and the updated references\nare correctly passed to the factory's deserialize method.\n\nLegacy embeddables have already injected the references\ninto the input state, so they will not pass references."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddablePackageState.searchSessionId",
             "type": "string",
             "tags": [],
@@ -12835,7 +12900,7 @@
             ],
             "signature": [
               "(initialState: RuntimeState, buildApi: (apiRegistration: ",
-              "ReactEmbeddableApiRegistration",
+              "BuildReactEmbeddableApiRegistration",
               "<SerializedState, Api>, comparators: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
@@ -12844,7 +12909,9 @@
                 "section": "def-common.StateComparators",
                 "text": "StateComparators"
               },
-              "<RuntimeState>) => Api, uuid: string, parentApi?: unknown) => Promise<{ Component: React.FC<{}>; api: Api; }>"
+              "<RuntimeState>) => Api, uuid: string, parentApi: unknown, setApi: (api: ",
+              "SetReactEmbeddableApiRegistration",
+              "<SerializedState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -12874,7 +12941,7 @@
                 "description": [],
                 "signature": [
                   "(apiRegistration: ",
-                  "ReactEmbeddableApiRegistration",
+                  "BuildReactEmbeddableApiRegistration",
                   "<SerializedState, Api>, comparators: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
@@ -12914,6 +12981,23 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$5",
+                "type": "Function",
+                "tags": [],
+                "label": "setApi",
+                "description": [],
+                "signature": [
+                  "(api: ",
+                  "SetReactEmbeddableApiRegistration",
+                  "<SerializedState, Api>) => Api"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
