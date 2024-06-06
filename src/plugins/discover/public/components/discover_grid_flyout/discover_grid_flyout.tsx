@@ -12,12 +12,13 @@ import { Filter, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-q
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
-import { DocViewerFlyout } from '@kbn/unified-doc-viewer';
+import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
+
+export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -68,8 +69,7 @@ export function DiscoverGridFlyout({
   });
 
   return (
-    <DocViewerFlyout
-      UnifiedDocViewer={UnifiedDocViewer}
+    <UnifiedDocViewerFlyout
       flyoutTitle={flyoutCustomization?.title}
       flyoutDefaultWidth={flyoutCustomization?.size}
       flyoutActions={
@@ -77,6 +77,7 @@ export function DiscoverGridFlyout({
           <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
         ) : null
       }
+      flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       FlyoutCustomBody={flyoutCustomization?.Content}
       services={services}
       docViewsRegistry={flyoutCustomization?.docViewsRegistry}

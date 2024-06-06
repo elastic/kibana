@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DocViewerFlyout, type DocViewerFlyoutProps } from './doc_viewer_flyout';
+export { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout';

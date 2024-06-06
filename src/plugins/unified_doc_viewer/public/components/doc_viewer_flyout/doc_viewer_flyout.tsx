@@ -30,14 +30,13 @@ import {
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import type { UnifiedDocViewer as UnifiedDocViewerComponent } from '@kbn/unified-doc-viewer-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import type { DocViewFilterFn, DocViewRenderProps } from '../../services/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import UnifiedDocViewer from '../doc_viewer';
 
-export interface DocViewerFlyoutProps {
+export interface UnifiedDocViewerFlyoutProps {
   'data-test-subj'?: string;
-  UnifiedDocViewer: typeof UnifiedDocViewerComponent;
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
   flyoutActions?: React.ReactNode;
@@ -71,13 +70,12 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
   });
 }
 
-export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
+export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
 /**
- * Flyout displaying an expanded Elasticsearch document
+ * Flyout displaying an expanded row details
  */
-export function DocViewerFlyout({
+export function UnifiedDocViewerFlyout({
   'data-test-subj': dataTestSubj,
-  UnifiedDocViewer,
   flyoutTitle,
   flyoutActions,
   flyoutDefaultWidth,
@@ -97,7 +95,7 @@ export function DocViewerFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
-}: DocViewerFlyoutProps) {
+}: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
   const DEFAULT_WIDTH = euiTheme.base * 34;
@@ -203,7 +201,6 @@ export function DocViewerFlyout({
       onFilter,
       removeColumn,
       docViewsRegistry,
-      UnifiedDocViewer,
     ]
   );
 

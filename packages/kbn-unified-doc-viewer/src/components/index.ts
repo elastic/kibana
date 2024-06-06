@@ -7,5 +7,4 @@
  */
 
 export * from './doc_viewer';
-export * from './doc_viewer_flyout';
 export * from './field_name';

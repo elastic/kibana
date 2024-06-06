@@ -35,5 +35,9 @@ export const UnifiedDocViewer = withSuspense<DocViewRenderProps>(
 );
 
 export { useEsDocSearch } from './hooks';
+export {
+  UnifiedDocViewerFlyout,
+  type UnifiedDocViewerFlyoutProps,
+} from './components/doc_viewer_flyout';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();
