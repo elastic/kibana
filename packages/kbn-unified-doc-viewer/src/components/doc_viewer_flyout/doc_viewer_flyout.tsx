@@ -155,7 +155,7 @@ export function DocViewerFlyout({
     (columnName: string) => {
       onAddColumn(columnName);
       services.toastNotifications?.addSuccess(
-        i18n.translate('discover.grid.flyout.toastColumnAdded', {
+        i18n.translate('unifiedDocViewer.flyout.toastColumnAdded', {
           defaultMessage: `Column ''{columnName}'' was added`,
           values: { columnName },
         })
@@ -168,7 +168,7 @@ export function DocViewerFlyout({
     (columnName: string) => {
       onRemoveColumn(columnName);
       services.toastNotifications?.addSuccess(
-        i18n.translate('discover.grid.flyout.toastColumnRemoved', {
+        i18n.translate('unifiedDocViewer.flyout.toastColumnRemoved', {
           defaultMessage: `Column ''{columnName}'' was removed`,
           values: { columnName },
         })
@@ -227,10 +227,10 @@ export function DocViewerFlyout({
   );
 
   const defaultFlyoutTitle = isEsqlQuery
-    ? i18n.translate('discover.grid.tableRow.docViewerEsqlDetailHeading', {
+    ? i18n.translate('unifiedDocViewer.flyout.docViewerEsqlDetailHeading', {
         defaultMessage: 'Result',
       })
-    : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
+    : i18n.translate('unifiedDocViewer.flyout.docViewerDetailHeading', {
         defaultMessage: 'Document',
       });
   const currentFlyoutTitle = flyoutTitle ?? defaultFlyoutTitle;
@@ -276,7 +276,7 @@ export function DocViewerFlyout({
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
-                  aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
+                  aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
                     defaultMessage: 'Document navigation',
                   })}
                   pageCount={pageCount}
@@ -298,7 +298,7 @@ export function DocViewerFlyout({
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-            {i18n.translate('discover.grid.flyout.close', {
+            {i18n.translate('unifiedDocViewer.flyout.closeButtonLabel', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>
