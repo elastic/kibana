@@ -33,7 +33,7 @@ type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | '
   layoutOption?: 'print';
   aggregateReportTypes: ShareMenuItemV2[];
   intl: InjectedIntl;
-  disableServerlessSettings: boolean;
+  publicAPIEnabled: boolean;
 };
 
 const ExportContentUi = ({
@@ -41,7 +41,7 @@ const ExportContentUi = ({
   aggregateReportTypes,
   intl,
   onClose,
-  disableServerlessSettings,
+  publicAPIEnabled,
 }: ExportProps) => {
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
@@ -123,7 +123,7 @@ const ExportContentUi = ({
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton && !disableServerlessSettings)
+    if (renderCopyURLButton && publicAPIEnabled)
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
@@ -158,7 +158,7 @@ const ExportContentUi = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, renderCopyURLButton, disableServerlessSettings]);
+  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
@@ -193,7 +193,7 @@ const ExportContentUi = ({
   };
 
   const renderHelpText = () => {
-    const showHelpText = !disableServerlessSettings && isDirty;
+    const showHelpText = publicAPIEnabled && isDirty;
     return (
       showHelpText && (
         <>
