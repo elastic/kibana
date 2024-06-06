@@ -39,6 +39,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
   ],
   "exclude": [
     "target/**/*",
