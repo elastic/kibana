@@ -25,7 +25,7 @@ export interface BundlerConfig {
 }
 
 interface BundleOptions {
-  includeXLabels?: string[];
+  includeLabels?: string[];
   specInfo?: Omit<Partial<OpenAPIV3.InfoObject>, 'version'>;
 }
 
@@ -88,7 +88,7 @@ async function resolveDocuments(
     schemaFilePaths.map(async (schemaFilePath) => {
       try {
         const resolvedDocument = await bundleDocument(schemaFilePath, {
-          includeXLabels: options?.includeXLabels,
+          includeLabels: options?.includeLabels,
         });
 
         logger.debug(`Processed ${chalk.bold(basename(schemaFilePath))}`);

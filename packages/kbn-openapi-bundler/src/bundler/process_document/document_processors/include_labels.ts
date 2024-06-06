@@ -16,7 +16,7 @@ import { DocumentNodeProcessor } from './types/document_node_processor';
  * Creates a node processor to include only OAS operation objects labeled
  * with one or more of the provided via `labelsToInclude` labels.
  */
-export function createIncludeXLabelsProcessor(labelsToInclude: string[]): DocumentNodeProcessor {
+export function createIncludeLabelsProcessor(labelsToInclude: string[]): DocumentNodeProcessor {
   if (labelsToInclude.length === 0) {
     throw new Error('"labelsToInclude" must have at least one label.');
   }
@@ -27,17 +27,17 @@ export function createIncludeXLabelsProcessor(labelsToInclude: string[]): Docume
     // https://swagger.io/docs/specification/paths-and-operations/
     return 'responses' in node;
   };
-  const logUnsupportedNodeWarning = (location: string, xLabelsValue: unknown): void => {
-    const value = Array.isArray(xLabelsValue) ? xLabelsValue.join(', ') : xLabelsValue;
+  const logUnsupportedNodeWarning = (location: string, labelsValue: unknown): void => {
+    const value = Array.isArray(labelsValue) ? labelsValue.join(', ') : labelsValue;
 
     logger.warning(
       `"${X_LABELS}: ${value}" in ${location} is ignored since "${X_LABELS}" is supported only for Operation objects.`
     );
   };
-  const logInvalidLabelsValueWarning = (location: string, xLabelsValue: unknown) => {
+  const logInvalidLabelsValueWarning = (location: string, labelsValue: unknown) => {
     logger.warning(
       `"${X_LABELS}" in ${location} is ignored since an array of labels is expected but got "${JSON.stringify(
-        xLabelsValue
+        labelsValue
       )}".`
     );
   };

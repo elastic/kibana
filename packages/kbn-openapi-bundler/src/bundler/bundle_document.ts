@@ -23,7 +23,7 @@ import {
   createMergeNonConflictingAllOfItemsProcessor,
   createUnfoldSingleAllOfItemProcessor,
 } from './process_document/document_processors/reduce_all_of_items';
-import { createIncludeXLabelsProcessor } from './process_document/document_processors/include_x_labels';
+import { createIncludeLabelsProcessor } from './process_document/document_processors/include_labels';
 import { BundleRefProcessor } from './process_document/document_processors/bundle_refs';
 import { RemoveUnusedComponentsProcessor } from './process_document/document_processors/remove_unused_components';
 
@@ -38,7 +38,7 @@ export interface BundledDocument extends ResolvedDocument {
 }
 
 interface BundleDocumentOptions {
-  includeXLabels?: string[];
+  includeLabels?: string[];
 }
 
 /**
@@ -89,8 +89,8 @@ export async function bundleDocument(
     createUnfoldSingleAllOfItemProcessor(),
   ];
 
-  if (options?.includeXLabels) {
-    defaultProcessors.push(createIncludeXLabelsProcessor(options?.includeXLabels));
+  if (options?.includeLabels) {
+    defaultProcessors.push(createIncludeLabelsProcessor(options?.includeLabels));
   }
 
   const bundleRefsProcessor = new BundleRefProcessor(X_INLINE);

@@ -20,7 +20,7 @@ describe('OpenAPI Bundler - specs with multiple modifications', () => {
     const bundledFilePathTemplate = join(outputFolderPath, 'oas-test-bundle-{version}.yaml');
 
     await bundleFolder(folderToBundlePath, bundledFilePathTemplate, {
-      includeXLabels: ['include'],
+      includeLabels: ['include'],
     });
 
     const [bundledSpec] = Object.values(readBundledSpecs(outputFolderPath));

@@ -9,7 +9,7 @@ used in the OpenAPI specification files. The package can be used for API documen
 - Omit parts of schemas that are hidden behind a feature flag (e.g. a new property added to an existing response schema).
 - Omit custom OpenAPI attributes from the bundle, such as `x-codegen-enabled`, `x-internal`, `x-modify` and `x-labels`.
 - Include only dedicated OpenAPI operation objects (a.k.a HTTP verbs) into the result bundle by labeling them via `x-labels`
-  and using `includeXLabels` bundler option, e.g. produce separate ESS and Serverless bundles
+  and using `includeLabels` bundler option, e.g. produce separate ESS and Serverless bundles
 - Transform the target schema according to the custom OpenAPI attributes, such as `x-modify`.
 - Resolve references, inline some of them and merge `allOf` object schemas for better readability. The bundled file contains only local references and paths.
 - Group OpenAPI specs by version (OpenAPI's `info.version`) and produce a separate bundle for each group
@@ -48,11 +48,11 @@ bundle({
   },
   // Bundler options (optional)
   options: {
-    // Optional `includeXLabels` allow to produce Serverless dedicated bundle by including only
+    // Optional `includeLabels` allow to produce Serverless dedicated bundle by including only
     // OpenAPI operations objects (a.k.a HTTP verbs) labeled with specified labels, e.g. `serverless`.
     // It requires labeling relevant operations objects with labels you want to be included, in the example
     // below it should be a `serverless` label.
-    includeXLabels: ['serverless'],
+    includeLabels: ['serverless'],
   },
 });
 ```
@@ -256,7 +256,7 @@ bundle({
     'target/openapi/serverless/my_bundle_name_{version}.bundled.schema.yaml'
   ),
   options: {
-    includeXLabels: ['serverless'],
+    includeLabels: ['serverless'],
   },
 });
 
@@ -264,7 +264,7 @@ bundle({
   sourceGlob: join(ROOT, './**/*.schema.yaml'),
   outputFilePath: join(ROOT, 'target/openapi/ess/my_bundle_name_{version}.bundled.schema.yaml'),
   options: {
-    includeXLabels: ['ess'],
+    includeLabels: ['ess'],
   },
 });
 ```
