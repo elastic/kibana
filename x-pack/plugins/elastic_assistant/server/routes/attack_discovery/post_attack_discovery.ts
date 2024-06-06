@@ -127,6 +127,7 @@ export const postAttackDiscoveryRoute = (
             latestReplacements,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
             llm,
+            logger,
             onNewReplacements,
             request,
             size,

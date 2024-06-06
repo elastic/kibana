@@ -33,8 +33,7 @@ export const updateSearchSource = (
   );
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
-    searchSource.setField('fields', [fields]);
+    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
   } else {
     searchSource.removeField('fields');
   }

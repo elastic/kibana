@@ -18,7 +18,7 @@ export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
 
 const toolDetails = {
   description:
-    "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, with no other text.",
+    "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, with no other text, and whether or not the entry is required.",
   id: 'knowledge-base-write-tool',
   name: 'KnowledgeBaseWriteTool',
 };
@@ -40,12 +40,17 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
       description: toolDetails.description,
       schema: z.object({
         query: z.string().describe(`Summary of items/things to save in the knowledge base`),
+        required: z
+          .boolean()
+          .describe(
+            `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
+          ),
       }),
       func: async (input, _, cbManager) => {
         logger.debug(`KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`);
 
         const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
-          metadata: { kbResource: 'user', source: 'conversation', required: false },
+          metadata: { kbResource: 'user', source: 'conversation', required: input.required },
           text: input.query,
         };
 

@@ -664,6 +664,7 @@ export class SavedSearchEmbeddable
               query={this.input.query}
               onAddFilter={searchProps.onFilter}
               searchSessionId={this.input.searchSessionId}
+              isEsqlMode={isEsqlMode}
             />
           </KibanaContextProvider>
         </KibanaRenderContextProvider>,

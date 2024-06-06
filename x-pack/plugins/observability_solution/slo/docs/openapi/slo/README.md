@@ -14,7 +14,7 @@ A guide about the OpenApi specification can be found at [https://swagger.io/docs
 ## Tools
 
 It is possible to manually validate the docs before bundling them with the following
-command in the `x-pack/plugins/observability_solution/observability/docs/openapi/slo` folder:
+command in the `x-pack/plugins/observability_solution/slo/docs/openapi/slo` folder:
 
 ```bash
 make validate
