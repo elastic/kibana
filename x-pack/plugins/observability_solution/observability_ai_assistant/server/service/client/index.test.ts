@@ -170,7 +170,7 @@ describe('Observability AI Assistant client', () => {
       fields: [],
     } as any);
 
-    knowledgeBaseServiceMock.getInstructions.mockResolvedValue([]);
+    knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue(['system']);
 
