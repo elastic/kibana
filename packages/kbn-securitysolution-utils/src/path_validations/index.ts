@@ -66,7 +66,7 @@ export const validatePotentialWildcardInput = ({
   if (field === 'file.path.text') {
     return validateFilePathInput({ os, value: textInput });
   }
-  return validateWildcardInput(textInput);
+  return doesAnyValueContainWildcard(textInput);
 };
 
 export const validateFilePathInput = ({
@@ -101,14 +101,15 @@ export const validateFilePathInput = ({
   }
 };
 
-export const validateWildcardInput = (value: string | string[]): string | undefined => {
+export const doesAnyValueContainWildcard = (value: string | string[]): string | undefined => {
+  const wildcardRegex = /[*?]/;
   if (Array.isArray(value)) {
-    const test = value.some((v) => /[*?]/.test(v));
+    const test = value.some((v) => wildcardRegex.test(v));
     if (test) {
       return WILDCARD_WARNING;
     }
   } else {
-    if (/[*?]/.test(value)) {
+    if (wildcardRegex.test(value)) {
       return WILDCARD_WARNING;
     }
   }
@@ -121,7 +122,7 @@ export const validateHasWildcardWithWrongOperator = ({
   operator: TrustedAppEntryTypes | EventFiltersTypes;
   value: string | string[];
 }): boolean => {
-  if (operator !== 'wildcard' && validateWildcardInput(value)) {
+  if (operator !== 'wildcard' && doesAnyValueContainWildcard(value)) {
     return true;
   } else {
     return false;
