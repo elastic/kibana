@@ -259,6 +259,21 @@ describe('validation', () => {
             'Unknown column [wrongField]',
           ]);
         });
+
+        test('various errors', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('METRICS a_index  avg(numberField) by percentile(numberField)', [
+            'METRICS BY does not support function percentile',
+          ]);
+          await expectErrors(
+            'METRICS a_index avg(numberField) by stringField, percentile(numberField) by ipField',
+            [
+              "SyntaxError: mismatched input 'by' expecting <EOF>",
+              'METRICS BY does not support function percentile',
+            ]
+          );
+        });
       });
     });
   });
