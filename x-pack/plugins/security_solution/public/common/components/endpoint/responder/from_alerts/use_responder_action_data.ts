@@ -21,12 +21,13 @@ import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from './translations';
 
+// FIXME:PT rename this to be specific to this hook
 export interface ResponderContextMenuItemProps {
   eventData: TimelineEventsDetailsItem[] | null;
   onClick?: () => void;
 }
 
-interface ResponderActionData {
+export interface ResponderActionData {
   handleResponseActionsClick: () => void;
   isDisabled: boolean;
   tooltip: ReactNode;

@@ -6,29 +6,29 @@
  */
 
 import { useResponderActionItem } from './use_responder_action_item';
-import { useUserPrivileges } from '../../../user_privileges';
+import { useUserPrivileges as _useUserPrivileges } from '../../../user_privileges';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../mock/endpoint';
 import { endpointAlertDataMock } from '../../../../mock/endpoint/endpoint_alert_data_mock';
 
 jest.mock('../../../user_privileges');
+jest.mock('./use_responder_action_data');
 
-// FIXME:PT implement tests
-// FIXME:PT move the tests under `x-pack/plugins/security_solution/public/detections/components/take_action_dropdown/index.test.tsx` here
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('useResponderActionItem', () => {
-  const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
   let alertDetailItemData: TimelineEventsDetailsItem[];
-  let renderHook: AppContextTestRender['renderHook'];
+  let renderHook: () => ReturnType<AppContextTestRender['renderHook']>;
 
   beforeEach(() => {
     const appContextMock = createAppRootMockRenderer();
 
-    renderHook = appContextMock.renderHook;
     alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
+    renderHook = () =>
+      appContextMock.renderHook(() => useResponderActionItem(alertDetailItemData, () => {}));
 
-    mockUseUserPrivileges.mockReturnValue({
+    useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: { loading: false, canAccessResponseConsole: true },
     });
   });
@@ -37,54 +37,14 @@ describe('useResponderActionItem', () => {
     jest.clearAllMocks();
   });
 
-  it('should return an empty array if user privileges are loading', () => {
-    mockUseUserPrivileges.mockReturnValue({
-      endpointPrivileges: { loading: true, canAccessResponseConsole: false },
-    });
-    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
-
-    expect(result.current).toHaveLength(0);
+  it('should return Respond action menu item if user has Authz', () => {
+    expect(renderHook().result.current).toHaveLength(1);
   });
 
-  it('should return an empty array if user cannot access response console', () => {
-    mockUseUserPrivileges.mockReturnValue({
+  it('should NOT return the Respond action menu item if user is not Authorized', () => {
+    useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: { loading: false, canAccessResponseConsole: false },
     });
-    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
-
-    expect(result.current).toHaveLength(0);
-  });
-
-  it('should return an empty array if the event is not an alert', () => {
-    alertDetailItemData = alertDetailItemData.filter(
-      (item) => item.field !== 'kibana.alert.rule.uuid'
-    );
-    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
-
-    expect(result.current).toHaveLength(0);
-  });
-
-  it('should return the response action item if all conditions are met for an Elastic Endpoint', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useResponderActionItem(alertDetailItemData, jest.fn())
-    );
-    await waitForNextUpdate();
-    const menuItem = result.current.at(0)!;
-
-    expect(menuItem).not.toBeUndefined();
-    expect(menuItem.disabled).toBe(false);
-    expect(menuItem.toolTipContent).toEqual('Loading');
-  });
-
-  it('should return the response action item if all conditions are met for a Crowdstrike event', () => {
-    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
-
-    expect(result.current).toEqual(['one']);
-  });
-
-  it('should return the response action item if all conditions are met for a SentinelOne event', () => {
-    const { result } = renderHook(() => useResponderActionItem(alertDetailItemData, jest.fn()));
-
-    expect(result.current).toEqual(['one']);
+    expect(renderHook().result.current).toHaveLength(0);
   });
 });

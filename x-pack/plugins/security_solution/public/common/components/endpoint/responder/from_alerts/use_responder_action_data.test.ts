@@ -22,6 +22,9 @@ jest.mock('../../../../../management/hooks', () => ({
 const useGetEndpointDetailsMock = useGetEndpointDetails as jest.Mock;
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
+// FIXME:PT fix tests
+// FIXME:PT move the tests under `x-pack/plugins/security_solution/public/detections/components/take_action_dropdown/index.test.tsx` here
+
 describe('#useResponderActionData', () => {
   beforeEach(() => {
     jest.clearAllMocks();
