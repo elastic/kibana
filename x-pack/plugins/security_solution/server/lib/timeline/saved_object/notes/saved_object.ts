@@ -49,14 +49,19 @@ export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelin
 
 export const deleteNote = async ({
   request,
-  noteId,
+  noteIds,
 }: {
   request: FrameworkRequest;
-  noteId: string;
+  noteIds: string[];
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-
-  await savedObjectsClient.delete(noteSavedObjectType, noteId);
+  const noteObjects = noteIds.map((id) => {
+    return {
+      id,
+      type: noteSavedObjectType,
+    };
+  });
+  await savedObjectsClient.bulkDelete(noteObjects);
 };
 
 export const getNote = async (request: FrameworkRequest, noteId: string): Promise<Note> => {
@@ -136,9 +141,27 @@ const createNote = async ({
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
-
-  console.log('migratedAttributes:', migratedAttributes);
-
+  console.log('references:', references);
+  if (references.length === 0) {
+    // Limit unassociated events to 1000
+    const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
+      type: noteSavedObjectType,
+      hasNoReference: { type: timelineSavedObjectType, id: '*' },
+    });
+    console.log('notesCount:', notesCount.total);
+    if (notesCount.total >= 1000) {
+      return {
+        code: 403,
+        message: 'Cannot create more than 1000 notes without associating them to a timeline',
+        note: {
+          ...note,
+          noteId: uuidv1(),
+          version: '',
+          timelineId: '',
+        },
+      };
+    }
+  }
   const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
     eventId: migratedAttributes.eventId,
     note: migratedAttributes.note,
@@ -253,7 +276,6 @@ export const getAllSavedNote = async (
 };
 
 export const convertSavedObjectToSavedNote = (savedObject: unknown): Note => {
-  console.log(savedObject, 'savedObject');
   return pipe(
     SavedObjectNoteRuntimeType.decode(savedObject),
     map((savedNote) => {
@@ -267,6 +289,9 @@ export const convertSavedObjectToSavedNote = (savedObject: unknown): Note => {
         createdBy: savedNote.attributes.createdBy,
         updated: savedNote.attributes.updated,
         updatedBy: savedNote.attributes.updatedBy,
+        eventIngested: savedNote.attributes.eventIngested,
+        eventTimestamp: savedNote.attributes.eventTimestamp,
+        eventDataView: savedNote.attributes.eventDataView,
       };
     }),
     fold((errors) => {

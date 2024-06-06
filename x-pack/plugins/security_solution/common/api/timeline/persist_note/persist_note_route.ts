@@ -28,6 +28,9 @@ export const persistNoteWithoutRefSchema = runtimeTypes.intersection([
     overrideOwner: unionWithNullType(runtimeTypes.boolean),
     noteId: unionWithNullType(runtimeTypes.string),
     version: unionWithNullType(runtimeTypes.string),
+    eventIngested: unionWithNullType(runtimeTypes.string),
+    eventTimestamp: unionWithNullType(runtimeTypes.string),
+    eventDataView: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
