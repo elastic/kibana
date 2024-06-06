@@ -50,7 +50,7 @@ import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import type { MessageSigningServiceInterface } from '..';
 
-import type { BulkActionsResolver } from './agents';
+import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
 class AppContextService {

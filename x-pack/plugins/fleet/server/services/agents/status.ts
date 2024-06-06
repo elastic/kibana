@@ -45,12 +45,24 @@ export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string,
-  filterKuery?: string
+  filterKuery?: string,
+  spaceId?: string
 ) {
   const logger = appContextService.getLogger();
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
 
   const clauses: QueryDslQueryContainer[] = [];
+
+  if (spaceId) {
+    if (spaceId === 'default') {
+      // TODO use constant
+      clauses.push(
+        toElasticsearchQuery(fromKueryExpression(`namespaces:"default" or not namespaces:*`))
+      );
+    } else {
+      clauses.push(toElasticsearchQuery(fromKueryExpression(`namespaces:"${spaceId}"`)));
+    }
+  }
 
   if (filterKuery) {
     const kueryAsElasticsearchQuery = toElasticsearchQuery(
