@@ -313,8 +313,6 @@ export const ModelsList: FC<Props> = ({
           }, {} as Record<string, JSX.Element>)
         );
       }
-
-      await fetchDownloadStatus();
     } catch (error) {
       displayErrorToast(
         error,
@@ -325,6 +323,9 @@ export const ModelsList: FC<Props> = ({
     }
     setIsInitialized(true);
     setIsLoading(false);
+
+    await fetchDownloadStatus();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIdToExpandedRowMap, isNLPEnabled]);
 
@@ -630,27 +631,40 @@ export const ModelsList: FC<Props> = ({
       truncateText: false,
       render: ({ state, downloadState }: ModelItem) => {
         const config = getModelStateColor(state);
+        if (!config) return null;
 
-        if (state === MODEL_STATE.DOWNLOADING && config && downloadState) {
-          const valueText =
-            ((downloadState.downloaded_parts / downloadState.total_parts) * 100).toFixed(0) + '%';
-          return (
-            <EuiProgress
-              label={config.name}
-              valueText={<>{valueText}</>}
-              value={downloadState?.downloaded_parts}
-              max={downloadState?.total_parts}
-              size="xs"
-              color={'primary'}
-            />
-          );
-        }
+        const isDownloadInProgress = state === MODEL_STATE.DOWNLOADING && downloadState;
 
-        return config ? (
+        const label = (
           <EuiHealth textSize={'xs'} color={config.color}>
             {config.name}
           </EuiHealth>
-        ) : null;
+        );
+
+        return (
+          <EuiFlexGroup direction={'column'} gutterSize={'none'}>
+            {isDownloadInProgress ? (
+              <EuiFlexItem>
+                <EuiProgress
+                  label={label}
+                  valueText={
+                    <>
+                      {((downloadState.downloaded_parts / downloadState.total_parts) * 100).toFixed(
+                        0
+                      ) + '%'}
+                    </>
+                  }
+                  value={downloadState?.downloaded_parts}
+                  max={downloadState?.total_parts}
+                  size="xs"
+                  color={config.color}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem>{label}</EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
     },
