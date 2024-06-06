@@ -104,6 +104,7 @@ import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
+import { useRuleFields } from '../../../rule_management/logic/use_rule_fields';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -214,6 +215,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ).length;
   const noMlJobsStarted = numberOfRuleMlJobsStarted === 0;
   const someMlJobsStarted = !noMlJobsStarted && numberOfRuleMlJobsStarted !== ruleMlJobs.length;
+  const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({ machineLearningJobId });
+  const mlSuppressionFields = useMemo(
+    () => getTermsAggregationFields(mlFields as BrowserField[]),
+    [mlFields]
+  );
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
@@ -1088,11 +1094,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   componentProps={{
                     browserFields: isEsqlRule(ruleType)
                       ? esqlSuppressionFields
+                      : isMlRule(ruleType)
+                      ? mlSuppressionFields
                       : termsAggregationFields,
                     isDisabled:
                       !isAlertSuppressionLicenseValid ||
                       areSuppressionFieldsDisabledBySequence ||
                       isEsqlSuppressionLoading ||
+                      mlFieldsLoading ||
                       noMlJobsStarted,
                     disabledText: areSuppressionFieldsDisabledBySequence
                       ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
