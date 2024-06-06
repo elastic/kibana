@@ -60,16 +60,18 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
+  isServerless = true,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
+  isServerless?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
   });
   history.replace(locationPathName);
 
-  const projectNavigationService = new ProjectNavigationService();
+  const projectNavigationService = new ProjectNavigationService(isServerless);
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
   const application = {
@@ -998,34 +1000,6 @@ describe('solution navigations', () => {
         projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
       );
       expect(activeSolution).toEqual(solution1);
-    }
-  });
-
-  it('should change the active solution if no node match the current Location', async () => {
-    const { projectNavigation, navLinksService, application } = setup({
-      locationPathName: '/app/app3', // we are on app3 which only exists in solution3
-      navLinkIds: ['app1', 'app2', 'app3'],
-    });
-
-    navLinksService.get.mockReturnValue({ url: '/app/app3', href: '/app/app3' } as any);
-
-    const getActiveDefinition = () =>
-      firstValueFrom(projectNavigation.getActiveSolutionNavDefinition$());
-
-    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
-
-    {
-      const definition = await getActiveDefinition();
-      expect(definition).toBe(null); // No active solution id yet
-    }
-
-    // Change to solution 2, but we are still on '/app/app3' which only exists in solution3
-    projectNavigation.changeActiveSolutionNavigation('solution2');
-
-    {
-      const definition = await getActiveDefinition();
-      expect(definition?.id).toBe('solution3'); // The solution3 was activated as it matches the "/app/app3" location
-      expect(application.navigateToUrl).toHaveBeenCalled(); // Redirect
     }
   });
 });

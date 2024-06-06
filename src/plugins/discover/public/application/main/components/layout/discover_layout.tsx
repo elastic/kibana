@@ -75,6 +75,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     history,
     spaces,
     observabilityAIAssistant,
+    dataVisualizer: dataVisualizerService,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -86,12 +87,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.sort,
   ]);
   const isEsqlMode = useIsEsqlMode();
+
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
-    if (state.viewMode === VIEW_MODE.DOCUMENT_LEVEL || state.viewMode === VIEW_MODE.PATTERN_LEVEL) {
-      return state.viewMode;
-    }
-    if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isEsqlMode)
+    const fieldStatsNotAvailable =
+      !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
+    if (state.viewMode === VIEW_MODE.AGGREGATED_LEVEL && fieldStatsNotAvailable) {
       return VIEW_MODE.DOCUMENT_LEVEL;
+    }
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
