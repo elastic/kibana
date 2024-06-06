@@ -45,11 +45,12 @@ export const usePollApi = ({
   const currentConnectorId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    currentConnectorId.current = connectorId; // Will set it to true on mount ...
+    currentConnectorId.current = connectorId;
     return () => {
       currentConnectorId.current = undefined;
-    }; // ... and to false on unmount
+    };
   }, [connectorId]);
+
   const handleResponse = useCallback(
     (responseData: AttackDiscoveryResponse) => {
       if (connectorId == null || connectorId === '') {
