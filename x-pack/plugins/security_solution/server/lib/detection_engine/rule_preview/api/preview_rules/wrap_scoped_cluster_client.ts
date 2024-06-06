@@ -42,6 +42,10 @@ export function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): ISco
       ...rest,
       esClient: scopedClusterClient.asCurrentUser,
     }),
+    asSecondaryAuth: wrapEsClient({
+      ...rest,
+      esClient: scopedClusterClient.asSecondaryAuth,
+    }),
   };
 }
 
