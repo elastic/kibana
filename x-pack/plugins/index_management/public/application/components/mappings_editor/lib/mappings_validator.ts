@@ -21,7 +21,6 @@ const ALLOWED_FIELD_PROPERTIES = [
   'type',
   'properties',
   'fields',
-  'subobjects',
 ];
 
 const DEFAULT_FIELD_TYPE = 'object';
@@ -71,10 +70,6 @@ const validateFieldType = (type: any): boolean => {
 
 const validateParameter = (parameter: string, value: any): boolean => {
   if (parameter === 'type') {
-    return true;
-  }
-
-  if (parameter === 'subobjects') {
     return true;
   }
 

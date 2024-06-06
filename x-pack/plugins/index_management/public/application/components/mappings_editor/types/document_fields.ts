@@ -164,7 +164,8 @@ export type ParameterName =
   | 'value'
   | 'meta'
   | 'time_series_metric'
-  | 'time_series_dimension';
+  | 'time_series_dimension'
+  | 'subobjects';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

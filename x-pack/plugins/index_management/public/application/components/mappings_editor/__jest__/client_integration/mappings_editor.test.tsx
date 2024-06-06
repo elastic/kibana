@@ -324,6 +324,7 @@ describe('Mappings editor: core', () => {
         _routing: {
           required: false,
         },
+        subobjects: true,
       };
 
       await act(async () => {

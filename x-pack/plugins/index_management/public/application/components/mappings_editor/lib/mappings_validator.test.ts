@@ -60,6 +60,7 @@ describe('Mappings configuration validator', () => {
       },
       properties: { title: { type: 'text' } },
       dynamic_templates: [],
+      subobjects: true,
       unknown: 123,
     };
 
@@ -128,7 +129,7 @@ describe('Properties validator', () => {
       prop5: [], // To be removed
       prop6: {
         properties: {
-          prop1: { type: 'text', subobjects: false },
+          prop1: { type: 'text' },
           prop2: 'abc', // To be removed
         },
       },
@@ -140,7 +141,7 @@ describe('Properties validator', () => {
       prop6: {
         type: 'object',
         properties: {
-          prop1: { type: 'text', subobjects: false },
+          prop1: { type: 'text' },
         },
       },
     });
@@ -161,7 +162,7 @@ describe('Properties validator', () => {
         type: 'object',
         properties: {
           prop1: {},
-          prop2: { type: 'keyword', subobjects: false },
+          prop2: { type: 'keyword' },
         },
       },
     };
@@ -182,7 +183,6 @@ describe('Properties validator', () => {
           },
           prop2: {
             type: 'keyword',
-            subobjects: false,
           },
         },
       },
@@ -230,7 +230,7 @@ describe('Properties validator', () => {
 
   it('should strip parameters that are unknown', () => {
     const properties = {
-      prop1: { type: 'text', unknown: true, anotherUnknown: 123, subobjects: false },
+      prop1: { type: 'text', unknown: true, anotherUnknown: 123 },
       prop2: { type: 'keyword', store: true, index: true, doc_values_binary: true },
       prop3: {
         type: 'object',
@@ -243,7 +243,7 @@ describe('Properties validator', () => {
     const { value, errors } = validateProperties(properties as any);
 
     expect(value).toEqual({
-      prop1: { type: 'text', subobjects: false },
+      prop1: { type: 'text' },
       prop2: { type: 'keyword', store: true, index: true, doc_values_binary: true },
       prop3: {
         type: 'object',
@@ -313,6 +313,7 @@ describe('Properties validator', () => {
         depth_limit: true,
         dims: false,
         max_shingle_size: 'string_not_allowed',
+        subobjects: 'abc',
       },
       // All the parameters in "goodField" have the correct format
       // and should still be there after the validation ran.
@@ -365,6 +366,7 @@ describe('Properties validator', () => {
         depth_limit: 20,
         dims: 'abc',
         max_shingle_size: 2,
+        subobjects: true,
       },
       goodField2: {
         type: 'object',

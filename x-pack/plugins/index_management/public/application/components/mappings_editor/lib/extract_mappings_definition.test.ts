@@ -126,6 +126,7 @@ describe('extractMappingsDefinition', () => {
       _size: {
         enabled: true,
       },
+      subobjects: true,
     };
 
     expect(extractMappingsDefinition(mappings)).toBe(mappings);
