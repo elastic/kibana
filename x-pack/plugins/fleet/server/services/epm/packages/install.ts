@@ -365,6 +365,7 @@ interface InstallUploadedArchiveParams {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   isBundledPackage?: boolean;
+  skipRateLimitCheck?: boolean;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -891,6 +892,7 @@ async function installPackageByUpload({
   ignoreMappingUpdateErrors,
   skipDataStreamRollover,
   isBundledPackage,
+  skipRateLimitCheck,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
 
@@ -906,7 +908,7 @@ async function installPackageByUpload({
     // Check cached timestamp for rate limiting
     const lastInstalledBy = getLastUploadInstallCache();
 
-    if (lastInstalledBy) {
+    if (lastInstalledBy && !skipRateLimitCheck) {
       const msSinceLastFetched = Date.now() - (lastInstalledBy || 0);
       if (msSinceLastFetched < UPLOAD_RETRY_AFTER_MS) {
         logger.error(
@@ -1033,6 +1035,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         ignoreMappingUpdateErrors,
         skipDataStreamRollover,
         isBundledPackage: true,
+        skipRateLimitCheck: true,
       });
 
       return { ...response, installSource: 'bundled' };
