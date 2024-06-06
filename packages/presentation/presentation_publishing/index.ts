@@ -38,6 +38,7 @@ export {
   apiPublishesPartialUnifiedSearch,
   apiPublishesFilters,
   apiPublishesTimeRange,
+  apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
   apiPublishesWritableUnifiedSearch,
   useSearchApi,
