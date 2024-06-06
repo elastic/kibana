@@ -674,7 +674,12 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             </EuiText>
           </>
         )}
-        {isFilterEntireProcessTreeFeatureEnabled && filterEntireProcessTreeSwitch}
+        {isFilterEntireProcessTreeFeatureEnabled && (
+          <>
+            <EuiSpacer size="m" />
+            {filterEntireProcessTreeSwitch}
+          </>
+        )}
         {showAssignmentSection && (
           <>
             <EuiHorizontalRule />
