@@ -29,7 +29,7 @@ export const MultilingualE5Prompt: React.FC<MultilingualE5PromptProps> = ({
       'xpack.searchInferenceEndpoints.inferenceEndpoints.addEmptyPrompt.e5Description',
       {
         defaultMessage:
-          'E5 is a third party NLP model that enables you to perform multi-lingual semantic search by using dense vector representations.',
+          'E5 is a dense vector NLP model that enables you to perform multi-lingual semantic search.',
       }
     )}
     title={i18n.translate(
