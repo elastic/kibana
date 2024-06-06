@@ -83,8 +83,7 @@ export const createMlAlertType = (
           spaceId,
           completeRule,
           mergeStrategy,
-          // TODO is this correct?
-          indicesToQuery: inputIndex,
+          indicesToQuery: [],
           buildReasonMessage,
           alertTimestampOverride,
           ruleExecutionLogger,
