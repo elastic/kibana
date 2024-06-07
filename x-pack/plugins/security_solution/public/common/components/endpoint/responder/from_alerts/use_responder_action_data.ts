@@ -76,18 +76,21 @@ export const useWithResponderActionDataFromAlert = ({
   ]);
 
   const handleResponseActionsClick = useCallback(() => {
-    showResponseActionsConsole({
-      agentId,
-      agentType,
-      hostName,
-      platform,
-      capabilities: isEndpointHost ? endpointHostData.capabilities : [],
-    });
+    if (!isDisabled) {
+      showResponseActionsConsole({
+        agentId,
+        agentType,
+        hostName,
+        platform,
+        capabilities: isEndpointHost ? endpointHostData.capabilities : [],
+      });
 
-    if (onClick) {
-      onClick();
+      if (onClick) {
+        onClick();
+      }
     }
   }, [
+    isDisabled,
     showResponseActionsConsole,
     agentId,
     agentType,
@@ -195,15 +198,25 @@ const useResponderDataForEndpointHost = (
   ]);
 };
 
+export interface UseResponderActionDataProps {
+  agentId: string;
+  agentType: ResponseActionAgentType;
+  onClick?: () => void;
+}
+
+/**
+ * Returns the data necessary to render a Responder action item (ex. menu item) when only the
+ * `agentId` and `agentType` is available (ex. when showing the `Respond` button on the Host
+ * details page of SIEM
+ * @param onClick
+ * @param agentId
+ * @param agentType
+ */
 export const useResponderActionData = ({
   onClick,
   agentId,
   agentType,
-}: {
-  agentId: string;
-  agentType: ResponseActionAgentType;
-  onClick?: () => void;
-}): ResponderActionData => {
+}: UseResponderActionDataProps): ResponderActionData => {
   const isEndpointHost = agentType === 'endpoint';
 
   const showResponseActionsConsole = useWithShowResponder();
@@ -215,26 +228,29 @@ export const useResponderActionData = ({
   // TODO:PT add support for other agent types once we add the `Respond` button to the Host details page in SIEM
 
   const handleResponseActionsClick = useCallback(() => {
-    showResponseActionsConsole({
-      agentId,
-      agentType,
-      hostName,
-      platform,
-      capabilities: isEndpointHost ? capabilities : [],
-    });
+    if (!isDisabled) {
+      showResponseActionsConsole({
+        agentId,
+        agentType,
+        hostName,
+        platform,
+        capabilities: isEndpointHost ? capabilities : [],
+      });
 
-    if (onClick) {
-      onClick();
+      if (onClick) {
+        onClick();
+      }
     }
   }, [
-    agentType,
-    capabilities,
-    agentId,
-    hostName,
-    isEndpointHost,
-    onClick,
-    platform,
+    isDisabled,
     showResponseActionsConsole,
+    agentId,
+    agentType,
+    hostName,
+    platform,
+    isEndpointHost,
+    capabilities,
+    onClick,
   ]);
 
   return useMemo(() => {

@@ -8,8 +8,12 @@
 import type {
   ResponderContextMenuItemProps,
   ResponderActionData,
+  UseResponderActionDataProps,
 } from './use_responder_action_data';
-import { useWithResponderActionDataFromAlert } from './use_responder_action_data';
+import {
+  useResponderActionData,
+  useWithResponderActionDataFromAlert,
+} from './use_responder_action_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
@@ -45,10 +49,22 @@ import { HostStatus } from '../../../../../../common/endpoint/types';
 
 describe('use responder action data hooks', () => {
   let appContextMock: AppContextTestRender;
-  let renderHook: () => RenderHookResult<ResponderContextMenuItemProps, ResponderActionData>;
+  let onClickMock: ResponderContextMenuItemProps['onClick'];
+
+  const getExpectedResponderActionData = (
+    overrides: Partial<ResponderActionData> = {}
+  ): ResponderActionData => {
+    return {
+      isDisabled: false,
+      tooltip: undefined,
+      handleResponseActionsClick: expect.any(Function),
+      ...overrides,
+    };
+  };
 
   beforeEach(() => {
     appContextMock = createAppRootMockRenderer();
+    onClickMock = jest.fn();
   });
 
   afterEach(() => {
@@ -56,23 +72,10 @@ describe('use responder action data hooks', () => {
   });
 
   describe('useWithResponderActionDataFromAlert() hook', () => {
+    let renderHook: () => RenderHookResult<ResponderContextMenuItemProps, ResponderActionData>;
     let alertDetailItemData: TimelineEventsDetailsItem[];
-    let onClickMock: ResponderContextMenuItemProps['onClick'];
-
-    const getExpectedResponderActionData = (
-      overrides: Partial<ResponderActionData> = {}
-    ): ResponderActionData => {
-      return {
-        isDisabled: false,
-        tooltip: undefined,
-        handleResponseActionsClick: expect.any(Function),
-        ...overrides,
-      };
-    };
 
     beforeEach(() => {
-      onClickMock = jest.fn();
-
       renderHook = () => {
         return appContextMock.renderHook<ResponderContextMenuItemProps, ResponderActionData>(() =>
           useWithResponderActionDataFromAlert({
@@ -83,15 +86,7 @@ describe('use responder action data hooks', () => {
       };
     });
 
-    describe('and agentType is NOT Endpoint', () => {
-      beforeEach(() => {
-        alertDetailItemData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
-      });
-
-      it('should show action when agentType is supported', () => {
-        expect(renderHook().result.current).toEqual(getExpectedResponderActionData());
-      });
-
+    describe('Common behaviours', () => {
       it('should show action as disabled if agent does not support response actions', () => {
         alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo');
 
@@ -101,6 +96,32 @@ describe('use responder action data hooks', () => {
             tooltip: NOT_FROM_ENDPOINT_HOST_TOOLTIP,
           })
         );
+      });
+
+      it('should call `onClick()` function prop when is pass to the hook', () => {
+        alertDetailItemData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
+        const { result } = renderHook();
+        result.current.handleResponseActionsClick();
+
+        expect(onClickMock).toHaveBeenCalled();
+      });
+
+      it('should NOT call `onClick` if the action is disabled', () => {
+        alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo');
+        const { result } = renderHook();
+        result.current.handleResponseActionsClick();
+
+        expect(onClickMock).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('and agentType is NOT Endpoint', () => {
+      beforeEach(() => {
+        alertDetailItemData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
+      });
+
+      it('should show action when agentType is supported', () => {
+        expect(renderHook().result.current).toEqual(getExpectedResponderActionData());
       });
 
       it('should NOT call the endpoint host metadata api', () => {
@@ -191,209 +212,56 @@ describe('use responder action data hooks', () => {
     });
   });
 
-  // describe('useResponderActionData() hook', () => {
-  //   // FIXME:PT implement and fix
-  //
-  //   it('should return `responder` menu item as `disabled` if agentType is not `endpoint` and feature flag is enabled', () => {
-  //     const { result } = renderHook(() =>
-  //       useResponderActionData({
-  //         endpointId: 'some-agent-type-id',
-  //         // @ts-expect-error this is for testing purpose
-  //         agentType: 'some_agent_type',
-  //         eventData: [],
-  //       })
-  //     );
-  //     expect(result.current.isDisabled).toEqual(true);
-  //   });
-  //
-  //   describe('when agentType is `endpoint`', () => {
-  //     it.each(Object.values(HostStatus).filter((status) => status !== 'unenrolled'))(
-  //       'should return `responder` menu item as `enabled `if agentType is `endpoint` when endpoint is %s',
-  //       (hostStatus) => {
-  //         useGetEndpointDetailsMock.mockReturnValue({
-  //           data: {
-  //             host_status: hostStatus,
-  //           },
-  //           isFetching: false,
-  //           error: undefined,
-  //         });
-  //         const { result } = renderHook(() =>
-  //           useResponderActionData({
-  //             endpointId: 'endpoint-id',
-  //             agentType: 'endpoint',
-  //           })
-  //         );
-  //         expect(result.current.isDisabled).toEqual(false);
-  //       }
-  //     );
-  //
-  //     it('should return responder menu item `disabled` if agentType is `endpoint` when endpoint is `unenrolled`', () => {
-  //       useGetEndpointDetailsMock.mockReturnValue({
-  //         data: {
-  //           host_status: 'unenrolled',
-  //         },
-  //         isFetching: false,
-  //         error: undefined,
-  //       });
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'endpoint-id',
-  //           agentType: 'endpoint',
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //     });
-  //
-  //     it('should return responder menu item `disabled` if agentType is `endpoint` when endpoint data has error', () => {
-  //       useGetEndpointDetailsMock.mockReturnValue({
-  //         data: {
-  //           host_status: 'online',
-  //         },
-  //         isFetching: false,
-  //         error: new Error('uh oh!'),
-  //       });
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'endpoint-id',
-  //           agentType: 'endpoint',
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //     });
-  //
-  //     it('should return responder menu item `disabled` if agentType is `endpoint` and endpoint data is fetching', () => {
-  //       useGetEndpointDetailsMock.mockReturnValue({
-  //         data: undefined,
-  //         isFetching: true,
-  //         error: undefined,
-  //       });
-  //
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'endpoint-id',
-  //           agentType: 'endpoint',
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //     });
-  //
-  //     it('should return responder menu item `disabled` when agentType is `endpoint` but no endpoint id is provided', () => {
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: '',
-  //           agentType: 'endpoint',
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //       expect(result.current.tooltip).toEqual(HOST_ENDPOINT_UNENROLLED_TOOLTIP);
-  //     });
-  //   });
-  //
-  //   describe('when agentType is `sentinel_one`', () => {
-  //     const createEventDataMock = (): TimelineEventsDetailsItem[] => {
-  //       return [
-  //         {
-  //           category: 'observer',
-  //           field: 'observer.serial_number',
-  //           values: ['c06d63d9-9fa2-046d-e91e-dc94cf6695d8'],
-  //           originalValue: ['c06d63d9-9fa2-046d-e91e-dc94cf6695d8'],
-  //           isObjectArray: false,
-  //         },
-  //       ];
-  //     };
-  //
-  //     it('should return `responder` menu item as `disabled` if agentType is `sentinel_one` and feature flag is disabled', () => {
-  //       useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-  //
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'sentinel-one-id',
-  //           agentType: 'sentinel_one',
-  //           eventData: createEventDataMock(),
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //     });
-  //
-  //     it('should return responder menu item as disabled with tooltip if agent id property is missing from event data', () => {
-  //       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'sentinel-one-id',
-  //           agentType: 'sentinel_one',
-  //           eventData: [],
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //       expect(result.current.tooltip).toEqual(
-  //         'Event data missing SentinelOne agent identifier (observer.serial_number)'
-  //       );
-  //     });
-  //
-  //     it('should return `responder` menu item as `enabled `if agentType is `sentinel_one` and feature flag is enabled', () => {
-  //       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'sentinel-one-id',
-  //           agentType: 'sentinel_one',
-  //           eventData: createEventDataMock(),
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(false);
-  //     });
-  //   });
-  //   describe('when agentType is `crowdstrike`', () => {
-  //     const createEventDataMock = (): TimelineEventsDetailsItem[] => {
-  //       return [
-  //         {
-  //           category: 'crowdstrike',
-  //           field: 'crowdstrike.event.DeviceId',
-  //           values: ['mockedAgentId'],
-  //           originalValue: ['mockedAgentId'],
-  //           isObjectArray: false,
-  //         },
-  //       ];
-  //     };
-  //
-  //     it('should return `responder` menu item as `disabled` if agentType is `crowdstrike` and feature flag is disabled', () => {
-  //       useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-  //
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'crowdstrike-id',
-  //           agentType: 'crowdstrike',
-  //           eventData: createEventDataMock(),
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //     });
-  //
-  //     it('should return responder menu item as disabled with tooltip if agent id property is missing from event data', () => {
-  //       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'crowdstrike-id',
-  //           agentType: 'crowdstrike',
-  //           eventData: [],
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(true);
-  //       expect(result.current.tooltip).toEqual(
-  //         'Event data missing Crowdstrike agent identifier (crowdstrike.event.DeviceId)'
-  //       );
-  //     });
-  //
-  //     it('should return `responder` menu item as `enabled `if agentType is `crowdstrike` and feature flag is enabled', () => {
-  //       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-  //       const { result } = renderHook(() =>
-  //         useResponderActionData({
-  //           endpointId: 'crowdstrike-id',
-  //           agentType: 'crowdstrike',
-  //           eventData: createEventDataMock(),
-  //         })
-  //       );
-  //       expect(result.current.isDisabled).toEqual(false);
-  //     });
-  //   });
-  // });
+  describe('useResponderActionData() hook', () => {
+    let hookProps: UseResponderActionDataProps;
+    let renderHook: () => RenderHookResult<UseResponderActionDataProps, ResponderActionData>;
+
+    beforeEach(() => {
+      endpointMetadataHttpMocks(appContextMock.coreStart.http);
+      hookProps = {
+        agentId: 'agent-123',
+        agentType: 'endpoint',
+        onClick: onClickMock,
+      };
+      renderHook = () => {
+        return appContextMock.renderHook<UseResponderActionDataProps, ResponderActionData>(() =>
+          useResponderActionData(hookProps)
+        );
+      };
+    });
+
+    it('should show action enabled when agentType is Endpoint and host is enabled', async () => {
+      const { result, waitForValueToChange } = renderHook();
+      await waitForValueToChange(() => result.current.isDisabled);
+
+      expect(result.current).toEqual(getExpectedResponderActionData());
+    });
+
+    it('should show action disabled if agent type is not Endpoint', () => {
+      hookProps.agentType = 'crowdstrike';
+
+      expect(renderHook().result.current).toEqual(
+        getExpectedResponderActionData({
+          isDisabled: true,
+          tooltip: NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+        })
+      );
+    });
+
+    it('should call `onClick` prop when action is enabled', async () => {
+      const { result, waitForValueToChange } = renderHook();
+      await waitForValueToChange(() => result.current.isDisabled);
+      result.current.handleResponseActionsClick();
+
+      expect(onClickMock).toHaveBeenCalled();
+    });
+
+    it('should not call `onCLick` prop when action is disabled', () => {
+      hookProps.agentType = 'sentinel_one';
+      const { result } = renderHook();
+      result.current.handleResponseActionsClick();
+
+      expect(onClickMock).not.toHaveBeenCalled();
+    });
+  });
 });
