@@ -12,16 +12,17 @@ const CommonUseField = getUseField({ component: Field });
 
 interface Props {
   isLoading: boolean;
+  autoFocus?: boolean;
 }
 
-const TitleComponent: React.FC<Props> = ({ isLoading }) => (
+const TitleComponent: React.FC<Props> = ({ isLoading, autoFocus = false }) => (
   <CommonUseField
     path="title"
     componentProps={{
       idAria: 'caseTitle',
       'data-test-subj': 'caseTitle',
       euiFieldProps: {
-        autoFocus: true,
+        autoFocus,
         fullWidth: true,
         disabled: isLoading,
       },

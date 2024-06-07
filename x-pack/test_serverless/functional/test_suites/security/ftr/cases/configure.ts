@@ -22,6 +22,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const retry = getService('retry');
   const find = getService('find');
+  const comboBox = getService('comboBox');
 
   describe('Configure Case', function () {
     before(async () => {
@@ -76,13 +77,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Custom fields', function () {
       it('adds a custom field', async () => {
         await testSubjects.existOrFail('custom-fields-form-group');
-        await common.clickAndValidate('add-custom-field', 'custom-field-flyout');
+        await common.clickAndValidate('add-custom-field', 'common-flyout');
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
         await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
 
-        await testSubjects.click('custom-field-flyout-save');
+        await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
         await testSubjects.existOrFail('custom-fields-list');
@@ -100,7 +101,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await input.type('!!!');
 
-        await testSubjects.click('custom-field-flyout-save');
+        await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
         await testSubjects.existOrFail('custom-fields-list');
@@ -119,6 +120,37 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmModalConfirmButton');
 
         await testSubjects.missingOrFail('custom-fields-list');
+      });
+    });
+
+    describe('Templates', function () {
+      it('adds a template', async () => {
+        await testSubjects.existOrFail('templates-form-group');
+        await common.clickAndValidate('add-template', 'common-flyout');
+
+        await testSubjects.setValue('template-name-input', 'Template name');
+        await comboBox.setCustom('template-tags', 'tag-t1');
+        await testSubjects.setValue('template-description-input', 'Template description');
+
+        const caseTitle = await find.byCssSelector(
+          `[data-test-subj="input"][aria-describedby="caseTitle"]`
+        );
+        await caseTitle.focus();
+        await caseTitle.type('case with template');
+
+        await cases.create.setDescription('test description');
+
+        await cases.create.setTags('tagme');
+        await cases.create.setCategory('new');
+
+        await testSubjects.click('common-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await retry.waitFor('templates-list', async () => {
+          return await testSubjects.exists('templates-list');
+        });
+
+        expect(await testSubjects.getVisibleText('templates-list')).to.be('Template name\ntag-t1');
       });
     });
   });

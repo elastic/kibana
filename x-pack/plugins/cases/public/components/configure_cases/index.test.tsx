@@ -36,6 +36,7 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useLicense } from '../../common/use_license';
+import * as i18n from './translations';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
@@ -425,6 +426,7 @@ describe('ConfigureCases', () => {
         },
         closureType: 'close-by-user',
         customFields: [],
+        templates: [],
         id: '',
         version: '',
       });
@@ -521,6 +523,7 @@ describe('ConfigureCases', () => {
         },
         closureType: 'close-by-pushing',
         customFields: [],
+        templates: [],
         id: '',
         version: '',
       });
@@ -706,6 +709,7 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
           ],
+          templates: [],
           id: '',
           version: '',
         });
@@ -729,11 +733,11 @@ describe('ConfigureCases', () => {
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
       userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -756,6 +760,7 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
           ],
+          templates: [],
           id: '',
           version: '',
         });
@@ -767,7 +772,7 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
     });
 
     it('closes fly out for when click on cancel', async () => {
@@ -775,12 +780,12 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
+      userEvent.click(screen.getByTestId('common-flyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
-      expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
     });
 
     it('closes fly out for when click on save field', async () => {
@@ -788,11 +793,11 @@ describe('ConfigureCases', () => {
 
       userEvent.click(screen.getByTestId('add-custom-field'));
 
-      expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -812,20 +817,132 @@ describe('ConfigureCases', () => {
               required: false,
             },
           ],
+          templates: [],
           id: '',
           version: '',
         });
       });
 
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
-      expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('templates', () => {
+    let appMockRender: AppMockRenderer;
+    const persistCaseConfigure = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false, isAtLeastGold: () => true });
+    });
+
+    it('should render template section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('add-template')).toBeInTheDocument();
+    });
+
+    it('should render template form in flyout', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('add-template'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.CREATE_TEMPLATE
+      );
+      expect(await screen.findByTestId('template-creation-form-steps')).toBeInTheDocument();
+    });
+
+    it('should add template', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('add-template'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
+      userEvent.paste(
+        await screen.findByTestId('template-description-input'),
+        'Template description'
+      );
+
+      const caseTitle = await screen.findByTestId('caseTitle');
+      userEvent.paste(within(caseTitle).getByTestId('input'), 'Case using template');
+
+      userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: customFieldsConfigurationMock,
+          templates: [
+            {
+              key: expect.anything(),
+              name: 'Template name',
+              description: 'Template description',
+              tags: [],
+              caseFields: {
+                title: 'Case using template',
+                connector: {
+                  id: 'none',
+                  name: 'none',
+                  type: ConnectorTypes.none,
+                  fields: null,
+                },
+                settings: {
+                  syncAlerts: true,
+                },
+                customFields: [
+                  {
+                    key: customFieldsConfigurationMock[0].key,
+                    type: customFieldsConfigurationMock[0].type,
+                    value: customFieldsConfigurationMock[0].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[1].key,
+                    type: customFieldsConfigurationMock[1].type,
+                    value: customFieldsConfigurationMock[1].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[3].key,
+                    type: customFieldsConfigurationMock[3].type,
+                    value: false, // when no default value for toggle, we set it to false
+                  },
+                ],
+              },
+            },
+          ],
+          id: '',
+          version: '',
+        });
+      });
+
+      expect(screen.getByTestId('templates-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
     });
   });
 
   describe('rendering with license limitations', () => {
     let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
-
     beforeEach(() => {
       // Default setup
       jest.clearAllMocks();

@@ -512,7 +512,6 @@ describe('client', () => {
               templates: new Array(MAX_TEMPLATES_LENGTH + 1).fill({
                 key: 'template_1',
                 name: 'template 1',
-                description: 'test',
                 caseFields: null,
               }),
             },
@@ -541,7 +540,6 @@ describe('client', () => {
                 {
                   key: 'template_1',
                   name: 'template 2',
-                  description: 'test',
                   tags: [],
                   caseFields: {
                     title: 'Case title',

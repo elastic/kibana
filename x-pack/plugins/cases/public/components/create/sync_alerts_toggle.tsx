@@ -6,11 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from './translations';
-
-const CommonUseField = getUseField({ component: Field });
 
 interface Props {
   isLoading: boolean;
@@ -18,9 +16,12 @@ interface Props {
 
 const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading }) => {
   const [{ syncAlerts }] = useFormData({ watch: ['syncAlerts'] });
+
   return (
-    <CommonUseField
+    <UseField
       path="syncAlerts"
+      component={ToggleField}
+      config={{ defaultValue: true }}
       componentProps={{
         idAria: 'caseSyncAlerts',
         'data-test-subj': 'caseSyncAlerts',

@@ -11,14 +11,16 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
+import { OptionalFieldLabel } from '../../create/optional_field_label';
 
 const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
   customFieldConfiguration,
   isLoading,
+  setAsOptional,
 }) => {
   const { key, label, required, defaultValue } = customFieldConfiguration;
   const config = getTextFieldConfig({
-    required,
+    required: setAsOptional ? false : required,
     label,
     ...(defaultValue && { defaultValue: String(defaultValue) }),
   });
@@ -30,6 +32,7 @@ const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
       component={TextField}
       label={label}
       componentProps={{
+        labelAppend: setAsOptional ? OptionalFieldLabel : null,
         euiFieldProps: {
           'data-test-subj': `${key}-text-create-custom-field`,
           fullWidth: true,

@@ -235,3 +235,19 @@ export const convertCustomFieldValue = (value: string | boolean) => {
 
   return value;
 };
+
+export const addOrReplaceField = <T extends { key: string }>(fields: T[], fieldToAdd: T): T[] => {
+  const foundFieldIndex = fields.findIndex((field) => field.key === fieldToAdd.key);
+
+  if (foundFieldIndex === -1) {
+    return [...fields, fieldToAdd];
+  }
+
+  return fields.map((field) => {
+    if (field.key !== fieldToAdd.key) {
+      return field;
+    }
+
+    return fieldToAdd;
+  });
+};

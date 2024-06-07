@@ -7,13 +7,10 @@
 
 import React, { memo, useMemo } from 'react';
 
-import { getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useGetTags } from '../../containers/use_get_tags';
 import * as i18n from './translations';
-
-const CommonUseField = getUseField({ component: Field });
-
 interface Props {
   isLoading: boolean;
 }
@@ -29,8 +26,10 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
   );
 
   return (
-    <CommonUseField
+    <UseField
       path="tags"
+      component={ComboBoxField}
+      defaultValue={[]}
       componentProps={{
         idAria: 'caseTags',
         'data-test-subj': 'caseTags',

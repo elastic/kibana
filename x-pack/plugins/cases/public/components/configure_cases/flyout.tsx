@@ -17,35 +17,41 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import type { CustomFieldFormState } from './form';
-import { CustomFieldsForm } from './form';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import type { FormHook, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
 
 import * as i18n from './translations';
 
-export interface CustomFieldFlyoutProps {
+export interface FormState<T extends FormData = FormData> {
+  isValid: boolean | undefined;
+  submit: FormHook<T>['submit'];
+}
+
+export interface FlyOutBodyProps<T extends FormData = FormData> {
+  onChange: (state: FormState<T>) => void;
+}
+
+export interface FlyoutProps<T extends FormData = FormData> {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
-  onSaveField: (data: CustomFieldConfiguration) => void;
-  customField: CustomFieldConfiguration | null;
+  onSaveField: (data: T) => void;
+  renderHeader: () => React.ReactNode;
+  renderBody: ({ onChange }: FlyOutBodyProps<T>) => React.ReactNode;
 }
 
-const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
+export const CommonFlyout = <T extends FormData = FormData>({
   onCloseFlyout,
   onSaveField,
   isLoading,
   disabled,
-  customField,
-}) => {
-  const dataTestSubj = 'custom-field-flyout';
-
-  const [formState, setFormState] = useState<CustomFieldFormState>({
+  renderHeader,
+  renderBody,
+}: FlyoutProps<T>) => {
+  const [formState, setFormState] = useState<FormState<T>>({
     isValid: undefined,
     submit: async () => ({
       isValid: false,
-      data: { key: '', label: '', type: CustomFieldTypes.TEXT, required: false },
+      data: {} as T,
     }),
   });
 
@@ -55,26 +61,28 @@ const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
     const { isValid, data } = await submit();
 
     if (isValid) {
-      onSaveField(data);
+      onSaveField(data as T);
     }
   }, [onSaveField, submit]);
 
   return (
-    <EuiFlyout onClose={onCloseFlyout} data-test-subj={dataTestSubj}>
-      <EuiFlyoutHeader hasBorder data-test-subj={`${dataTestSubj}-header`}>
+    <EuiFlyout onClose={onCloseFlyout} data-test-subj="common-flyout">
+      <EuiFlyoutHeader hasBorder data-test-subj="common-flyout-header">
         <EuiTitle size="s">
-          <h3 id="flyoutTitle">{i18n.ADD_CUSTOM_FIELD}</h3>
+          <h3 id="flyoutTitle">{renderHeader()}</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <CustomFieldsForm initialValue={customField} onChange={setFormState} />
+        {renderBody({
+          onChange: setFormState,
+        })}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter data-test-subj={`${dataTestSubj}-footer`}>
+      <EuiFlyoutFooter data-test-subj={'common-flyout-footer'}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onCloseFlyout}
-              data-test-subj={`${dataTestSubj}-cancel`}
+              data-test-subj={'common-flyout-cancel'}
               disabled={disabled}
               isLoading={isLoading}
             >
@@ -86,11 +94,11 @@ const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
               <EuiButton
                 fill
                 onClick={handleSaveField}
-                data-test-subj={`${dataTestSubj}-save`}
+                data-test-subj={'common-flyout-save'}
                 disabled={disabled}
                 isLoading={isLoading}
               >
-                {i18n.SAVE_FIELD}
+                {i18n.SAVE}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -100,6 +108,4 @@ const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
   );
 };
 
-CustomFieldFlyoutComponent.displayName = 'CustomFieldFlyout';
-
-export const CustomFieldFlyout = React.memo(CustomFieldFlyoutComponent);
+CommonFlyout.displayName = 'CommonFlyout';

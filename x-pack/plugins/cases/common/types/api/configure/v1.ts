@@ -86,20 +86,20 @@ export const TemplateConfigurationRt = rt.intersection([
      */
     name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
     /**
-     * description of templates
-     */
-    description: limitedStringSchema({
-      fieldName: 'description',
-      min: 1,
-      max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
-    }),
-    /**
      * case fields
      */
     caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRequestRt]),
   }),
   rt.exact(
     rt.partial({
+      /**
+       * description of templates
+       */
+      description: limitedStringSchema({
+        fieldName: 'description',
+        min: 0,
+        max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
+      }),
       /**
        * tags of templates
        */

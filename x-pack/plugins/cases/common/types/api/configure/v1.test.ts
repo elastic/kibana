@@ -585,6 +585,18 @@ describe('configure', () => {
       });
     });
 
+    it('does not throw when there is no description or tags', () => {
+      const newRequest = {
+        key: 'template_key_1',
+        name: 'Template 1',
+        caseFields: null,
+      };
+
+      expect(PathReporter.report(TemplateConfigurationRt.decode({ ...newRequest }))).toContain(
+        'No errors!'
+      );
+    });
+
     it('limits name to 50 characters', () => {
       const longName = 'x'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1);
 

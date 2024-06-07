@@ -45,7 +45,7 @@ type PersistedCustomFieldsConfiguration = Array<{
 type PersistedTemplatesConfiguration = Array<{
   key: string;
   name: string;
-  description: string;
+  description?: string;
   tags?: string[];
   caseFields?: CaseFieldsAttributes | null;
 }>;
