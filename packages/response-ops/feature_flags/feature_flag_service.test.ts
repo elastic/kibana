@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { isFeatureFlagSet } from './is_feature_flag_set';
+import { createFeatureFlagService } from './feature_flag_service';
 
-describe('isFeatureFlagSet', () => {
+describe('FeatureFlagService', () => {
   it('returns true if the feature exists', () => {
-    expect(isFeatureFlagSet('test.myFeature')).toBe(true);
+    const featureFlagService = createFeatureFlagService(['test.myFeature']);
+    expect(featureFlagService.isFeatureFlagSet('test.myFeature')).toBe(true);
   });
 
   it('returns false if the feature does not exist', () => {
-    expect(isFeatureFlagSet('foo')).toBe(false);
+    const featureFlagService = createFeatureFlagService(['test.myFeature']);
+    // @ts-expect-error: foo is not part of the valid feature flags
+    expect(featureFlagService.isFeatureFlagSet('foo')).toBe(false);
   });
 });

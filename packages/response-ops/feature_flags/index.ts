@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { isFeatureFlagSet } from './is_feature_flag_set';
+export { createFeatureFlagService } from './feature_flag_service';
+export type { FeatureFlagService } from './feature_flag_service';
