@@ -32,8 +32,8 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
   });
 
   it('schedule from rule details page', () => {
-    createRule(getNewRule({ rule_id: 'new custom rule' })).then((rule) =>
-      visitRuleDetailsPage(rule.body.id)
+    createRule(getNewRule({ rule_id: 'new custom rule', interval: '5m', from: 'now-6m' })).then(
+      (rule) => visitRuleDetailsPage(rule.body.id)
     );
     manualRuleRunFromDetailsPage();
 
@@ -52,24 +52,26 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
   });
 
   it('schedule from rules management table', () => {
-    createRule(getNewRule({ rule_id: 'new custom rule' })).then((rule) => {
-      visitRulesManagementTable();
-      disableAutoRefresh();
-      manuallyRunFirstRule();
+    createRule(getNewRule({ rule_id: 'new custom rule', interval: '5m', from: 'now-6m' })).then(
+      (rule) => {
+        visitRulesManagementTable();
+        disableAutoRefresh();
+        manuallyRunFirstRule();
 
-      visitRuleDetailsPage(rule.body.id);
-      goToExecutionLogTab();
-      filterByRunType('Manual');
-      cy.waitUntil(
-        () => {
-          cy.log('Waiting for manually scheduled rule execution logs to appear');
-          refreshRuleExecutionTable();
-          return getExecutionLogTableRow().then((rows) => {
-            return rows.length > 2;
-          });
-        },
-        { interval: 5000, timeout: 20000 }
-      );
-    });
+        visitRuleDetailsPage(rule.body.id);
+        goToExecutionLogTab();
+        filterByRunType('Manual');
+        cy.waitUntil(
+          () => {
+            cy.log('Waiting for manually scheduled rule execution logs to appear');
+            refreshRuleExecutionTable();
+            return getExecutionLogTableRow().then((rows) => {
+              return rows.length > 2;
+            });
+          },
+          { interval: 5000, timeout: 20000 }
+        );
+      }
+    );
   });
 });
