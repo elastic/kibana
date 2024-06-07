@@ -11,6 +11,7 @@ import type {
   IScopedClusterClient,
   IUiSettingsClient,
   KibanaRequest,
+  KibanaResponseFactory,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -51,6 +52,7 @@ export type ObservabilityAIAssistantRequestHandlerContext = Omit<
 
 export interface ObservabilityAIAssistantRouteHandlerResources {
   request: KibanaRequest;
+  response: KibanaResponseFactory;
   context: ObservabilityAIAssistantRequestHandlerContext;
   logger: Logger;
   service: ObservabilityAIAssistantService;
