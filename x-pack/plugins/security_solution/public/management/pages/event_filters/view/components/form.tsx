@@ -605,8 +605,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         const tags = getTagsUpdatedBy('entireTree', newFilterProcessTreeTags);
 
         processChanged({ tags });
+        if (!hasFormChanged) setHasFormChanged(true);
       },
-      [getTagsUpdatedBy, processChanged]
+      [getTagsUpdatedBy, hasFormChanged, processChanged]
     );
 
     const filterEntireProcessTreeSection = useMemo(() => {
