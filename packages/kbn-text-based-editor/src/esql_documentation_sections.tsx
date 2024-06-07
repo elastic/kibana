@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Markdown as SharedUXMarkdown } from '@kbn/shared-ux-markdown';
 
 const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
-  <SharedUXMarkdown {...props} enableSoftLineBreaks />
+  <SharedUXMarkdown {...props} readOnly enableSoftLineBreaks />
 );
 
 export const initialSection = (
