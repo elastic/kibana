@@ -23,8 +23,8 @@ export function getAlertStartAnnotation({
       alertStart={alertStart}
       alertEnd={alertEnd}
       color={color}
-      id={'alertActiveRect'}
-      key={'alertActiveRect'}
+      id="alertActiveRect"
+      key="alertActiveRect"
     />,
     <AlertAnnotation
       key="alertAnnotationStart"
