@@ -8,20 +8,22 @@
 import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
 import { allOrAnyStringOrArray, dateType } from './common';
-import { durationType } from './duration';
+import { durationType, durationTypeConfigSchema } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
+const occurrencesBudgetingMethodConfigSchema = schema.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
+const timeslicesBudgetingMethodConfigSchema = schema.literal('timeslices');
 
 const budgetingMethodSchema = t.union([
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 ]);
 const budgetingMethodConfigSchema = schema.oneOf([
-  schema.literal('occurrences'),
-  schema.literal('timeslices'),
+  occurrencesBudgetingMethodConfigSchema,
+  timeslicesBudgetingMethodConfigSchema,
 ]);
 
 const targetSchema = t.type({ target: t.number });
@@ -48,12 +50,10 @@ const settingsSchema = t.type({
 const groupBySchema = allOrAnyStringOrArray;
 
 const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
-// TODO Change to partial
 const optionalSettingsConfigSchema = schema.object({
-  // TODO Change to durationType
-  syncDelay: schema.duration(),
-  frequency: schema.duration(),
-  preventInitialBackfill: schema.boolean(),
+  syncDelay: schema.maybe(durationTypeConfigSchema),
+  frequency: schema.maybe(durationTypeConfigSchema),
+  preventInitialBackfill: schema.maybe(schema.boolean()),
 });
 
 const tagsSchema = t.array(t.string);
@@ -97,6 +97,7 @@ export {
   objectiveConfigSchema,
   groupBySchema,
   occurrencesBudgetingMethodSchema,
+  occurrencesBudgetingMethodConfigSchema,
   optionalSettingsSchema,
   optionalSettingsConfigSchema,
   settingsSchema,
@@ -107,4 +108,5 @@ export {
   tagsConfigSchema,
   targetSchema,
   timeslicesBudgetingMethodSchema,
+  timeslicesBudgetingMethodConfigSchema,
 };

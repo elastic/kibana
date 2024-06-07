@@ -11,6 +11,7 @@ import {
   ALL_VALUE,
   syntheticsAvailabilityIndicatorSchema,
   occurrencesBudgetingMethodSchema,
+  // occurrencesBudgetingMethodConfigSchema,
   SyntheticsAvailabilityIndicator,
 } from '@kbn/slo-schema';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
@@ -168,6 +169,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
 
   private buildAggregations(slo: SLODefinition) {
     if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      // if (!occurrencesBudgetingMethodConfigSchema.validate(slo.budgetingMethod)) {
       throw new Error(
         "The sli.synthetics.availability indicator MUST have an 'Occurrences' budgeting method."
       );

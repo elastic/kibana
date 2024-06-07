@@ -7,7 +7,7 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
-import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, CreateSLOParamsConfigSchema, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 import {
@@ -36,7 +36,7 @@ export class CreateSLO {
     private basePath: IBasePath
   ) {}
 
-  public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
+  public async execute(params: CreateSLOParamsConfigSchema): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
@@ -89,8 +89,8 @@ export class CreateSLO {
     return this.toResponse(slo);
   }
 
-  public inspect(params: CreateSLOParams): {
-    slo: CreateSLOParams;
+  public inspect(params: CreateSLOParamsConfigSchema): {
+    slo: CreateSLOParamsConfigSchema;
     pipeline: Record<string, any>;
     rollUpTransform: TransformPutTransformRequest;
     summaryTransform: TransformPutTransformRequest;
@@ -119,12 +119,13 @@ export class CreateSLO {
     };
   }
 
-  private toSLO(params: CreateSLOParams): SLODefinition {
+  private toSLO(params: CreateSLOParamsConfigSchema): SLODefinition {
     const now = new Date();
     return {
       ...params,
       id: params.id ?? uuidv4(),
       settings: {
+        // TODO Fix type error: "Type 'string | Duration' is not assignable to type 'Duration'."
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
         preventInitialBackfill: params.settings?.preventInitialBackfill ?? false,

@@ -7,6 +7,7 @@
 
 import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { schema } from '@kbn/config-schema';
 
 import { Duration, DurationUnit } from '../models/duration';
 
@@ -28,4 +29,22 @@ const durationType = new t.Type<Duration, string, unknown>(
   (duration: Duration): string => duration.format()
 );
 
-export { durationType };
+const durationTypeConfigSchema = schema.string({
+  minLength: 2,
+  validate(value) {
+    try {
+      new Duration(parseInt(value.slice(0, -1), 10), value.slice(-1) as DurationUnit);
+      return;
+    } catch (err) {
+      // IF duration is not valid, the get the following message:
+      // {
+      // 	"statusCode": 400,
+      // 	"error": "Bad Request",
+      // 	"message": "[request body.timeWindow.duration]: error: Error: invalid duration unit"
+      // }
+      return `error: ${err}`;
+    }
+  },
+});
+
+export { durationType, durationTypeConfigSchema };

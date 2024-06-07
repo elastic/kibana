@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
   allOrAnyStringOrArrayConfigSchema,
   indicatorSchema,
@@ -49,24 +49,19 @@ const createSLOParamsSchema = t.type({
 });
 
 const createSLOParamsConfigSchema = {
-  body: schema.oneOf([
-    schema.object({
-      name: schema.string(),
-      description: schema.string(),
-      indicator: indicatorConfigSchema,
-      timeWindow: timeWindowConfigSchema,
-      budgetingMethod: budgetingMethodConfigSchema,
-      objective: objectiveConfigSchema,
-    }),
-    // TODO Change to partial
-    schema.object({
-      id: sloIdConfigSchema,
-      settings: optionalSettingsConfigSchema,
-      tags: tagsConfigSchema,
-      groupBy: allOrAnyStringOrArrayConfigSchema,
-      revision: schema.number(),
-    }),
-  ]),
+  body: schema.object({
+    name: schema.string(),
+    description: schema.string(),
+    indicator: indicatorConfigSchema,
+    timeWindow: timeWindowConfigSchema,
+    budgetingMethod: budgetingMethodConfigSchema,
+    objective: objectiveConfigSchema,
+    id: schema.maybe(sloIdConfigSchema),
+    settings: schema.maybe(optionalSettingsConfigSchema),
+    tags: schema.maybe(tagsConfigSchema),
+    groupBy: schema.maybe(allOrAnyStringOrArrayConfigSchema),
+    revision: schema.maybe(schema.number()),
+  }),
 };
 
 const createSLOResponseSchema = t.type({
@@ -79,6 +74,8 @@ const createSLOResponseConfigSchema = {
 
 type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
+type CreateSLOInputConfigSchema = TypeOf<typeof createSLOParamsConfigSchema.body>; // Parsed payload used by the frontend
+type CreateSLOParamsConfigSchema = TypeOf<typeof createSLOParamsConfigSchema.body>; // Parsed payload used by the backend
 type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw response sent to the frontend
 
 export {
@@ -87,4 +84,10 @@ export {
   createSLOResponseSchema,
   createSLOResponseConfigSchema,
 };
-export type { CreateSLOInput, CreateSLOParams, CreateSLOResponse };
+export type {
+  CreateSLOInput,
+  CreateSLOInputConfigSchema,
+  CreateSLOParams,
+  CreateSLOParamsConfigSchema,
+  CreateSLOResponse,
+};

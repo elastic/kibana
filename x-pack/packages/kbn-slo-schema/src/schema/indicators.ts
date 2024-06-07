@@ -362,7 +362,10 @@ const indicatorSchema = t.union([
   histogramIndicatorSchema,
 ]);
 // TODO Add rest of the indicators
-const indicatorConfigSchema = schema.oneOf([apmTransactionDurationIndicatorConfigSchema]);
+const indicatorConfigSchema = schema.oneOf([
+  apmTransactionDurationIndicatorConfigSchema,
+  schema.any(),
+]);
 
 export {
   kqlQuerySchema,
