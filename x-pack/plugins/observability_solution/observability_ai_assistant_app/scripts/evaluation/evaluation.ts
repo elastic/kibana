@@ -77,6 +77,8 @@ function runEvaluations() {
             node: serviceUrls.esUrl,
           });
 
+          await kibanaClient.createSpaceIfNeeded();
+
           const connectors = await kibanaClient.getConnectors();
 
           if (!connectors.length) {
