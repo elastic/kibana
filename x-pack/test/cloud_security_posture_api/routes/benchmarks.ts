@@ -144,7 +144,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/179815
-  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {
+  describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
         await index.removeFindings();
