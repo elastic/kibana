@@ -11,11 +11,12 @@ import { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, DefaultInferenceModels, Field } from '../../../../../types';
 import { MLModelNotificationToasts } from '../../../ml_model_toasts';
-
+import { getInferenceModels } from '../../../../../../../services/api';
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
@@ -30,7 +31,6 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const { form, setErrorsInTrainedModelDeployment, ml } = props;
   const { inferenceToModelIdMap } = useMappingsState();
   const dispatch = useDispatch();
-
   const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<string>();
   const [nameValue, setNameValue] = useState<string>();
   const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
@@ -128,9 +128,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
     if (data.inferenceId === undefined) {
       return;
     }
-
     const inferenceData = inferenceToModelIdMap?.[data.inferenceId];
-
     if (!inferenceData) {
       return;
     }
@@ -140,6 +138,15 @@ export function useSemanticText(props: UseSemanticTextProps) {
     showMlSuccessToasts();
 
     try {
+      // check if model exist
+      const inferenceModels = await getInferenceModels();
+      const inferenceModel: InferenceAPIConfigResponse[] = inferenceModels.data.filter(
+        (e: InferenceAPIConfigResponse) => e.model_id === inferenceValue
+      );
+      if (inferenceModel.length > 0) {
+        return;
+      }
+
       await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
     } catch (error) {
       // trainedModelId is empty string when it's a third party model
