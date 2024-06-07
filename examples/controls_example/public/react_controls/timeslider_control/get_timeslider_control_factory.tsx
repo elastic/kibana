@@ -30,6 +30,7 @@ import {
   TO_INDEX,
 } from './time_utils';
 import { initTimeRangePercentage } from './init_time_range_percentage';
+import './components/index.scss';
 
 export const getTimesliderControlFactory = (
   services: Services
