@@ -201,6 +201,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           canEditName={canEditName}
         />
 
+        <EuiSpacer size="xl" />
+
         {/* Form submission */}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
