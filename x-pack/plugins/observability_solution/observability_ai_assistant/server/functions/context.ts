@@ -70,8 +70,10 @@ export function registerContextFunction({
           messages.filter((message) => message.message.role === MessageRole.User)
         );
 
-        const userPrompt = userMessage?.message.content!;
-        const queries = compact([{ text: userPrompt, boost: 3 }, { text: screenDescription }]);
+        const userPrompt = userMessage?.message.content;
+        const queries = [{ text: userPrompt, boost: 3 }, { text: screenDescription }].filter(
+          ({ text }) => text
+        ) as Array<{ text: string; boost?: number }>;
 
         const suggestions = await retrieveSuggestions({ client, queries });
         if (suggestions.length === 0) {
@@ -90,7 +92,7 @@ export function registerContextFunction({
           });
 
           analytics.reportEvent<RecallRanking>(RecallRankingEventType, {
-            prompt: `${screenDescription} | ${userPrompt}`,
+            prompt: queries.map((query) => query.text).join('|'),
             scoredDocuments: suggestions.map((suggestion) => {
               const llmScore = scores.find((score) => score.id === suggestion.id);
               return {
