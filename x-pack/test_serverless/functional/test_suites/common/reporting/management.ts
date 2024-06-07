@@ -22,6 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const reportingAPI = getService('svlReportingApi');
   const svlUserManager = getService('svlUserManager');
   let role: RoleCredentials;
+  let roleName: string;
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -54,7 +55,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Kibana CI and MKI use different users
     before('initialize saved object archive', async () => {
-      role = await svlUserManager.createApiKeyForRole('admin');
+      roleName = 'admin';
+      role = await svlUserManager.createApiKeyForRole(roleName);
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });
@@ -76,7 +78,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // Skipping test for now because functionality is not yet possible to test
     xit(`user doesn't see a job another user has created`, async () => {
-      log.debug(`creating a csv report job using api keys for role`);
+      log.debug(`creating a csv report job using api keys for role: [${roleName}]`);
 
       const {
         job: { id: jobId },
