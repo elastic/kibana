@@ -418,59 +418,73 @@ describe('Event filter form', () => {
     });
   });
 
-  describe('Filter entire process tree', () => {
+  describe('Filter descendents of process', () => {
     beforeEach(() => {
       mockedContext.setExperimentalFlag({ filterEntireProcessTreeForEventFiltersEnabled: true });
     });
 
-    it('should not be displayed when feature flag is disabled', () => {
+    it('should not display selector when feature flag is disabled', () => {
       mockedContext.setExperimentalFlag({ filterEntireProcessTreeForEventFiltersEnabled: false });
       render();
 
       expect(
-        renderResult.queryByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)
+        renderResult.queryByTestId(`${formPrefix}-filterProcessDescendentsButton`)
       ).not.toBeInTheDocument();
     });
 
-    it('should display unchecked switch when tags are missing', () => {
+    it('should show `Events` filter selected when tags are missing', () => {
       delete formProps.item.tags;
       render();
 
+      expect(renderResult.getByTestId(`${formPrefix}-filterEventsButton`)).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
       expect(
-        renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)
-      ).not.toBeChecked();
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`)
+      ).toHaveAttribute('aria-pressed', 'false');
     });
 
-    it('should display unchecked switch when filtering entire process tree is disabled', () => {
+    it('should show `Events` filter selected when filtering descendents of process is disabled in config', () => {
       formProps.item.tags = [];
       render();
 
+      expect(renderResult.getByTestId(`${formPrefix}-filterEventsButton`)).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
       expect(
-        renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)
-      ).not.toBeChecked();
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`)
+      ).toHaveAttribute('aria-pressed', 'false');
     });
 
-    it('should display checked switch when filtering entire process tree is enabled', () => {
+    it('should show `Descendent of processes` filter selected when enabled in config', () => {
       formProps.item.tags = [ENTIRE_PROCESS_TREE_TAG];
       render();
 
-      expect(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`)).toBeChecked();
+      expect(renderResult.getByTestId(`${formPrefix}-filterEventsButton`)).toHaveAttribute(
+        'aria-pressed',
+        'false'
+      );
+      expect(
+        renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`)
+      ).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('should add process tree filtering tag to tags when enabled', () => {
+    it('should add process tree filtering tag to tags when filtering descendents enabled', () => {
       formProps.item.tags = [];
       render();
 
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`));
 
       expect(latestUpdatedItem.tags).toStrictEqual([ENTIRE_PROCESS_TREE_TAG]);
     });
 
-    it('should remove process tree filtering tag from tags when disabled', () => {
+    it('should remove process tree filtering tag from tags when filtering descendents disabled', () => {
       formProps.item.tags = [ENTIRE_PROCESS_TREE_TAG];
       render();
 
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
 
       expect(latestUpdatedItem.tags).toStrictEqual([]);
     });
@@ -483,7 +497,7 @@ describe('Event filter form', () => {
       formProps.item.tags = perPolicyTags;
       render();
 
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`));
       expect(latestUpdatedItem.tags).toStrictEqual([...perPolicyTags, ENTIRE_PROCESS_TREE_TAG]);
 
       rerenderWithLatestProps();
@@ -491,11 +505,11 @@ describe('Event filter form', () => {
       expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG]);
 
       rerenderWithLatestProps();
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
       expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG]);
 
       rerenderWithLatestProps();
-      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEntireProcessTreeSwitch`));
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`));
       expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG]);
 
       rerenderWithLatestProps();
@@ -504,8 +518,8 @@ describe('Event filter form', () => {
     });
 
     it('should display a tooltip to the user', async () => {
-      const tooltipIconSelector = `${formPrefix}-filterEntireProcessTreeTooltipIcon`;
-      const tooltipTextSelector = `${formPrefix}-filterEntireProcessTreeTooltipText`;
+      const tooltipIconSelector = `${formPrefix}-filterProcessDescendents-tooltipIcon`;
+      const tooltipTextSelector = `${formPrefix}-filterProcessDescendents-tooltipText`;
       render();
 
       expect(renderResult.getByTestId(tooltipIconSelector)).toBeInTheDocument();

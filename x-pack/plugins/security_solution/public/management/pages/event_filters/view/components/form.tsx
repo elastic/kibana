@@ -8,22 +8,25 @@
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 
 import { isEqual } from 'lodash';
-import type { EuiSuperSelectOption, EuiSwitchEvent } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiButtonGroup,
   EuiToolTip,
   EuiIcon,
+  useEuiTheme,
   EuiForm,
   EuiFormRow,
   EuiSuperSelect,
-  EuiSwitch,
   EuiText,
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
@@ -167,12 +170,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
     );
+    const { getTagsUpdatedBy } = useGetUpdatedTags(exception, TAG_FILTERS);
+    const euiTheme = useEuiTheme();
 
-    const isFilterEntireProcessTreeFeatureEnabled = useIsExperimentalFeatureEnabled(
+    const isFilterDescendentsOfProcessFeatureEnabled = useIsExperimentalFeatureEnabled(
       'filterEntireProcessTreeForEventFiltersEnabled'
     );
 
-    const isFilterEntireProcessTreeSwitchEnabled = useMemo(
+    const isFilterDescendentsOfProcessSelected = useMemo(
       () => isFilterEntireProcessTreeEnabled(exception),
       [exception]
     );
@@ -432,6 +437,120 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [nameInputMemo, descriptionInputMemo]
     );
 
+    const handleFilterTypeOnChange = useCallback(
+      (id: string) => {
+        const newFilterProcessTreeTags = id === 'descendents' ? [ENTIRE_PROCESS_TREE_TAG] : [];
+        const tags = getTagsUpdatedBy('entireTree', newFilterProcessTreeTags);
+
+        processChanged({ tags });
+        if (!hasFormChanged) setHasFormChanged(true);
+      },
+      [getTagsUpdatedBy, hasFormChanged, processChanged]
+    );
+
+    const filterTypeOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
+      const descendentsTooltip = (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.tooltip"
+              defaultMessage="Filtering the descendents of a process means that events from the matched process are still ingested, but the ones from its descendent processes will be omitted."
+            />
+          }
+          data-test-subj={getTestId('filterProcessDescendents-tooltipText')}
+        >
+          <EuiIcon
+            type="iInCircle"
+            data-test-subj={getTestId('filterProcessDescendents-tooltipIcon')}
+          />
+        </EuiToolTip>
+      );
+
+      return [
+        {
+          id: 'events',
+          label: (
+            <EuiText>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.eventsButton"
+                defaultMessage="Events"
+              />
+            </EuiText>
+          ),
+          iconType: isFilterDescendentsOfProcessSelected ? 'empty' : 'checkInCircleFilled',
+          'data-test-subj': getTestId('filterEventsButton'),
+        },
+        {
+          id: 'descendents',
+          label: (
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.descendentsOfProcessButton"
+                  defaultMessage="Descendents of process"
+                />
+              </EuiText>
+              {descendentsTooltip}
+            </EuiFlexGroup>
+          ),
+          iconType: isFilterDescendentsOfProcessSelected ? 'checkInCircleFilled' : 'empty',
+          'data-test-subj': getTestId('filterProcessDescendentsButton'),
+        },
+      ];
+    }, [getTestId, isFilterDescendentsOfProcessSelected]);
+
+    const filterTypeSubsection = useMemo(() => {
+      if (!isFilterDescendentsOfProcessFeatureEnabled) return null;
+
+      return (
+        <>
+          <EuiButtonGroup
+            legend="Events or Process descendents selector"
+            color="primary"
+            onChange={handleFilterTypeOnChange}
+            css={css`
+              .euiButtonGroupButton {
+                padding-right: ${euiTheme.euiTheme.size.l};
+              }
+            `}
+            options={filterTypeOptions}
+            idSelected={isFilterDescendentsOfProcessSelected ? 'descendents' : 'events'}
+          />
+          <EuiSpacer size="m" />
+
+          {isFilterDescendentsOfProcessSelected && (
+            <>
+              <EuiText
+                size="s"
+                data-test-subj={getTestId(
+                  'filterProcessDescendents-additionalConditionDescription'
+                )}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.additionalConditionDescription"
+                  defaultMessage="Additional condition added:"
+                />
+              </EuiText>
+              <code>
+                <FormattedMessage
+                  id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.additionalCondition"
+                  defaultMessage="event.category is process"
+                />
+              </code>
+              <EuiSpacer size="m" />
+            </>
+          )}
+        </>
+      );
+    }, [
+      isFilterDescendentsOfProcessFeatureEnabled,
+      handleFilterTypeOnChange,
+      euiTheme.euiTheme.size.l,
+      filterTypeOptions,
+      isFilterDescendentsOfProcessSelected,
+      getTestId,
+    ]);
+
     // conditions and handler
     const handleOnBuilderChange = useCallback(
       (arg: OnChangeProps) => {
@@ -549,13 +668,12 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               <EuiSpacer />
             </>
           ) : null}
+          {filterTypeSubsection}
           {exceptionBuilderComponentMemo}
         </>
       ),
-      [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
+      [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo, filterTypeSubsection]
     );
-
-    const { getTagsUpdatedBy } = useGetUpdatedTags(exception, TAG_FILTERS);
 
     // policy and handler
     const handleOnPolicyChange = useCallback(
@@ -597,77 +715,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       ]
     );
 
-    const handleFilterEntireProcessTreeOnChange = useCallback(
-      (event: EuiSwitchEvent) => {
-        const isChecked = event.target.checked;
-
-        const newFilterProcessTreeTags = isChecked ? [ENTIRE_PROCESS_TREE_TAG] : [];
-        const tags = getTagsUpdatedBy('entireTree', newFilterProcessTreeTags);
-
-        processChanged({ tags });
-        if (!hasFormChanged) setHasFormChanged(true);
-      },
-      [getTagsUpdatedBy, hasFormChanged, processChanged]
-    );
-
-    const filterEntireProcessTreeSection = useMemo(() => {
-      const tooltip = (
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.filterEntireProcessTree.tooltip"
-              defaultMessage="Filtering entire process tree means that events from the matched process are still ingested, but the ones from its descendant processes will be omitted."
-            />
-          }
-          data-test-subj={getTestId('filterEntireProcessTreeTooltipText')}
-        >
-          <EuiIcon
-            color="subdued"
-            type="iInCircle"
-            data-test-subj={getTestId('filterEntireProcessTreeTooltipIcon')}
-          />
-        </EuiToolTip>
-      );
-
-      return (
-        <>
-          <EuiHorizontalRule />
-          <EuiText size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterEntireProcessTree.sectionTitle"
-                defaultMessage="Filtering events from entire process tree"
-              />
-            </h3>
-
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterEntireProcessTree.details"
-                defaultMessage="Select to omit events from the matched process' descendants, while ingesting the events coming from the matched process itself."
-              />
-            </p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
-          <EuiSwitch
-            checked={isFilterEntireProcessTreeSwitchEnabled}
-            onChange={handleFilterEntireProcessTreeOnChange}
-            data-test-subj={getTestId('filterEntireProcessTreeSwitch')}
-            label={
-              <>
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterEntireProcessTree.switchLabel"
-                  defaultMessage="Filter entire process tree"
-                />{' '}
-                {tooltip}
-              </>
-            }
-          />
-        </>
-      );
-    }, [getTestId, handleFilterEntireProcessTreeOnChange, isFilterEntireProcessTreeSwitchEnabled]);
-
     useEffect(() => {
       processChanged();
     }, [processChanged]);
@@ -691,12 +738,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 defaultMessage="Using multiples of the same field values can degrade Endpoint performance and/or create ineffective rules"
               />
             </EuiText>
-          </>
-        )}
-        {isFilterEntireProcessTreeFeatureEnabled && (
-          <>
-            <EuiSpacer size="m" />
-            {filterEntireProcessTreeSection}
           </>
         )}
         {showAssignmentSection && (
