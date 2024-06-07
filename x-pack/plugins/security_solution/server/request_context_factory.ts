@@ -29,6 +29,7 @@ import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_en
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/rule_management/detection_rules_client';
+import { buildMlAuthz } from './lib/machine_learning/authz';
 
 export interface IRequestContextFactory {
   create(
@@ -113,14 +114,19 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
-      getDetectionRulesClient: () =>
-        createDetectionRulesClient(
-          startPlugins.alerting.getRulesClientWithRequest(request),
+      getDetectionRulesClient: () => {
+        const mlAuthz = buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
           request,
-          coreContext.savedObjects.client,
-          licensing,
-          plugins.ml
-        ),
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+
+        return createDetectionRulesClient(
+          startPlugins.alerting.getRulesClientWithRequest(request),
+          mlAuthz
+        );
+      },
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
