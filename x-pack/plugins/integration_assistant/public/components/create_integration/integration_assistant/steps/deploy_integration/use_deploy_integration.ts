@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import type { BuildIntegrationApiRequest } from '../../../../../../common';
 import type { State } from '../../state';
-import { runBuildIntegration, runInstallPackage } from './api';
+import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
 
 interface PipelineGenerationProps {
   integrationSettings: State['integrationSettings'];

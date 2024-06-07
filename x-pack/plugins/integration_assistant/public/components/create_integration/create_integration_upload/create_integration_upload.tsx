@@ -20,8 +20,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionWrapper } from '../../../common/components/section_wrapper';
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
-import type { InstallPackageResponse } from '../../../common/lib/api';
 import { runInstallPackage, type RequestDeps } from '../../../common/lib/api';
+import type { InstallPackageResponse } from '../../../../common';
 import type { SetIntegrationName, SetPage } from '../../types';
 import * as i18n from './translations';
 

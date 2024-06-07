@@ -6,21 +6,22 @@
  */
 
 export type {
+  ESProcessorOptions,
+  ESProcessorItem,
+  Pipeline,
+  InputType,
+  DataStream,
+  Integration,
   BuildIntegrationApiRequest,
   EcsMappingApiRequest,
   CategorizationApiRequest,
   RelatedApiRequest,
+  CheckPipelineApiRequest,
   CategorizationApiResponse,
   RelatedApiResponse,
   EcsMappingApiResponse,
-  Pipeline,
-  ESProcessorItem,
-  ESProcessorOptions,
-  DataStream,
-  Integration,
-  InputType,
-  CheckPipelineApiRequest,
   CheckPipelineApiResponse,
+  InstallPackageResponse,
 } from './types';
 
 export {

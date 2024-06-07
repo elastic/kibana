@@ -15,7 +15,7 @@ import {
   runCheckPipelineResults,
   runEcsGraph,
   runRelatedGraph,
-} from './api';
+} from '../../../../../common/lib/api';
 
 export type ProgressItem = 'ecs' | 'categorization' | 'related_graph' | 'integration_builder';
 
@@ -96,7 +96,6 @@ export const usePipelineGeneration = ({
         const relatedGraphResult = await runRelatedGraph(parametersWithPipeline, deps);
         if (abortController.signal.aborted) return;
         if (!isEmpty(relatedGraphResult?.results)) {
-          // parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
           setResult(relatedGraphResult.results);
         }
       } catch (e) {

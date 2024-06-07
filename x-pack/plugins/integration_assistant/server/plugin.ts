@@ -22,6 +22,7 @@ export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContex
     getStartServices: CoreSetup<{
       actions: ActionsPluginsStart;
     }>['getStartServices'];
+    logger: Logger;
   };
 }>;
 
@@ -43,6 +44,7 @@ export class IntegrationAssistantPlugin
       'integrationAssistant'
     >('integrationAssistant', () => ({
       getStartServices: core.getStartServices,
+      logger: this.logger,
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
     this.logger.debug('integrationAssistant api: Setup');

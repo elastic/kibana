@@ -120,3 +120,7 @@ export interface CheckPipelineApiResponse {
   pipelineResults: object[];
   errors?: object[];
 }
+
+export interface InstallPackageResponse {
+  response: [{ id: string }];
+}

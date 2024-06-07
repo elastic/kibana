@@ -7,7 +7,10 @@
 
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import type { BedrockChat } from '@kbn/langchain/server/language_models';
+import type {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { modifySamples, mergeSamples } from '../../util/samples';
 import { createPipeline } from './pipeline';
@@ -137,7 +140,7 @@ function chainRouter(state: EcsMappingState): string {
   return END;
 }
 
-export async function getEcsGraph(model: BedrockChat) {
+export async function getEcsGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
   const workflow = new StateGraph({
     channels: graphState,
   })

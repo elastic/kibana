@@ -24,6 +24,7 @@
       "files",
       "uiActions",
       "dashboard",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "features",

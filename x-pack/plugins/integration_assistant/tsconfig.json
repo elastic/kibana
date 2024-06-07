@@ -16,6 +16,7 @@
     "@kbn/config-schema",
     "@kbn/langchain",
     "@kbn/core-elasticsearch-server",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/data-plugin"
   ]
 }

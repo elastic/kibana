@@ -15,6 +15,7 @@ const defaultPortCloud = {
   cloudHost: 'us-central1.gcp.cloud.es.io',
   cloudDefaultPort: '443',
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
@@ -29,6 +30,7 @@ const customPortCloud = {
   cloudHost: 'us-central1.gcp.cloud.es.io',
   cloudDefaultPort: '9243',
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
@@ -39,6 +41,7 @@ const missingDeploymentIdCloud = {
     'dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvOjkyNDMkYWMzMWViYjkwMjQxNzczMTU3MDQzYzM0ZmQyNmZkNDYkYTRjMDYyMzBlNDhjOGZjZTdiZTg4YTA3NGEzYmIzZTA=',
   isCloudEnabled: true,
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
@@ -48,6 +51,7 @@ const noCloud = {
   cloudId: undefined,
   isCloudEnabled: false,
   registerCloudService: jest.fn(),
+  onboarding: {},
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
