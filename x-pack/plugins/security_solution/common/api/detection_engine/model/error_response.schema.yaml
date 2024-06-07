@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Error Schema
+  version: 'not applicable'
+paths: {}
+components:
+  schemas:
+    GenericErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string

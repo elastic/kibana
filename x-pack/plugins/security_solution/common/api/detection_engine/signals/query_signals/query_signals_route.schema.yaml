@@ -6,8 +6,7 @@ paths:
   /api/detection_engine/signals/search:
     post:
       operationId: SearchAlerts
-      x-codegen-enabled: false
-      description: Finds detection alerts them that match the given query and allows to apply Elasticsearch aggregations to the result
+      summary: Finds detection alerts them that match the given query and allows to apply Elasticsearch aggregations to the result
       tags:
         - Alerts API
       requestBody:
@@ -19,11 +18,23 @@ paths:
               $ref: '#/components/schemas/SearchAlertsRequestBody'
       responses:
         200:
-          description: Indicates a successful call.
+          description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchAlertsResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
 
 components:
   schemas:

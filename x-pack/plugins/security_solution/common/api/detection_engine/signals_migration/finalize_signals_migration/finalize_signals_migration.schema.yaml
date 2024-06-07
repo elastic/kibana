@@ -6,10 +6,10 @@ paths:
   /api/detection_engine/signals/finalize_migration:
     post:
       operationId: FinalizeAlertsMigration
-      x-codegen-enabled: false
+      summary: Finalizes alerts migration(s)
       description: |
-        Finalizes alerts migration(s).
-        The finalization endpoint replaces the original index's alias with the successfully migrated index's alias. The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion, finalize it.
+        The finalization endpoint replaces the original index's alias with the successfully migrated index's alias.
+        The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion, finalize it.
       tags:
         - Alerts migration API
       requestBody:
@@ -21,11 +21,23 @@ paths:
               $ref: '#/components/schemas/FinalizeAlertsMigrationRequestBody'
       responses:
         200:
-          description: Indicates a successful call.
+          description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FinalizeAlertsMigrationResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
 
 components:
   schemas:
@@ -71,11 +83,11 @@ components:
               type: string
             status_code:
               type: integer
-        required:
-          - id
-          - completed
-          - destinationIndex
-          - status
-          - sourceIndex
-          - version
-          - updated
+      required:
+        - id
+        - completed
+        - destinationIndex
+        - status
+        - sourceIndex
+        - version
+        - updated

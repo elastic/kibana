@@ -6,8 +6,7 @@ paths:
   /api/detection_engine/signals/tags:
     post:
       operationId: ManageAlertTags
-      x-codegen-enabled: false
-      description: Manage alert tags for a single or multiple alerts
+      summary: Manage alert tags for a single or multiple alerts
       tags:
         - Alerts API
       requestBody:
@@ -19,11 +18,23 @@ paths:
               $ref: '#/components/schemas/ManageAlertTagsRequestBody'
       responses:
         200:
-          description: Indicates a successful call.
+          description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ManageAlertTagsResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
 
 components:
   schemas:
@@ -34,9 +45,9 @@ components:
           $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
         tags:
           $ref: '#/components/schemas/ManageAlertTags'
-        required:
-          - ids
-          - tags
+      required:
+        - ids
+        - tags
 
     ManageAlertTagsResponse:
       type: object

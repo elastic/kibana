@@ -6,8 +6,7 @@ paths:
   /api/detection_engine/signals/search:
     post:
       operationId: SetAlertsStatus
-      x-codegen-enabled: false
-      description: Sets the status of a single or multiple alert
+      summary: Sets the status of a single or multiple alert
       tags:
         - Alerts API
       requestBody:
@@ -19,11 +18,23 @@ paths:
               $ref: '#/components/schemas/SetAlertsStatusRequestBody'
       responses:
         200:
-          description: Indicates a successful call.
+          description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SetAlertsStatusResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
 
 components:
   schemas:

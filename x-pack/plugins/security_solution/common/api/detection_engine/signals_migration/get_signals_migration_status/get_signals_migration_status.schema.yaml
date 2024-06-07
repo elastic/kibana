@@ -6,8 +6,7 @@ paths:
   /api/detection_engine/signals/migration_status:
     post:
       operationId: GetAlertsMigration
-      x-codegen-enabled: false
-      description: Returns an alerts migration
+      summary: Returns an alerts migration
       tags:
         - Alerts migration API
       parameters:
@@ -19,11 +18,23 @@ paths:
             $ref: '../../../detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleIntervalFrom'
       responses:
         200:
-          description: Indicates a successful call.
+          description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetAlertsMigrationStatusResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
 
 components:
   schemas:

@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/signals/migration:
     delete:
       operationId: AlertsMigrationCleanup
-      x-codegen-enabled: false
+      summary: Clean up alerts migration(s)
       description: |
         Performs alerts migration(s) cleanup.
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of the migration process. A successful migration will result in both the old and new indices being present. As such, the old, orphaned index can (and likely should) be deleted.
@@ -22,11 +22,23 @@ paths:
               $ref: '#/components/schemas/CleanupAlertsMigrationRequestBody'
       responses:
         200:
-          description: Indicates a successful call.
+          description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CleanupAlertsMigrationResponse'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
 
 components:
   schemas:
@@ -70,10 +82,10 @@ components:
               type: string
             status_code:
               type: integer
-        required:
-          - id
-          - destinationIndex
-          - status
-          - sourceIndex
-          - version
-          - updated
+      required:
+        - id
+        - destinationIndex
+        - status
+        - sourceIndex
+        - version
+        - updated
