@@ -39,7 +39,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
   const [startDate, setStartDate] = useState(now.clone().subtract(3, 'h'));
   const [endDate, setEndDate] = useState(now.clone());
 
-  const isStartDayOutOfRange = now
+  const isStartDateOutOfRange = now
     .clone()
     .subtract(MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS, 'd')
     .isAfter(startDate);

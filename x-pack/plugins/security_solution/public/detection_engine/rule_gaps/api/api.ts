@@ -18,8 +18,8 @@ import type { ScheduleBackfillProps } from '../types';
 /**
  * Schedule rules run over a specified time range
  *
- * @param ruleIds Rule ids
- * @param timeRange Time range
+ * @param ruleIds `rule_id`s of each rule to be backfilled
+ * @param timeRange the time range over which the backfill should apply
  * @param signal to cancel request
  *
  * @throws An error if response is not OK

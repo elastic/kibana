@@ -31,7 +31,7 @@ describe('Schedule rule run hook', () => {
     fetchMock.mockResolvedValue(scheduleRuleRunMock);
   });
 
-  it('Schedule a rule run', async () => {
+  it('schedules a rule run by calling the backfill API', async () => {
     result = await renderMutation(() => useScheduleRuleRunMutation());
 
     expect(fetchMock).toHaveBeenCalledTimes(0);
