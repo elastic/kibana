@@ -23,6 +23,8 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
 
+// Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
+// Once `manualRuleRunEnabled` FF is removed, we can remove `@skipInServerlessMKI` as well
 describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
