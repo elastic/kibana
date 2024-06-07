@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ResponderActionData, ResponderContextMenuItemProps } from '../../..';
+import type { ResponderActionData, UseWithResponderActionDataFromAlertProps } from '../../..';
 
 const useWithResponderActionDataFromAlertMock = (
-  options: ResponderContextMenuItemProps
+  options: UseWithResponderActionDataFromAlertProps
 ): ResponderActionData => {
   return {
     handleResponseActionsClick: jest.fn(() => {

@@ -21,8 +21,7 @@ import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from './translations';
 
-// FIXME:PT rename this to be specific to this hook
-export interface ResponderContextMenuItemProps {
+export interface UseWithResponderActionDataFromAlertProps {
   eventData: TimelineEventsDetailsItem[] | null;
   onClick?: () => void;
 }
@@ -47,7 +46,7 @@ export interface ResponderActionData {
 export const useWithResponderActionDataFromAlert = ({
   eventData = [],
   onClick,
-}: ResponderContextMenuItemProps): ResponderActionData => {
+}: UseWithResponderActionDataFromAlertProps): ResponderActionData => {
   const {
     isSupported: hostSupportsResponseActions,
     details: { agentType, agentId, platform, hostName },

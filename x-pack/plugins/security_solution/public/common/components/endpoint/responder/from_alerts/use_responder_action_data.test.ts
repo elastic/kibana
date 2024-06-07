@@ -6,7 +6,7 @@
  */
 
 import type {
-  ResponderContextMenuItemProps,
+  UseWithResponderActionDataFromAlertProps,
   ResponderActionData,
   UseResponderActionDataProps,
 } from './use_responder_action_data';
@@ -31,7 +31,7 @@ import { HostStatus } from '../../../../../../common/endpoint/types';
 
 describe('use responder action data hooks', () => {
   let appContextMock: AppContextTestRender;
-  let onClickMock: ResponderContextMenuItemProps['onClick'];
+  let onClickMock: UseWithResponderActionDataFromAlertProps['onClick'];
 
   const getExpectedResponderActionData = (
     overrides: Partial<ResponderActionData> = {}
@@ -54,12 +54,18 @@ describe('use responder action data hooks', () => {
   });
 
   describe('useWithResponderActionDataFromAlert() hook', () => {
-    let renderHook: () => RenderHookResult<ResponderContextMenuItemProps, ResponderActionData>;
+    let renderHook: () => RenderHookResult<
+      UseWithResponderActionDataFromAlertProps,
+      ResponderActionData
+    >;
     let alertDetailItemData: TimelineEventsDetailsItem[];
 
     beforeEach(() => {
       renderHook = () => {
-        return appContextMock.renderHook<ResponderContextMenuItemProps, ResponderActionData>(() =>
+        return appContextMock.renderHook<
+          UseWithResponderActionDataFromAlertProps,
+          ResponderActionData
+        >(() =>
           useWithResponderActionDataFromAlert({
             eventData: alertDetailItemData,
             onClick: onClickMock,
