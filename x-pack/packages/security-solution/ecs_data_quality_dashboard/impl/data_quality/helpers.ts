@@ -17,7 +17,7 @@ import * as i18n from './translations';
 import type {
   DataQualityCheckResult,
   DataQualityIndexCheckedParams,
-  EcsMetadata,
+  EcsBasedFieldMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
   IlmPhase,
@@ -27,6 +27,7 @@ import type {
   PatternRollup,
   UnallowedValueCount,
 } from './types';
+import { EcsFlatTyped } from './constants';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 export const INTERNAL_API_VERSION = '1';
@@ -172,7 +173,7 @@ export const getEnrichedFieldMetadata = ({
   fieldMetadata,
   unallowedValues,
 }: {
-  ecsMetadata: Record<string, EcsMetadata>;
+  ecsMetadata: EcsFlatTyped;
   fieldMetadata: FieldType;
   unallowedValues: Record<string, UnallowedValueCount[]>;
 }): EnrichedFieldMetadata => {
@@ -202,7 +203,7 @@ export const getEnrichedFieldMetadata = ({
     return {
       indexFieldName: field,
       indexFieldType: type,
-      indexInvalidValues,
+      indexInvalidValues: [],
       hasEcsMetadata: false,
       isEcsCompliant: false,
       isInSameFamily: false, // custom fields are never in the same family
@@ -210,15 +211,14 @@ export const getEnrichedFieldMetadata = ({
   }
 };
 
-export const getMissingTimestampFieldMetadata = (): EnrichedFieldMetadata => ({
-  description: i18n.TIMESTAMP_DESCRIPTION,
+export const getMissingTimestampFieldMetadata = (): EcsBasedFieldMetadata => ({
+  ...EcsFlatTyped['@timestamp'],
   hasEcsMetadata: true,
   indexFieldName: '@timestamp',
   indexFieldType: '-',
   indexInvalidValues: [],
   isEcsCompliant: false,
   isInSameFamily: false, // `date` is not a member of any families
-  type: 'date',
 });
 
 export const getPartitionedFieldMetadata = (
@@ -257,11 +257,6 @@ export const getPartitionedFieldMetadataStats = (
     sameFamily: sameFamily.length,
   };
 };
-
-export const hasValidTimestampMapping = (enrichedFieldMetadata: EnrichedFieldMetadata[]): boolean =>
-  enrichedFieldMetadata.some(
-    (x) => x.indexFieldName === '@timestamp' && x.indexFieldType === 'date'
-  );
 
 export const getDocsCount = ({
   indexName,

@@ -7,7 +7,6 @@
 
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EcsFlat } from '@elastic/ecs';
 import { omit } from 'lodash/fp';
 
 import {
@@ -33,7 +32,6 @@ import {
   getTotalPatternIndicesChecked,
   getTotalPatternSameFamily,
   getTotalSizeInBytes,
-  hasValidTimestampMapping,
   isMappingCompatible,
   postStorageResult,
   getStorageResults,
@@ -68,13 +66,11 @@ import {
   COLD_DESCRIPTION,
   FROZEN_DESCRIPTION,
   HOT_DESCRIPTION,
-  TIMESTAMP_DESCRIPTION,
   UNMANAGED_DESCRIPTION,
   WARM_DESCRIPTION,
 } from './translations';
 import {
   DataQualityCheckResult,
-  EcsMetadata,
   EnrichedFieldMetadata,
   PartitionedFieldMetadata,
   PatternRollup,
@@ -82,8 +78,7 @@ import {
 } from './types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-
-const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
+import { EcsFlatTyped } from './constants';
 
 describe('helpers', () => {
   describe('getTotalPatternSameFamily', () => {
@@ -485,7 +480,7 @@ describe('helpers', () => {
     test('it returns the happy path result when the index has no mapping conflicts, and no unallowed values', () => {
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues: noUnallowedValues, // no unallowed values for `event.category` in this index
         })
@@ -501,7 +496,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues: noEntryForEventCategory, // a lookup in this map for the `event.category` field will return undefined
         })
@@ -511,7 +506,7 @@ describe('helpers', () => {
     test('it returns a result with the expected `indexInvalidValues` and `isEcsCompliant` when the index has no mapping conflict, but it has unallowed values', () => {
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues, // this index has unallowed values for the event.category field
         })
@@ -537,7 +532,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field: 'event.category', // `event.category` is a `keyword`, per the ECS spec
             type: indexFieldType, // this index has a mapping of `text` instead
@@ -558,7 +553,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field: 'event.category', // `event.category` is a `keyword` per the ECS spec
             type: indexFieldType, // this index has a mapping of `wildcard` instead
@@ -579,7 +574,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field: 'event.category', // `event.category` is a `keyword` per the ECS spec
             type: indexFieldType, // this index has a mapping of `text` instead
@@ -611,7 +606,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field,
             type: indexFieldType, // no mapping conflict, because ECS doesn't define this field
@@ -632,14 +627,13 @@ describe('helpers', () => {
   describe('getMissingTimestampFieldMetadata', () => {
     test('it returns the expected `EnrichedFieldMetadata`', () => {
       expect(getMissingTimestampFieldMetadata()).toEqual({
-        description: TIMESTAMP_DESCRIPTION,
+        ...EcsFlatTyped['@timestamp'],
         hasEcsMetadata: true,
         indexFieldName: '@timestamp',
         indexFieldType: '-', // the index did NOT define a mapping for @timestamp
         indexInvalidValues: [],
         isEcsCompliant: false, // an index must define the @timestamp mapping
         isInSameFamily: false, // `date` is not a member of any families
-        type: 'date',
       });
     });
   });
@@ -714,37 +708,6 @@ describe('helpers', () => {
         incompatible: 3,
         sameFamily: 0,
       });
-    });
-  });
-
-  describe('hasValidTimestampMapping', () => {
-    test('it returns true when the `enrichedFieldMetadata` has a valid @timestamp', () => {
-      const enrichedFieldMetadata: EnrichedFieldMetadata[] = [timestamp, sourcePort];
-
-      expect(hasValidTimestampMapping(enrichedFieldMetadata)).toBe(true);
-    });
-
-    test('it returns false when the `enrichedFieldMetadata` collection does NOT include a valid @timestamp', () => {
-      const enrichedFieldMetadata: EnrichedFieldMetadata[] = [sourcePort];
-
-      expect(hasValidTimestampMapping(enrichedFieldMetadata)).toBe(false);
-    });
-
-    test('it returns false when the `enrichedFieldMetadata` has an @timestamp with an invalid mapping', () => {
-      const timestampWithInvalidMapping: EnrichedFieldMetadata = {
-        ...timestamp,
-        indexFieldType: 'text', // invalid mapping, should be "date"
-      };
-      const enrichedFieldMetadata: EnrichedFieldMetadata[] = [
-        timestampWithInvalidMapping,
-        sourcePort,
-      ];
-
-      expect(hasValidTimestampMapping(enrichedFieldMetadata)).toBe(false);
-    });
-
-    test('it returns false when `enrichedFieldMetadata` is empty', () => {
-      expect(hasValidTimestampMapping([])).toBe(false);
     });
   });
 
