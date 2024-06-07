@@ -472,7 +472,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         {
           id: 'events',
           label: (
-            <EuiText>
+            <EuiText size="s">
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.eventsButton"
                 defaultMessage="Events"
@@ -486,7 +486,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           id: 'descendents',
           label: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiText>
+              <EuiText size="s">
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.descendentsOfProcessButton"
                   defaultMessage="Descendents of process"
