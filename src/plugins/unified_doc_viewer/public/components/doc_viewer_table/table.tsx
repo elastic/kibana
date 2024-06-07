@@ -8,6 +8,7 @@
 
 import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
+import useWindowSize from 'react-use/lib/useWindowSize';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -335,6 +336,7 @@ export const DocViewerTable = ({
     [rows, filter]
   );
 
+  useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
   const { width: containerWidth } = useResizeObserver(containerRef);
 
   const gridColumns: EuiDataGridProps['columns'] = useMemo(

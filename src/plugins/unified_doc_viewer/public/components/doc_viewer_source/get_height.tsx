@@ -9,7 +9,7 @@ import { monaco } from '@kbn/monaco';
 import { MAX_LINES_CLASSIC_TABLE, MIN_HEIGHT } from './source';
 
 // Displayed margin of the tab content to the window bottom
-export const DEFAULT_MARGIN_BOTTOM = 25;
+export const DEFAULT_MARGIN_BOTTOM = 16;
 
 export function getTabContentAvailableHeight(
   elementRef: HTMLElement | undefined,
