@@ -72,6 +72,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
 
 export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
   rows$: BehaviorSubject<DataTableRecord[]>;
+  totalHitCount$: BehaviorSubject<number | undefined>;
   columns$: BehaviorSubject<string[] | undefined>;
   columnsMeta$: BehaviorSubject<DataTableColumnsMeta | undefined>;
   sort$: BehaviorSubject<SortOrder[] | undefined>;

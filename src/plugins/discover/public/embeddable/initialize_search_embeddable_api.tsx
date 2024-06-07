@@ -68,6 +68,7 @@ export const initializeSearchEmbeddableApi = async (
   /** This is the state that has to be fetched */
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
+  const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
 
   const stateManager: SavedSearchAttributesManager = {
     columns: columns$,
@@ -124,6 +125,7 @@ export const initializeSearchEmbeddableApi = async (
       rows$,
       columns$,
       columnsMeta$,
+      totalHitCount$,
       sort$,
       searchSource$,
       sampleSize$,

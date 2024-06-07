@@ -66,6 +66,7 @@ export function SearchEmbeddableGridComponent({
     searchSource,
     dataViews,
     rows,
+    totalHitCount,
     columns,
     columnsMeta,
     sort,
@@ -78,6 +79,7 @@ export function SearchEmbeddableGridComponent({
     api.searchSource$,
     api.dataViews,
     api.rows$,
+    api.totalHitCount$,
     api.columns$,
     api.columnsMeta$,
     api.sort$,
@@ -177,13 +179,13 @@ export function SearchEmbeddableGridComponent({
       isLoading: false,
       rows,
       onFilter: onAddFilter,
-      totalHitCount: rows.length,
+      totalHitCount,
       useNewFieldsApi: !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
       cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
-  }, [savedSearchProps, rows, onAddFilter, discoverServices]);
+  }, [savedSearchProps, rows, totalHitCount, onAddFilter, discoverServices]);
 
   const fetchedSampleSize = useMemo(() => {
     return getAllowedSampleSize(savedSearchProps.sampleSizeState, discoverServices.uiSettings);

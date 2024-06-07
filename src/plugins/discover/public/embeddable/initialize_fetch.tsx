@@ -111,6 +111,7 @@ export function initializeFetch({
                 ? getTextBasedColumnsMeta(result.esqlQueryColumns)
                 : undefined,
               rows: result.records,
+              hitCount: result.records.length,
               fetchContext,
             };
           }
@@ -155,6 +156,7 @@ export function initializeFetch({
 
           return {
             rows: resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView)),
+            hitCount: resp.hits.total as number,
             fetchContext,
           };
         } catch (error) {
@@ -167,6 +169,9 @@ export function initializeFetch({
       if (next) {
         if (next.hasOwnProperty('rows')) {
           api.rows$.next(next.rows ?? []);
+        }
+        if (next.hasOwnProperty('hitCount')) {
+          api.totalHitCount$.next(next.hitCount);
         }
         if (next.hasOwnProperty('columnsMeta')) {
           api.columnsMeta$.next(next.columnsMeta);
