@@ -34,14 +34,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "name": {
-                      "type": "string"
-                    },
                     "status": {
                       "type": "string"
                     },
-                    "host": {
+                    "id": {
                       "type": "string"
+                    },
+                    "host": {
+                      "type": "string",
+                      "deprecated": true
                     }
                   }
                 }
@@ -65,11 +66,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "host": {
+                  "id": {
                     "type": "string"
+                  },
+                  "host": {
+                    "type": "string",
+                    "deprecated": true
                   }
                 }
-              }
+              },
+              "required": [
+                "id"
+              ]
             }
           }
         }

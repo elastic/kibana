@@ -9,11 +9,14 @@ import https from 'https';
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
+import { getFleetServerHost } from '../../services/fleet_server_host';
+
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
+
 import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 
@@ -43,7 +46,19 @@ export const postHealthCheckHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const abortController = new AbortController();
-    const { host } = request.body;
+    const { id } = request.body;
+    const coreContext = await context.core;
+    const soClient = coreContext.savedObjects.client;
+
+    const fleetServerHost = await getFleetServerHost(soClient, id);
+    const { host_urls: hostUrls } = fleetServerHost;
+    if (!fleetServerHost || hostUrls.length === 0)
+      return response.badRequest({
+        body: {
+          message: `The requested host id ${id} does not have associated host urls.`,
+        },
+      });
+    const host = hostUrls[0];
 
     // Sometimes when the host is not online, the request hangs
     // Setting a timeout to abort the request after 5s
@@ -66,10 +81,17 @@ export const postHealthCheckHandler: FleetRequestHandler<
 
     return response.ok({ body });
   } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.badRequest({
+        body: {
+          message: `The requested host id ${request.body.id} does not exist.`,
+        },
+      });
+    }
     // when the request is aborted, return offline status
-    if (error.name === 'AbortError') {
+    if (error.message.includes('user aborted')) {
       return response.ok({
-        body: { name: 'fleet-server', status: `OFFLINE`, host: request.body.host },
+        body: { status: `OFFLINE`, host_id: request.body.id },
       });
     }
     return defaultFleetErrorHandler({ error, response });
