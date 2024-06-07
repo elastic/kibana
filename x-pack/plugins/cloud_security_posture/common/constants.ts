@@ -192,3 +192,5 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   managed_identity: [],
   manual: [],
 };
+
+export const CLOUD_SECURITY_PLUGIN_VERSION = '1.8.1';

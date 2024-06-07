@@ -33,7 +33,7 @@ import {
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { IntegrationIcon } from '../../common';
-import { useLinkToLogsExplorer } from '../../../hooks';
+import { useRedirectLink } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 
@@ -320,24 +320,24 @@ export const getDatasetQualityTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LogsExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <RedirectLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
 };
 
-const LogsExplorerLink = ({
+const RedirectLink = ({
   dataStreamStat,
   title,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
+  const redirectLinkProps = useRedirectLink({ dataStreamStat });
 
   return (
-    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...logsExplorerLinkProps}>
+    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...redirectLinkProps}>
       {title}
     </EuiLink>
   );
