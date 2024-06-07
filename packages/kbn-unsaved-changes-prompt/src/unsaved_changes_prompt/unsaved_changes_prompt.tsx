@@ -20,11 +20,11 @@ const DEFAULT_TITLE_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalTitl
 });
 
 const DEFAULT_CANCEL_BUTTON = i18n.translate('unsavedChangesPrompt.defaultModalCancel', {
-  defaultMessage: 'Leave page',
+  defaultMessage: 'Keep editing',
 });
 
 const DEFAULT_CONFIRM_BUTTON = i18n.translate('unsavedChangesPrompt.defaultModalConfirm', {
-  defaultMessage: 'Keep editing',
+  defaultMessage: 'Leave page',
 });
 
 interface Props {

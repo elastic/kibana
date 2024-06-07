@@ -162,12 +162,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     messageText: i18n.translate('xpack.ingestPipelines.form.unsavedPrompt.body', {
       defaultMessage: `The data will be lost if you leave this page without saving the pipeline changes`,
     }),
-    confirmButtonText: i18n.translate('xpack.ingestPipelines.form.unsavedPrompt.leavePageText', {
-      defaultMessage: `Leave page`,
-    }),
-    cancelButtonText: i18n.translate('xpack.ingestPipelines.form.unsavedPrompt.keepEditingText', {
-      defaultMessage: `Keep editing`,
-    }),
     hasUnsavedChanges: (isFormDirty || areProcessorsDirty) && !hasSubmittedForm,
     openConfirm: overlays.openConfirm,
     history,
