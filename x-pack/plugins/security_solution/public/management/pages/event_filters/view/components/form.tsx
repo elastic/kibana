@@ -38,10 +38,10 @@ import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
-import { ENTIRE_PROCESS_TREE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { FILTER_DESCENDENTS_OF_PROCESS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 import {
-  isFilterEntireProcessTreeEnabled,
-  isFilterEntireProcessTreeTag,
+  isFilterDescendentsOfProcessEnabled,
+  isFilterDescendentsOfProcessTag,
   isPolicySelectionTag,
 } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
@@ -94,7 +94,7 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
 // Defines the tag categories for Event Filters, using the given order.
 const TAG_FILTERS = {
   policySelection: isPolicySelectionTag,
-  entireTree: isFilterEntireProcessTreeTag,
+  descendentOfProcessFiltering: isFilterDescendentsOfProcessTag,
 };
 
 const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
@@ -178,7 +178,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const isFilterDescendentsOfProcessSelected = useMemo(
-      () => isFilterEntireProcessTreeEnabled(exception),
+      () => isFilterDescendentsOfProcessEnabled(exception),
       [exception]
     );
 
@@ -439,8 +439,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
     const handleFilterTypeOnChange = useCallback(
       (id: string) => {
-        const newFilterProcessTreeTags = id === 'descendents' ? [ENTIRE_PROCESS_TREE_TAG] : [];
-        const tags = getTagsUpdatedBy('entireTree', newFilterProcessTreeTags);
+        const newTagsForDescendents =
+          id === 'descendents' ? [FILTER_DESCENDENTS_OF_PROCESS_TAG] : [];
+
+        const tags = getTagsUpdatedBy('descendentOfProcessFiltering', newTagsForDescendents);
 
         processChanged({ tags });
         if (!hasFormChanged) setHasFormChanged(true);

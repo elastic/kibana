@@ -28,7 +28,7 @@ import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
-  ENTIRE_PROCESS_TREE_TAG,
+  FILTER_DESCENDENTS_OF_PROCESS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 
@@ -93,7 +93,7 @@ describe('Event filter form', () => {
       os_types: [OperatingSystem.WINDOWS],
       entries: [createEntry()],
       type: 'simple',
-      tags: [GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG],
+      tags: [GLOBAL_ARTIFACT_TAG, FILTER_DESCENDENTS_OF_PROCESS_TAG],
     };
     return {
       ...defaults,
@@ -461,7 +461,7 @@ describe('Event filter form', () => {
     });
 
     it('should show `Descendent of processes` filter selected when enabled in config', () => {
-      formProps.item.tags = [ENTIRE_PROCESS_TREE_TAG];
+      formProps.item.tags = [FILTER_DESCENDENTS_OF_PROCESS_TAG];
       render();
 
       expect(renderResult.getByTestId(`${formPrefix}-filterEventsButton`)).toHaveAttribute(
@@ -479,11 +479,11 @@ describe('Event filter form', () => {
 
       userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`));
 
-      expect(latestUpdatedItem.tags).toStrictEqual([ENTIRE_PROCESS_TREE_TAG]);
+      expect(latestUpdatedItem.tags).toStrictEqual([FILTER_DESCENDENTS_OF_PROCESS_TAG]);
     });
 
     it('should remove process tree filtering tag from tags when filtering descendents disabled', () => {
-      formProps.item.tags = [ENTIRE_PROCESS_TREE_TAG];
+      formProps.item.tags = [FILTER_DESCENDENTS_OF_PROCESS_TAG];
       render();
 
       userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
@@ -500,11 +500,17 @@ describe('Event filter form', () => {
       render();
 
       userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`));
-      expect(latestUpdatedItem.tags).toStrictEqual([...perPolicyTags, ENTIRE_PROCESS_TREE_TAG]);
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        ...perPolicyTags,
+        FILTER_DESCENDENTS_OF_PROCESS_TAG,
+      ]);
 
       rerenderWithLatestProps();
       userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
-      expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG]);
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        GLOBAL_ARTIFACT_TAG,
+        FILTER_DESCENDENTS_OF_PROCESS_TAG,
+      ]);
 
       rerenderWithLatestProps();
       userEvent.click(renderResult.getByTestId(`${formPrefix}-filterEventsButton`));
@@ -512,11 +518,17 @@ describe('Event filter form', () => {
 
       rerenderWithLatestProps();
       userEvent.click(renderResult.getByTestId(`${formPrefix}-filterProcessDescendentsButton`));
-      expect(latestUpdatedItem.tags).toStrictEqual([GLOBAL_ARTIFACT_TAG, ENTIRE_PROCESS_TREE_TAG]);
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        GLOBAL_ARTIFACT_TAG,
+        FILTER_DESCENDENTS_OF_PROCESS_TAG,
+      ]);
 
       rerenderWithLatestProps();
       userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy'));
-      expect(latestUpdatedItem.tags).toStrictEqual([...perPolicyTags, ENTIRE_PROCESS_TREE_TAG]);
+      expect(latestUpdatedItem.tags).toStrictEqual([
+        ...perPolicyTags,
+        FILTER_DESCENDENTS_OF_PROCESS_TAG,
+      ]);
     });
 
     it('should display a tooltip to the user', async () => {

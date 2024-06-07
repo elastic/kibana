@@ -11,7 +11,7 @@ export const BY_POLICY_ARTIFACT_TAG_PREFIX = 'policy:';
 
 export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
-export const ENTIRE_PROCESS_TREE_TAG = 'filter_entire_process_tree';
+export const FILTER_DESCENDENTS_OF_PROCESS_TAG = 'filter_descendents_of_process';
 
 // TODO: refact all uses of `ALL_ENDPOINT_ARTIFACTS_LIST_IDS to sue new const from shared package
 export const ALL_ENDPOINT_ARTIFACT_LIST_IDS = ENDPOINT_ARTIFACT_LIST_IDS;
