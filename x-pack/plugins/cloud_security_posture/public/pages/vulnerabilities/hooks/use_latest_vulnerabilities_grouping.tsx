@@ -8,7 +8,7 @@ import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderers,
+  GetGroupStats,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
@@ -109,13 +109,13 @@ export const isVulnerabilitiesRootGroupingAggregation = (
  */
 export const useLatestVulnerabilitiesGrouping = ({
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<VulnerabilitiesGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderers<VulnerabilitiesGroupingAggregation>;
+  getGroupStats?: GetGroupStats<VulnerabilitiesGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
@@ -143,7 +143,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     getDefaultQuery,
     unit: VULNERABILITIES_UNIT,
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
     groupingLevel,
     groupsUnit: VULNERABILITIES_GROUPS_UNIT,

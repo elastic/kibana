@@ -23,7 +23,7 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
-import type { ParsedGroupingAggregation, GroupPanelRenderer, GroupStatsRenderers } from './types';
+import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
 import { GroupingBucket, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
@@ -33,7 +33,7 @@ export interface GroupingProps<T> {
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
-  groupStatsRenderers?: GroupStatsRenderers<T>;
+  getGroupStats?: GetGroupStats<T>;
   groupingId: string;
   groupingLevel?: number;
   inspectButton?: JSX.Element;
@@ -59,7 +59,7 @@ const GroupingComponent = <T,>({
   activePage,
   data,
   groupPanelRenderer,
-  groupStatsRenderers,
+  getGroupStats,
   groupSelector,
   groupingId,
   groupingLevel = 0,
@@ -124,9 +124,7 @@ const GroupingComponent = <T,>({
                         )
                   }
                   groupNumber={groupNumber}
-                  statRenderers={
-                    groupStatsRenderers && groupStatsRenderers(selectedGroup, groupBucket)
-                  }
+                  stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
                   takeActionItems={takeActionItems}
                 />
               }
@@ -166,7 +164,7 @@ const GroupingComponent = <T,>({
     [
       data?.groupByFields?.buckets,
       groupPanelRenderer,
-      groupStatsRenderers,
+      getGroupStats,
       groupingId,
       groupingLevel,
       isLoading,

@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/grouping/src';
+import { GroupPanelRenderer, RawBucket, GroupStatsItem } from '@kbn/grouping/src';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getCloudProviderNameFromAbbreviation } from '../../../common/utils/helpers';
@@ -195,7 +195,7 @@ const SeverityStats = React.memo(SeverityStatsComponent);
 export const groupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<VulnerabilitiesGroupingAggregation>
-): StatRenderer[] => {
+): GroupStatsItem[] => {
   const defaultBadges = [
     {
       title: VULNERABILITIES,
