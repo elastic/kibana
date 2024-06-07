@@ -101,17 +101,17 @@ const registeredPanels = [
 ];
 
 export const Right: Story<void> = () => {
-  const state = {
+  const state: State = {
     byId: {
       memory: {
         right: {
           id: 'right',
         },
-        left: {},
-        preview: [],
+        left: undefined,
+        preview: undefined,
       },
     },
-  } as unknown as State;
+  };
 
   return (
     <TestProvider state={state}>
@@ -121,7 +121,7 @@ export const Right: Story<void> = () => {
 };
 
 export const Left: Story<void> = () => {
-  const state = {
+  const state: State = {
     byId: {
       memory: {
         right: {
@@ -130,10 +130,10 @@ export const Left: Story<void> = () => {
         left: {
           id: 'left',
         },
-        preview: [],
+        preview: undefined,
       },
     },
-  } as unknown as State;
+  };
 
   return (
     <TestProvider state={state}>
@@ -143,7 +143,7 @@ export const Left: Story<void> = () => {
 };
 
 export const Preview: Story<void> = () => {
-  const state = {
+  const state: State = {
     byId: {
       memory: {
         right: {
@@ -159,7 +159,7 @@ export const Preview: Story<void> = () => {
         ],
       },
     },
-  } as unknown as State;
+  };
 
   return (
     <TestProvider state={state}>
@@ -169,7 +169,7 @@ export const Preview: Story<void> = () => {
 };
 
 export const MultiplePreviews: Story<void> = () => {
-  const state = {
+  const state: State = {
     byId: {
       memory: {
         right: {
@@ -188,7 +188,7 @@ export const MultiplePreviews: Story<void> = () => {
         ],
       },
     },
-  } as unknown as State;
+  };
 
   return (
     <TestProvider state={state}>
