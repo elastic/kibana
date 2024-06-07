@@ -39,6 +39,7 @@ export function createAddChangePointChartAction(
         getIconType: () => 'machineLearningApp',
       },
     ],
+    order: 40,
     getIconType: () => 'machineLearningApp',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {

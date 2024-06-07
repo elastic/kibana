@@ -51,6 +51,7 @@ describe('mergeGroupedItemsProvider', () => {
       items: [
         {
           id: 'addPanelActionId',
+          placementPriority: 0,
         },
       ],
     },
@@ -74,9 +75,11 @@ describe('mergeGroupedItemsProvider', () => {
             description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
+            placementPriority: 0,
           },
           {
             id: 'addPanelActionId',
+            placementPriority: 0,
           },
         ],
         'data-test-subj': 'dashboardEditorMenu-group1Group',
@@ -99,6 +102,7 @@ describe('mergeGroupedItemsProvider', () => {
         items: [
           {
             id: 'addPanelActionId',
+            placementPriority: 0,
           },
         ],
         placementPriority: 10,
@@ -124,6 +128,7 @@ describe('mergeGroupedItemsProvider', () => {
             description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
+            placementPriority: 0,
           },
         ],
         placementPriority: 10,

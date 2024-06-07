@@ -28,6 +28,7 @@ export const registerCreateImageAction = () => {
   uiActionsService.registerAction<EmbeddableApiContext>({
     id: ADD_IMAGE_EMBEDDABLE_ACTION_ID,
     getIconType: () => 'image',
+    order: 20,
     isCompatible: async ({ embeddable: parentApi }) => {
       return Boolean(await parentApiIsCompatible(parentApi));
     },

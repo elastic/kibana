@@ -105,6 +105,7 @@ export const metricsVisDefinition: VisTypeDefinition<
   }),
   icon: 'visVisualBuilder',
   group: VisGroups.LEGACY,
+  order: 10,
   visConfig: {
     defaults: {
       id: () => uuidv4(),

@@ -74,6 +74,7 @@ describe('getAddPanelActionMenuItems', () => {
             name: 'Action name 01',
             onClick: expect.any(Function),
             description: 'Action tooltip',
+            placementPriority: 0,
           },
           {
             'data-test-subj': 'create-action-Action name',
@@ -82,6 +83,7 @@ describe('getAddPanelActionMenuItems', () => {
             name: 'Action name',
             onClick: expect.any(Function),
             description: 'Action tooltip',
+            placementPriority: 0,
           },
         ],
       },
@@ -98,6 +100,7 @@ describe('getAddPanelActionMenuItems', () => {
             description: 'Action tooltip',
             onClick: expect.any(Function),
             'data-test-subj': 'create-action-Action name',
+            placementPriority: 0,
           },
         ],
       },

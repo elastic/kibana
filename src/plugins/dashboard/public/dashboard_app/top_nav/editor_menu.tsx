@@ -19,14 +19,15 @@ import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-p
 import { pluginServices } from '../../services/plugin_services';
 import {
   getAddPanelActionMenuItemsGroup,
+  type PlacementPriority,
+  type PanelSelectionMenuItemIncPriority,
   type GroupedAddPanelActions,
-  type PanelSelectionMenuItem,
   type GroupedAddPanelActionsIncPriority,
 } from './add_panel_action_menu_items';
 import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
 import type { DashboardServices } from '../../services/types';
 
-export interface FactoryGroup extends Pick<GroupedAddPanelActionsIncPriority, 'placementPriority'> {
+export interface FactoryGroup extends PlacementPriority {
   id: string;
   appName: string;
   icon?: IconType;
@@ -42,7 +43,7 @@ export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactor
 
 export const getEmbeddableFactoryMenuItemProvider =
   (api: PresentationContainer, closePopover: () => void) =>
-  (factory: EmbeddableFactory): PanelSelectionMenuItem => {
+  (factory: EmbeddableFactory): PanelSelectionMenuItemIncPriority => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
     return {
@@ -55,16 +56,17 @@ export const getEmbeddableFactoryMenuItemProvider =
         api.addNewPanel({ panelType: factory.type }, true);
       },
       'data-test-subj': `createNew-${factory.type}`,
+      placementPriority: factory.order ?? 0,
     };
   };
 
-const sortGroupPanelsByPlacementPriority = (
-  panelGroups: GroupedAddPanelActionsIncPriority[]
-): GroupedAddPanelActions[] => {
+const sortGroupPanelsByPlacementPriority = <T extends PlacementPriority>(
+  panelGroups: T[]
+): Array<Omit<T, 'placementPriority'>> => {
   return (
     panelGroups
       .sort(
-        // bigger number sorted to the top
+        // larger number sorted to the top
         (panelGroupA, panelGroupB) => panelGroupB.placementPriority - panelGroupA.placementPriority
       )
       // strip out placement priority before return
@@ -259,8 +261,16 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
   const getVisTypeMenuItem = (
     onClickCb: () => void,
     visType: BaseVisType
-  ): PanelSelectionMenuItem => {
-    const { name, title, titleInWizard, description, icon = 'empty', isDeprecated } = visType;
+  ): PanelSelectionMenuItemIncPriority => {
+    const {
+      name,
+      title,
+      titleInWizard,
+      description,
+      icon = 'empty',
+      isDeprecated,
+      order,
+    } = visType;
     return {
       id: name,
       name: titleInWizard || title,
@@ -269,14 +279,15 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       onClick: augmentedCreateNewVisType(visType, onClickCb),
       'data-test-subj': `visType-${name}`,
       description,
+      placementPriority: order,
     };
   };
 
   const getVisTypeAliasMenuItem = (
     onClickCb: () => void,
     visTypeAlias: VisTypeAlias
-  ): PanelSelectionMenuItem => {
-    const { name, title, description, icon = 'empty' } = visTypeAlias;
+  ): PanelSelectionMenuItemIncPriority => {
+    const { name, title, description, icon = 'empty', order } = visTypeAlias;
 
     return {
       id: name,
@@ -285,6 +296,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       onClick: augmentedCreateNewVisType(visTypeAlias, onClickCb),
       'data-test-subj': `visType-${name}`,
       description,
+      placementPriority: order ?? 0,
     };
   };
 
@@ -303,36 +315,47 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
     );
 
     // enhance panel groups
-    return sortGroupPanelsByPlacementPriority(initialPanelGroups).map((panelGroup) => {
+    return sortGroupPanelsByPlacementPriority<GroupedAddPanelActionsIncPriority>(
+      initialPanelGroups
+    ).map((panelGroup) => {
       switch (panelGroup.id) {
         case 'visualizations': {
           return {
             ...panelGroup,
-            items: (panelGroup.items ?? []).concat(
-              promotedVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout)),
-              // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
-              visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, closeFlyout))
+            items: sortGroupPanelsByPlacementPriority<PanelSelectionMenuItemIncPriority>(
+              (panelGroup.items ?? []).concat(
+                // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
+                visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, closeFlyout)),
+                promotedVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
+              )
             ),
           };
         }
         case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
           return {
             ...panelGroup,
-            items: (panelGroup.items ?? []).concat(
-              legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
+            items: sortGroupPanelsByPlacementPriority<PanelSelectionMenuItemIncPriority>(
+              (panelGroup.items ?? []).concat(
+                legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
+              )
             ),
           };
         }
         case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
           return {
             ...panelGroup,
-            items: (panelGroup.items ?? []).concat(
-              toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
+            items: sortGroupPanelsByPlacementPriority<PanelSelectionMenuItemIncPriority>(
+              (panelGroup.items ?? []).concat(
+                toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
+              )
             ),
           };
         }
         default: {
-          return panelGroup;
+          return {
+            ...panelGroup,
+            items: sortGroupPanelsByPlacementPriority(panelGroup.items),
+          };
         }
       }
     });

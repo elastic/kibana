@@ -217,4 +217,6 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
    * have incosistencies in legacy visLib visualizations
    */
   readonly visConfig: Record<string, any>;
+
+  readonly order?: number;
 }

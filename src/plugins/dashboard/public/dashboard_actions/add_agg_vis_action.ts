@@ -26,6 +26,8 @@ export class AddAggVisualizationPanelAction implements Action<EmbeddableApiConte
   public readonly id = ADD_AGG_VIS_ACTION_ID;
   public readonly grouping = [COMMON_EMBEDDABLE_GROUPING.legacy];
 
+  public readonly order = 20;
+
   private showNewVisModal;
 
   constructor() {

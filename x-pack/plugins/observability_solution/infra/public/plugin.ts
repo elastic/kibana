@@ -402,6 +402,7 @@ export class Plugin implements InfraClientPluginClass {
     plugins.uiActions.registerAction<EmbeddableApiContext>({
       id: ADD_LOG_STREAM_ACTION_ID,
       grouping: [COMMON_EMBEDDABLE_GROUPING.legacy],
+      order: 30,
       getDisplayName: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
           defaultMessage: 'Log stream',

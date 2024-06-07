@@ -34,9 +34,16 @@ export type GroupedAddPanelActions = Pick<
   items: PanelSelectionMenuItem[];
 };
 
-export type GroupedAddPanelActionsIncPriority = GroupedAddPanelActions & {
+export interface PlacementPriority {
   placementPriority: number;
-};
+}
+
+export type PanelSelectionMenuItemIncPriority = PanelSelectionMenuItem & PlacementPriority;
+
+export type GroupedAddPanelActionsIncPriority = Omit<GroupedAddPanelActions, 'items'> &
+  PlacementPriority & {
+    items: PanelSelectionMenuItemIncPriority[];
+  };
 
 const onAddPanelActionClick =
   (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
@@ -67,7 +74,7 @@ export const getAddPanelActionMenuItemsGroup = (
     trigger: addPanelMenuTrigger,
   };
 
-  const getMenuItem = (item: Action<object>): PanelSelectionMenuItem => {
+  const getMenuItem = (item: Action<object>): PanelSelectionMenuItemIncPriority => {
     const actionName = item.getDisplayName(context);
 
     return {
@@ -78,6 +85,7 @@ export const getAddPanelActionMenuItemsGroup = (
       onClick: onAddPanelActionClick(item, context, closePopover),
       'data-test-subj': `create-action-${actionName}`,
       description: item?.getDisplayNameTooltip?.(context),
+      placementPriority: item.order ?? 0,
     };
   };
 
