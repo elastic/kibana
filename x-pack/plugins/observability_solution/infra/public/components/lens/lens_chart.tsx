@@ -80,7 +80,6 @@ export const LensChart = React.memo(
                 m.displayLocations.find((d) => d.id === 'embeddableBadge') !== undefined &&
                 m.uniqueId === USER_MESSAGE_IDS.FIELD_NOT_FOUND &&
                 !acc.ids.has(USER_MESSAGE_IDS.FIELD_NOT_FOUND)
-                // we need something else to better identify those errors
               ) {
                 acc.ids.add(USER_MESSAGE_IDS.FIELD_NOT_FOUND);
                 acc.filtered.push({
