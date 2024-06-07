@@ -67,6 +67,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 
 const containerStyles = css`
   position: relative;
@@ -260,6 +261,7 @@ function DiscoverDocumentsComponent({
   const { customControlColumnsConfiguration } = useDiscoverCustomization('data_table') || {};
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations() || {};
+  const additionalFieldGroups = useAdditionalFieldGroups();
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -426,6 +428,7 @@ function DiscoverDocumentsComponent({
                   externalCustomRenderers={customCellRenderer}
                   customGridColumnsConfiguration={customGridColumnsConfiguration}
                   customControlColumnsConfiguration={customControlColumnsConfiguration}
+                  additionalFieldGroups={additionalFieldGroups}
                 />
               </CellActionsProvider>
             </div>

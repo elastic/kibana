@@ -44,7 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.preserveCrossAppState();
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
-        await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+        await dashboard.saveDashboard(DASHBOARD_NAME, {
+          exitFromEditMode: false,
+          saveAsNew: true,
+        });
         await dashboard.loadSavedDashboard(DASHBOARD_NAME);
         await dashboard.switchToEditMode();
       });

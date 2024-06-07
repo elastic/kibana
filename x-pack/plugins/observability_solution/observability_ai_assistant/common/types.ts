@@ -87,6 +87,9 @@ export interface KnowledgeBaseEntry {
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
+  user?: {
+    name: string;
+  };
 }
 
 export interface UserInstruction {
