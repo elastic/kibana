@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+export type { CompatibleJSONSchema } from '../common/functions/types';
 
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
