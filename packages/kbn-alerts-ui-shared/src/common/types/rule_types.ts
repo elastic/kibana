@@ -65,9 +65,6 @@ export type ResolvedRule = Omit<
 
 export type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
 
-export type InitialRule = Partial<Rule> &
-  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
-
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,

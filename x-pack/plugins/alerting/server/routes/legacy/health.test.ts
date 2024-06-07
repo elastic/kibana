@@ -142,8 +142,7 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated:
-            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -157,7 +156,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        fetchAlertingFrameworkHealth: {
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -201,8 +200,7 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated:
-            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -216,7 +214,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        fetchAlertingFrameworkHealth: {
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -260,8 +258,7 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated:
-            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -275,7 +272,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        fetchAlertingFrameworkHealth: {
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -319,8 +316,7 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated:
-            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -334,7 +330,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        fetchAlertingFrameworkHealth: {
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -378,8 +374,7 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated:
-            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
+          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -393,7 +388,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        fetchAlertingFrameworkHealth: {
+        alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,

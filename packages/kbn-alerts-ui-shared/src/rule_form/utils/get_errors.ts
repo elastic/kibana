@@ -7,7 +7,6 @@
  */
 
 import {
-  InitialRule,
   RuleTypeModel,
   RuleFormErrors,
   ValidationResult,
@@ -22,6 +21,7 @@ import {
   INTERVAL_MINIMUM_TEXT,
   RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT,
 } from '../translations';
+import { InitialRule } from '../types';
 
 export function validateBaseProperties({
   rule,

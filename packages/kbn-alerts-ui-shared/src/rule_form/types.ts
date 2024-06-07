@@ -18,3 +18,6 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   notifyWhen?: Rule<Params>['notifyWhen'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
 }
+
+export type InitialRule = Partial<Rule> &
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
