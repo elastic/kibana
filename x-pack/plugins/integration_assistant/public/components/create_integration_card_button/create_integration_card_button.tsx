@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import integrationsImage from '../../images/integrations_light.svg';
+import integrationsImage from '../../common/images/integrations_light.svg';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();

@@ -20,11 +20,7 @@ interface PipelineGenerationProps {
 
 export type ProgressItem = 'build' | 'install';
 
-export const useDeployIntegration = ({
-  integrationSettings,
-  result,
-  connectorId,
-}: PipelineGenerationProps) => {
+export const useDeployIntegration = ({ integrationSettings, result }: PipelineGenerationProps) => {
   const { http, notifications } = useKibana().services;
   const [integrationFile, setIntegrationFile] = useState<Blob | null>(null);
   // const [integrationFile, setIntegrationFile] = useState<Buffer | undefined>(undefined);
@@ -63,7 +59,6 @@ export const useDeployIntegration = ({
               },
             ],
           },
-          connectorId,
         };
         setIsLoading(true);
 
@@ -94,7 +89,6 @@ export const useDeployIntegration = ({
     };
   }, [
     setIntegrationFile,
-    connectorId,
     http,
     integrationSettings,
     notifications?.toasts,

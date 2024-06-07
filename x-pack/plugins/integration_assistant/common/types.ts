@@ -62,7 +62,6 @@ export interface Integration {
 // Server Request Schemas
 export interface BuildIntegrationApiRequest {
   integration: Integration;
-  connectorId?: string;
 }
 
 export interface EcsMappingApiRequest {
