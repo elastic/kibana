@@ -13,8 +13,9 @@ servers:
 
 paths:
   /engine/settings:
-    x-internal: true
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: RiskEngineSettingsGet
       summary: Get the settings of the Risk Engine
       responses:
