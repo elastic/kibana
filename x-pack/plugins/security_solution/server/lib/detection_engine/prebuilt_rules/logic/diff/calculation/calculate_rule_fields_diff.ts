@@ -37,8 +37,11 @@ import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/api/de
 import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
-import { simpleDiffAlgorithm } from './algorithms/simple_diff_algorithm';
-import { numberDiffAlgorithm, singleLineStringDiffAlgorithm } from './algorithms';
+import {
+  simpleDiffAlgorithm,
+  numberDiffAlgorithm,
+  singleLineStringDiffAlgorithm,
+} from './algorithms';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;
 const TARGET_TYPE_ERROR = `Target version can't be of different rule type`;
