@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { setup } from './helpers';
+import * as helpers from './helpers';
+
+const { setup, writeFixtureFile } = helpers.withErrorsCollected(helpers.setup, 'STATS');
+
+afterAll(writeFixtureFile);
 
 describe('validation', () => {
   describe('command', () => {
