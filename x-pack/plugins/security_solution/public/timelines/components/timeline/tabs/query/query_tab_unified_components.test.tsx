@@ -195,7 +195,7 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe.skip('render', () => {
+  describe('render', () => {
     it(
       'should render unifiedDataTable in timeline',
       async () => {
@@ -260,7 +260,7 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe.skip('pagination', () => {
+  describe('pagination', () => {
     beforeEach(() => {
       // should return all the records instead just 3
       // as the case in the default mock
@@ -278,6 +278,11 @@ describe('query tab with unified timeline', () => {
         },
       ]);
     });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it(
       'should paginate correctly',
       async () => {
