@@ -21,10 +21,12 @@ import type {
   EnrichedFieldMetadata,
   ErrorSummary,
   IlmPhase,
+  IncompatibleFieldItem,
   MeteringStatsIndex,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
   PatternRollup,
+  SameFamilyFieldItem,
   UnallowedValueCount,
 } from './types';
 import { EcsFlatTyped } from './constants';
@@ -466,8 +468,10 @@ export interface StorageResult {
   ecsFieldCount: number;
   customFieldCount: number;
   incompatibleFieldCount: number;
+  incompatibleFieldItems: IncompatibleFieldItem[];
   sameFamilyFieldCount: number;
   sameFamilyFields: string[];
+  sameFamilyFieldItems: SameFamilyFieldItem[];
   unallowedMappingFields: string[];
   unallowedValueFields: string[];
   sizeInBytes: number;
@@ -486,28 +490,68 @@ export const formatStorageResult = ({
   result: DataQualityCheckResult;
   report: DataQualityIndexCheckedParams;
   partitionedFieldMetadata: PartitionedFieldMetadata;
-}): StorageResult => ({
-  batchId: report.batchId,
-  indexName: result.indexName,
-  indexPattern: result.pattern,
-  isCheckAll: report.isCheckAll,
-  checkedAt: result.checkedAt ?? Date.now(),
-  docsCount: result.docsCount ?? 0,
-  totalFieldCount: partitionedFieldMetadata.all.length,
-  ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
-  customFieldCount: partitionedFieldMetadata.custom.length,
-  incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
-  sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
-  sameFamilyFields: report.sameFamilyFields ?? [],
-  unallowedMappingFields: report.unallowedMappingFields ?? [],
-  unallowedValueFields: report.unallowedValueFields ?? [],
-  sizeInBytes: report.sizeInBytes ?? 0,
-  ilmPhase: result.ilmPhase,
-  markdownComments: result.markdownComments,
-  ecsVersion: report.ecsVersion,
-  indexId: report.indexId ?? '', // ---> we don't have this field when isILMAvailable is false
-  error: result.error,
-});
+}): StorageResult => {
+  const incompatibleFieldItems: IncompatibleFieldItem[] = [];
+  const sameFamilyFieldItems: SameFamilyFieldItem[] = [];
+
+  partitionedFieldMetadata.incompatible.forEach((field) => {
+    if (field.type !== field.indexFieldType) {
+      // Mapping incompatibility
+      incompatibleFieldItems.push({
+        fieldName: field.indexFieldName,
+        expectedValue: field.type,
+        actualValue: field.indexFieldType,
+        description: field.description,
+        reason: 'mapping',
+      });
+    }
+
+    if (field.indexInvalidValues.length > 0) {
+      // Value incompatibility
+      incompatibleFieldItems.push({
+        fieldName: field.indexFieldName,
+        expectedValue: field.allowed_values?.map((x) => x.name) ?? [],
+        actualValue: field.indexInvalidValues.map((v) => v.fieldName),
+        description: field.description,
+        reason: 'value',
+      });
+    }
+  });
+
+  partitionedFieldMetadata.sameFamily.forEach((field) => {
+    sameFamilyFieldItems.push({
+      fieldName: field.indexFieldName,
+      expectedValue: field.type,
+      actualValue: field.indexFieldType,
+      description: field.description,
+    });
+  });
+
+  return {
+    batchId: report.batchId,
+    indexName: result.indexName,
+    indexPattern: result.pattern,
+    isCheckAll: report.isCheckAll,
+    checkedAt: result.checkedAt ?? Date.now(),
+    docsCount: result.docsCount ?? 0,
+    totalFieldCount: partitionedFieldMetadata.all.length,
+    ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
+    customFieldCount: partitionedFieldMetadata.custom.length,
+    incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
+    incompatibleFieldItems,
+    sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
+    sameFamilyFields: report.sameFamilyFields ?? [],
+    sameFamilyFieldItems,
+    unallowedMappingFields: report.unallowedMappingFields ?? [],
+    unallowedValueFields: report.unallowedValueFields ?? [],
+    sizeInBytes: report.sizeInBytes ?? 0,
+    ilmPhase: result.ilmPhase,
+    markdownComments: result.markdownComments,
+    ecsVersion: report.ecsVersion,
+    indexId: report.indexId ?? '',
+    error: result.error,
+  };
+};
 
 export const formatResultFromStorage = ({
   storageResult,

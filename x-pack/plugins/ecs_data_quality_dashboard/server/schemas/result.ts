@@ -19,8 +19,25 @@ const ResultDocumentInterface = t.interface({
   ecsFieldCount: t.number,
   customFieldCount: t.number,
   incompatibleFieldCount: t.number,
+  incompatibleFieldItems: t.array(
+    t.type({
+      fieldName: t.string,
+      expectedValue: t.union([t.string, t.array(t.string)]),
+      actualValue: t.union([t.string, t.array(t.string)]),
+      description: t.string,
+      reason: t.string,
+    })
+  ),
   sameFamilyFieldCount: t.number,
   sameFamilyFields: t.array(t.string),
+  sameFamilyFieldItems: t.array(
+    t.type({
+      fieldName: t.string,
+      expectedValue: t.string,
+      actualValue: t.string,
+      description: t.string,
+    })
+  ),
   unallowedMappingFields: t.array(t.string),
   unallowedValueFields: t.array(t.string),
   sizeInBytes: t.number,

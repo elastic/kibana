@@ -119,6 +119,31 @@ export interface UnallowedValueSearchResult {
 
 export type IlmPhase = 'hot' | 'warm' | 'cold' | 'frozen' | 'unmanaged';
 
+export interface IncompatibleMappingItem {
+  fieldName: string;
+  expectedValue: string;
+  actualValue: string;
+  description: string;
+  reason: 'mapping';
+}
+
+export interface IncompatibleValueItem {
+  fieldName: string;
+  expectedValue: string[];
+  actualValue: string[];
+  description: string;
+  reason: 'value';
+}
+
+export type IncompatibleFieldItem = IncompatibleMappingItem | IncompatibleValueItem;
+
+export interface SameFamilyFieldItem {
+  fieldName: string;
+  expectedValue: string;
+  actualValue: string;
+  description: string;
+}
+
 export interface IlmExplainPhaseCounts {
   hot: number;
   warm: number;
