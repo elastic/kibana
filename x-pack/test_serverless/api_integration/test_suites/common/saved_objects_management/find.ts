@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    describe('with kibana index', () => {
+    describe('with kibana index - basic', () => {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
@@ -96,20 +96,27 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
       });
+    });
 
+    describe('with kibana index - relationships', () => {
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+        );
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+      });
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
-        before(async () => {
-          await kibanaServer.savedObjects.cleanStandardList();
-          await kibanaServer.importExport.load(
-            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
-          );
-        });
-        after(async () => {
-          await kibanaServer.importExport.unload(
-            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
-          );
-        });
-
         it('search for a reference', async () => {
           const { body } = await supertest
             .get('/api/kibana/management/saved_objects/_find')
@@ -124,8 +131,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(objects.map((obj: any) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
         });
       });
-      // does not work in serverless mode
-      it.skip('search for multiple references with OR operator', async () => {
+
+      it('search for multiple references with OR operator', async () => {
         await supertest
           .get('/api/kibana/management/saved_objects/_find')
           .query({
@@ -134,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
               { type: 'ref-type', id: 'ref-1' },
               { type: 'ref-type', id: 'ref-2' },
             ]),
-            // hasReferenceOperator: 'OR',
+            hasReferenceOperator: 'OR',
           })
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
@@ -146,8 +153,8 @@ export default function ({ getService }: FtrProviderContext) {
             );
           });
       });
-      // does not work in serverless mode
-      it.skip('search for multiple references with AND operator', async () => {
+
+      it('search for multiple references with AND operator', async () => {
         const { body } = await supertest
           .get('/api/kibana/management/saved_objects/_find')
           .query({
@@ -165,8 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(objects.map((obj: any) => obj.id)).to.eql(['ref-1-and-ref-2']);
       });
 
-      describe.skip('`sortField` and `sortOrder` parameters', () => {
-        // does not work in serverless mode
+      describe('`sortField` and `sortOrder` parameters', () => {
         it('sort objects by "type" in "asc" order', async () => {
           const { body } = await supertest
             .get('/api/kibana/management/saved_objects/_find')
