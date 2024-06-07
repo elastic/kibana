@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { Key } from 'selenium-webdriver';
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -13,6 +13,7 @@ export default ({ getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
+  const find = getService('find');
 
   describe('Custom threshold rule', function () {
     this.tags('includeFirefox');
@@ -43,15 +44,132 @@ export default ({ getService }: FtrProviderContext) => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('is filtered to only show "all" alerts by default', async () => {
+    it('shows the custom threshold rule in the observability section', async () => {
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
       await testSubjects.existOrFail('observability.rules.custom_threshold-SelectOption');
+      await observability.alerts.rulesPage.clickOnCustomThresholdRule();
     });
 
-    it('can create a custom threshold rule', async () => {
-      await observability.alerts.rulesPage.clickOnCustomThresholdRule();
-      await observability.alerts.rulesPage.fillCustomThresholdRule('test custom threshold rule');
+    it('can add name and tags', async () => {
+      await testSubjects.setValue('ruleNameInput', 'test custom threshold rule');
+      await testSubjects.setValue('comboBoxSearchInput', 'tag1');
+    });
+
+    it('can add data view', async () => {
+      // select data view
+      await testSubjects.click('selectDataViewExpression');
+      await testSubjects.setValue('indexPattern-switcher--input', 'metricbeat-*');
+      const dataViewExpression = await find.byCssSelector(
+        '[data-test-subj="indexPattern-switcher--input"]'
+      );
+      await dataViewExpression.pressKeys(Key.ENTER);
+    });
+
+    it('can select aggregation', async () => {
+      // select aggregation
+      await testSubjects.click('aggregationNameA');
+      await testSubjects.click('aggregationTypeSelect');
+      // assert all options are available
+      await find.byCssSelector('option[value="avg"]');
+      await find.byCssSelector('option[value="min"]');
+      await find.byCssSelector('option[value="max"]');
+      await find.byCssSelector('option[value="sum"]');
+      await find.byCssSelector('option[value="count"]');
+      await find.byCssSelector('option[value="cardinality"]');
+      await find.byCssSelector('option[value="p99"]');
+      await find.byCssSelector('option[value="p95"]');
+      await find.byCssSelector('option[value="rate"]');
+
+      // set first aggregation
+      await find.clickByCssSelector(`option[value="avg"]`);
+      const input1 = await find.byCssSelector('[data-test-subj="aggregationField"] input');
+      await input1.type('metricset.rtt');
+      await testSubjects.click('o11yClosablePopoverTitleButton');
+
+      // set second aggregation
+      await testSubjects.click('thresholdRuleCustomEquationEditorAddAggregationFieldButton');
+      await testSubjects.click('aggregationNameB');
+      await testSubjects.setValue('ruleKqlFilterSearchField', 'service.name : "opbeans-node"');
+      await testSubjects.click('o11yClosablePopoverTitleButton');
+    });
+
+    // it('can set custom equation', async () => {
+    // set custom equation
+    // await testSubjects.click('customEquation');
+    // const customEquationField = await find.byCssSelector(
+    //   '[data-test-subj="thresholdRuleCustomEquationEditorFieldText"]'
+    // );
+    // await customEquationField.click();
+    // await customEquationField.type('A - B');
+    // await testSubjects.click('o11yClosablePopoverTitleButton');
+    // });
+
+    it('can set threshold', async () => {
+      // set threshold
+      await testSubjects.click('thresholdPopover');
+      await testSubjects.click('comparatorOptionsComboBox');
+      // assert all options are available
+      await find.byCssSelector('option[value=">="]');
+      await find.byCssSelector('option[value="<="]');
+      await find.byCssSelector('option[value=">"]');
+      await find.byCssSelector('option[value="<"]');
+      await find.byCssSelector('option[value="between"]');
+      await find.byCssSelector('option[value="notBetween"]');
+      // select an option
+      await find.clickByCssSelector(`option[value="notBetween"]`);
+      const thresholdField1 = await find.byCssSelector('[data-test-subj="alertThresholdInput0"]');
+      await thresholdField1.click();
+      await new Promise((r) => setTimeout(r, 1000));
+      await thresholdField1.pressKeys(Key.BACK_SPACE);
+      await new Promise((r) => setTimeout(r, 1000));
+      await thresholdField1.pressKeys(Key.BACK_SPACE);
+      await new Promise((r) => setTimeout(r, 1000));
+      await thresholdField1.pressKeys(Key.BACK_SPACE);
+      await thresholdField1.type('200');
+      const thresholdField2 = await find.byCssSelector('[data-test-subj="alertThresholdInput1"]');
+      thresholdField2.type('250');
+      await find.clickByCssSelector('[aria-label="Close"]');
+    });
+
+    it('can set equation label', async () => {
+      // set equation label
+      await testSubjects.setValue('thresholdRuleCustomEquationEditorFieldText', 'test equation');
+    });
+
+    it('can set time range', async () => {
+      // set time range
+      await testSubjects.click('forLastExpression');
+      await new Promise((r) => setTimeout(r, 1000));
+      const timeRangeField = await find.byCssSelector('[data-test-subj="timeWindowSizeNumber"]');
+      await timeRangeField.click();
+      await new Promise((r) => setTimeout(r, 1000));
+      await timeRangeField.pressKeys(Key.BACK_SPACE);
+      await timeRangeField.type('2');
+      // assert all options are available
+      await testSubjects.click('timeWindowUnitSelect');
+      await find.byCssSelector('option[value="s"]');
+      await find.byCssSelector('option[value="m"]');
+      await find.byCssSelector('option[value="h"]');
+      await find.byCssSelector('option[value="d"]');
+      // select an option
+      await new Promise((r) => setTimeout(r, 3000));
+      await find.clickByCssSelector('[data-test-subj="timeWindowUnitSelect"] option[value="d"]');
+      await find.clickByCssSelector('[aria-label="Close"]');
+    });
+
+    it('can set groupby', async () => {
+      // set group by
+      const groupByField = await find.byCssSelector(
+        '[data-test-subj="thresholdRuleMetricsExplorer-groupBy"] [data-test-subj="comboBoxSearchInput"]'
+      );
+      await groupByField.type('docker.container.name');
+    });
+
+    it('can save the rule', async () => {
+      await testSubjects.click('saveRuleButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await find.byCssSelector('button[title="test custom threshold rule"]');
     });
 
     it('saved the rule correctly', async () => {
@@ -61,8 +179,28 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           page: 1,
           per_page: 10,
-          filter:
-            '{"type":"function","function":"or","arguments":[{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":".es-query","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"xpack.ml.anomaly_detection_alert","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"xpack.uptime.alerts.tlsCertificate","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"xpack.uptime.alerts.monitorStatus","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"xpack.uptime.alerts.durationAnomaly","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"xpack.synthetics.alerts.monitorStatus","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"xpack.synthetics.alerts.tls","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"slo.rules.burnRate","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"metrics.alert.threshold","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"metrics.alert.inventory.threshold","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"observability.rules.custom_threshold","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"logs.alert.document.count","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"apm.error_rate","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"apm.transaction_error_rate","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"apm.transaction_duration","isQuoted":false}]},{"type":"function","function":"is","arguments":[{"type":"literal","value":"alert.attributes.alertTypeId","isQuoted":false},{"type":"literal","value":"apm.anomaly","isQuoted":false}]}]}',
+          filter: `{
+            "type": "function",
+            "function": "or",
+            "arguments": [
+              {
+                "type": "function",
+                "function": "is",
+                "arguments": [
+                  {
+                    "type": "literal",
+                    "value": "alert.attributes.alertTypeId",
+                    "isQuoted": false
+                  },
+                  {
+                    "type": "literal",
+                    "value": "observability.rules.custom_threshold",
+                    "isQuoted": false
+                  }
+                ]
+              }
+            ]
+          }`,
           sort_field: 'name',
           sort_order: 'asc',
           filter_consumers: ['apm', 'infrastructure', 'logs', 'uptime', 'slo', 'observability'],
