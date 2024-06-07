@@ -15,8 +15,14 @@ import { ValidationOptions } from '../types';
 import { validateQuery } from '../validation';
 import type { ValidationTestCase, ValidationTestSuite } from './types';
 
+/** Validation test API factory, can be called at the start of each unit test. */
 export type Setup = typeof setup;
 
+/**
+ * Sets up an API for ES|QL query validation testing.
+ *
+ * @returns API for testing validation logic.
+ */
 export const setup = async () => {
   const callbacks = getCallbackMocks();
 
@@ -72,6 +78,10 @@ export interface WithErrorsCollectedReturn {
   writeFixtureFile: () => Promise<void>;
 }
 
+/**
+ * A higher-order setup function that collects validation test error and warning
+ * asserts and provides ability to write them to a fixture file.
+ */
 export const withErrorsCollected = (_setup: Setup, filename: string): WithErrorsCollectedReturn => {
   const testCases: ValidationTestCase[] = [];
 
