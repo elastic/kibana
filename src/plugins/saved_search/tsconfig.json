@@ -23,7 +23,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/saved-objects-plugin",
     "@kbn/es-query",
-    "@kbn/discover-utils",
     "@kbn/logging",
     "@kbn/core-plugins-server",
     "@kbn/utility-types",
