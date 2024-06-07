@@ -5,12 +5,13 @@ info:
 paths:
   /api/detection_engine/signals/tags:
     post:
+      x-labels: [serverless, ess]
       operationId: ManageAlertTags
-      summary: Manage alert tags for a single or multiple alerts
+      summary: Manage alert tags for a one or more alerts
       tags:
         - Alerts API
       requestBody:
-        description: A JSON object with the alert `ids` and `tags` fields
+        description: An object containing tags to add or remove and alert ids the changes will be applied
         required: true
         content:
           application/json:

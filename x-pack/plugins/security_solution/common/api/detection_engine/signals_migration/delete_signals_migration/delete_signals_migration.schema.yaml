@@ -5,12 +5,15 @@ info:
 paths:
   /api/detection_engine/signals/migration:
     delete:
+      x-labels: [ess]
       operationId: AlertsMigrationCleanup
-      summary: Clean up alerts migration(s)
+      summary: Performs alerts migration(s) cleanup
       description: |
-        Performs alerts migration(s) cleanup.
-        Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of the migration process. A successful migration will result in both the old and new indices being present. As such, the old, orphaned index can (and likely should) be deleted.
-        While you can delete these indices manually, the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted after 30 days. It also deletes other artifacts specific to the migration implementation.
+        Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
+        the migration process. A successful migration will result in both the old and new indices being present.
+        As such, the old, orphaned index can (and likely should) be deleted. While you can delete these indices manually,
+        the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
+        after 30 days. It also deletes other artifacts specific to the migration implementation.
       tags:
         - Alerts migration API
       requestBody:
@@ -75,6 +78,7 @@ components:
           type: string
         updated:
           type: string
+          format: date-time
         error:
           type: object
           properties:

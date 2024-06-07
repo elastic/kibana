@@ -5,8 +5,9 @@ info:
 paths:
   /api/detection_engine/signals/search:
     post:
+      x-labels: [serverless, ess]
       operationId: SearchAlerts
-      summary: Finds detection alerts them that match the given query and allows to apply Elasticsearch aggregations to the result
+      summary: Find and/or aggregate detection alerts that match the given query
       tags:
         - Alerts API
       requestBody:

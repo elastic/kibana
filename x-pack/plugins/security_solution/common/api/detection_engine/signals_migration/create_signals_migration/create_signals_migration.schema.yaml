@@ -5,6 +5,7 @@ info:
 paths:
   /api/detection_engine/signals/migration:
     post:
+      x-labels: [ess]
       operationId: CreateAlertsMigration
       summary: Initiates an alerts migration
       tags:

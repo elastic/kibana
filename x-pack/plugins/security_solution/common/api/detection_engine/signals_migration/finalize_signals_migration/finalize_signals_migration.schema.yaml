@@ -5,11 +5,13 @@ info:
 paths:
   /api/detection_engine/signals/finalize_migration:
     post:
+      x-labels: [ess]
       operationId: FinalizeAlertsMigration
       summary: Finalizes alerts migration(s)
       description: |
         The finalization endpoint replaces the original index's alias with the successfully migrated index's alias.
-        The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion, finalize it.
+        The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
+        finalize it.
       tags:
         - Alerts migration API
       requestBody:
@@ -76,6 +78,7 @@ components:
           type: string
         updated:
           type: string
+          format: date-time
         error:
           type: object
           properties:

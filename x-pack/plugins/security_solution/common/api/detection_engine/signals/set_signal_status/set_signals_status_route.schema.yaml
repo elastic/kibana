@@ -3,14 +3,15 @@ info:
   title: Set alerts status API endpoint
   version: '2023-10-31'
 paths:
-  /api/detection_engine/signals/search:
+  /api/detection_engine/signals/status:
     post:
+      x-labels: [serverless, ess]
       operationId: SetAlertsStatus
-      summary: Sets the status of a single or multiple alert
+      summary: Sets the status of one or more alerts
       tags:
         - Alerts API
       requestBody:
-        description: A JSON object with either a `query` or `signal_ids` field
+        description: An object containing desired status and explicit alert ids or a query to select alerts
         required: true
         content:
           application/json:

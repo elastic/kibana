@@ -5,8 +5,9 @@ info:
 paths:
   /api/detection_engine/signals/migration_status:
     post:
-      operationId: GetAlertsMigration
-      summary: Returns an alerts migration
+      x-labels: [ess]
+      operationId: GetAlertsMigrationStatus
+      summary: Returns an alerts migration status
       tags:
         - Alerts migration API
       parameters:
@@ -15,7 +16,11 @@ paths:
           description: Maximum age of qualifying detection alerts
           required: true
           schema:
-            $ref: '../../../detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleIntervalFrom'
+            type: string
+            description: |
+              Time from which data is analyzed. For example, now-4200s means the rule analyzes data from 70 minutes
+              before its start time. Defaults to now-6m (analyzes data from 6 minutes before the start time).
+            format: date-math
       responses:
         200:
           description: Successful response
@@ -87,3 +92,4 @@ components:
           type: integer
         updated:
           type: string
+          format: date-time
