@@ -27,6 +27,8 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
+import { runTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
+import { Setup, setup } from './__tests__/helpers';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -260,6 +262,29 @@ describe('validation logic', () => {
           ])
       );
     });
+
+    const collectFixturesSetup: Setup = async (...args) => {
+      const api = await setup(...args);
+      type ExpectErrors = Awaited<ReturnType<Setup>>['expectErrors'];
+      return {
+        ...api,
+        expectErrors: async (...params: Parameters<ExpectErrors>) => {
+          const [query, error = [], warning = []] = params;
+          const allStrings =
+            error.every((e) => typeof e === 'string') &&
+            warning.every((w) => typeof w === 'string');
+          if (allStrings) {
+            testCases.push({
+              query,
+              error,
+              warning,
+            });
+          }
+        },
+      };
+    };
+
+    runFromTestSuite(collectFixturesSetup);
 
     describe('row', () => {
       testErrorsAndWarnings('row', [
