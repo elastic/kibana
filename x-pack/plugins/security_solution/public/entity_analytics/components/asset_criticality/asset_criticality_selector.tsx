@@ -214,7 +214,7 @@ interface ModalProps {
   onSave: (value: CriticalityLevelWithUnassigned) => void;
 }
 
-const AssetCriticalityModal: React.FC<ModalProps> = ({
+export const AssetCriticalityModal: React.FC<ModalProps> = ({
   initialCriticalityLevel,
   toggle,
   onSave,

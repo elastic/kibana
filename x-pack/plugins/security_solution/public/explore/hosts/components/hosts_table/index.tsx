@@ -13,6 +13,8 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 import { EuiButton } from '@elastic/eui';
 import { useMutation } from '@tanstack/react-query';
+import { useToggle } from 'react-use';
+import { AssetCriticalityModal } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import type { DeleteAssetCriticalityResponse } from '../../../../entity_analytics/api/api';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 import type { Params } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
@@ -43,6 +45,7 @@ import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -187,6 +190,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 
   const { createAssetCriticality, deleteAssetCriticality } = useEntityAnalyticsRoutes();
 
+  const [isCriticalityModalVisible, toggleCriticalityModal] = useToggle(false);
   const criticality = useMutation<
     Array<AssetCriticalityRecord | DeleteAssetCriticalityResponse>,
     unknown,
@@ -211,47 +215,58 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     onSuccess: () => location.reload(),
   });
 
+  const bulkAssignCriticality = (criticalityLevel: CriticalityLevelWithUnassigned) => {
+    console.log('clicked');
+    const obj = selected.map(buildCriticalityMutationParams(criticalityLevel));
+    console.log('obj', obj);
+    criticality.mutate(obj);
+  };
+
   return (
-    <PaginatedTable
-      activePage={activePage}
-      columns={hostsColumns}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerTitle={i18n.HOSTS}
-      headerUnit={i18n.UNIT(totalCount)}
-      headerSupplement={
-        selected.length > 0 ? (
-          <EuiButton
-            onClick={() => {
-              console.log('clicked');
-              const obj = selected.map(buildCriticalityMutationParams('extreme_impact'));
-              console.log('obj', obj);
-              criticality.mutate(obj);
-            }}
-            title={`Assign criticality to ${selected.length} selected items`}
-          >{`Assign criticality to ${selected.length} selected items`}</EuiButton>
-        ) : undefined
-      }
-      id={id}
-      isInspect={isInspect}
-      itemsPerRow={rowItems}
-      limit={limit}
-      loading={loading}
-      loadPage={loadPage}
-      onChange={onChange}
-      pageOfItems={data}
-      setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={showMorePagesIndicator}
-      sorting={sorting}
-      selection={{
-        selected,
-        onSelectionChange: (items) => setSelected(items as HostsEdges[]),
-      }}
-      itemId={(item: HostsEdges) => item.node._id}
-      totalCount={fakeTotalCount}
-      updateLimitPagination={updateLimitPagination}
-      updateActivePage={updateActivePage}
-    />
+    <>
+      {isCriticalityModalVisible ? (
+        <AssetCriticalityModal
+          onSave={bulkAssignCriticality}
+          initialCriticalityLevel={undefined}
+          toggle={toggleCriticalityModal}
+        />
+      ) : null}
+      <PaginatedTable
+        activePage={activePage}
+        columns={hostsColumns}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerTitle={i18n.HOSTS}
+        headerUnit={i18n.UNIT(totalCount)}
+        headerSupplement={
+          selected.length > 0 ? (
+            <EuiButton
+              onClick={() => toggleCriticalityModal(true)}
+              title={`Assign criticality to ${selected.length} selected items`}
+            >{`Assign criticality to ${selected.length} selected items`}</EuiButton>
+          ) : undefined
+        }
+        id={id}
+        isInspect={isInspect}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        onChange={onChange}
+        pageOfItems={data}
+        setQuerySkip={setQuerySkip}
+        showMorePagesIndicator={showMorePagesIndicator}
+        sorting={sorting}
+        selection={{
+          selected,
+          onSelectionChange: (items) => setSelected(items as HostsEdges[]),
+        }}
+        itemId={(item: HostsEdges) => item.node._id}
+        totalCount={fakeTotalCount}
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
+      />
+    </>
   );
 };
 
