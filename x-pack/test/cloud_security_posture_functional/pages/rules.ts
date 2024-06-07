@@ -64,6 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {
@@ -92,9 +93,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Clicking the integrations counter button leads to the integration page', async () => {
-        await rule.rulePage.clickIntegrationsEvaluatedButton();
         await retry.waitFor('Wait until url includes', async () =>
-          rule.rulePage.doesCurrentUrlContains('add-integration/kspm')
+          rule.rulePage.doesElementContainsUrl(
+            'rules-counters-integrations-evaluated-button',
+            'add-integration/kspm'
+          )
         );
       });
 
