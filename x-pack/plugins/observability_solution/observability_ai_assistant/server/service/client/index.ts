@@ -53,6 +53,7 @@ import {
   type Message,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
   KnowledgeBaseEntryOperationType,
@@ -271,7 +272,7 @@ export class ObservabilityAIAssistantClient {
         ]).pipe(
           switchMap(([messagesWithUpdatedSystemMessage, knowledgeBaseInstructions]) => {
             // if needed, inject a context function request here
-            const contextRequest = functionClient.hasFunction('context')
+            const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
               : undefined;
 

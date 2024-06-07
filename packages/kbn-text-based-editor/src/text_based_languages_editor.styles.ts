@@ -22,16 +22,23 @@ export const textBasedLanguageEditorStyles = (
   isCodeEditorExpandedFocused: boolean,
   hasReference: boolean,
   editorIsInline: boolean,
-  historyIsOpen: boolean
+  historyIsOpen: boolean,
+  hideHeaderWhenExpanded: boolean
 ) => {
-  let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
-  if (isCodeEditorExpanded) {
-    position = 'relative' as 'relative';
-  }
   const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
+
+  const showHeader = hideHeaderWhenExpanded === true && isCodeEditorExpanded;
+
+  let position = isCompactFocused ? ('absolute' as const) : ('relative' as const);
+  if (isCodeEditorExpanded) {
+    position = 'relative';
+  }
+
   return {
     editorContainer: {
       position,
+      left: 0,
+      right: 0,
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
@@ -57,14 +64,14 @@ export const textBasedLanguageEditorStyles = (
       ...(isCodeEditorExpanded && { overflow: 'hidden' }),
     },
     linesBadge: {
-      position: 'absolute' as 'absolute', // cast string to type 'absolute',
+      position: 'absolute' as const,
       zIndex: 1,
       right: hasErrors || hasWarning ? '60px' : '12px',
       top: '50%',
       transform: 'translate(0, -50%)',
     },
     errorsBadge: {
-      position: 'absolute' as 'absolute', // cast string to type 'absolute',
+      position: 'absolute' as const,
       zIndex: 1,
       right: '12px',
       top: '50%',
@@ -86,7 +93,7 @@ export const textBasedLanguageEditorStyles = (
       paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       width: '100%',
-      position: 'relative' as 'relative', // cast string to type 'relative',
+      position: 'relative' as const,
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
@@ -100,7 +107,7 @@ export const textBasedLanguageEditorStyles = (
       borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
       backgroundColor: euiTheme.colors.lightestShade,
       width: '100%',
-      position: 'relative' as 'relative', // cast string to type 'relative',
+      position: 'relative' as const,
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
@@ -114,10 +121,10 @@ export const textBasedLanguageEditorStyles = (
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.xs,
       paddingRight: euiTheme.size.xs,
-      paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
-      paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
+      paddingTop: showHeader ? euiTheme.size.s : euiTheme.size.xs,
+      paddingBottom: showHeader ? euiTheme.size.s : euiTheme.size.xs,
       width: '100%',
-      position: 'relative' as 'relative', // cast string to type 'relative',
+      position: 'relative' as const,
       marginLeft: 0,
       marginTop: editorIsInline ? 0 : euiTheme.size.s,
       borderBottom: 'none',
