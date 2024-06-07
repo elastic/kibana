@@ -8,7 +8,7 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -33,9 +33,10 @@ export function fetchEsql(
   inspectorAdapters: Adapters,
   abortSignal?: AbortSignal,
   filters?: Filter[],
-  inputQuery?: Query
+  inputQuery?: Query,
+  inputTimeRange?: TimeRange
 ): Promise<RecordsFetchResponse> {
-  const timeRange = data.query.timefilter.timefilter.getTime();
+  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getTime();
   return textBasedQueryStateToAstWithValidation({
     filters,
     query,

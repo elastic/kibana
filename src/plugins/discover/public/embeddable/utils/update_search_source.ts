@@ -13,11 +13,7 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../build_services';
 import { getSortForSearchSource } from '../../utils/sorting';
 
-const getTimeRangeFilter = (
-  discoverServices: DiscoverServices,
-  dataView: DataView | undefined,
-  fetchContext: FetchContext
-) => {
+export const getTimeRangeFromFetchContext = (fetchContext: FetchContext) => {
   const timeRange =
     fetchContext.timeslice !== undefined
       ? {
@@ -26,6 +22,16 @@ const getTimeRangeFilter = (
           mode: 'absolute' as 'absolute',
         }
       : fetchContext.timeRange;
+  if (!timeRange) return undefined;
+  return timeRange;
+};
+
+const getTimeRangeFilter = (
+  discoverServices: DiscoverServices,
+  dataView: DataView | undefined,
+  fetchContext: FetchContext
+) => {
+  const timeRange = getTimeRangeFromFetchContext(fetchContext);
   if (!dataView || !timeRange) return undefined;
   return discoverServices.timefilter.createFilter(dataView, timeRange);
 };
@@ -60,7 +66,6 @@ export const updateSearchSource = (
     searchSource.removeField('fields');
   }
 
-  // TODO: Make this better??
   // if the search source has a parent, update that too based on fetch context
   const parentSearchSource = searchSource.getParent();
   if (parentSearchSource) {

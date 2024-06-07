@@ -32,7 +32,7 @@ import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SearchEmbeddableApi } from './types';
-import { updateSearchSource } from './utils/update_search_source';
+import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 
 export const isEsqlMode = (savedSearch: Pick<SavedSearch, 'searchSource'>): boolean => {
   const query = savedSearch.searchSource.getField('query');
@@ -62,16 +62,12 @@ export function initializeFetch({
         if (!dataView || !searchSource) {
           return;
         }
-        const sampleSize = api.sampleSize$.getValue();
-        const searchSourceQuery = searchSource.getField('query');
-
         // Abort any in-progress requests
         abortController.abort();
         abortController = new AbortController();
 
-        const searchSessionId = fetchContext.searchSessionId;
         const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
-
+        const sampleSize = api.sampleSize$.getValue();
         updateSearchSource(
           discoverServices,
           searchSource,
@@ -84,6 +80,9 @@ export function initializeFetch({
             sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           }
         );
+
+        const searchSessionId = fetchContext.searchSessionId;
+        const searchSourceQuery = searchSource.getField('query');
 
         try {
           api.dataLoading.next(true);
@@ -104,7 +103,8 @@ export function initializeFetch({
               discoverServices.inspector,
               abortController.signal,
               fetchContext.filters,
-              fetchContext.query
+              fetchContext.query,
+              getTimeRangeFromFetchContext(fetchContext)
             );
             return {
               columnsMeta: result.esqlQueryColumns
