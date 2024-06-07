@@ -151,7 +151,6 @@ async function retrieveSuggestions({
 }) {
   const recallResponse = await client.recall({
     queries,
-    categories: [],
   });
 
   return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction'));
