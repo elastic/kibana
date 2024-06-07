@@ -9,7 +9,7 @@ tags: ['kibana', 'dev', 'contributor', 'api docs']
 
 ## Overview
 
-"Encrypted Saved Objects" (ESO) are <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Object types" /> that have been registered with the Encrypted Saved Objects
+"Encrypted Saved Objects" (ESO) are <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Object types"/> that have been registered with the Encrypted Saved Objects
 Service (ESO Service) to specify which attributes should be protected (encrypted attributes) and which attributes, if any, should be present and unchanged
 in order to decrypt the protected attributes ("Additional Authenticated Data", or AAD).
 
@@ -36,8 +36,10 @@ When in doubt, consult with the Kibana Security team (Application Experience/Pla
 
 ### Registration
 
-To register a Saved Object type with the ESO Service, call the service's `registerType` function, and provide an `EncryptedSavedObjectTypeRegistration`
-object that defines how the object should be encrypted.
+To register a Saved Object type, the type must first be registered with the Saved Objects Repository. This can be achieved by calling the Saved Object Service's
+`registerType` function. More information can be found in the <DocLink id="kibDevTutorialSavedObject" text="Register a new saved object type"/> tutorial. Once the
+Saved Object type is registered, use the ESO Plugin's `registerType` function, and provide an `EncryptedSavedObjectTypeRegistration` object that defines how the
+object should be encrypted.
 
 ```ts
   export interface EncryptedSavedObjectTypeRegistration {
@@ -86,8 +88,9 @@ This is one reason why it is important to carefully consider whether an attribut
 
 #### Nested attributes
 
-When an attribute is included in AAD, all of its properties, or subfields, are inherently included in AAD. When AAD is constructed as key-value pairs, the nested
-properties of an attribute are all included in its value. In this way, AAD inclusion is hierarchical.
+When an attribute is included in AAD, all of its properties, or subfields, are inherently included in AAD. When AAD is constructed as key-value pairs, the nested properties
+of an attribute are all included in its value. In this way, AAD inclusion is hierarchical. If restructuring the attributes of an object to account for AAD hierarchical
+inclusion is not possible or desireable, you can make use of more granular keys, e.g. `firstLevelAttribute.nestedFieldToInclude`.
 
 #### What attributes should be included in AAD
 
@@ -185,6 +188,214 @@ the current and previous version of Kibana. Some of the advice here is applicabl
 | Change an existing attribute to be encrypted | No->Yes    | No/Yes  | This is not currently supported. The previous version of Kibana will not decrypt this attribute, and any business logic that utilizes the attribute will fail.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Remove an attribute from the encrypted list  | Yes->No    | No      | This is not currently supported. The previous version of Kibana will always attempt to decrypt the attribute.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Remove an attribute from AAD inclusion       | No         | Yes->No | This is not currently supported. The previous version of Kibana will always use the attribute to construct AAD.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+## A real world example
+
+Let's examine one of the latest ESO types as of writing this document, the 'ad_hoc_run_params' type. We're using this type as an example, because it is one of the first
+new ESO types to use a Model Version, and it is a fairly simple type (compared to other Model Version ESOs).
+
+### Registering the Saved Object type
+
+Below is the call to reigster the type.
+
+```ts
+  savedObjects.registerType({
+    name: AD_HOC_RUN_SAVED_OBJECT_TYPE, // 'ad_hoc_run_params'
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: {
+      dynamic: false,
+      properties: {
+        apiKeyId: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
+        },
+        end: {
+          type: 'date',
+        },
+        rule: {
+          properties: {
+            alertTypeId: {
+              type: 'keyword',
+            },
+            consumer: {
+              type: 'keyword',
+            },
+          },
+        },
+        start: {
+          type: 'date',
+        },
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: adHocRunParamsModelVersions,
+  });
+```
+And here is what the Model Version and schemas look like:
+
+```ts
+  const adHocRunParamsModelVersions: CustomSavedObjectsModelVersionMap = {
+    '1': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: rawAdHocRunParamsSchemaV1.extends({}, { unknowns: 'ignore' }),
+        create: rawAdHocRunParamsSchemaV1,
+      },
+      isCompatibleWithPreviousVersion: () => true,
+    },
+  };
+
+  const rawAdHocRunParamsSchema = schema.object({
+    apiKeyId: schema.string(),
+    apiKeyToUse: schema.string(),
+    createdAt: schema.string(),
+    duration: schema.string(),
+    enabled: schema.boolean(),
+    end: schema.maybe(schema.string()),
+    rule: rawAdHocRunParamsRuleSchema,
+    spaceId: schema.string(),
+    start: schema.string(),
+    status: rawAdHocRunStatus,
+    schedule: schema.arrayOf(rawAdHocRunSchedule),
+  });
+
+  const rawAdHocRunParamsRuleSchema = schema.object({
+    name: schema.string(),
+    tags: schema.arrayOf(schema.string()),
+    alertTypeId: schema.string(),
+    params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
+    apiKeyOwner: schema.nullable(schema.string()),
+    apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+    consumer: schema.string(),
+    enabled: schema.boolean(),
+    schedule: schema.object({
+      interval: schema.string(),
+    }),
+    createdBy: schema.nullable(schema.string()),
+    updatedBy: schema.nullable(schema.string()),
+    updatedAt: schema.string(),
+    createdAt: schema.string(),
+    revision: schema.number(),
+  });
+
+  const rawAdHocRunStatus = schema.oneOf([
+    schema.literal('complete'),
+    schema.literal('pending'),
+    schema.literal('running'),
+    schema.literal('error'),
+    schema.literal('timeout'),
+  ]);
+
+  const rawAdHocRunSchedule = schema.object({
+    interval: schema.string(),
+    status: rawAdHocRunStatus,
+    runAt: schema.string(),
+  });
+```
+
+### Registering the type as an Encrytped Saved Object
+
+```ts
+  encryptedSavedObjects.registerType({
+    type: AD_HOC_RUN_SAVED_OBJECT_TYPE, // 'ad_hoc_run_params' - the type name must match
+    attributesToEncrypt: new Set(['apiKeyToUse']),
+    attributesToIncludeInAAD: new Set(['rule', 'spaceId']),
+  });
+```
+
+There is only one encrypted attribute, `apiKeyToUse`, which contains the API key that needs to be protected. The attributes to include in AAD consist of the `spaceId`,
+and the `rule` definition. Since the object's namespace type is `'multiple-isolated'`, the space ID (or namespace) will not automatically be part of AAD by way of the
+Saved Object Descriptor (see <DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="aad" text="AAD"/>). In theory, the space id will never change for a
+`'multiple-isolated'`, which makes it a reasonable candidate for an AAD field.
+
+The `rule` attribute contains values related to the encrtypted attribute `apiKeyToUse`, or that will never change:
+
+```ts
+  apiKeyOwner: schema.nullable(schema.string()),
+  apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+  createdBy: schema.nullable(schema.string()),
+  createdAt: schema.string(),
+```
+
+The above are prime examples of the type of attributes that should comprise AAD. The `rule` attribute also contains some attributes that may change independently of the
+encrypted attribute `apiKeyToUse`:
+
+```ts
+  enabled: schema.boolean(),
+  schedule: schema.object({
+    interval: schema.string(),
+  }),
+  updatedBy: schema.nullable(schema.string()),
+  updatedAt: schema.string(),
+  revision: schema.number(),
+```
+
+This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. It is worth considering the nature
+of AAD hierarchical inclusion when structuring attributes for your saved objects. You can also utilize more granular keys when speficying which attributes to include in AAD,
+e.g. `rule.apiKeyOwner`. For more information, see the <DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="nested-attributes" text="Nested attributes"/> section of
+this document.
+
+Additionally, the owning team implemeted a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them un-decryptable.
+
+```ts
+export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
+```
+
+Usage:
+```ts
+export type PartiallyUpdateableAdHocRunAttributes = Partial<
+  Omit<AdHocRunSO, AdHocRunAttributesNotPartiallyUpdatable>
+>;
+
+interface PartiallyUpdateAdHocRunSavedObjectOptions {
+  refresh?: SavedObjectsUpdateOptions['refresh'];
+  version?: string;
+  ignore404?: boolean;
+  namespace?: string; // only should be used  with ISavedObjectsRepository
+}
+
+// typed this way so we can send a SavedObjectClient or SavedObjectRepository
+type SavedObjectClientForUpdate = Pick<SavedObjectsClient, 'update'>;
+
+export async function partiallyUpdateAdHocRun(
+  savedObjectsClient: SavedObjectClientForUpdate,
+  id: string,
+  attributes: PartiallyUpdateableAdHocRunAttributes,
+  options: PartiallyUpdateAdHocRunSavedObjectOptions = {}
+): Promise<void> {
+  // ensure we only have the valid attributes that are not encrypted and are excluded from AAD
+  const attributeUpdates = omit(attributes, [
+    ...AdHocRunAttributesToEncrypt,
+    ...AdHocRunAttributesIncludedInAAD,
+  ]);
+  const updateOptions: SavedObjectsUpdateOptions<AdHocRunSO> = pick(
+    options,
+    'namespace',
+    'version',
+    'refresh'
+  );
+
+  try {
+    await savedObjectsClient.update<AdHocRunSO>(
+      AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      id,
+      attributeUpdates,
+      updateOptions
+    );
+  } catch (err) {
+    if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      return;
+    }
+    throw err;
+  }
+}
+```
 
 ## Making Changes
 
