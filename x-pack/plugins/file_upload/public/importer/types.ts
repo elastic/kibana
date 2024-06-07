@@ -43,7 +43,11 @@ export interface IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline
+    pipeline: IngestPipeline,
+    createNewPipeline?: boolean,
+    reuseIndex?: boolean,
+    pipelineId?: string,
+    reuseMappings?: boolean
   ): Promise<ImportResponse>;
   import(
     id: string,

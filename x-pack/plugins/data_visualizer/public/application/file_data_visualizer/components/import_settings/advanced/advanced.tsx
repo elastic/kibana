@@ -20,17 +20,17 @@ import {
 } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import type { CombinedField } from '../../../common/components/combined_fields';
-import { CombinedFieldsForm } from '../../../common/components/combined_fields';
-import { JsonEditor, EDITOR_MODE } from '../json_editor';
-import { CreateDataViewToolTip } from './create_data_view_tooltip';
-const EDITOR_HEIGHT = '300px';
+import type { CombinedField } from '../../../../common/components/combined_fields';
+import { CombinedFieldsForm } from '../../../../common/components/combined_fields';
+
+import { CreateDataViewToolTip } from '../create_data_view_tooltip';
+import { IndexSettings, IngestPipeline, Mappings } from './inputs';
 
 interface Props {
   index: string;
   dataView: string;
   initialized: boolean;
-  onIndexChange(): void;
+  onIndexChange(index: string, skipValidation?: boolean): void;
   createDataView: boolean;
   onCreateDataViewChange(): void;
   onDataViewChange(): void;
@@ -70,7 +70,7 @@ export const AdvancedSettings: FC<Props> = ({
   canCreateDataView,
 }) => {
   return (
-    <React.Fragment>
+    <>
       <EuiFormRow
         label={
           <FormattedMessage
@@ -90,7 +90,7 @@ export const AdvancedSettings: FC<Props> = ({
           )}
           value={index}
           disabled={initialized === true}
-          onChange={onIndexChange}
+          onChange={(e) => onIndexChange(e.target.value)}
           isInvalid={indexNameError !== ''}
           aria-label={i18n.translate(
             'xpack.dataVisualizer.file.advancedImportSettings.indexNameAriaLabel',
@@ -175,84 +175,6 @@ export const AdvancedSettings: FC<Props> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </React.Fragment>
-  );
-};
-
-interface JsonEditorProps {
-  initialized: boolean;
-  data: string;
-  onChange(value: string): void;
-}
-
-const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
-  return (
-    <React.Fragment>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.indexSettingsLabel"
-            defaultMessage="Index settings"
-          />
-        }
-        fullWidth
-      >
-        <JsonEditor
-          mode={EDITOR_MODE.JSON}
-          readOnly={initialized === true}
-          value={data}
-          height={EDITOR_HEIGHT}
-          onChange={onChange}
-        />
-      </EuiFormRow>
-    </React.Fragment>
-  );
-};
-
-const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
-  return (
-    <React.Fragment>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.mappingsLabel"
-            defaultMessage="Mappings"
-          />
-        }
-        fullWidth
-      >
-        <JsonEditor
-          mode={EDITOR_MODE.JSON}
-          readOnly={initialized === true}
-          value={data}
-          height={EDITOR_HEIGHT}
-          onChange={onChange}
-        />
-      </EuiFormRow>
-    </React.Fragment>
-  );
-};
-
-const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
-  return (
-    <React.Fragment>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
-            defaultMessage="Ingest pipeline"
-          />
-        }
-        fullWidth
-      >
-        <JsonEditor
-          mode={EDITOR_MODE.JSON}
-          readOnly={initialized === true}
-          value={data}
-          height={EDITOR_HEIGHT}
-          onChange={onChange}
-        />
-      </EuiFormRow>
-    </React.Fragment>
+    </>
   );
 };

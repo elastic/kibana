@@ -160,7 +160,7 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
           text: examples,
         },
       },
-      { maxRetries: 0 }
+      { maxRetries: 0, requestTimeout: 1 }
     );
 
     const lengths = examples.map((e) => e.length);

@@ -57,7 +57,7 @@ export const SimpleSettings: FC<Props> = ({
           )}
           value={index}
           disabled={initialized === true}
-          onChange={onIndexChange}
+          onChange={(e) => onIndexChange(e.target.value)}
           isInvalid={indexNameError !== ''}
           aria-label={i18n.translate(
             'xpack.dataVisualizer.file.simpleImportSettings.indexNameAriaLabel',

@@ -20,7 +20,6 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
@@ -35,6 +34,7 @@ import {
   getDefaultCombinedFields,
 } from '../../../common/components/combined_fields';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
+import { importData } from './import';
 
 const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
@@ -74,14 +74,22 @@ const DEFAULT_STATE = {
   checkingValidIndex: false,
   combinedFields: [],
   importer: undefined,
+  reuseIndex: false,
+  pipelineId: null,
+  createNewPipeline: false,
 };
 
 export class ImportView extends Component {
+  originalMappingsString = '';
+  originalPipelineString = '';
+
   constructor(props) {
     super(props);
 
     this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
     this.dataViewsContract = props.dataViewsContract;
+    this.originalMappingsString = this.state.mappingsString;
+    this.originalPipelineString = this.state.pipelineString;
   }
 
   componentDidMount() {
@@ -96,228 +104,36 @@ export class ImportView extends Component {
   };
 
   clickImport = () => {
-    this.import();
-  };
-
-  // TODO - sort this function out. it's a mess
-  async import() {
     const { data, results, dataViewsContract, fileUpload } = this.props;
+    const {
+      index,
+      dataView,
+      createDataView,
+      indexSettingsString,
+      mappingsString,
+      pipelineString,
+      reuseIndex,
+      pipelineId,
+      createNewPipeline,
+    } = this.state;
 
-    const { format } = results;
-    let { timeFieldName } = this.state;
-    const { index, dataView, createDataView, indexSettingsString, mappingsString, pipelineString } =
-      this.state;
-
-    const errors = [];
-
-    if (index !== '') {
-      this.setState(
-        {
-          importing: true,
-          errors,
-        },
-        async () => {
-          // check to see if the user has permission to create and ingest data into the specified index
-          if (
-            (await fileUpload.hasImportPermission({
-              checkCreateDataView: createDataView,
-              checkHasManagePipeline: true,
-              indexName: index,
-            })) === false
-          ) {
-            errors.push(
-              i18n.translate('xpack.dataVisualizer.file.importView.importPermissionError', {
-                defaultMessage:
-                  'You do not have permission to create or import data into index {index}.',
-                values: {
-                  index,
-                },
-              })
-            );
-            this.setState({
-              permissionCheckStatus: IMPORT_STATUS.FAILED,
-              importing: false,
-              imported: false,
-              errors,
-            });
-            return;
-          }
-
-          this.setState(
-            {
-              importing: true,
-              imported: false,
-              reading: true,
-              initialized: true,
-              permissionCheckStatus: IMPORT_STATUS.COMPLETE,
-            },
-            () => {
-              setTimeout(async () => {
-                let success = true;
-                const createPipeline = pipelineString !== '';
-
-                let settings = {};
-                let mappings = {};
-                let pipeline = {};
-
-                try {
-                  settings = JSON.parse(indexSettingsString);
-                } catch (error) {
-                  success = false;
-                  const parseError = i18n.translate(
-                    'xpack.dataVisualizer.file.importView.parseSettingsError',
-                    {
-                      defaultMessage: 'Error parsing settings:',
-                    }
-                  );
-                  errors.push(`${parseError} ${error.message}`);
-                }
-
-                try {
-                  mappings = JSON.parse(mappingsString);
-                } catch (error) {
-                  success = false;
-                  const parseError = i18n.translate(
-                    'xpack.dataVisualizer.file.importView.parseMappingsError',
-                    {
-                      defaultMessage: 'Error parsing mappings:',
-                    }
-                  );
-                  errors.push(`${parseError} ${error.message}`);
-                }
-
-                try {
-                  if (createPipeline) {
-                    pipeline = JSON.parse(pipelineString);
-                  }
-                } catch (error) {
-                  success = false;
-                  const parseError = i18n.translate(
-                    'xpack.dataVisualizer.file.importView.parsePipelineError',
-                    {
-                      defaultMessage: 'Error parsing ingest pipeline:',
-                    }
-                  );
-                  errors.push(`${parseError} ${error.message}`);
-                }
-
-                this.setState({
-                  parseJSONStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                });
-
-                if (success) {
-                  const importer = await fileUpload.importerFactory(format, {
-                    excludeLinesPattern: results.exclude_lines_pattern,
-                    multilineStartPattern: results.multiline_start_pattern,
-                  });
-                  if (importer !== undefined) {
-                    const readResp = importer.read(data, this.setReadProgress);
-                    success = readResp.success;
-                    this.setState({
-                      readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                      reading: false,
-                      importer,
-                    });
-
-                    if (readResp.success === false) {
-                      console.error(readResp.error);
-                      errors.push(readResp.error);
-                    }
-
-                    if (success) {
-                      const initializeImportResp = await importer.initializeImport(
-                        index,
-                        settings,
-                        mappings,
-                        pipeline
-                      );
-
-                      timeFieldName = importer.getTimeField();
-                      this.setState({ timeFieldName });
-
-                      const indexCreated = initializeImportResp.index !== undefined;
-                      this.setState({
-                        indexCreatedStatus: indexCreated
-                          ? IMPORT_STATUS.COMPLETE
-                          : IMPORT_STATUS.FAILED,
-                      });
-
-                      if (createPipeline) {
-                        const pipelineCreated = initializeImportResp.pipelineId !== undefined;
-                        if (indexCreated) {
-                          this.setState({
-                            ingestPipelineCreatedStatus: pipelineCreated
-                              ? IMPORT_STATUS.COMPLETE
-                              : IMPORT_STATUS.FAILED,
-                            ingestPipelineId: pipelineCreated
-                              ? initializeImportResp.pipelineId
-                              : '',
-                          });
-                        }
-                        success = indexCreated && pipelineCreated;
-                      } else {
-                        success = indexCreated;
-                      }
-
-                      if (success) {
-                        const importId = initializeImportResp.id;
-                        const pipelineId = initializeImportResp.pipelineId;
-                        const importResp = await importer.import(
-                          importId,
-                          index,
-                          pipelineId,
-                          this.setImportProgress
-                        );
-                        success = importResp.success;
-                        this.setState({
-                          uploadStatus: importResp.success
-                            ? IMPORT_STATUS.COMPLETE
-                            : IMPORT_STATUS.FAILED,
-                          importFailures: importResp.failures,
-                          docCount: importResp.docCount,
-                        });
-
-                        if (success) {
-                          if (createDataView) {
-                            const dataViewName = dataView === '' ? index : dataView;
-                            const dataViewResp = await createKibanaDataView(
-                              dataViewName,
-                              dataViewsContract,
-                              timeFieldName
-                            );
-                            success = dataViewResp.success;
-                            this.setState({
-                              dataViewCreatedStatus: dataViewResp.success
-                                ? IMPORT_STATUS.COMPLETE
-                                : IMPORT_STATUS.FAILED,
-                              dataViewId: dataViewResp.id,
-                            });
-                            if (dataViewResp.success === false) {
-                              errors.push(dataViewResp.error);
-                            }
-                          }
-                        } else {
-                          errors.push(importResp.error);
-                        }
-                      } else {
-                        errors.push(initializeImportResp.error);
-                      }
-                    }
-                  }
-                }
-
-                this.setState({
-                  importing: false,
-                  imported: success,
-                  errors,
-                });
-              }, 500);
-            }
-          );
-        }
-      );
-    }
-  }
+    importData(
+      { data, results, dataViewsContract, fileUpload },
+      {
+        index,
+        dataView,
+        createDataView,
+        indexSettingsString,
+        mappingsString,
+        originalMappingsString: this.originalMappingsString,
+        pipelineString,
+        reuseIndex,
+        pipelineId,
+        createNewPipeline: reuseIndex ? createNewPipeline : true,
+      },
+      (state) => this.setState(state)
+    );
+  };
 
   onConfigModeChange = (configMode) => {
     this.setState({
@@ -325,13 +141,14 @@ export class ImportView extends Component {
     });
   };
 
-  onIndexChange = (e) => {
-    const index = e.target.value;
+  onIndexChange = (index, skipValidation) => {
     this.setState({
       index,
-      checkingValidIndex: true,
+      checkingValidIndex: !skipValidation,
     });
-    this.debounceIndexCheck(index);
+    if (!skipValidation) {
+      this.debounceIndexCheck(index);
+    }
   };
 
   debounceIndexCheck = debounce(async (index) => {
@@ -385,14 +202,20 @@ export class ImportView extends Component {
     });
   };
 
-  onCombinedFieldsChange = (combinedFields) => {
-    this.setState({ combinedFields });
+  onPipelineIdChange = (text) => {
+    this.setState({
+      pipelineId: text,
+    });
   };
 
-  setImportProgress = (progress) => {
+  onCreateNewPipelineChange = (b) => {
     this.setState({
-      uploadProgress: progress,
+      createNewPipeline: b,
     });
+  };
+
+  onCombinedFieldsChange = (combinedFields) => {
+    this.setState({ combinedFields });
   };
 
   setReadProgress = (progress) => {
@@ -403,6 +226,14 @@ export class ImportView extends Component {
 
   showFilebeatFlyout = () => {
     this.setState({ isFilebeatFlyoutVisible: true });
+  };
+
+  closeFilebeatFlyout = () => {
+    this.setState({ isFilebeatFlyoutVisible: false });
+  };
+
+  setReuseIndex = (reuseIndex) => {
+    this.setState({ reuseIndex });
   };
 
   closeFilebeatFlyout = () => {
@@ -450,6 +281,9 @@ export class ImportView extends Component {
       checkingValidIndex,
       combinedFields,
       importer,
+      reuseIndex,
+      pipelineId,
+      createNewPipeline,
     } = this.state;
 
     const createPipeline = pipelineString !== '';
@@ -473,7 +307,8 @@ export class ImportView extends Component {
       indexNameError !== '' ||
       (createDataView === true && dataViewNameError !== '') ||
       initialized === true ||
-      checkingValidIndex === true;
+      checkingValidIndex === true ||
+      (reuseIndex && pipelineId === null);
 
     return (
       <EuiPageBody data-test-subj="dataVisualizerPageFileImport">
@@ -512,11 +347,20 @@ export class ImportView extends Component {
               onIndexSettingsStringChange={this.onIndexSettingsStringChange}
               onMappingsStringChange={this.onMappingsStringChange}
               onPipelineStringChange={this.onPipelineStringChange}
+              onPipelineIdChange={this.onPipelineIdChange}
               indexNameError={indexNameError}
               dataViewNameError={dataViewNameError}
               combinedFields={combinedFields}
               onCombinedFieldsChange={this.onCombinedFieldsChange}
               results={this.props.results}
+              reuseIndex={reuseIndex}
+              setReuseIndex={this.setReuseIndex}
+              pipelineId={pipelineId}
+              setPipelineId={this.setPipelineId}
+              originalMappingsString={this.originalMappingsString}
+              originalPipelineString={this.originalPipelineString}
+              createNewPipeline={createNewPipeline}
+              onCreateNewPipelineChange={this.onCreateNewPipelineChange}
             />
 
             <EuiSpacer size="m" />
@@ -645,25 +489,6 @@ export class ImportView extends Component {
         )}
       </EuiPageBody>
     );
-  }
-}
-
-async function createKibanaDataView(dataViewName, dataViewsContract, timeFieldName) {
-  try {
-    const emptyPattern = await dataViewsContract.createAndSave({
-      title: dataViewName,
-      timeFieldName,
-    });
-
-    return {
-      success: true,
-      id: emptyPattern.id,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error,
-    };
   }
 }
 
