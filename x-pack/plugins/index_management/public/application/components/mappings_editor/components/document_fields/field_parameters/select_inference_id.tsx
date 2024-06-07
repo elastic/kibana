@@ -55,7 +55,12 @@ const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchMod
     elser: ElasticsearchModelDefaultOptions.elser,
     elasticsearch: ElasticsearchModelDefaultOptions.e5,
   };
-
+const uncheckSelectedModelOption = (options: EuiSelectableOption[]) => {
+  const checkedOption = options.find(({ checked }) => checked === 'on');
+  if (checkedOption) {
+    checkedOption.checked = undefined;
+  }
+};
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
@@ -158,19 +163,22 @@ export const SelectInferenceId = ({
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-      const oldOptions = options;
       try {
         const isDeployable =
           modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
         if (isDeployable) showMlSuccessToasts();
 
-        const combined: EuiSelectableOption[] = [
+        const newOption: EuiSelectableOption[] = [
           {
             label: inferenceId,
+            checked: 'on',
             'data-test-subj': `custom-inference_${inferenceId}`,
           },
         ];
-        setOptions([...oldOptions, ...combined]);
+        // uncheck selected endpoint id
+        uncheckSelectedModelOption(options);
+
+        setOptions([...options, ...newOption]);
 
         const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
         const defaultEndpointId =
@@ -190,8 +198,6 @@ export const SelectInferenceId = ({
         showMlSuccessToasts();
       } catch (error) {
         showMlErrorToasts(error);
-        // reset options
-        setOptions([...oldOptions]);
       }
     },
     [
@@ -336,7 +342,7 @@ export const SelectInferenceId = ({
             data-test-subj={dataTestSubj}
             searchable
             isLoading={isLoading}
-            singleSelection
+            singleSelection="always"
             searchProps={{
               compressed: true,
               placeholder: i18n.translate(
