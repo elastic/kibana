@@ -12,7 +12,7 @@ servers:
         default: '5601'
 
 paths:
-  /engine/settings:
+  /internal/risk_score/engine/settings:
     get:
       x-labels: [ess, serverless]
       x-internal: true
