@@ -8,12 +8,12 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { EndpointPendingActions } from '../../../../../common/endpoint/types';
-import { useAgentStatusHook } from '../../../../management/hooks/agents/use_get_agent_status';
-import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
-import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoint_hosts/view/host_constants';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { EndpointPendingActions } from '../../../../../../common/endpoint/types';
+import { useAgentStatusHook } from '../../../../../management/hooks/agents/use_get_agent_status';
+import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
+import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../../management/pages/endpoint_hosts/view/host_constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { getAgentStatusText } from '../agent_status_text';
 import { AgentResponseActionsStatus } from './agent_response_action_status';
 export enum SENTINEL_ONE_NETWORK_STATUS {

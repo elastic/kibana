@@ -21,7 +21,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import {
   AgentStatus,
   EndpointAgentStatus,
-} from '../../../../../common/components/agents/agent_status';
+} from '../../../../../common/components/endpoint/agents/agent_status';
 import { isPolicyOutOfDate } from '../../utils';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';

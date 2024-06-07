@@ -22,7 +22,7 @@ import {
 import {
   AgentStatus,
   EndpointAgentStatusById,
-} from '../../../../../common/components/agents/agent_status';
+} from '../../../../../common/components/endpoint/agents/agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';

@@ -19,7 +19,7 @@ import type { CommandExecutionComponentProps } from '../../console/types';
 import { FormattedError } from '../../formatted_error';
 import { ConsoleCodeBlock } from '../../console/components/console_code_block';
 import { POLICY_STATUS_TO_TEXT } from '../../../pages/endpoint_hosts/view/host_constants';
-import { getAgentStatusText } from '../../../../common/components/agents/agent_status_text';
+import { getAgentStatusText } from '../../../../common/components/endpoint/agents/agent_status_text';
 
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<

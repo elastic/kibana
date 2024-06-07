@@ -10,7 +10,7 @@ import { EuiHealth } from '@elastic/eui';
 
 import type { EntityTableRows } from '../../shared/components/entity_table/types';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import { EndpointAgentStatus } from '../../../../common/components/agents/agent_status';
+import { EndpointAgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy';

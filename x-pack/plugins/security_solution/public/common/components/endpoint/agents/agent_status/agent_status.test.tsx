@@ -11,17 +11,17 @@ import { AgentStatus } from './agent_status';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
-} from '../../../../management/hooks/agents/use_get_agent_status';
+} from '../../../../../management/hooks/agents/use_get_agent_status';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   type ResponseActionAgentType,
-} from '../../../../../common/endpoint/service/response_actions/constants';
-import type { AppContextTestRender } from '../../../mock/endpoint';
-import { createAppRootMockRenderer } from '../../../mock/endpoint';
-import { HostStatus } from '../../../../../common/endpoint/types';
+} from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { AppContextTestRender } from '../../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../mock/endpoint';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../../hooks/use_experimental_features');
-jest.mock('../../../../management/hooks/agents/use_get_agent_status');
+jest.mock('../../../../hooks/use_experimental_features');
+jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
 
 const getAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;

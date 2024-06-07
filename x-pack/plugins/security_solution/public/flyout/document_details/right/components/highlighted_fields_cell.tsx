@@ -14,7 +14,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import {
   AgentStatus,
   EndpointAgentStatusById,
-} from '../../../../common/components/agents/agent_status';
+} from '../../../../common/components/endpoint/agents/agent_status';
 import { useRightPanelContext } from '../context';
 import {
   AGENT_STATUS_FIELD_NAME,
