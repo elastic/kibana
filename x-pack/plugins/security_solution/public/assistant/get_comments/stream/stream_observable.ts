@@ -255,8 +255,8 @@ export const getStreamObservable = ({
             const nextChunks = getGeminiChunks(lines);
 
             nextChunks.forEach((chunk: string) => {
-              let currentWord = "";
-            
+              let currentWord = '';
+
               for (const char of chunk) {
                 currentWord += char;
                 if (currentWord.length === 2) {
@@ -266,19 +266,20 @@ export const getStreamObservable = ({
                     message: chunks.join(''),
                     loading: true,
                   });
-                  currentWord ="";
+                  currentWord = '';
                 }
               }
-            
-              if (currentWord) { // Add any remaining characters as a single-letter word
+
+              if (currentWord) {
+                // Add any remaining characters as a single-letter word
                 chunks.push(currentWord);
                 observer.next({
                   chunks,
                   message: chunks.join(''),
                   loading: true,
                 });
-            }
-          });
+              }
+            });
           } catch (err) {
             observer.error(err);
             return;
