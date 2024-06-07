@@ -157,12 +157,15 @@ export class SavedSearchPublicPlugin
         });
       },
       byValue: {
-        toSavedSearch: async (
+        toSavedSearch: async <
+          Serialized extends boolean = boolean,
+          ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+        >(
           id: string | undefined,
           result: SavedSearchUnwrapResult,
-          serialized: boolean = false
-        ) => {
-          return toSavedSearch(id, result, deps, serialized);
+          serialized?: Serialized
+        ): Promise<ReturnType> => {
+          return (await toSavedSearch(id, result, deps, serialized)) as ReturnType;
         },
       },
     };

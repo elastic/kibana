@@ -13,7 +13,6 @@ export type {
   SavedSearch,
   SaveSavedSearchOptions,
   SavedSearchByValueAttributes,
-  SavedSearchAttributeService,
   SavedSearchUnwrapMetaInfo,
   SavedSearchUnwrapResult,
 } from './services/saved_searches';
