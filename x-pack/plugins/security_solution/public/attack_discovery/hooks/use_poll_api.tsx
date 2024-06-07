@@ -26,6 +26,10 @@ export interface Props {
   connectorId?: string;
 }
 
+export interface AttackDiscoveryData extends AttackDiscoveryResponse {
+  connectorId: string;
+}
+
 export const usePollApi = ({
   http,
   setApproximateFutureTime,
@@ -33,11 +37,11 @@ export const usePollApi = ({
   connectorId,
 }: Props): {
   status: AttackDiscoveryStatus | null;
-  data: AttackDiscoveryResponse | null;
+  data: AttackDiscoveryData | null;
   pollApi: () => void;
 } => {
   const [status, setStatus] = useState<AttackDiscoveryStatus | null>(null);
-  const [data, setData] = useState<AttackDiscoveryResponse | null>(null);
+  const [data, setData] = useState<AttackDiscoveryData | null>(null);
   const currentConnectorId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -58,6 +62,7 @@ export const usePollApi = ({
       );
       setData({
         ...responseData,
+        connectorId,
         attackDiscoveries: responseData.attackDiscoveries.map((attackDiscovery) => ({
           ...attackDiscovery,
           id: attackDiscovery.id ?? uuid.v4(),

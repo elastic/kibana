@@ -110,7 +110,7 @@ describe('usePollApi', () => {
     });
 
     expect(result.current.status).toBe(attackDiscoveryStatus.succeeded);
-    expect(result.current.data).toEqual(mockResponse);
+    expect(result.current.data).toEqual({ ...mockResponse, connectorId: defaultProps.connectorId });
     expect(setApproximateFutureTime).toHaveBeenCalledWith(
       moment(mockResponse.updatedAt).add(mockResponse.averageIntervalMs, 'milliseconds').toDate()
     );
