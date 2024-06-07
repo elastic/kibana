@@ -196,7 +196,7 @@ new ESO types to use a Model Version, and it is a fairly simple type (compared t
 
 ### Registering the Saved Object type
 
-Below is the call to reigster the type.
+Below is the call to register the type.
 
 ```ts
   savedObjects.registerType({
@@ -299,7 +299,7 @@ And here is what the Model Version and schemas look like:
   });
 ```
 
-### Registering the type as an Encrytped Saved Object
+### Registering the type as an Encrypted Saved Object
 
 ```ts
   encryptedSavedObjects.registerType({
@@ -314,7 +314,7 @@ and the `rule` definition. Since the object's namespace type is `'multiple-isola
 Saved Object Descriptor (see <DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="aad" text="AAD"/>). In theory, the space id will never change for a
 `'multiple-isolated'`, which makes it a reasonable candidate for an AAD field.
 
-The `rule` attribute contains values related to the encrtypted attribute `apiKeyToUse`, or that will never change:
+The `rule` attribute contains values related to the encrypted attribute `apiKeyToUse`, or that will never change:
 
 ```ts
   apiKeyOwner: schema.nullable(schema.string()),
@@ -337,11 +337,11 @@ encrypted attribute `apiKeyToUse`:
 ```
 
 This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. It is worth considering the nature
-of AAD hierarchical inclusion when structuring attributes for your saved objects. You can also utilize more granular keys when speficying which attributes to include in AAD,
+of AAD hierarchical inclusion when structuring attributes for your saved objects. You can also utilize more granular keys when specifying which attributes to include in AAD,
 e.g. `rule.apiKeyOwner`. For more information, see the <DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="nested-attributes" text="Nested attributes"/> section of
 this document.
 
-Additionally, the owning team implemeted a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them un-decryptable.
+Additionally, the owning team implemented a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them undecryptable.
 
 ```ts
 export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
