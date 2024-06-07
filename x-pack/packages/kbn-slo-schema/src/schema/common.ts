@@ -7,15 +7,23 @@
 
 import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { schema } from '@kbn/config-schema';
 
 const ALL_VALUE = '*';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
+const allOrAnyStringConfigSchema = schema.oneOf([schema.literal(ALL_VALUE), schema.string()]);
 
 const allOrAnyStringOrArray = t.union([
   t.literal(ALL_VALUE),
   t.string,
   t.array(t.union([t.literal(ALL_VALUE), t.string])),
+]);
+
+const allOrAnyStringOrArrayConfigSchema = schema.oneOf([
+  schema.literal(ALL_VALUE),
+  schema.string(),
+  schema.arrayOf(schema.oneOf([schema.literal(ALL_VALUE), schema.string()])),
 ]);
 
 const dateType = new t.Type<Date, string, unknown>(
@@ -94,7 +102,9 @@ const dateRangeSchema = t.type({
 export {
   ALL_VALUE,
   allOrAnyString,
+  allOrAnyStringConfigSchema,
   allOrAnyStringOrArray,
+  allOrAnyStringOrArrayConfigSchema,
   dateRangeSchema,
   dateType,
   errorBudgetSchema,

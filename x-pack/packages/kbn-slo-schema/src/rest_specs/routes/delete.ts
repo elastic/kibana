@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
-import { sloIdSchema } from '../../schema/slo';
+import { sloIdSchema, sloIdConfigSchema } from '../../schema/slo';
 
 const deleteSLOParamsSchema = t.type({
   path: t.type({
@@ -13,4 +15,10 @@ const deleteSLOParamsSchema = t.type({
   }),
 });
 
-export { deleteSLOParamsSchema };
+const deleteSLOParamsConfigSchema = {
+  params: schema.object({
+    id: sloIdConfigSchema,
+  }),
+};
+
+export { deleteSLOParamsSchema, deleteSLOParamsConfigSchema };

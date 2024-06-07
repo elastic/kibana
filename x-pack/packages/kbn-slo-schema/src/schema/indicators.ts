@@ -6,9 +6,11 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString } from './common';
+import { schema } from '@kbn/config-schema';
+import { allOrAnyString, allOrAnyStringConfigSchema } from './common';
 
 const kqlQuerySchema = t.string;
+const kqlQueryConfigSchema = schema.string();
 
 const filtersSchema = t.array(
   t.type({
@@ -32,15 +34,44 @@ const filtersSchema = t.array(
     query: t.record(t.string, t.any),
   })
 );
+const filtersConfigSchema = schema.arrayOf(
+  schema.object({
+    // TODO Change to partial
+    meta: schema.object({
+      alias: schema.nullable(schema.string()),
+      disabled: schema.boolean(),
+      negate: schema.boolean(),
+      // controlledBy is there to identify who owns the filter
+      controlledBy: schema.string(),
+      // allows grouping of filters
+      group: schema.string(),
+      // index and type are optional only because when you create a new filter, there are no defaults
+      index: schema.string(),
+      isMultiIndex: schema.boolean(),
+      type: schema.string(),
+      key: schema.string(),
+      params: schema.any(),
+      value: schema.string(),
+      field: schema.string(),
+    }),
+    query: schema.recordOf(schema.string(), schema.any()),
+  })
+);
 
 const kqlWithFiltersSchema = t.type({
   kqlQuery: t.string,
   filters: filtersSchema,
 });
+const kqlWithFiltersConfigSchema = schema.object({
+  kqlQuery: schema.string(),
+  filters: filtersConfigSchema,
+});
 
 const querySchema = t.union([kqlQuerySchema, kqlWithFiltersSchema]);
+const queryConfigSchema = schema.oneOf([kqlQueryConfigSchema, kqlWithFiltersConfigSchema]);
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
+const apmTransactionDurationIndicator = 'sli.apm.transactionDuration';
+const apmTransactionDurationIndicatorTypeSchema = t.literal(apmTransactionDurationIndicator);
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
   params: t.intersection([
@@ -55,6 +86,24 @@ const apmTransactionDurationIndicatorSchema = t.type({
     t.partial({
       filter: querySchema,
       dataViewId: t.string,
+    }),
+  ]),
+});
+const apmTransactionDurationIndicatorConfigSchema = schema.object({
+  type: schema.literal(apmTransactionDurationIndicator),
+  // TODO Change to intersection
+  params: schema.oneOf([
+    schema.object({
+      environment: allOrAnyStringConfigSchema,
+      service: allOrAnyStringConfigSchema,
+      transactionType: allOrAnyStringConfigSchema,
+      transactionName: allOrAnyStringConfigSchema,
+      threshold: schema.number(),
+      index: schema.string(),
+    }),
+    // TODO Change to partial
+    schema.object({
+      filter: queryConfigSchema,
     }),
   ]),
 });
@@ -319,6 +368,8 @@ const indicatorSchema = t.union([
   timesliceMetricIndicatorSchema,
   histogramIndicatorSchema,
 ]);
+// TODO Add rest of the indicators
+const indicatorConfigSchema = schema.oneOf([apmTransactionDurationIndicatorConfigSchema]);
 
 export {
   kqlQuerySchema,
@@ -326,6 +377,7 @@ export {
   querySchema,
   filtersSchema,
   apmTransactionDurationIndicatorSchema,
+  apmTransactionDurationIndicatorConfigSchema,
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -347,6 +399,7 @@ export {
   histogramIndicatorTypeSchema,
   histogramIndicatorSchema,
   indicatorSchema,
+  indicatorConfigSchema,
   indicatorTypesArraySchema,
   indicatorTypesSchema,
 };
