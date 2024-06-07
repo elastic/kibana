@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { setup } from './helpers';
+import { setup as rawSetup, withErrorsCollected } from './helpers';
 import { METADATA_FIELDS } from '../../shared/constants';
+
+const setup = withErrorsCollected(rawSetup);
 
 test('does not load fields when validating only a single FROM, SHOW, ROW command', async () => {
   const { validate, callbacks } = await setup();

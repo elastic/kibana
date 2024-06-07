@@ -61,3 +61,22 @@ export const setup = async () => {
     expectErrors,
   };
 };
+
+export type Setup = typeof setup;
+
+export const withErrorsCollected = (_setup: Setup): Setup => {
+  return async (...args: Parameters<Setup>) => {
+    const api = await _setup(...args);
+    type ExpectErrors = Awaited<ReturnType<Setup>>['expectErrors'];
+
+    return {
+      ...api,
+      expectErrors: async (...params: Parameters<ExpectErrors>) => {
+        const result = await api.expectErrors(...params);
+        const [query, expectedErrors = [], expectedWarnings = []] = params;
+        console.log('Errors:', query, expectedErrors, expectedWarnings);
+        return result;
+      },
+    };
+  };
+};
