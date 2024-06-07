@@ -42,7 +42,10 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
-import { VisualizeESQLFunctionArguments } from '../../common/functions/visualize_esql';
+import type {
+  VisualizeESQLFunctionArguments,
+  VisualizeQueryResponse,
+} from '../../common/functions/visualize_esql';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 enum ChartType {
@@ -57,24 +60,6 @@ enum ChartType {
   Waffle = 'Waffle',
   Table = 'Table',
 }
-
-interface VisualizeQueryResponsev0 {
-  content: DatatableColumn[];
-}
-
-interface VisualizeQueryResponsev1 {
-  data: {
-    columns: DatatableColumn[];
-    rows: ESQLRow[];
-    userOverrides?: unknown;
-  };
-  content: {
-    message: string;
-    errorMessages: string[];
-  };
-}
-
-type VisualizeQueryResponse = VisualizeQueryResponsev0 | VisualizeQueryResponsev1;
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
