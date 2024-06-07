@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './profiles';
-export { getMergedAccessor } from './composable_profile';
-export { ProfilesManager } from './profiles_manager';
-export { useProfileAccessor, useRootProfile } from './hooks';
+export { useProfileAccessor } from './use_profile_accessor';
+export { useRootProfile } from './use_root_profile';
