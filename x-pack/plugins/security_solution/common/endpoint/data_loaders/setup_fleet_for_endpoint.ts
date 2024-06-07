@@ -101,8 +101,24 @@ export const installOrUpgradeEndpointFleetPackage = usageTracker.track(
   'installOrUpgradeEndpointFleetPackage',
   async (kbnClient: KbnClient, logger: ToolingLog): Promise<BulkInstallPackageInfo> => {
     logger.debug(`installOrUpgradeEndpointFleetPackage(): starting`);
-
     const updatePackages = async () => {
+      /*
+      const installEndpointPackageResp = {
+        data: {
+          items: [{
+            name: '',
+            version: '',
+            result: {
+              assets?: AssetReference[];
+              status?: InstallResultStatus;
+              error?: Error;
+              installType: InstallType;
+              installSource: InstallSource;
+            }
+          }]
+        }
+      } as AxiosResponse<BulkInstallPackagesResponse>;
+      */
       const installEndpointPackageResp = (await kbnClient
         .request({
           path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
