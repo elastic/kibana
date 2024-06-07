@@ -25,6 +25,7 @@ run(async ({ log }) => {
       // so it's still super slow. This prevents loading the files
       // and still relies on gitignore to final ignores
       '**/node_modules',
+      'bundle/',
     ],
   });
 
