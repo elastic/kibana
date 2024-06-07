@@ -38,8 +38,8 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
         .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
-      // Flipped because this API matches as "left is part of right"
-      expect(baseConfig).toMatchObject(body);
+
+      expect(body).toMatchObject(baseConfig);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {
