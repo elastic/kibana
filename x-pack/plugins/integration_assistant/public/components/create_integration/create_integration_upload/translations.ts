@@ -28,9 +28,16 @@ export const INSTALL_BUTTON = i18n.translate(
   }
 );
 
+export const CLOSE_BUTTON = i18n.translate(
+  'xpack.integrationAssistant.createIntegrationUpload.close',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
 export const UPLOAD_ERROR = i18n.translate(
   'xpack.integrationAssistant.createIntegrationUpload.error',
   {
-    defaultMessage: 'Error uploading package',
+    defaultMessage: 'Error installing package',
   }
 );

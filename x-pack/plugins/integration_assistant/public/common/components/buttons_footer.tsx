@@ -39,7 +39,7 @@ export const ButtonsFooter = React.memo<ButtonsFooterProps>(
   }) => {
     const integrationsUrl = useKibana().services.application.getUrlForApp('integrations');
     return (
-      <KibanaPageTemplate.BottomBar paddingSize="s" css={bottomBarCss}>
+      <KibanaPageTemplate.BottomBar paddingSize="s" usePortal={false} css={bottomBarCss}>
         <EuiFlexGroup
           direction="row"
           justifyContent="spaceBetween"

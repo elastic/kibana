@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const Pages = ['landing', 'upload', 'assistant', 'success'] as const;
-export const IntegrationNameParam = 'integration_name' as const;
+export const Pages = ['landing', 'upload', 'assistant'] as const;

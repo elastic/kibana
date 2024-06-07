@@ -8,4 +8,3 @@ import type { Pages } from './constants';
 
 export type Page = typeof Pages[number];
 export type SetPage = (page: Page) => void;
-export type SetIntegrationName = (integrationName: string) => void;

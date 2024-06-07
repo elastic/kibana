@@ -23,28 +23,30 @@ export const CreateIntegrationLanding = React.memo<CreateIntegrationLandingProps
   return (
     <KibanaPageTemplate>
       <IntegrationImageHeader />
-      <SectionWrapper title={i18n.LANDING_TITLE} subtitle={i18n.LANDING_DESCRIPTION}>
-        <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
-          <EuiFlexItem>
-            <ButtonPanel
-              icon={<EuiIcon type="exportAction" size="l" />}
-              title={i18n.PACKAGE_UPLOAD_TITLE}
-              description={i18n.PACKAGE_UPLOAD_DESCRIPTION}
-              buttonLabel={i18n.PACKAGE_UPLOAD_BUTTON}
-              onClick={() => setPage('upload')}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ButtonPanel
-              icon={<AssistantAvatar />}
-              title={i18n.ASSISTANT_TITLE}
-              description={i18n.ASSISTANT_DESCRIPTION}
-              buttonLabel={i18n.ASSISTANT_BUTTON}
-              onClick={() => setPage('assistant')}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </SectionWrapper>
+      <KibanaPageTemplate.Section grow>
+        <SectionWrapper title={i18n.LANDING_TITLE} subtitle={i18n.LANDING_DESCRIPTION}>
+          <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
+            <EuiFlexItem>
+              <ButtonPanel
+                icon={<EuiIcon type="exportAction" size="l" />}
+                title={i18n.PACKAGE_UPLOAD_TITLE}
+                description={i18n.PACKAGE_UPLOAD_DESCRIPTION}
+                buttonLabel={i18n.PACKAGE_UPLOAD_BUTTON}
+                onClick={() => setPage('upload')}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ButtonPanel
+                icon={<AssistantAvatar />}
+                title={i18n.ASSISTANT_TITLE}
+                description={i18n.ASSISTANT_DESCRIPTION}
+                buttonLabel={i18n.ASSISTANT_BUTTON}
+                onClick={() => setPage('assistant')}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </SectionWrapper>
+      </KibanaPageTemplate.Section>
       <ButtonsFooter />
     </KibanaPageTemplate>
   );

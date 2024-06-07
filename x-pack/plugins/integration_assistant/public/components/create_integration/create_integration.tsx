@@ -8,9 +8,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CreateIntegrationLanding } from './create_integration_landing';
 import { CreateIntegrationUpload } from './create_integration_upload';
-import { CreateIntegrationSuccess } from './create_integration_success';
-import { IntegrationAssistant as CreateIntegrationAssistant } from './integration_assistant';
-import type { Page, SetIntegrationName, SetPage } from '../types';
+import { IntegrationAssistant as CreateIntegrationAssistant } from './create_integration_assistant';
+import type { Page, SetPage } from '../types';
 import { Pages } from '../constants';
 
 const getPageFromHash = (hash: string): Page | null => {
@@ -33,16 +32,6 @@ export const CreateIntegration = React.memo(() => {
     setPageState(page || 'landing');
   }, [hash, setPageState]);
 
-  const setIntegrationName = useCallback<SetIntegrationName>((integrationName?: string) => {
-    const params = new URLSearchParams(location.search);
-    if (integrationName) {
-      params.set('integration_name', integrationName);
-    } else {
-      params.delete('integration_name');
-    }
-    history.pushState('', '', `?${params.toString()}`);
-  }, []);
-
   const setPage = useCallback<SetPage>((page) => {
     location.hash = page === 'landing' ? '' : page;
   }, []);
@@ -51,11 +40,9 @@ export const CreateIntegration = React.memo(() => {
     case 'landing':
       return <CreateIntegrationLanding setPage={setPage} />;
     case 'upload':
-      return <CreateIntegrationUpload setPage={setPage} setIntegrationName={setIntegrationName} />;
+      return <CreateIntegrationUpload setPage={setPage} />;
     case 'assistant':
       return <CreateIntegrationAssistant setPage={setPage} />;
-    case 'success':
-      return <CreateIntegrationSuccess setPage={setPage} />;
     default:
       return null;
   }

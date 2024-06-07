@@ -7,7 +7,6 @@
 
 import React, { type PropsWithChildren } from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
 
 const contentCss = css`
@@ -23,7 +22,7 @@ export type SectionWrapperProps = PropsWithChildren<{
   subtitle?: React.ReactNode;
 }>;
 export const SectionWrapper = React.memo<SectionWrapperProps>(({ children, title, subtitle }) => (
-  <KibanaPageTemplate.Section grow>
+  <>
     <EuiSpacer size="xxl" />
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiFlexItem css={contentCss}>
@@ -45,6 +44,6 @@ export const SectionWrapper = React.memo<SectionWrapperProps>(({ children, title
         {children}
       </EuiFlexItem>
     </EuiFlexGroup>
-  </KibanaPageTemplate.Section>
+  </>
 ));
 SectionWrapper.displayName = 'SectionWrapper';

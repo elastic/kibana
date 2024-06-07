@@ -6,29 +6,18 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFilePicker,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFilePicker, EuiSpacer, EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { SuccessSection } from '../../../common/components/success_section';
 import { SectionWrapper } from '../../../common/components/section_wrapper';
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
 import { runInstallPackage, type RequestDeps } from '../../../common/lib/api';
 import type { InstallPackageResponse } from '../../../../common';
-import type { SetIntegrationName, SetPage } from '../../types';
+import type { SetPage } from '../../types';
+import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
-
-interface CreateIntegrationUploadProps {
-  setPage: SetPage;
-  setIntegrationName: SetIntegrationName;
-}
 
 /**
  * This is a hacky way to get the integration name from the response.
@@ -48,100 +37,103 @@ const getIntegrationNameFromResponse = (response: InstallPackageResponse) => {
   return '';
 };
 
-export const CreateIntegrationUpload = React.memo<CreateIntegrationUploadProps>(
-  ({ setPage, setIntegrationName }) => {
-    const { http, notifications } = useKibana().services;
-    const [file, setFile] = useState<Blob>();
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+interface CreateIntegrationUploadProps {
+  setPage: SetPage;
+}
+export const CreateIntegrationUpload = React.memo<CreateIntegrationUploadProps>(({ setPage }) => {
+  const { http } = useKibana().services;
+  const [file, setFile] = useState<Blob>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>();
+  const [integrationName, setIntegrationName] = useState<string>();
 
-    const onBack = useCallback(() => {
-      setPage('landing');
-    }, [setPage]);
+  const onBack = useCallback(() => {
+    setPage('landing');
+  }, [setPage]);
 
-    const onChangeFile = useCallback((files: FileList | null) => {
-      setFile(files?.[0]);
-    }, []);
+  const onChangeFile = useCallback((files: FileList | null) => {
+    setFile(files?.[0]);
+    setError(undefined);
+  }, []);
 
-    const onConfirm = useCallback(() => {
-      if (http == null || file == null) {
-        return;
-      }
-      setIsLoading(true);
-      const abortController = new AbortController();
-      (async () => {
-        try {
-          const deps: RequestDeps = { http, abortSignal: abortController.signal };
-          const response = await runInstallPackage(file, deps);
+  const onConfirm = useCallback(() => {
+    if (http == null || file == null) {
+      return;
+    }
+    setIsLoading(true);
+    const abortController = new AbortController();
+    (async () => {
+      try {
+        const deps: RequestDeps = { http, abortSignal: abortController.signal };
+        const response = await runInstallPackage(file, deps);
 
-          const integrationName = getIntegrationNameFromResponse(response);
-          if (integrationName) {
-            setIntegrationName(integrationName);
-            setPage('success');
-          }
-        } catch (e) {
-          if (!abortController.signal.aborted) {
-            notifications?.toasts.addError(e, { title: i18n.UPLOAD_ERROR });
-          }
-        } finally {
-          setIsLoading(false);
+        const integrationNameFromResponse = getIntegrationNameFromResponse(response);
+        if (integrationNameFromResponse) {
+          setIntegrationName(integrationNameFromResponse);
+        } else {
+          throw new Error('Integration name not found in response');
         }
-      })();
-    }, [file, http, setPage, setIntegrationName, notifications?.toasts]);
+      } catch (e) {
+        if (!abortController.signal.aborted) {
+          setError(`${i18n.UPLOAD_ERROR}: ${e.message}`);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [file, http, setIntegrationName, setError]);
 
-    return (
-      <KibanaPageTemplate>
-        <IntegrationImageHeader />
-        <SectionWrapper title={i18n.UPLOAD_TITLE} subtitle={<DocsLinkSubtitle />}>
-          <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xl">
-            <EuiFlexItem>
-              <EuiFilePicker
-                id="logsSampleFilePicker"
-                initialPromptText={i18n.UPLOAD_INPUT_TEXT}
-                onChange={onChangeFile}
-                display="large"
-                aria-label="Upload .zip file"
-                accept="application/x-zip-compressed"
-                isLoading={isLoading}
-                fullWidth
-              />
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </SectionWrapper>
-        <ButtonsFooter
-          isNextDisabled={file == null}
-          nextButtonText={i18n.INSTALL_BUTTON}
-          onBack={onBack}
-          onNext={onConfirm}
-        />
-      </KibanaPageTemplate>
-    );
-  }
-);
-CreateIntegrationUpload.displayName = 'CreateIntegrationUpload';
-
-const DocsLinkSubtitle = React.memo(() => {
-  const { docLinks } = useKibana().services;
   return (
-    <EuiText size="xs" color="subdued">
-      <FormattedMessage
-        id="xpack.integrationAssistant.createIntegrationUpload.uploadHelpText"
-        defaultMessage="Have some issues? Please read the {link}"
-        values={{
-          link: (
-            <EuiLink
-              href={docLinks?.links.fleet.installAndUninstallIntegrationAssets} // TODO: Update the docs link to the correct place
-              target="_blank"
-            >
-              <FormattedMessage
-                id="xpack.integrationAssistant.createIntegrationUpload.documentation"
-                defaultMessage="documentation"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiText>
+    <KibanaPageTemplate>
+      <IntegrationImageHeader />
+      {integrationName ? (
+        <>
+          <KibanaPageTemplate.Section grow>
+            <SuccessSection integrationName={integrationName} />
+          </KibanaPageTemplate.Section>
+          <ButtonsFooter cancelButtonText={i18n.CLOSE_BUTTON} />
+        </>
+      ) : (
+        <>
+          <KibanaPageTemplate.Section grow>
+            <SectionWrapper title={i18n.UPLOAD_TITLE} subtitle={<DocsLinkSubtitle />}>
+              <EuiFlexGroup
+                direction="row"
+                alignItems="center"
+                justifyContent="center"
+                gutterSize="xl"
+              >
+                <EuiFlexItem>
+                  <EuiFilePicker
+                    id="logsSampleFilePicker"
+                    initialPromptText={i18n.UPLOAD_INPUT_TEXT}
+                    onChange={onChangeFile}
+                    display="large"
+                    aria-label="Upload .zip file"
+                    accept="application/zip"
+                    isLoading={isLoading}
+                    fullWidth
+                    isInvalid={error != null}
+                  />
+                  <EuiSpacer size="xs" />
+                  {error && (
+                    <EuiText color="danger" size="xs">
+                      {error}
+                    </EuiText>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </SectionWrapper>
+          </KibanaPageTemplate.Section>
+          <ButtonsFooter
+            isNextDisabled={file == null}
+            nextButtonText={i18n.INSTALL_BUTTON}
+            onBack={onBack}
+            onNext={onConfirm}
+          />
+        </>
+      )}
+    </KibanaPageTemplate>
   );
 });
-DocsLinkSubtitle.displayName = 'DocsLinkSubtitle';
+CreateIntegrationUpload.displayName = 'CreateIntegrationUpload';
