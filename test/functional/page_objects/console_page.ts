@@ -18,6 +18,87 @@ export class ConsolePageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly browser = this.ctx.getService('browser');
 
+  public monaco = {
+    getTextArea: async () => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      return await codeEditor.findByTagName('textarea');
+    },
+    getEditorText: async () => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      const editorViewDiv = await codeEditor.findByClassName('view-lines');
+      return await editorViewDiv.getVisibleText();
+    },
+    clearEditorText: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.clickMouseButton();
+      await textArea.clearValueWithKeyboard();
+    },
+    getOutputText: async () => {
+      const outputPanel = await this.testSubjects.find('consoleMonacoOutput');
+      const outputViewDiv = await outputPanel.findByClassName('view-lines');
+      return await outputViewDiv.getVisibleText();
+    },
+    pressEnter: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(Key.ENTER);
+    },
+    enterText: async (text: string) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.type(text);
+    },
+    promptAutocomplete: async (letter = 'b') => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.type(letter);
+      await this.retry.waitFor('autocomplete to be visible', () =>
+        this.monaco.isAutocompleteVisible()
+      );
+    },
+    isAutocompleteVisible: async () => {
+      const element = await this.find.byClassName('suggest-widget').catch(() => null);
+      if (!element) return false;
+
+      const attribute = await element.getAttribute('style');
+      return !attribute?.includes('display: none;');
+    },
+    getAutocompleteSuggestion: async (index: number) => {
+      const suggestionsWidget = await this.find.byClassName('suggest-widget');
+      const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
+      const label = await suggestions[index].findByClassName('label-name');
+      return label.getVisibleText();
+    },
+    pressUp: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.UP] : Key.UP);
+    },
+    pressDown: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.DOWN] : Key.DOWN);
+    },
+    pressRight: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.RIGHT] : Key.RIGHT);
+    },
+    pressLeft: async (shift: boolean = false) => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(shift ? [Key.SHIFT, Key.LEFT] : Key.LEFT);
+    },
+    pressCtrlSpace: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.SPACE,
+      ]);
+    },
+    pressEscape: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(Key.ESCAPE);
+    },
+    pressBackspace: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys(Key.BACK_SPACE);
+    },
+  };
+
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
     const linesText = await Promise.all(lines.map(async (line) => await line.getVisibleText()));

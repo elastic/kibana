@@ -115,6 +115,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         width: 100%;
       `}
       ref={divRef}
+      data-test-subj="consoleMonacoEditorContainer"
     >
       <EuiFlexGroup
         className="conApp__editorActions"
