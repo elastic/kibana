@@ -39,7 +39,8 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
     return bundledPackagesFromCache();
   }
 
-  const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+  // const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+  const bundledPackageLocation = './bundle';
 
   if (!bundledPackageLocation) {
     throw new BundledPackageLocationNotFoundError(
