@@ -21,6 +21,7 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
   createFunctionLimitExceededError,
@@ -209,7 +210,7 @@ export function continueConversation({
   function executeNextStep() {
     if (isUserMessage) {
       const operationName =
-        lastMessage.name && lastMessage.name !== 'context'
+        lastMessage.name && lastMessage.name !== CONTEXT_FUNCTION_NAME
           ? `function_response ${lastMessage.name}`
           : 'user_message';
 
