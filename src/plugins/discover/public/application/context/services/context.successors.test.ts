@@ -104,7 +104,10 @@ describe('context successors', function () {
         ({ rows }) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+            buildDataTableRecordList({
+              docs: mockSearchSource._stubHits.slice(-3),
+              dataView,
+            })
           );
         }
       );
@@ -136,7 +139,10 @@ describe('context successors', function () {
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'lte']);
           expect(intervals.length).toBeGreaterThan(1);
           expect(rows).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+            buildDataTableRecordList({
+              docs: mockSearchSource._stubHits.slice(-3),
+              dataView,
+            })
           );
         }
       );
@@ -166,7 +172,10 @@ describe('context successors', function () {
           expect(moment(last(intervals)?.gte).valueOf()).toBeGreaterThan(MS_PER_DAY * 2200);
           expect(intervals.length).toBeGreaterThan(1);
           expect(rows).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 4), dataView)
+            buildDataTableRecordList({
+              docs: mockSearchSource._stubHits.slice(0, 4),
+              dataView,
+            })
           );
         }
       );
@@ -252,7 +261,10 @@ describe('context successors', function () {
         ({ rows, interceptedWarnings }) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+            buildDataTableRecordList({
+              docs: mockSearchSource._stubHits.slice(-3),
+              dataView,
+            })
           );
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
@@ -324,7 +336,10 @@ describe('context successors', function () {
         ({ rows, interceptedWarnings }) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(rows).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
+            buildDataTableRecordList({
+              docs: mockSearchSource._stubHits.slice(-3),
+              dataView,
+            })
           );
           expect(dataPluginMock.search.showWarnings).toHaveBeenCalledTimes(1);
           expect(interceptedWarnings?.length).toBe(1);
