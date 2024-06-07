@@ -609,7 +609,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       [getTagsUpdatedBy, processChanged]
     );
 
-    const filterEntireProcessTreeSwitch = useMemo(() => {
+    const filterEntireProcessTreeSection = useMemo(() => {
       const tooltip = (
         <EuiToolTip
           content={
@@ -701,7 +701,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         {isFilterEntireProcessTreeFeatureEnabled && (
           <>
             <EuiSpacer size="m" />
-            {filterEntireProcessTreeSwitch}
+            {filterEntireProcessTreeSection}
           </>
         )}
         {showAssignmentSection && (
