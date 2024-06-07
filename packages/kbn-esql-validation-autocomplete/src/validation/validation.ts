@@ -17,10 +17,10 @@ import {
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
-  ESQLSingleAstItem,
   ESQLSource,
   walk,
 } from '@kbn/esql-ast';
+import type { ESQLAstField } from '@kbn/esql-ast/src/types';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -76,7 +76,6 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
-import type {ESQLAstField} from '@kbn/esql-ast/src/types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -409,7 +408,9 @@ function validateFunction(
           allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          (parentCommand === 'stats' || parentCommand === 'metrics') ? isNested || !isAssignment(astFunction) : false
+          parentCommand === 'stats' || parentCommand === 'metrics'
+            ? isNested || !isAssignment(astFunction)
+            : false
         );
 
         if (messagesFromArg.some(({ code }) => code === 'expectedConstant')) {
@@ -560,13 +561,17 @@ function validateSetting(
  * recursively terminate at either a literal or an aggregate function.
  */
 const isFunctionAggClosed = (fn: ESQLFunction): boolean =>
-  isAggFunction(fn) || fn.args.every(
-    (arg) => isLiteralItem(arg) || (isFunctionItem(arg) && isFunctionAggClosed(arg)));
+  isAggFunction(fn) ||
+  fn.args.every((arg) => isLiteralItem(arg) || (isFunctionItem(arg) && isFunctionAggClosed(arg)));
 
 /**
  * Validates aggregates fields: `... <aggregates> ...`.
  */
-const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[], references: ReferenceMaps) => {
+const validateAggregates = (
+  command: ESQLCommand,
+  aggregates: ESQLAstField[],
+  references: ReferenceMaps
+) => {
   const messages: ESQLMessage[] = [];
 
   // Should never happen.
@@ -590,7 +595,7 @@ const validateAggregates = (command: ESQLCommand, aggregates: ESQLAstField[], re
           if (definition.type === 'agg') hasAggregationFunction = true;
         },
       });
-  
+
       if (!hasAggregationFunction) {
         hasMissingAggregationFunctionError = true;
         messages.push(errors.noAggFunction(command, aggregate));
@@ -625,7 +630,7 @@ const validateByGrouping = (
   fields: ESQLAstItem[],
   commandName: string,
   referenceMaps: ReferenceMaps,
-  multipleParams: boolean,
+  multipleParams: boolean
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   for (const field of fields) {
@@ -812,12 +817,15 @@ function validateColumnForCommand(
   return messages;
 }
 
-export function validateSources(command: ESQLCommand, sources: ESQLSource[], references: ReferenceMaps): ESQLMessage[] {
+export function validateSources(
+  command: ESQLCommand,
+  sources: ESQLSource[],
+  references: ReferenceMaps
+): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
   for (const source of sources) {
-    const errors = validateSource(source, command.name, references);
-    if (errors && errors.length) messages.push(...errors);
+    messages.push(...validateSource(source, command.name, references));
   }
 
   return messages;
@@ -825,12 +833,15 @@ export function validateSources(command: ESQLCommand, sources: ESQLSource[], ref
 
 /**
  * Validates the METRICS source command:
- * 
+ *
  *     METRICS <sources> [ <aggregates> [ BY <grouping> ]]
  */
-const validateMetricsCommand = (command: ESQLAstMetricsCommand, references: ReferenceMaps): ESQLMessage[] => {
+const validateMetricsCommand = (
+  command: ESQLAstMetricsCommand,
+  references: ReferenceMaps
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
-  const {sources, aggregates, grouping} = command;
+  const { sources, aggregates, grouping } = command;
 
   // METRICS <sources> ...
   messages.push(...validateSources(command, sources, references));
@@ -845,9 +856,15 @@ const validateMetricsCommand = (command: ESQLAstMetricsCommand, references: Refe
     }
   }
 
-  const hasGroupingButDoesNotHaveAggregates = grouping && grouping.length && (!aggregates || !aggregates.length);
+  const hasGroupingButDoesNotHaveAggregates =
+    grouping && grouping.length && (!aggregates || !aggregates.length);
   if (hasGroupingButDoesNotHaveAggregates) {
-    messages.push(errors.unexpected(command.location, 'Grouping fields are not allowed without aggregate functions.'));
+    messages.push(
+      errors.unexpected(
+        command.location,
+        'Grouping fields are not allowed without aggregate functions.'
+      )
+    );
   }
 
   return messages;
@@ -999,7 +1016,6 @@ export async function validateQuery(
   if (!options.ignoreOnMissingCallbacks) {
     return result;
   }
-  const { errors, warnings } = result;
   const finalCallbacks = callbacks || {};
   const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce((acc, [key, errorCodes]) => {
     if (
@@ -1012,7 +1028,7 @@ export async function validateQuery(
     }
     return acc;
   }, {} as Partial<Record<ErrorTypes, boolean>>);
-  const filteredErrors = errors
+  const filteredErrors = result.errors
     .filter((error) => {
       if ('severity' in error) {
         return true;
@@ -1029,7 +1045,7 @@ export async function validateQuery(
           }
         : error
     );
-  return { errors: filteredErrors, warnings };
+  return { errors: filteredErrors, warnings: result.warnings };
 }
 
 /**
@@ -1045,7 +1061,8 @@ async function validateAst(
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
-  const { ast, errors } = await astProvider(queryString);
+  const parsingResult = await astProvider(queryString);
+  const { ast } = parsingResult;
 
   const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
@@ -1093,7 +1110,7 @@ async function validateAst(
   }
 
   return {
-    errors: [...errors, ...messages.filter(({ type }) => type === 'error')],
+    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }
