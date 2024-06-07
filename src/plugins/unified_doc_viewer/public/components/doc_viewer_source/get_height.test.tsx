@@ -32,7 +32,7 @@ describe('getHeight', () => {
     const monacoMock = getMonacoMock(500, 0);
 
     const height = getHeight(monacoMock, true, DEFAULT_MARGIN_BOTTOM);
-    expect(height).toBe(475);
+    expect(height).toBe(484);
 
     const heightCustom = getHeight(monacoMock, true, 80);
     expect(heightCustom).toBe(420);

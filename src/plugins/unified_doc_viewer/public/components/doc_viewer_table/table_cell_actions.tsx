@@ -12,14 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 
 export interface TableRow {
-  action: Omit<FieldRecordLegacy['action'], 'isActive'> & {
-    isAddedAsColumn: (field: string) => boolean;
-  };
+  action: Omit<FieldRecordLegacy['action'], 'isActive'>;
   field: {
     pinned: boolean;
     onTogglePinned: (field: string) => void;
   } & FieldRecordLegacy['field'];
   value: FieldRecordLegacy['value'];
+  columns: string[] | undefined;
 }
 
 interface TableActionsProps {
@@ -242,15 +241,16 @@ export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) =>
   }
 
   const {
-    action: { onToggleColumn, isAddedAsColumn },
+    action: { onToggleColumn },
     field: { field },
+    columns,
   } = row;
 
   if (!onToggleColumn) {
     return null;
   }
 
-  const isAdded = isAddedAsColumn(field);
+  const isAdded = columns?.includes(field);
 
   // Toggle columns
   const toggleColumnsLabel = isAdded
@@ -267,6 +267,7 @@ export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) =>
       iconType={isAdded ? 'list' : 'listAdd'}
       title={toggleColumnsLabel}
       flush="left"
+      disabled={isAdded}
       onClick={() => onToggleColumn(field)}
     >
       {toggleColumnsLabel}
