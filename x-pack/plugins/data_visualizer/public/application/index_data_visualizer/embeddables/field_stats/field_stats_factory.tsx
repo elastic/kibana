@@ -20,27 +20,36 @@ import {
 import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, map, skipWhile, Subscription, skip, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  map,
+  skipWhile,
+  Subscription,
+  skip,
+  switchMap,
+  distinctUntilChanged,
+} from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import fastIsEqual from 'fast-deep-equal';
+import { isDefined } from '@kbn/ml-is-defined';
+import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
-import type {
-  FieldStatisticsTableEmbeddableApi,
-  FieldStatisticsTableEmbeddableState,
-} from '../grid_embeddable/types';
+import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
+import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import { FIELD_STATS_EMBEDDABLE_TYPE, FIELD_STATS_DATA_VIEW_REF_NAME } from './constants';
 import { initializeFieldStatsControls } from './initialize_field_stats_controls';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
+import type { FieldStatisticsTableEmbeddableApi } from './types';
 
 export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
 }
-
 export type EmbeddableFieldStatsChartType = typeof FIELD_STATS_EMBEDDABLE_TYPE;
 
-const FieldStatisticsWrapper = dynamic(
-  () => import('../grid_embeddable/field_stats_embeddable_wrapper')
-);
+const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper'));
 
 export const getDependencies = async (
   getStartServices: StartServicesAccessor<
@@ -137,8 +146,6 @@ export const getFieldStatsChartEmbeddableFactory = (
           )
           .subscribe((nextSelectedDataView) => {
             dataViews$.next([nextSelectedDataView]);
-            // fieldStatsControlsApi.filter$.next([]);
-            // fieldStatsControlsApi.globalQuery$.next();
           })
       );
 
@@ -174,7 +181,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           },
           dataViews: dataViews$,
           serializeState: () => {
-            const dataViewId = fieldStatsControlsApi.dataViewId?.getValue();
+            const dataViewId = fieldStatsControlsApi.dataViewId$?.getValue();
             const references: Reference[] = dataViewId
               ? [
                   {
@@ -204,8 +211,27 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const reload$ = fetch$(api).pipe(
         skipWhile((fetchContext) => !fetchContext.isReload),
-        map((fetchContext) => Date.now())
+        map(() => Date.now())
       );
+      const query$ = fetch$(api).pipe(
+        map((fetchContext) => fetchContext.query),
+        distinctUntilChanged(fastIsEqual)
+      );
+      const filters$ = fetch$(api).pipe(
+        map((fetchContext) => fetchContext.filters),
+        distinctUntilChanged(fastIsEqual)
+      );
+
+      const onTableUpdate = (changes: Partial<DataVisualizerTableState>) => {
+        if (isDefined(changes?.showDistributions)) {
+          fieldStatsControlsApi.showDistributions$.next(changes.showDistributions);
+        }
+      };
+      const statsTableCss = css({
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+      });
 
       return {
         api,
@@ -214,20 +240,21 @@ export const getFieldStatsChartEmbeddableFactory = (
             throw new Error('Parent API does not have execution context');
           }
 
-          const [dataViews, esqlQuery, globalQuery, globalFilters, viewType] =
+          const [dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
               api.dataViews,
               api.query$,
-              parentApi.query$,
-              parentApi.filters$,
-              api.viewType$
+              api.viewType$,
+              api.showDistributions$
             );
-          const isEsqlMode = viewType === 'esql';
-          // const query = useObservable(parentApi.query$, undefined);
-          // const filters = useObservable(parentApi.filters$, undefined);
+          const globalQuery = useObservable(query$, undefined);
+          const globalFilters = useObservable(filters$, undefined);
+          const lastReloadRequestTime = useObservable(reload$, Date.now());
+
+          const isEsqlMode = viewType === FieldStatsInitializerViewType.ESQL;
+
           const dataView =
             Array.isArray(dataViews) && dataViews.length > 0 ? dataViews[0] : undefined;
-          const lastReloadRequestTime = useObservable(reload$, Date.now());
 
           // On destroy
           useEffect(() => {
@@ -240,15 +267,19 @@ export const getFieldStatsChartEmbeddableFactory = (
           }, []);
 
           return (
-            <FieldStatisticsWrapper
-              shouldGetSubfields={false}
-              dataView={dataView}
-              esqlQuery={esqlQuery}
-              query={globalQuery}
-              filters={globalFilters}
-              lastReloadRequestTime={lastReloadRequestTime}
-              isEsqlMode={isEsqlMode}
-            />
+            <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
+              <FieldStatisticsWrapper
+                shouldGetSubfields={false}
+                dataView={dataView}
+                esqlQuery={esqlQuery}
+                query={globalQuery}
+                filters={globalFilters}
+                lastReloadRequestTime={lastReloadRequestTime}
+                isEsqlMode={isEsqlMode}
+                onTableUpdate={onTableUpdate}
+                showPreviewByDefault={showPreviewByDefault}
+              />
+            </EuiFlexItem>
           );
         },
       };

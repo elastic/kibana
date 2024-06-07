@@ -10,7 +10,6 @@ import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
@@ -116,14 +115,11 @@ export interface FieldStatsInitialState {
   dataViewId?: string;
   viewType?: FieldStatsInitializerViewType;
   query?: AggregateQuery;
-  isEsqlMode?: boolean;
+  showDistributions?: boolean;
 }
 export type FieldStatisticsTableEmbeddableState = FieldStatsInitialState &
   SerializedTitles &
-  SerializedTimeRange;
-interface FieldStatisticsTableEmbeddableComponentApi {
-  showDistributions$?: BehaviorSubject<boolean>;
-}
+  SerializedTimeRange & {};
 
 export type OnAddFilter = (field: DataViewField | string, value: string, type: '+' | '-') => void;
 export interface FieldStatisticsTableEmbeddableParentApi {
@@ -132,10 +128,6 @@ export interface FieldStatisticsTableEmbeddableParentApi {
   overrideServices?: Partial<DataVisualizerStartDependencies>;
   onAddFilter?: OnAddFilter;
 }
-
-export type FieldStatisticsTableEmbeddableApi =
-  DefaultEmbeddableApi<FieldStatisticsTableEmbeddableState> &
-    FieldStatisticsTableEmbeddableComponentApi;
 
 export type DataVisualizerGridEmbeddableApi = Partial<FieldStatisticsTableEmbeddableState>;
 

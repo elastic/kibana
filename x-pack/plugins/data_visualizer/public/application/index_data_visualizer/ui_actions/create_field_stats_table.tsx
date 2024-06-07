@@ -13,6 +13,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../embeddables/field_stats/constants';
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
+import type { FieldStatisticsTableEmbeddableApi } from '../embeddables/field_stats/types';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -22,8 +23,8 @@ const parentApiIsCompatible = async (
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
 
-interface FieldStatsActionContext {
-  embeddable: EmbeddableApiContext;
+interface FieldStatsActionContext extends EmbeddableApiContext {
+  embeddable: FieldStatisticsTableEmbeddableApi;
 }
 export function createAddFieldStatsTableAction(
   coreStart: CoreStart,

@@ -14,38 +14,42 @@
 import type { AggregateQuery } from '@kbn/es-query';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
+import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
+import type { FieldStatsInitialState } from '../grid_embeddable/types';
+import type { FieldStatsControlsApi } from './types';
 
-type FieldStatsEmbeddableCustomState = Omit<
-  FieldStatsTableState,
-  'timeRange' | 'title' | 'description' | 'hidePanelTitles'
->;
-
-export const initializeFieldStatsControls = (rawState: FieldStatsEmbeddableCustomState) => {
-  const viewType$ = new BehaviorSubject<'dataView' | 'esql'>(rawState.viewType);
-  const dataViewId$ = new BehaviorSubject<string>(rawState.dataViewId);
-  const query$ = new BehaviorSubject<AggregateQuery>(rawState.query);
+export const initializeFieldStatsControls = (rawState: FieldStatsInitialState) => {
+  const viewType$ = new BehaviorSubject<FieldStatsInitializerViewType | undefined>(
+    rawState.viewType ?? FieldStatsInitializerViewType.ESQL
+  );
+  const dataViewId$ = new BehaviorSubject<string | undefined>(rawState.dataViewId);
+  const query$ = new BehaviorSubject<AggregateQuery | undefined>(rawState.query);
+  const showDistributions$ = new BehaviorSubject<boolean | undefined>(rawState.showDistributions);
 
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-  const updateUserInput = (update: FieldStatsEmbeddableCustomState) => {
+  const updateUserInput = (update: FieldStatsInitialState) => {
     viewType$.next(update.viewType);
     dataViewId$.next(update.dataViewId);
     query$.next(update.query);
   };
 
-  const serializeFieldStatsChartState = (): FieldStatsEmbeddableCustomState => {
+  const serializeFieldStatsChartState = (): FieldStatsInitialState => {
     return {
       viewType: viewType$.getValue(),
       dataViewId: dataViewId$.getValue(),
       query: query$.getValue(),
+      showDistributions: showDistributions$.getValue(),
     };
   };
 
-  const fieldStatsControlsComparators: StateComparators<FieldStatsEmbeddableCustomState> = {
-    viewType: [viewType$, (arg) => viewType.next(arg)],
-    dataViewId: [dataViewId$, (arg) => dataViewId.next(arg)],
-    query: [query$, (arg) => query.next(arg)],
+  const fieldStatsControlsComparators: StateComparators<FieldStatsInitialState> = {
+    viewType: [viewType$, (arg) => viewType$.next(arg)],
+    dataViewId: [dataViewId$, (arg) => dataViewId$.next(arg)],
+    query: [query$, (arg) => query$.next(arg), fastIsEqual],
+    showDistributions: [showDistributions$, (arg) => showDistributions$.next(arg)],
   };
 
   const onRenderComplete = () => dataLoading$.next(false);
@@ -58,6 +62,7 @@ export const initializeFieldStatsControls = (rawState: FieldStatsEmbeddableCusto
       dataViewId$,
       query$,
       updateUserInput,
+      showDistributions$,
     } as unknown as FieldStatsControlsApi,
     dataLoadingApi: {
       dataLoading$,

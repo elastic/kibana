@@ -6,7 +6,7 @@
  */
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { FieldStatisticsTableEmbeddableState } from '../embeddables/grid_embeddable/types';
+import type { FieldStatisticTableEmbeddableProps } from '../embeddables/grid_embeddable/types';
 
 /**
  * Helper logic to add multi-fields to the table for embeddables outside of Index data visualizer
@@ -19,7 +19,7 @@ export const getFieldsWithSubFields = ({
   currentDataView,
   shouldGetSubfields = false,
 }: {
-  input: FieldStatisticsTableEmbeddableState;
+  input: FieldStatisticTableEmbeddableProps;
   currentDataView: DataView;
   shouldGetSubfields: boolean;
 }) => {

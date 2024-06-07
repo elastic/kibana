@@ -49,7 +49,7 @@ import {
   getDefaultPageState,
 } from '../constants/index_data_visualizer_viewer';
 import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
-import type { FieldStatisticsTableEmbeddableState } from '../embeddables/grid_embeddable/types';
+import type { FieldStatisticTableEmbeddableProps } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 
@@ -64,7 +64,7 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
 };
 export const useDataVisualizerGridData = (
   // Data view is required for non-ES|QL queries like kuery or lucene
-  input: Required<FieldStatisticsTableEmbeddableState, 'dataView'>,
+  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void

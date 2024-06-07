@@ -73,7 +73,7 @@ import {
   RANDOM_SAMPLER_OPTION,
   type RandomSamplerOption,
 } from '../../constants/random_sampler';
-import type { FieldStatisticsTableEmbeddableState } from '../../embeddables/grid_embeddable/types';
+import type { FieldStatisticTableEmbeddableProps } from '../../embeddables/grid_embeddable/types';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -217,7 +217,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
   };
 
-  const input: Required<FieldStatisticsTableEmbeddableState, 'dataView'> = useMemo(() => {
+  const input: Required<FieldStatisticTableEmbeddableProps, 'dataView'> = useMemo(() => {
     return {
       dataView: currentDataView,
       savedSearch: currentSavedSearch,

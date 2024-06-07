@@ -68,7 +68,6 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   const updatedProps = useMemo(() => {
     return {
       viewType,
-      isEsqlMode,
       title: initialInput?.title ?? defaultTitle,
       dataViewId: isEsqlMode ? undefined : dataViewId,
       query: isEsqlMode ? esqlQuery : undefined,
@@ -80,7 +79,6 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     async (query: AggregateQuery, abortController: AbortController) => {
       await onPreview({
         viewType,
-        isEsqlMode,
         dataViewId: undefined,
         query,
       });

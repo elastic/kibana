@@ -95,7 +95,7 @@ export class DataVisualizerPlugin
       FieldStatisticsTable: dynamic(
         async () =>
           import(
-            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_embeddable_wrapper'
+            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_wrapper'
           )
       ),
     };

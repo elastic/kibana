@@ -82,7 +82,7 @@ export const useESQLDataVisualizerData = (
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, fieldFormats, executionContext, data } = services;
+  const { uiSettings, executionContext, data } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
