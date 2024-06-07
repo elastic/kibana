@@ -420,11 +420,13 @@ describe('Event filter form', () => {
 
   describe('Filter descendents of process', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ filterEntireProcessTreeForEventFiltersEnabled: true });
+      mockedContext.setExperimentalFlag({ filterDescendentsOfProcessForEventFiltersEnabled: true });
     });
 
     it('should not display selector when feature flag is disabled', () => {
-      mockedContext.setExperimentalFlag({ filterEntireProcessTreeForEventFiltersEnabled: false });
+      mockedContext.setExperimentalFlag({
+        filterDescendentsOfProcessForEventFiltersEnabled: false,
+      });
       render();
 
       expect(

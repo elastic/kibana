@@ -174,7 +174,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const euiTheme = useEuiTheme();
 
     const isFilterDescendentsOfProcessFeatureEnabled = useIsExperimentalFeatureEnabled(
-      'filterEntireProcessTreeForEventFiltersEnabled'
+      'filterDescendentsOfProcessForEventFiltersEnabled'
     );
 
     const isFilterDescendentsOfProcessSelected = useMemo(
