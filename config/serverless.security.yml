@@ -9,6 +9,43 @@ xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.search.notebooks.enabled: false
 
+## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Dashboard feature is hidden in Role management since it's automatically granted by SIEM feature.
+  dashboard.hidden: true
+  ### Discover feature is hidden in Role management since it's automatically granted by SIEM feature.
+  discover.hidden: true
+  ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
+  ml:
+    category: "security"
+    order: 1101
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siem:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover"
+          privileges: [ "all" ]
+        - feature: "dashboard"
+          privileges: [ "all" ]
+        - feature: "visualize"
+          privileges: [ "all" ]
+        - feature: "maps"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover"
+          privileges: [ "read" ]
+        - feature: "dashboard"
+          privileges: [ "read" ]
+        - feature: "visualize"
+          privileges: [ "read" ]
+        - feature: "maps"
+          privileges: [ "read" ]
+
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
 
