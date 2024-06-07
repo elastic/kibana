@@ -24,21 +24,13 @@ import {
   SerializableSavedSearch,
   SortOrder,
 } from '@kbn/saved-search-plugin/common/types';
-import type { SavedSearchByValueAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DiscoverServices } from '../build_services';
 import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
 import type { DiscoverGridEmbeddableSearchProps } from './components/saved_search_grid';
-
-export type SearchEmbeddableSerializedState = SerializedTitles & {
-  // by value
-  attributes?: SavedSearchByValueAttributes;
-
-  // by reference
-  savedObjectId?: string;
-};
 
 export type SearchEmbeddableAttributes = Pick<
   SerializableSavedSearch,
@@ -54,6 +46,14 @@ export type SearchEmbeddableAttributes = Pick<
   | 'viewMode'
 >;
 
+export type SearchEmbeddableSerializedState = SerializedTitles & {
+  // by value
+  attributes?: SearchEmbeddableAttributes;
+
+  // by reference
+  savedObjectId?: string;
+};
+
 export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
   SerializedTitles & {
     savedObjectTitle?: string;
@@ -61,28 +61,14 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
     savedObjectDescription?: string;
   };
 
-// export type SearchEmbeddableRuntimeState = Omit<
-//   SavedSearchByValueAttributes,
-//   | 'title'
-//   | 'description'
-//   | 'kibanaSavedObjectMeta'
-//   | 'visContext'
-//   | 'timeRestore'
-//   | 'refreshInterval'
-// > &
-//   SerializedTitles & { savedObjectId?: string };
-
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   PublishesDataViews &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
   PublishesSavedSearchAttributes &
-  HasInPlaceLibraryTransforms & // TODO: Should it be in place?
-  // PublishesSearchSession
-  // PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
+  HasInPlaceLibraryTransforms &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
-// HasParentApi<HasExecutionContext>;
 
 export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
   rows$: BehaviorSubject<DataTableRecord[]>;
@@ -95,7 +81,6 @@ export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasS
   headerRowHeight$: BehaviorSubject<number | undefined>;
   rowsPerPage$: BehaviorSubject<number | undefined>;
   savedSearchViewMode$: BehaviorSubject<VIEW_MODE | undefined>;
-  // dataViewId$: BehaviorSubject<string | undefined>;
 }
 
 export interface HasSavedSearch {

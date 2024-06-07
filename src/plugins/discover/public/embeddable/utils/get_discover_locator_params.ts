@@ -16,9 +16,8 @@ export const getDiscoverLocatorParams = (
 ) => {
   const savedSearch = api.getSavedSearch();
 
-  const dataView = savedSearch?.searchSource?.getField('index');
+  const dataView = savedSearch?.searchSource.getField('index');
   const savedObjectId = api.savedObjectId?.getValue();
-  console.log('savedObjectId', savedObjectId);
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? { savedSearchId: savedObjectId }
     : {
@@ -26,8 +25,8 @@ export const getDiscoverLocatorParams = (
         dataViewSpec: dataView?.toMinimalSpec(),
         timeRange: savedSearch?.timeRange,
         refreshInterval: savedSearch?.refreshInterval,
-        filters: savedSearch?.searchSource?.getField('filter') as Filter[],
-        query: savedSearch?.searchSource?.getField('query'),
+        filters: savedSearch?.searchSource.getField('filter') as Filter[],
+        query: savedSearch?.searchSource.getField('query'),
         columns: savedSearch?.columns,
         sort: savedSearch?.sort,
         viewMode: savedSearch?.viewMode,

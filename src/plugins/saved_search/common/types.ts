@@ -41,6 +41,7 @@ export type VisContextUnmapped =
 
 /** @internal **/
 export interface SavedSearchAttributes {
+  id: string;
   title: string; // duplicate title??? verify this
   sort: SortOrder[];
   columns: string[];

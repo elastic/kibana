@@ -7,18 +7,17 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
-import { SearchEmbeddableSerializedState } from './types';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
 
 export const inject = (
-  state: SearchEmbeddableSerializedState,
+  state: EmbeddableStateWithType,
   injectedReferences: SavedObjectReference[]
-): SearchEmbeddableSerializedState => {
+): EmbeddableStateWithType & { attributes?: SavedSearchByValueAttributes } => {
   if (hasAttributes(state)) {
     // Filter out references that are not in the state
     // https://github.com/elastic/kibana/pull/119079
-    const references = (state.attributes?.references ?? [])
+    const references = state.attributes.references
       .map((stateRef) =>
         injectedReferences.find((injectedRef) => injectedRef.name === stateRef.name)
       )
@@ -30,25 +29,25 @@ export const inject = (
         ...state.attributes,
         references,
       },
-    } as SearchEmbeddableSerializedState;
+    } as EmbeddableStateWithType;
   }
 
   return state;
 };
 
-export const extract = (state: {
-  attributes: SavedSearchByValueAttributes;
-}): SerializedPanelState<{
-  attributes: SearchEmbeddableSerializedState;
-}> => {
+export const extract = (
+  state: EmbeddableStateWithType & { attributes?: SavedSearchByValueAttributes }
+): { state: EmbeddableStateWithType; references: SavedObjectReference[] } => {
   let references: SavedObjectReference[] = [];
 
   if (hasAttributes(state)) {
     references = state.attributes.references;
   }
 
-  return { rawState: state, references };
+  return { state, references };
 };
 
-const hasAttributes = (state: unknown): state is SearchEmbeddableSerializedState =>
-  'attributes' in (state as SearchEmbeddableSerializedState);
+const hasAttributes = (
+  state: EmbeddableStateWithType
+): state is EmbeddableStateWithType & { attributes: SavedSearchByValueAttributes } =>
+  'attributes' in state;

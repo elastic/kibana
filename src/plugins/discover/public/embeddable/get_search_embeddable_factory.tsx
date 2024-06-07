@@ -28,6 +28,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { DiscoverServices } from '../build_services';
@@ -79,7 +80,7 @@ export const getSearchEmbeddableFactory = ({
       const savedSearch = await toSavedSearch(
         undefined,
         inject(
-          serializedState.rawState,
+          serializedState.rawState as EmbeddableStateWithType,
           serializedState.references ?? []
         ) as SavedSearchUnwrapResult,
         true
@@ -114,7 +115,9 @@ export const getSearchEmbeddableFactory = ({
           searchEmbeddableApi.getSavedSearch(),
           searchSourceJSON
         );
-        const { rawState, references } = extract({
+        const { state, references } = extract({
+          id: uuid,
+          type: SEARCH_EMBEDDABLE_TYPE,
           attributes: {
             ...savedSearchAttributes,
             references: originalReferences,
@@ -124,7 +127,7 @@ export const getSearchEmbeddableFactory = ({
         return {
           rawState: {
             ...serializeTitles(),
-            ...(rawState as unknown as SearchEmbeddableSerializedState),
+            ...(state as unknown as SearchEmbeddableSerializedState),
           },
           references,
         };

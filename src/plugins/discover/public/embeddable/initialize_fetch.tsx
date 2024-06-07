@@ -18,7 +18,12 @@ import { EsHitRecord } from '@kbn/discover-utils/types';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { apiHasExecutionContext, fetch$, FetchContext } from '@kbn/presentation-publishing';
+import {
+  apiHasExecutionContext,
+  apiHasParentApi,
+  fetch$,
+  FetchContext,
+} from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
@@ -127,16 +132,17 @@ export function initializeFetch({
                     'This request queries Elasticsearch to fetch the data for the search.',
                 }),
               },
-              executionContext: apiHasExecutionContext(api.parentApi)
-                ? api.parentApi?.executionContext
-                : {
-                    type: SEARCH_EMBEDDABLE_TYPE,
-                    name: 'discover',
-                    id: searchSource.getId(),
-                    description:
-                      api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
-                    // url: this.output.editUrl,
-                  },
+              executionContext:
+                apiHasParentApi(api) && apiHasExecutionContext(api.parentApi)
+                  ? api.parentApi?.executionContext
+                  : {
+                      type: SEARCH_EMBEDDABLE_TYPE,
+                      name: 'discover',
+                      id: searchSource.getId(),
+                      description:
+                        api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
+                      // url: this.output.editUrl,
+                    },
               disableWarningToasts: true,
             })
           );
