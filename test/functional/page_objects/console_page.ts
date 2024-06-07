@@ -29,15 +29,13 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequest() {
-    const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
-    const editorViewDiv = await codeEditor.findByClassName('view-lines');
-    return await editorViewDiv.getVisibleText();
+    const requestEditor = await this.getRequestEditor();
+    return await this.getVisibleTextFromAceEditor(requestEditor);
   }
 
   public async getResponse() {
-    const codeEditor = await this.testSubjects.find('consoleMonacoOutput');
-    const editorViewDiv = await codeEditor.findByClassName('view-lines');
-    return await editorViewDiv.getVisibleText();
+    const responseEditor = await this.testSubjects.find('response-editor');
+    return await this.getVisibleTextFromAceEditor(responseEditor);
   }
 
   public async clickPlay() {
@@ -139,19 +137,13 @@ export class ConsolePageObject extends FtrService {
 
   // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
   public async promptAutocomplete(letter = 'b') {
-    const textArea = await this.getEditorTextArea();
+    const textArea = await this.testSubjects.find('console-textarea');
     await textArea.type(letter);
     await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
-  public async promptAutocomplete1() {
-    const textArea = await this.getEditorTextArea();
-    await textArea.pressKeys([Key.SPACE, Key.CONTROL]);
-    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
-  }
-
   public async isAutocompleteVisible() {
-    const element = await this.find.byCssSelector('.suggest-widget.visible').catch(() => null);
+    const element = await this.find.byCssSelector('.ace_autocomplete').catch(() => null);
     if (!element) return false;
 
     const attribute = await element.getAttribute('style');
@@ -173,20 +165,21 @@ export class ConsolePageObject extends FtrService {
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
-    const isAutocompleteVisible = await this.isAutocompleteVisible();
-    if (isAutocompleteVisible) {
-      await textArea.pressKeys(Key.ESCAPE);
-    }
   }
 
   public async enterText(text: string) {
-    const textArea = await this.getEditorTextArea();
+    const textArea = await this.testSubjects.find('console-textarea');
     await textArea.type(text);
   }
 
   private async getEditorTextArea() {
-    const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
-    return await codeEditor.findByTagName('textarea');
+    // This focusses the cursor on the bottom of the text area
+    await this.retry.try(async () => {
+      const editor = await this.getEditor();
+      const content = await editor.findByCssSelector('.ace_content');
+      await content.click();
+    });
+    return await this.testSubjects.find('console-textarea');
   }
 
   public async getAllTextLines() {
@@ -216,7 +209,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async pressEnter() {
-    const textArea = await this.getEditorTextArea();
+    const textArea = await this.testSubjects.find('console-textarea');
     await textArea.pressKeys(Key.ENTER);
   }
 
@@ -247,11 +240,15 @@ export class ConsolePageObject extends FtrService {
 
   public async clearTextArea() {
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-      const textArea = await this.getEditorTextArea();
+      const textArea = await this.testSubjects.find('console-textarea');
       await textArea.clickMouseButton();
-
       await textArea.clearValueWithKeyboard();
-      return true;
+
+      const editor = await this.getEditor();
+      const lines = await editor.findAllByClassName('ace_line_group');
+      // there should be only one empty line after clearing the textarea
+      const text = await lines[lines.length - 1].getVisibleText();
+      return lines.length === 1 && text.trim() === '';
     });
   }
 
