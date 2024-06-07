@@ -61,6 +61,8 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: Rule field has an update and doesn't have a custom value**](#scenario-rule-field-has-an-update-and-doesnt-have-a-custom-value)
     - [**Scenario: Rule field has an update and a custom value that are the same**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-the-same)
     - [**Scenario: Rule field has an update and a custom value that are NOT the same**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-not-the-same)
+    - [**Scenario: Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-not-the-same-and-the-rule-base-version-doesnt-exist)
+    - [**Scenario: Rule field has an update and a custom value that are the same and the rule base version doesn't exist**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-the-same-and-the-rule-base-version-doesnt-exist)
   - [Rule upgrade workflow: viewing rule changes in JSON diff view](#rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
     - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
     - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
@@ -852,8 +854,8 @@ And for this rule there is a new version available
 And <field_name> field is customized by the user (current version != base version)
 And <field_name> field is not updated by Elastic in this upgrade (target version == base version)
 Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
-And <field_name> field should not be returned from the `upgrade/_review` API endpoint
-And <field_name> field should not be shown in the upgrade preview UI
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
 | field_name | base_version | current_version | target_version |
@@ -868,8 +870,8 @@ Examples:
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And <field_name> field is customized by the user (current version == base version)
-And <field_name> field is not updated by Elastic in this upgrade (target version != base version)
+And <field_name> field is not customized by the user (current version == base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 Then for <field_name> field the diff algorithm should output the target version as the merged one without a conflict
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
@@ -908,7 +910,7 @@ Examples:
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
 And <field_name> field is customized by the user (current version != base version)
-And <field_name> field is not updated by Elastic in this upgrade (target version != base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
 Then for <field_name> field the diff algorithm should output the current version as the merged one with a conflict
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
@@ -946,6 +948,7 @@ Examples:
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
+And the base version of the rule cannot be determined
 And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
 Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
 And <field_name> field should not be returned from the `upgrade/_review` API endpoint
