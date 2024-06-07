@@ -9,22 +9,33 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
-  MAX_DESCRIPTION_LENGTH,
-  MAX_LENGTH_PER_TAG,
-  MAX_TAGS_PER_CASE,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATE_TAG_LENGTH,
-  MAX_TITLE_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
 } from '../../../common/constants';
 import { OptionalFieldLabel } from '../create/optional_field_label';
-import { SEVERITY_TITLE } from '../severity/translations';
 import * as i18n from './translations';
 import type { TemplateFormProps } from './types';
-import { validateEmptyTags, validateMaxLength, validateMaxTagsLength } from './utils';
-
+import {
+  validateEmptyTags,
+  validateMaxLength,
+  validateMaxTagsLength,
+} from '../case_form_fields/utils';
+import { schema as CaseFormFieldsSchema } from '../case_form_fields/schema';
 const { emptyField, maxLengthField } = fieldValidators;
+
+// add optional label to all case form fields
+export const CaseFormFieldsSchemaWithOptionalLabel = Object.fromEntries(
+  Object.entries(CaseFormFieldsSchema).map(([key, value]) => {
+    if (typeof value === 'object') {
+      const updatedValue = { ...value, labelAppend: OptionalFieldLabel };
+      return [key, updatedValue];
+    }
+
+    return [key, value];
+  })
+);
 
 export const schema: FormSchema<TemplateFormProps> = {
   key: {
@@ -50,6 +61,7 @@ export const schema: FormSchema<TemplateFormProps> = {
   },
   templateDescription: {
     label: i18n.DESCRIPTION,
+    labelAppend: OptionalFieldLabel,
     validations: [
       {
         validator: maxLengthField({
@@ -90,71 +102,6 @@ export const schema: FormSchema<TemplateFormProps> = {
       },
     ],
   },
-  title: {
-    label: i18n.NAME,
-    labelAppend: OptionalFieldLabel,
-    validations: [
-      {
-        validator: maxLengthField({
-          length: MAX_TITLE_LENGTH,
-          message: i18n.MAX_LENGTH_ERROR('name', MAX_TITLE_LENGTH),
-        }),
-      },
-    ],
-  },
-  description: {
-    label: i18n.DESCRIPTION,
-    labelAppend: OptionalFieldLabel,
-    validations: [
-      {
-        validator: maxLengthField({
-          length: MAX_DESCRIPTION_LENGTH,
-          message: i18n.MAX_LENGTH_ERROR('description', MAX_DESCRIPTION_LENGTH),
-        }),
-      },
-    ],
-  },
-  tags: {
-    label: i18n.TAGS,
-    helpText: i18n.TAGS_HELP,
-    labelAppend: OptionalFieldLabel,
-    validations: [
-      {
-        validator: ({ value }: { value: string | string[] }) =>
-          validateEmptyTags({ value, message: i18n.TAGS_EMPTY_ERROR }),
-        type: VALIDATION_TYPES.ARRAY_ITEM,
-        isBlocking: false,
-      },
-      {
-        validator: ({ value }: { value: string | string[] }) =>
-          validateMaxLength({
-            value,
-            message: i18n.MAX_LENGTH_ERROR('tag', MAX_LENGTH_PER_TAG),
-            limit: MAX_LENGTH_PER_TAG,
-          }),
-        type: VALIDATION_TYPES.ARRAY_ITEM,
-        isBlocking: false,
-      },
-      {
-        validator: ({ value }: { value: string[] }) =>
-          validateMaxTagsLength({
-            value,
-            message: i18n.MAX_TAGS_ERROR(MAX_TAGS_PER_CASE),
-            limit: MAX_TAGS_PER_CASE,
-          }),
-      },
-    ],
-  },
-  severity: {
-    label: SEVERITY_TITLE,
-    labelAppend: OptionalFieldLabel,
-  },
-  assignees: {
-    labelAppend: OptionalFieldLabel,
-  },
-  category: {
-    labelAppend: OptionalFieldLabel,
-  },
   connectorId: {
     labelAppend: OptionalFieldLabel,
     label: i18n.CONNECTORS,
@@ -168,4 +115,5 @@ export const schema: FormSchema<TemplateFormProps> = {
     labelAppend: OptionalFieldLabel,
     defaultValue: true,
   },
+  ...CaseFormFieldsSchemaWithOptionalLabel,
 };

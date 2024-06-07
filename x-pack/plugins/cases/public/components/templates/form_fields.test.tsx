@@ -9,7 +9,8 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { ConnectorTypes } from '../../../common/types/domain';
+import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
@@ -26,9 +27,21 @@ describe('form fields', () => {
   const onSubmit = jest.fn();
   const defaultProps = {
     connectors: connectorsMock,
-    configurationConnectorId: 'none',
-    configurationCustomFields: [],
-    configurationTemplateTags: [],
+    currentConfiguration: {
+      closureType: 'close-by-user' as const,
+      connector: {
+        fields: null,
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+      },
+      customFields: [],
+      templates: [],
+      mappings: [],
+      version: '',
+      id: '',
+      owner: mockedTestProvidersOwner[0],
+    },
   };
 
   beforeEach(() => {
@@ -101,8 +114,12 @@ describe('form fields', () => {
   it('renders custom fields correctly', async () => {
     const newProps = {
       ...defaultProps,
-      configurationCustomFields: customFieldsConfigurationMock,
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        customFields: customFieldsConfigurationMock,
+      },
     };
+
     appMockRenderer.render(
       <FormTestComponent onSubmit={onSubmit}>
         <FormFields {...newProps} />
@@ -125,7 +142,15 @@ describe('form fields', () => {
   it('renders connector and its fields correctly', async () => {
     const newProps = {
       ...defaultProps,
-      configurationConnectorId: 'servicenow-1',
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        connector: {
+          id: 'servicenow-1',
+          name: 'My SN connector',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+      },
     };
 
     appMockRenderer.render(
@@ -234,8 +259,12 @@ describe('form fields', () => {
   it('calls onSubmit with custom fields', async () => {
     const newProps = {
       ...defaultProps,
-      configurationCustomFields: customFieldsConfigurationMock,
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        customFields: customFieldsConfigurationMock,
+      },
     };
+
     appMockRenderer.render(
       <FormTestComponent onSubmit={onSubmit}>
         <FormFields {...newProps} />
@@ -282,7 +311,15 @@ describe('form fields', () => {
   it('calls onSubmit with connector fields', async () => {
     const newProps = {
       ...defaultProps,
-      configurationConnectorId: 'servicenow-1',
+      currentConfiguration: {
+        ...defaultProps.currentConfiguration,
+        connector: {
+          id: 'servicenow-1',
+          name: 'My SN connector',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+      },
     };
 
     appMockRenderer.render(

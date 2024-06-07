@@ -21,19 +21,19 @@ import { SyncAlertsToggle } from '../create/sync_alerts_toggle';
 interface FormFieldsProps {
   isSubmitting?: boolean;
   connectors: ActionConnector[];
-  configurationConnectorId: string;
-  configurationCustomFields: CasesConfigurationUI['customFields'];
-  configurationTemplateTags: string[];
+  currentConfiguration: CasesConfigurationUI;
 }
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   isSubmitting = false,
   connectors,
-  configurationConnectorId,
-  configurationCustomFields,
-  configurationTemplateTags,
+  currentConfiguration,
 }) => {
   const { isSyncAlertsEnabled } = useCasesFeatures();
+  const { customFields: configurationCustomFields, connector, templates } = currentConfiguration;
+  const configurationTemplateTags = templates
+    .map((template) => (template?.tags?.length ? template.tags : []))
+    .flat();
 
   const firstStep = useMemo(
     () => ({
@@ -78,12 +78,12 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
           <Connector
             connectors={connectors}
             isLoading={isSubmitting}
-            configurationConnectorId={configurationConnectorId}
+            configurationConnectorId={connector.id}
           />
         </div>
       ),
     }),
-    [connectors, configurationConnectorId, isSubmitting]
+    [connectors, connector, isSubmitting]
   );
 
   const allSteps = useMemo(

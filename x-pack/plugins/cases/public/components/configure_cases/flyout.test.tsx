@@ -10,7 +10,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import {
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
@@ -18,8 +18,8 @@ import {
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
 } from '../../../common/constants';
+import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
 import { FIELD_LABEL, DEFAULT_VALUE } from '../custom_fields/translations';
@@ -349,13 +349,27 @@ describe('CommonFlyout ', () => {
   });
 
   describe('TemplateFlyout', () => {
+    const currentConfiguration = {
+      closureType: 'close-by-user' as const,
+      connector: {
+        fields: null,
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+      },
+      customFields: [],
+      templates: [],
+      mappings: [],
+      version: '',
+      id: '',
+      owner: mockedTestProvidersOwner[0],
+    };
+
     const renderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
       <TemplateForm
         initialValue={null}
         connectors={connectorsMock}
-        configurationConnectorId={'none'}
-        configurationCustomFields={[]}
-        configurationTemplateTags={[]}
+        currentConfiguration={currentConfiguration}
         onChange={onChange}
       />
     );
@@ -408,9 +422,7 @@ describe('CommonFlyout ', () => {
             templateDescription: 'test description',
           }}
           connectors={[]}
-          configurationConnectorId={'none'}
-          configurationCustomFields={[]}
-          configurationTemplateTags={[]}
+          currentConfiguration={currentConfiguration}
           onChange={onChange}
         />
       );
@@ -454,6 +466,7 @@ describe('CommonFlyout ', () => {
     });
 
     it('calls onSaveField form with custom fields correctly', async () => {
+      const newConfig = { ...currentConfiguration, customFields: customFieldsConfigurationMock };
       const newRenderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
         <TemplateForm
           initialValue={{
@@ -462,9 +475,7 @@ describe('CommonFlyout ', () => {
             templateDescription: 'test description',
           }}
           connectors={[]}
-          configurationConnectorId={'none'}
-          configurationCustomFields={customFieldsConfigurationMock}
-          configurationTemplateTags={[]}
+          currentConfiguration={newConfig}
           onChange={onChange}
         />
       );
@@ -504,6 +515,15 @@ describe('CommonFlyout ', () => {
 
     it('calls onSaveField form with connector fields correctly', async () => {
       useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
+      const newConfig = {
+        ...currentConfiguration,
+        connector: {
+          id: 'servicenow-1',
+          name: 'My SN connector',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+      };
 
       const newRenderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
         <TemplateForm
@@ -513,9 +533,7 @@ describe('CommonFlyout ', () => {
             templateDescription: 'test description',
           }}
           connectors={connectorsMock}
-          configurationConnectorId={'servicenow-1'}
-          configurationCustomFields={[]}
-          configurationTemplateTags={[]}
+          currentConfiguration={newConfig}
           onChange={onChange}
         />
       );

@@ -17,22 +17,20 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
-import type { CustomFieldConfiguration } from '../../../common/types/domain';
+import type { FormHook, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
 
 import * as i18n from './translations';
-import type { TemplateFormProps } from '../templates/types';
 
-export interface FormState<T> {
+export interface FormState<T extends FormData = FormData> {
   isValid: boolean | undefined;
   submit: FormHook<T>['submit'];
 }
 
-export interface FlyOutBodyProps<T> {
+export interface FlyOutBodyProps<T extends FormData = FormData> {
   onChange: (state: FormState<T>) => void;
 }
 
-export interface FlyoutProps<T> {
+export interface FlyoutProps<T extends FormData = FormData> {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
@@ -41,7 +39,7 @@ export interface FlyoutProps<T> {
   renderBody: ({ onChange }: FlyOutBodyProps<T>) => React.ReactNode;
 }
 
-export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormProps>({
+export const CommonFlyout = <T extends FormData = FormData>({
   onCloseFlyout,
   onSaveField,
   isLoading,

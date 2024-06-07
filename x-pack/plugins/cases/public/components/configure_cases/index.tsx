@@ -84,18 +84,20 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const {
-    data: {
-      id: configurationId,
-      version: configurationVersion,
-      closureType,
-      connector,
-      mappings,
-      customFields,
-      templates,
-    },
+    data: currentConfiguration,
     isLoading: loadingCaseConfigure,
     refetch: refetchCaseConfigure,
   } = useGetCaseConfiguration();
+
+  const {
+    id: configurationId,
+    version: configurationVersion,
+    closureType,
+    connector,
+    mappings,
+    customFields,
+    templates,
+  } = currentConfiguration;
 
   const {
     mutate: persistCaseConfigure,
@@ -104,10 +106,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
   } = usePersistConfiguration();
 
   const isLoadingCaseConfiguration = loadingCaseConfigure || isPersistingConfiguration;
-  const configurationTemplateTags = templates
-    .map((template) => (template?.tags?.length ? template.tags : []))
-    .flat();
-
   const {
     isLoading: isLoadingConnectors,
     data: connectors = [],
@@ -461,9 +459,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           <TemplateForm
             initialValue={templateToEdit as TemplateFormProps | null}
             connectors={connectors ?? []}
-            configurationConnectorId={connector.id ?? ''}
-            configurationCustomFields={customFields ?? []}
-            configurationTemplateTags={configurationTemplateTags ?? []}
+            currentConfiguration={currentConfiguration}
             onChange={onChange}
           />
         )}

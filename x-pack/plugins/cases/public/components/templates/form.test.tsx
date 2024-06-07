@@ -9,14 +9,14 @@ import React from 'react';
 import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
 import {
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
 } from '../../../common/constants';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
@@ -32,9 +32,21 @@ describe('TemplateForm', () => {
   let appMockRenderer: AppMockRenderer;
   const defaultProps = {
     connectors: connectorsMock,
-    configurationConnectorId: 'none',
-    configurationCustomFields: [],
-    configurationTemplateTags: [],
+    currentConfiguration: {
+      closureType: 'close-by-user' as const,
+      connector: {
+        fields: null,
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+      },
+      customFields: [],
+      templates: [],
+      mappings: [],
+      version: '',
+      id: '',
+      owner: mockedTestProvidersOwner[0],
+    },
     onChange: jest.fn(),
     initialValue: null,
   };
@@ -229,7 +241,19 @@ describe('TemplateForm', () => {
 
     appMockRenderer.render(
       <TemplateForm
-        {...{ ...defaultProps, configurationConnectorId: 'servicenow-1', onChange: onChangeState }}
+        {...{
+          ...defaultProps,
+          currentConfiguration: {
+            ...defaultProps.currentConfiguration,
+            connector: {
+              id: 'servicenow-1',
+              name: 'My SN connector',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+          },
+          onChange: onChangeState,
+        }}
       />
     );
 
@@ -285,7 +309,10 @@ describe('TemplateForm', () => {
       <TemplateForm
         {...{
           ...defaultProps,
-          configurationCustomFields: customFieldsConfigurationMock,
+          currentConfiguration: {
+            ...defaultProps.currentConfiguration,
+            customFields: customFieldsConfigurationMock,
+          },
           onChange: onChangeState,
         }}
       />
