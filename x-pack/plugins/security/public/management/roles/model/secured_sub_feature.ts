@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SubFeatureConfig } from '@kbn/features-plugin/common';
+import type { SubFeatureConfig, SubFeaturePrivilegeGroupConfig } from '@kbn/features-plugin/common';
 import { SubFeature } from '@kbn/features-plugin/common';
 
 import { SubFeaturePrivilege } from './sub_feature_privilege';
@@ -14,6 +14,10 @@ import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 export class SecuredSubFeature extends SubFeature {
   public readonly privileges: SubFeaturePrivilege[];
   public readonly privilegesTooltip: string;
+  /**
+   * A list of the privilege groups that have at least one enabled privilege.
+   */
+  private readonly nonEmptyPrivilegeGroups: SubFeaturePrivilegeGroupConfig[];
 
   constructor(
     config: SubFeatureConfig,
@@ -23,14 +27,27 @@ export class SecuredSubFeature extends SubFeature {
 
     this.privilegesTooltip = config.privilegesTooltip || '';
 
-    this.privileges = [];
-    for (const privilege of this.privilegeIterator()) {
-      this.privileges.push(privilege);
-    }
+    this.nonEmptyPrivilegeGroups = this.privilegeGroups.flatMap((group) => {
+      const filteredPrivileges = group.privileges.filter((privilege) => !privilege.disabled);
+      if (filteredPrivileges.length === 0) {
+        return [];
+      }
+
+      // If some privileges are disabled, we need to update the group to reflect the change.
+      return [
+        group.privileges.length === filteredPrivileges.length
+          ? group
+          : ({ ...group, privileges: filteredPrivileges } as SubFeaturePrivilegeGroupConfig),
+      ];
+    });
+
+    this.privileges = Array.from(this.privilegeIterator());
   }
 
   public getPrivilegeGroups() {
-    return this.privilegeGroups.map((pg) => new SubFeaturePrivilegeGroup(pg, this.actionMapping));
+    return this.nonEmptyPrivilegeGroups.map(
+      (pg) => new SubFeaturePrivilegeGroup(pg, this.actionMapping)
+    );
   }
 
   public *privilegeIterator({
@@ -38,10 +55,13 @@ export class SecuredSubFeature extends SubFeature {
   }: {
     predicate?: (privilege: SubFeaturePrivilege, feature: SecuredSubFeature) => boolean;
   } = {}): IterableIterator<SubFeaturePrivilege> {
-    for (const group of this.privilegeGroups) {
-      yield* group.privileges
-        .map((gp) => new SubFeaturePrivilege(gp, this.actionMapping[gp.id]))
-        .filter((privilege) => predicate(privilege, this));
+    for (const group of this.nonEmptyPrivilegeGroups) {
+      for (const gp of group.privileges) {
+        const privilege = new SubFeaturePrivilege(gp, this.actionMapping[gp.id]);
+        if (predicate(privilege, this)) {
+          yield privilege;
+        }
+      }
     }
   }
 
