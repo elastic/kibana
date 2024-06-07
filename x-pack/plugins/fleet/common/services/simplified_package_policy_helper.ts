@@ -149,7 +149,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   } = data;
   const packagePolicy = packageToPackagePolicy(
     packageInfo,
-    policyId && !policyIds?.[0] ? policyId : policyIds,
+    policyId && !policyIds[0] ? policyId : policyIds,
     namespace,
     name,
     description
