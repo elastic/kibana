@@ -84,7 +84,7 @@ const controlGroupPanels = {
       title: 'Time slider',
       enhancements: {},
     },
-  },
+  }
 };
 
 /**
@@ -205,6 +205,18 @@ export const ReactControlExample = ({
       subscription.unsubscribe();
     };
   }, [dashboardApi, controlGroupApi]);
+
+  useEffect(() => {
+    if (!controlGroupApi) return;
+
+    const subscription = controlGroupApi.timeslice$.subscribe((timeslice) => {
+      timeslice$.next(timeslice);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
 
   if (error || (!dataViews?.[0]?.id && !loading))
     return (

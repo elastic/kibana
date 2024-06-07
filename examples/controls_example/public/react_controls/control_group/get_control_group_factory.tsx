@@ -28,8 +28,10 @@ import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   apiPublishesFilters,
+  apiPublishesTimeslice,
   PublishesDataViews,
   PublishesFilters,
+  PublishesTimeslice,
   PublishingSubject,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -68,6 +70,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         ignoreParentSettings: initialParentSettings,
       } = initialState;
 
+      const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -174,6 +177,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         filters$,
         dataViews,
         labelPosition: labelPosition$,
+        timeslice$,
       });
 
       /**
@@ -194,6 +198,21 @@ export const getControlGroupEmbeddableFactory = (services: {
         []
       ).subscribe((newFilters) => filters$.next(newFilters));
 
+      const childrenTimesliceSubscription = combineCompatibleChildrenApis<PublishesTimeslice, [number, number] | undefined>(
+        api,
+        'timeslice$',
+        apiPublishesTimeslice,
+        undefined,
+        // flatten method
+        (values) => {
+          // control group should never allow multiple timeslider controls
+          // returns first timeslider control value
+          return values.length === 0 ? undefined : values[0];
+        }
+      ).subscribe((timeslice) => {
+        timeslice$.next(timeslice);
+      });
+
       /** Subscribe to all children's output data views, combine them, and output them */
       const childDataViewsSubscription = combineCompatibleChildrenApis<
         PublishesDataViews,
@@ -211,6 +230,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             return () => {
               outputFiltersSubscription.unsubscribe();
               childDataViewsSubscription.unsubscribe();
+              childrenTimesliceSubscription.unsubscribe();
             };
           }, []);
 

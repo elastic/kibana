@@ -17,6 +17,7 @@ import {
   HasParentApi,
   PublishesDataLoading,
   PublishesFilters,
+  PublishesTimeslice,
   PublishesUnifiedSearch,
   PublishesUnsavedChanges,
   PublishingSubject,
@@ -50,6 +51,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
+  PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch>>;
 
 export interface ControlGroupRuntimeState {
