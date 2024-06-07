@@ -39,6 +39,8 @@ import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 
 import { RuleDefinitionSandbox } from './components/rule_form/rule_definition_sandbox';
+import { RuleActionsSandbox } from './components/rule_form/rule_actions_sandbox';
+import { RuleDetailsSandbox } from './components/rule_form/rule_details_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -171,6 +173,22 @@ const TriggersActionsUiExampleApp = ({
                 dataViews={dataViews}
                 unifiedSearch={unifiedSearch}
               />
+            </Page>
+          )}
+        />
+        <Route
+          path="/rule_actions"
+          render={() => (
+            <Page title="Rule Actions">
+              <RuleActionsSandbox />
+            </Page>
+          )}
+        />
+        <Route
+          path="/rule_details"
+          render={() => (
+            <Page title="Rule Details">
+              <RuleDetailsSandbox />
             </Page>
           )}
         />
