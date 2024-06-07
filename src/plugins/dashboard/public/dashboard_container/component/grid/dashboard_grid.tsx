@@ -23,7 +23,12 @@ import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
+export let gridFirstRenderTime: number | undefined;
+
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
+  console.log('DashboardGrid has rendered');
+  gridFirstRenderTime = performance.now();
+
   const dashboard = useDashboardContainer();
   const panels = dashboard.select((state) => state.explicitInput.panels);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
