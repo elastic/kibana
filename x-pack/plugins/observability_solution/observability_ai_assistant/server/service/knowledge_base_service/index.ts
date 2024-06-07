@@ -537,7 +537,7 @@ export class KnowledgeBaseService {
     };
   };
 
-  getInstructions = async (
+  getUserInstructions = async (
     namespace: string,
     user?: { name: string }
   ): Promise<UserInstruction[]> => {
