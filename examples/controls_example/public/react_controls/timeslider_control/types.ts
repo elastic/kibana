@@ -11,6 +11,8 @@ import type { DefaultControlApi, DefaultControlState } from "../types";
 
 export const TIMESLIDER_CONTROL_TYPE = 'timesliderControl';
 
+export type Timeslice = [number, number];
+
 export interface TimesliderControlState extends DefaultControlState {
   isAnchored?: boolean;
   // Encode value as percentage of time range to support relative time ranges.
