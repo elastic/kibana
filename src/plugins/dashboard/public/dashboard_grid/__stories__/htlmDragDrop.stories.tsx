@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useRef, useState } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useRef, useState } from 'react';
 import { useDebouncedWidthObserver } from '../../dashboard_container/component/viewport/dashboard_viewport';
+import { resolveGridLayout } from './grid_resolver';
+import { GridData, GridLayout } from './types';
 
 export default {
   title: 'POC - html drag drop',
@@ -18,24 +21,16 @@ export default {
   argTypes: {},
 };
 
-type TrackingGridData = GridData & { moved?: boolean };
-
-interface GridLayout {
-  [key: string]: GridData;
-}
-
-interface GridData {
-  id: string;
-  column: number;
-  row: number;
-  width: number;
-  height: number;
-}
-
 export const HtmlDragDrop = () => {
   const [gridLayout, setGridLayout] = useState<GridLayout>({
-    panel1: { column: 0, row: 0, width: 4, height: 4, id: 'panel1' },
-    panel2: { column: 4, row: 0, width: 4, height: 2, id: 'panel2' },
+    panel1: { column: 0, row: 0, width: 12, height: 6, id: 'panel1' },
+    panel2: { column: 0, row: 6, width: 8, height: 4, id: 'panel2' },
+    panel3: { column: 8, row: 6, width: 12, height: 4, id: 'panel3' },
+    panel4: { column: 0, row: 10, width: 48, height: 4, id: 'panel4' },
+    panel5: { column: 12, row: 0, width: 36, height: 6, id: 'panel5' },
+    panel6: { column: 24, row: 6, width: 24, height: 4, id: 'panel6' },
+    panel7: { column: 20, row: 6, width: 4, height: 2, id: 'panel7' },
+    panel8: { column: 20, row: 8, width: 4, height: 2, id: 'panel8' },
   });
   const [draggingId, setDraggingId] = useState<string | undefined>();
   const lastDraggedGridLocation = useRef<{ column: number; row: number } | undefined>(undefined);
@@ -43,105 +38,6 @@ export const HtmlDragDrop = () => {
   const shiftRef = useRef({ x: 0, y: 0 });
   const updateShift = ({ x, y }: { x: number; y: number }) => {
     shiftRef.current = { x, y };
-  };
-
-  const keysInOrder = useMemo(() => {
-    const keys = Object.keys(gridLayout);
-    return keys.sort((panelKeyA, panelKeyB) => {
-      const panelA = gridLayout[panelKeyA];
-      const panelB = gridLayout[panelKeyB];
-      if (panelA.row > panelB.row || (panelA.row === panelB.row && panelA.column > panelB.column)) {
-        return 1;
-      }
-      return -1;
-    });
-  }, [gridLayout]);
-
-  const collides = (panelA: GridData, panelB: GridData) => {
-    if (panelA.id === panelB.id) return false; // same panel
-    if (panelA.column + panelA.width <= panelB.column) return false; // panel a is left of panel b
-    if (panelA.column >= panelB.column + panelB.width) return false; // panel a is right of panel b
-    if (panelA.row + panelA.height <= panelB.row) return false; // panel a is above panel b
-    if (panelA.row >= panelB.row + panelB.height) return false; // panel a is below panel b
-    return true; // boxes overlap
-  };
-
-  const getAllCollisions = (panelToCheck: GridData): GridData[] => {
-    const collidingPanels: GridData[] = [];
-    for (const key of keysInOrder) {
-      const comparePanel = gridLayout[key];
-      if (collides(panelToCheck, comparePanel)) {
-        collidingPanels.push(comparePanel);
-      }
-    }
-    return collidingPanels;
-  };
-
-  const isColliding = useMemo(() => {
-    // temporarily check if panel1 and panel2 collide. This should be replaced with a check for all panels.
-    if (!gridLayout.panel1 || !gridLayout.panel2) return false;
-    return collides(gridLayout.panel1, gridLayout.panel2);
-  }, [gridLayout]);
-
-  // ------------------------------------------------------------------
-  // Compact and resolve collisions methods are unused for now.
-  // ------------------------------------------------------------------
-  const compact = (layout: GridLayout): GridLayout => {
-    const compactResult: GridLayout = {};
-    for (const key of keysInOrder) {
-      const compactedGridData = { ...layout[key] };
-
-      // try to push panel up.
-      while (
-        compactedGridData.row > 0 &&
-        getAllCollisions({ ...compactedGridData, row: compactedGridData.row - 1 }).length === 0
-      ) {
-        compactedGridData.row--;
-      }
-      //   compareWith.push(key);
-      compactResult[key] = compactedGridData;
-    }
-    return compactResult;
-  };
-
-  const resolveCollisions = (key: string, layout: GridLayout): GridLayout => {
-    // for (const key of keysInOrder) {
-    const thisPanel = layout[key];
-    const collidingPanels = getAllCollisions(layout[key]);
-    for (const collision of collidingPanels as TrackingGridData[]) {
-      if (collision.moved) continue;
-
-      // calculate amount of overlap
-      const columnOverlap = Math.max(
-        0,
-        Math.min(thisPanel.column + thisPanel.width, collision.column + collision.width) -
-          Math.max(thisPanel.column, collision.column)
-      );
-      const rowOverlap = Math.max(
-        0,
-        Math.min(thisPanel.row + thisPanel.height, collision.row + collision.height) -
-          Math.max(thisPanel.row, collision.row)
-      );
-      const moveColumn = columnOverlap < rowOverlap;
-
-      if (moveColumn) {
-        if (thisPanel.column < collision.column) {
-          thisPanel.column -= columnOverlap;
-        } else {
-          thisPanel.column += columnOverlap;
-        }
-      } else {
-        if (thisPanel.row < collision.row) {
-          thisPanel.row -= rowOverlap;
-        } else {
-          thisPanel.row += rowOverlap;
-        }
-      }
-      resolveCollisions(key, layout);
-      //   collision.moved = true;
-    }
-    // }
-    return layout;
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -157,21 +53,18 @@ export const HtmlDragDrop = () => {
       row !== lastDraggedGridLocation.current?.row ||
       column !== lastDraggedGridLocation.current?.column
     ) {
-      setGridLayout((current) => {
-        if (!draggingId) return current;
-        return {
-          ...current,
-          [draggingId]: { ...current[draggingId], row, column },
-        };
-      });
+      if (!draggingId) return;
+      setGridLayout((current) =>
+        resolveGridLayout(current, { ...current[draggingId], row, column })
+      );
       lastDraggedGridLocation.current = { row, column };
     }
   };
 
-  const gutterSize = 20;
+  const gutterSize = 8;
   const rowHeight = 26;
-  const rowCount = 10;
-  const columnCount = 12;
+  const rowCount = 30;
+  const columnCount = 48;
 
   const { width, ref: parentResizeRef } = useDebouncedWidthObserver();
   const gridRef = useRef<HTMLDivElement>(null);
@@ -204,54 +97,48 @@ export const HtmlDragDrop = () => {
     return { column, row };
   };
 
+  const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
   const gridBackgroundStyles = css`
     background-position: top -${gutterSize / 2}px left -${gutterSize / 2}px;
     background-size: ${columnPixelWidth + gutterSize}px ${rowHeight + gutterSize}px;
-    background-image: linear-gradient(to right, white 2px, transparent 1px),
-      linear-gradient(to bottom, white 2px, transparent 1px);
+    background-image: linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+      linear-gradient(to bottom, ${gridColor} 1px, transparent 1px);
   `;
 
   return (
-    <>
-      <div ref={parentResizeRef}>
-        <div
-          ref={gridRef}
-          onDragOver={(e) => handleDragOver(e)}
-          onDragEnd={() => {
-            setDraggingId(undefined);
-            lastDraggedGridLocation.current = undefined;
-          }}
-          css={css`
-            height: 100%;
-            width: 100%;
-            display: grid;
-            gap: ${gutterSize}px;
-            grid-template-columns: repeat(
-              ${columnCount},
-              calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
-            );
-            grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
-            justify-items: stretch;
-            background-color: ${isColliding ? '#fcebee' : 'transparent'};
-
-            ${draggingId ? gridBackgroundStyles : ''}
-          `}
-        >
+    <div ref={parentResizeRef}>
+      <div
+        ref={gridRef}
+        onDragOver={(e) => handleDragOver(e)}
+        onDragEnd={() => {
+          setDraggingId(undefined);
+          lastDraggedGridLocation.current = undefined;
+        }}
+        css={css`
+          height: 100%;
+          width: 100%;
+          display: grid;
+          gap: ${gutterSize}px;
+          grid-template-columns: repeat(
+            ${columnCount},
+            calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
+          );
+          grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
+          justify-items: stretch;
+          ${draggingId ? gridBackgroundStyles : ''}
+        `}
+      >
+        {Object.values(gridLayout).map((gridData) => (
           <DraggableElement
             setDraggingId={setDraggingId}
-            id={'panel1'}
+            key={gridData.id}
+            id={gridData.id}
             updateShift={updateShift}
-            gridData={gridLayout.panel1}
+            gridData={gridData}
           />
-          <DraggableElement
-            setDraggingId={setDraggingId}
-            id={'panel2'}
-            updateShift={updateShift}
-            gridData={gridLayout.panel2}
-          />
-        </div>
+        ))}
       </div>
-    </>
+    </div>
   );
 };
 const DraggableElement = ({
@@ -285,11 +172,13 @@ const DraggableElement = ({
       }}
     >
       <EuiPanel
+        hasShadow={false}
+        hasBorder={true}
         css={css`
           height: 100%;
         `}
       >
-        {gridData.id}
+        <strong>id:</strong> {gridData.id}{' '}
       </EuiPanel>
     </div>
   );
