@@ -1,10 +1,9 @@
-.kbnDocViewer__fieldIcon {
+.kbnDocViewer__fieldIconContainer {
   padding-top: $euiSizeXS * 1.5;
   line-height: $euiSize;
 }
 
 .kbnDocViewer__fieldName {
-  flex-shrink: 0;
   padding: $euiSizeXS;
   padding-left: 0;
   line-height: $euiLineHeight;
@@ -18,8 +17,4 @@
 .kbnDocViewer__multiFieldBadge {
   @include euiFont;
   margin: $euiSizeXS 0;
-}
-
-.kbnDocViewer__fieldPinned {
-  margin-right: $euiSizeS;
 }
