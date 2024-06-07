@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/i18n_tools/bin/run_i18n_check');
+import { i18n } from '@kbn/i18n';
+
+i18n.translate('extra_value_test_ts_call', {
+  defaultMessage: 'hey! there is an unused value here',
+  values: {
+    UNUSED_VALUE: '123',
+  },
+});

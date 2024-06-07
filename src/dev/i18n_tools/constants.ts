@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/i18n_tools/bin/run_i18n_check');
+export const DEFAULT_MESSAGE_KEY = 'defaultMessage';
+export const DESCRIPTION_KEY = 'description';
+export const VALUES_KEY = 'values';
+export const I18N_RC = '.i18nrc.json';

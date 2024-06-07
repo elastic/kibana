@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/i18n_tools/bin/run_i18n_check');
+i18n.translate('no_tag_here', {
+  defaultMessage: `Just a good ol' message`,
+  ignoreTag: true,
+});

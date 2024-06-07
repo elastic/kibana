@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/i18n_tools/bin/run_i18n_check');
+export { mergeConfigs } from './merge_configs';
+export { checkConfigs } from './check_configs';
+export { validateTranslationsTask } from './validate_translations';

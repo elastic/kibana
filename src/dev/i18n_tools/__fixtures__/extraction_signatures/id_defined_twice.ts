@@ -5,6 +5,3 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-require('../src/setup_node_env');
-require('../src/dev/i18n_tools/bin/run_i18n_check');

@@ -6,5 +6,13 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/i18n_tools/bin/run_i18n_check');
+import path from 'path';
+import normalize from 'normalize-path';
+
+export function normalizePath(inputPath: string) {
+  return normalize(path.relative('.', inputPath));
+}
+
+export function arrayify(subj: unknown) {
+  return Array.isArray(subj) ? subj : [subj];
+}
