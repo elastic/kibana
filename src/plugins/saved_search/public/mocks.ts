@@ -12,7 +12,6 @@ import { SearchSource } from '@kbn/data-plugin/public';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedSearchPublicPluginStart } from './plugin';
-import type { SavedSearchAttributeService } from './services/saved_searches';
 
 const createEmptySearchSource = jest.fn(() => {
   const deps = {
@@ -43,16 +42,8 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
     searchSource: createEmptySearchSource(),
   })),
   save: jest.fn(),
+  checkForDuplicateTitle: jest.fn(),
   byValue: {
-    attributeService: {
-      getInputAsRefType: jest.fn(),
-      getInputAsValueType: jest.fn(),
-      inputIsRefType: jest.fn(),
-      unwrapMethod: jest.fn(() => ({
-        attributes: { id: 'savedSearch', title: 'savedSearchTitle' },
-      })),
-      wrapAttributes: jest.fn(),
-    } as unknown as SavedSearchAttributeService,
     toSavedSearch: jest.fn((id, result) =>
       Promise.resolve({
         id,

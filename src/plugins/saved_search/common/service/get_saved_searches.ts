@@ -73,7 +73,7 @@ export const convertToSavedSearch = async (
     managed: boolean | undefined;
   },
   { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies,
-  serializable: boolean = false
+  serialized: boolean = false
 ) => {
   const parsedSearchSourceJSON = parseSearchSourceJSON(
     attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
@@ -89,7 +89,7 @@ export const convertToSavedSearch = async (
     ? savedObjectsTagging.ui.getTagIdsFromReferences(references)
     : undefined;
 
-  const searchSource = serializable
+  const searchSource = serialized
     ? searchSourceValues
     : await searchSourceCreate(searchSourceValues);
 
@@ -106,11 +106,14 @@ export const convertToSavedSearch = async (
   return returnVal;
 };
 
-export const getSavedSearch = async <Serialized extends boolean = boolean>(
+export const getSavedSearch = async <
+  Serialized extends boolean = boolean,
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+>(
   savedSearchId: string,
   deps: GetSavedSearchDependencies,
-  serialized: boolean = false
-): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {
+  serialized?: boolean
+): Promise<ReturnType> => {
   const so = await getSearchSavedObject(savedSearchId, deps);
   const savedSearch = await convertToSavedSearch(
     {
@@ -124,7 +127,7 @@ export const getSavedSearch = async <Serialized extends boolean = boolean>(
     serialized
   );
 
-  return savedSearch;
+  return savedSearch as ReturnType;
 };
 
 /**

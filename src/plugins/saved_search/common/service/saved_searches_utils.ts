@@ -11,6 +11,7 @@ import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
 import type { SavedSearch, SavedSearchAttributes } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
+import { SerializableSavedSearch } from '../types';
 
 export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '..';
 
@@ -22,7 +23,7 @@ export const fromSavedSearchAttributes = (
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
   managed: boolean
-): SavedSearch => ({
+): SavedSearch | SerializableSavedSearch => ({
   ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed),
   sharingSavedObjectProps,
   references,
