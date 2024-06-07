@@ -9,4 +9,3 @@
 export * from './components/alerts_grouping';
 export * from './contexts/alerts_grouping_context';
 export * from './types';
-export * from './hooks/use_persistent_controls';
