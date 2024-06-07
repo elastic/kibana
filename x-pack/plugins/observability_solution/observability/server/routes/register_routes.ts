@@ -17,6 +17,7 @@ import {
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ObservabilityConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { AlertDetailsContextualInsightsService } from '../services';
@@ -35,6 +36,7 @@ export interface RegisterRoutesDependencies {
   pluginsSetup: {
     core: CoreSetup;
   };
+  dataViews: DataViewsServerPluginStart;
   spaces?: SpacesPluginStart;
   ruleDataService: RuleDataPluginService;
   assistant: {
