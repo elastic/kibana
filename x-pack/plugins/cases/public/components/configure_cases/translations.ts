@@ -168,6 +168,6 @@ export const ADD_CUSTOM_FIELD = i18n.translate(
   }
 );
 
-export const CRATE_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.flyoutTitle', {
+export const CREATE_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.flyoutTitle', {
   defaultMessage: 'Create template',
 });

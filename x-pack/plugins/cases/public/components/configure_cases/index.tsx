@@ -454,7 +454,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         }
         onCloseFlyout={onCloseTemplateFlyout}
         onSaveField={onTemplateSave}
-        renderHeader={() => <span>{i18n.CRATE_TEMPLATE}</span>}
+        renderHeader={() => <span>{i18n.CREATE_TEMPLATE}</span>}
         renderBody={({ onChange }) => (
           <TemplateForm
             initialValue={templateToEdit as TemplateFormProps | null}

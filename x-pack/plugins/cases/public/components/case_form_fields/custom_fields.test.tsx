@@ -103,8 +103,6 @@ describe('CustomFields', () => {
   });
 
   it('should update the custom fields', async () => {
-    // appMockRender = createAppMockRenderer();
-
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields {...defaultProps} />
