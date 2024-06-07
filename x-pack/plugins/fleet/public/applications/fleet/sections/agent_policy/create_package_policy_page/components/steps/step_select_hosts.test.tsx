@@ -67,8 +67,8 @@ describe('StepSelectHosts', () => {
   const render = () =>
     (renderResult = testRenderer.render(
       <StepSelectHosts
-        agentPolicy={agentPolicy}
-        updateAgentPolicy={jest.fn()}
+        agentPolicies={[agentPolicy]}
+        updateAgentPolicies={jest.fn()}
         newAgentPolicy={newAgentPolicy}
         updateNewAgentPolicy={jest.fn()}
         withSysMonitoring={false}

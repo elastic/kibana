@@ -96,7 +96,7 @@ describe('StepDefinePackagePolicy', () => {
   const render = () =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
-        agentPolicy={agentPolicy}
+        agentPolicies={[agentPolicy]}
         packageInfo={packageInfo}
         packagePolicy={packagePolicy}
         updatePackagePolicy={mockUpdatePackagePolicy}
