@@ -55,7 +55,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
 
   // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
   const maskProps = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }),
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
     [euiTheme.levels.flyout]
   );
 
