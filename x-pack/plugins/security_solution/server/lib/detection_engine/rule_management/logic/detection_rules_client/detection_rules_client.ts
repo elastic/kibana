@@ -53,7 +53,7 @@ export const createDetectionRulesClient = (
   },
 
   async patchRule(args: PatchRuleArgs): Promise<RuleAlertType> {
-    return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
+    return withSecuritySpan('DetectionRulesClient.patchRule', async () => {
       return patchRule(rulesClient, args, mlAuthz);
     });
   },
