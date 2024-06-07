@@ -300,7 +300,7 @@ export const useColumns = (
       ['Doc count']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnDocCount',
         width: NARROW_COLUMN_WIDTH,
-        field: 'doc_count',
+        field: isGroupsTable ? 'docCount' : 'doc_count',
         name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountLabel', {
           defaultMessage: 'Doc count',
         }),
