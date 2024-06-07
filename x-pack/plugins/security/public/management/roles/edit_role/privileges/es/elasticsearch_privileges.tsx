@@ -120,8 +120,8 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
-                  id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterDataDescription"
-                  defaultMessage="Control access to the data in remote clusters. "
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterActionsDescription"
+                  defaultMessage="Manage the actions this role can perform against your remote cluster. "
                 />
                 {this.learnMore(docLinks.links.security.clusterPrivileges)}
               </p>
