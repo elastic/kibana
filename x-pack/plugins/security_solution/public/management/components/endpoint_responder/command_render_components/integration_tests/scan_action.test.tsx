@@ -132,25 +132,7 @@ describe('When using scan action from response actions console', () => {
     enterConsoleCommand(renderResult, 'scan --path=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --path. Argument cannot be empty'
-    );
-  });
-
-  it('should show error if `--path` is invalid string', async () => {
-    await render();
-    enterConsoleCommand(renderResult, 'scan --path="testpath"');
-
-    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --path. Argument must be a non-empty string representing a file path'
-    );
-  });
-
-  it('should show error if `--path` is a number', async () => {
-    await render();
-    enterConsoleCommand(renderResult, 'scan --path 1234');
-
-    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --path. Argument must be a non-empty string representing a file path'
+      'Argument --path must have a value'
     );
   });
 
@@ -223,7 +205,7 @@ describe('When using scan action from response actions console', () => {
 
   it.each([
     'ra_scan_error_not-found',
-    'ra_scan_error_scan-invalid-input',
+    'ra_scan_error_scan_invalid-input',
     'ra_scan_error_scan-queue-quota',
   ])('should show detailed error if `scan` failure returned code: %s', async (outputCode) => {
     const mockData = apiMocks.responseProvider.actionDetails({

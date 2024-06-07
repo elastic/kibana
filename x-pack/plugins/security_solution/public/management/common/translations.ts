@@ -201,7 +201,7 @@ export const CONSOLE_COMMANDS = {
         about: i18n.translate(
           'xpack.securitySolution.endpointConsoleCommands.scan.args.path.about',
           {
-            defaultMessage: 'The absolute path to be scanned',
+            defaultMessage: 'The absolute path to a file or directory to be scanned',
           }
         ),
       },

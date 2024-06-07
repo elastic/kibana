@@ -274,7 +274,7 @@ const CODES = Object.freeze({
   // SCAN CODES
   // -----------------------------------------------------------------
 
-  'ra_scan_error_scan-invalid-input': i18n.translate(
+  'ra_scan_error_scan_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.invalidInput',
     { defaultMessage: 'Invalid absolute file path provided' }
   ),

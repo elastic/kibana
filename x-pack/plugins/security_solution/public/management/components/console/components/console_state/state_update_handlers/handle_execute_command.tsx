@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
 import { executionTranslations } from './translations';
