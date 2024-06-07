@@ -157,9 +157,6 @@ elasticsearch.ignoreVersionMismatch: true
 # Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
 elasticsearch.maxSockets: 800
 
-# Enable dynamic config to be updated via the internal HTTP requests
-coreApp.allowDynamicConfigOverrides: true
-
 # Visualizations editors readonly settings
 vis_type_gauge.readOnly: true
 vis_type_heatmap.readOnly: true
