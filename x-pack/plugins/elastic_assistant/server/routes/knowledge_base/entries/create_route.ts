@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
@@ -18,12 +18,12 @@ import {
 } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/common_attributes.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../../helpers';
+import { performChecks } from '../../helpers';
 
 export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 
       options: {
@@ -32,7 +32,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(KnowledgeBaseEntryCreateProps),
@@ -43,21 +43,18 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         const assistantResponse = buildResponse(response);
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
-          }
 
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
+          // Perform license, authenticated user and FF checks
+          const checkResponse = performChecks({
+            authenticatedUser: true,
+            capability: 'assistantKnowledgeBaseByDefault',
+            context: ctx,
+            license: true,
+            request,
+            response,
+          });
+          if (checkResponse) {
+            return checkResponse;
           }
 
           return assistantResponse.error({

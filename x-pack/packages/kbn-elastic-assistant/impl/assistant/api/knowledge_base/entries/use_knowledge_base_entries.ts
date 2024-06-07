@@ -9,8 +9,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   API_VERSIONS,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
-  KnowledgeBaseEntryResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
 
@@ -18,10 +17,7 @@ import { useCallback } from 'react';
 
 export interface UseKnowledgeBaseEntriesParams {
   http: HttpSetup;
-  onFetch: (result: FindKnowledgeBaseEntriesResponse) => Record<string, KnowledgeBaseEntryResponse>;
   signal?: AbortSignal | undefined;
-  refetchOnWindowFocus?: boolean;
-  isAssistantEnabled: boolean;
 }
 
 /**
@@ -42,24 +38,18 @@ const query = {
 };
 
 export const KNOWLEDGE_BASE_ENTRY_QUERY_KEY = [
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   query.page,
   query.perPage,
   API_VERSIONS.internal.v1,
 ];
 
-export const useKnowledgeBaseEntries = ({
-  http,
-  onFetch,
-  signal,
-  refetchOnWindowFocus = true,
-  isAssistantEnabled,
-}: UseKnowledgeBaseEntriesParams) =>
+export const useKnowledgeBaseEntries = ({ http, signal }: UseKnowledgeBaseEntriesParams) =>
   useQuery(
     KNOWLEDGE_BASE_ENTRY_QUERY_KEY,
     async () =>
       http.fetch<FindKnowledgeBaseEntriesResponse>(
-        ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+        ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
         {
           method: 'GET',
           version: API_VERSIONS.internal.v1,
@@ -68,11 +58,8 @@ export const useKnowledgeBaseEntries = ({
         }
       ),
     {
-      select: (data) => onFetch(data),
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
-      refetchOnWindowFocus,
-      enabled: isAssistantEnabled,
     }
   );
 
