@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable, Subject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 import { Metrics } from '../metrics';
 
 export interface NodeMetrics {
@@ -68,20 +69,20 @@ export function metricsRoute(params: MetricsRouteParams) {
       req: KibanaRequest<unknown, TypeOf<typeof QuerySchema>, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
+      const metricsToReturn = lastMetrics
+        ? cloneDeep(lastMetrics)
+        : { process_uuid: taskManagerId, timestamp: new Date().toISOString(), metrics: {} };
       debugLogger.debug(
-        `/api/task_manager/metrics route accessed with reset=${req.query.reset} - metrics ${
-          lastMetrics ? JSON.stringify(lastMetrics) : 'not available'
-        }`
+        `/api/task_manager/metrics route accessed with reset=${
+          req.query.reset
+        } - metrics ${JSON.stringify(metricsToReturn)}`
       );
+
       if (req.query.reset) {
         resetMetrics$.next(true);
       }
 
-      return res.ok({
-        body: lastMetrics
-          ? lastMetrics
-          : { process_uuid: taskManagerId, timestamp: new Date().toISOString(), metrics: {} },
-      });
+      return res.ok({ body: metricsToReturn });
     }
   );
 }
