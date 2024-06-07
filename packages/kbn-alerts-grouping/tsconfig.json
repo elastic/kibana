@@ -21,10 +21,8 @@
     "@kbn/alerts-ui-shared",
     "@kbn/kibana-utils-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/core-ui-settings-browser",
     "@kbn/core-notifications-browser",
     "@kbn/data-views-plugin",
     "@kbn/core-http-browser",
-    "@kbn/data-plugin",
   ]
 }
