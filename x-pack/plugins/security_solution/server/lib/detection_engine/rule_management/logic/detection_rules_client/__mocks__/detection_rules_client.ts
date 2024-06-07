@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IDetectionRulesClient } from '../detection_rules_client';
+import type { IDetectionRulesClient } from '../detection_rules_client_interface';
 
 export type DetectionRulesClientMock = jest.Mocked<IDetectionRulesClient>;
 
