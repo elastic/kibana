@@ -615,10 +615,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           content={
             <FormattedMessage
               id="xpack.securitySolution.eventFilters.filterEntireProcessTree.tooltip"
-              defaultMessage={
-                `Filtering entire process tree means that events from the matched process are still ingested, ` +
-                `but the ones from its descendant processes will be omitted.`
-              }
+              defaultMessage="Filtering entire process tree means that events from the matched process are still ingested, but the ones from its descendant processes will be omitted."
             />
           }
           data-test-subj={getTestId('filterEntireProcessTreeTooltipText')}
@@ -645,10 +642,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.eventFilters.filterEntireProcessTree.details"
-                defaultMessage={
-                  `Select to omit events from the matched process' descendants, while ingesting the events ` +
-                  `coming from the matched process itself.`
-                }
+                defaultMessage="Select to omit events from the matched process' descendants, while ingesting the events coming from the matched process itself."
               />
             </p>
           </EuiText>
