@@ -2,36 +2,48 @@
 
 exports[`FieldName renders a custom description icon 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
-  >
-    <span
-      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
-    >
-      <span
-        data-euiicon-type="tokenString"
-        title="String"
-      >
-        String
-      </span>
-    </span>
-  </div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
-      data-test-subj="tableDocViewRow-test-name"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <span
-        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          test
+        <span
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+        >
+          <span
+            data-euiicon-type="tokenString"
+            title="String"
+          >
+            String
+          </span>
         </span>
-      </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        data-test-subj="tableDocViewRow-test-name"
+      >
+        <span
+          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span>
+            test
+          </span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -39,36 +51,48 @@ exports[`FieldName renders a custom description icon 1`] = `
 
 exports[`FieldName renders a geo field 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
-  >
-    <span
-      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis5"
-    >
-      <span
-        data-euiicon-type="tokenGeo"
-        title="Geo point"
-      >
-        Geo point
-      </span>
-    </span>
-  </div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
-      data-test-subj="tableDocViewRow-test.test.test-name"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <span
-        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          test.test.test
+        <span
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis5"
+        >
+          <span
+            data-euiicon-type="tokenGeo"
+            title="Geo point"
+          >
+            Geo point
+          </span>
         </span>
-      </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        data-test-subj="tableDocViewRow-test.test.test-name"
+      >
+        <span
+          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span>
+            test.test.test
+          </span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -76,36 +100,48 @@ exports[`FieldName renders a geo field 1`] = `
 
 exports[`FieldName renders a number field by providing a field record 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
-  >
-    <span
-      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
-    >
-      <span
-        data-euiicon-type="tokenNumber"
-        title="Number"
-      >
-        Number
-      </span>
-    </span>
-  </div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
-      data-test-subj="tableDocViewRow-test.test.test-name"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <span
-        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          test.test.test
+        <span
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+        >
+          <span
+            data-euiicon-type="tokenNumber"
+            title="Number"
+          >
+            Number
+          </span>
         </span>
-      </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        data-test-subj="tableDocViewRow-test.test.test-name"
+      >
+        <span
+          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span>
+            test.test.test
+          </span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -113,36 +149,48 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
 
 exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
-  >
-    <span
-      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
-    >
-      <span
-        data-euiicon-type="tokenString"
-        title="String"
-      >
-        String
-      </span>
-    </span>
-  </div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
-      data-test-subj="tableDocViewRow-test-name"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <span
-        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          test
+        <span
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+        >
+          <span
+            data-euiicon-type="tokenString"
+            title="String"
+          >
+            String
+          </span>
         </span>
-      </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        data-test-subj="tableDocViewRow-test-name"
+      >
+        <span
+          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span>
+            test
+          </span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -150,36 +198,48 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
 
 exports[`FieldName renders unknown field 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
-  >
-    <span
-      class="euiToken kbnFieldIcon emotion-euiToken-circle-light-s-gray"
-    >
-      <span
-        data-euiicon-type="questionInCircle"
-        title="Unknown field"
-      >
-        Unknown field
-      </span>
-    </span>
-  </div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
-      data-test-subj="tableDocViewRow-test.test.test-name"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <span
-        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          test.test.test
+        <span
+          class="euiToken kbnFieldIcon emotion-euiToken-circle-light-s-gray"
+        >
+          <span
+            data-euiicon-type="questionInCircle"
+            title="Unknown field"
+          >
+            Unknown field
+          </span>
         </span>
-      </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        data-test-subj="tableDocViewRow-test.test.test-name"
+      >
+        <span
+          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span>
+            test.test.test
+          </span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -187,36 +247,48 @@ exports[`FieldName renders unknown field 1`] = `
 
 exports[`FieldName renders when mapping is provided 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
-  >
-    <span
-      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
-    >
-      <span
-        data-euiicon-type="tokenNumber"
-        title="Number"
-      >
-        Number
-      </span>
-    </span>
-  </div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
-      data-test-subj="tableDocViewRow-test-name"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <span
-        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          bytes
+        <span
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+        >
+          <span
+            data-euiicon-type="tokenNumber"
+            title="Number"
+          >
+            Number
+          </span>
         </span>
-      </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        data-test-subj="tableDocViewRow-test-name"
+      >
+        <span
+          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span>
+            bytes
+          </span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -224,41 +296,53 @@ exports[`FieldName renders when mapping is provided 1`] = `
 
 exports[`FieldName renders with a search highlight 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-flexStart-row"
 >
   <div
-    class="euiFlexItem kbnDocViewer__fieldIcon emotion-euiFlexItem-growZero"
-  >
-    <span
-      class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
-    >
-      <span
-        data-euiicon-type="tokenNumber"
-        title="Number"
-      >
-        Number
-      </span>
-    </span>
-  </div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
-      data-test-subj="tableDocViewRow-test.test.test-name"
+      class="euiFlexGroup kbnDocViewer__fieldIconContainer emotion-euiFlexGroup-s-flexStart-center-row"
     >
-      <span
-        class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <span>
-          <mark
-            class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+        <span
+          class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+        >
+          <span
+            data-euiicon-type="tokenNumber"
+            title="Number"
           >
-            te
-          </mark>
-          st.test.test
+            Number
+          </span>
         </span>
-      </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-none-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem kbnDocViewer__fieldName eui-textBreakAll emotion-euiFlexItem-growZero"
+        data-test-subj="tableDocViewRow-test.test.test-name"
+      >
+        <span
+          class="euiToolTipAnchor eui-textBreakAll emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span>
+            <mark
+              class="euiMark emotion-euiMark-hasScreenReaderHelpText"
+            >
+              te
+            </mark>
+            st.test.test
+          </span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
