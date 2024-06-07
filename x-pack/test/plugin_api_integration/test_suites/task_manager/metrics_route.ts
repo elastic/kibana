@@ -47,10 +47,13 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   describe('task manager metrics', () => {
+    beforeEach(async () => {
+      // reset the metrics before each test
+      await getMetricsRequest(true);
+    });
+
     describe('task claim', () => {
       it('should increment task claim success/total counters', async () => {
-        // counters are reset every 30 seconds, so wait until the start of a
-        // fresh counter cycle to make sure values are incrementing
         const initialMetrics = (
           await getMetrics(false, (metrics) => metrics?.metrics?.task_claim?.value.total === 1)
         ).metrics;
@@ -88,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should reset task claim success/total counters at an interval', async () => {
-        const initialCounterValue = 7;
+        const initialCounterValue = 3;
         const initialMetrics = (
           await getMetrics(
             false,
@@ -109,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should reset task claim success/total counters on request', async () => {
-        const initialCounterValue = 1;
+        const initialCounterValue = 3;
         const initialMetrics = (
           await getMetrics(
             false,
@@ -120,29 +123,24 @@ export default function ({ getService }: FtrProviderContext) {
         expect(initialMetrics?.task_claim).not.to.be(null);
         expect(initialMetrics?.task_claim?.value).not.to.be(null);
 
-        let previousTaskClaimTimestamp: string = initialMetrics?.task_claim?.timestamp!;
+        // call the API with reset = true
+        // metrics returned should equal the initial metrics, then next call to the metrics
+        // should return 0 because they've been reset
+        let metrics = (await getMetricsRequest(true)).metrics;
+        expect(metrics).to.eql(initialMetrics);
 
-        for (let i = 0; i < 5; ++i) {
-          const metrics = (
-            await getMetrics(
-              true,
-              (m: NodeMetrics) => m.metrics?.task_claim?.timestamp !== previousTaskClaimTimestamp
-            )
-          ).metrics;
-          expect(metrics).not.to.be(null);
-          expect(metrics?.task_claim).not.to.be(null);
-          expect(metrics?.task_claim?.value).not.to.be(null);
+        metrics = (await getMetricsRequest(false)).metrics;
+        expect(metrics).not.to.be(null);
+        expect(metrics?.task_claim).not.to.be(null);
+        expect(metrics?.task_claim?.value).not.to.be(null);
 
-          expect(metrics?.task_claim?.value.success).to.equal(0);
-          expect(metrics?.task_claim?.value.total).to.equal(0);
+        expect(metrics?.task_claim?.value.success).to.equal(0);
+        expect(metrics?.task_claim?.value.total).to.equal(0);
 
-          previousTaskClaimTimestamp = metrics?.task_claim?.timestamp!;
-
-          // check that duration histogram exists
-          expect(metrics?.task_claim?.value.duration).not.to.be(null);
-          expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
-          expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
-        }
+        // check that duration histogram exists
+        expect(metrics?.task_claim?.value.duration).not.to.be(null);
+        expect(Array.isArray(metrics?.task_claim?.value.duration.counts)).to.be(true);
+        expect(Array.isArray(metrics?.task_claim?.value.duration.values)).to.be(true);
       });
     });
 
@@ -182,6 +180,11 @@ export default function ({ getService }: FtrProviderContext) {
           .then((response) => response.body);
 
         ruleId = rule.id;
+      });
+
+      beforeEach(async () => {
+        // reset the metrics before each test
+        await getMetricsRequest(true);
       });
 
       after(async () => {
@@ -264,10 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const metrics = (
-          await getMetrics(
-            false,
-            (m) => m?.metrics?.task_run?.value.overall.framework_errors! === 1
-          )
+          await getMetrics(true, (m) => m?.metrics?.task_run?.value.overall.framework_errors! === 1)
         ).metrics;
 
         const total = metrics?.task_run?.value.overall.total || 0;
@@ -305,13 +305,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const metrics = (
-          await getMetrics(false, (m) => m?.metrics?.task_run?.value.overall.user_errors! === 1)
+          await getMetrics(true, (m) => m?.metrics?.task_run?.value.overall.user_errors! === 1)
         ).metrics;
 
         const total = metrics?.task_run?.value.overall.total || 0;
         const success = metrics?.task_run?.value.overall.success || 0;
 
-        expect(total - success).to.be(2);
+        expect(total - success).to.be(1);
       });
     });
 
