@@ -8,6 +8,9 @@ import React from 'react';
 import { EuiPanel, EuiToolTip, type EuiPanelProps } from '@elastic/eui';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
+import { USER_MESSAGE_IDS } from '@kbn/lens-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { UserMessage } from '@kbn/lens-plugin/public/types';
 import { useLensAttributes, type UseLensAttributesParams } from '../../hooks/use_lens_attributes';
 import type { BaseChartProps } from './types';
 import type { TooltipContentProps } from './metric_explanation/tooltip_content';
@@ -70,6 +73,46 @@ export const LensChart = React.memo(
         onBrushEnd={onBrushEnd}
         searchSessionId={searchSessionId}
         onFilter={onFilter}
+        handleUserMessages={(messages) => {
+          return messages.reduce<{ filtered: UserMessage[]; ids: Set<string> }>(
+            (acc, m) => {
+              if (
+                m.displayLocations.find((d) => d.id === 'embeddableBadge') !== undefined &&
+                m.uniqueId === USER_MESSAGE_IDS.FIELD_NOT_FOUND &&
+                !acc.ids.has(USER_MESSAGE_IDS.FIELD_NOT_FOUND)
+                // we need something else to better identify those errors
+              ) {
+                acc.ids.add(USER_MESSAGE_IDS.FIELD_NOT_FOUND);
+                acc.filtered.push({
+                  ...m,
+                  severity: 'warning' as const,
+                  longMessage: (
+                    <p>
+                      <b>
+                        {i18n.translate('xpack.infra.lens.b.noResultsFoundLabel', {
+                          defaultMessage: 'No Results found',
+                        })}
+                      </b>
+                      <br />
+                      {i18n.translate('xpack.infra.lens.p.youCanShowTheLabel', {
+                        defaultMessage:
+                          'You can show the cpu by declaring metrics in your system integration',
+                      })}
+                      <br />
+                      <a>
+                        {i18n.translate('xpack.infra.lens.a.learnHowLabel', {
+                          defaultMessage: 'Learn how',
+                        })}
+                      </a>
+                    </p>
+                  ),
+                });
+              }
+              return acc;
+            },
+            { filtered: [], ids: new Set() }
+          ).filtered;
+        }}
       />
     );
     const content = !toolTip ? (
