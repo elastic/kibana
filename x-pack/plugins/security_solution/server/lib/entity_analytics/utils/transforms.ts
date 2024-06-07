@@ -14,7 +14,6 @@ import type {
   TransformPutTransformRequest,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { isEqual, get } from 'lodash/fp';
 import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
@@ -24,6 +23,7 @@ import {
   getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,
 } from '../../../../common/utils/risk_score_modules';
+import type { TransformOptions } from '../risk_score/configurations';
 import { getTransformOptions } from '../risk_score/configurations';
 
 export const getLegacyTransforms = async ({
@@ -202,13 +202,8 @@ export const scheduleLatestTransformNow = async ({
 /**
  * Whitelist the transform fields that we can update.
  */
-const UPDATED_TRANSFORM_PROPERTIES = ['sync', 'settings', 'frequency', 'dest', 'source.index'];
 
 const isTransformOutdated = (
   transform: TransformGetTransformTransformSummary,
-  newConfig: object
-): boolean => {
-  return UPDATED_TRANSFORM_PROPERTIES.some(
-    (key) => !isEqual(get(key, transform), get(key, newConfig))
-  );
-};
+  newConfig: TransformOptions
+): boolean => transform._meta?.version !== newConfig._meta?.version;
