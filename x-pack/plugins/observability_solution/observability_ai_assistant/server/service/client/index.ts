@@ -691,19 +691,16 @@ export class ObservabilityAIAssistantClient {
   };
 
   recall = async ({
-    userPrompt,
-    screenDescription,
+    queries,
     categories,
   }: {
-    userPrompt: string | undefined;
-    screenDescription: string;
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      userPrompt,
-      screenDescription,
+      queries,
       categories,
       asCurrentUser: this.dependencies.esClient.asCurrentUser,
       uiSettingsClient: this.dependencies.uiSettingsClient,

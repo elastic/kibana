@@ -70,9 +70,10 @@ export function registerContextFunction({
           messages.filter((message) => message.message.role === MessageRole.User)
         );
 
-        const userPrompt = userMessage?.message.content;
-        const suggestions = await retrieveSuggestions({ client, userPrompt, screenDescription });
+        const userPrompt = userMessage?.message.content!;
+        const queries = compact([{ text: userPrompt, boost: 3 }, { text: screenDescription }]);
 
+        const suggestions = await retrieveSuggestions({ client, queries });
         if (suggestions.length === 0) {
           return { content };
         }
@@ -140,17 +141,14 @@ export function registerContextFunction({
 }
 
 async function retrieveSuggestions({
-  userPrompt,
-  screenDescription,
+  queries,
   client,
 }: {
-  userPrompt: string | undefined;
-  screenDescription: string;
+  queries: Array<{ text: string; boost?: number }>;
   client: ObservabilityAIAssistantClient;
 }) {
   const recallResponse = await client.recall({
-    userPrompt,
-    screenDescription,
+    queries,
     categories: [],
   });
 

@@ -297,33 +297,21 @@ export class KnowledgeBaseService {
   };
 
   private async recallFromKnowledgeBase({
-    userPrompt,
-    screenDescription,
+    queries,
     categories,
     namespace,
     user,
     modelId,
   }: {
-    userPrompt: string | undefined;
-    screenDescription: string;
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     namespace: string;
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    function textExpansionFilter({
-      text,
-      boost = 1,
-    }: {
-      text: string | undefined;
-      boost?: number;
-    }) {
-      if (!text) {
-        return [];
-      }
-
-      return [
-        {
+    const query = {
+      bool: {
+        should: queries.map(({ text, boost = 1 }) => ({
           text_expansion: {
             'ml.tokens': {
               model_text: text,
@@ -331,16 +319,7 @@ export class KnowledgeBaseService {
               boost,
             },
           },
-        },
-      ];
-    }
-
-    const query = {
-      bool: {
-        should: [
-          ...textExpansionFilter({ text: userPrompt, boost: 3 }),
-          ...textExpansionFilter({ text: screenDescription }),
-        ],
+        })),
         filter: [
           ...getAccessQuery({
             user,
@@ -402,14 +381,12 @@ export class KnowledgeBaseService {
   }
 
   private async recallFromConnectors({
-    userPrompt,
-    screenDescription,
+    queries,
     asCurrentUser,
     uiSettingsClient,
     modelId,
   }: {
-    userPrompt: string | undefined;
-    screenDescription: string;
+    queries: Array<{ text: string; boost?: number }>;
     asCurrentUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
     modelId: string;
@@ -434,23 +411,12 @@ export class KnowledgeBaseService {
       return [];
     }
 
-    function textExpansionBoolFilter({
-      vectorField,
-      modelField,
-      text,
-      boost = 1,
-    }: {
-      vectorField: string;
-      modelField: string;
-      text: string | undefined;
-      boost?: number;
-    }) {
-      if (!text) {
-        return [];
-      }
+    const esQueries = fieldsWithVectors.flatMap((field) => {
+      const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
+      const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
 
-      return [
-        {
+      return queries.map(({ text, boost = 1 }) => {
+        return {
           bool: {
             should: [
               {
@@ -463,20 +429,16 @@ export class KnowledgeBaseService {
                 },
               },
             ],
-            filter: [{ term: { [modelField]: modelId } }],
+            filter: [
+              {
+                term: {
+                  [modelField]: modelId,
+                },
+              },
+            ],
           },
-        },
-      ];
-    }
-
-    const esQueries = fieldsWithVectors.flatMap((field) => {
-      const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
-      const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
-
-      return [
-        ...textExpansionBoolFilter({ vectorField, modelField, text: userPrompt, boost: 3 }),
-        ...textExpansionBoolFilter({ vectorField, modelField, text: screenDescription, boost: 1 }),
-      ];
+        };
+      });
     });
 
     const response = await asCurrentUser.search<unknown>({
@@ -504,15 +466,13 @@ export class KnowledgeBaseService {
 
   recall = async ({
     user,
-    userPrompt,
-    screenDescription,
+    queries,
     categories,
     namespace,
     asCurrentUser,
     uiSettingsClient,
   }: {
-    userPrompt: string | undefined;
-    screenDescription: string;
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     user?: { name: string };
     namespace: string;
@@ -521,16 +481,13 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    this.dependencies.logger.debug(
-      `Recalling entries from KB for user prompt: "${userPrompt}" and screen description: "${screenDescription}"`
-    );
+    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
-        userPrompt,
-        screenDescription,
+        queries,
         categories,
         namespace,
         modelId,
@@ -543,8 +500,7 @@ export class KnowledgeBaseService {
       this.recallFromConnectors({
         asCurrentUser,
         uiSettingsClient,
-        userPrompt,
-        screenDescription,
+        queries,
         modelId,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');
