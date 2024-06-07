@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { getViewModeSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ControlFactory } from '../types';
 import {
   TimesliderControlState,
@@ -31,6 +31,7 @@ import {
 } from './time_utils';
 import { initTimeRangePercentage } from './init_time_range_percentage';
 import './components/index.scss';
+import { TimeSliderPrepend } from './components/time_slider_prepend';
 
 export const getTimesliderControlFactory = (
   services: Services
@@ -79,6 +80,17 @@ export const getTimesliderControlFactory = (
               references: [],
             };
           },
+          getCustomPrepend: () => {
+            return (
+              <TimeSliderPrepend
+                onNext={() => {}}
+                onPrevious={() => {}}
+                viewModeSubject={getViewModeSubject(parentApi) ?? new BehaviorSubject('view')}
+                disablePlayButton={false}
+                setIsPopoverOpen={setIsPopoverOpen}
+              />
+            );
+          }
         },
         {
           ...defaultControlComparators,

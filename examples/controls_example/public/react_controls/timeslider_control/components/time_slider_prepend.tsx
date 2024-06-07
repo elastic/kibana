@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import { EuiButtonIcon } from '@elastic/eui';
+import React, { FC, useCallback, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';
 import { TimeSliderStrings } from './time_slider_strings';
+import { PlayButton } from './play_button';
+import { PublishingSubject, useBatchedPublishingSubjects, ViewMode } from '@kbn/presentation-publishing';
 
 interface Props {
   onNext: () => void;
   onPrevious: () => void;
   waitForControlOutputConsumersToLoad$?: Observable<void>;
-  viewMode: ViewMode;
+  viewModeSubject: PublishingSubject<ViewMode>;
   disablePlayButton: boolean;
   setIsPopoverOpen: (isPopoverOpen: boolean) => void;
 }
@@ -26,6 +27,9 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
+
+  const [viewMode] =
+    useBatchedPublishingSubjects(props.viewModeSubject);
 
   const playNextFrame = useCallback(() => {
     // advance to next frame
@@ -64,31 +68,6 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     }
   }, [props.setIsPopoverOpen, subscription, timeoutId]);
 
-  const PlayButton = useMemo(() => {
-    const Button = (
-      <EuiButtonIcon
-        className="timeSlider-playToggle"
-        onClick={isPaused ? onPlay : onPause}
-        disabled={props.disablePlayButton}
-        iconType={isPaused ? 'playFilled' : 'pause'}
-        size="s"
-        display="fill"
-        aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(isPaused)}
-      />
-    );
-    return (
-      <>
-        {props.disablePlayButton ? (
-          <EuiToolTip content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
-            {Button}
-          </EuiToolTip>
-        ) : (
-          Button
-        )}
-      </>
-    );
-  }, [isPaused, onPlay, onPause, props.disablePlayButton]);
-
   return (
     <div>
       <EuiButtonIcon
@@ -101,10 +80,14 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
         data-test-subj="timeSlider-previousTimeWindow"
       />
-      {props.waitForControlOutputConsumersToLoad$ === undefined ||
-      (props.disablePlayButton && props.viewMode === ViewMode.VIEW)
-        ? null
-        : PlayButton}
+      <PlayButton
+        onPlay={onPlay}
+        onPause={onPause}
+        waitForControlOutputConsumersToLoad$={props.waitForControlOutputConsumersToLoad$}
+        viewMode={viewMode}
+        disablePlayButton={props.disablePlayButton}
+        isPaused={isPaused}
+      />
       <EuiButtonIcon
         onClick={() => {
           onPause();
