@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ApplicationStart, ScopedHistory, OverlayStart, HttpStart } from '@kbn/core/public';
 
 const DEFAULT_BODY_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalText', {
-  defaultMessage: `You can't recover unsaved changes.`,
+  defaultMessage: `The data will be lost if you leave this page without saving the changes.`,
 });
 
 const DEFAULT_TITLE_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalTitle', {
@@ -20,11 +20,11 @@ const DEFAULT_TITLE_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalTitl
 });
 
 const DEFAULT_CANCEL_BUTTON = i18n.translate('unsavedChangesPrompt.defaultModalCancel', {
-  defaultMessage: 'Cancel',
+  defaultMessage: 'Leave page',
 });
 
 const DEFAULT_CONFIRM_BUTTON = i18n.translate('unsavedChangesPrompt.defaultModalConfirm', {
-  defaultMessage: 'Discard changes',
+  defaultMessage: 'Keep editing',
 });
 
 interface Props {
@@ -58,15 +58,14 @@ export const useUnsavedChangesPrompt = ({
 
     const unblock = history.block((state) => {
       async function confirmAsync() {
-        const confirmRes = await openConfirm(messageText, {
+        const stayInPage = await openConfirm(messageText, {
           title: titleText,
           cancelButtonText,
           confirmButtonText,
-          buttonColor: 'danger',
           'data-test-subj': 'navigationBlockConfirmModal',
         });
 
-        if (confirmRes) {
+        if (!stayInPage) {
           // Compute the URL we want to redirect to
           const url = http.basePath.prepend(state.pathname) + state.hash + state.search;
           // Unload history block
