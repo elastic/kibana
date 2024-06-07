@@ -54,3 +54,10 @@ export const MANUAL_RULE_RUN_FUTURE_TIME_RANGE_ERROR = i18n.translate(
     defaultMessage: 'Manual rule run cannot be scheduled for the future',
   }
 );
+
+export const MANUAL_RULE_RUN_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookback: number) =>
+  i18n.translate('xpack.securitySolution.manuelRuleRun.startDateIsOutOfRangeError', {
+    values: { maxDaysLookback },
+    defaultMessage:
+      'Manual rule run cannot be scheduled with the look back more than {maxDaysLookback, plural, =1 {# day} other {# days}}',
+  });

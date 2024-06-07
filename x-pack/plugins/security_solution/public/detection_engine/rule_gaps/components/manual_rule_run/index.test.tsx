@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { render } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import { ManualRuleRunModal } from '.';
-import { TestProviders } from '../../../../common/mock';
 
 describe('ManualRuleRunModal', () => {
   const onCancelMock = jest.fn();
@@ -31,24 +29,50 @@ describe('ManualRuleRunModal', () => {
   });
 
   it('should render confirmation button disabled if invalid time range has been selected', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
-      </TestProviders>
+    const wrapper = render(
+      <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
     );
 
-    expect(
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"] button').prop('disabled')
-    ).toBe(false);
+    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeEnabled();
 
-    wrapper
-      .find('[data-test-subj="end-date-picker"]')
-      .find('button.react-datepicker__navigation--previous')
-      .first()
-      .simulate('click');
+    within(wrapper.getByTestId('end-date-picker')).getByText('Previous Month').click();
 
-    expect(
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"] button').prop('disabled')
-    ).toBe(true);
+    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    expect(wrapper.getByTestId('manual-rule-run-time-range-form')).toHaveTextContent(
+      'Selected time range is invalid'
+    );
+  });
+
+  it('should render confirmation button disabled if selected start date is more than 90 days in the past', () => {
+    const wrapper = render(
+      <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
+    );
+
+    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+
+    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
+    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
+    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
+    within(wrapper.getByTestId('start-date-picker')).getByText('Previous Month').click();
+
+    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    expect(wrapper.getByTestId('manual-rule-run-time-range-form')).toHaveTextContent(
+      'Manual rule run cannot be scheduled with the look back more than 90 days'
+    );
+  });
+
+  it('should render confirmation button disabled if selected end date is in future', () => {
+    const wrapper = render(
+      <ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />
+    );
+
+    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeEnabled();
+
+    within(wrapper.getByTestId('end-date-picker')).getByText('Next month').click();
+
+    expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    expect(wrapper.getByTestId('manual-rule-run-time-range-form')).toHaveTextContent(
+      'Manual rule run cannot be scheduled for the future'
+    );
   });
 });

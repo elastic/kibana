@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Rule execution logic API', function () {
+  describe('Rule gaps API', function () {
     loadTestFile(require.resolve('./manual_rule_run'));
   });
 }

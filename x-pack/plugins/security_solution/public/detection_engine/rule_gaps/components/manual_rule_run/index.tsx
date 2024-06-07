@@ -23,6 +23,8 @@ import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common
 
 import * as i18n from './translations';
 
+export const MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS = 90;
+
 interface ManualRuleRunModalProps {
   onCancel: () => void;
   onConfirm: (timeRange: { startDate: moment.Moment; endDate: moment.Moment }) => void;
@@ -31,22 +33,33 @@ interface ManualRuleRunModalProps {
 const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const now = useMemo(() => moment(), []);
+  const now = moment();
 
-  const [startDate, setStartDate] = useState(now.clone().subtract(1, 'd'));
+  // By default we show three hours time range which user can then adjust
+  const [startDate, setStartDate] = useState(now.clone().subtract(3, 'h'));
   const [endDate, setEndDate] = useState(now.clone());
 
+  const isStartDayOutOfRange = now
+    .clone()
+    .subtract(MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS, 'd')
+    .isAfter(startDate);
   const isEndDateInFuture = endDate.isAfter(now);
-  const isInvalid = isEndDateInFuture || startDate.isSameOrAfter(endDate);
-  const errorMessage = useMemo(
-    () =>
-      isInvalid
-        ? isEndDateInFuture
-          ? i18n.MANUAL_RULE_RUN_FUTURE_TIME_RANGE_ERROR
-          : i18n.MANUAL_RULE_RUN_INVALID_TIME_RANGE_ERROR
-        : null,
-    [isEndDateInFuture, isInvalid]
-  );
+  const isInvalidTimeRange = startDate.isSameOrAfter(endDate);
+  const isInvalid = isStartDayOutOfRange || isEndDateInFuture || isInvalidTimeRange;
+  const errorMessage = useMemo(() => {
+    if (isStartDayOutOfRange) {
+      return i18n.MANUAL_RULE_RUN_START_DATE_OUT_OF_RANGE_ERROR(
+        MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS
+      );
+    }
+    if (isEndDateInFuture) {
+      return i18n.MANUAL_RULE_RUN_FUTURE_TIME_RANGE_ERROR;
+    }
+    if (isInvalidTimeRange) {
+      return i18n.MANUAL_RULE_RUN_INVALID_TIME_RANGE_ERROR;
+    }
+    return null;
+  }, [isEndDateInFuture, isInvalidTimeRange, isStartDayOutOfRange]);
 
   const handleConfirm = useCallback(() => {
     onConfirm({ startDate, endDate });
@@ -65,6 +78,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
       <EuiForm data-test-subj="manual-rule-run-modal-form">
         <EuiSpacer size="m" />
         <EuiFormRow
+          data-test-subj="manual-rule-run-time-range-form"
           label={
             <EuiFlexGroup>
               <EuiFlexItem>{i18n.MANUAL_RULE_RUN_TIME_RANGE_TITLE}</EuiFlexItem>

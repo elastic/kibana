@@ -8,6 +8,7 @@
 import expect from 'expect';
 
 import moment from 'moment';
+import { BackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, scheduleRuleRun } from '../../../utils';
 import {
@@ -41,6 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
+  // Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
   describe('@ess @serverless @skipInServerlessMKI manual_rule_run', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
@@ -74,8 +76,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(results.length).toBe(1);
-        expect((results[0] as any).start).toEqual(startDate.toISOString());
-        expect((results[0] as any).schedule).toEqual(
+        expect((results[0] as BackfillResponse).start).toEqual(startDate.toISOString());
+        expect((results[0] as BackfillResponse).schedule).toEqual(
           buildSchedule(startDate, endDate, intervalInMinutes)
         );
       });
@@ -279,6 +281,38 @@ export default ({ getService }: FtrProviderContext) => {
             }),
           ])
         );
+      });
+
+      it('should return bad request error when start date is more than 90 days in the past', async () => {
+        const intervalInMinutes = 25;
+        const interval = `${intervalInMinutes}m`;
+        const createdRule = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            interval,
+          })
+        );
+
+        const endDate = moment();
+        const startDate = endDate.clone().subtract(91, 'd');
+
+        const results = await scheduleRuleRun(
+          supertest,
+          [createdRule.id],
+          {
+            startDate,
+            endDate,
+          },
+          400
+        );
+
+        expect(results).toEqual({
+          error: 'Bad Request',
+          message: '[request body.0]: Backfill cannot look back more than 90 days',
+          statusCode: 400,
+        });
       });
 
       it('should return bad request error when end date is in future', async () => {
