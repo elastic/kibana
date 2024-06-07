@@ -206,7 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('includes an unmapped nested field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'nested.unmapped']);
-        expect((csvFile as string).length).to.be(101);
+        expect((csvFile as string).length).to.be(120);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 

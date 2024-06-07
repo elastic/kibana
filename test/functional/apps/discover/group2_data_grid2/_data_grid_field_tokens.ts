@@ -106,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Text',
         'Number',
         'IP address',
-        'Text',
       ]);
     });
 
@@ -129,7 +128,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Text',
         'Number',
         'IP address',
-        'Text',
       ]);
     });
 

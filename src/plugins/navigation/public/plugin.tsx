@@ -158,7 +158,7 @@ export class NavigationPublicPlugin
   ) {
     // Here we will read the space state and decide if we are in classic or project style
     const mockSpaceState: { solutionView?: 'classic' | 'es' | 'oblt' | 'security' } = {
-      solutionView: 'security', // Change this value to test different solution views
+      solutionView: 'oblt', // Change this value to test different solution views
     };
 
     const isProjectNav =
