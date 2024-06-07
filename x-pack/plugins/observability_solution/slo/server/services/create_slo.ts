@@ -89,7 +89,7 @@ export class CreateSLO {
     return this.toResponse(slo);
   }
 
-  public inspect(params: CreateSLOParams): {
+  public async inspect(params: CreateSLOParams): Promise<{
     slo: CreateSLOParams;
     pipeline: Record<string, any>;
     rollUpTransform: TransformPutTransformRequest;
@@ -97,13 +97,13 @@ export class CreateSLO {
     temporaryDoc: Record<string, any>;
     rollUpTransformCompositeQuery: string;
     summaryTransformCompositeQuery: string;
-  } {
+  }> {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    const rollUpTransform = this.transformManager.inspect(slo);
+    const rollUpTransform = await this.transformManager.inspect(slo);
     const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
-    const summaryTransform = this.summaryTransformManager.inspect(slo);
+    const summaryTransform = await this.summaryTransformManager.inspect(slo);
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
     return {
