@@ -162,19 +162,20 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
   data,
   query,
 }: ValueClickDataContext) => {
-  let queryWithFilter: string | undefined;
   if (!query) {
     return;
   }
   // Do not append in case of time series, for now. We need to find a way to compute the interval
   // to create the time range filter correctly. The users can brush to update the time filter instead.
-  const metricPoints = data.filter(
-    (point) => point && point.table?.columns?.[point.column].meta?.type !== 'date'
-  );
-  if (!metricPoints.length) {
+  const dataPoints = data.filter((point) => {
+    return point && point.table?.columns?.[point.column]?.meta?.type !== 'date';
+  });
+
+  if (!dataPoints.length) {
     return;
   }
-  const { table, column: columnIndex, row: rowIndex } = metricPoints[metricPoints.length - 1];
+  const { table, column: columnIndex, row: rowIndex } = dataPoints[dataPoints.length - 1];
+
   if (table && table.columns && table.columns[columnIndex]) {
     const column = table.columns[columnIndex];
     const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
@@ -183,6 +184,4 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
     }
     return appendWhereClauseToESQLQuery(query.esql, column.name, value, '+', column.meta?.type);
   }
-
-  return queryWithFilter;
 };
