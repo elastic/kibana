@@ -28,7 +28,7 @@ export class TypeRegistry<T extends BaseObjectType> {
   public register(objectType: T) {
     if (this.has(objectType.id)) {
       throw new Error(
-        i18n.translate('alertsUiShared.typeRegistry.register.duplicateObjectTypeErrorMessage', {
+        i18n.translate('alertsUIShared.typeRegistry.register.duplicateObjectTypeErrorMessage', {
           defaultMessage: 'Object type "{id}" is already registered.',
           values: {
             id: objectType.id,
@@ -45,7 +45,7 @@ export class TypeRegistry<T extends BaseObjectType> {
   public get(id: string): T {
     if (!this.has(id)) {
       throw new Error(
-        i18n.translate('alertsUiShared.typeRegistry.get.missingActionTypeErrorMessage', {
+        i18n.translate('alertsUIShared.typeRegistry.get.missingActionTypeErrorMessage', {
           defaultMessage: 'Object type "{id}" is not registered.',
           values: {
             id,
