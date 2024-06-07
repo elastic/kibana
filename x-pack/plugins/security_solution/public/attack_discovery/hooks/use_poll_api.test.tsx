@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { attackDiscoveryStatus, usePollApi } from './use_poll_api';
 import moment from 'moment/moment';
+import { kibanaMock } from '../../common/mock';
 
 const http: HttpSetupMock = coreMock.createSetup().http;
 const setApproximateFutureTime = jest.fn();
@@ -146,17 +147,21 @@ describe('usePollApi', () => {
     expect(setTimeout).toHaveBeenCalledTimes(3);
   });
   test('When no connectorId and pollApi is called, should update status and data to null on error and show toast', async () => {
-    const mockToasts = { addDanger: jest.fn() };
+    const addDangerMock = jest.spyOn(kibanaMock.notifications.toasts, 'addDanger');
     const { result } = renderHook(() =>
-      usePollApi({ http, setApproximateFutureTime: () => {}, toasts: mockToasts })
+      usePollApi({
+        http,
+        setApproximateFutureTime: () => {},
+        toasts: kibanaMock.notifications.toasts,
+      })
     );
 
     await result.current.pollApi();
 
     expect(result.current.status).toBeNull();
     expect(result.current.data).toBeNull();
-    expect(mockToasts.addDanger).toHaveBeenCalledTimes(1);
-    expect(mockToasts.addDanger).toHaveBeenCalledWith(new Error('Invalid connector id'), {
+    expect(addDangerMock).toHaveBeenCalledTimes(1);
+    expect(addDangerMock).toHaveBeenCalledWith(new Error('Invalid connector id'), {
       text: 'Invalid connector id',
       title: 'Error generating attack discoveries',
     });
