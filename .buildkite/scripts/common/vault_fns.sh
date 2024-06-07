@@ -88,10 +88,19 @@ function get_vault_secret_id() {
 }
 
 function with_legacy_vault() {
+    VAULT_ADDR_SAVED="$VAULT_ADDR"
+
+    export VAULT_ADDR="$LEGACY_VAULT_ADDR"
     VAULT_ROLE_ID="$(get_vault_role_id)"
     VAULT_SECRET_ID="$(get_vault_secret_id)"
-    VAULT_TOKEN=$(retry 5 30 VAULT_ADDR="$LEGACY_VAULT_ADDR" vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    retry 5 30 "VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print $VAULT_TOKEN"
+    VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+    retry 5 30 vault login -no-print "$VAULT_TOKEN"
 
-    VAULT_ADDR="$LEGACY_VAULT_ADDR" "$@"
+    set +e
+    "$@"
+    EXIT_CODE=$?
+    set -e
+
+    export VAULT_ADDR="$VAULT_ADDR_SAVED"
+    return $EXIT_CODE
 }
