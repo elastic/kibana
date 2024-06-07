@@ -240,6 +240,6 @@ export function createUninstallTokenServiceMock(): UninstallTokenServiceInterfac
     encryptTokens: jest.fn(),
     checkTokenValidityForAllPolicies: jest.fn(),
     checkTokenValidityForPolicy: jest.fn(),
-    scoped: jest.fn().mockReturnValue(createUninstallTokenServiceMock()),
+    scoped: jest.fn().mockImplementation(() => createUninstallTokenServiceMock()),
   };
 }
