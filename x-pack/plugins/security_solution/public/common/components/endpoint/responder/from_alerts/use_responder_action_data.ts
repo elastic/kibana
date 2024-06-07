@@ -115,11 +115,15 @@ type ResponderDataForEndpointHost = Omit<ResponderActionData, 'handleResponseAct
  * Hook to specifically for the responder data for Elastic Defend endpoints
  * @param endpointAgentId
  * @param enabled
+ *
+ * @private
  */
 const useResponderDataForEndpointHost = (
   endpointAgentId: string,
   enabled: boolean = true
 ): ResponderDataForEndpointHost => {
+  // FIXME:PT is this the correct API to call? or should we call the agent status api instead
+
   const {
     data: endpointHostInfo,
     isFetching,
