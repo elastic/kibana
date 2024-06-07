@@ -429,7 +429,6 @@ export class DiscoverPlugin
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     injectTruncateStyles(core.uiSettings.get(TRUNCATE_MAX_HEIGHT));
 
-    const getDiscoverServicesInternal = () => this.getDiscoverServices(core, plugins);
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
     if (plugins.share && this.locator && isEsqlEnabled) {
@@ -440,6 +439,10 @@ export class DiscoverPlugin
         })
       );
     }
+
+    const getDiscoverServicesInternal = () => {
+      return this.getDiscoverServices(core, plugins, this.createEmptyProfilesManager());
+    };
 
     return {
       locator: this.locator,
@@ -470,7 +473,19 @@ export class DiscoverPlugin
     );
   }
 
-  private getDiscoverServices = (core: CoreStart, plugins: DiscoverStartPlugins) => {
+  private createEmptyProfilesManager() {
+    return new ProfilesManager(
+      new RootProfileService(),
+      new DataSourceProfileService(),
+      new DocumentProfileService()
+    );
+  }
+
+  private getDiscoverServices = (
+    core: CoreStart,
+    plugins: DiscoverStartPlugins,
+    profilesManager = this.createProfilesManager()
+  ) => {
     return buildServices({
       core,
       plugins,
@@ -480,7 +495,7 @@ export class DiscoverPlugin
       singleDocLocator: this.singleDocLocator!,
       history: this.historyService.getHistory(),
       urlTracker: this.urlTracker!,
-      profilesManager: this.createProfilesManager(),
+      profilesManager,
     });
   };
 
