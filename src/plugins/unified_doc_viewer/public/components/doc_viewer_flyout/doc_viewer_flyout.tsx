@@ -240,7 +240,7 @@ export function UnifiedDocViewerFlyout({
         type={flyoutType ?? 'push'}
         size={flyoutWidth}
         pushMinBreakpoint="xl"
-        data-test-subj={dataTestSubj ?? 'docTableDetailsFlyout'}
+        data-test-subj={dataTestSubj ?? 'docViewerFlyout'}
         onKeyDown={onKeyDown}
         ownFocus={true}
         minWidth={minWidth}
@@ -262,7 +262,7 @@ export function UnifiedDocViewerFlyout({
             <EuiFlexItem grow={false}>
               <EuiTitle
                 size="xs"
-                data-test-subj="docTableRowDetailsTitle"
+                data-test-subj="docViewerRowDetailsTitle"
                 css={css`
                   white-space: nowrap;
                 `}
@@ -271,7 +271,7 @@ export function UnifiedDocViewerFlyout({
               </EuiTitle>
             </EuiFlexItem>
             {activePage !== -1 && (
-              <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
+              <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
                 <EuiPagination
                   aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
                     defaultMessage: 'Document navigation',
@@ -280,7 +280,7 @@ export function UnifiedDocViewerFlyout({
                   activePage={activePage}
                   onPageClick={setPage}
                   compressed
-                  data-test-subj="dscDocNavigation"
+                  data-test-subj="docViewerFlyoutNavigation"
                 />
               </EuiFlexItem>
             )}

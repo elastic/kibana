@@ -268,7 +268,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
-    return await this.testSubjects.findAll('docTableDetailsFlyout');
+    return await this.testSubjects.findAll('docViewerFlyout');
   }
 
   public async closeFlyout() {

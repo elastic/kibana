@@ -156,13 +156,13 @@ describe('Discover flyout', function () {
 
   it('displays document navigation when there is more than 1 doc available', async () => {
     const { component } = await mountComponent({ dataView: dataViewWithTimefieldMock });
-    const docNav = findTestSubject(component, 'dscDocNavigation');
+    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
     expect(docNav.length).toBeTruthy();
   });
 
   it('displays no document navigation when there are 0 docs available', async () => {
     const { component } = await mountComponent({ hits: [] });
-    const docNav = findTestSubject(component, 'dscDocNavigation');
+    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
     expect(docNav.length).toBeFalsy();
   });
 
@@ -185,7 +185,7 @@ describe('Discover flyout', function () {
       },
     ].map((hit) => buildDataTableRecord(hit, dataViewMock));
     const { component } = await mountComponent({ hits });
-    const docNav = findTestSubject(component, 'dscDocNavigation');
+    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
     expect(docNav.length).toBeFalsy();
   });
 
@@ -221,19 +221,19 @@ describe('Discover flyout', function () {
 
   it('allows navigating with arrow keys through documents', async () => {
     const { component, props } = await mountComponent({});
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowRight' });
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::2::' }));
     component.setProps({ ...props, hit: props.hits[1] });
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowLeft' });
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::1::' }));
   });
 
   it('should not navigate with keypresses when already at the border of documents', async () => {
     const { component, props } = await mountComponent({});
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowLeft' });
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
     component.setProps({ ...props, hit: props.hits[props.hits.length - 1] });
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowRight' });
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 
@@ -258,7 +258,7 @@ describe('Discover flyout', function () {
     });
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
-    const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
+    const flyoutTitle = findTestSubject(component, 'docViewerRowDetailsTitle');
     expect(flyoutTitle.text()).toBe('Result');
   });
 
@@ -270,7 +270,7 @@ describe('Discover flyout', function () {
 
         const { component } = await mountComponent({});
 
-        const titleNode = findTestSubject(component, 'docTableRowDetailsTitle');
+        const titleNode = findTestSubject(component, 'docViewerRowDetailsTitle');
 
         expect(titleNode.text()).toBe(customTitle);
       });

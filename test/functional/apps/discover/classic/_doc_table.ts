@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
             const detailsEl = await docTable.getDetailsRows();
             const defaultMessageEl = await detailsEl[0].findByTestSubject(
-              'docTableRowDetailsTitle'
+              'docViewerRowDetailsTitle'
             );
             expect(defaultMessageEl).to.be.ok();
           });
@@ -187,14 +187,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
             const detailsEl = await docTable.getDetailsRows();
             const defaultMessageEl = await detailsEl[0].findByTestSubject(
-              'docTableRowDetailsTitle'
+              'docViewerRowDetailsTitle'
             );
             expect(defaultMessageEl).to.be.ok();
             await queryBar.submitQuery();
             const nrOfFetchesResubmit = await PageObjects.discover.getNrOfFetches();
             expect(nrOfFetchesResubmit).to.be.above(nrOfFetches);
             const defaultMessageElResubmit = await detailsEl[0].findByTestSubject(
-              'docTableRowDetailsTitle'
+              'docViewerRowDetailsTitle'
             );
 
             expect(defaultMessageElResubmit).to.be.ok();

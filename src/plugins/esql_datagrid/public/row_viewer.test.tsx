@@ -106,14 +106,14 @@ describe('RowViewer', () => {
       },
     } as unknown as DataTableRecord);
     await waitFor(() => {
-      expect(screen.getByTestId('dscDocNavigation')).toBeInTheDocument();
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
     });
   });
 
   it('doesnt display row navigation when there is only 1 row available', async () => {
     renderComponent();
     await waitFor(() => {
-      expect(screen.queryByTestId('dscDocNavigation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
     });
   });
 });

@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let fieldTokens: string[] | undefined = [];
     await retry.try(async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      fieldTokens = await findFirstFieldIcons('docTableDetailsFlyout');
+      fieldTokens = await findFirstFieldIcons('docViewerFlyout');
     });
     return fieldTokens;
   }
