@@ -75,7 +75,20 @@ export const EnabledFeatures: FunctionComponent<Props> = (props) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <FeatureTable features={props.features} space={props.space} onChange={props.onChange} />
+          <FeatureTable
+            features={props.features}
+            space={props.space}
+            onChange={props.onChange}
+            headerText={
+              <EuiText size="xs">
+                <b>
+                  {i18n.translate('xpack.spaces.management.featureVisibilityTitle', {
+                    defaultMessage: 'Feature visibility',
+                  })}
+                </b>
+              </EuiText>
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SectionPanel>

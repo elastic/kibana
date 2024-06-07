@@ -31,6 +31,7 @@ import type { Space } from '../../../../common';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 
 interface Props {
+  headerText?: JSX.Element;
   space: Partial<Space>;
   features: KibanaFeatureConfig[];
   onChange?: (space: Partial<Space>) => void;
@@ -222,15 +223,7 @@ export class FeatureTable extends Component<Props, {}> {
     return (
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiText size="xs">
-              <b>
-                {i18n.translate('xpack.spaces.management.featureVisibilityTitle', {
-                  defaultMessage: 'Feature visibility',
-                })}
-              </b>
-            </EuiText>
-          </EuiFlexItem>
+          <EuiFlexItem>{this.props.headerText}</EuiFlexItem>
           {controls.map((control, idx) => (
             <EuiFlexItem grow={false} key={idx}>
               {control}
