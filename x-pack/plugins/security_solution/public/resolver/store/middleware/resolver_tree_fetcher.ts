@@ -84,7 +84,7 @@ export function ResolverTreeFetcher(
 
         databaseParameters = {
           ...databaseParameters,
-          agentId: dataSourceAgentId,
+          agentId: dataSourceAgentId ?? '',
         };
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
@@ -93,7 +93,7 @@ export function ResolverTreeFetcher(
           indices: databaseParameters.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),
-          agentId: dataSourceAgentId,
+          agentId: databaseParameters.agentId,
         });
 
         const resolverTree: NewResolverTree = {
@@ -108,7 +108,7 @@ export function ResolverTreeFetcher(
             indices: databaseParameters.indices,
             ancestors: ancestorsRequestAmount(dataSourceSchema),
             descendants: descendantsRequestAmount(),
-            agentId: dataSourceAgentId,
+            agentId: databaseParameters.agentId,
           });
           if (unboundedTree.length > 0) {
             const timestamps = unboundedTree

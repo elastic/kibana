@@ -83,7 +83,6 @@ export const getSupportedSchemas = (
         id: 'process.entity_id',
         parent: 'process.parent.entity_id',
         name: 'process.name',
-        agentId: 'agent.id',
       },
     },
     {
@@ -102,7 +101,6 @@ export const getSupportedSchemas = (
         id: 'process.entity_id',
         parent: 'process.parent.entity_id',
         name: 'process.name',
-        agentId: 'agent.id',
       },
     },
     {
@@ -121,7 +119,6 @@ export const getSupportedSchemas = (
         id: 'process.entity_id',
         parent: 'process.parent.entity_id',
         name: 'process.name',
-        agentId: 'agent.id',
       },
     },
   ];

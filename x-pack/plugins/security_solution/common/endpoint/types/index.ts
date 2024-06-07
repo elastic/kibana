@@ -867,9 +867,9 @@ export interface ResolverSchema {
   parent: string;
 
   /**
-   * agent id is required because entity_id might not include agent.id soon
+   * agent id is required for endpoint because entity_id might not include agent.id soon
    */
-  agentId: string;
+  agentId?: string;
 }
 
 /**
@@ -891,9 +891,9 @@ export type ResolverEntityIndex = Array<{
   id: string;
 
   /**
-   * Agent id is required because entity_id might not include agent.id soon
+   * Agent id is required for endpoint because entity_id might not include agent.id soon
    */
-  agentId: string;
+  agentId?: string;
 }>;
 
 /**

@@ -400,7 +400,7 @@ export class TelemetryTimelineFetcher {
       entities[0].schema,
       this.timeFrame.startOfDay,
       this.timeFrame.endOfDay,
-      entities[0].agentId
+      entities[0].agentId || ''
     );
 
     const nodeIds = Array.isArray(tree) ? tree.map((node) => node?.id.toString()) : [];
