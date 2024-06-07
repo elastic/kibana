@@ -10,6 +10,11 @@ import type {
   TransformGetTransformStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../common/entity_analytics/risk_engine';
+import { getTransformOptions } from '../risk_score/configurations';
 import { scheduleLatestTransformNow, scheduleTransformNow } from './transforms';
 
 const transformId = 'test_transform_id';
@@ -34,19 +39,19 @@ const stoppedTransformsMock = {
   ],
 } as TransformGetTransformStatsResponse;
 
+const latestIndex = getRiskScoreLatestIndex('tests');
+const timeSeriesIndex = getRiskScoreTimeSeriesIndex('tests');
+const transformConfig = getTransformOptions({
+  dest: latestIndex,
+  source: [timeSeriesIndex],
+});
+
 const updatedTransformsMock = {
   count: 1,
   transforms: [
     {
       id: 'test_transform_id_3',
-      sync: {
-        time: {
-          delay: '0s',
-        },
-      },
-      settings: {
-        unattended: true,
-      },
+      ...transformConfig,
     },
   ],
 } as TransformGetTransformResponse;

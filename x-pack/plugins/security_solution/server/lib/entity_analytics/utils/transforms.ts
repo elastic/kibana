@@ -119,7 +119,7 @@ export const scheduleTransformNow = async ({
 }: {
   esClient: ElasticsearchClient;
   transformId: string;
-}): Promise<TransformStartTransformResponse | void> => {
+}): Promise<void> => {
   const transformStats = await esClient.transform.getTransformStats({
     transform_id: transformId,
   });
