@@ -42,7 +42,7 @@ import {
   LAST_SEEN,
   HOST_RISK_LEVEL,
 } from '../../../../overview/components/host_overview/translations';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+// import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
@@ -51,10 +51,11 @@ import {
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
+// import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+// import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { HostPanelKey } from '../../../entity_details/host_right';
+import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
 
 const HOST_ICON = 'storage';
 
@@ -69,20 +70,37 @@ export interface HostEntityOverviewProps {
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openFlyout, openLeftPanel } = useExpandableFlyoutApi();
+  const { scopeId } = useRightPanelContext();
+  const { openFlyout, openPreviewPanel } = useExpandableFlyoutApi();
 
-  const goToEntitiesTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
+  // const goToEntitiesTab = useCallback(() => {
+  //   openLeftPanel({
+  //     id: DocumentDetailsLeftPanelKey,
+  //     path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
+  //     params: {
+  //       id: eventId,
+  //       indexName,
+  //       scopeId,
+  //     },
+  //   });
+  // }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  const goToHostPreview = useCallback(() => {
+    openPreviewPanel({
+      id: HostPreviewPanelKey,
       params: {
-        id: eventId,
-        indexName,
+        hostName,
         scopeId,
+        banner: {
+          title: i18n.translate('xpack.securitySolution.flyout.right.host.hostPreviewTitle', {
+            defaultMessage: 'Preview host',
+          }),
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
       },
     });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  }, [openPreviewPanel, hostName, scopeId]);
 
   const goToHostFlyout = useCallback(() => {
     openFlyout({
@@ -215,7 +233,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
                 font-size: ${xsFontSize};
                 font-weight: ${euiTheme.font.weight.bold};
               `}
-              onClick={goToEntitiesTab}
+              onClick={goToHostPreview}
             >
               {hostName}
             </EuiLink>

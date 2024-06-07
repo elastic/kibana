@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+// import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
+import { i18n } from '@kbn/i18n';
 import {
   EuiTitle,
   EuiSpacer,
@@ -18,39 +19,45 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiPanel,
+  EuiButtonIcon,
+  EuiLink,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { UserOverview } from '../../../../overview/components/user_overview';
-import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+// import { UserOverview } from '../../../../overview/components/user_overview';
+// import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { CellActions } from './cell_actions';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
+// import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
+// import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
+// import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+// import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+// import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { HostPanelKey } from '../../../entity_details/host_right';
+import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
 
-const USER_DETAILS_ID = 'entities-users-details';
+// const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
 
-const UserOverviewManage = manageQuery(UserOverview);
+// const UserOverviewManage = manageQuery(UserOverview);
 const RelatedHostsManage = manageQuery(InspectButtonContainer);
 
 export interface UserDetailsProps {
@@ -72,39 +79,56 @@ export interface UserDetailsProps {
  * User details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
 export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, scopeId }) => {
-  const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
+  const { deleteQuery, setQuery } = useGlobalTime();
+  // const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
-  const dispatch = useDispatch();
-  // create a unique, but stable (across re-renders) query id
-  const userDetailsQueryId = useMemo(() => `${USER_DETAILS_ID}-${uuid()}`, []);
+  // const dispatch = useDispatch();
+  // // create a unique, but stable (across re-renders) query id
+  // const userDetailsQueryId = useMemo(() => `${USER_DETAILS_ID}-${uuid()}`, []);
   const relatedHostsQueryId = useMemo(() => `${RELATED_HOSTS_ID}-${uuid()}`, []);
 
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
+  const { openFlyout, openPreviewPanel } = useExpandableFlyoutApi();
+  // const narrowDateRange = useCallback(
+  //   (score, interval) => {
+  //     const fromTo = scoreIntervalToDateTime(score, interval);
+  //     dispatch(
+  //       setAbsoluteRangeDatePicker({
+  //         id: InputsModelId.global,
+  //         from: fromTo.from,
+  //         to: fromTo.to,
+  //       })
+  //     );
+  //   },
+  //   [dispatch]
+  // );
 
-  const narrowDateRange = useCallback(
-    (score, interval) => {
-      const fromTo = scoreIntervalToDateTime(score, interval);
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: fromTo.from,
-          to: fromTo.to,
-        })
-      );
-    },
-    [dispatch]
-  );
-
-  const [isUserLoading, { inspect, userDetails, refetch }] = useObservedUserDetails({
-    id: userDetailsQueryId,
-    startDate: from,
-    endDate: to,
-    userName,
-    indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0,
-  });
+  // const [isUserLoading, { inspect, userDetails, refetch }] = useObservedUserDetails({
+  //   id: userDetailsQueryId,
+  //   startDate: from,
+  //   endDate: to,
+  //   userName,
+  //   indexNames: selectedPatterns,
+  //   skip: selectedPatterns.length === 0,
+  // });
+  const goToUserPreview = useCallback(() => {
+    openPreviewPanel({
+      id: UserPreviewPanelKey,
+      params: {
+        userName,
+        scopeId,
+        banner: {
+          title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
+            defaultMessage: 'Preview user',
+          }),
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
+      },
+    });
+  }, [openPreviewPanel, userName, scopeId]);
 
   const {
     loading: isRelatedHostLoading,
@@ -123,16 +147,65 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
     () => [
       {
         field: 'host',
+        width: '15%',
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsActionColumnLabel"
+            defaultMessage="Action"
+          />
+        ),
+        render: (hostName: string) => (
+          <EuiButtonIcon
+            iconType={'expand'}
+            onClick={() => {
+              openFlyout({
+                right: {
+                  id: HostPanelKey,
+                  title: hostName,
+                  params: {
+                    hostName,
+                    scopeId,
+                  },
+                },
+              });
+            }}
+          />
+        ),
+      },
+      {
+        field: 'host',
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsNameColumnLabel"
             defaultMessage="Name"
           />
         ),
-        render: (host: string) => (
+        render: (hostName: string) => (
           <EuiText grow={false} size="xs">
-            <CellActions field={'host.name'} value={host}>
-              {host}
+            <CellActions field={'host.name'} value={hostName}>
+              <EuiLink
+                onClick={() =>
+                  openPreviewPanel({
+                    id: HostPreviewPanelKey,
+                    params: {
+                      hostName,
+                      scopeId,
+                      banner: {
+                        title: i18n.translate(
+                          'xpack.securitySolution.flyout.right.host.hostPreviewTitle',
+                          {
+                            defaultMessage: 'Preview host',
+                          }
+                        ),
+                        backgroundColor: 'warning',
+                        textColor: 'warning',
+                      },
+                    },
+                  })
+                }
+              >
+                {hostName}
+              </EuiLink>
             </CellActions>
           </EuiText>
         ),
@@ -176,7 +249,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId]
+    [isEntityAnalyticsAuthorized, scopeId, openFlyout, openPreviewPanel]
   );
 
   const relatedHostsCount = useMemo(
@@ -222,6 +295,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           title: userName,
           iconType: 'user',
           headerContent: relatedHostsCount,
+          link: {
+            tooltip: 'go to user',
+            callback: goToUserPreview,
+          },
         }}
         expand={{
           expandable: true,
@@ -229,7 +306,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         }}
         data-test-subj={USER_DETAILS_TEST_ID}
       >
-        <EuiTitle size="xxs">
+        {/* <EuiTitle size="xxs">
           <h4>
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.entities.userDetailsInfoTitle"
@@ -238,7 +315,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <AnomalyTableProvider
+         <AnomalyTableProvider
           criteriaFields={hostToCriteria(userDetails)}
           startDate={from}
           endDate={to}
@@ -264,7 +341,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
             />
           )}
         </AnomalyTableProvider>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="s" /> */}
         <EuiPanel hasBorder={true}>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>

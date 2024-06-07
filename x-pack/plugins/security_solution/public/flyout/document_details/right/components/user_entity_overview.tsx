@@ -20,9 +20,9 @@ import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+// import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+// import { LeftPanelInsightsTab } from '../../left';
+// import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getField } from '../../shared/utils';
@@ -55,6 +55,7 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
+import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
 import { UserPanelKey } from '../../../entity_details/user_right';
 
 const USER_ICON = 'user';
@@ -70,19 +71,36 @@ export interface UserEntityOverviewProps {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openFlyout, openLeftPanel } = useExpandableFlyoutApi();
-  const goToEntitiesTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
+  const { scopeId } = useRightPanelContext();
+  const { openFlyout, openPreviewPanel } = useExpandableFlyoutApi();
+  // const goToEntitiesTab = useCallback(() => {
+  //   openLeftPanel({
+  //     id: DocumentDetailsLeftPanelKey,
+  //     path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
+  //     params: {
+  //       id: eventId,
+  //       indexName,
+  //       scopeId,
+  //     },
+  //   });
+  // }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  const goToUserPreview = useCallback(() => {
+    openPreviewPanel({
+      id: UserPreviewPanelKey,
       params: {
-        id: eventId,
-        indexName,
+        userName,
         scopeId,
+        banner: {
+          title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
+            defaultMessage: 'Preview user',
+          }),
+          backgroundColor: 'warning',
+          textColor: 'warning',
+        },
       },
     });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  }, [openPreviewPanel, userName, scopeId]);
 
   const goToUserFlyout = useCallback(() => {
     openFlyout({
@@ -203,7 +221,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}
     >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems={"center"}>
+        <EuiFlexGroup gutterSize="m" responsive={false} alignItems={'center'}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={USER_ICON} />
           </EuiFlexItem>
@@ -214,7 +232,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
                 font-size: ${xsFontSize};
                 font-weight: ${euiTheme.font.weight.bold};
               `}
-              onClick={goToEntitiesTab}
+              onClick={goToUserPreview}
             >
               {userName}
             </EuiLink>
