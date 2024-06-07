@@ -18,7 +18,6 @@ import {
   ESQLFunction,
   ESQLMessage,
   ESQLSource,
-  walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstField } from '@kbn/esql-ast/src/types';
 import {
@@ -56,6 +55,7 @@ import {
   isAggFunction,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
+import { walk } from '../walker';
 import { getMessageFromId, getUnknownTypeLabel, errors } from './errors';
 import type {
   ErrorTypes,

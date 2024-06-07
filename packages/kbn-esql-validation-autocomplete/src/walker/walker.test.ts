@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { walk } from './walker';
-import { getAstAndSyntaxErrors } from './ast_parser';
 
 test('can walk all functions', () => {
   const { ast } = getAstAndSyntaxErrors('METRICS index a(b(c(foo)))');

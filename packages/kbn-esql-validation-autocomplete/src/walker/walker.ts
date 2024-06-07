@@ -13,7 +13,7 @@ import type {
   ESQLAstNode,
   ESQLFunction,
   ESQLSingleAstItem,
-} from './types';
+} from '@kbn/esql-ast';
 
 export interface WalkerOptions {
   visitSingleAstItem?: (node: ESQLSingleAstItem) => void;
