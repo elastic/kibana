@@ -103,6 +103,13 @@ const generateEndpointAlertDetailsItemDataMock = (
       isObjectArray: false,
     },
     {
+      category: 'event',
+      field: 'event.category',
+      originalValue: ['process'],
+      values: ['process'],
+      isObjectArray: false,
+    },
+    {
       category: 'host',
       field: 'host.name',
       values: ['elastic-host-win'],

@@ -299,6 +299,16 @@ export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): E
   return { primaryEventCategory, allEventCategories };
 }
 
+export interface UseSummaryRowsProps {
+  data: TimelineEventsDetailsItem[];
+  browserFields: BrowserFields;
+  scopeId: string;
+  eventId: string;
+  investigationFields?: string[];
+  isDraggable?: boolean;
+  isReadOnly?: boolean;
+}
+
 export const useSummaryRows = ({
   data,
   browserFields,
@@ -307,15 +317,7 @@ export const useSummaryRows = ({
   isDraggable = false,
   isReadOnly = false,
   investigationFields,
-}: {
-  data: TimelineEventsDetailsItem[];
-  browserFields: BrowserFields;
-  scopeId: string;
-  eventId: string;
-  investigationFields?: string[];
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
-}) => {
+}: UseSummaryRowsProps): AlertSummaryRow[] => {
   const responseActionsSupport = useAlertResponseActionsSupport(data);
 
   return useMemo(() => {

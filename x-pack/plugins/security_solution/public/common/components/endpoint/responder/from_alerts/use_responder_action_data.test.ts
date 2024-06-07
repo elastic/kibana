@@ -29,24 +29,6 @@ import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
-// import { useAlertResponseActionsSupport as _useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
-
-// const useAlertResponseActionsSupportMock = _useAlertResponseActionsSupport as jest.Mock;
-
-// FIXME:PT cleanup
-//
-// jest.mock('../../../../hooks/use_experimental_features');
-// jest.mock('../../../../../management/hooks', () => ({
-//   useGetEndpointDetails: (jest.fn() as jest.Mock).mockImplementation(() => ({ enabled: false })),
-//   useWithShowResponder: jest.fn(),
-// }));
-
-// const useGetEndpointDetailsMock = useGetEndpointDetails as jest.Mock;
-// const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-
-// FIXME:PT fix tests
-// FIXME:PT move the tests under `x-pack/plugins/security_solution/public/detections/components/take_action_dropdown/index.test.tsx` here
-
 describe('use responder action data hooks', () => {
   let appContextMock: AppContextTestRender;
   let onClickMock: ResponderContextMenuItemProps['onClick'];
