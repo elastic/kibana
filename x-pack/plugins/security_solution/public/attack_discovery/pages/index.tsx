@@ -78,8 +78,6 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     replacements,
   } = useAttackDiscovery({
     connectorId,
-    // TODO make sure this is cool
-    // setConnectorId,
     setLoadingConnectorId,
   });
 

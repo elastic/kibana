@@ -72,12 +72,6 @@ export const updateAttackDiscovery = async ({
       doc: params,
     });
 
-    // TODO do something
-    // if (response.result.status === 'failure') {
-    //   logger.warn(`Error updating attack discovery: ${response.result.error} by ID: ${params.id}`);
-    //   return null;
-    // }
-
     const updatedAttackDiscovery = await getAttackDiscovery({
       esClient,
       attackDiscoveryIndex,

@@ -37,16 +37,11 @@ export interface UseAttackDiscovery {
 
 export const useAttackDiscovery = ({
   connectorId,
-  setConnectorId,
   setLoadingConnectorId,
 }: {
   connectorId: string | undefined;
-  setConnectorId?: (connectorId: string | undefined) => void;
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
-  // TODO implement telemetry server side
-  // const { reportAttackDiscoveriesGenerated } = useAttackDiscoveryTelemetry();
-
   // get Kibana services and connectors
   const {
     http,

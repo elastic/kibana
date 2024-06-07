@@ -37,6 +37,7 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AttackDiscoveryToolParams => {
     const { alertsIndexPattern, llm, request, size } = params;
+
     return (
       requestHasRequiredAnonymizationParams(request) &&
       alertsIndexPattern != null &&
