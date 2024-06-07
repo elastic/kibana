@@ -91,7 +91,6 @@ export class KnowledgeBaseService {
           input: {
             field_names: ['text_field'],
           },
-          // @ts-expect-error
           wait_for_completion: true,
         },
         { requestTimeout: '20m' }
@@ -584,7 +583,7 @@ export class KnowledgeBaseService {
     };
   };
 
-  getInstructions = async (
+  getUserInstructions = async (
     namespace: string,
     user?: { name: string }
   ): Promise<UserInstruction[]> => {

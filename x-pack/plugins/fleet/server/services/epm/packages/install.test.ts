@@ -426,7 +426,6 @@ describe('install', () => {
       });
       afterEach(() => {
         (install._installPackage as jest.Mock).mockClear();
-        // jest.resetAllMocks();
       });
       afterAll(() => {
         jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
@@ -834,10 +833,14 @@ describe('installAssetsForInputPackagePolicy', () => {
 
 describe('handleInstallPackageFailure', () => {
   const mockedLogger = jest.mocked(appContextService.getLogger());
+  const savedObjectsClient = savedObjectsClientMock.create();
+
   beforeEach(() => {
-    jest.mocked(install._installPackage).mockClear();
-    jest.mocked(install._installPackage).mockResolvedValue({} as any);
     mockedLogger.error.mockClear();
+    jest.mocked(install._installPackage).mockClear();
+    mockGetBundledPackageByPkgKey.mockReset();
+
+    jest.mocked(install._installPackage).mockResolvedValue({} as any);
     mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
     jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
     jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
@@ -860,9 +863,7 @@ describe('handleInstallPackageFailure', () => {
   });
   const pkgName = 'test_package';
 
-  it('should do nothing if error is ', async () => {
-    const savedObjectsClient = savedObjectsClientMock.create();
-
+  it('should do nothing if error is ConcurrentInstallOperationError', async () => {
     const installedPkg: SavedObject<Installation> = {
       id: 'test-package',
       references: [],
@@ -893,8 +894,6 @@ describe('handleInstallPackageFailure', () => {
   });
 
   it('Should rollback on upgrade on FleetError', async () => {
-    const savedObjectsClient = savedObjectsClientMock.create();
-
     const installedPkg: SavedObject<Installation> = {
       id: 'test-package',
       references: [],
@@ -933,11 +932,10 @@ describe('handleInstallPackageFailure', () => {
         }),
       })
     );
+    jest.mocked(getInstallationObject).mockReset();
   });
 
   it('Should update the installation status to: install_failed on rollback error', async () => {
-    const savedObjectsClient = savedObjectsClientMock.create();
-
     jest.mocked(install._installPackage).mockRejectedValue(new Error('test error'));
 
     const installedPkg: SavedObject<Installation> = {
