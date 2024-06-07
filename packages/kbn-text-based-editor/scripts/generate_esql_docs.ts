@@ -62,7 +62,6 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
     ),
     description: (
       <Markdown
-        readOnly
         markdownContent={i18n.translate(
           'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.${name}.markdown',
           {
@@ -78,7 +77,9 @@ function writeFunctionDocs(functionDocs: Map<string, string>) {
 
   const pathToDocsFile = path.join(__dirname, '../src/esql_documentation_sections.tsx');
 
-  const ast = recast.parse(fs.readFileSync(pathToDocsFile, 'utf-8'));
+  const ast = recast.parse(fs.readFileSync(pathToDocsFile, 'utf-8'), {
+    parser: require('recast/parsers/babel'),
+  });
 
   const functionsList = findFunctionsList(ast);
 
@@ -134,7 +135,7 @@ function findFunctionsList(ast: any): recast.types.namedTypes.ArrayExpression {
       }
       return false;
     },
-    visitProperty(astPath) {
+    visitObjectProperty(astPath) {
       if (
         n.Identifier.check(astPath.node.key) &&
         astPath.node.key.name === 'items' &&
