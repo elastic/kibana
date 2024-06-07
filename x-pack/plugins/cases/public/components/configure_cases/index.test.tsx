@@ -858,7 +858,7 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
       expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
-        i18n.CRATE_TEMPLATE
+        i18n.CREATE_TEMPLATE
       );
       expect(await screen.findByTestId('template-creation-form-steps')).toBeInTheDocument();
     });
