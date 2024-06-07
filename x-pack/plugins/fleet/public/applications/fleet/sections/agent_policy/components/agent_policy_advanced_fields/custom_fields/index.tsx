@@ -30,7 +30,9 @@ export const CustomFields: React.FunctionComponent<Props> = ({
   agentPolicy,
   updateAgentPolicy,
 }) => {
-  const isAgentPolicy = (policy: Partial<AgentPolicy | NewAgentPolicy>): policy is AgentPolicy => {
+  const agentPolicyHasPackages = (
+    policy: Partial<AgentPolicy | NewAgentPolicy>
+  ): policy is AgentPolicy => {
     return (policy as AgentPolicy).package_policies !== undefined;
   };
 
@@ -38,7 +40,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
     policy: Partial<AgentPolicy | NewAgentPolicy>,
     excludedInputs: Set<string>
   ): string[] => {
-    if (!isAgentPolicy(policy)) {
+    if (!agentPolicyHasPackages(policy)) {
       return [];
     }
 
