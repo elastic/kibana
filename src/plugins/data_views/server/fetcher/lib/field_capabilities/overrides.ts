@@ -14,6 +14,7 @@ const OVERRIDES: Record<string, Partial<FieldDescriptor>> = {
   _index: { type: 'string' },
   _type: { type: 'string' },
   _id: { type: 'string' },
+  _ignored: { type: 'string' },
   _score: {
     type: 'number',
     searchable: false,

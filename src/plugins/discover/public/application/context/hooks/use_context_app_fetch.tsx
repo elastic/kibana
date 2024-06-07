@@ -184,9 +184,10 @@ export function useContextAppFetch({
     [fetchSurroundingRows]
   );
 
-  const fetchAllRows = useCallback(() => {
-    fetchAnchorRow().then((anchor) => anchor && fetchContextRows(anchor));
-  }, [fetchAnchorRow, fetchContextRows]);
+  const fetchAllRows = useCallback(
+    () => fetchAnchorRow().then((anchor) => anchor && fetchContextRows(anchor)),
+    [fetchAnchorRow, fetchContextRows]
+  );
 
   const resetFetchedState = useCallback(() => {
     setFetchedState(getInitialContextQueryState());
