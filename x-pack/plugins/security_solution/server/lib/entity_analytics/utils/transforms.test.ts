@@ -60,11 +60,16 @@ const outdatedTransformsMock = {
   count: 1,
   transforms: [
     {
+      ...transformConfig,
       id: 'test_transform_id_3',
       sync: {
         time: {
+          field: '@timestamp',
           delay: '2s',
         },
+      },
+      _meta: {
+        version: '1',
       },
     },
   ],

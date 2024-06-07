@@ -436,6 +436,11 @@ describe('RiskScoreDataClient', () => {
           settings: {
             unattended: true,
           },
+          _meta: {
+            version: 2,
+            managed: true,
+            managed_by: 'security-entity-analytics',
+          },
         },
       });
     });
