@@ -103,6 +103,39 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           </EuiFormRow>
         </EuiDescribedFormGroup>
         <EuiSpacer />
+        {buildFlavor === 'traditional' && canUseRemoteClusters && (
+          <>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.remoteClusterPrivilegesTitle"
+                  defaultMessage="Remote cluster privileges"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToRemoteClusterActionsDescription"
+                  defaultMessage="Manage the actions this role can perform against your remote cluster. "
+                />
+                {this.learnMore(docLinks.links.security.clusterPrivileges)}
+              </p>
+            </EuiText>
+            <RemoteClusterPrivileges
+              remoteClusters={remoteClusters}
+              role={role}
+              validator={validator}
+              license={license}
+              onChange={onChange}
+              availableRemoteClusterPrivileges={builtinESPrivileges.remote_cluster ?? []}
+              editable={editable}
+            />
+            <EuiSpacer />
+            <EuiSpacer />
+          </>
+        )}
 
         {buildFlavor === 'traditional' && (
           <>
