@@ -38,7 +38,7 @@ const analytics: AnalyticsServiceStart = {
  */
 const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   // TODO: Add a switcher to see components in other locales or pseudo locale
-  i18n.init({ locale: 'en' });
+  i18n.init({ locale: 'en', messages: {} });
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
 
   useEffect(() => {
