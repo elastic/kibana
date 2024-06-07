@@ -38,7 +38,7 @@ export function registerBatchReindexIndicesRoutes(
       path: `${BASE_PATH}/batch/queue`,
       options: {
         access: 'public',
-        description: `Get the batch reindex queue`,
+        summary: `Get the batch reindex queue`,
       },
       validate: {},
     },
@@ -77,7 +77,7 @@ export function registerBatchReindexIndicesRoutes(
       path: `${BASE_PATH}/batch`,
       options: {
         access: 'public',
-        description: `Batch start or resume reindex`,
+        summary: `Batch start or resume reindex`,
       },
       validate: {
         body: schema.object({
