@@ -14,7 +14,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import {
   AuthenticationExpiredError,
@@ -103,7 +103,7 @@ export class CsvESQLGenerator {
       const { rawResponse, warning } = await lastValueFrom(
         this.clients.data.search<
           IKibanaSearchRequest<ESQLSearchParams>,
-          IKibanaSearchResponse<ESQLSearchReponse>
+          IKibanaSearchResponse<ESQLSearchResponse>
         >(searchParams, {
           strategy: ESQL_SEARCH_STRATEGY,
           abortSignal: abortController.signal,

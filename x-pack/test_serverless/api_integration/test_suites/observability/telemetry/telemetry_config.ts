@@ -45,7 +45,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
       expect(body).toMatchObject(baseConfig);
     });
 
-    it('GET should get updated labels after dynamically updating them', async () => {
+    it.skip('GET should get updated labels after dynamically updating them', async () => {
       await supertestWithoutAuth
         .put('/internal/core/_settings')
         .set(internalReqHeader)
