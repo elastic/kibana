@@ -14,6 +14,7 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 
 import { getDefaultRowsPerPage } from '../../common/constants';
 import { DiscoverServices } from '../build_services';
@@ -52,7 +53,8 @@ export const initializeSearchEmbeddableApi = async (
 
   const dataView = searchSource.getField('index');
   const dataViews = new BehaviorSubject(dataView ? [dataView] : undefined);
-  const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+
+  /** This is the state that can be initialized from the saved initial state */
   const managed$ = new BehaviorSubject(initialState.managed);
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
   const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
@@ -62,6 +64,10 @@ export const initializeSearchEmbeddableApi = async (
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
   const breakdownField$ = new BehaviorSubject<string | undefined>(initialState.breakdownField);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
+
+  /** This is the state that has to be fetched */
+  const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
 
   const stateManager: SavedSearchAttributesManager = {
     columns: columns$,
@@ -117,6 +123,7 @@ export const initializeSearchEmbeddableApi = async (
     searchEmbeddableApi: {
       rows$,
       columns$,
+      columnsMeta$,
       sort$,
       searchSource$,
       sampleSize$,

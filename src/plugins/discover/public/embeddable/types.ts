@@ -25,6 +25,7 @@ import {
   SortOrder,
 } from '@kbn/saved-search-plugin/common/types';
 import type { SavedSearchByValueAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DiscoverServices } from '../build_services';
@@ -86,6 +87,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
 export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
   rows$: BehaviorSubject<DataTableRecord[]>;
   columns$: BehaviorSubject<string[] | undefined>;
+  columnsMeta$: BehaviorSubject<DataTableColumnsMeta | undefined>;
   sort$: BehaviorSubject<SortOrder[] | undefined>;
   sampleSize$: BehaviorSubject<number | undefined>;
   searchSource$: BehaviorSubject<ISearchSource>;

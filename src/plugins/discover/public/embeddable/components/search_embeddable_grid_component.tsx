@@ -36,7 +36,7 @@ import { isEsqlMode } from '../initialize_fetch';
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi;
   query?: AggregateQuery | Query;
-  onAddFilter: DocViewFilterFn;
+  onAddFilter?: DocViewFilterFn;
   stateManager: SavedSearchAttributesManager;
 }
 
@@ -58,15 +58,16 @@ type SavedSearchProps = Omit<
 
 export function SearchEmbeddableGridComponent({
   api,
-  query,
   onAddFilter,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const [
+    searchSource,
     dataViews,
     rows,
     columns,
+    columnsMeta,
     sort,
     sampleSize,
     rowHeight,
@@ -74,9 +75,11 @@ export function SearchEmbeddableGridComponent({
     rowsPerPage,
     savedSearchId,
   ] = useBatchedPublishingSubjects(
+    api.searchSource$,
     api.dataViews,
     api.rows$,
     api.columns$,
+    api.columnsMeta$,
     api.sort$,
     api.sampleSize$,
     api.rowHeight$,
@@ -99,7 +102,9 @@ export function SearchEmbeddableGridComponent({
       searchTitle: savedSearchTitle,
       description: panelDescription,
       searchDescription: savedSearchDescription,
+      columnsMeta,
       savedSearchId,
+      query: searchSource.getField('query'),
       dataView: dataViews?.[0],
       columns: columns ?? [],
       sort: getSortForEmbeddable(sort, dataViews?.[0], discoverServices.uiSettings, false),
@@ -131,6 +136,7 @@ export function SearchEmbeddableGridComponent({
       },
     };
   }, [
+    searchSource,
     panelTitle,
     panelDescription,
     savedSearchTitle,
@@ -138,6 +144,7 @@ export function SearchEmbeddableGridComponent({
     savedSearchId,
     dataViews,
     columns,
+    columnsMeta,
     sort,
     sampleSize,
     rowHeight,
@@ -147,8 +154,8 @@ export function SearchEmbeddableGridComponent({
     discoverServices.uiSettings,
   ]);
 
-  const isEsql = useMemo(() => isEsqlMode(api.getSavedSearch()), [api]);
-  console.log('isEsql', isEsql);
+  const isEsql = useMemo(() => isEsqlMode({ searchSource }), [searchSource]);
+
   const useLegacyTable = useMemo(
     () =>
       isLegacyTableEnabled({
@@ -170,6 +177,7 @@ export function SearchEmbeddableGridComponent({
       isLoading: false,
       rows,
       onFilter: onAddFilter,
+      totalHitCount: rows.length,
       useNewFieldsApi: !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
@@ -200,7 +208,6 @@ export function SearchEmbeddableGridComponent({
       {...searchProps}
       sampleSizeState={fetchedSampleSize}
       loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-      query={query}
     />
   );
 }

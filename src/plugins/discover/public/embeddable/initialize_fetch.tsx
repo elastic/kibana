@@ -15,13 +15,15 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { apiHasExecutionContext, fetch$, FetchContext } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
+import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SearchEmbeddableApi } from './types';
@@ -49,14 +51,14 @@ export function initializeFetch({
   const fetchSubscription = combineLatest([fetch$(api), api.sort$])
     .pipe(
       switchMap(async ([fetchContext, sort]) => {
-        // api.blockingError$.next(undefined);
+        api.blockingError.next(undefined);
         const dataView = api.dataViews.getValue()?.[0];
         const searchSource = api.searchSource$.getValue();
         if (!dataView || !searchSource) {
           return;
         }
-        const query = searchSource.getField('query');
         const sampleSize = api.sampleSize$.getValue();
+        const searchSourceQuery = searchSource.getField('query');
 
         // Abort any in-progress requests
         abortController.abort();
@@ -79,40 +81,34 @@ export function initializeFetch({
         );
 
         try {
-          // api.dataLoading$.next(true);
+          api.dataLoading.next(true);
           // Log request to inspector
           requestAdapter.reset();
 
-          // const esqlMode = isEsqlMode({ searchSource });
-
-          // if (esqlMode && query) {
-          //   const result = await fetchEsql(
-          //     searchSource.getField('query')!,
-          //     dataView,
-          //     this.services.data,
-          //     this.services.expressions,
-          //     this.services.inspector,
-          //     this.abortController.signal,
-          //     this.input.filters,
-          //     this.input.query
-          //   );
-          // }
-          // const parentContext = api.parentApi?.executionContext;
-          // console.log('parent context', parentContext);
-          // const child: KibanaExecutionContext = {
-          //   type: SEARCH_EMBEDDABLE_TYPE,
-          //   name: 'discover',
-          //   id: savedSearch.id,
-          //   description: api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
-          //   // description: this.output.title || this.output.defaultTitle || '',
-          //   // url: this.output.editUrl,
-          // };
-          // const executionContext = parentContext
-          //   ? {
-          //       ...parentContext,
-          //       child,
-          //     }
-          //   : child;
+          const esqlMode = isEsqlMode({ searchSource });
+          if (
+            esqlMode &&
+            searchSourceQuery &&
+            (!fetchContext.query || isOfQueryType(fetchContext.query))
+          ) {
+            const result = await fetchEsql(
+              searchSourceQuery,
+              dataView,
+              discoverServices.data,
+              discoverServices.expressions,
+              discoverServices.inspector,
+              abortController.signal,
+              fetchContext.filters,
+              fetchContext.query
+            );
+            return {
+              columnsMeta: result.esqlQueryColumns
+                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
+                : undefined,
+              rows: result.records,
+              fetchContext,
+            };
+          }
 
           /**
            * Fetch via saved search
@@ -139,7 +135,6 @@ export function initializeFetch({
                     id: searchSource.getId(),
                     description:
                       api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
-                    // description: this.output.title || this.output.defaultTitle || '',
                     // url: this.output.editUrl,
                   },
               disableWarningToasts: true,
@@ -162,16 +157,19 @@ export function initializeFetch({
       })
     )
     .subscribe((next) => {
-      // api.dataLoading$.next(false);
+      api.dataLoading.next(false);
       if (next) {
         if (next.hasOwnProperty('rows')) {
           api.rows$.next(next.rows ?? []);
+        }
+        if (next.hasOwnProperty('columnsMeta')) {
+          api.columnsMeta$.next(next.columnsMeta);
         }
         if (next.hasOwnProperty('fetchContext') && next.fetchContext !== undefined) {
           api.fetchContext$.next(next.fetchContext);
         }
         if (next.hasOwnProperty('error')) {
-          // api.blockingError$.next(next.error);
+          api.blockingError.next(next.error);
         }
       }
     });

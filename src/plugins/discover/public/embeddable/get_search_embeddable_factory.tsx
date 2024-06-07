@@ -350,7 +350,7 @@ export const getSearchEmbeddableFactory = ({
                   >
                     <SearchEmbeddableGridComponent
                       api={api}
-                      onAddFilter={onAddFilter}
+                      onAddFilter={isEsqlMode({ searchSource }) ? undefined : onAddFilter}
                       stateManager={searchEmbeddableStateManager}
                     />
                   </CellActionsProvider>
