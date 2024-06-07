@@ -80,6 +80,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualitySparkPlot: 'datasetQualitySparkPlot',
     datasetQualityHeaderButton: 'datasetQualityHeaderButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
+    datasetQualityFlyoutFieldsListIntegrationDetails:
+      'datasetQualityFlyoutFieldsList-integration_details',
     datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
     datasetQualityFlyoutIntegrationAction: (action: string) =>
       `datasetQualityFlyoutIntegrationAction${action}`,
@@ -267,29 +269,32 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async openDatasetFlyout(datasetName: string) {
+      await this.waitUntilTableLoaded();
       const cols = await this.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
         (dName) => dName === datasetName
       );
-      const expanderColumn = cols['0'];
-      let expanderButtons: WebElementWrapper[];
-      await retry.try(async () => {
-        expanderButtons = await expanderColumn.getCellChildren(
-          `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
-        );
-        expect(expanderButtons.length).to.be.greaterThan(0);
 
-        // Check if 'title' attribute is "Expand" or "Collapse"
-        const isCollapsed =
-          (await expanderButtons[testDatasetRowIndex].getAttribute('title')) === 'Expand';
+      expect(testDatasetRowIndex).to.be.greaterThan(-1);
 
-        // Open if collapsed
-        if (isCollapsed) {
-          await expanderButtons[testDatasetRowIndex].click();
-        }
-      });
+      const expandColumn = cols['0'];
+      const expandButtons = await expandColumn.getCellChildren(
+        `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
+      );
+
+      expect(expandButtons.length).to.be.greaterThan(0);
+
+      const datasetExpandButton = expandButtons[testDatasetRowIndex];
+
+      // Check if 'title' attribute is "Expand" or "Collapse"
+      const isCollapsed = (await datasetExpandButton.getAttribute('title')) === 'Expand';
+
+      // Open if collapsed
+      if (isCollapsed) {
+        await datasetExpandButton.click();
+      }
     },
 
     async closeFlyout() {
