@@ -98,6 +98,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     async getCompletedJobOutput(downloadReportPath: string, role: RoleCredentials) {
       const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
+        .set(...INTERNAL_HEADER)
         .set(role.apiKeyHeader);
 
       return response.text as unknown;
@@ -109,6 +110,7 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
       await retry.tryForTime(5000, async () => {
         await supertestWithoutAuth
           .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
+          .set(...INTERNAL_HEADER)
           .set(role.apiKeyHeader)
           .send({ query: { match_all: {} } });
       });
