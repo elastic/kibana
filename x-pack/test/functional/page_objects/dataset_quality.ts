@@ -55,7 +55,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const euiSelectable = getService('selectable');
-  const retry = getService('retry');
   const find = getService('find');
 
   const selectors = {
