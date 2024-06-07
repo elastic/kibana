@@ -9,5 +9,3 @@ export * from './dependencies_start_mock';
 export * from './app_context_render';
 export * from './endpoint_alert_data_mock';
 export * from './http_handler_mock_factory';
-
-// FIXME:PT Reminder - ensure this directory is owned by our team
