@@ -101,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.clickShareModal();
 
           expect(await PageObjects.lens.isShareActionEnabled(`export`));
-          await PageObjects.lens.closeShareModal();
         });
 
         it(`should be able to download report of the current visualization`, async () => {
@@ -114,19 +113,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.openReportingShare(type);
           await PageObjects.reporting.clickGenerateReportButton();
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.lens.closeShareModal();
-          }
+
+          await PageObjects.lens.closeShareModal();
+
           const url = await PageObjects.reporting.getReportURL(60000);
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.lens.closeShareModal();
-          }
+
+          await PageObjects.lens.closeShareModal();
+
           expect(url).to.be.ok();
           if (await testSubjects.exists('toastCloseButton')) {
             await testSubjects.click('toastCloseButton');
-          }
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.lens.closeShareModal();
           }
         });
 
