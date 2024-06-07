@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '6 available fields. 1 empty field. 2 meta fields.'
+            '6 available fields. 1 empty field. 3 meta fields.'
           );
         });
 

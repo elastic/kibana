@@ -98,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await findFirstDocViewerTokens()).to.eql([
         'Keyword',
         'Keyword',
+        'Keyword',
         'Number',
         'Text',
         'Text',
@@ -118,6 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'IP address', 'Geo point']);
 
       expect(await findFirstDocViewerTokens()).to.eql([
+        'Keyword',
         'Keyword',
         'Keyword',
         'Number',

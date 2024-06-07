@@ -200,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('includes an unmapped field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'unmapped']);
-        expect((csvFile as string).length).to.be(92);
+        expect((csvFile as string).length).to.be(111);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
@@ -737,7 +737,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
-        expect((csvFile as string).length).to.be(4826973);
+        expect((csvFile as string).length).to.be(4845684);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
