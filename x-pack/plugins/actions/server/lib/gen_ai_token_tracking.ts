@@ -173,6 +173,26 @@ export const getGenAiTokenTracking = async ({
     }
   }
 
+  // Process non-streamed Gemini response from `usageMetadata` object
+  if (actionTypeId === '.gemini') {
+    const data = result.data as unknown as {
+      usageMetadata: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+        totalTokenCount?: number;
+      };
+    };
+    if (data.usageMetadata == null) {
+      logger.error('Response did not contain usage metadata object');
+      return null;
+    }
+    return {
+      total_tokens: data.usageMetadata?.totalTokenCount ?? 0,
+      prompt_tokens: data.usageMetadata?.promptTokenCount ?? 0,
+      completion_tokens: data.usageMetadata?.candidatesTokenCount ?? 0,
+    };
+  }
+
   // this is a non-streamed Bedrock response used by security solution
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
     try {
@@ -215,4 +235,4 @@ export const getGenAiTokenTracking = async ({
 };
 
 export const shouldTrackGenAiToken = (actionTypeId: string) =>
-  actionTypeId === '.gen-ai' || actionTypeId === '.bedrock';
+  actionTypeId === '.gen-ai' || actionTypeId === '.bedrock' || actionTypeId === '.gemini';
