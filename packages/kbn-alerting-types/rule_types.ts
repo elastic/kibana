@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectAttribute, SavedObjectAttributes, SavedObjectsResolveResponse } from '@kbn/core/server';
+import type {
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
