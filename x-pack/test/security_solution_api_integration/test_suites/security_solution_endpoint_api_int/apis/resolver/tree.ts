@@ -686,7 +686,7 @@ export default function ({ getService }: FtrProviderContext) {
           schema: schemaWithAncestry,
           genTree: tree,
         });
-§      });
+      });
     });
     describe('different agent.ids', () => {
       it('should return correct nodes for tree1 and tree2 based on agent.id', async () => {
