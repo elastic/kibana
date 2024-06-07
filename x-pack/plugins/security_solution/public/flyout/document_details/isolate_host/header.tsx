@@ -8,12 +8,12 @@
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint';
 
 /**
  * Document details expandable right section header for the isolate host panel
@@ -31,22 +31,16 @@ export const PanelHeader: FC = () => {
 
   const title = (
     <EuiFlexGroup responsive gutterSize="s">
-      <EuiFlexItem grow={false}>
-        {isolateAction === 'isolateHost' ? (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
-            defaultMessage="Isolate host"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
-            defaultMessage="Release host"
-          />
-        )}
+      <EuiFlexItem grow={false} data-test-subj="flyoutHostIsolationHeaderTitle">
+        {isolateAction === 'isolateHost' ? <>{ISOLATE_HOST}</> : <>{UNISOLATE_HOST}</>}
       </EuiFlexItem>
       {showTechPreviewBadge && (
         <EuiFlexItem grow={false}>
-          <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
+          <EuiBetaBadge
+            data-test-subj="flyoutHostIsolationHeaderBadge"
+            label={TECHNICAL_PREVIEW}
+            tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
