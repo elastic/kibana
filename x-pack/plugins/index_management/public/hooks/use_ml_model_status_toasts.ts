@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useComponentTemplatesContext } from '../../../component_templates/component_templates_context';
+import { ErrorType, extractErrorProperties, MLRequestFailure } from '@kbn/ml-error-utils';
+import { useComponentTemplatesContext } from '../../public/application/components/component_templates/component_templates_context';
 
-export function MLModelNotificationToasts() {
+export function useMLModelNotificationToasts() {
   const { toasts } = useComponentTemplatesContext();
-  const showMlSuccessToasts = () => {
+  const showSuccessToasts = () => {
     return toasts.addSuccess({
       title: i18n.translate(
         'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
@@ -23,18 +24,13 @@ export function MLModelNotificationToasts() {
       }),
     });
   };
-  const showMlErrorToasts = (error: any) => {
-    return toasts.addError(
-      error.body && error.body.message ? new Error(error.body.message) : error,
-      {
-        title: i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle',
-          {
-            defaultMessage: 'Model deployment failed',
-          }
-        ),
-      }
-    );
+  const showErrorToasts = (error: ErrorType) => {
+    const errorObj = extractErrorProperties(error);
+    return toasts.addError(new MLRequestFailure(errorObj, error), {
+      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle', {
+        defaultMessage: 'Model deployment failed',
+      }),
+    });
   };
-  return { showMlSuccessToasts, showMlErrorToasts };
+  return { showSuccessToasts, showErrorToasts };
 }

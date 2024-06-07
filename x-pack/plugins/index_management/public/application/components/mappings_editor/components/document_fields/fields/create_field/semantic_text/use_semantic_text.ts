@@ -15,7 +15,8 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, DefaultInferenceModels, Field } from '../../../../../types';
-import { MLModelNotificationToasts } from '../../../ml_model_toasts';
+import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_ml_model_status_toasts';
+
 import { getInferenceModels } from '../../../../../../../services/api';
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
@@ -38,7 +39,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const [inferenceValue, setInferenceValue] = useState<string>(
     DefaultInferenceModels.elser_model_2
   );
-  const { showMlSuccessToasts, showMlErrorToasts } = MLModelNotificationToasts();
+  const { showSuccessToasts, showErrorToasts } = useMLModelNotificationToasts();
 
   const useFieldEffect = (
     semanticTextform: FormHook,
@@ -135,15 +136,15 @@ export function useSemanticText(props: UseSemanticTextProps) {
 
     const { trainedModelId } = inferenceData;
     dispatch({ type: 'field.addSemanticText', value: data });
-    showMlSuccessToasts();
+    showSuccessToasts();
 
     try {
-      // check if model exist
+      // if model exists already, do not create inference endpoint
       const inferenceModels = await getInferenceModels();
-      const inferenceModel: InferenceAPIConfigResponse[] = inferenceModels.data.filter(
+      const inferenceModel: InferenceAPIConfigResponse[] = inferenceModels.data.some(
         (e: InferenceAPIConfigResponse) => e.model_id === inferenceValue
       );
-      if (inferenceModel.length > 0) {
+      if (inferenceModel) {
         return;
       }
 
@@ -153,7 +154,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (trainedModelId) {
         setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
       }
-      showMlErrorToasts(error);
+      showErrorToasts(error);
     }
   };
 

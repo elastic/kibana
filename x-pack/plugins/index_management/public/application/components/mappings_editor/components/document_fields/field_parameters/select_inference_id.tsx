@@ -43,7 +43,7 @@ import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
-import { MLModelNotificationToasts } from '../ml_model_toasts';
+import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
 import {
   CustomInferenceEndpointConfig,
   DefaultInferenceModels,
@@ -158,7 +158,7 @@ export const SelectInferenceId = ({
     setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
 
-  const { showMlSuccessToasts, showMlErrorToasts } = MLModelNotificationToasts();
+  const { showSuccessToasts, showErrorToasts } = useMLModelNotificationToasts();
 
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
@@ -166,7 +166,7 @@ export const SelectInferenceId = ({
       try {
         const isDeployable =
           modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
-        if (isDeployable) showMlSuccessToasts();
+        if (isDeployable) showSuccessToasts();
 
         const newOption: EuiSelectableOption[] = [
           {
@@ -195,9 +195,9 @@ export const SelectInferenceId = ({
           modelConfig,
         };
         setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
-        showMlSuccessToasts();
+        showSuccessToasts();
       } catch (error) {
-        showMlErrorToasts(error);
+        showErrorToasts(error);
       }
     },
     [
@@ -205,8 +205,8 @@ export const SelectInferenceId = ({
       ml,
       setNewInferenceEndpoint,
       options,
-      showMlSuccessToasts,
-      showMlErrorToasts,
+      showSuccessToasts,
+      showErrorToasts,
     ]
   );
   useEffect(() => {
