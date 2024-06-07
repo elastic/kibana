@@ -20,6 +20,7 @@ import type { CompleteRule } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
+import { generateId } from './utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
 
@@ -59,12 +60,12 @@ export const wrapSuppressedAlerts = ({
       fields: event.fields,
     });
 
-    const id = objectHash([
+    const id = generateId(
       event._index,
       event._id,
-      `${spaceId}:${completeRule.alertId}`,
-      suppressionTerms,
-    ]);
+      String(event._version),
+      `${spaceId}:${completeRule.alertId}`
+    );
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
