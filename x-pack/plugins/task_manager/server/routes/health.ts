@@ -131,7 +131,7 @@ export function healthRoute(params: HealthRouteParams): {
       validate: false,
       options: {
         access: 'public',
-        description: `Get task manager health`,
+        summary: `Get task manager health`,
       },
     },
     async function (
