@@ -23,10 +23,7 @@ export async function queryToFields({
   let fields = dataView.timeFieldName ? [dataView.timeFieldName] : [];
   if (sort) {
     const sortArr = Array.isArray(sort) ? sort : [sort];
-    for (const s of sortArr) {
-      const keys = Object.keys(s);
-      fields = fields.concat(keys);
-    }
+    fields.push(...sortArr.flatMap((s) => Object.keys(s)));
   }
   for (const query of request.query) {
     if (query.query) {
@@ -48,16 +45,14 @@ export async function queryToFields({
     }
   }
 
-  if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
-    // if source filtering is enabled, we need to fetch all the fields
-    return (await dataView.getFields({ fieldName: ['*'] })).getFieldMapSorted();
-  } else if (fields.length) {
-    return (
-      await dataView.getFields({
-        fieldName: fields,
-      })
-    ).getFieldMapSorted();
+  // if source filtering is enabled, we need to fetch all the fields
+  const fieldName =
+    dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length ? ['*'] : fields;
+
+  if (fieldName.length) {
+    return (await dataView.getFields({ fieldName })).getFieldMapSorted();
   }
+
   // no fields needed to be loaded for query
   return {};
 }
