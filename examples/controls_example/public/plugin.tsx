@@ -63,8 +63,15 @@ export class ControlsExamplePlugin
     });
 
     registerControlFactory(TIMESLIDER_CONTROL_TYPE, async () => {
-      const { timesliderControlFactory } = await import('./react_controls/timeslider_control/timeslider_control_factory');
-      return timesliderControlFactory;
+      const [{ getTimesliderControlFactory }, [coreStart, depsStart]] =
+        await Promise.all([
+          import('./react_controls/timeslider_control/get_timeslider_control_factory'),
+          core.getStartServices(),
+        ]);
+      return getTimesliderControlFactory({
+        core: coreStart,
+        data: depsStart.data,
+      });
     });
 
     core.application.register({
