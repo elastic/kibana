@@ -36,7 +36,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
-import { useColumns } from './use_columns';
+import { GROUPS_TABLE, useColumns } from './use_columns';
 
 const EXPAND_COLUMN_WIDTH = '40px';
 const MAX_GROUP_BADGES = 5;
@@ -254,7 +254,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   ];
 
   const columns = useColumns(
-    'groups',
+    GROUPS_TABLE,
     skippedColumns,
     searchQuery,
     timeRangeMs,

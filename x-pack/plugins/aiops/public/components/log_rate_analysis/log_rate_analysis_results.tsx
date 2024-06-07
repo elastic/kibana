@@ -419,6 +419,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FieldFilterPopover
+            dataTestSubj='aiopsFieldFilterButton'
             disabled={!groupResults || isRunning}
             disabledApplyButton={isRunning}
             disabledApplyTooltipContent={disabledFieldFilterApplyButtonTooltipContent}
@@ -431,6 +432,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ColumnFilterPopover
+            dataTestSubj='aiopsColumnFilterButton'
             disabled={isRunning}
             disabledApplyButton={isRunning}
             disabledApplyTooltipContent={disabledColumnFilterApplyButtonTooltipContent}

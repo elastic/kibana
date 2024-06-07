@@ -298,7 +298,9 @@ export const useColumns = (
         valign: 'middle',
       },
       ['Doc count']: {
-        'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnDocCount',
+        'data-test-subj': isGroupsTable
+          ? 'aiopsLogRateAnalysisResultsGroupsTableColumnDocCount'
+          : 'aiopsLogRateAnalysisResultsTableColumnDocCount',
         width: NARROW_COLUMN_WIDTH,
         field: isGroupsTable ? 'docCount' : 'doc_count',
         name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountLabel', {

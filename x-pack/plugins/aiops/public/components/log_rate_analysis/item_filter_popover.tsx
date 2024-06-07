@@ -30,6 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ItemFilterApplyButton } from './item_filter_apply_button';
 
 interface ItemFilterPopoverProps {
+  dataTestSubj: string;
   disabled?: boolean;
   disabledApplyButton?: boolean;
   disabledApplyTooltipContent?: string;
@@ -45,6 +46,7 @@ interface ItemFilterPopoverProps {
 // This component is mostly inspired by EUI's Data Grid Column Selector
 // https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/column_selector.tsx
 export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
+  dataTestSubj,
   disabled,
   disabledApplyButton,
   disabledApplyTooltipContent,
@@ -103,13 +105,12 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
 
   return (
     <EuiPopover
-      data-test-subj="aiopsFieldFilterPopover"
       anchorPosition="downLeft"
       panelPaddingSize="s"
       panelStyle={{ minWidth: '20%' }}
       button={
         <EuiButton
-          data-test-subj="aiopsFieldFilterButton"
+          data-test-subj={dataTestSubj}
           onClick={onItemSelectionButtonClick}
           disabled={disabled}
           size="s"
