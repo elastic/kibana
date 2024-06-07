@@ -16,7 +16,6 @@ describe('TableActions', () => {
         onFilter: jest.fn(),
         flattenedField: 'flattenedField',
         onToggleColumn: jest.fn(),
-        isAddedAsColumn: jest.fn(),
       },
       field: {
         pinned: true,

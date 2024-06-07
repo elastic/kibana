@@ -8,7 +8,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
@@ -50,7 +49,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
@@ -97,7 +95,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
@@ -144,7 +141,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
@@ -186,7 +182,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
@@ -228,7 +223,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
@@ -277,7 +271,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
@@ -319,7 +312,6 @@ Array [
       Object {
         "action": Object {
           "flattenedField": "flattenedField",
-          "isAddedAsColumn": [MockFunction],
           "onFilter": [MockFunction],
           "onToggleColumn": [MockFunction],
         },
