@@ -7,7 +7,6 @@
  */
 
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import { RowHeightMode } from '@kbn/unified-data-table/src/components/row_height_settings';
 
 export { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
