@@ -193,31 +193,33 @@ export class FeatureTable extends Component<Props, {}> {
     const featureCount = this.props.features.length;
     const enabledCount = getEnabledFeatures(this.props.features, this.props.space).length;
     const controls = [];
-    if (enabledCount < featureCount) {
-      controls.push(
-        <EuiButtonEmpty
-          onClick={() => this.showAll()}
-          size="xs"
-          data-test-subj="showAllFeaturesLink"
-        >
-          {i18n.translate('xpack.spaces.management.selectAllFeaturesLink', {
-            defaultMessage: 'Show all',
-          })}
-        </EuiButtonEmpty>
-      );
-    }
-    if (enabledCount > 0) {
-      controls.push(
-        <EuiButtonEmpty
-          onClick={() => this.hideAll()}
-          size="xs"
-          data-test-subj="hideAllFeaturesLink"
-        >
-          {i18n.translate('xpack.spaces.management.deselectAllFeaturesLink', {
-            defaultMessage: 'Hide all',
-          })}
-        </EuiButtonEmpty>
-      );
+    if (this.props.onChange) {
+      if (enabledCount < featureCount) {
+        controls.push(
+          <EuiButtonEmpty
+            onClick={() => this.showAll()}
+            size="xs"
+            data-test-subj="showAllFeaturesLink"
+          >
+            {i18n.translate('xpack.spaces.management.selectAllFeaturesLink', {
+              defaultMessage: 'Show all',
+            })}
+          </EuiButtonEmpty>
+        );
+      }
+      if (enabledCount > 0) {
+        controls.push(
+          <EuiButtonEmpty
+            onClick={() => this.hideAll()}
+            size="xs"
+            data-test-subj="hideAllFeaturesLink"
+          >
+            {i18n.translate('xpack.spaces.management.deselectAllFeaturesLink', {
+              defaultMessage: 'Hide all',
+            })}
+          </EuiButtonEmpty>
+        );
+      }
     }
 
     return (
