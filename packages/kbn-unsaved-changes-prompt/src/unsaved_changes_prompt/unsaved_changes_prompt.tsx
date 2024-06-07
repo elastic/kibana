@@ -58,14 +58,14 @@ export const useUnsavedChangesPrompt = ({
 
     const unblock = history.block((state) => {
       async function confirmAsync() {
-        const stayInPage = await openConfirm(messageText, {
+        const confirmResponse = await openConfirm(messageText, {
           title: titleText,
           cancelButtonText,
           confirmButtonText,
           'data-test-subj': 'navigationBlockConfirmModal',
         });
 
-        if (!stayInPage) {
+        if (confirmResponse) {
           // Compute the URL we want to redirect to
           const url = http.basePath.prepend(state.pathname) + state.hash + state.search;
           // Unload history block
