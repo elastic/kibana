@@ -16,10 +16,10 @@ const testProps = {
   groupFilter: [],
   groupNumber: 0,
   onTakeActionsOpen,
-  statRenderers: [
+  stats: [
     {
       title: 'Severity',
-      renderer: <p data-test-subj="customMetricStat" />,
+      component: <p data-test-subj="customMetricStat" />,
     },
     { title: "IP's:", badge: { value: 1 } },
     { title: 'Rules:', badge: { value: 2 } },
@@ -37,8 +37,8 @@ describe('Group stats', () => {
   it('renders each stat item', () => {
     const { getByTestId, queryByTestId } = render(<GroupStats {...testProps} />);
     expect(getByTestId('group-stats')).toBeInTheDocument();
-    testProps.statRenderers.forEach(({ title: stat, renderer }) => {
-      if (renderer != null) {
+    testProps.stats.forEach(({ title: stat, component }) => {
+      if (component != null) {
         expect(getByTestId(`customMetric-${stat}`)).toBeInTheDocument();
         expect(queryByTestId(`metric-${stat}`)).not.toBeInTheDocument();
       } else {
