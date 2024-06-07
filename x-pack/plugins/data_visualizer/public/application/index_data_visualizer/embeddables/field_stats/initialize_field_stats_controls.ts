@@ -11,6 +11,7 @@
  * 2.0.
  */
 
+import type { AggregateQuery } from '@kbn/es-query';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 
@@ -57,7 +58,7 @@ export const initializeFieldStatsControls = (rawState: FieldStatsEmbeddableCusto
       dataViewId$,
       query$,
       updateUserInput,
-    } as unknown as FieldStatsComponentApi,
+    } as unknown as FieldStatsControlsApi,
     dataLoadingApi: {
       dataLoading$,
       onRenderComplete,

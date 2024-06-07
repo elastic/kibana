@@ -20,57 +20,78 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
-import {
-  DataSourceTypeSelector,
-  FieldStatsInitializerViewType,
-} from './field_stats_initializer_view_type';
-import type { ChangePointEmbeddableRuntimeState } from '../grid_embeddable/types';
+import React, { useMemo, useState, useCallback } from 'react';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
+import { DataSourceTypeSelector } from './field_stats_initializer_view_type';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
+import type {
+  FieldStatisticsTableEmbeddableState,
+  FieldStatsInitialState,
+} from '../grid_embeddable/types';
+import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 export interface FieldStatsInitializerProps {
-  initialInput?: Partial<ChangePointEmbeddableRuntimeState>;
-  onCreate: (props: ChangePointEmbeddableRuntimeState) => void;
+  initialInput?: Partial<FieldStatisticsTableEmbeddableState>;
+  onCreate: (props: FieldStatsInitialState) => void;
   onCancel: () => void;
+  onPreview: (update: Partial<FieldStatsInitialState>) => Promise<void>;
 }
 
 const defaultESQLQuery = { esql: 'from kibana_sample_data_ecommerce | limit 10' };
+const defaultTitle = i18n.translate('xpack.dataVisualizer.fieldStatistics.displayName', {
+  defaultMessage: 'Field statistics',
+});
 
 export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   initialInput,
   onCreate,
   onCancel,
+  onPreview,
 }) => {
   const {
     unifiedSearch: {
       ui: { IndexPatternSelect },
     },
+    uiSettings,
   } = useDataVisualizerKibana().services;
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
   const [viewType, setViewType] = useState(
     initialInput?.viewType ?? FieldStatsInitializerViewType.ESQL
   );
+  const [esqlQuery, setQuery] = useState<AggregateQuery>(initialInput?.query ?? defaultESQLQuery);
+  const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
 
-  const [isFormValid, setIsFormValid] = useState(true);
-  const [esqlQuery, setQuery] = useState<AggregateQuery | Query>(
-    initialInput?.esqlQuery ?? defaultESQLQuery
-  );
-
+  const isEsqlMode = viewType === FieldStatsInitializerViewType.ESQL;
   const updatedProps = useMemo(() => {
-    const isEsqlMode = viewType === 'esql';
-    const defaultTitle = 'Field statistics';
     return {
       viewType,
       isEsqlMode,
-      title: defaultTitle,
-      dataViewId,
-      query: esqlQuery,
+      title: initialInput?.title ?? defaultTitle,
+      dataViewId: isEsqlMode ? undefined : dataViewId,
+      query: isEsqlMode ? esqlQuery : undefined,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, viewType, esqlQuery.esql]);
+  }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
 
-  const canEditTextBasedQuery = true;
+  const onESQLQuerySubmit = useCallback(
+    async (query: AggregateQuery, abortController: AbortController) => {
+      await onPreview({
+        viewType,
+        isEsqlMode,
+        dataViewId: undefined,
+        query,
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isEsqlMode]
+  );
+  const isEsqlFormValid = isEsqlMode ? isEsqlEnabled && isESQLQuery(esqlQuery) : true;
+  const isDataViewFormValid =
+    viewType === FieldStatsInitializerViewType.DATA_VIEW ? dataViewId !== '' : true;
+
   return (
     <>
       <EuiFlyoutHeader>
@@ -114,8 +135,12 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               />
             </EuiFormRow>
           ) : null}
-          {viewType === FieldStatsInitializerViewType.ESQL ? (
-            <FieldStatsESQLEditor query={esqlQuery} setQuery={setQuery} />
+          {isEsqlMode && isEsqlEnabled ? (
+            <FieldStatsESQLEditor
+              query={esqlQuery}
+              setQuery={setQuery}
+              onQuerySubmit={onESQLQuerySubmit}
+            />
           ) : null}
         </EuiForm>
       </EuiFlyoutBody>
@@ -133,10 +158,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="fieldStatsInitializerConfirmButton"
-              isDisabled={
-                !isFormValid ||
-                (viewType === FieldStatsInitializerViewType.DATA_VIEW && dataViewId === undefined)
-              }
+              isDisabled={!isEsqlFormValid || !isDataViewFormValid}
               onClick={onCreate.bind(null, updatedProps)}
               fill
             >

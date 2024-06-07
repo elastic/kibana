@@ -9,11 +9,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonGroup, EuiFormRow, type EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 
-export enum FieldStatsInitializerViewType {
-  DATA_VIEW = 'dataview',
-  ESQL = 'esql',
-}
 const viewTypeOptions: EuiButtonGroupOptionProps[] = [
   {
     id: FieldStatsInitializerViewType.DATA_VIEW,
@@ -37,27 +34,35 @@ const viewTypeOptions: EuiButtonGroupOptionProps[] = [
   },
 ];
 
+const dataSourceLabel = i18n.translate(
+  'xpack.dataVisualizer.fieldStatsDashboardPanel.dataSourceLabel',
+  {
+    defaultMessage: 'Data source',
+  }
+);
+
+const dataSourceAriaLabel = i18n.translate(
+  'xpack.dataVisualizer.fieldStatsDashboardPanel.viewTypeLabel',
+  {
+    defaultMessage: 'Pick type of data source to use',
+  }
+);
+
 export interface ViewTypeSelectorProps {
-  value: ChangePointDetectionViewType;
-  onChange: (update: ChangePointDetectionViewType) => void;
+  value: FieldStatsInitializerViewType;
+  onChange: (update: FieldStatsInitializerViewType) => void;
 }
 
 export const DataSourceTypeSelector: FC<ViewTypeSelectorProps> = ({ value, onChange }) => {
   return (
-    <EuiFormRow
-      fullWidth
-      label={i18n.translate('xpack.dataVisualizer.fieldStatsDashboardPanel.dataSourceLabel', {
-        defaultMessage: 'Data source',
-      })}
-    >
+    <EuiFormRow fullWidth label={dataSourceLabel}>
       <EuiButtonGroup
         isFullWidth
-        aria-label={i18n.translate('xpack.dataVisualizer.fieldStatsDashboardPanel.viewTypeLabel', {
-          defaultMessage: 'Pick type of data source to use',
-        })}
+        aria-label={dataSourceAriaLabel}
         options={viewTypeOptions}
         idSelected={value}
         onChange={onChange as (id: string) => void}
+        legend={dataSourceAriaLabel}
       />
     </EuiFormRow>
   );

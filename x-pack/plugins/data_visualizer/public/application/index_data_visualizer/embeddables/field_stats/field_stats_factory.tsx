@@ -118,21 +118,21 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldStatsControlsComparators,
         serializeFieldStatsChartState,
         onFieldStatsTableDestroy,
-      } = initializeFieldStatsControls(state, titlesApi, parentApi);
+      } = initializeFieldStatsControls(state);
 
       const defaultDataViewId = await deps.data.dataViews.getDefaultId();
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        state.dataViewId !== ''
-          ? await deps.data.dataViews.get(state.dataViewId ?? defaultDataViewId)
-          : undefined,
-      ]);
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+        state.dataViewId !== '' && defaultDataViewId
+          ? [await deps.data.dataViews.get(state.dataViewId ?? defaultDataViewId)]
+          : undefined
+      );
 
       const subscriptions = new Subscription();
       subscriptions.add(
         fieldStatsControlsApi.dataViewId$
           .pipe(
             skip(1),
-            skipWhile((dataViewId) => dataViewId === ''),
+            skipWhile((dataViewId) => dataViewId === '' && defaultDataViewId === null),
             switchMap((dataViewId) => deps.data.dataViews.get(dataViewId ?? defaultDataViewId))
           )
           .subscribe((nextSelectedDataView) => {
@@ -164,7 +164,8 @@ export const getFieldStatsChartEmbeddableFactory = (
                 pluginStart,
                 parentApi,
                 uuid,
-                chartState
+                chartState,
+                fieldStatsControlsApi
               );
               fieldStatsControlsApi.updateUserInput(nextUpdate);
             } catch (e) {
@@ -173,7 +174,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           },
           dataViews: dataViews$,
           serializeState: () => {
-            const dataViewId = fieldStatsControlsApi.dataViewId.getValue();
+            const dataViewId = fieldStatsControlsApi.dataViewId?.getValue();
             const references: Reference[] = dataViewId
               ? [
                   {

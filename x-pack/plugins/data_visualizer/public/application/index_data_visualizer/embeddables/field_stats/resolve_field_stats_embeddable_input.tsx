@@ -10,18 +10,18 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FieldStatisticsInitializer } from './field_stats_initializer';
-import type { ChangePointEmbeddableState } from './types';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
-
-// const FieldStatisticsInitializer = dynamic(() => import('./field_stats_initializer'));
+import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
+import type { FieldStatsControlsApi } from './types';
 
 export async function resolveEmbeddableFieldStatsUserInput(
   coreStart: CoreStart,
   pluginStart: DataVisualizerStartDependencies,
   parentApi: unknown,
   focusedPanelId: string,
-  input?: ChangePointEmbeddableState
-): Promise<ChangePointEmbeddableState> {
+  initialState?: FieldStatisticsTableEmbeddableState,
+  fieldStatsControlsApi?: FieldStatsControlsApi
+): Promise<FieldStatisticsTableEmbeddableState> {
   const { overlays } = coreStart;
 
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
@@ -29,28 +29,42 @@ export async function resolveEmbeddableFieldStatsUserInput(
     ...coreStart,
     ...pluginStart,
   };
+
+  let hasChanged = false;
   return new Promise(async (resolve, reject) => {
     try {
+      const cancelChanges = () => {
+        // Reset to initialState in case user has changed the preview state
+        if (hasChanged && fieldStatsControlsApi && initialState) {
+          fieldStatsControlsApi.updateUserInput(initialState);
+        }
+
+        flyoutSession.close();
+        overlayTracker?.clearOverlays();
+      };
+
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <KibanaContextProvider services={services}>
             <FieldStatisticsInitializer
-              initialInput={input}
+              initialInput={initialState}
+              onPreview={async (nextUpdate) => {
+                if (fieldStatsControlsApi) {
+                  fieldStatsControlsApi.updateUserInput(nextUpdate);
+                  hasChanged = true;
+                }
+              }}
               onCreate={(update) => {
                 resolve(update);
 
-                if (update?.dataViewId !== input?.dataViewId) {
+                if (update?.dataViewId !== initialState?.dataViewId) {
                   // @TODO: Need to reset
                 }
 
                 flyoutSession.close();
                 overlayTracker?.clearOverlays();
               }}
-              onCancel={() => {
-                reject();
-                flyoutSession.close();
-                overlayTracker?.clearOverlays();
-              }}
+              onCancel={cancelChanges}
             />
           </KibanaContextProvider>,
           coreStart
@@ -60,11 +74,7 @@ export async function resolveEmbeddableFieldStatsUserInput(
           size: 's',
           type: 'push',
           'data-test-subj': 'fieldStatisticsInitializerFlyout',
-          onClose: () => {
-            reject();
-            flyoutSession.close();
-            overlayTracker?.clearOverlays();
-          },
+          onClose: cancelChanges,
         }
       );
 

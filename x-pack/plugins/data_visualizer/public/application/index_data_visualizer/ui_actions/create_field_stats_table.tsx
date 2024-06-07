@@ -31,8 +31,9 @@ export function createAddFieldStatsTableAction(
 ): UiActionsActionDefinition<FieldStatsActionContext> {
   return {
     id: 'create-field-stats-table',
+    getIconType: () => 'inspect',
     getDisplayName: () =>
-      i18n.translate('xpack.dataVisualizer.embeddableChangePointChartDisplayName', {
+      i18n.translate('xpack.dataVisualizer.fieldStatistics.displayName', {
         defaultMessage: 'Field statistics',
       }),
     async isCompatible(context: EmbeddableApiContext) {
@@ -59,7 +60,7 @@ export function createAddFieldStatsTableAction(
           initialState,
         });
       } catch (e) {
-        return Promise.reject();
+        return Promise.reject(e);
       }
     },
   };

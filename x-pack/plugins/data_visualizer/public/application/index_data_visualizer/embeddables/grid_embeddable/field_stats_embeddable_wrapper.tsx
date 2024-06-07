@@ -45,7 +45,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
       <EmbeddableESQLFieldStatsTableWrapper
         dataView={props.dataView}
         esqlQuery={props.esqlQuery}
-        isEsqlMode={props.isEsqlMode}
+        isEsqlMode={props.isEsqlMode ?? props.esql}
         filters={props.filters}
         lastReloadRequestTime={props.lastReloadRequestTime}
         onAddFilter={props.onAddFilter}
@@ -153,7 +153,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
         <DatePickerContextProvider {...datePickerDeps}>
           <FieldStatisticsWrapperContent
             dataView={props.dataView}
-            isEsqlMode={props.isEsqlMode}
+            isEsqlMode={props.isEsqlMode ?? props.esql}
             esqlQuery={props.esqlQuery}
             filters={props.filters}
             lastReloadRequestTime={props.lastReloadRequestTime}

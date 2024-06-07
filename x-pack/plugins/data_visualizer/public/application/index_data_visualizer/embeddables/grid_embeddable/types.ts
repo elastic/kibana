@@ -11,7 +11,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
@@ -82,6 +82,8 @@ export interface FieldStatisticTableEmbeddableProps {
    * If esql:true, switch table to ES|QL mode
    */
   esql?: boolean;
+  isEsqlMode?: boolean;
+  esqlQuery?: AggregateQuery;
   /**
    * If esql:true, the index pattern is used to validate time field
    */
@@ -105,10 +107,20 @@ export type ESQLDataVisualizerGridEmbeddableState = Omit<
   'query'
 > & { query?: ESQLQuery };
 
-interface FieldStatsInitialState {
-  dataViewId?: string;
+export enum FieldStatsInitializerViewType {
+  DATA_VIEW = 'dataview',
+  ESQL = 'esql',
 }
-export type FieldStatisticsTableEmbeddableState = FieldStatsInitialState & SerializedTitles;
+
+export interface FieldStatsInitialState {
+  dataViewId?: string;
+  viewType?: FieldStatsInitializerViewType;
+  query?: AggregateQuery;
+  isEsqlMode?: boolean;
+}
+export type FieldStatisticsTableEmbeddableState = FieldStatsInitialState &
+  SerializedTitles &
+  SerializedTimeRange;
 interface FieldStatisticsTableEmbeddableComponentApi {
   showDistributions$?: BehaviorSubject<boolean>;
 }

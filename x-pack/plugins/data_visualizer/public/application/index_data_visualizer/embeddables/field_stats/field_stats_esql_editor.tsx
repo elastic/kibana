@@ -6,31 +6,36 @@
  */
 import React, { useRef, useState, useCallback } from 'react';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import type { AggregateQuery } from '@kbn/es-query';
 
 const expandCodeEditor = (status: boolean) => {};
 
-export const FieldStatsESQLEditor = ({ canEditTextBasedQuery = true, query, setQuery }) => {
-  const prevQuery = useRef<AggregateQuery | Query>(query);
+interface FieldStatsESQLEditorProps {
+  canEditTextBasedQuery?: boolean;
+  query: AggregateQuery;
+  setQuery: (query: AggregateQuery) => void;
+  onQuerySubmit: (query: AggregateQuery, abortController: AbortController) => Promise<void>;
+}
+export const FieldStatsESQLEditor = ({
+  canEditTextBasedQuery = true,
+  query,
+  setQuery,
+  onQuerySubmit,
+}: FieldStatsESQLEditorProps) => {
+  const prevQuery = useRef<AggregateQuery>(query);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
 
-  const runQuery = useCallback(async (q, abortController) => {
-    // const attrs = await getSuggestions(
-    //   q,
-    //   startDependencies,
-    //   datasourceMap,
-    //   visualizationMap,
-    //   adHocDataViews,
-    //   setErrors,
-    //   abortController
-    // );
-    // if (attrs) {
-    //   setCurrentAttributes?.(attrs);
-    //   setErrors([]);
-    //   updateSuggestion?.(attrs);
-    // }
-    setIsVisualizationLoading(false);
-  }, []);
+  const onTextLangQuerySubmit = useCallback(
+    async (q, abortController) => {
+      if (q && onQuerySubmit) {
+        setIsVisualizationLoading(true);
+        await onQuerySubmit(q, abortController);
+        setIsVisualizationLoading(false);
+      }
+    },
+    [onQuerySubmit]
+  );
 
   if (!canEditTextBasedQuery) return null;
 
@@ -50,12 +55,7 @@ export const FieldStatsESQLEditor = ({ canEditTextBasedQuery = true, query, setQ
         hideMinimizeButton
         editorIsInline
         hideRunQueryText
-        // onTextLangQuerySubmit={async (q, a) => {
-        //   if (q) {
-        //     setIsVisualizationLoading(true);
-        //     await runQuery(q, a);
-        //   }
-        // }}
+        onTextLangQuerySubmit={onTextLangQuerySubmit}
         isDisabled={false}
         allowQueryCancellation
         isLoading={isVisualizationLoading}
