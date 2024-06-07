@@ -64,7 +64,7 @@ export const significantItemColumns = {
 export const GROUPS_TABLE = 'groups';
 export const SIG_ITEMS_TABLE = 'significantItems';
 type TableType = typeof GROUPS_TABLE | typeof SIG_ITEMS_TABLE;
-type ColumnNames = keyof typeof significantItemColumns | 'unique';
+export type ColumnNames = keyof typeof significantItemColumns | 'unique';
 
 const logRateHelpMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.logRateColumnTooltip',

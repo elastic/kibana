@@ -55,6 +55,7 @@ import {
 import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
 import { ItemFilterPopover as ColumnFilterPopover } from './item_filter_popover';
 import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
+import type { ColumnNames } from '../log_rate_analysis_results_table';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResults',
@@ -193,7 +194,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
-  const [skippedColumns, setSkippedColumns] = useState<string[]>(['p-value']);
+  const [skippedColumns, setSkippedColumns] = useState<ColumnNames[]>(['p-value']);
 
   const onGroupResultsToggle = (optionId: string) => {
     setToggleIdSelected(optionId);
@@ -216,7 +217,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     startHandler(true, false);
   };
 
-  const onVisibleColumnsChange = (columns: string[]) => {
+  const onVisibleColumnsChange = (columns: ColumnNames[]) => {
     setSkippedColumns(columns);
   };
 
@@ -446,7 +447,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
                 ? Object.values(commonColumns)
                 : Object.values(significantItemColumns)) as string[]
             }
-            onChange={onVisibleColumnsChange}
+            onChange={onVisibleColumnsChange as (columns: string[]) => void}
           />
         </EuiFlexItem>
       </ProgressControls>
