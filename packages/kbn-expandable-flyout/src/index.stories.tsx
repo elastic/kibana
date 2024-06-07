@@ -102,11 +102,15 @@ const registeredPanels = [
 
 export const Right: Story<void> = () => {
   const state = {
-    right: {
-      id: 'right',
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {},
+        preview: [],
+      },
     },
-    left: {},
-    preview: [],
   } as unknown as State;
 
   return (
@@ -118,13 +122,17 @@ export const Right: Story<void> = () => {
 
 export const Left: Story<void> = () => {
   const state = {
-    right: {
-      id: 'right',
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: [],
+      },
     },
-    left: {
-      id: 'left',
-    },
-    preview: [],
   } as unknown as State;
 
   return (
@@ -136,17 +144,21 @@ export const Left: Story<void> = () => {
 
 export const Preview: Story<void> = () => {
   const state = {
-    right: {
-      id: 'right',
-    },
-    left: {
-      id: 'left',
-    },
-    preview: [
-      {
-        id: 'preview1',
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: [
+          {
+            id: 'preview1',
+          },
+        ],
       },
-    ],
+    },
   } as unknown as State;
 
   return (
@@ -158,20 +170,24 @@ export const Preview: Story<void> = () => {
 
 export const MultiplePreviews: Story<void> = () => {
   const state = {
-    right: {
-      id: 'right',
-    },
-    left: {
-      id: 'left',
-    },
-    preview: [
-      {
-        id: 'preview1',
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: [
+          {
+            id: 'preview1',
+          },
+          {
+            id: 'preview2',
+          },
+        ],
       },
-      {
-        id: 'preview2',
-      },
-    ],
+    },
   } as unknown as State;
 
   return (
