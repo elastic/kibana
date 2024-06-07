@@ -68,6 +68,9 @@ export default function ({ getService }: FtrProviderContext) {
    * Tests
    */
   describe('Generate CSV from SearchSource', function () {
+    // see details: https://github.com/elastic/kibana/issues/184987
+    this.tags(['failsOnMKI']);
+
     // 7 minutes timeout for each test in serverless
     // This is because it may take up to 5 minutes to generate the CSV
     // see kibanaReportCompletion config
