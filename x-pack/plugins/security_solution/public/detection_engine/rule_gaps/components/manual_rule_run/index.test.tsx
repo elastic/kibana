@@ -57,7 +57,7 @@ describe('ManualRuleRunModal', () => {
 
     expect(wrapper.getByTestId('confirmModalConfirmButton')).toBeDisabled();
     expect(wrapper.getByTestId('manual-rule-run-time-range-form')).toHaveTextContent(
-      'Manual rule run cannot be scheduled with the look back more than 90 days'
+      'Manual rule run cannot be scheduled earlier than 90 days ago'
     );
   });
 

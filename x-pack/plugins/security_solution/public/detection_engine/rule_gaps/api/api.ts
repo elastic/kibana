@@ -20,7 +20,6 @@ import type { ScheduleBackfillProps } from '../types';
  *
  * @param ruleIds `rule_id`s of each rule to be backfilled
  * @param timeRange the time range over which the backfill should apply
- * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */

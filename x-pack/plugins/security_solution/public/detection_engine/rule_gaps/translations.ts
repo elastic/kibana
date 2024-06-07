@@ -132,7 +132,7 @@ export const BACKFILL_SCHEDULE_SUCCESS = (numRules: number) =>
     {
       values: { numRules },
       defaultMessage:
-        'Successfully scheduled backfill for {numRules} {numRules, plural, =1 {rule} other {rules}}',
+        'Successfully scheduled backfill for {numRules, plural, =1 {# rule} other {# rules}}',
     }
   );
 

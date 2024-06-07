@@ -45,9 +45,9 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
     .isAfter(startDate);
   const isEndDateInFuture = endDate.isAfter(now);
   const isInvalidTimeRange = startDate.isSameOrAfter(endDate);
-  const isInvalid = isStartDayOutOfRange || isEndDateInFuture || isInvalidTimeRange;
+  const isInvalid = isStartDateOutOfRange || isEndDateInFuture || isInvalidTimeRange;
   const errorMessage = useMemo(() => {
-    if (isStartDayOutOfRange) {
+    if (isStartDateOutOfRange) {
       return i18n.MANUAL_RULE_RUN_START_DATE_OUT_OF_RANGE_ERROR(
         MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS
       );
@@ -59,7 +59,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
       return i18n.MANUAL_RULE_RUN_INVALID_TIME_RANGE_ERROR;
     }
     return null;
-  }, [isEndDateInFuture, isInvalidTimeRange, isStartDayOutOfRange]);
+  }, [isEndDateInFuture, isInvalidTimeRange, isStartDateOutOfRange]);
 
   const handleConfirm = useCallback(() => {
     onConfirm({ startDate, endDate });
