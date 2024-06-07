@@ -41,13 +41,13 @@ describe('step select agent policy', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const mockSetHasAgentPolicyError = jest.fn();
-  const updateAgentPolicyMock = jest.fn();
+  const updateAgentPoliciesMock = jest.fn();
   const render = () =>
     (renderResult = testRenderer.render(
       <StepSelectAgentPolicy
         packageInfo={{ name: 'apache' } as any}
-        agentPolicy={undefined}
-        updateAgentPolicy={updateAgentPolicyMock}
+        agentPolicies={[]}
+        updateAgentPolicies={updateAgentPoliciesMock}
         setHasAgentPolicyError={mockSetHasAgentPolicyError}
         selectedAgentPolicyId={undefined}
       />
@@ -55,7 +55,7 @@ describe('step select agent policy', () => {
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
-    updateAgentPolicyMock.mockReset();
+    updateAgentPoliciesMock.mockReset();
   });
 
   test('should not select agent policy by default if multiple exists', async () => {
@@ -92,8 +92,8 @@ describe('step select agent policy', () => {
     render();
     await act(async () => {}); // Needed as updateAgentPolicy is called after multiple useEffect
     await act(async () => {
-      expect(updateAgentPolicyMock).toBeCalled();
-      expect(updateAgentPolicyMock).toBeCalledWith({ id: 'policy-1' });
+      expect(updateAgentPoliciesMock).toBeCalled();
+      expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1' }]);
     });
   });
 });

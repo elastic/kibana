@@ -163,14 +163,14 @@ function doesAgentPolicyHaveLimitedPackage(policy: AgentPolicy, pkgInfo: Package
 
 export const StepSelectAgentPolicy: React.FunctionComponent<{
   packageInfo?: PackageInfo;
-  agentPolicy: AgentPolicy | undefined;
-  updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
+  agentPolicies: AgentPolicy[];
+  updateAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
   selectedAgentPolicyId?: string;
 }> = ({
   packageInfo,
-  agentPolicy,
-  updateAgentPolicy: updateSelectedAgentPolicy,
+  agentPolicies,
+  updateAgentPolicies: updateSelectedAgentPolicies,
   setHasAgentPolicyError,
   selectedAgentPolicyId,
 }) => {
@@ -178,25 +178,31 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
-  const { isLoading, agentPoliciesError, agentPolicyOptions, agentPolicies } =
-    useAgentPoliciesOptions(packageInfo);
+  const {
+    isLoading,
+    agentPoliciesError,
+    agentPolicyOptions,
+    agentPolicies: existingAgentPolicies,
+  } = useAgentPoliciesOptions(packageInfo);
   // Selected agent policy state
+  // TODO multiple
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
-    agentPolicy?.id ??
-      (selectedAgentPolicyId || (agentPolicies.length === 1 ? agentPolicies[0].id : undefined))
+    agentPolicies[0]?.id ??
+      (selectedAgentPolicyId ||
+        (existingAgentPolicies.length === 1 ? existingAgentPolicies[0].id : undefined))
   );
 
   const [isLoadingSelectedAgentPolicy, setIsLoadingSelectedAgentPolicy] = useState<boolean>(false);
   const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<AgentPolicy | undefined>(
-    agentPolicy
+    agentPolicies[0]
   );
 
   const updateAgentPolicy = useCallback(
     (selectedPolicy: AgentPolicy | undefined) => {
       setSelectedAgentPolicy(selectedPolicy);
-      updateSelectedAgentPolicy(selectedPolicy);
+      updateSelectedAgentPolicies(selectedPolicy ? [selectedPolicy] : []);
     },
-    [updateSelectedAgentPolicy]
+    [updateSelectedAgentPolicies]
   );
   // Update parent selected agent policy state
   useEffect(() => {
@@ -217,20 +223,23 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         updateAgentPolicy(undefined);
       }
     };
-    if (!agentPolicy || selectedPolicyId !== agentPolicy.id) {
+    if (
+      agentPolicies.length === 0 ||
+      !agentPolicies.map((policy) => policy.id).includes(selectedPolicyId ?? '')
+    ) {
       fetchAgentPolicyInfo();
     }
-  }, [selectedPolicyId, agentPolicy, updateAgentPolicy]);
+  }, [selectedPolicyId, agentPolicies, updateAgentPolicy]);
 
   // Try to select default agent policy
   useEffect(() => {
-    if (!selectedPolicyId && agentPolicies.length && agentPolicyOptions.length) {
+    if (!selectedPolicyId && existingAgentPolicies.length && agentPolicyOptions.length) {
       const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
       if (enabledOptions.length === 1) {
         setSelectedPolicyId(enabledOptions[0].value as string | undefined);
       }
     }
-  }, [agentPolicies, agentPolicyOptions, selectedPolicyId]);
+  }, [existingAgentPolicies, agentPolicyOptions, selectedPolicyId]);
 
   // Bubble up any issues with agent policy selection
   useEffect(() => {
