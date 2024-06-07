@@ -294,7 +294,12 @@ export function UnifiedDocViewerFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+          <EuiButtonEmpty
+            iconType="cross"
+            onClick={onClose}
+            flush="left"
+            data-test-subj="docViewerFlyoutCloseButton"
+          >
             {i18n.translate('unifiedDocViewer.flyout.closeButtonLabel', {
               defaultMessage: 'Close',
             })}
