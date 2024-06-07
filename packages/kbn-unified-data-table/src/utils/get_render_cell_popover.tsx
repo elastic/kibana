@@ -33,8 +33,8 @@ export const getCustomCellPopoverRenderer = () => {
     return <DefaultCellPopover {...props} />;
   });
 
-  // Component passed to the eui must be a non-memoized component
-  // otherwise eui throws an error `typeof Component !== 'function'`
+  // Components passed to EUI DataGrid cannot be memoized components
+  // otherwise EUI throws an error `typeof Component !== 'function'`
   return (props: EuiDataGridCellPopoverElementProps) => (
     <RenderCustomCellPopoverMemoized {...props} />
   );

@@ -252,9 +252,9 @@ describe('query tab with unified timeline', () => {
 
         fireEvent.click(screen.getByLabelText('Closes this modal window'));
 
-        expect(screen.queryByTestId('row-renderers-modal')).toBeFalsy();
+        expect(screen.queryByTestId('row-renderers-modal')).not.toBeInTheDocument();
 
-        expect(screen.queryByTestId('timeline-row-renderer-0')).toBeFalsy();
+        expect(screen.queryByTestId('timeline-row-renderer-0')).not.toBeInTheDocument();
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -742,7 +742,7 @@ describe('query tab with unified timeline', () => {
         fireEvent.click(screen.getByTitle('Hide sidebar'));
 
         await waitFor(() => {
-          expect(screen.queryByTestId('fieldListGroupedFieldGroups')).toBeFalsy();
+          expect(screen.queryByTestId('fieldListGroupedFieldGroups')).not.toBeInTheDocument();
         });
       },
       SPECIAL_TEST_TIMEOUT
