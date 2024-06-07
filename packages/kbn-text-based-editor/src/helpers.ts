@@ -157,7 +157,6 @@ export const getDocumentationSections = async (language: string) => {
       functions,
       aggregationFunctions,
       groupingFunctions,
-      spatialFunctions,
       operators,
     } = await import('./esql_documentation_sections');
     groups.push({
@@ -172,7 +171,6 @@ export const getDocumentationSections = async (language: string) => {
       functions,
       aggregationFunctions,
       groupingFunctions,
-      spatialFunctions,
       operators
     );
     return {
