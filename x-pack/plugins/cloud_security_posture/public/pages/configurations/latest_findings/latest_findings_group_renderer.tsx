@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/grouping/src';
+import { GroupPanelRenderer, RawBucket, GroupStatsItem } from '@kbn/grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
@@ -221,7 +221,7 @@ const ComplianceBar = React.memo(ComplianceBarComponent);
 export const groupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<FindingsGroupingAggregation>
-): StatRenderer[] => {
+): GroupStatsItem[] => {
   const defaultBadges = [
     {
       title: i18n.translate('xpack.csp.findings.grouping.stats.badges.findings', {

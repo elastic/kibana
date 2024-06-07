@@ -19,7 +19,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { Filter } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { StatRenderer } from '../types';
+import { GroupStatsItem } from '../types';
 import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
 
@@ -28,7 +28,7 @@ interface GroupStatsProps<T> {
   groupFilter: Filter[];
   groupNumber: number;
   onTakeActionsOpen?: () => void;
-  statRenderers?: StatRenderer[];
+  stats?: GroupStatsItem[];
   takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
 }
 
@@ -51,7 +51,7 @@ const GroupStatsComponent = <T,>({
   groupFilter,
   groupNumber,
   onTakeActionsOpen,
-  statRenderers,
+  stats,
   takeActionItems: getTakeActionItems,
 }: GroupStatsProps<T>) => {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -65,7 +65,7 @@ const GroupStatsComponent = <T,>({
 
   const statsComponents = useMemo(
     () =>
-      statRenderers?.map((stat) => {
+      stats?.map((stat) => {
         const { dataTestSubj, component } =
           stat.badge != null
             ? {
@@ -81,7 +81,7 @@ const GroupStatsComponent = <T,>({
                   </EuiToolTip>
                 ),
               }
-            : { dataTestSubj: `customMetric-${stat.title}`, component: stat.renderer };
+            : { dataTestSubj: `customMetric-${stat.title}`, component: stat.component };
 
         return (
           <EuiFlexItem grow={false} key={stat.title}>
@@ -92,7 +92,7 @@ const GroupStatsComponent = <T,>({
           </EuiFlexItem>
         );
       }) ?? [],
-    [statRenderers]
+    [stats]
   );
 
   const takeActionMenu = useMemo(

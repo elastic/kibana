@@ -31,7 +31,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
     globalFilters,
     globalQuery,
     renderGroupPanel,
-    groupStatsRenderers,
+    getGroupStats,
     children,
   } = props;
   const { storage, dataViews, notifications, http } = services;
@@ -61,7 +61,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
-      groupStatsRenderers,
+      getGroupStats,
       unit: (totalCount) =>
         i18n.translate('alertsGrouping.unit', {
           values: { totalCount },
@@ -228,12 +228,10 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
  *     defaultGroupingOptions={...}
  *     getAggregationsByGroupingField={getAggregationsByGroupingField}
  *     renderGroupPanel={renderGroupPanel}
- *     groupStatsRenderers={getStats}
+ *     getGroupStats={getStats}
  *     services={{
- *       uiSettings,
  *       storage,
  *       notifications,
- *       dataViews,
  *       http,
  *       data,
  *     }}

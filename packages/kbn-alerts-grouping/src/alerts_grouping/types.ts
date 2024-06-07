@@ -6,20 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { Filter, Query } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   GenericBuckets,
   GroupingProps,
   GroupOption,
   GroupPanelRenderer,
-  GroupStatsRenderers,
+  GetGroupStats,
   NamedAggregation,
 } from '@kbn/grouping/src';
 import { ReactElement } from 'react';
@@ -45,10 +43,10 @@ export interface AlertsGroupingProps<T = {}> {
    */
   renderGroupPanel?: GroupPanelRenderer<T>;
   /**
-   * A function that given the current grouping field, returns an array of
-   * render functions for the group stats
+   * A function that given the current grouping field and aggregation results, returns an array of
+   * stat items to be rendered in the group panel
    */
-  groupStatsRenderers?: GroupStatsRenderers<T>;
+  getGroupStats?: GetGroupStats<T>;
   /**
    * Default search filters
    */
@@ -98,11 +96,9 @@ export interface AlertsGroupingProps<T = {}> {
    */
   services: {
     storage: Storage;
-    uiSettings: IUiSettingsClient;
     notifications: NotificationsStart;
     dataViews: DataViewsServicePublic;
     http: HttpSetup;
-    data: DataPublicPluginStart;
   };
 }
 
