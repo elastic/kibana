@@ -78,7 +78,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
     return bundledPackagesFromCache();
   } catch (err) {
     const logger = appContextService.getLogger();
-    logger.warn(`Unable to read bundled packages from ${bundledPackageLocation}`);
+    logger.warn(`Unable to read bundled packages from ${bundledPackageLocation}: ${err}`);
 
     return [];
   }
