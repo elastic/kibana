@@ -660,6 +660,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  hideBulkActions?: boolean;
   ruleTypeIds?: string[];
   useFetchPageContext?: PreFetchPageContext;
   actions?: {

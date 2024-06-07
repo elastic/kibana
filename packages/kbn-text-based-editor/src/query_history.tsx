@@ -66,7 +66,7 @@ export function QueryHistoryAction({
             }
           >
             <EuiIcon
-              type="clock"
+              type="clockCounter"
               color="primary"
               size="m"
               onClick={toggleHistory}
@@ -90,7 +90,7 @@ export function QueryHistoryAction({
             css={css`
               padding-inline: 0;
             `}
-            iconType="clock"
+            iconType="clockCounter"
             data-test-subj="TextBasedLangEditor-toggle-query-history-button"
           >
             {isHistoryOpen
