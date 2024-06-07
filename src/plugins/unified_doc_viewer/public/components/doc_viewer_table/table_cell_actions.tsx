@@ -12,9 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 
 export interface TableRow {
-  action: Omit<FieldRecordLegacy['action'], 'isActive'> & {
-    isAddedAsColumn: (field: string) => boolean;
-  };
+  action: Omit<FieldRecordLegacy['action'], 'isActive'>;
   field: {
     pinned: boolean;
     onTogglePinned: (field: string) => void;
@@ -242,7 +240,7 @@ export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) =>
   }
 
   const {
-    action: { onToggleColumn, isAddedAsColumn },
+    action: { onToggleColumn },
     field: { field },
   } = row;
 
@@ -250,26 +248,23 @@ export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) =>
     return null;
   }
 
-  const isAdded = isAddedAsColumn(field);
-
-  // Toggle columns
-  const toggleColumnsLabel = isAdded
-    ? i18n.translate('unifiedDocViewer.docViews.table.removeColumnFromTableButtonTooltip', {
-        defaultMessage: 'Remove column from table',
-      })
-    : i18n.translate('unifiedDocViewer.docViews.table.addColumnToTableButtonTooltip', {
-        defaultMessage: 'Add column to table',
-      });
+  // Toggle column
+  const toggleColumnLabel = i18n.translate(
+    'unifiedDocViewer.docViews.table.toggleColumnTableButtonTooltip',
+    {
+      defaultMessage: 'Toggle column in table',
+    }
+  );
 
   return (
     <Component
       data-test-subj={`toggleColumnButton-${field}`}
-      iconType={isAdded ? 'list' : 'listAdd'}
-      title={toggleColumnsLabel}
+      iconType="listAdd"
+      title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(field)}
     >
-      {toggleColumnsLabel}
+      {toggleColumnLabel}
     </Component>
   );
 };

@@ -162,13 +162,6 @@ export const DocViewerTable = ({
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
 
-  const isAddedAsColumn = useCallback(
-    (field: string) => {
-      return columns?.includes(field) ?? false;
-    },
-    [columns]
-  );
-
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
       return undefined;
@@ -224,7 +217,6 @@ export const DocViewerTable = ({
           onToggleColumn,
           onFilter: filter,
           flattenedField: flattened[field],
-          isAddedAsColumn,
         },
         field: {
           field,
@@ -257,7 +249,6 @@ export const DocViewerTable = ({
       flattened,
       onTogglePinned,
       fieldFormats,
-      isAddedAsColumn,
     ]
   );
 
