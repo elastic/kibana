@@ -1712,7 +1712,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
         let agentPolicyId;
         // fallback to first agent policy id in case no policy_id is specified, BWC with 8.0
-        if (!newPolicy.policy_id && !newPolicy.policy_ids?.[0]) {
+        if (!newPolicy.policy_id && !newPolicy.policy_ids[0]) {
           const { items: agentPolicies } = await agentPolicyService.list(soClient, {
             perPage: 1,
           });
