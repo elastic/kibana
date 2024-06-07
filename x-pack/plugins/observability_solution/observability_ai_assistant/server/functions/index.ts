@@ -6,13 +6,17 @@
  */
 
 import dedent from 'dedent';
-import { registerContextFunction } from './context';
-import { registerSummarizationFunction } from './summarize';
+import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context';
+import { registerSummarizationFunction, SUMMARIZE_FUNCTION_NAME } from './summarize';
 import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
-import { registerGetDatasetInfoFunction } from './get_dataset_info';
+import { GET_DATASET_INFO_FUNCTION_NAME, registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';
 import { registerExecuteConnectorFunction } from './execute_connector';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../service/chat_function_client';
+
+// cannot be imported from x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/query/index.ts due to circular dependency
+export const QUERY_FUNCTION_NAME = 'query';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<RegistrationCallback>[0],
@@ -59,30 +63,30 @@ export const registerFunctions: RegistrationCallback = async ({
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];
 
-    if (availableFunctionNames.includes('get_dataset_info')) {
-      instructions.push(`You MUST use the get_dataset_info function ${
-        functions.hasFunction('get_apm_dataset_info') ? 'or get_apm_dataset_info' : ''
-      } function before calling the "query" or "changes" function.
+    if (availableFunctionNames.includes(GET_DATASET_INFO_FUNCTION_NAME)) {
+      instructions.push(`You MUST use the "${GET_DATASET_INFO_FUNCTION_NAME}" ${
+        functions.hasFunction('get_apm_dataset_info') ? 'or the get_apm_dataset_info' : ''
+      } function before calling the "${QUERY_FUNCTION_NAME}" or the "changes" functions.
         
-        If a function requires an index, you MUST use the results from the dataset info functions.`);
+      If a function requires an index, you MUST use the results from the dataset info functions.`);
     }
 
-    if (availableFunctionNames.includes('get_data_on_screen')) {
-      instructions.push(`You have access to data on the screen by calling the "get_data_on_screen" function.
-        Use it to help the user understand what they are looking at. A short summary of what they are looking at is available in the return of the "context" function.
-        Data that is compact enough automatically gets included in the response for the "context" function.`);
+    if (availableFunctionNames.includes(GET_DATA_ON_SCREEN_FUNCTION_NAME)) {
+      instructions.push(`You have access to data on the screen by calling the "${GET_DATA_ON_SCREEN_FUNCTION_NAME}" function.
+        Use it to help the user understand what they are looking at. A short summary of what they are looking at is available in the return of the "${CONTEXT_FUNCTION_NAME}" function.
+        Data that is compact enough automatically gets included in the response for the "${CONTEXT_FUNCTION_NAME}" function.`);
     }
 
     if (isReady) {
-      if (availableFunctionNames.includes('summarize')) {
-        instructions.push(`You can use the "summarize" functions to store new information you have learned in a knowledge database.
+      if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
+        instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
           Only use this function when the user asks for it.
           All summaries MUST be created in English, even if the conversation was carried out in a different language.`);
       }
 
-      if (availableFunctionNames.includes('context')) {
+      if (availableFunctionNames.includes(CONTEXT_FUNCTION_NAME)) {
         instructions.push(
-          `Additionally, you can use the "context" function to retrieve relevant information from the knowledge database.`
+          `Additionally, you can use the "${CONTEXT_FUNCTION_NAME}" function to retrieve relevant information from the knowledge database.`
         );
       }
     } else {
