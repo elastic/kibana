@@ -8,6 +8,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { i18n as i18nFn } from '@kbn/i18n';
 import orderBy from 'lodash/orderBy';
 import {
   EuiButtonEmpty,
@@ -158,7 +159,10 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
                   }}
-                  aria-label="search field for panels"
+                  aria-label={i18nFn.translate(
+                    'dashboard.editorMenu.addPanelFlyout.searchLabelText',
+                    { defaultMessage: 'search field for panels' }
+                  )}
                   className="nsPanelSelectionFlyout__searchInput"
                 />
               </EuiFormRow>
@@ -170,14 +174,14 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
                 ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) => (
                   <EuiFlexItem key={id} data-test-subj={dataTestSubj}>
                     <EuiTitle
-                      id={`${title}-group`}
+                      id={`${id}-group`}
                       size="xxs"
                       css={isDisabled ? { color: euiTheme.colors.disabled } : {}}
                     >
                       {typeof title === 'string' ? <h3>{title}</h3> : title}
                     </EuiTitle>
                     <EuiListGroup
-                      aria-labelledby={`${title}-group`}
+                      aria-labelledby={`${id}-group`}
                       size="s"
                       gutterSize="none"
                       maxWidth={false}
@@ -208,7 +212,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
                             iconType={item.icon}
                             data-test-subj={item['data-test-subj']}
                             isDisabled={item.isDisabled}
-                            aria-description={item.description}
+                            title={item.description}
                           />
                         );
                       })}
