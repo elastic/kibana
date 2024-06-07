@@ -33,9 +33,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import type { RuleTypeModel, RuleFormErrors, MinimumScheduleInterval } from '../types';
+import type {
+  RuleTypeModel,
+  RuleFormErrors,
+  MinimumScheduleInterval,
+  Rule,
+  RuleTypeParams,
+} from '../../common';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -68,12 +73,12 @@ interface RuleDefinitionProps {
     docLinks: DocLinksStart;
   };
   formValues: {
-    id?: SanitizedRule<RuleTypeParams>['id'];
-    params: SanitizedRule<RuleTypeParams>['params'];
-    schedule: SanitizedRule<RuleTypeParams>['schedule'];
-    alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'];
-    notifyWhen?: SanitizedRule<RuleTypeParams>['notifyWhen'];
-    consumer?: SanitizedRule<RuleTypeParams>['consumer'];
+    id?: Rule<RuleTypeParams>['id'];
+    params: Rule<RuleTypeParams>['params'];
+    schedule: Rule<RuleTypeParams>['schedule'];
+    alertDelay?: Rule<RuleTypeParams>['alertDelay'];
+    notifyWhen?: Rule<RuleTypeParams>['notifyWhen'];
+    consumer?: Rule<RuleTypeParams>['consumer'];
   };
   minimumScheduleInterval?: MinimumScheduleInterval;
   errors?: RuleFormErrors;

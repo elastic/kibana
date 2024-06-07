@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { alertingFrameworkHealth } from './health';
+import { fetchAlertingFrameworkHealth } from '.';
 
-describe('alertingFrameworkHealth', () => {
+describe('fetchAlertingFrameworkHealth', () => {
   const http = httpServiceMock.createStartContract();
-  test('should call alertingFrameworkHealth API', async () => {
+  test('should call fetchAlertingFrameworkHealth API', async () => {
     http.get.mockResolvedValueOnce({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: true,
@@ -20,7 +21,7 @@ describe('alertingFrameworkHealth', () => {
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
       },
     });
-    const result = await alertingFrameworkHealth({ http });
+    const result = await fetchAlertingFrameworkHealth({ http });
     expect(result).toEqual({
       alertingFrameworkHealth: {
         decryptionHealth: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },

@@ -31,10 +31,10 @@ import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { RuleAction } from '@kbn/alerting-plugin/common';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
-import { TypeRegistry } from './application/type_registry';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';

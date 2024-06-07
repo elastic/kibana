@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { RuleUpdates } from '../../../types';
-import { createRule } from './create';
+import { RuleTypeParams } from '../../types';
+import { createRule } from './create_rule';
+import { CreateRuleBody } from './types';
 
 const http = httpServiceMock.createStartContract();
 
@@ -62,10 +64,7 @@ describe('createRule', () => {
       },
     };
 
-    const ruleToCreate: Omit<
-      RuleUpdates,
-      'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
-    > = {
+    const ruleToCreate: CreateRuleBody<RuleTypeParams> = {
       params: {
         aggType: 'count',
         termSize: 5,
@@ -106,17 +105,14 @@ describe('createRule', () => {
           actionTypeId: '.system-action',
         },
       ],
-      createdAt: new Date('2021-04-01T21:33:13.247Z'),
-      updatedAt: new Date('2021-04-01T21:33:13.247Z'),
-      apiKeyOwner: '',
-      revision: 0,
+      notifyWhen: 'onActionGroupChange',
       alertDelay: {
         active: 10,
       },
     };
     http.post.mockResolvedValueOnce(resolvedValue);
 
-    const result = await createRule({ http, rule: ruleToCreate });
+    const result = await createRule({ http, rule: ruleToCreate as CreateRuleBody });
     expect(result).toEqual({
       actions: [
         {

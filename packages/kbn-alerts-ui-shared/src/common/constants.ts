@@ -8,4 +8,6 @@
 
 export const ALERTS_FEATURE_ID = 'alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
+export const BASE_TRIGGERS_ACTIONS_UI_API_PATH = '/internal/triggers_actions_ui';

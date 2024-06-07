@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Rule } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { updateRule } from './update';
+import { Rule } from '../../types';
+import { updateRule, UpdateRuleBody } from '.';
 
 const http = httpServiceMock.createStartContract();
 
@@ -89,7 +90,7 @@ describe('updateRule', () => {
       ],
     });
 
-    const result = await updateRule({ http, id: '12/3', rule: ruleToUpdate });
+    const result = await updateRule({ http, id: '12/3', rule: ruleToUpdate as UpdateRuleBody });
 
     expect(result).toEqual({
       ...resolvedValue,

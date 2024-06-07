@@ -1,18 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { TypeRegistry } from './type_registry';
-import {
-  ValidationResult,
-  RuleTypeModel,
-  ActionTypeModel,
-  GenericValidationResult,
-} from '../types';
-import { actionTypeRegistryMock } from './action_type_registry.mock';
+import { ActionTypeModel, GenericValidationResult, RuleTypeModel, ValidationResult } from './types';
+import { actionTypeRegistryMock } from './test_utils/action_type_registry.mock';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
   return null;

@@ -12,7 +12,7 @@ import {
   RuleFormErrors,
   ValidationResult,
   MinimumScheduleInterval,
-} from '../types';
+} from '../../common';
 import { parseDuration, formatDuration } from './parse_duration';
 import {
   NAME_REQUIRED_TEXT,

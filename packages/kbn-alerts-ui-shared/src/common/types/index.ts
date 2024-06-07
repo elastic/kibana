@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { RuleType } from '@kbn/triggers-actions-ui-types';
-
-export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
-
-export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
+export * from './rule_types';
+export * from './action_types';

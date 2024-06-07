@@ -28,6 +28,8 @@ import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import { updateRule } from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
 import {
   Rule,
   RuleFlyoutCloseReason,
@@ -44,7 +46,6 @@ import {
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { getRuleReducer } from './rule_reducer';
-import { updateRule } from '../../lib/rule_api/update';
 import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
@@ -52,7 +53,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
 import { ShowRequestModal } from './show_request_modal';
 

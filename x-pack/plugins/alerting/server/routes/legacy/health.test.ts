@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { HealthStatus } from '@kbn/alerting-types';
 import { healthRoute } from './health';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { rulesClientMock } from '../../rules_client.mock';
-import { HealthStatus, RecoveredActionGroup } from '../../types';
+import { RecoveredActionGroup } from '../../types';
 import { alertsMock } from '../../mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { RegistryAlertTypeWithAuth } from '../../authorization';
@@ -141,7 +142,8 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          _deprecated:
+            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -155,7 +157,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        alertingFrameworkHealth: {
+        fetchAlertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -199,7 +201,8 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          _deprecated:
+            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -213,7 +216,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        alertingFrameworkHealth: {
+        fetchAlertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -257,7 +260,8 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          _deprecated:
+            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -271,7 +275,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        alertingFrameworkHealth: {
+        fetchAlertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -315,7 +319,8 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          _deprecated:
+            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -329,7 +334,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        alertingFrameworkHealth: {
+        fetchAlertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -373,7 +378,8 @@ describe('healthRoute', () => {
       body: {
         alertingFrameworkHeath: {
           // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+          _deprecated:
+            'This state property has a typo, use "fetchAlertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,
@@ -387,7 +393,7 @@ describe('healthRoute', () => {
             timestamp: currentDate,
           },
         },
-        alertingFrameworkHealth: {
+        fetchAlertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
             timestamp: currentDate,

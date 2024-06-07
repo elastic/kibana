@@ -7,12 +7,12 @@
 
 import { healthRoute } from './health';
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { HealthStatus } from '@kbn/alerting-types';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { rulesClientMock } from '../rules_client.mock';
-import { HealthStatus } from '../types';
 import { alertsMock } from '../mocks';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryAlertTypeWithAuth } from '../authorization';

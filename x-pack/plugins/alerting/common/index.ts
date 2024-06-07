@@ -7,9 +7,6 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
-
-import { AlertsHealth } from './rule';
-
 export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';
@@ -71,12 +68,6 @@ export {
   getComponentTemplateFromFieldMap,
   contextToSchemaName,
 } from './alert_schema';
-
-export interface AlertingFrameworkHealth {
-  isSufficientlySecure: boolean;
-  hasPermanentEncryptionKey: boolean;
-  alertingFrameworkHealth: AlertsHealth;
-}
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';

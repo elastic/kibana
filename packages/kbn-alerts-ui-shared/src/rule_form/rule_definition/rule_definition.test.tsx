@@ -16,8 +16,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { RuleDefinition } from './rule_definition';
-import { RuleTypeModel } from '../types';
-import { RuleType } from '@kbn/alerting-types';
+import { RuleTypeModel } from '../../common';
+import { RuleType } from '@kbn/triggers-actions-ui-types';
 import { ALERT_DELAY_TITLE } from '../translations';
 
 const ruleType = {
