@@ -314,8 +314,7 @@ GET _search
       });
     });
 
-    // this feature is not implemented for Monaco yet https://github.com/elastic/kibana/issues/184856
-    describe.skip('with a missing comma in query', () => {
+    describe('with a missing comma in query', () => {
       const LINE_NUMBER = 4;
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
@@ -385,13 +384,13 @@ GET _search
 
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
-        await PageObjects.console.enterRequest('\nPOST _snapshot/test_repo');
+        await PageObjects.console.enterRequest('\n POST _snapshot/test_repo');
         await PageObjects.console.pressEnter();
       });
 
       await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
         it('should insert different templates depending on the value of type', async () => {
-          await PageObjects.console.enterText(`{\n\t"type": "${type}",`);
+          await PageObjects.console.enterText(`{\n\t"type": "${type}"`);
           await PageObjects.console.pressEnter();
           await PageObjects.console.sleepForDebouncePeriod();
           // Prompt autocomplete for 'settings'
