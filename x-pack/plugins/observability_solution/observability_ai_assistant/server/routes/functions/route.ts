@@ -109,7 +109,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources) => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {

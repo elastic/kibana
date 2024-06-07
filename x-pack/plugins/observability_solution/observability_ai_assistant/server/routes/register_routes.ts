@@ -19,7 +19,7 @@ export function registerServerRoutes({
   logger: Logger;
   dependencies: Omit<
     ObservabilityAIAssistantRouteHandlerResources,
-    'request' | 'context' | 'logger' | 'params'
+    'request' | 'response' | 'context' | 'logger' | 'params'
   >;
 }) {
   registerRoutes({
