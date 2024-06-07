@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -72,6 +73,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     selectedTabId: _selectedTabId,
   } = props;
 
+  const [activeSpaceId, setActiveSpaceId] = useState<string | null>(null);
   const selectedTabId = getSelectedTabId(_selectedTabId);
   const [space, setSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
@@ -83,10 +85,15 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const { capabilities, getUrlForApp, navigateToUrl } = props;
 
   useEffect(() => {
+    spacesManager.getActiveSpace().then(({ id: nextSpaceId }) => {
+      setActiveSpaceId(nextSpaceId);
+    });
+  }, [spacesManager]);
+
+  useEffect(() => {
     if (!spaceId) {
       return;
     }
-
     const getSpace = async () => {
       const result = await spacesManager.getSpace(spaceId);
       if (!result) {
@@ -183,6 +190,10 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   };
 
   const SwitchButton = () => {
+    if (activeSpaceId === space.id) {
+      return <EuiCallOut>This is the current space.</EuiCallOut>;
+    }
+
     const { serverBasePath } = props;
     const urlToSelectedSpace = addSpaceIdToPath(
       serverBasePath,
@@ -220,10 +231,14 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
             </p>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SettingsButton />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SwitchButton />
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <SettingsButton />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <SwitchButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
