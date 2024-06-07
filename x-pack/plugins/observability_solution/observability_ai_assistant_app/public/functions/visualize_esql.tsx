@@ -105,6 +105,19 @@ interface VisualizeESQLProps {
 function generateId() {
   return uuidv4();
 }
+const saveVisualizationLabel = i18n.translate(
+  'xpack.observabilityAiAssistant.lensESQLFunction.save',
+  {
+    defaultMessage: 'Save visualization',
+  }
+);
+
+const editVisualizationLabel = i18n.translate(
+  'xpack.observabilityAiAssistant.lensESQLFunction.edit',
+  {
+    defaultMessage: 'Edit visualization',
+  }
+);
 
 export function VisualizeESQL({
   lens,
@@ -260,7 +273,7 @@ export function VisualizeESQL({
   return (
     <>
       <EuiFlexGroup direction="column">
-        {Boolean(errorMessages?.length) && (
+        {!!errorMessages?.length && (
           <>
             <EuiText size="s">
               {i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.errorMessage', {
@@ -268,7 +281,7 @@ export function VisualizeESQL({
               })}
             </EuiText>
             <EuiDescriptionList data-test-subj="observabilityAiAssistantErrorsList">
-              {errorMessages?.map((error, index) => {
+              {errorMessages.map((error, index) => {
                 return (
                   <EuiDescriptionListDescription key={index}>
                     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -318,18 +331,14 @@ export function VisualizeESQL({
                           : i18n.translate(
                               'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
                               {
-                                defaultMessage: 'Display results',
+                                defaultMessage: 'Display table',
                               }
                             )
                       }
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
-                <EuiToolTip
-                  content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
-                    defaultMessage: 'Edit visualization',
-                  })}
-                >
+                <EuiToolTip content={editVisualizationLabel}>
                   <EuiButtonIcon
                     size="xs"
                     iconType="pencil"
@@ -340,34 +349,17 @@ export function VisualizeESQL({
                       }
                     }}
                     data-test-subj="observabilityAiAssistantLensESQLEditButton"
-                    aria-label={i18n.translate(
-                      'xpack.observabilityAiAssistant.lensESQLFunction.edit',
-                      {
-                        defaultMessage: 'Edit visualization',
-                      }
-                    )}
+                    aria-label={editVisualizationLabel}
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.observabilityAiAssistant.lensESQLFunction.save',
-                      {
-                        defaultMessage: 'Save visualization',
-                      }
-                    )}
-                  >
+                  <EuiToolTip content={saveVisualizationLabel}>
                     <EuiButtonIcon
                       size="xs"
                       iconType="save"
                       onClick={() => setIsSaveModalOpen(true)}
                       data-test-subj="observabilityAiAssistantLensESQLSaveButton"
-                      aria-label={i18n.translate(
-                        'xpack.observabilityAiAssistant.lensESQLFunction.save',
-                        {
-                          defaultMessage: 'Save visualization',
-                        }
-                      )}
+                      aria-label={saveVisualizationLabel}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
