@@ -26,6 +26,8 @@ import { parseSuggestionScores } from './parse_suggestion_scores';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
 
+export const CONTEXT_FUNCTION_NAME = 'context';
+
 export function registerContextFunction({
   client,
   functions,
@@ -34,7 +36,7 @@ export function registerContextFunction({
 }: FunctionRegistrationParameters & { isKnowledgeBaseAvailable: boolean }) {
   functions.registerFunction(
     {
-      name: 'context',
+      name: CONTEXT_FUNCTION_NAME,
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.Internal,
@@ -157,7 +159,7 @@ export function registerContextFunction({
           .then(({ content, data }) => {
             subscriber.next(
               createFunctionResponseMessage({
-                name: 'context',
+                name: CONTEXT_FUNCTION_NAME,
                 content,
                 data,
               })
