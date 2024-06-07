@@ -6,24 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from "rxjs";
-import { TimeRangeMeta } from "./get_time_range_meta";
-import { FROM_INDEX, TO_INDEX } from "./time_utils";
-import { Timeslice, TimesliderControlState } from "./types";
+import { BehaviorSubject } from 'rxjs';
+import { TimeRangeMeta } from './get_time_range_meta';
+import { FROM_INDEX, TO_INDEX } from './time_utils';
+import { Timeslice, TimesliderControlState } from './types';
 
 export function initTimeRangePercentage(state: TimesliderControlState) {
-  const timesliceStartAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(state.timesliceStartAsPercentageOfTimeRange);
-  const timesliceEndAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(state.timesliceEndAsPercentageOfTimeRange);
-  
+  const timesliceStartAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
+    state.timesliceStartAsPercentageOfTimeRange
+  );
+  const timesliceEndAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
+    state.timesliceEndAsPercentageOfTimeRange
+  );
+
   return {
     setTimeRangePercentage(timeslice: Timeslice | undefined, timeRangeMeta: TimeRangeMeta) {
       let timesliceStartAsPercentageOfTimeRange: number | undefined;
       let timesliceEndAsPercentageOfTimeRange: number | undefined;
       if (timeslice) {
         timesliceStartAsPercentageOfTimeRange =
-          (timeslice[FROM_INDEX] - timeRangeMeta.timeRangeBounds[FROM_INDEX]) / timeRangeMeta.timeRange;
+          (timeslice[FROM_INDEX] - timeRangeMeta.timeRangeBounds[FROM_INDEX]) /
+          timeRangeMeta.timeRange;
         timesliceEndAsPercentageOfTimeRange =
-          (timeslice[TO_INDEX] - timeRangeMeta.timeRangeBounds[FROM_INDEX]) / timeRangeMeta.timeRange;
+          (timeslice[TO_INDEX] - timeRangeMeta.timeRangeBounds[FROM_INDEX]) /
+          timeRangeMeta.timeRange;
       }
       timesliceStartAsPercentageOfTimeRange$.next(timesliceStartAsPercentageOfTimeRange);
       timesliceEndAsPercentageOfTimeRange$.next(timesliceEndAsPercentageOfTimeRange);
@@ -31,7 +37,7 @@ export function initTimeRangePercentage(state: TimesliderControlState) {
     serializeState: () => {
       return {
         timesliceStartAsPercentageOfTimeRange: timesliceStartAsPercentageOfTimeRange$.value,
-        timesliceEndAsPercentageOfTimeRange: timesliceEndAsPercentageOfTimeRange$.value
+        timesliceEndAsPercentageOfTimeRange: timesliceEndAsPercentageOfTimeRange$.value,
       };
     },
     comparators: {
@@ -39,14 +45,14 @@ export function initTimeRangePercentage(state: TimesliderControlState) {
         timesliceStartAsPercentageOfTimeRange$,
         (value: number | undefined) => {
           timesliceStartAsPercentageOfTimeRange$.next(value);
-        }
+        },
       ],
       timesliceEndAsPercentageOfTimeRange: [
         timesliceEndAsPercentageOfTimeRange$,
         (value: number | undefined) => {
           timesliceEndAsPercentageOfTimeRange$.next(value);
-        }
-      ]
-    }
-  }
+        },
+      ],
+    },
+  };
 }

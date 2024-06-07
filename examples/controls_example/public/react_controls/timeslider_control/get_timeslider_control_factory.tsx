@@ -8,26 +8,42 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ControlFactory } from '../types';
-import { TimesliderControlState, TimesliderControlApi, TIMESLIDER_CONTROL_TYPE, Services, Timeslice } from './types';
 import { BehaviorSubject } from 'rxjs';
-import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { EuiInputPopover } from '@elastic/eui';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { ControlFactory } from '../types';
+import {
+  TimesliderControlState,
+  TimesliderControlApi,
+  TIMESLIDER_CONTROL_TYPE,
+  Services,
+  Timeslice,
+} from './types';
+import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { initTimeRangeSubscription } from './init_time_range_subscription';
-import { FROM_INDEX, roundDownToNextStepSizeFactor, roundUpToNextStepSizeFactor, TO_INDEX } from './time_utils';
+import {
+  FROM_INDEX,
+  roundDownToNextStepSizeFactor,
+  roundUpToNextStepSizeFactor,
+  TO_INDEX,
+} from './time_utils';
 import { initTimeRangePercentage } from './init_time_range_percentage';
 
-export const getTimesliderControlFactory = (services: Services): ControlFactory<TimesliderControlState, TimesliderControlApi> => {
+export const getTimesliderControlFactory = (
+  services: Services
+): ControlFactory<TimesliderControlState, TimesliderControlApi> => {
   return {
     type: TIMESLIDER_CONTROL_TYPE,
     getIconType: () => 'search',
     getDisplayName: () =>
-      i18n.translate('controlsExamples.timesliderControl.displayName', { defaultMessage: 'Timeslider' }),
+      i18n.translate('controlsExamples.timesliderControl.displayName', {
+        defaultMessage: 'Timeslider',
+      }),
     buildControl: (initialState, buildApi, uuid, parentApi) => {
-      const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } = initTimeRangeSubscription(parentApi, services);
+      const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
+        initTimeRangeSubscription(parentApi, services);
       const timeRangePercentage = initTimeRangePercentage(initialState);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       function setTimeslice(timeslice?: Timeslice) {
@@ -38,18 +54,15 @@ export const getTimesliderControlFactory = (services: Services): ControlFactory<
       function setIsAnchored(isAnchored: boolean | undefined) {
         isAnchored$.next(isAnchored);
       }
-      
+
       const isPopoverOpen$ = new BehaviorSubject(false);
       function setIsPopoverOpen(value: boolean) {
         isPopoverOpen$.next(value);
       }
 
-      const {
-        defaultControlApi,
-        defaultControlComparators,
-        serializeDefaultControl,
-      } = initializeDefaultControlApi(initialState);
-      
+      const { defaultControlApi, defaultControlComparators, serializeDefaultControl } =
+        initializeDefaultControlApi(initialState);
+
       const api = buildApi(
         {
           ...defaultControlApi,
@@ -64,20 +77,18 @@ export const getTimesliderControlFactory = (services: Services): ControlFactory<
               },
               references: [],
             };
-          }
+          },
         },
         {
           ...defaultControlComparators,
           ...timeRangePercentage.comparators,
-          isAnchored: [
-            isAnchored$,
-            setIsAnchored
-          ],
+          isAnchored: [isAnchored$, setIsAnchored],
         }
       );
 
-      const timeRangeMetaSubscription = timeRangeMeta$.subscribe(timeRangeMeta => {
-        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } = timeRangePercentage.serializeState();
+      const timeRangeMetaSubscription = timeRangeMeta$.subscribe((timeRangeMeta) => {
+        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+          timeRangePercentage.serializeState();
         if (
           timesliceStartAsPercentageOfTimeRange === undefined ||
           timesliceEndAsPercentageOfTimeRange === undefined
@@ -88,8 +99,12 @@ export const getTimesliderControlFactory = (services: Services): ControlFactory<
           return;
         }
 
-        const from = timeRangeMeta.timeRangeBounds[FROM_INDEX] + timesliceStartAsPercentageOfTimeRange * timeRangeMeta.timeRange;
-        const to = timeRangeMeta.timeRangeBounds[FROM_INDEX] + timesliceEndAsPercentageOfTimeRange * timeRangeMeta.timeRange;
+        const from =
+          timeRangeMeta.timeRangeBounds[FROM_INDEX] +
+          timesliceStartAsPercentageOfTimeRange * timeRangeMeta.timeRange;
+        const to =
+          timeRangeMeta.timeRangeBounds[FROM_INDEX] +
+          timesliceEndAsPercentageOfTimeRange * timeRangeMeta.timeRange;
         timeslice$.next([
           roundDownToNextStepSizeFactor(from, timeRangeMeta.stepSize),
           roundUpToNextStepSizeFactor(to, timeRangeMeta.stepSize),
@@ -99,23 +114,14 @@ export const getTimesliderControlFactory = (services: Services): ControlFactory<
       return {
         api,
         Component: () => {
-          const [
-            isAnchored,
-            isPopoverOpen,
-            timeRangeMeta,
-            timeslice,
-          ] = useBatchedPublishingSubjects(
-            isAnchored$,
-            isPopoverOpen$,
-            timeRangeMeta$,
-            timeslice$
-          );
+          const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
+            useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
 
           useEffect(() => {
-            return () => { 
+            return () => {
               cleanupTimeRangeSubscription();
               timeRangeMetaSubscription.unsubscribe();
-            }
+            };
           }, []);
 
           const from = useMemo(() => {
@@ -124,7 +130,7 @@ export const getTimesliderControlFactory = (services: Services): ControlFactory<
           const to = useMemo(() => {
             return timeslice ? timeslice[TO_INDEX] : timeRangeMeta.timeRangeMax;
           }, [timeslice, timeRangeMeta.timeRangeMax]);
-          
+
           return (
             <EuiInputPopover
               className="timeSlider__popoverOverride"
@@ -144,10 +150,7 @@ export const getTimesliderControlFactory = (services: Services): ControlFactory<
               panelPaddingSize="s"
             >
               <TimeSliderPopoverContent
-                isAnchored={typeof isAnchored === 'boolean'
-                  ? isAnchored
-                  : false
-                }
+                isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
                 setIsAnchored={setIsAnchored}
                 value={[from, to]}
                 onChange={setTimeslice}
@@ -162,4 +165,4 @@ export const getTimesliderControlFactory = (services: Services): ControlFactory<
       };
     },
   };
-}
+};

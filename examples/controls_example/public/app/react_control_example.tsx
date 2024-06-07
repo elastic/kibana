@@ -84,7 +84,7 @@ const controlGroupPanels = {
       title: 'Time slider',
       enhancements: {},
     },
-  }
+  },
 };
 
 /**

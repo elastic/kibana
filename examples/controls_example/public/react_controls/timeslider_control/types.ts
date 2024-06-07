@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from "@kbn/core/public";
-import { DataPublicPluginStart } from "@kbn/data-plugin/public";
-import type { PublishesTimeslice } from "@kbn/presentation-publishing";
-import type { DefaultControlApi, DefaultControlState } from "../types";
+import { CoreStart } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { PublishesTimeslice } from '@kbn/presentation-publishing';
+import type { DefaultControlApi, DefaultControlState } from '../types';
 
 export const TIMESLIDER_CONTROL_TYPE = 'timesliderControl';
 
@@ -24,7 +24,7 @@ export interface TimesliderControlState extends DefaultControlState {
 
 export type TimesliderControlApi = DefaultControlApi & PublishesTimeslice;
 
-export type Services = {
+export interface Services {
   core: CoreStart;
   data: DataPublicPluginStart;
 }

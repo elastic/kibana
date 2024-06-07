@@ -23,7 +23,6 @@ interface Props {
 }
 
 export const TimeSliderPrepend: FC<Props> = (props: Props) => {
-
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);

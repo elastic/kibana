@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiRangeTick } from "@elastic/eui";
-import { TimeRange } from "@kbn/es-query";
-import { FROM_INDEX, getStepSize, getTicks, roundDownToNextStepSizeFactor, roundUpToNextStepSizeFactor, TO_INDEX } from "./time_utils";
-import { Services } from "./types";
+import { EuiRangeTick } from '@elastic/eui';
+import { TimeRange } from '@kbn/es-query';
+import {
+  FROM_INDEX,
+  getStepSize,
+  getTicks,
+  roundDownToNextStepSizeFactor,
+  roundUpToNextStepSizeFactor,
+  TO_INDEX,
+} from './time_utils';
+import { Services } from './types';
 
 export interface TimeRangeMeta {
   format: string;
@@ -19,9 +26,12 @@ export interface TimeRangeMeta {
   timeRangeBounds: [number, number];
   timeRangeMax: number;
   timeRangeMin: number;
-};
+}
 
-export function getTimeRangeMeta(timeRange: TimeRange | undefined, services: Services): TimeRangeMeta {
+export function getTimeRangeMeta(
+  timeRange: TimeRange | undefined,
+  services: Services
+): TimeRangeMeta {
   const nextBounds = timeRangeToBounds(timeRange ?? getDefaultTimeRange(services), services);
   const ticks = getTicks(nextBounds[FROM_INDEX], nextBounds[TO_INDEX], getTimezone(services));
   const { format, stepSize } = getStepSize(ticks);
