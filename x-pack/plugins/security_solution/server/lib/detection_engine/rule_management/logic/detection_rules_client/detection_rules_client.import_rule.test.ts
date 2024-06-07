@@ -13,7 +13,7 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
-import type { IDetectionRulesClient } from './detection_rules_client';
+import type { IDetectionRulesClient } from './detection_rules_client_interface';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -50,7 +50,7 @@ describe('DetectionRulesClient.importRule', () => {
     await detectionRulesClient.importRule({
       ruleToImport,
       overwriteRules: true,
-      options: { allowMissingConnectorSecrets },
+      allowMissingConnectorSecrets,
     });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
@@ -78,7 +78,7 @@ describe('DetectionRulesClient.importRule', () => {
       detectionRulesClient.importRule({
         ruleToImport,
         overwriteRules: true,
-        options: { allowMissingConnectorSecrets },
+        allowMissingConnectorSecrets,
       })
     ).rejects.toThrow('mocked MLAuth error');
 
@@ -92,7 +92,7 @@ describe('DetectionRulesClient.importRule', () => {
       await detectionRulesClient.importRule({
         ruleToImport,
         overwriteRules: true,
-        options: { allowMissingConnectorSecrets },
+        allowMissingConnectorSecrets,
       });
 
       expect(rulesClient.update).toHaveBeenCalledWith(
@@ -133,7 +133,7 @@ describe('DetectionRulesClient.importRule', () => {
           timestamp_override: undefined,
         },
         overwriteRules: true,
-        options: { allowMissingConnectorSecrets },
+        allowMissingConnectorSecrets,
       });
 
       expect(rulesClient.create).not.toHaveBeenCalled();
@@ -154,7 +154,7 @@ describe('DetectionRulesClient.importRule', () => {
         detectionRulesClient.importRule({
           ruleToImport,
           overwriteRules: false,
-          options: { allowMissingConnectorSecrets },
+          allowMissingConnectorSecrets,
         })
       ).rejects.toMatchObject({
         error: {
