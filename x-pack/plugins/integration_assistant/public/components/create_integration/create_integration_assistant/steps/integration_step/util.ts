@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { CreateIntegrationAssistant } from './create_integration_assistant';
+import type { State } from '../../state';
+export const isConfigureIntegrationReady = ({ integrationSettings }: State) =>
+  Boolean(integrationSettings?.title && integrationSettings?.description);

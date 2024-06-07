@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { CreateIntegrationAssistant } from './create_integration_assistant';
+export { IntegrationStep } from './integration_step';
+export * from './util';

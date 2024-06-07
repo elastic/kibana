@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { ConnectorSetup } from './connector_setup';
-export * from './util';
+export { BottomBar } from './bottom_bar';

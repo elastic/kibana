@@ -17,78 +17,85 @@ const bottomBarCss = css`
 const containerCss = css`
   min-height: 40px;
 `;
+const contentCss = css`
+  width: 100%;
+  max-width: 730px;
+`;
 
 interface ButtonsFooterProps {
-  hideCancel?: boolean;
   cancelButtonText?: string;
-  isNextDisabled?: boolean;
   nextButtonText?: string;
-  onNext?: () => void;
   backButtonText?: string;
+  onNext?: () => void;
   onBack?: () => void;
+  hideCancel?: boolean;
+  isNextDisabled?: boolean;
 }
 export const ButtonsFooter = React.memo<ButtonsFooterProps>(
   ({
-    hideCancel = false,
     cancelButtonText,
-    isNextDisabled = false,
     nextButtonText,
-    onNext,
     backButtonText,
+    onNext,
     onBack,
+    hideCancel = false,
+    isNextDisabled = false,
   }) => {
     const integrationsUrl = useKibana().services.application.getUrlForApp('integrations');
     return (
-      <KibanaPageTemplate.BottomBar paddingSize="s" usePortal={false} css={bottomBarCss}>
-        <EuiFlexGroup
-          direction="row"
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="l"
-          css={containerCss}
-        >
-          <EuiFlexItem>
-            {!hideCancel && (
-              <EuiLink href={integrationsUrl} color="text">
-                {cancelButtonText || (
-                  <FormattedMessage
-                    id="xpack.integrationAssistant.footer.cancel"
-                    defaultMessage="Cancel"
-                  />
-                )}
-              </EuiLink>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem>
+      <KibanaPageTemplate.BottomBar paddingSize="s" position="sticky" css={bottomBarCss}>
+        <EuiFlexGroup direction="column" alignItems="center" css={containerCss}>
+          <EuiFlexItem css={contentCss}>
             <EuiFlexGroup
               direction="row"
-              justifyContent="flexEnd"
+              justifyContent="spaceBetween"
               alignItems="center"
               gutterSize="l"
             >
-              <EuiFlexItem grow={false}>
-                {onBack && (
-                  <EuiLink onClick={onBack} color="text">
-                    {backButtonText || (
+              <EuiFlexItem>
+                {!hideCancel && (
+                  <EuiLink href={integrationsUrl} color="text">
+                    {cancelButtonText || (
                       <FormattedMessage
-                        id="xpack.integrationAssistant.footer.back"
-                        defaultMessage="Back"
+                        id="xpack.integrationAssistant.footer.cancel"
+                        defaultMessage="Cancel"
                       />
                     )}
                   </EuiLink>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {onNext && (
-                  <EuiButton fill color="primary" onClick={onNext} isDisabled={isNextDisabled}>
-                    {nextButtonText || (
-                      <FormattedMessage
-                        id="xpack.integrationAssistant.footer.next"
-                        defaultMessage="Next"
-                      />
+              <EuiFlexItem>
+                <EuiFlexGroup
+                  direction="row"
+                  justifyContent="flexEnd"
+                  alignItems="center"
+                  gutterSize="l"
+                >
+                  <EuiFlexItem grow={false}>
+                    {onBack && (
+                      <EuiLink onClick={onBack} color="text">
+                        {backButtonText || (
+                          <FormattedMessage
+                            id="xpack.integrationAssistant.footer.back"
+                            defaultMessage="Back"
+                          />
+                        )}
+                      </EuiLink>
                     )}
-                  </EuiButton>
-                )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {onNext && (
+                      <EuiButton fill color="primary" onClick={onNext} isDisabled={isNextDisabled}>
+                        {nextButtonText || (
+                          <FormattedMessage
+                            id="xpack.integrationAssistant.footer.next"
+                            defaultMessage="Next"
+                          />
+                        )}
+                      </EuiButton>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

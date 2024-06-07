@@ -8,7 +8,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CreateIntegrationLanding } from './create_integration_landing';
 import { CreateIntegrationUpload } from './create_integration_upload';
-import { IntegrationAssistant as CreateIntegrationAssistant } from './create_integration_assistant';
+import { CreateIntegrationAssistant } from './create_integration_assistant';
 import type { Page, SetPage } from '../types';
 import { Pages } from '../constants';
 

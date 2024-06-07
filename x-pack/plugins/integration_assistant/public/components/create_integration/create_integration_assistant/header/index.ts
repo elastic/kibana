@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const isConnectorSetupReady = ({ connectorId }: { connectorId: string | undefined }) =>
-  connectorId != null;
+export { Header } from './header';

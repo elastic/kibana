@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 
 const contentCss = css`
   width: 100%;
-  max-width: 47em;
+  max-width: 660px;
 `;
 const titleCss = css`
   text-align: center;

@@ -9,32 +9,31 @@ import { EuiStepsHorizontal, type EuiStepStatus, type EuiStepsHorizontalProps } 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
-interface IntegrationsAssistantStepsProps {
+interface StepsProps {
   currentStep: number;
   setStep: (step: number) => void;
   isGenerating: boolean;
 }
 
-const SETUP_CONNECTOR = i18n.translate('xpack.integrationAssistant.step.install', {
-  defaultMessage: 'Setup connector',
+const STEP_CONNECTOR = i18n.translate('xpack.integrationAssistant.step.connector', {
+  defaultMessage: 'Connector',
 });
 
-const CONFIGURE_INTEGRATION = i18n.translate(
-  'xpack.integrationAssistant.step.configureIntegration',
-  { defaultMessage: 'Integration details' }
-);
-
-const LOGS_ANALYSIS = i18n.translate('xpack.integrationAssistant.step.logsAnalysis', {
-  defaultMessage: 'Logs analysis',
+const STEP_INTEGRATION = i18n.translate('xpack.integrationAssistant.step.integration', {
+  defaultMessage: 'Integration',
 });
 
-const GENERATION = i18n.translate('xpack.integrationAssistant.step.generation', {
-  defaultMessage: 'Generation',
+const STEP_DATA_STREAM = i18n.translate('xpack.integrationAssistant.step.dataStream', {
+  defaultMessage: 'Data stream',
 });
 
-const INSTALL = i18n.translate('xpack.integrationAssistant.step.install', {
-  defaultMessage: 'Deploy',
+const STEP_REVIEW = i18n.translate('xpack.integrationAssistant.step.review', {
+  defaultMessage: 'Review',
 });
+
+// const INSTALL = i18n.translate('xpack.integrationAssistant.step.install', {
+//   defaultMessage: 'Deploy',
+// });
 
 const getStepStatus = (step: number, currentStep: number, loading?: boolean): EuiStepStatus => {
   if (step === currentStep) {
@@ -53,39 +52,37 @@ const getStepOnClick = (step: number, currentStep: number, setStep: (step: numbe
   return () => {};
 };
 
-export const IntegrationsAssistantSteps = React.memo<IntegrationsAssistantStepsProps>(
-  ({ currentStep, setStep, isGenerating }) => {
-    const steps = useMemo<EuiStepsHorizontalProps['steps']>(() => {
-      return [
-        {
-          title: SETUP_CONNECTOR,
-          status: getStepStatus(1, currentStep),
-          onClick: getStepOnClick(1, currentStep, setStep),
-        },
-        {
-          title: CONFIGURE_INTEGRATION,
-          status: getStepStatus(2, currentStep),
-          onClick: getStepOnClick(2, currentStep, setStep),
-        },
-        {
-          title: LOGS_ANALYSIS,
-          status: getStepStatus(3, currentStep),
-          onClick: getStepOnClick(3, currentStep, setStep),
-        },
-        {
-          title: GENERATION,
-          status: getStepStatus(4, currentStep, isGenerating),
-          onClick: getStepOnClick(4, currentStep, setStep),
-        },
-        {
-          title: INSTALL,
-          status: getStepStatus(5, currentStep),
-          onClick: getStepOnClick(5, currentStep, setStep),
-        },
-      ];
-    }, [currentStep, setStep, isGenerating]);
+export const Steps = React.memo<StepsProps>(({ currentStep, setStep, isGenerating }) => {
+  const steps = useMemo<EuiStepsHorizontalProps['steps']>(() => {
+    return [
+      {
+        title: STEP_CONNECTOR,
+        status: getStepStatus(1, currentStep),
+        onClick: getStepOnClick(1, currentStep, setStep),
+      },
+      {
+        title: STEP_INTEGRATION,
+        status: getStepStatus(2, currentStep),
+        onClick: getStepOnClick(2, currentStep, setStep),
+      },
+      {
+        title: STEP_DATA_STREAM,
+        status: getStepStatus(3, currentStep),
+        onClick: getStepOnClick(3, currentStep, setStep),
+      },
+      {
+        title: STEP_REVIEW,
+        status: getStepStatus(4, currentStep, isGenerating),
+        onClick: getStepOnClick(4, currentStep, setStep),
+      },
+      // {
+      //   title: INSTALL,
+      //   status: getStepStatus(5, currentStep),
+      //   onClick: getStepOnClick(5, currentStep, setStep),
+      // },
+    ];
+  }, [currentStep, setStep, isGenerating]);
 
-    return <EuiStepsHorizontal steps={steps} size="s" />;
-  }
-);
-IntegrationsAssistantSteps.displayName = 'IntegrationsAssistantSteps';
+  return <EuiStepsHorizontal steps={steps} size="s" />;
+});
+Steps.displayName = 'Steps';

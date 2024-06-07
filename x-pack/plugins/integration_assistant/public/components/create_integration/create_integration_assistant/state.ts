@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import type { InputType, Pipeline } from '../../../../common/types';
-import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
-
-export interface IntegrationSettings {
-  title?: string;
-  description?: string;
-  dataStreamTitle?: string;
-  dataStreamDescription?: string;
-  name?: string;
-  dataStreamName?: string;
-  inputType?: InputType;
-  logsSampleFileName?: string;
-  logsSampleParsed?: string[];
-}
+import type { Pipeline } from '../../../../common/types';
+// import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
+import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
   step: number;
-  connectorId?: string;
+  connectorId?: AIConnector['id'];
   integrationSettings?: IntegrationSettings;
   isGenerating: boolean;
   result?: {
@@ -31,14 +20,14 @@ export interface State {
   };
 }
 
-export const initialState = dummyInitialState;
-// export const initialState: State = {
-//   step: 1,
-//   connectorId: undefined,
-//   integrationSettings: undefined,
-//   isGenerating: false,
-//   result: undefined,
-// };
+// export const initialState = { ...dummyInitialState, step: 2 };
+export const initialState: State = {
+  step: 1,
+  connectorId: undefined,
+  integrationSettings: undefined,
+  isGenerating: false,
+  result: undefined,
+};
 
 type Action =
   | { type: 'SET_STEP'; payload: State['step'] }

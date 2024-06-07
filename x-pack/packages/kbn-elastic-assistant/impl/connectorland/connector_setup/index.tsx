@@ -34,6 +34,7 @@ const ConnectorButtonWrapper = styled.div`
 export interface ConnectorSetupProps {
   conversation?: Conversation;
   isFlyoutMode?: boolean;
+  actionTypeIds?: string[];
   onSetupComplete?: () => void;
   onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
@@ -42,6 +43,7 @@ export interface ConnectorSetupProps {
 export const useConnectorSetup = ({
   conversation: defaultConversation,
   isFlyoutMode,
+  actionTypeIds,
   onSetupComplete,
   onConversationUpdate,
   updateConversationsOnSaveConnector = true,
@@ -74,7 +76,7 @@ export const useConnectorSetup = ({
     // If no presentation data on messages, default to showing add connector button so it doesn't delay render and flash on screen
     return conversationHasNoPresentationData(conversation);
   });
-  const { data: actionTypes } = useLoadActionTypes({ http });
+  const { data: actionTypes } = useLoadActionTypes({ http, actionTypeIds });
 
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 

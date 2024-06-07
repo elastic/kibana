@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ConfigureIntegration } from './configure_integration';
-export * from './util';
+import type { State } from '../../state';
+export const isConnectorStepReady = ({ connectorId }: State) => connectorId != null;
