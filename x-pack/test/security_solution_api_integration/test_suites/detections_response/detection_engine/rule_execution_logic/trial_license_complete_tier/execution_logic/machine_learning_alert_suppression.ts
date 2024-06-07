@@ -766,10 +766,10 @@ export default ({ getService }: FtrProviderContext) => {
                   value: ['root'],
                 },
               ],
-              [ALERT_ORIGINAL_TIME]: firstTimestamp,
-              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
               [ALERT_SUPPRESSION_END]: secondTimestamp,
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
             })
           );
         });
