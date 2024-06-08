@@ -58,7 +58,7 @@ components:
           minimum: 1
       required: [index]
 
-    CreateAlertsMigrationResponse:
+    SuccessAlertsIndexMigration:
       type: object
       properties:
         index:
@@ -67,3 +67,43 @@ components:
           type: string
         migration_index:
           type: string
+      required:
+        - index
+        - migration_id
+        - migration_index
+
+    ErrorAlertsIndexMigration:
+      type: object
+      properties:
+        index:
+          type: string
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status_code:
+              type: string
+          required: [message, status_code]
+      required:
+        - index
+        - error
+
+    SkippedAlertsIndexMigration:
+      type: object
+      properties:
+        index:
+          type: string
+      required:
+        - index
+
+    CreateAlertsMigrationResponse:
+      type: object
+      properties:
+        indices:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/SuccessAlertsIndexMigration'
+              - $ref: '#/components/schemas/ErrorAlertsIndexMigration'
+              - $ref: '#/components/schemas/SkippedAlertsIndexMigration'
