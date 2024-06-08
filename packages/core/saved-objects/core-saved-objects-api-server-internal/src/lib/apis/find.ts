@@ -91,6 +91,7 @@ export const performFind = async <T = unknown, A = unknown>(
     aggs,
     migrationVersionCompatibility,
   } = options;
+
   if (!type) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'options.type must be a string or an array of strings'

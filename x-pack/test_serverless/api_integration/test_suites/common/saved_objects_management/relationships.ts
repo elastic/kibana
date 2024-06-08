@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
       title: schema.string(),
       icon: schema.string(),
       editUrl: schema.maybe(schema.string()),
-      // dashboards and visualizations don't declare an inAppUrl
+      // visualizations don't declare an inAppUrl
       inAppUrl: schema.maybe(
         schema.object({
           path: schema.string(),
