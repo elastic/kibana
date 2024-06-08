@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// See x-pack/test_serverless/api_integration/test_suites/common/core/translations.ts
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
