@@ -53,7 +53,7 @@ paths:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         500:
-          description: Unsuccessful authentication response
+          description: Internal server error response
           content:
             application/json:
               schema:
