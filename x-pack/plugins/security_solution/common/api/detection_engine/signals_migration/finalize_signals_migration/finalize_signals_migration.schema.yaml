@@ -7,6 +7,7 @@ paths:
     post:
       x-labels: [ess]
       operationId: FinalizeAlertsMigration
+      x-codegen-enabled: true
       summary: Finalizes alerts migration(s)
       description: |
         The finalization endpoint replaces the original index's alias with the successfully migrated index's alias.
@@ -20,14 +21,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FinalizeAlertsMigrationRequestBody'
+              type: object
+              properties:
+                migration_ids:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+              required: [migration_ids]
       responses:
         200:
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FinalizeAlertsMigrationResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/MigrationFinalizationResult'
         400:
           description: Invalid input data response
           content:
@@ -43,21 +53,6 @@ paths:
 
 components:
   schemas:
-    FinalizeAlertsMigrationRequestBody:
-      type: object
-      properties:
-        migration_ids:
-          type: array
-          items:
-            type: string
-          minItems: 1
-      required: [migration_ids]
-
-    FinalizeAlertsMigrationResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/MigrationFinalizationResult'
-
     MigrationFinalizationResult:
       type: object
       properties:

@@ -7,6 +7,7 @@ paths:
     post:
       x-labels: [ess]
       operationId: CreateAlertsMigration
+      x-codegen-enabled: true
       summary: Initiates an alerts migration
       tags:
         - Alerts migration API
@@ -16,14 +17,39 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateAlertsMigrationRequestBody'
+              type: object
+              properties:
+                index:
+                  type: array
+                  items:
+                    $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                  minItems: 1
+                requests_per_second:
+                  type: integer
+                  minimum: 1
+                size:
+                  type: integer
+                  minimum: 1
+                slices:
+                  type: integer
+                  minimum: 1
+              required: [index]
       responses:
         200:
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateAlertsMigrationResponse'
+                type: object
+                properties:
+                  indices:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/AlertsIndexMigrationSuccess'
+                        - $ref: '#/components/schemas/AlertsIndexMigrationError'
+                        - $ref: '#/components/schemas/SkippedAlertsIndexMigration'
+                required: [indices]
         400:
           description: Invalid input data response
           content:
@@ -39,26 +65,7 @@ paths:
 
 components:
   schemas:
-    CreateAlertsMigrationRequestBody:
-      type: object
-      properties:
-        index:
-          type: array
-          items:
-            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-          minItems: 1
-        requests_per_second:
-          type: integer
-          minimum: 1
-        size:
-          type: integer
-          minimum: 1
-        slices:
-          type: integer
-          minimum: 1
-      required: [index]
-
-    SuccessAlertsIndexMigration:
+    AlertsIndexMigrationSuccess:
       type: object
       properties:
         index:
@@ -72,7 +79,7 @@ components:
         - migration_id
         - migration_index
 
-    ErrorAlertsIndexMigration:
+    AlertsIndexMigrationError:
       type: object
       properties:
         index:
@@ -96,14 +103,3 @@ components:
           type: string
       required:
         - index
-
-    CreateAlertsMigrationResponse:
-      type: object
-      properties:
-        indices:
-          type: array
-          items:
-            oneOf:
-              - $ref: '#/components/schemas/SuccessAlertsIndexMigration'
-              - $ref: '#/components/schemas/ErrorAlertsIndexMigration'
-              - $ref: '#/components/schemas/SkippedAlertsIndexMigration'

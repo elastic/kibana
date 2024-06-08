@@ -7,6 +7,7 @@ paths:
     delete:
       x-labels: [ess]
       operationId: AlertsMigrationCleanup
+      x-codegen-enabled: true
       summary: Performs alerts migration(s) cleanup
       description: |
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
@@ -22,14 +23,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CleanupAlertsMigrationRequestBody'
+              type: object
+              properties:
+                migration_ids:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+              required: [migration_ids]
       responses:
         200:
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CleanupAlertsMigrationResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/MigrationCleanupResult'
         400:
           description: Invalid input data response
           content:
@@ -45,21 +55,6 @@ paths:
 
 components:
   schemas:
-    CleanupAlertsMigrationRequestBody:
-      type: object
-      properties:
-        migration_ids:
-          type: array
-          items:
-            type: string
-          minItems: 1
-      required: [migration_ids]
-
-    CleanupAlertsMigrationResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/MigrationCleanupResult'
-
     MigrationCleanupResult:
       type: object
       properties:

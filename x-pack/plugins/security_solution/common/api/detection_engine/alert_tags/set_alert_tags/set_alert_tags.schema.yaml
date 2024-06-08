@@ -7,6 +7,7 @@ paths:
     post:
       x-labels: [serverless, ess]
       operationId: ManageAlertTags
+      x-codegen-enabled: true
       summary: Manage alert tags for a one or more alerts
       tags:
         - Alerts API
@@ -16,14 +17,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ManageAlertTagsRequestBody'
+              type: object
+              properties:
+                ids:
+                  $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
+                tags:
+                  $ref: '#/components/schemas/ManageAlertTags'
+              required:
+                - ids
+                - tags
       responses:
         200:
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManageAlertTagsResponse'
+                type: object
+                additionalProperties: true
+                description: Elasticsearch update by query response
         400:
           description: Invalid input data response
           content:
@@ -39,22 +50,6 @@ paths:
 
 components:
   schemas:
-    ManageAlertTagsRequestBody:
-      type: object
-      properties:
-        ids:
-          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
-        tags:
-          $ref: '#/components/schemas/ManageAlertTags'
-      required:
-        - ids
-        - tags
-
-    ManageAlertTagsResponse:
-      type: object
-      additionalProperties: true
-      description: Elasticsearch update by query response
-
     ManageAlertTags:
       type: object
       properties:

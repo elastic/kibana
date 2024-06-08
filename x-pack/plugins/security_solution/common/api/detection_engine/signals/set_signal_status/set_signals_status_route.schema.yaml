@@ -7,6 +7,7 @@ paths:
     post:
       x-labels: [serverless, ess]
       operationId: SetAlertsStatus
+      x-codegen-enabled: true
       summary: Sets the status of one or more alerts
       tags:
         - Alerts API
@@ -16,14 +17,40 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SetAlertsStatusRequestBody'
+              oneOf:
+                - type: object
+                  properties:
+                    signal_ids:
+                      type: array
+                      items:
+                        $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                      minItems: 1
+                    status:
+                      $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+                  required: [signal_ids]
+                - type: object
+                  properties:
+                    query:
+                      type: object
+                      additionalProperties: true
+                    status:
+                      $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+                    conflicts:
+                      type: string
+                      enum:
+                        - abort
+                        - proceed
+                      default: abort
+                  required: [query]
       responses:
         200:
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SetAlertsStatusResponse'
+                type: object
+                additionalProperties: true
+                description: Elasticsearch update by query response
         400:
           description: Invalid input data response
           content:
@@ -36,37 +63,3 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-
-components:
-  schemas:
-    SetAlertsStatusRequestBody:
-      oneOf:
-        - type: object
-          properties:
-            signal_ids:
-              type: array
-              items:
-                $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-              minItems: 1
-            status:
-              $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
-          required: [signal_ids]
-        - type: object
-          properties:
-            query:
-              type: object
-              additionalProperties: true
-            status:
-              $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
-            conflicts:
-              type: string
-              enum:
-                - abort
-                - proceed
-              default: abort
-          required: [query]
-
-    SetAlertsStatusResponse:
-      type: object
-      additionalProperties: true
-      description: Elasticsearch update by query response

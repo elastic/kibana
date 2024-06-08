@@ -57,6 +57,7 @@ components:
           type: integer
         count:
           type: integer
+      required: [version, count]
 
     MigrationStatus:
       type: object
