@@ -8,7 +8,7 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { createDetectionRulesClient } from './detection_rules_client';
-import type { IDetectionRulesClient } from './detection_rules_client';
+import type { IDetectionRulesClient } from './detection_rules_client_interface';
 
 jest.mock('../../../../machine_learning/authz');
 

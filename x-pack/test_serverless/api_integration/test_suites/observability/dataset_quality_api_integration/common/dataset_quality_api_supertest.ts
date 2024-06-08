@@ -11,6 +11,7 @@ import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quali
 import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 import { InheritedFtrProviderContext } from '../../../../services';
 
 export function createDatasetQualityApiClient(st: supertest.Agent) {
@@ -18,20 +19,18 @@ export function createDatasetQualityApiClient(st: supertest.Agent) {
     options: {
       type?: 'form-data';
       endpoint: TEndpoint;
+      roleAuthc: RoleCredentials;
+      internalReqHeader: InternalRequestHeader;
     } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
   ): Promise<SupertestReturnType<TEndpoint>> => {
-    const { endpoint, type } = options;
+    const { endpoint, type, internalReqHeader, roleAuthc } = options;
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
     const { method, pathname, version } = formatRequest(endpoint, params.path);
     const url = format({ pathname, query: params?.query });
 
-    const headers: Record<string, string> = {
-      'kbn-xsrf': 'foo',
-      'x-elastic-internal-origin': 'foo',
-    };
-
+    const headers: Record<string, string> = { ...internalReqHeader, ...roleAuthc.apiKeyHeader };
     if (version) {
       headers['Elastic-Api-Version'] = version;
     }
