@@ -193,7 +193,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             role: MessageRole.Assistant,
             function_call: {
               name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
