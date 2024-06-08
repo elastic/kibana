@@ -18,3 +18,14 @@ components:
         - statusCode
         - error
         - message
+
+    SiemErrorResponse:
+      type: object
+      properties:
+        status_code:
+          type: integer
+        message:
+          type: string
+      required:
+        - status_code
+        - message
