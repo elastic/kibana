@@ -13,13 +13,9 @@ import { i18n } from '@kbn/i18n';
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-} from '@kbn/fleet-plugin/common';
-
+} from '../../../common/utils/get_template_url_package_info';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import {
-  SINGLE_ACCOUNT,
-  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-} from '../../../../common/constants';
+import { SINGLE_ACCOUNT, TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR } from '../../../../common/constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormAgentlessOptions,

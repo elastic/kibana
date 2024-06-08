@@ -31,6 +31,9 @@ export function AddCisIntegrationFormPageProvider({
     getPostInstallCloudFormationModal: async () => {
       return await testSubjects.find('postInstallCloudFormationModal');
     },
+    getLaunchCloudFormationAgentlessButton: async () => {
+      return await testSubjects.find('launchCloudFormationAgentlessButton');
+    },
   };
 
   const cisGcp = {
@@ -88,6 +91,9 @@ export function AddCisIntegrationFormPageProvider({
       await PageObjects.header.waitUntilLoadingHasFinished();
       const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
       return fieldValue;
+    },
+    getLaunchCloudShellAgentlessButton: async () => {
+      return await testSubjects.find('launchGoogleCloudShellAgentlessButton');
     },
   };
 

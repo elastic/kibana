@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-} from '@kbn/fleet-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
+} from '../../../common/utils/get_template_url_package_info';
 import {
   ORGANIZATION_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -60,19 +60,23 @@ export const GcpCredentialsFormAgentless = ({
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiButton
-        data-test-subj="agentlessLaunchGoogleCloudShellButtonTestId"
-        target="_blank"
-        iconSide="left"
-        iconType="launch"
-        href={cloudShellUrl}
-      >
-        <FormattedMessage
-          id="xpack.csp.agentlessForm..googleCloudShell.cloudCredentials.button"
-          defaultMessage="Launch Google Cloud Shell"
-        />
-      </EuiButton>
-      <EuiSpacer size="l" />
+      {cloudShellUrl && (
+        <>
+          <EuiButton
+            data-test-subj="launchGoogleCloudShellAgentlessButton"
+            target="_blank"
+            iconSide="left"
+            iconType="launch"
+            href={cloudShellUrl}
+          >
+            <FormattedMessage
+              id="xpack.csp.agentlessForm..googleCloudShell.cloudCredentials.button"
+              defaultMessage="Launch Google Cloud Shell"
+            />
+          </EuiButton>
+          <EuiSpacer size="l" />
+        </>
+      )}
       <GcpInputVarFields
         disabled={disabled}
         fields={fields}
