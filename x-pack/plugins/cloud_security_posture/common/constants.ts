@@ -198,3 +198,5 @@ export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 export const SINGLE_ACCOUNT = 'single-account';
+
+export const CLOUD_SECURITY_PLUGIN_VERSION = '1.8.1';

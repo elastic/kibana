@@ -199,6 +199,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.onboarding",
+            "type": "Object",
+            "tags": [],
+            "label": "onboarding",
+            "description": [],
+            "signature": [
+              "{ default_solution?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.serverless",
             "type": "Object",
             "tags": [],
@@ -799,6 +813,30 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.onboarding",
+          "type": "Object",
+          "tags": [],
+          "label": "onboarding",
+          "description": [
+            "\nOnboarding configuration"
+          ],
+          "signature": [
+            "{ defaultSolution?: ",
+            {
+              "pluginId": "cloud",
+              "scope": "common",
+              "docId": "kibCloudPluginApi",
+              "section": "def-common.OnBoardingDefaultSolution",
+              "text": "OnBoardingDefaultSolution"
+            },
+            " | undefined; }"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-public.CloudSetup.isServerlessEnabled",
           "type": "boolean",
           "tags": [],
@@ -1060,6 +1098,30 @@
         },
         {
           "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.onboarding",
+          "type": "Object",
+          "tags": [],
+          "label": "onboarding",
+          "description": [
+            "\nOnboarding configuration."
+          ],
+          "signature": [
+            "{ defaultSolution?: ",
+            {
+              "pluginId": "cloud",
+              "scope": "common",
+              "docId": "kibCloudPluginApi",
+              "section": "def-common.OnBoardingDefaultSolution",
+              "text": "OnBoardingDefaultSolution"
+            },
+            " | undefined; }"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
           "id": "def-server.CloudSetup.isServerlessEnabled",
           "type": "boolean",
           "tags": [],
@@ -1161,7 +1223,23 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "cloud",
+        "id": "def-common.OnBoardingDefaultSolution",
+        "type": "Type",
+        "tags": [],
+        "label": "OnBoardingDefaultSolution",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "x-pack/plugins/cloud/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
