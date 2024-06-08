@@ -275,7 +275,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
         if (lastSavedId) {
           const [baseTitle, baseCount] = extractTitleAndCount(newTitle);
-          let copyCount = baseCount + 1;
+          const copyCount = baseCount + 1;
           newTitle = `${baseTitle} (${copyCount})`;
 
           // increment count until we find a unique title
@@ -285,10 +285,12 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
               lastSavedTitle: currentState.title,
               copyOnSave: true,
               isTitleDuplicateConfirmed: false,
+              onTitleDuplicate(speculativeSuggestion) {
+                newTitle = speculativeSuggestion;
+              },
             }))
           ) {
-            copyCount++;
-            newTitle = `${baseTitle} (${copyCount})`;
+            // see onTitleDuplicate
           }
 
           switch (interactionMode) {
