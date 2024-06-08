@@ -21,6 +21,7 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
   createFunctionLimitExceededError,
@@ -171,7 +172,7 @@ export function continueConversation({
   signal,
   functionCallsLeft,
   requestInstructions,
-  knowledgeBaseInstructions,
+  userInstructions,
   logger,
   disableFunctions,
   tracer,
@@ -182,7 +183,7 @@ export function continueConversation({
   signal: AbortSignal;
   functionCallsLeft: number;
   requestInstructions: Array<string | UserInstruction>;
-  knowledgeBaseInstructions: UserInstruction[];
+  userInstructions: UserInstruction[];
   logger: Logger;
   disableFunctions:
     | boolean
@@ -204,7 +205,7 @@ export function continueConversation({
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
       registeredInstructions: functionClient.getInstructions(),
-      knowledgeBaseInstructions,
+      userInstructions,
       requestInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
     }),
@@ -221,7 +222,7 @@ export function continueConversation({
   function executeNextStep() {
     if (isUserMessage) {
       const operationName =
-        lastMessage.name && lastMessage.name !== 'context'
+        lastMessage.name && lastMessage.name !== CONTEXT_FUNCTION_NAME
           ? `function_response ${lastMessage.name}`
           : 'user_message';
 
@@ -325,7 +326,7 @@ export function continueConversation({
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
               signal,
-              knowledgeBaseInstructions,
+              userInstructions,
               requestInstructions,
               logger,
               disableFunctions,

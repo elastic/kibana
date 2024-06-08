@@ -7,8 +7,6 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export interface ConfigSchema {}
-
 export interface InvestigateSetupDependencies {}
 
 export interface InvestigateStartDependencies {}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegisterWidget, WidgetDefinition } from './types';
+import type { RegisterWidget, WidgetDefinition } from './types';
 
 export class WidgetRegistry {
   private readonly definitions: WidgetDefinition[] = [];

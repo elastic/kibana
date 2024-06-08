@@ -13,12 +13,12 @@ import { RegisteredInstruction } from '../types';
 
 export function getSystemMessageFromInstructions({
   registeredInstructions,
-  knowledgeBaseInstructions,
+  userInstructions,
   requestInstructions,
   availableFunctionNames,
 }: {
   registeredInstructions: RegisteredInstruction[];
-  knowledgeBaseInstructions: UserInstruction[];
+  userInstructions: UserInstruction[];
   requestInstructions: UserInstructionOrPlainText[];
   availableFunctionNames: string[];
 }): string {
@@ -45,10 +45,8 @@ export function getSystemMessageFromInstructions({
   const requestOverrideIds = requestUserInstructionsWithId.map((instruction) => instruction.doc_id);
 
   // all request instructions, and those from the KB that are not defined as a request instruction
-  const allUserInstructions = requestUserInstructionsWithId.concat(
-    knowledgeBaseInstructions.filter(
-      (instruction) => !requestOverrideIds.includes(instruction.doc_id)
-    )
+  const allUserInstructions = requestInstructionsWithId.concat(
+    userInstructions.filter((instruction) => !requestOverrideIds.includes(instruction.doc_id))
   );
 
   const instructionsWithinBudget = withTokenBudget(allUserInstructions, 1000);

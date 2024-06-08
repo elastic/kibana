@@ -22,9 +22,12 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
+
+export const QUERY_FUNCTION_NAME = 'query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -71,8 +74,8 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   functions.registerInstruction(({ availableFunctionNames }) => {
     let message = '';
 
-    if (availableFunctionNames.includes('query')) {
-      message += `You MUST use the "query" function when the user wants to:
+    if (availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
+      message += `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
   - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
@@ -80,11 +83,11 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   - asks general questions about ES|QL
 
   DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
+  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${QUERY_FUNCTION_NAME}" function for this.
 
   If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
 
-  Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
+  Even if the "${CONTEXT_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
   even if it has been called before.`;
     }
 
@@ -137,7 +140,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   );
   functions.registerFunction(
     {
-      name: 'query',
+      name: QUERY_FUNCTION_NAME,
       description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
@@ -164,7 +167,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
         await chat('classify_esql', {
           messages: withEsqlSystemMessage().concat(
             createFunctionResponseMessage({
-              name: 'query',
+              name: QUERY_FUNCTION_NAME,
               content: {},
             }).message,
             {
@@ -328,7 +331,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       }
 
       const queryFunctionResponseMessage = createFunctionResponseMessage({
-        name: 'query',
+        name: QUERY_FUNCTION_NAME,
         content: {},
         data: {
           // add the included docs for debugging

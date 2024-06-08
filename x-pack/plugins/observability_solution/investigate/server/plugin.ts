@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { InvestigateConfig } from './config';
 import type {
-  ConfigSchema,
   InvestigateServerSetup,
   InvestigateServerStart,
   InvestigateSetupDependencies,
@@ -26,7 +26,7 @@ export class InvestigatePlugin
 {
   logger: Logger;
 
-  constructor(context: PluginInitializerContext<ConfigSchema>) {
+  constructor(context: PluginInitializerContext<InvestigateConfig>) {
     this.logger = context.logger.get();
   }
   setup(coreSetup: CoreSetup, pluginsSetup: InvestigateSetupDependencies): InvestigateServerSetup {

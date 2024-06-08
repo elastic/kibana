@@ -8,6 +8,7 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { DeepPartial, PickByValue } from 'utility-types';
+
 export interface InvestigateUser {
   name: string;
 }
