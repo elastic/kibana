@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 
 import {
   EuiBasicTable,
-  EuiBadge,
   EuiPanel,
   EuiText,
   EuiFlexGroup,
@@ -20,6 +19,7 @@ import {
   EuiButtonIcon,
   EuiOverlayMask,
   EuiConfirmModal,
+  EuiCode,
 } from '@elastic/eui';
 
 import type {
@@ -229,13 +229,9 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
     </EuiOverlayMask>
   );
 
-  const badgeStyle = {
-    backgroundColor: '#f5f7fa',
-    color: '#6a52b3',
-  };
-
   const columns = [
     {
+      valign: 'top',
       field: 'name',
       name: 'Name',
       render: (name: string, item: GlobalDataTag) => {
@@ -255,11 +251,12 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
             />
           </EuiFormRow>
         ) : (
-          <EuiBadge style={badgeStyle}>{name}</EuiBadge>
+          <EuiCode>{name}</EuiCode>
         );
       },
     },
     {
+      valign: 'top',
       field: 'value',
       name: 'Value',
       render: (value: string, item: GlobalDataTag) => {
@@ -279,7 +276,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
             />
           </EuiFormRow>
         ) : (
-          <EuiBadge style={badgeStyle}>{value}</EuiBadge>
+          <EuiCode>{value}</EuiCode>
         );
       },
     },
