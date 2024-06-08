@@ -7,6 +7,7 @@ paths:
     post:
       x-labels: [ess]
       operationId: GetAlertsMigrationStatus
+      x-codegen-enabled: true
       summary: Returns an alerts migration status
       tags:
         - Alerts migration API
@@ -27,7 +28,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetAlertsMigrationStatusResponse'
+                type: object
+                properties:
+                  indices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IndexMigrationStatus'
+                required: [indices]
         400:
           description: Invalid input data response
           content:
@@ -43,32 +50,6 @@ paths:
 
 components:
   schemas:
-    GetAlertsMigrationStatusResponse:
-      type: object
-      properties:
-        indices:
-          type: array
-          items:
-            $ref: '#/components/schemas/IndexMigrationStatus'
-
-    IndexMigrationStatus:
-      type: object
-      properties:
-        index:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-        version:
-          type: integer
-        signal_versions:
-          type: array
-          items:
-            $ref: '#/components/schemas/AlertVersion'
-        migrations:
-          type: array
-          items:
-            $ref: '#/components/schemas/MigrationStatus'
-        is_outdated:
-          type: boolean
-
     AlertVersion:
       type: object
       properties:
@@ -93,3 +74,32 @@ components:
         updated:
           type: string
           format: date-time
+      required:
+        - id
+        - status
+        - version
+        - updated
+
+    IndexMigrationStatus:
+      type: object
+      properties:
+        index:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        version:
+          type: integer
+        signal_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertVersion'
+        migrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MigrationStatus'
+        is_outdated:
+          type: boolean
+      required:
+        - index
+        - version
+        - signal_versions
+        - migrations
+        - is_outdated
