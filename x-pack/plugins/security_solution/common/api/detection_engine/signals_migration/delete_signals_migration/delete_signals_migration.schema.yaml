@@ -53,6 +53,7 @@ components:
           items:
             type: string
           minItems: 1
+      required: [migration_ids]
 
     CleanupAlertsMigrationResponse:
       type: array
@@ -86,6 +87,7 @@ components:
               type: string
             status_code:
               type: integer
+          required: [message, status_code]
       required:
         - id
         - destinationIndex
