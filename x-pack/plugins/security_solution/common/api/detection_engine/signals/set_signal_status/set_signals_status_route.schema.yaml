@@ -29,13 +29,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
-                $ref: '../../model/error_response.schema.yaml#/components/schemas/GenericErrorResponse'
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
 
 components:
   schemas:

@@ -5,7 +5,7 @@ info:
 paths: {}
 components:
   schemas:
-    GenericErrorResponse:
+    PlatformErrorResponse:
       type: object
       properties:
         statusCode:
@@ -14,3 +14,7 @@ components:
           type: string
         message:
           type: string
+      required:
+        - statusCode
+        - error
+        - message
