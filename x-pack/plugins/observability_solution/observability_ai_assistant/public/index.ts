@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-export type { CompatibleJSONSchema } from '../common/functions/types';
 
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
@@ -18,6 +17,7 @@ import type {
   ObservabilityAIAssistantChatService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
+  DiscoveredDataset,
 } from './types';
 
 export type {
@@ -27,6 +27,7 @@ export type {
   ObservabilityAIAssistantChatService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
+  DiscoveredDataset,
 };
 
 export { aiAssistantCapabilities } from '../common/capabilities';
@@ -59,14 +60,26 @@ export {
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../common/functions/visualize_esql';
 
-export { isSupportedConnectorType } from '../common';
-export { FunctionVisibility } from '../common';
+export {
+  isSupportedConnectorType,
+  FunctionVisibility,
+  MessageRole,
+  KnowledgeBaseEntryRole,
+  concatenateChatCompletionChunks,
+  StreamingChatResponseEventType,
+} from '../common';
+export type {
+  CompatibleJSONSchema,
+  Conversation,
+  Message,
+  KnowledgeBaseEntry,
+  FunctionDefinition,
+  ChatCompletionChunkEvent,
+  ShortIdTable,
+} from '../common';
 
 export type { TelemetryEventTypeWithPayload } from './analytics';
 export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetry_event_type';
-
-export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
-export { MessageRole, KnowledgeBaseEntryRole } from '../common';
 
 export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
 export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';

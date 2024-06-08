@@ -309,7 +309,7 @@ export class KnowledgeBaseService {
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    const query = {
+    const esQuery = {
       bool: {
         should: queries.map(({ text, boost = 1 }) => ({
           text_expansion: {
@@ -334,7 +334,7 @@ export class KnowledgeBaseService {
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
     >({
       index: [this.dependencies.resources.aliases.kb],
-      query,
+      query: esQuery,
       size: 20,
       _source: {
         includes: ['text', 'is_correction', 'labels'],
@@ -481,13 +481,17 @@ export class KnowledgeBaseService {
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
+    const mappedQueries = queries.map((query) =>
+      typeof query === 'string' ? { boost: 1, text: query } : query
+    );
+
+    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${mappedQueries}"`);
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
-        queries,
+        queries: mappedQueries,
         categories,
         namespace,
         modelId,
@@ -500,7 +504,7 @@ export class KnowledgeBaseService {
       this.recallFromConnectors({
         asCurrentUser,
         uiSettingsClient,
-        queries,
+        queries: mappedQueries,
         modelId,
       }).catch((error) => {
         this.dependencies.logger.debug('Error getting data from search indices');

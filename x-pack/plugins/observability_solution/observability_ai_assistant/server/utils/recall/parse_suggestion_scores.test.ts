@@ -12,56 +12,56 @@ describe('parseSuggestionScores', () => {
     expect(
       parseSuggestionScores(
         dedent(
-          `0,1
-      2,7
-      3,10`
+          `my-id,1
+      my-other-id,7
+      my-another-id,10`
         )
       )
     ).toEqual([
       {
-        index: 0,
+        id: 'my-id',
         score: 1,
       },
       {
-        index: 2,
+        id: 'my-other-id',
         score: 7,
       },
       {
-        index: 3,
+        id: 'my-another-id',
         score: 10,
       },
     ]);
   });
 
   it('parses semi-colons as separators', () => {
-    expect(parseSuggestionScores(`0,1;2,7;3,10`)).toEqual([
+    expect(parseSuggestionScores(`idone,1;idtwo,7;idthree,10`)).toEqual([
       {
-        index: 0,
+        id: 'idone',
         score: 1,
       },
       {
-        index: 2,
+        id: 'idtwo',
         score: 7,
       },
       {
-        index: 3,
+        id: 'idthree',
         score: 10,
       },
     ]);
   });
 
   it('parses spaces as separators', () => {
-    expect(parseSuggestionScores(`0,1 2,7 3,10`)).toEqual([
+    expect(parseSuggestionScores(`a,1 b,7 c,10`)).toEqual([
       {
-        index: 0,
+        id: 'a',
         score: 1,
       },
       {
-        index: 2,
+        id: 'b',
         score: 7,
       },
       {
-        index: 3,
+        id: 'c',
         score: 10,
       },
     ]);
