@@ -428,7 +428,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const parsedUrl = new URL(currentUrl);
           const pageState = parsedUrl.searchParams.get('pageState');
 
-          expect(decodeURIComponent(pageState)).to.contain('sort:(direction:desc,field:count)');
+          expect(decodeURIComponent(pageState as string)).to.contain(
+            'sort:(direction:desc,field:count)'
+          );
         });
 
         countColumn.sort('ascending');
@@ -438,7 +440,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const parsedUrl = new URL(currentUrl);
           const pageState = parsedUrl.searchParams.get('pageState');
 
-          expect(decodeURIComponent(pageState)).to.contain('sort:(direction:asc,field:count)');
+          expect(decodeURIComponent(pageState as string)).to.contain(
+            'sort:(direction:asc,field:count)'
+          );
         });
 
         await PageObjects.datasetQuality.closeFlyout();

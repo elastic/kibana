@@ -56,6 +56,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   const testSubjects = getService('testSubjects');
   const euiSelectable = getService('selectable');
   const find = getService('find');
+  const retry = getService('retry');
 
   const selectors = {
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
@@ -478,9 +479,11 @@ async function parseDatasetTable(tableWrapper: WebElementWrapper, columnNamesOrI
         cellContentElements: cellContentWrappers,
         getSortDirection,
         sort: async (sortDirection: 'ascending' | 'descending') => {
-          while ((await getSortDirection()) !== sortDirection) {
-            await headerElement.click();
-          }
+          retry.tryForTime(5000, async () => {
+            while ((await getSortDirection()) !== sortDirection) {
+              await headerElement.click();
+            }
+          });
         },
         getCellTexts: async (textContainerSelector?: string) => {
           const cellContentContainerWrappers = textContainerSelector
