@@ -6,21 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type {
-  AggregationOptionsByType,
-  ESSearchOptions,
-  SearchHit,
-  ESSearchResponse,
-  ESSearchRequest,
-  ESSourceOptions,
-  InferSearchResponseOf,
-  AggregationResultOf,
-  AggregationResultOfMap,
-  ESFilter,
-  MaybeReadonlyArray,
-  ESQLColumn,
-  ESQLRow,
-  ESQLSearchResponse,
-  ESQLSearchParams,
-  SearchField,
-} from './src';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { lazy } from 'react';
+export type { RowViewerProps } from './row_viewer';
+
+export const RowViewer = withSuspense(lazy(() => import('./row_viewer')));
