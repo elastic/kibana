@@ -20,3 +20,11 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/AlertTag'
+
+    AlertStatus:
+      type: string
+      enum:
+        - open
+        - closed
+        - acknowledged
+        - in-progress

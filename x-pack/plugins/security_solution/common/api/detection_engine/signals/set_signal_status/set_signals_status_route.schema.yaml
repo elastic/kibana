@@ -40,38 +40,31 @@ paths:
 components:
   schemas:
     SetAlertsStatusRequestBody:
-      allOf:
+      oneOf:
         - type: object
           properties:
+            signal_ids:
+              type: array
+              items:
+                $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+              minItems: 1
             status:
-              type: string
-              enum:
-                - open
-                - closed
-                - acknowledged
-                - in-progress
+              $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+          required: [signal_ids]
+        - type: object
+          properties:
+            query:
+              type: object
+              additionalProperties: true
+            status:
+              $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
             conflicts:
               type: string
               enum:
                 - abort
                 - proceed
               default: abort
-          required: [status]
-        - oneOf:
-            - type: object
-              properties:
-                signal_ids:
-                  type: array
-                  items:
-                    $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-                  minItems: 1
-              required: [signal_ids]
-            - type: object
-              properties:
-                query:
-                  type: object
-                  additionalProperties: true
-              required: [query]
+          required: [query]
 
     SetAlertsStatusResponse:
       type: object
