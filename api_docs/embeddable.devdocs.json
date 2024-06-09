@@ -14303,10 +14303,6 @@
               "path": "src/plugins/discover/public/plugin.tsx"
             },
             {
-              "plugin": "infra",
-              "path": "x-pack/plugins/observability_solution/infra/public/plugin.ts"
-            },
-            {
               "plugin": "profiling",
               "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
             },
