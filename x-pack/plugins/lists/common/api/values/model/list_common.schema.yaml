@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Error Schema
+  version: 'not applicable'
+paths: {}
+components:
+  schemas:
+    ListType:
+      type: string
+      enum:
+        - binary
+        - boolean
+        - byte
+        - date
+        - date_nanos
+        - date_range
+        - double
+        - double_range
+        - float
+        - float_range
+        - geo_point
+        - geo_shape
+        - half_float
+        - integer
+        - integer_range
+        - ip
+        - ip_range
+        - keyword
+        - long
+        - long_range
+        - shape
+        - short
+        - text
+
+    ListMeta:
+      type: object
+      additionalProperties: true
+
+    List:
+      type: object
+      properties:
+        id:
+          $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        type:
+          $ref: '#/components/schemas/ListType'
+        name:
+          $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        description:
+          $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        serializer:
+          type: string
+        deserializer:
+          type: string
+        immutable:
+          type: boolean
+        meta:
+          $ref: '#/components/schemas/ListMeta'
+        '@timestamp':
+          type: string
+          format: date-time
+        version:
+          type: integer
+          minimum: 1
+        _version:
+          type: string
+        tie_breaker_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        updated_by:
+          type: string
+      required:
+        - id
+        - type
+        - name
+        - description
+        - immutable
+        - version
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
