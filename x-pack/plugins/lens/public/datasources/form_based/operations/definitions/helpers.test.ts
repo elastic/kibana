@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
 import { createMockedIndexPattern } from '../../mocks';
 import type { FormBasedLayer } from '../../types';
 import type { GenericIndexPatternColumn } from './column_types';
@@ -67,6 +68,7 @@ describe('helpers', () => {
               }
             }
           />,
+          "uniqueId": "field_not_found",
         }
       `);
     });
@@ -84,7 +86,10 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field timestamp is of the wrong type');
+      expect(messages![0]).toEqual({
+        uniqueId: FIELD_WRONG_TYPE,
+        message: 'Field timestamp is of the wrong type',
+      });
     });
 
     it('returns an error if one field amongst multiples does not exist', () => {
@@ -134,6 +139,7 @@ describe('helpers', () => {
               }
             }
           />,
+          "uniqueId": "field_not_found",
         }
       `);
     });
@@ -191,6 +197,7 @@ describe('helpers', () => {
               }
             }
           />,
+          "uniqueId": "field_not_found",
         }
       `);
     });
@@ -211,7 +218,10 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field timestamp is of the wrong type');
+      expect(messages![0]).toEqual({
+        uniqueId: FIELD_WRONG_TYPE,
+        message: 'Field timestamp is of the wrong type',
+      });
     });
 
     it('returns an error if multiple fields are of the wrong type', () => {
@@ -230,7 +240,10 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Fields start_date, timestamp are of the wrong type');
+      expect(messages![0]).toEqual({
+        uniqueId: FIELD_WRONG_TYPE,
+        message: 'Fields start_date, timestamp are of the wrong type',
+      });
     });
 
     it('returns no message if all fields are matching', () => {
@@ -245,7 +258,7 @@ describe('helpers', () => {
         columnId,
         createMockedIndexPattern()
       );
-      expect(messages).toBeUndefined();
+      expect(messages).toHaveLength(0);
     });
   });
 

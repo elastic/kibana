@@ -34,11 +34,18 @@ import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
 } from './helpers/alerting_wait_for_helpers';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAdmin: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
@@ -64,6 +71,11 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.alert.consecutive_matches',
     ];
 
+    before(async () => {
+      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+
     afterEach(async () => {
       await supertest
         .delete(`/api/actions/connector/${connectorId}`)
@@ -78,17 +90,25 @@ export default function ({ getService }: FtrProviderContext) {
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
     });
 
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+    });
+
     it('should schedule actions for summary of alerts per rule run', async () => {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -206,14 +226,18 @@ export default function ({ getService }: FtrProviderContext) {
     it('should filter alerts by kql', async () => {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -340,14 +364,18 @@ export default function ({ getService }: FtrProviderContext) {
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -412,14 +440,18 @@ export default function ({ getService }: FtrProviderContext) {
     it('should schedule actions for summary of alerts on a custom interval', async () => {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,

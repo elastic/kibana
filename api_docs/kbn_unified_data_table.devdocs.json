@@ -532,7 +532,7 @@
         "label": "UnifiedDataTable",
         "description": [],
         "signature": [
-          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalControlColumns, externalAdditionalControls, rowsPerPageOptions, visibleCellActions, externalCustomRenderers, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, cellActionsMetadata, customGridColumnsConfiguration, customControlColumnsConfiguration, enableComparisonMode, cellContext, renderCellPopover, }: ",
+          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalControlColumns, externalAdditionalControls, rowsPerPageOptions, visibleCellActions, externalCustomRenderers, additionalFieldGroups, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, cellActionsMetadata, customGridColumnsConfiguration, customControlColumnsConfiguration, enableComparisonMode, cellContext, renderCellPopover, }: ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "common",
@@ -551,7 +551,7 @@
             "id": "def-common.UnifiedDataTable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  trailingControlColumns,\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalControlColumns,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  visibleCellActions,\n  externalCustomRenderers,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  cellActionsMetadata,\n  customGridColumnsConfiguration,\n  customControlColumnsConfiguration,\n  enableComparisonMode,\n  cellContext,\n  renderCellPopover,\n}",
+            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  trailingControlColumns,\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalControlColumns,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  visibleCellActions,\n  externalCustomRenderers,\n  additionalFieldGroups,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  cellActionsMetadata,\n  customGridColumnsConfiguration,\n  customControlColumnsConfiguration,\n  enableComparisonMode,\n  cellContext,\n  renderCellPopover,\n}",
             "description": [],
             "signature": [
               {
@@ -1453,7 +1453,13 @@
               "\nCurrent sort setting"
             ],
             "signature": [
-              "SortOrder",
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "common",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-common.SortOrder",
+                "text": "SortOrder"
+              },
               "[]"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
@@ -1768,7 +1774,7 @@
                 "section": "def-common.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
-              "; dataViewFieldEditor: ",
+              "; dataViewFieldEditor?: ",
               {
                 "pluginId": "dataViewFieldEditor",
                 "scope": "public",
@@ -1776,7 +1782,7 @@
                 "section": "def-public.PluginStart",
                 "text": "PluginStart"
               },
-              "; toastNotifications: ",
+              " | undefined; toastNotifications: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
                 "scope": "common",
@@ -2154,6 +2160,37 @@
                 "text": "CustomCellRenderer"
               },
               " | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.UnifiedDataTableProps.additionalFieldGroups",
+            "type": "Object",
+            "tags": [],
+            "label": "additionalFieldGroups",
+            "description": [
+              "\nAn optional prop to provide awareness of additional field groups when paired with the Unified Field List."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "common",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-common.AdditionalFieldGroups",
+                "text": "AdditionalFieldGroups"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/field-utils",
+                "scope": "common",
+                "docId": "kibKbnFieldUtilsPluginApi",
+                "section": "def-common.FieldBase",
+                "text": "FieldBase"
+              },
+              "> | undefined"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
             "deprecated": false,
@@ -2672,6 +2709,21 @@
           "\"select\""
         ],
         "path": "packages/kbn-unified-data-table/src/components/data_table_columns.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-common.SortOrder",
+        "type": "Type",
+        "tags": [],
+        "label": "SortOrder",
+        "description": [],
+        "signature": [
+          "[string, string]"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -83,7 +83,7 @@ import {
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -93,6 +93,7 @@ import type { ISearchGeneric, IKibanaSearchResponse, IEsSearchResponse } from '@
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import { queryToFields } from './query_to_fields';
 
 import { AggConfigs, EsQuerySortValue } from '../..';
 import type {
@@ -134,6 +135,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  dataViews: DataViewsContract;
   scriptedFieldsEnabled: boolean;
 }
 
@@ -712,7 +714,7 @@ export class SearchSource {
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
-    typeof fld === 'string' ? fld : (fld.field as string);
+    typeof fld === 'string' ? fld : (fld?.field as string);
 
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
@@ -771,6 +773,11 @@ export class SearchSource {
       field.format = 'strict_date_optional_time';
     }
     return field;
+  }
+
+  public async loadDataViewFields(dataView: DataViewLazy) {
+    const request = this.mergeProps(this, { body: {} });
+    return await queryToFields({ dataView, request });
   }
 
   private flatten() {
