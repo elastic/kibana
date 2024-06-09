@@ -7,13 +7,32 @@
  */
 
 import { ListrTaskWrapper, DefaultRenderer, SimpleRenderer } from 'listr2';
-import { I18nConfig } from './i18n_config';
+
 import { ErrorReporter } from './utils';
+
+export interface MessageDescriptor {
+  id: string;
+  description?: string | object;
+  defaultMessage?: string;
+  file?: string;
+  start?: number;
+  end?: number;
+  hasValuesObject?: boolean;
+  valuesKeys?: string[];
+  ignoreTag?: boolean;
+}
 
 export interface I18nCheckTaskContext {
   config?: I18nConfig;
-  reporter: ErrorReporter;
-  messages: Map<string, { message: string }>;
+  errorReporter: ErrorReporter;
+  messages: Map<string, MessageDescriptor[]>;
+}
+
+export interface I18nConfig {
+  paths: Record<string, string[]>;
+  exclude: string[];
+  translations: string[];
+  prefix?: string;
 }
 
 export type I18nTask = ListrTaskWrapper<
@@ -21,6 +40,7 @@ export type I18nTask = ListrTaskWrapper<
   typeof DefaultRenderer,
   typeof SimpleRenderer
 >;
+
 export type TaskSignature<TaskOptions> = (
   context: I18nCheckTaskContext,
   task: I18nTask,

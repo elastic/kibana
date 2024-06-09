@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ErrorReporter } from './error_reporter';
-export { globNamespacePaths, globTranslationFiles } from './glob_namespace';
-
-export { normalizePath, arrayify, makeAbsolutePath } from './helpers';
+export { mergeConfigs } from './merge_configs';
+export { checkConfigs } from './check_configs';

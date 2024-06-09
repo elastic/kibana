@@ -15,7 +15,7 @@ export interface Options {
   absolute?: boolean;
 }
 
-export async function globNamespacePaths(namespaceRoot: string, options: Options = {}) {
+export async function globTranslationFiles(fileRoot: string, options: Options = {}) {
   const { additionalIgnore = [], mark = false, absolute = false } = options;
   const ignore = [
     '**/node_modules/**',
@@ -31,11 +31,21 @@ export async function globNamespacePaths(namespaceRoot: string, options: Options
     .map((i) => `!${i}`);
 
   const entries = await globby(['*.{js,jsx,ts,tsx}', ...ignore], {
-    cwd: namespaceRoot,
+    cwd: fileRoot,
     baseNameMatch: true,
     markDirectories: mark,
     absolute,
   });
 
-  return entries.map((entry) => path.resolve(namespaceRoot, entry));
+  return entries.map((entry) => path.resolve(fileRoot, entry));
+}
+
+export async function globNamespacePaths(
+  namespaceRoots: string[],
+  options: Options = {}
+): Promise<string[]> {
+  const filePaths = await Promise.all(
+    namespaceRoots.map((fileRoot) => globTranslationFiles(fileRoot, options))
+  );
+  return filePaths.flat();
 }

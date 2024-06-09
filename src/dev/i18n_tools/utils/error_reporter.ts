@@ -7,6 +7,7 @@
  */
 
 import chalk from 'chalk';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { normalizePath } from './helpers';
 
 export interface Context {
@@ -14,15 +15,34 @@ export interface Context {
 }
 
 export class ErrorReporter {
+  static stdoutPrefix = chalk.white.bgRed(' I18N ERROR ');
+
   readonly errors: string[] = [];
-
-  withContext(context: Context) {
-    return { report: (error: Error) => this.report(error, context) };
+  private formatErrorMessage(message: string): string {
+    return `${ErrorReporter.stdoutPrefix} ${message}`;
   }
-
-  report(error: Error, context: Context) {
+  private report(error: Error, context: Context) {
     this.errors.push(
       `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
     );
+  }
+
+  private reportFailure(err: string | Error) {
+    const failureMessage = this.formatErrorMessage(typeof err === 'string' ? err : err.message);
+    return createFailError(failureMessage);
+  }
+
+  public hasErrors() {
+    return this.errors.length > 0;
+  }
+
+  public withContext(context: Context) {
+    return {
+      // Creates an error that might be recoverable.
+      reportError: (error: Error) => this.report(error, context),
+
+      // Creates an error with exit code 1
+      reportFailure: (err: string | Error) => this.reportFailure(err),
+    };
   }
 }

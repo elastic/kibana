@@ -7,17 +7,9 @@
  */
 
 import { resolve } from 'path';
-
-// @ts-ignore
 import { readFile as readFileAsync } from 'fs/promises';
-import { normalizePath } from './utils';
-
-export interface I18nConfig {
-  paths: Record<string, string[]>;
-  exclude: string[];
-  translations: string[];
-  prefix?: string;
-}
+import { normalizePath } from '../../utils';
+import type { I18nConfig } from '../../types';
 
 export async function checkConfigNamespacePrefix(configPath: string) {
   const { prefix, paths } = JSON.parse(await readFileAsync(resolve(configPath), 'utf8'));

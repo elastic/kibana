@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { mergeConfigs } from './merge_configs';
-export { checkConfigs } from './check_configs';
+export { mergeConfigs, checkConfigs } from './verify_rc_files';
+
 export { validateTranslationsTask } from './validate_translations';
+export { checkUntrackedNamespacesTask } from './check_untracked_namespaces';

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { ErrorReporter } from './error_reporter';
-export { globNamespacePaths, globTranslationFiles } from './glob_namespace';
+import { TranslationInput } from '@kbn/i18n';
 
-export { normalizePath, arrayify, makeAbsolutePath } from './helpers';
+export type FileOutput = Omit<TranslationInput, 'locale'>;
+
+export type Serializer = (
+  messages: TranslationInput['messages'],
+  formats?: TranslationInput['formats']
+) => string;

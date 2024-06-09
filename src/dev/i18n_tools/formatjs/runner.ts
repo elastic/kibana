@@ -5,22 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-// import { extract } from '@formatjs/cli-lib';
-
 import { Opts, transformWithTs } from '@formatjs/ts-transformer';
 
 import difference from 'lodash/difference';
-
 import * as icuParser from '@formatjs/icu-messageformat-parser';
 import type { MessageFormatElement } from '@formatjs/icu-messageformat-parser';
 
 import ts from 'typescript';
 type TypeScript = typeof ts;
-
-// npx formatjs extract 'src/plugins/home/server/tutorials/instructions/functionbeat_instructions.ts' --throws --additional-function-names='translate' --out-file='en.json'
-// contains formatting error
-// packages/kbn-text-based-editor/src/esql_documentation_sections.tsx
 
 import { extractMessagesFromCallExpression, MessageDescriptor } from '../extractors/call_expt';
 import { extractMessageFromJsxComponent } from '../extractors/react';
@@ -76,7 +68,7 @@ export function normalizeI18nTranslateSignature(
   return transformFn;
 }
 
-const extractValues = (elements) => {
+export const extractValues = (elements) => {
   return elements.reduce((acc, element) => {
     if (icuParser.isTagElement(element)) {
       acc.push(element.value);
@@ -94,6 +86,7 @@ const extractValues = (elements) => {
     return acc;
   }, [] as string[]);
 };
+
 export const verifyMessagesWithValues = (
   messageDescriptor: MessageDescriptor,
   elements: MessageFormatElement[]
@@ -147,16 +140,34 @@ export const verifyMessagesWithValues = (
 // How about using kibana.json instead of .i18nrc file to define namespace prefix
 
 // Next:
-// Verify ID Namespace
 // test case for double count
-export const verifyMessageDescriptor = (messageDescriptor: MessageDescriptor) => {
-  const elements = icuParser.parse(messageDescriptor.defaultMessage!, {
+
+export const verifyMessageDescriptor = (
+  defaultMessage: string,
+  messageDescriptor: MessageDescriptor
+) => {
+  const elements = icuParser.parse(defaultMessage, {
     requiresOtherClause: true,
     shouldParseSkeletons: true,
     ignoreTag: messageDescriptor.ignoreTag,
   });
 
   verifyMessagesWithValues(messageDescriptor, elements);
+};
+
+export const verifyMessageIdStartsWithNamespace = (
+  messageDescriptor: MessageDescriptor,
+  namespace: string
+): boolean => {
+  /**
+   * Example:
+   * namespace: advancedSettings
+   * Valid messageId: advancedSettings.advancedSettingsLabel
+   * Invalid messageId: advancedSettings123.advancedSettingsLabel
+   * Invalid messageId: something_else.advancedSettingsLabel
+   */
+
+  return messageDescriptor.id.startsWith(`${namespace}.`);
 };
 
 export async function extractI18nMessageDescriptors(fileName: string, source: string) {

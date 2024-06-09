@@ -15,18 +15,8 @@ const MESSAGE_DESC_KEYS: Array<keyof MessageDescriptor> = [
   'description',
   'ignoreTag',
 ];
-
-export interface MessageDescriptor {
-  id: string;
-  description?: string | object;
-  defaultMessage?: string;
-  file?: string;
-  start?: number;
-  end?: number;
-  hasValuesObject?: boolean;
-  valuesKeys?: string[];
-  ignoreTag?: boolean;
-}
+import type { MessageDescriptor } from '../types';
+export { MessageDescriptor };
 
 /**
  * Check if node is `i18n.translate` node

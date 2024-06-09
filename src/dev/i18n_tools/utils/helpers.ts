@@ -13,6 +13,15 @@ export function normalizePath(inputPath: string) {
   return normalize(path.relative('.', inputPath));
 }
 
+export function makeAbsolutePath(inputPath: string, withTrailingSlash?: boolean) {
+  const absPath = path.isAbsolute(inputPath) ? inputPath : path.resolve(inputPath);
+  if (withTrailingSlash) {
+    return path.join(absPath, path.sep);
+  }
+
+  return absPath;
+}
+
 export function arrayify(subj: unknown) {
   return Array.isArray(subj) ? subj : [subj];
 }

@@ -7,13 +7,13 @@
  */
 
 import { resolve, join } from 'path';
-import { I18N_RC } from '../constants';
-import { arrayify } from '../utils';
-import { checkConfigNamespacePrefix } from '../i18n_config';
-import { I18nCheckTaskContext } from '../types';
+import { I18N_RC } from '../../constants';
+import { arrayify } from '../../utils';
+import { checkConfigNamespacePrefix } from './i18n_config';
+import { I18nCheckTaskContext } from '../../types';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
-  const root = join(__dirname, '../../../../');
+  const root = join(__dirname, '../../../../../');
   const kibanaRC = resolve(root, I18N_RC);
   const xpackRC = resolve(root, 'x-pack', I18N_RC);
 
@@ -24,10 +24,10 @@ export function checkConfigs(additionalConfigPaths: string | string[] = []) {
       try {
         await checkConfigNamespacePrefix(configPath);
       } catch (err) {
-        const { reporter } = context;
-        const reporterWithContext = reporter.withContext({ name: configPath });
-        reporterWithContext.report(err);
-        throw reporter;
+        const { errorReporter } = context;
+        const reporterWithContext = errorReporter.withContext({ name: configPath });
+        reporterWithContext.reportError(err);
+        throw errorReporter;
       }
     },
     title: `Checking configs in ${configPath}`,

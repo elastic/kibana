@@ -14,8 +14,8 @@ import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter } from '../utils';
-import { checkConfigs, mergeConfigs, validateTranslationsTask } from '../tasks';
 import { I18nCheckTaskContext } from '../types';
+import { checkConfigs, mergeConfigs, checkUntrackedNamespacesTask } from '../tasks';
 
 const toolingLog = new ToolingLog({
   level: 'info',
@@ -67,7 +67,8 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
+    const kibanaRootPaths = ['./src', './packages', './x-pack'];
+    const rootPaths = Array().concat(path || kibanaRootPaths);
 
     const list = new Listr<I18nCheckTaskContext>(
       [
@@ -81,21 +82,21 @@ run(
           task: (context, task) =>
             task.newListr(mergeConfigs(includeConfig), { exitOnError: true }),
         },
-        {
-          title: 'Validating i18n Messages',
-          skip: skipOnNoTranslations,
-          task: (context, task) => validateTranslationsTask(context, task, {}),
-        },
-
         // {
-        //   title: 'Checking For Untracked Messages based on .i18nrc.json',
-        //   enabled: (_) => !ignoreUntracked,
+        //   title: 'Validating i18n Messages',
         //   skip: skipOnNoTranslations,
-
-        //   task: (context, task) => {
-        //     console.log('context::', context);
-        //   }
+        //   task: (context, task) => validateTranslationsTask(context, task, {}),
         // },
+        // {
+        //   title: 'Checking Untracked i18n Messages outside defined namespaces',
+        //   enabled: (_) => !ignoreUntracked,
+        //   task: (context, task) => checkUntrackedNamespacesTask(context, task, { rootPaths }),
+        // },
+        {
+          title: 'Validating translation files',
+          skip: skipOnNoTranslations,
+          task: (context, task) => checkUntrackedNamespacesTask(context, task, { rootPaths }),
+        },
       ],
       {
         concurrent: false,
@@ -105,9 +106,9 @@ run(
     );
 
     try {
-      const reporter = new ErrorReporter();
+      const errorReporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
-      await list.run({ messages, reporter });
+      await list.run({ messages, errorReporter });
 
       reportTime(runStartTime, 'total', {
         success: true,
