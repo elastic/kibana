@@ -11,6 +11,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   id: 'builtin-services',
   name: 'Services from logs',
   type: 'service',
+  managed: true,
   indexPatterns: ['logs-*'],
   history: {
     timestampField: '@timestamp',
