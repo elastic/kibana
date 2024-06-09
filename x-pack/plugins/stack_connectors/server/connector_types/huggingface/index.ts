@@ -18,15 +18,15 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { ConfigSchema, SecretsSchema } from '../../../common/huggingface/schema';
-import { Config, Secrets } from '../../../common/huggingface/types';
-import { HuggingFaceConnector } from './huggingface';
-import { renderParameterTemplates } from './render';
 import {
   HuggingFaceProviderType,
   HUGGINGFACE_CONNECTOR_ID,
   HUGGINGFACE_TITLE,
-} from '@kbn/stack-connectors-plugin/common/huggingface/constants';
+} from '../../../common/huggingface/constants';
+import { ConfigSchema, SecretsSchema } from '../../../common/huggingface/schema';
+import { Config, Secrets } from '../../../common/huggingface/types';
+import { HuggingFaceConnector } from './huggingface';
+import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: HUGGINGFACE_CONNECTOR_ID,
