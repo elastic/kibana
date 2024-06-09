@@ -5,31 +5,37 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { formatNumber } from '@elastic/eui';
 
 import { DegradedField } from '../../../../common/api_types';
+import { SparkPlot } from './spark_plot';
+import { NUMBER_FORMAT } from '../../../../common/constants';
 
 const fieldColumnName = i18n.translate('xpack.datasetQuality.flyout.degradedField.field', {
   defaultMessage: 'Field',
 });
 
 const countColumnName = i18n.translate('xpack.datasetQuality.flyout.degradedField.count', {
-  defaultMessage: 'Count',
+  defaultMessage: 'Docs count',
 });
 
 const lastOccurrenceColumnName = i18n.translate(
   'xpack.datasetQuality.flyout.degradedField.lastOccurrence',
   {
-    defaultMessage: 'Last Occurrence',
+    defaultMessage: 'Last occurrence',
   }
 );
 
 export const getDegradedFieldsColumns = ({
   dateFormatter,
+  isLoading,
 }: {
   dateFormatter: FieldFormat;
+  isLoading: boolean;
 }): Array<EuiBasicTableColumn<DegradedField>> => [
   {
     name: fieldColumnName,
@@ -39,7 +45,10 @@ export const getDegradedFieldsColumns = ({
     name: countColumnName,
     sortable: true,
     field: 'count',
-    truncateText: true,
+    render: (_, { count, timeSeries }) => {
+      const countValue = formatNumber(count, NUMBER_FORMAT);
+      return <SparkPlot series={timeSeries} valueLabel={countValue} isLoading={isLoading} />;
+    },
   },
   {
     name: lastOccurrenceColumnName,

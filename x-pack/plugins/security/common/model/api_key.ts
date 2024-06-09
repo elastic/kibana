@@ -113,5 +113,5 @@ interface BaseQueryApiKeyResult {
   canManageApiKeys: boolean;
   canManageOwnApiKeys: boolean;
   aggregationTotal: number;
-  aggregations: Record<string, estypes.SecurityQueryApiKeysAPIKeyAggregate> | undefined;
+  aggregations: Record<string, estypes.SecurityQueryApiKeysApiKeyAggregate> | undefined;
 }

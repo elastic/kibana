@@ -32,7 +32,8 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
       expect(body).toMatchObject(baseConfig);
     });
 
-    it('GET should get updated labels after dynamically updating them', async () => {
+    // coreApp.allowDynamicConfigOverrides is disabled
+    it.skip('GET should get updated labels after dynamically updating them', async () => {
       const uniqueJourneyName = `my-ftr-test-${new Date().getMilliseconds()}`;
       await supertest
         .put('/internal/core/_settings')
