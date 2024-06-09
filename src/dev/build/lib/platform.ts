@@ -8,12 +8,14 @@
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
+export type Variant = 'serverless' | null;
 
 export class Platform {
   constructor(
     private name: PlatformName,
     private architecture: PlatformArchitecture,
-    private buildName: string
+    private buildName: string,
+    private variant: Variant
   ) {}
 
   getName() {
@@ -32,6 +34,10 @@ export class Platform {
     return `${this.name}-${this.architecture}`;
   }
 
+  getVariant() {
+    return this.variant;
+  }
+
   isWindows() {
     return this.name === 'win32';
   }
@@ -43,12 +49,23 @@ export class Platform {
   isLinux() {
     return this.name === 'linux';
   }
+
+  isServerless() {
+    return this.variant === 'serverless';
+  }
 }
 
-export const ALL_PLATFORMS = [
-  new Platform('linux', 'x64', 'linux-x86_64'),
-  new Platform('linux', 'arm64', 'linux-aarch64'),
-  new Platform('darwin', 'x64', 'darwin-x86_64'),
-  new Platform('darwin', 'arm64', 'darwin-aarch64'),
-  new Platform('win32', 'x64', 'windows-x86_64'),
+export const DOWNLOAD_PLATFORMS = [
+  new Platform('linux', 'x64', 'linux-x86_64', null),
+  new Platform('linux', 'arm64', 'linux-aarch64', null),
+  new Platform('darwin', 'x64', 'darwin-x86_64', null),
+  new Platform('darwin', 'arm64', 'darwin-aarch64', null),
+  new Platform('win32', 'x64', 'windows-x86_64', null),
 ];
+
+export const SERVERLESS_PLATFORMS = [
+  new Platform('linux', 'x64', 'linux-x86_64', 'serverless'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless'),
+];
+
+export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS];

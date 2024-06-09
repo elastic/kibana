@@ -16,7 +16,7 @@ import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constant
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
-import type { IDetectionRulesClient } from './detection_rules_client';
+import type { IDetectionRulesClient } from './detection_rules_client_interface';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
