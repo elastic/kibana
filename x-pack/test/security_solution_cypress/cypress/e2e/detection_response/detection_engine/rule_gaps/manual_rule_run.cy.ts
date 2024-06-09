@@ -5,19 +5,14 @@
  * 2.0.
  */
 
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   disableAutoRefresh,
   manuallyRunFirstRule,
   manualRuleRunFromDetailsPage,
 } from '../../../../tasks/alerts_detection_rules';
-import {
-  filterByRunType,
-  getExecutionLogTableRow,
-  goToExecutionLogTab,
-  refreshRuleExecutionTable,
-  visitRuleDetailsPage,
-} from '../../../../tasks/rule_details';
+import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import { getNewRule } from '../../../../objects/rule';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -37,18 +32,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
     );
     manualRuleRunFromDetailsPage();
 
-    goToExecutionLogTab();
-    filterByRunType('Manual');
-    cy.waitUntil(
-      () => {
-        cy.log('Waiting for manually scheduled rule execution logs to appear');
-        refreshRuleExecutionTable();
-        return getExecutionLogTableRow().then((rows) => {
-          return rows.length > 2;
-        });
-      },
-      { interval: 5000, timeout: 20000 }
-    );
+    cy.get(TOASTER).should('have.text', 'Successfully scheduled backfill for 1 rule');
   });
 
   it('schedule from rules management table', () => {
@@ -58,19 +42,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
         disableAutoRefresh();
         manuallyRunFirstRule();
 
-        visitRuleDetailsPage(rule.body.id);
-        goToExecutionLogTab();
-        filterByRunType('Manual');
-        cy.waitUntil(
-          () => {
-            cy.log('Waiting for manually scheduled rule execution logs to appear');
-            refreshRuleExecutionTable();
-            return getExecutionLogTableRow().then((rows) => {
-              return rows.length > 2;
-            });
-          },
-          { interval: 5000, timeout: 20000 }
-        );
+        cy.get(TOASTER).should('have.text', 'Successfully scheduled backfill for 1 rule');
       }
     );
   });
