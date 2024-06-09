@@ -32,26 +32,11 @@ export function getRequestWithStreamOption(
   url: string,
   body: string,
   stream: boolean,
-  defaultModel: string
-): string;
-
-export function getRequestWithStreamOption(
-  provider: HuggingFaceProviderType.HuggingFace,
-  url: string,
-  body: string,
-  stream: boolean
-): string;
-
-export function getRequestWithStreamOption(
-  provider: HuggingFaceProviderType,
-  url: string,
-  body: string,
-  stream: boolean,
   defaultModel?: string
 ): string;
 
 export function getRequestWithStreamOption(
-  provider: string,
+  provider: HuggingFaceProviderType | string,
   url: string,
   body: string,
   stream: boolean,
