@@ -6,6 +6,6 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { adminConsoleServicesEntityDefinition } from './admin_console_services';
+import { builtInServicesEntityDefinition } from './services';
 
-export const builtInEntityDefinitions: EntityDefinition[] = [adminConsoleServicesEntityDefinition];
+export const builtInEntityDefinitions: EntityDefinition[] = [builtInServicesEntityDefinition];
