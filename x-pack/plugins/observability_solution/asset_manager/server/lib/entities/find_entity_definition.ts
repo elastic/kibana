@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { compact } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
@@ -17,21 +18,26 @@ export async function findEntityDefinitions({
   soClient,
   esClient,
   managed,
+  id,
   page = 1,
   perPage = 10,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  managed?: boolean;
+  id?: string;
   page?: number;
   perPage?: number;
-  managed?: boolean;
-}): Promise<EntityDefinition[]> {
+}): Promise<Array<EntityDefinition & { state: { installed: boolean; running: boolean } }>> {
+  const filter = compact([
+    typeof managed === 'boolean'
+      ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.managed:(${managed})`
+      : undefined,
+    id ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})` : undefined,
+  ]).join(' AND ');
   const response = await soClient.find<EntityDefinition>({
     type: SO_ENTITY_DEFINITION_TYPE,
-    filter:
-      typeof managed === 'boolean'
-        ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.managed:(${managed})`
-        : undefined,
+    filter,
     page,
     perPage,
   });
