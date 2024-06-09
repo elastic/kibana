@@ -36,9 +36,9 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         }
 
         return res.ok();
-      } catch (e) {
-        server.logger.error(e);
-        throw e;
+      } catch (err) {
+        server.logger.error(err);
+        return res.customError({ statusCode: 500, body: err });
       }
     }
   );

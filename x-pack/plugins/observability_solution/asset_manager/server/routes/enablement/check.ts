@@ -9,12 +9,13 @@ import { RequestHandlerContext } from '@kbn/core/server';
 import { readEntityDiscoveryAPIKey, checkIfEntityDiscoveryAPIKeyIsValid } from '../../lib/auth';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
+import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
 
 export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {
-  router.get(
+  router.get<unknown, unknown, unknown>(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
       validate: false,
@@ -25,35 +26,20 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
         const apiKey = await readEntityDiscoveryAPIKey(server);
 
         if (apiKey === undefined) {
-          return res.ok({
-            body: {
-              enabled: false,
-              reason: 'no saved entity discovery API key found',
-            },
-          });
+          return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_FOUND } });
         }
 
         server.logger.debug('validating existing entity discovery API key');
         const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
 
         if (!isValid) {
-          return res.ok({
-            body: {
-              enabled: false,
-              reason: 'entity discovery API key exists, but is not valid',
-            },
-          });
+          return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
         }
 
-        return res.ok({
-          body: {
-            enabled: true,
-            reason: 'valid entity discovery API key exists',
-          },
-        });
-      } catch (e) {
-        server.logger.error(e);
-        throw e;
+        return res.ok({ body: { enabled: true } });
+      } catch (err) {
+        server.logger.error(err);
+        return res.customError({ statusCode: 500, body: err });
       }
     }
   );

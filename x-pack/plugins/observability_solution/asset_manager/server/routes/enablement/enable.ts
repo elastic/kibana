@@ -17,6 +17,7 @@ import {
 } from '../../lib/auth';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
+import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
@@ -37,7 +38,8 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           return res.ok({
             body: {
               success: false,
-              reason:
+              reason: ERROR_API_KEY_SERVICE_DISABLED,
+              message:
                 'API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config',
             },
           });
@@ -53,8 +55,9 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           return res.ok({
             body: {
               success: false,
-              reason:
-                'current Kibana user does not have the required permissions to enable entity discovery',
+              reason: ERROR_USER_NOT_AUTHORIZED,
+              message:
+                'Current Kibana user does not have the required permissions to enable entity discovery',
             },
           });
         }
@@ -76,7 +79,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
             return res.ok({
               body: {
                 success: true,
-                reason: 'valid entity discovery API key already exists',
+                message: 'Valid entity discovery API key already exists',
               },
             });
           }
@@ -103,12 +106,12 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         return res.ok({
           body: {
             success: true,
-            reason: 'new entity discovery API key generated',
+            message: 'New entity discovery API key generated',
           },
         });
-      } catch (e) {
-        server.logger.error(e);
-        throw e;
+      } catch (err) {
+        server.logger.error(err);
+        return res.customError({ statusCode: 500, body: err });
       }
     }
   );
