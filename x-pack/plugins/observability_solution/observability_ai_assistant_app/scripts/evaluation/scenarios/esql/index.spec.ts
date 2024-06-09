@@ -29,7 +29,7 @@ async function evaluateEsqlQuery({
     ...(expected
       ? [
           `Returns a ES|QL query that is functionally equivalent to:      
-      ${expected}`,
+      ${expected}. It's OK if column names are slightly different, as long as the expected end result is the same.`,
         ]
       : []),
     ...(execute
@@ -90,7 +90,7 @@ describe('ES|QL query generation', () => {
       it('top 10 unique domains', async () => {
         await evaluateEsqlQuery({
           question:
-            'For standard Elastic ECS compliant packetbeat data view, shows the top 10 unique destination.domain with more docs',
+            'For standard Elastic ECS compliant packetbeat data view, show me the top 10 unique destination.domain with the most docs',
           expected: `FROM packetbeat-*
           | STATS doc_count = COUNT(*) BY destination.domain
           | SORT doc_count DESC
