@@ -20,7 +20,7 @@ export function installBuiltinEntityDefinitionsRoute<T extends RequestHandlerCon
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.get(
+  router.post(
     {
       path: `${ENTITY_INTERNAL_API_PREFIX}/managed/start`,
       validate: false,
