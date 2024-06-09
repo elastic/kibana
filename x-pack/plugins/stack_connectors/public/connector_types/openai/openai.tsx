@@ -16,7 +16,6 @@ interface ValidationErrors {
   subAction: string[];
   body: string[];
 }
-
 export function getConnectorType(): OpenAIConnector {
   return {
     id: OPENAI_CONNECTOR_ID,
