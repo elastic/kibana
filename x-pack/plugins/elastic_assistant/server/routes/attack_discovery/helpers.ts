@@ -191,51 +191,39 @@ export const updateAttackDiscoveryStatusToRunning = async (
     connectorId: apiConfig.connectorId,
     authenticatedUser,
   });
-  let currentAd: AttackDiscoveryResponse;
-  let attackDiscoveryId: string;
-  if (foundAttackDiscovery == null) {
-    const ad = await dataClient?.createAttackDiscovery({
-      attackDiscoveryCreate: {
-        attackDiscoveries: [],
-        apiConfig,
-        status: attackDiscoveryStatus.running,
-      },
-      authenticatedUser,
-    });
-    if (ad == null) {
-      throw new Error(
-        `Could not create attack discovery for connectorId: ${apiConfig.connectorId}`
-      );
-    } else {
-      currentAd = ad;
-    }
-    attackDiscoveryId = currentAd.id;
-  } else {
-    attackDiscoveryId = foundAttackDiscovery.id;
+  const currentAd = foundAttackDiscovery
+    ? await dataClient?.updateAttackDiscovery({
+        attackDiscoveryUpdateProps: {
+          backingIndex: foundAttackDiscovery.backingIndex,
+          id: foundAttackDiscovery.id,
+          status: attackDiscoveryStatus.running,
+        },
+        authenticatedUser,
+      })
+    : await dataClient?.createAttackDiscovery({
+        attackDiscoveryCreate: {
+          apiConfig,
+          attackDiscoveries: [],
+          status: attackDiscoveryStatus.running,
+        },
+        authenticatedUser,
+      });
 
-    const ad = await dataClient?.updateAttackDiscovery({
-      attackDiscoveryUpdateProps: {
-        id: attackDiscoveryId,
-        status: attackDiscoveryStatus.running,
-        backingIndex: foundAttackDiscovery.backingIndex,
-      },
-      authenticatedUser,
-    });
-    if (ad == null) {
-      throw new Error(
-        `Could not update attack discovery for connectorId: ${apiConfig.connectorId}`
-      );
-    } else {
-      currentAd = ad;
-    }
+  if (!currentAd) {
+    throw new Error(
+      `Could not ${foundAttackDiscovery ? 'update' : 'create'} attack discovery for connectorId: ${
+        apiConfig.connectorId
+      }`
+    );
   }
+
   return {
+    attackDiscoveryId: currentAd.id,
     currentAd,
-    attackDiscoveryId,
   };
 };
 
-export const updateAttackDiscoveries = async ({
+export const updateAttackDiscoveries = ({
   apiConfig,
   attackDiscoveryId,
   authenticatedUser,
@@ -281,28 +269,30 @@ export const updateAttackDiscoveries = async ({
     backingIndex: currentAd.backingIndex,
   };
 
-  await dataClient.updateAttackDiscovery({
-    attackDiscoveryUpdateProps: updateProps,
-    authenticatedUser,
-  });
-
-  telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
-    actionTypeId: apiConfig.actionTypeId,
-    alertsContextCount: updateProps.alertsContextCount,
-    alertsCount: uniq(
-      updateProps.attackDiscoveries.flatMap(
-        (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
-      )
-    ).length,
-    configuredAlertsCount: size,
-    discoveriesGenerated: updateProps.attackDiscoveries.length,
-    durationMs,
-    model: apiConfig.model,
-    provider: apiConfig.provider,
-  });
+  dataClient
+    .updateAttackDiscovery({
+      attackDiscoveryUpdateProps: updateProps,
+      authenticatedUser,
+    })
+    .then(() => {
+      telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
+        actionTypeId: apiConfig.actionTypeId,
+        alertsContextCount: updateProps.alertsContextCount,
+        alertsCount: uniq(
+          updateProps.attackDiscoveries.flatMap(
+            (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
+          )
+        ).length,
+        configuredAlertsCount: size,
+        discoveriesGenerated: updateProps.attackDiscoveries.length,
+        durationMs,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
+      });
+    });
 };
 
-export const handleToolError = async ({
+export const handleToolError = ({
   apiConfig,
   attackDiscoveryId,
   authenticatedUser,
@@ -325,22 +315,26 @@ export const handleToolError = async ({
 }) => {
   logger.error(err);
   const error = transformError(err);
-  telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-    actionTypeId: apiConfig.actionTypeId,
-    errorMessage: error.message,
-    model: apiConfig.model,
-    provider: apiConfig.provider,
-  });
-  await dataClient.updateAttackDiscovery({
-    attackDiscoveryUpdateProps: {
-      attackDiscoveries: [],
-      status: attackDiscoveryStatus.failed,
-      id: attackDiscoveryId,
-      replacements: latestReplacements,
-      backingIndex,
-    },
-    authenticatedUser,
-  });
+
+  dataClient
+    .updateAttackDiscovery({
+      attackDiscoveryUpdateProps: {
+        attackDiscoveries: [],
+        status: attackDiscoveryStatus.failed,
+        id: attackDiscoveryId,
+        replacements: latestReplacements,
+        backingIndex,
+      },
+      authenticatedUser,
+    })
+    .then(() => {
+      telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
+        actionTypeId: apiConfig.actionTypeId,
+        errorMessage: error.message,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
+      });
+    });
 };
 
 export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginName: string) => {

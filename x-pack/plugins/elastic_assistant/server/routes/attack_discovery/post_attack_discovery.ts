@@ -147,7 +147,7 @@ export const postAttackDiscoveryRoute = (
 
           toolInstance
             ?.invoke('')
-            .then(async (rawAttackDiscoveries) =>
+            .then((rawAttackDiscoveries) =>
               updateAttackDiscoveries({
                 apiConfig,
                 attackDiscoveryId,
@@ -161,7 +161,7 @@ export const postAttackDiscoveryRoute = (
                 telemetry,
               })
             )
-            .catch(async (err) =>
+            .catch((err) =>
               handleToolError({
                 apiConfig,
                 attackDiscoveryId,
