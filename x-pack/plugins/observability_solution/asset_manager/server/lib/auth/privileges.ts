@@ -16,7 +16,7 @@ export const requiredRunTimePrivileges = {
       privileges: ['create_index', 'index', 'create_doc', 'auto_configure', 'read'],
     },
     {
-      names: ['apm-*', 'logs-*', 'metrics-*', 'filebeat*', 'metricbeat*'],
+      names: ['apm-*', 'logs-*', 'metrics-*', 'filebeat*', 'metricbeat*', `${ENTITY_BASE_PREFIX}*`],
       privileges: ['read', 'view_index_metadata'],
     },
   ],
