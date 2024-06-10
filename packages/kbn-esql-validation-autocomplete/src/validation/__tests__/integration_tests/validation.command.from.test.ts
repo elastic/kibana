@@ -21,7 +21,7 @@ import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 const enrichFieldsRaw = [...enrichFieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 
-export type IntegrationEnvKit = Awaited<ReturnType<typeof setupIntegrationEnv>>;
+export type IntegrationEnv = Awaited<ReturnType<typeof setupIntegrationEnv>>;
 
 const setupIntegrationEnv = async () => {
   const servers = await createTestServers({
@@ -55,47 +55,29 @@ const setupIntegrationEnv = async () => {
   };
 };
 
-describe('validation', () => {
-  let integrationEnv: IntegrationEnvKit | undefined;
+type StringType = 'text' | 'keyword';
+type NumberType = 'integer' | 'double' | 'long' | 'unsigned_long';
+type EsqlEnv = Awaited<ReturnType<typeof setupEsqlEnv>>;
 
-  beforeAll(async () => {
-    integrationEnv = await setupIntegrationEnv();
-  });
-
-  afterAll(async () => {
-    await integrationEnv?.shutdown();
-  });
-
-  describe('commands', () => {
-    test('test...', async () => {
-      // test...
-      expect(1).toBe(1);
-    });
-  });
-
-  // const stringVariants = ['text', 'keyword'] as const;
-  // const numberVariants = ['integer', 'long', 'double', 'long'] as const;
-  const stringVariants = ['text'] as const;
-  const numberVariants = ['integer'] as const;
-
+const setupEsqlEnv = async () => {
+  const integrationEnv = await setupIntegrationEnv();
+  const { esClient: es } = integrationEnv;
   const cleanup = async () => {
-    const { esClient } = integrationEnv!;
-    await esClient.indices.delete({ index: indexes, ignore_unavailable: true }, { ignore: [404] });
-    await esClient.indices.delete(
+    await es.indices.delete({ index: indexes, ignore_unavailable: true }, { ignore: [404] });
+    await es.indices.delete(
       { index: policies[0].sourceIndices[0], ignore_unavailable: true },
       { ignore: [404] }
     );
     for (const policy of policies) {
-      await esClient.enrich.deletePolicy({ name: policy.name }, { ignore: [404] });
+      await es.enrich.deletePolicy({ name: policy.name }, { ignore: [404] });
     }
   };
-
-  function createIndexRequest(
+  const createIndexRequest = (
     index: string,
     fieldList: Array<{ name: string; type: string }>,
-    stringType: 'text' | 'keyword',
-    numberType: 'integer' | 'double' | 'long' | 'unsigned_long'
-  ) {
+    stringType: StringType,
+    numberType: NumberType
+  ) => {
     return {
       index,
       mappings: {
@@ -127,71 +109,94 @@ describe('validation', () => {
         ),
       },
     };
-  }
+  };
+  await cleanup();
+  const setupIndicesPolicies = async (stringFieldType: StringType, numberFieldType: NumberType) => {
+    for (const index of indexes) {
+      await es.indices.create(
+        createIndexRequest(
+          index,
+          /unsupported/.test(index) ? unsupported_field : fields,
+          stringFieldType,
+          numberFieldType
+        ),
+        { ignore: [409] }
+      );
+    }
+
+    for (const { sourceIndices, matchField } of policies.slice(0, 1)) {
+      const enrichFields = [{ name: matchField, type: 'string' }].concat(enrichFieldsRaw);
+      await es.indices.create(
+        createIndexRequest(sourceIndices[0], enrichFields, stringFieldType, numberFieldType),
+        {
+          ignore: [409],
+        }
+      );
+    }
+    for (const { name, sourceIndices, matchField, enrichFields } of policies) {
+      await es.enrich.putPolicy(
+        {
+          name,
+          body: {
+            match: {
+              indices: sourceIndices,
+              match_field: matchField,
+              enrich_fields: enrichFields,
+            },
+          },
+        },
+        { ignore: [409] }
+      );
+      await es.enrich.executePolicy({ name });
+    }
+  };
+
+  return {
+    integrationEnv,
+    cleanup,
+    createIndexRequest,
+    setupIndicesPolicies,
+  };
+};
+
+describe('validation', () => {
+  let esqlEnv: EsqlEnv | undefined;
+
+  beforeAll(async () => {
+    esqlEnv = await setupEsqlEnv();
+  });
+
+  afterAll(async () => {
+    await esqlEnv?.cleanup();
+    await esqlEnv?.integrationEnv?.shutdown();
+  });
+
+  // const stringVariants = ['text', 'keyword'] as const;
+  // const numberVariants = ['integer', 'long', 'double', 'long'] as const;
+  const stringVariants = ['text'] as const;
+  const numberVariants = ['integer'] as const;
 
   for (const stringFieldType of stringVariants) {
     for (const numberFieldType of numberVariants) {
       describe(`Using string field type: ${stringFieldType} and number field type: ${numberFieldType}`, () => {
-        beforeAll(async () => {
-          const { esClient: es } = integrationEnv!;
-          await cleanup();
-          for (const index of indexes) {
-            await es.indices.create(
-              createIndexRequest(
-                index,
-                /unsupported/.test(index) ? unsupported_field : fields,
-                stringFieldType,
-                numberFieldType
-              ),
-              { ignore: [409] }
-            );
-          }
-
-          for (const { sourceIndices, matchField } of policies.slice(0, 1)) {
-            const enrichFields = [{ name: matchField, type: 'string' }].concat(enrichFieldsRaw);
-            await es.indices.create(
-              createIndexRequest(sourceIndices[0], enrichFields, stringFieldType, numberFieldType),
-              {
-                ignore: [409],
-              }
-            );
-          }
-          for (const { name, sourceIndices, matchField, enrichFields } of policies) {
-            await es.enrich.putPolicy(
-              {
-                name,
-                body: {
-                  match: {
-                    indices: sourceIndices,
-                    match_field: matchField,
-                    enrich_fields: enrichFields,
-                  },
-                },
-              },
-              { ignore: [409] }
-            );
-            await es.enrich.executePolicy({ name });
-          }
-        });
-
         interface EsqlResultColumn {
           name: string;
           type: string;
         }
-
         type EsqlResultRow = Array<string | null>;
-
         interface EsqlTable {
           columns: EsqlResultColumn[];
           values: EsqlResultRow[];
         }
 
-        async function sendESQLQuery(query: string): Promise<{
+        const sendESQLQuery = async (
+          query: string
+        ): Promise<{
           resp: EsqlTable | undefined;
           error: { message: string } | undefined;
-        }> {
+        }> => {
           try {
-            const resp = await integrationEnv!.esClient.transport.request<EsqlTable>({
+            const resp = await esqlEnv!.integrationEnv!.esClient.transport.request<EsqlTable>({
               method: 'POST',
               path: '/_query',
               body: {
@@ -202,10 +207,14 @@ describe('validation', () => {
           } catch (e) {
             return { resp: undefined, error: { message: e.meta.body.error.root_cause[0].reason } };
           }
-        }
+        };
+
+        beforeAll(async () => {
+          await esqlEnv?.setupIndicesPolicies(stringFieldType, numberFieldType);
+        });
 
         afterAll(async () => {
-          await cleanup();
+          await esqlEnv?.cleanup();
         });
 
         runFromCommandTestSuite(async () => {
