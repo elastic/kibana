@@ -332,7 +332,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Show missing connector callout if no connectors are configured
 
   const showMissingConnectorCallout = useMemo(() => {
-    if (!isLoading && areConnectorsFetched) {
+    if (!isLoading && areConnectorsFetched && currentConversation?.id !== '') {
       if (!currentConversation?.apiConfig?.connectorId) {
         return true;
       }
@@ -343,7 +343,13 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return false;
-  }, [areConnectorsFetched, connectors, currentConversation?.apiConfig?.connectorId, isLoading]);
+  }, [
+    areConnectorsFetched,
+    connectors,
+    currentConversation?.apiConfig?.connectorId,
+    currentConversation?.id,
+    isLoading,
+  ]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -700,8 +706,8 @@ const AssistantComponent: React.FC<Props> = ({
           conversation: payload,
           apiConfig: {
             ...payload?.apiConfig,
-            connectorId: defaultConnector?.id as string,
-            actionTypeId: defaultConnector?.actionTypeId as string,
+            connectorId: (defaultConnector?.id as string) ?? '',
+            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
             provider: apiConfig?.apiProvider,
             model: apiConfig?.defaultModel,
           },
@@ -722,12 +728,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      if (
-        showMissingConnectorCallout &&
-        areConnectorsFetched &&
-        defaultConnector &&
-        currentConversation
-      ) {
+      if (areConnectorsFetched && currentConversation?.id === '') {
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);

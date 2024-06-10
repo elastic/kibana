@@ -179,6 +179,9 @@ export class DataViewEditorService {
   };
 
   private getRollupIndexCaps = async () => {
+    if (this.dataViews.getRollupsEnabled() === false) {
+      return {};
+    }
     let rollupIndicesCaps: RollupIndicesCapsResponse = {};
     try {
       rollupIndicesCaps = await this.http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
