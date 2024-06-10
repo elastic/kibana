@@ -19,8 +19,11 @@ import {
 } from './create_and_install_transform';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
+import { findEntityDefinitions } from './find_entity_definition';
 import { saveEntityDefinition } from './save_entity_definition';
+import { startTransform } from './start_transform';
 import { stopAndDeleteHistoryTransform } from './stop_and_delete_transform';
+import { uninstallEntityDefinition } from './uninstall_entity_definition';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -90,21 +93,57 @@ export async function installEntityDefinition({
   }
 }
 
-export async function installEntityDefinitions({
+export async function installBuiltInEntityDefinitions({
   esClient,
   soClient,
   logger,
-  definitions,
+  builtInDefinitions,
   spaceId,
-}: Omit<InstallDefinitionParams, 'definition'> & { definitions: EntityDefinition[] }): Promise<
-  EntityDefinition[]
-> {
-  if (definitions.length === 0) return [];
+}: Omit<InstallDefinitionParams, 'definition'> & { builtInDefinitions: EntityDefinition[] }) {
+  if (builtInDefinitions.length === 0) return;
 
-  logger.debug(`Starting installation of ${definitions.length} definitions`);
-  const installPromises = definitions.map(async (definition) =>
-    installEntityDefinition({ esClient, soClient, definition, logger, spaceId })
-  );
+  logger.debug(`Starting installation of ${builtInDefinitions.length} built-in definitions`);
+  const installPromises = builtInDefinitions.map(async (builtInDefinition) => {
+    const definitions = await findEntityDefinitions({
+      esClient,
+      soClient,
+      id: builtInDefinition.id,
+    });
 
-  return Promise.all(installPromises);
+    if (definitions.length === 0) {
+      return await installAndStartDefinition({
+        definition: builtInDefinition,
+        esClient,
+        soClient,
+        logger,
+        spaceId,
+      });
+    }
+
+    const definition = definitions[0];
+    // verify current installation
+    if (!definition.state.installed) {
+      logger.debug(`Detected partial installation of definition [${definition.id}], reinstalling`);
+      await uninstallEntityDefinition({ esClient, soClient, logger, definition });
+      return await installAndStartDefinition({
+        definition: builtInDefinition,
+        esClient,
+        soClient,
+        logger,
+        spaceId,
+      });
+    }
+
+    if (!definition.state.running) {
+      logger.debug(`Starting transforms for definition [${definition.id}]`);
+      await startTransform(esClient, definition, logger);
+    }
+  });
+
+  await Promise.all(installPromises);
+}
+
+async function installAndStartDefinition(params: InstallDefinitionParams) {
+  const definition = await installEntityDefinition(params);
+  await startTransform(params.esClient, definition, params.logger);
 }

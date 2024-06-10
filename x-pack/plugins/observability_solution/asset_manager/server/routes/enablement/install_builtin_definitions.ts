@@ -8,12 +8,11 @@
 import { RequestHandlerContext } from '@kbn/core/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { readEntityDiscoveryAPIKey, checkIfEntityDiscoveryAPIKeyIsValid } from '../../lib/auth';
-import { builtInEntityDefinitions } from '../../lib/entities/built_in';
+import { builtInDefinitions } from '../../lib/entities/built_in';
 import { SetupRouteOptions } from '../types';
 import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
-import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
-import { startTransform } from '../../lib/entities/start_transform';
+import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
 
 export function installBuiltinEntityDefinitionsRoute<T extends RequestHandlerContext>({
   router,
@@ -46,18 +45,13 @@ export function installBuiltinEntityDefinitionsRoute<T extends RequestHandlerCon
         const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
         logger.info(`Starting installation of builtin definitions`);
-        await Promise.all(
-          builtInEntityDefinitions.map(async (builtInDefinition) => {
-            const definition = await installEntityDefinition({
-              esClient,
-              soClient,
-              logger,
-              definition: builtInDefinition,
-              spaceId: 'default',
-            });
-            await startTransform(esClient, definition, logger);
-          })
-        );
+        await installBuiltInEntityDefinitions({
+          esClient,
+          soClient,
+          logger,
+          builtInDefinitions,
+          spaceId: 'default',
+        });
         logger.info(`Builtin definitions are running`);
 
         return res.ok({ body: { success: true } });

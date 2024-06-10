@@ -22,7 +22,7 @@ export async function stopAndDeleteHistoryTransform(
       () =>
         esClient.transform.stopTransform(
           { transform_id: historyTransformId, wait_for_completion: true, force: true },
-          { ignore: [409] }
+          { ignore: [409, 404] }
         ),
       { logger }
     );
@@ -39,6 +39,7 @@ export async function stopAndDeleteHistoryTransform(
     throw e;
   }
 }
+
 export async function stopAndDeleteLatestTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
@@ -50,7 +51,7 @@ export async function stopAndDeleteLatestTransform(
       () =>
         esClient.transform.stopTransform(
           { transform_id: latestTransformId, wait_for_completion: true, force: true },
-          { ignore: [409] }
+          { ignore: [409, 404] }
         ),
       { logger }
     );

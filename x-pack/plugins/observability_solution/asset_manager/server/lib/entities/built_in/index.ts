@@ -8,4 +8,4 @@
 import { EntityDefinition } from '@kbn/entities-schema';
 import { builtInServicesEntityDefinition } from './services';
 
-export const builtInEntityDefinitions: EntityDefinition[] = [builtInServicesEntityDefinition];
+export const builtInDefinitions: EntityDefinition[] = [builtInServicesEntityDefinition];
