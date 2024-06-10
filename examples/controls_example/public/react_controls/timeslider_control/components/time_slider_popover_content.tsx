@@ -15,7 +15,7 @@ import { TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range
 import { Timeslice } from '../types';
 
 interface Props {
-  isAnchored?: boolean;
+  isAnchored: boolean;
   setIsAnchored: (isAnchored: boolean) => void;
   value: Timeslice;
   onChange: (value?: Timeslice) => void;
@@ -70,7 +70,7 @@ export function TimeSliderPopoverContent(props: Props) {
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={anchorStartToggleButtonLabel}>
+        <EuiToolTip content={anchorStartToggleButtonLabel} position="left">
           <EuiButtonIcon
             iconType={props.isAnchored ? 'pinFilled' : 'pin'}
             onClick={() => {

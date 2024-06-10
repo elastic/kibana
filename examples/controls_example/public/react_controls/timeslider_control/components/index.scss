@@ -16,7 +16,8 @@
   @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
 
   .euiText {
-    background-color: transparent !important;
+    background-color: $euiFormBackgroundColor !important;
+    // background-color: transparent !important; TODO revert to this rule once control group provides background color
 
     &:hover {
       text-decoration: underline;
