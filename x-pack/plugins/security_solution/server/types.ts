@@ -33,7 +33,7 @@ import type { EndpointInternalFleetServicesInterface } from './endpoint/services
 import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/rule_management/detection_rules_client';
+import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
