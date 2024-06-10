@@ -176,7 +176,7 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
   }
   const { table, column: columnIndex, row: rowIndex } = dataPoints[dataPoints.length - 1];
 
-  if (table && table.columns && table.columns[columnIndex]) {
+  if (table?.columns?.[columnIndex]) {
     const column = table.columns[columnIndex];
     const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
     if (value == null) {
