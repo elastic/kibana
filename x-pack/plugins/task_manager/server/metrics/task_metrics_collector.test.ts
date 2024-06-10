@@ -188,6 +188,9 @@ describe('TaskManagerMetricsCollector', () => {
                       ],
                     },
                   },
+                ],
+                minimum_should_match: 1,
+                must: [
                   {
                     bool: {
                       must: [

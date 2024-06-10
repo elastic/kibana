@@ -99,11 +99,9 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
             filter: [
               {
                 bool: {
-                  should: [
-                    IdleTaskWithExpiredRunAt,
-                    RunningOrClaimingTaskWithExpiredRetryAt,
-                    OneOfTaskTypes('task.taskType', searchedTypes),
-                  ],
+                  must: [OneOfTaskTypes('task.taskType', searchedTypes)],
+                  should: [IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt],
+                  minimum_should_match: 1,
                 },
               },
             ],
