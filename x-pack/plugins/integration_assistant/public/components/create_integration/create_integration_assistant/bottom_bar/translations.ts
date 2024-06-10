@@ -14,3 +14,7 @@ export const ANALYZE_LOGS = i18n.translate('xpack.integrationAssistant.bottomBar
 export const LOADING = i18n.translate('xpack.integrationAssistant.bottomBar.loading', {
   defaultMessage: 'Loading',
 });
+
+export const ADD_TO_ELASTIC = i18n.translate('xpack.integrationAssistant.bottomBar.addToElastic', {
+  defaultMessage: 'Add to Elastic',
+});

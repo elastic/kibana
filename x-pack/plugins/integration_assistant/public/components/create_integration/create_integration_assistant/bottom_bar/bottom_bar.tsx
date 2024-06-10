@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ButtonsFooter } from '../../../../common/components/buttons_footer';
 import type { SetPage } from '../../../types';
 import type { State } from '../state';
@@ -62,18 +62,24 @@ export const BottomBar = React.memo<BottomBarProps>(
       }
     }, [currentStep, onGenerate, setStep]);
 
-    // if (currentStep === 5) {
-    //   return <ButtonsFooter isNextDisabled={!isNextStepEnabled} onBack={onBack} onNext={onNext} />;
-    // }
+    const nextButtonText = useMemo(() => {
+      if (currentStep === 3) {
+        return <Step3ButtonText isGenerating={isGenerating} />;
+      }
+      if (currentStep === 4) {
+        return i18n.ADD_TO_ELASTIC;
+      }
+    }, [currentStep, isGenerating]);
 
+    if (currentStep > 4) {
+      return null;
+    }
     return (
       <ButtonsFooter
         isNextDisabled={!isNextStepEnabled || isGenerating}
         onBack={onBack}
         onNext={onNext}
-        nextButtonText={
-          currentStep === 3 ? <Step3ButtonText isGenerating={isGenerating} /> : undefined
-        }
+        nextButtonText={nextButtonText}
       />
     );
   }

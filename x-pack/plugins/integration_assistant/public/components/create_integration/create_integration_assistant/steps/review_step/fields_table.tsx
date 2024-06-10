@@ -18,10 +18,6 @@ import {
   type EuiSearchBarProps,
 } from '@elastic/eui';
 
-interface FieldsTableProps {
-  documents: object[];
-}
-
 interface FieldObject {
   type: string;
   name: string;
@@ -56,7 +52,7 @@ const columns: Array<EuiBasicTableColumn<FieldObject>> = [
   {
     field: 'name',
     name: 'Name',
-    truncateText: true,
+    // truncateText: true,
     sortable: true,
     render: (name: string, { type }) => {
       return (
@@ -93,7 +89,10 @@ const search: EuiSearchBarProps = {
   },
 };
 
-const flattenDocument = (document: object): FieldObject[] => {
+const flattenDocument = (document?: object): FieldObject[] => {
+  if (!document) {
+    return [];
+  }
   const fields: FieldObject[] = [];
   const flatten = (object: object, prefix = '') => {
     Object.entries(object).forEach(([key, value]) => {
@@ -109,7 +108,10 @@ const flattenDocument = (document: object): FieldObject[] => {
   return fields;
 };
 
-export const FieldsTable = React.memo<FieldsTableProps>(({ documents }) => {
+interface FieldsTableProps {
+  documents?: object[];
+}
+export const FieldsTable = React.memo<FieldsTableProps>(({ documents = [] }) => {
   const fields = useMemo(() => flattenDocument(documents[0]), [documents]);
   return (
     <EuiInMemoryTable

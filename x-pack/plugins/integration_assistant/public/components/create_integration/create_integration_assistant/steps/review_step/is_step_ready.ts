@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export const isPipelineGenerationReady = ({
-  isGenerating,
-  result,
-}: {
-  isGenerating: boolean;
-  result?: object;
-}) => isGenerating === false && result != null;
+import type { State } from '../../state';
+
+export const isReviewStepReady = ({ isGenerating, result }: State) =>
+  isGenerating === false && result != null;

@@ -68,7 +68,7 @@ export const Steps = React.memo<StepsProps>(({ currentStep, setStep, isGeneratin
       },
       {
         title: STEP_REVIEW,
-        status: getStepStatus(4, currentStep),
+        status: getStepStatus(4, currentStep, isGenerating),
         onClick: getStepOnClick(4, currentStep, setStep),
       },
     ];

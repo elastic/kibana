@@ -15,8 +15,7 @@ import { BottomBar } from './bottom_bar';
 import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
 import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
-import { isPipelineGenerationReady, PipelineGeneration } from './steps/pipeline_integration';
-import { DeployIntegration } from './steps/deploy_integration';
+import { ReviewStep, isReviewStepReady } from './steps/review_step';
 import type { SetPage } from '../../types';
 
 interface CreateIntegrationAssistantProps {
@@ -38,10 +37,7 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
       } else if (state.step === 3) {
         return isDataStreamStepReady(state);
       } else if (state.step === 4) {
-        return isPipelineGenerationReady({
-          result: state.result,
-          isGenerating: state.isGenerating,
-        });
+        return isReviewStepReady(state);
       }
       return false;
     }, [state]);
@@ -89,7 +85,7 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
             />
           )}
           {state.step === 4 && (
-            <PipelineGeneration
+            <ReviewStep
               integrationSettings={state.integrationSettings}
               connectorId={state.connectorId}
               isGenerating={state.isGenerating}
@@ -99,13 +95,13 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
               setResult={actions.setResult}
             />
           )}
-          {state.step === 5 && (
+          {/* {state.step === 5 && (
             <DeployIntegration
               integrationSettings={state.integrationSettings}
               result={state.result}
               connectorId={state.connectorId}
             />
-          )}
+          )} */}
         </KibanaPageTemplate.Section>
         <BottomBar
           currentStep={state.step}
