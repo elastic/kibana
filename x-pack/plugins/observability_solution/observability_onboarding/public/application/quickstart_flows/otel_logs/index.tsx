@@ -61,24 +61,12 @@ export const OtelLogsPanel: React.FC = () => {
 
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
 
-  const inventoryLocator = share.url.locators.get('INVENTORY_LOCATOR');
-
   const [{ value: deeplinks }, getDeeplinks] = useAsyncFn(async () => {
     return {
-      logs: allDatasetsLocator!.getRedirectUrl({
+      logs: allDatasetsLocator?.getRedirectUrl({
         type: 'logs',
       }),
-      metrics: hostsLocator!.getRedirectUrl({}),
-      pods: inventoryLocator!.getRedirectUrl({
-        view: 'map',
-        metric: '',
-        nodeType: 'pod',
-        sort: {
-          by: 'name',
-          direction: 'desc',
-        },
-        timelineOpen: false,
-      }),
+      metrics: hostsLocator?.getRedirectUrl({}),
     };
   }, [allDatasetsLocator]);
 
@@ -372,63 +360,57 @@ rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && 
                       </EuiFlexItem>
                       <EuiFlexItem grow>
                         <EuiFlexGroup direction="column" gutterSize="xs">
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s">
-                              {i18n.translate(
-                                'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel',
-                                { defaultMessage: 'View and analyze your logs' }
-                              )}
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiLink
-                              data-test-subj="obltOnboardingExploreLogs"
-                              href={deeplinks?.logs}
-                            >
-                              {i18n.translate(
-                                'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
-                                {
-                                  defaultMessage: 'Open Logs Explorer',
-                                }
-                              )}
-                            </EuiLink>
-                          </EuiFlexItem>
+                          {deeplinks?.logs && (
+                            <>
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="s">
+                                  {i18n.translate(
+                                    'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel',
+                                    { defaultMessage: 'View and analyze your logs' }
+                                  )}
+                                </EuiText>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiLink
+                                  data-test-subj="obltOnboardingExploreLogs"
+                                  href={deeplinks.logs}
+                                >
+                                  {i18n.translate(
+                                    'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
+                                    {
+                                      defaultMessage: 'Open Logs Explorer',
+                                    }
+                                  )}
+                                </EuiLink>
+                              </EuiFlexItem>
+                            </>
+                          )}
                           <EuiSpacer size="s" />
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s">
-                              {i18n.translate(
-                                'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
-                                { defaultMessage: 'View and analyze your metrics' }
-                              )}
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            {selectedTab === 'kubernetes' ? (
-                              <EuiLink
-                                data-test-subj="obltOnboardingExploreMetrics"
-                                href={deeplinks?.pods}
-                              >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.explorePods',
-                                  {
-                                    defaultMessage: 'Open Pods',
-                                  }
-                                )}
-                              </EuiLink>
-                            ) : (
-                              <EuiLink
-                                data-test-subj="obltOnboardingExploreMetrics"
-                                href={deeplinks?.metrics}
-                              >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
-                                  {
-                                    defaultMessage: 'Open Hosts',
-                                  }
-                                )}
-                              </EuiLink>
-                            )}
-                          </EuiFlexItem>
+                          {deeplinks?.metrics && (
+                            <>
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="s">
+                                  {i18n.translate(
+                                    'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
+                                    { defaultMessage: 'View and analyze your metrics' }
+                                  )}
+                                </EuiText>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiLink
+                                  data-test-subj="obltOnboardingExploreMetrics"
+                                  href={deeplinks.metrics}
+                                >
+                                  {i18n.translate(
+                                    'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
+                                    {
+                                      defaultMessage: 'Open Hosts',
+                                    }
+                                  )}
+                                </EuiLink>
+                              </EuiFlexItem>
+                            </>
+                          )}
                         </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
