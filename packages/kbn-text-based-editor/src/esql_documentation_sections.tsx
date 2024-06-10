@@ -706,7 +706,7 @@ Refer to **Operators** for an overview of the supported operators.
 };
 
 // DO NOT RENAME!
-// managed by generate_esql_docs.ts
+// managed by scripts/generate_esql_docs.ts
 export const functions = {
   label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.functions', {
     defaultMessage: 'Functions',
