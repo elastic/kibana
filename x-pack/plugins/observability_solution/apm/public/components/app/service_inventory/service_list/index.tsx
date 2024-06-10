@@ -445,15 +445,15 @@ export function ServiceList({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               position="top"
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate('xpack.apm.servicesTable.tooltip.metricsExplanation', {
                 defaultMessage:
                   'Service metrics are aggregated on their transaction type, which can be request or page-load. If neither exists, metrics are aggregated on the top available transaction type.',
               })}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
