@@ -68,7 +68,7 @@ run(
     `,
     flags: {
       boolean: ['update', 'serverless', 'traditional'],
-      string: ['include-path', 'exclude-path', 'build-flavor'],
+      string: ['include-path', 'exclude-path'],
       default: {
         fix: false,
         serverless: true,
