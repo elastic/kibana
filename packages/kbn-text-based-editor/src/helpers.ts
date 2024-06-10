@@ -241,7 +241,7 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
   }
 };
 
-export const getIntegrations = async (core: CoreStart) => {
+const getIntegrations = async (core: CoreStart) => {
   const route = '/api/fleet/epm/packages/installed';
   const response = (await core.http
     .get(route, { query: undefined, version: '2023-10-31' })
