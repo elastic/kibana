@@ -217,6 +217,7 @@ export const dataLoaders = (
         withResponseActions,
         numResponseActions,
         alertIds,
+        isServerless,
       });
     },
 

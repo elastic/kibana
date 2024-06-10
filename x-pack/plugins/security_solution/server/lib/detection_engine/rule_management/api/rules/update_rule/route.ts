@@ -16,7 +16,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
@@ -49,7 +49,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 
@@ -80,7 +80,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
             existingRule
           );
 
-          const rule = await rulesManagementClient.updateRule({
+          const rule = await detectionRulesClient.updateRule({
             ruleUpdate: request.body,
           });
 

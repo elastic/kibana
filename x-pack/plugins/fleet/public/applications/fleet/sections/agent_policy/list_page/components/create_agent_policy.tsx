@@ -153,7 +153,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                     if (data) {
                       notifications.toasts.addSuccess(
                         i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
-                          defaultMessage: "Agent policy '{name}' created",
+                          defaultMessage: "Agent policy ''{name}'' created",
                           values: { name: agentPolicy.name },
                         })
                       );

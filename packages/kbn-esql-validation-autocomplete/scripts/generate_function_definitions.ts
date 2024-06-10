@@ -29,7 +29,9 @@ const evalSupportedCommandsAndOptions = {
   supportedOptions: ['by'],
 };
 
-const excludedFunctions = new Set(['bucket', 'case']);
+// coalesce can be removed when a test is added for version type
+// (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
+const excludedFunctions = new Set(['bucket', 'case', 'coalesce']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
@@ -51,6 +53,48 @@ const extraFunctions: FunctionDefinition[] = [
     examples: [
       `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
     ],
+  },
+  {
+    type: 'eval',
+    name: 'coalesce',
+    description:
+      'Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.',
+    alias: undefined,
+    signatures: supportedFieldTypes
+      .map<FunctionDefinition['signatures']>((type) => [
+        {
+          params: [
+            {
+              name: 'first',
+              type,
+              optional: false,
+            },
+          ],
+          returnType: type,
+          minParams: 1,
+        },
+        {
+          params: [
+            {
+              name: 'first',
+              type,
+              optional: false,
+            },
+            {
+              name: 'rest',
+              type,
+              optional: true,
+            },
+          ],
+          returnType: type,
+          minParams: 1,
+        },
+      ])
+      .flat(),
+    supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+    supportedOptions: ['by'],
+    validate: undefined,
+    examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
   },
 ];
 
@@ -214,40 +258,6 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     }),
   },
   // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
-  coalesce: {
-    signatures: supportedFieldTypes
-      .map<FunctionDefinition['signatures']>((type) => [
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-        {
-          params: [
-            {
-              name: 'first',
-              type,
-              optional: false,
-            },
-            {
-              name: 'rest',
-              type: 'boolean',
-              optional: true,
-            },
-          ],
-          returnType: type,
-          minParams: 1,
-        },
-      ])
-      .flat(),
-  },
-  // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
   mv_dedupe: {
     signatures: supportedFieldTypes.map<FunctionDefinition['signatures'][number]>((type) => ({
       params: [
@@ -304,21 +314,53 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 }
 
 function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) {
+  /**
+   * Deals with asciidoc internal cross-references in the function descriptions
+   *
+   * Examples:
+   * <<esql-mv_max>> -> `MV_MAX`
+   * <<esql-st_intersects,ST_INTERSECTS>> -> `ST_INTERSECTS`
+   * <<esql-multivalued-fields, multivalued fields>> -> multivalued fields
+   */
+  const removeAsciiDocInternalCrossReferences = (
+    asciidocString: string,
+    functionNames: string[]
+  ) => {
+    const internalCrossReferenceRegex = /<<(.+?)(,.+?)?>>/g;
+
+    const extractPossibleFunctionName = (id: string) => id.replace('esql-', '');
+
+    return asciidocString.replace(internalCrossReferenceRegex, (_match, anchorId, linkText) => {
+      const ret = linkText ? linkText.slice(1) : anchorId;
+
+      const matchingFunction = functionNames.find(
+        (name) =>
+          extractPossibleFunctionName(ret) === name.toLowerCase() ||
+          extractPossibleFunctionName(ret) === name.toUpperCase()
+      );
+      return matchingFunction ? `\`${matchingFunction.toUpperCase()}\`` : ret;
+    });
+  };
+
   const removeInlineAsciiDocLinks = (asciidocString: string) => {
     const inlineLinkRegex = /\{.+?\}\/.+?\[(.+?)\]/g;
+
     return asciidocString.replace(inlineLinkRegex, '$1');
   };
 
   const getDefinitionName = (name: string) => _.camelCase(`${name}Definition`);
 
-  const printFunctionDefinition = (functionDefinition: FunctionDefinition) => {
+  const printFunctionDefinition = (
+    functionDefinition: FunctionDefinition,
+    functionNames: string[]
+  ) => {
     const { type, name, description, alias, signatures } = functionDefinition;
 
     return `const ${getDefinitionName(name)}: FunctionDefinition = {
     type: '${type}',
     name: '${name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-      removeInlineAsciiDocLinks(description)
+      removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
     )} }),
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
@@ -340,7 +382,14 @@ import type { FunctionDefinition } from './types';
 
 `;
 
-  const functionDefinitionsString = functionDefinitions.map(printFunctionDefinition).join('\n\n');
+  const functionDefinitionsString = functionDefinitions
+    .map((def) =>
+      printFunctionDefinition(
+        def,
+        functionDefinitions.map(({ name }) => name)
+      )
+    )
+    .join('\n\n');
 
   const fileContents = `${fileHeader}${functionDefinitionsString}
   export const evalFunctionDefinitions = [${functionDefinitions

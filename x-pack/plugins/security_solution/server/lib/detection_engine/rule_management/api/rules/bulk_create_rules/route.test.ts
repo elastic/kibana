@@ -34,7 +34,7 @@ describe('Bulk create rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful creation
-    clients.rulesManagementClient.createCustomRule.mockResolvedValue(
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(
       getRuleMock(getQueryRuleParams())
     );
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -55,7 +55,7 @@ describe('Bulk create rules route', () => {
 
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
-      clients.rulesManagementClient.createCustomRule.mockImplementationOnce(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementationOnce(async () => {
         throw new HttpAuthzError('mocked validation message');
       });
 
@@ -108,7 +108,7 @@ describe('Bulk create rules route', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.rulesManagementClient.createCustomRule.mockImplementation(async () => {
+      clients.detectionRulesClient.createCustomRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(

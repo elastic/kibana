@@ -46,6 +46,13 @@ export const flyoutOpenInLogsExplorerText = i18n.translate(
   }
 );
 
+export const flyoutOpenInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',
   {
@@ -140,7 +147,7 @@ export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShow
 export const flyoutImprovementText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
   {
-    defaultMessage: 'Degraded Fields',
+    defaultMessage: 'Degraded fields',
   }
 );
 

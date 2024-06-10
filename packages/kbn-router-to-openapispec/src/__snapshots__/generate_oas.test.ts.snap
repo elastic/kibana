@@ -26,6 +26,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
@@ -85,10 +86,10 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
   },
@@ -102,7 +103,7 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [],
 }
 `;
 
@@ -132,6 +133,7 @@ Object {
   "paths": Object {
     "/bar": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/bar#0",
         "parameters": Array [
           Object {
@@ -213,10 +215,14 @@ Object {
           },
         },
         "summary": "versioned route",
+        "tags": Array [
+          "versioned",
+        ],
       },
     },
     "/foo/{id}/{path*}": Object {
       "get": Object {
+        "description": "route description",
         "operationId": "/foo/{id}/{path*}#0",
         "parameters": Array [
           Object {
@@ -353,10 +359,157 @@ Object {
                 },
               },
             },
-            "description": "route",
           },
         },
-        "summary": "route",
+        "summary": "route summary",
+        "tags": Array [
+          "bar",
+        ],
+      },
+      "post": Object {
+        "description": "route description",
+        "operationId": "/foo/{id}/{path*}#1",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+          Object {
+            "description": "id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": Object {
+              "maxLength": 36,
+              "type": "string",
+            },
+          },
+          Object {
+            "description": "path",
+            "in": "path",
+            "name": "path",
+            "required": true,
+            "schema": Object {
+              "maxLength": 36,
+              "type": "string",
+            },
+          },
+          Object {
+            "description": "page",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": Object {
+              "default": 1,
+              "maximum": 999,
+              "minimum": 1,
+              "type": "number",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "any": Object {},
+                  "booleanDefault": Object {
+                    "default": true,
+                    "description": "defaults to to true",
+                    "type": "boolean",
+                  },
+                  "ipType": Object {
+                    "format": "ipv4",
+                    "type": "string",
+                  },
+                  "literalType": Object {
+                    "enum": Array [
+                      "literallythis",
+                    ],
+                    "type": "string",
+                  },
+                  "map": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "maybeNumber": Object {
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "type": "number",
+                  },
+                  "record": Object {
+                    "additionalProperties": Object {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
+                  "string": Object {
+                    "maxLength": 10,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "union": Object {
+                    "anyOf": Array [
+                      Object {
+                        "description": "Union string",
+                        "maxLength": 1,
+                        "type": "string",
+                      },
+                      Object {
+                        "description": "Union number",
+                        "minimum": 0,
+                        "type": "number",
+                      },
+                    ],
+                  },
+                  "uri": Object {
+                    "default": "prototest://something",
+                    "format": "uri",
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "string",
+                  "ipType",
+                  "literalType",
+                  "map",
+                  "record",
+                  "union",
+                  "any",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
+                "schema": Object {
+                  "maxLength": 10,
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+            },
+          },
+        },
+        "summary": "route summary",
+        "tags": Array [
+          "bar",
+        ],
       },
     },
   },
@@ -370,7 +523,14 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [
+    Object {
+      "name": "bar",
+    },
+    Object {
+      "name": "versioned",
+    },
+  ],
 }
 `;
 
@@ -417,6 +577,7 @@ Object {
   "paths": Object {
     "/recursive": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/recursive#0",
         "parameters": Array [
           Object {
@@ -452,10 +613,10 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
   },
@@ -469,7 +630,7 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [],
 }
 `;
 
@@ -499,6 +660,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
@@ -528,14 +690,15 @@ Object {
                 "schema": Object {},
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
     "/test": Object {
       "get": Object {
+        "description": undefined,
         "operationId": "/test#0",
         "parameters": Array [
           Object {
@@ -568,6 +731,7 @@ Object {
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
   },
@@ -581,6 +745,6 @@ Object {
       "url": "https://test.oas",
     },
   ],
-  "tags": undefined,
+  "tags": Array [],
 }
 `;

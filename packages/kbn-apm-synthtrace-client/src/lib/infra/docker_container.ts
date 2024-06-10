@@ -21,6 +21,10 @@ export class DockerContainer extends Entity<DockerContainerDocument> {
       ...this.fields,
       'docker.cpu.total.pct': 25,
       'docker.memory.usage.pct': 20,
+      'docker.network.inbound.bytes': 100,
+      'docker.network.outbound.bytes': 200,
+      'docker.diskio.read.ops': 10,
+      'docker.diskio.write.ops': 20,
     });
   }
 }
@@ -28,6 +32,10 @@ export class DockerContainer extends Entity<DockerContainerDocument> {
 export interface DockerContainerMetricsDocument extends DockerContainerDocument {
   'docker.cpu.total.pct': number;
   'docker.memory.usage.pct': number;
+  'docker.network.inbound.bytes': number;
+  'docker.network.outbound.bytes': number;
+  'docker.diskio.read.ops': number;
+  'docker.diskio.write.ops': number;
 }
 
 class DockerContainerMetrics extends Serializable<DockerContainerMetricsDocument> {}

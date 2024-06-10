@@ -22,7 +22,8 @@ export function PercentOfParent({ duration, totalDuration, parentType }: Percent
   const percentOfParent = isOver100 ? '>100%' : asPercent(duration, totalDuration, '');
 
   const percentOfParentText = i18n.translate('xpack.apm.percentOfParent', {
-    defaultMessage: '({value} of {parentType, select, transaction { transaction } trace {trace} })',
+    defaultMessage:
+      '({value} of {parentType, select, transaction { transaction } trace {trace} other {unknown parentType} })',
     values: { value: percentOfParent, parentType },
   });
 
@@ -34,7 +35,7 @@ export function PercentOfParent({ duration, totalDuration, parentType }: Percent
         <EuiToolTip
           content={i18n.translate('xpack.apm.transactionDetails.percentOfTraceLabelExplanation', {
             defaultMessage:
-              'The % of {parentType, select, transaction {transaction} trace {trace} } exceeds 100% because this {childType, select, span {span} transaction {transaction} } takes longer than the root transaction.',
+              'The % of {parentType, select, transaction {transaction} trace {trace} other {unknown parentType} } exceeds 100% because this {childType, select, span {span} transaction {transaction} other {unknown childType} } takes longer than the root transaction.',
             values: {
               parentType,
               childType,

@@ -47,7 +47,7 @@ import {
   INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -149,7 +149,6 @@ describe(
             .should('have.text', `${humanizedDuration}`);
         });
 
-        waitForTheRuleToBeExecuted();
         waitForAlertsToPopulate();
 
         cy.get(ALERT_DATA_GRID)

@@ -82,6 +82,12 @@ export const degradedFieldRt = rt.type({
   name: rt.string,
   count: rt.number,
   lastOccurrence: rt.union([rt.null, rt.number]),
+  timeSeries: rt.array(
+    rt.type({
+      x: rt.number,
+      y: rt.number,
+    })
+  ),
 });
 
 export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;

@@ -378,14 +378,14 @@ export function useOnSubmit({
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
-            defaultMessage: `'{packagePolicyName}' integration added.`,
+            defaultMessage: `''{packagePolicyName}'' integration added.`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
           }),
           text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy.`,
                 values: {
                   agentPolicyName: agentPolicy!.name,
                 },
