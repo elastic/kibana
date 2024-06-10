@@ -139,12 +139,12 @@ export const useHostIsolationAction = ({
     }
 
     // Determine if menu item should be disabled
-    if (isEndpointAgent && loadingHostIsolationStatus) {
-      menuItem.disabled = true;
-      menuItem.toolTipContent = LOADING_ENDPOINT_DATA_TOOLTIP;
-    } else if (!doesHostSupportIsolation) {
+    if (!doesHostSupportIsolation) {
       menuItem.disabled = true;
       menuItem.toolTipContent = NOT_FROM_ENDPOINT_HOST_TOOLTIP;
+    } else if (isEndpointAgent && loadingHostIsolationStatus) {
+      menuItem.disabled = true;
+      menuItem.toolTipContent = LOADING_ENDPOINT_DATA_TOOLTIP;
     } else if (isHostAgentUnEnrolled) {
       menuItem.disabled = true;
       menuItem.toolTipContent = isEndpointAgent

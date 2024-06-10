@@ -54,7 +54,10 @@ export const useWithResponderActionDataFromAlert = ({
 
   const isEndpointHost = agentType === 'endpoint';
 
-  const endpointHostData = useResponderDataForEndpointHost(agentId, isEndpointHost);
+  const endpointHostData = useResponderDataForEndpointHost(
+    agentId,
+    hostSupportsResponseActions && isEndpointHost
+  );
   const showResponseActionsConsole = useWithShowResponder();
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
