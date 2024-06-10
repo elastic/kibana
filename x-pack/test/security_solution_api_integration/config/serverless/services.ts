@@ -8,9 +8,11 @@
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
 import { services as serverlessServices } from '../../../../test_serverless/api_integration/services';
+import { SecuritySolutionServerlessSuperTest } from './security_supertests';
 
 export const services = {
   ...serverlessServices,
   spaces: SpacesServiceProvider,
   secureBsearch: BsearchSecureService,
+  supertest: SecuritySolutionServerlessSuperTest,
 };
