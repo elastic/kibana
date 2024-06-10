@@ -33,7 +33,7 @@ export const updateActionRoute = (
       path: `${BASE_ACTION_API_PATH}/action/{id}`,
       options: {
         access: 'public',
-        description: `Update a connector`,
+        summary: `Update a connector`,
       },
       validate: {
         body: bodySchema,

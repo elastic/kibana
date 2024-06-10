@@ -69,7 +69,7 @@ const supportedTypes = new Set([
   'date_range',
 ]);
 
-function getInvalidSortFieldMessage(
+function getInvalidSortFieldMessages(
   sortField: string,
   columnId: string,
   indexPattern?: IndexPattern
@@ -226,7 +226,7 @@ export const lastValueOperation: OperationDefinition<
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
     return [
       ...getInvalidFieldMessage(layer, columnId, indexPattern),
-      ...getInvalidSortFieldMessage(column.params.sortField, columnId, indexPattern),
+      ...getInvalidSortFieldMessages(column.params.sortField, columnId, indexPattern),
       ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ];
   },
@@ -331,11 +331,8 @@ export const lastValueOperation: OperationDefinition<
       });
 
     const dateFields = getDateFields(indexPattern);
-    const isSortFieldInvalid = !!getInvalidSortFieldMessage(
-      currentColumn.params.sortField,
-      '',
-      indexPattern
-    );
+    const isSortFieldInvalid =
+      getInvalidSortFieldMessages(currentColumn.params.sortField, '', indexPattern).length > 0;
 
     const usingTopValues = Object.keys(layer.columns).some(
       (_columnId) => layer.columns[_columnId].operationType === 'terms'
