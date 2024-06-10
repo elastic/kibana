@@ -54,14 +54,16 @@ export interface AgentStatsProvider {
  **/
 export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
   private readonly agents: Set<HttpAgent>;
-  private readonly cacheableLookup: CacheableLookup;
+  private readonly cacheableLookup?: CacheableLookup;
 
   constructor(private readonly logger: Logger, options: AgentManagerOptions) {
     this.agents = new Set();
     // Use DNS caching to avoid too many repetitive (and CPU-blocking) dns.lookup calls
-    this.cacheableLookup = new CacheableLookup({
-      maxTtl: options.dnsCacheTtlInSeconds,
-    });
+    if (options.dnsCacheTtlInSeconds > 0) {
+      this.cacheableLookup = new CacheableLookup({
+        maxTtl: options.dnsCacheTtlInSeconds,
+      });
+    }
   }
 
   public getAgentFactory(agentOptions?: AgentOptions): AgentFactory {
@@ -77,7 +79,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
           httpsAgent = new HttpsAgent(config);
           this.agents.add(httpsAgent);
           dereferenceOnDestroy(this.agents, httpsAgent);
-          this.cacheableLookup.install(httpsAgent);
+          this.cacheableLookup?.install(httpsAgent);
         }
 
         return httpsAgent;
@@ -87,7 +89,7 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
         httpAgent = new HttpAgent(agentOptions);
         this.agents.add(httpAgent);
         dereferenceOnDestroy(this.agents, httpAgent);
-        this.cacheableLookup.install(httpAgent);
+        this.cacheableLookup?.install(httpAgent);
       }
 
       return httpAgent;
