@@ -25,7 +25,7 @@ export const parseLine = (line: string): ParsedLineTokens => {
   // try to parse into method and url (split on whitespace)
   const parts = line.split(whitespacesRegex);
   // 1st part is the method
-  const method = parts[0];
+  const method = parts[0].toUpperCase();
   // 2nd part is the url
   const url = parts[1];
   // try to parse into url path and url params (split on question mark)

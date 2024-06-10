@@ -184,7 +184,7 @@ GET _search
         }
       });
 
-      it.skip('should activate auto-complete for methods case-insensitively', async () => {
+      it('should activate auto-complete for methods case-insensitively', async () => {
         const methods = _.sampleSize(
           _.compact(
             `
@@ -261,6 +261,7 @@ GET _search
         expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
       });
 
+      // not fixed for monaco yet https://github.com/elastic/kibana/issues/184442
       it.skip('should not activate auto-complete after comma following endpoint in URL', async () => {
         await PageObjects.console.monaco.enterText('GET _search');
 
