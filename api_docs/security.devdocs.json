@@ -1236,10 +1236,12 @@
           "parentPluginId": "security",
           "id": "def-public.SecurityPluginSetup.authc",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "authc",
           "description": [
-            "\nExposes authentication information about the currently logged in user."
+            "\nExposes authentication information about the currently logged in user.\n"
           ],
           "signature": [
             {
@@ -1251,8 +1253,18 @@
             }
           ],
           "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
+          "deprecated": true,
+          "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/filebeat_config_flyout/filebeat_config_flyout.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
+            }
+          ]
         },
         {
           "parentPluginId": "security",
@@ -5415,10 +5427,12 @@
           "parentPluginId": "security",
           "id": "def-server.SecurityPluginStart.authc",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "authc",
           "description": [
-            "\nAuthentication services to confirm the user is who they say they are."
+            "\nAuthentication services to confirm the user is who they say they are.\n"
           ],
           "signature": [
             {
@@ -5430,8 +5444,326 @@
             }
           ],
           "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
+          "deprecated": true,
+          "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "actions",
+              "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/rules_settings_client_factory.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/maintenance_window_client_factory.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/invalidate_pending_api_keys/task.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/plugin.ts"
+            },
+            {
+              "plugin": "alerting",
+              "path": "x-pack/plugins/alerting/server/plugin.ts"
+            },
+            {
+              "plugin": "files",
+              "path": "src/plugins/files/server/routes/file_kind/create.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/client/factory.ts"
+            },
+            {
+              "plugin": "observabilityAIAssistant",
+              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/index.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/services/security/security.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/services/api_keys/transform_api_keys.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/services/api_keys/security.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/settings/index.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+            },
+            {
+              "plugin": "cloudDefend",
+              "path": "x-pack/plugins/cloud_defend/server/routes/setup_routes.ts"
+            },
+            {
+              "plugin": "cloudSecurityPosture",
+              "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
+            },
+            {
+              "plugin": "elasticAssistant",
+              "path": "x-pack/plugins/elastic_assistant/server/routes/request_context_factory.ts"
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "path": "x-pack/plugins/enterprise_search/server/lib/indices/create_api_key.ts"
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+            },
+            {
+              "plugin": "enterpriseSearch",
+              "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+            },
+            {
+              "plugin": "lists",
+              "path": "x-pack/plugins/lists/server/get_user.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/routes/saved_query/create_saved_query_route.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/routes/saved_query/update_saved_query_route.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/routes/pack/create_pack_route.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/routes/pack/update_pack_route.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/routes/asset/update_assets_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/endpoint_app_context_services.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
+            },
+            {
+              "plugin": "reporting",
+              "path": "x-pack/plugins/reporting/server/routes/common/get_user.ts"
+            },
+            {
+              "plugin": "serverlessSearch",
+              "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+            },
+            {
+              "plugin": "serverlessSearch",
+              "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+            },
+            {
+              "plugin": "serverlessSearch",
+              "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
+            },
+            {
+              "plugin": "transform",
+              "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/agent_keys/get_agent_keys_privileges.ts"
+            },
+            {
+              "plugin": "apm",
+              "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
+            },
+            {
+              "plugin": "synthetics",
+              "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/setup/handlers.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/setup/handlers.test.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/setup/handlers.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/base_validator.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/timeline/utils/common.ts"
+            }
+          ]
         },
         {
           "parentPluginId": "security",
@@ -5459,10 +5791,12 @@
           "parentPluginId": "security",
           "id": "def-server.SecurityPluginStart.userProfiles",
           "type": "Object",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "userProfiles",
           "description": [
-            "\nUser profiles services to retrieve user profiles."
+            "\nUser profiles services to retrieve user profiles.\n"
           ],
           "signature": [
             {
@@ -5474,8 +5808,30 @@
             }
           ],
           "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
+          "deprecated": true,
+          "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/services/notifications/email_notification_service.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/client/factory.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/client/cases/utils.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/services/user_profiles/index.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/users/suggest_user_profiles_route.ts"
+            }
+          ]
         }
       ],
       "lifecycle": "start",
