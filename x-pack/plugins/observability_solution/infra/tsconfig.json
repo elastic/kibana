@@ -104,6 +104,8 @@
     "@kbn/router-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-containers",
     "@kbn/deeplinks-observability"
   ],
   "exclude": [
