@@ -50,10 +50,11 @@ interface GenericSearchSourceFields extends SerializedSearchSourceFields {
   query?: Query;
   filter?: Array<Pick<Filter, 'meta' | 'query'>>;
 }
-interface GenericMetric {
+export interface GenericMetric {
   aggType: Aggregators | MetricRuleAgg;
   name: string;
   field?: string;
+  filter?: string;
 }
 interface RuleConditionChartProps {
   metricExpression: {
@@ -363,8 +364,6 @@ export function RuleConditionChart({
       </div>
     );
   }
-  console.log('additionalFilters', additionalFilters);
-  console.log('searchConfig', searchConfiguration);
   return (
     <div>
       <lens.EmbeddableComponent

@@ -312,6 +312,7 @@ export const Expressions: React.FC<Props> = (props) => {
               field: e.metric || '',
             },
           ];
+
           return (
             <ExpressionRow
               canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
@@ -331,7 +332,13 @@ export const Expressions: React.FC<Props> = (props) => {
                   timeSize,
                   timeUnit,
                 }}
-                searchConfiguration={{ query: { query: '', language: '' } }}
+                searchConfiguration={{
+                  index: metricsView.dataViewReference.id,
+                  query: {
+                    query: ruleParams.filterQueryText || '',
+                    language: 'kuery',
+                  },
+                }}
                 timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
                 error={(errors[idx] as IErrorObject) || emptyError}
                 dataView={metricsView.dataViewReference}
