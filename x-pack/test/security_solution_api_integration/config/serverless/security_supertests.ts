@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // It is wrapper around supertest that injects Serverless auth headers
 export async function SecuritySolutionServerlessSuperTest({ getService }: FtrProviderContext) {
   // TODO delete the log
+  // eslint-disable-next-line no-console
   console.log('------------------ SecuritySolutionServerlessSuperTest ------------------');
 
   const config = getService('config');
