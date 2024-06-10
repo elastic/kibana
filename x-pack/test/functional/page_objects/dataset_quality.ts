@@ -51,6 +51,20 @@ type SummaryPanelKpi = Record<
 
 type FlyoutKpi = Record<'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs', string>;
 
+const texts = {
+  noActivityText: 'No activity in the selected timeframe',
+  datasetHealthPoor: 'Poor',
+  datasetHealthDegraded: 'Degraded',
+  datasetHealthGood: 'Good',
+  activeDatasets: 'Active Datasets',
+  estimatedData: 'Estimated Data',
+  docsCountTotal: 'Docs count (total)',
+  size: 'Size',
+  services: 'Services',
+  hosts: 'Hosts',
+  degradedDocs: 'Degraded docs',
+};
+
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
@@ -219,7 +233,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async parseDatasetTable() {
       const table = await this.getDatasetsTable();
-      return parseDatasetTable(table, [
+      return this.parseTable(table, [
         '0',
         'Dataset Name',
         'Namespace',
@@ -233,7 +247,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async parseDegradedFieldTable() {
       const table = await this.getDatasetQualityFlyoutDegradedFieldTable();
-      return parseDatasetTable(table, ['Field', 'Docs count', 'Last Occurrence']);
+      return this.parseTable(table, ['Field', 'Docs count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -430,84 +444,86 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         fieldText
       );
     },
+
+    async parseTable(tableWrapper: WebElementWrapper, columnNamesOrIndexes: string[]) {
+      const headerElementWrappers = await tableWrapper.findAllByCssSelector('thead th, thead td');
+
+      const result: Record<
+        string,
+        {
+          columnNameOrIndex: string;
+          sortDirection?: 'ascending' | 'descending';
+          headerElement: WebElementWrapper;
+          cellElements: WebElementWrapper[];
+          cellContentElements: WebElementWrapper[];
+          getSortDirection: () => Promise<'ascending' | 'descending' | undefined>;
+          sort: (sortDirection: 'ascending' | 'descending') => Promise<void>;
+          getCellTexts: (selector?: string) => Promise<string[]>;
+          getCellChildren: (selector: string) => Promise<WebElementWrapper[]>;
+        }
+      > = {};
+
+      for (let i = 0; i < headerElementWrappers.length; i++) {
+        const tdSelector = `table > tbody > tr td:nth-child(${i + 1})`;
+        const cellContentSelector = `${tdSelector} .euiTableCellContent`;
+        const thWrapper = headerElementWrappers[i];
+        const columnName = await thWrapper.getVisibleText();
+        const columnIndex = `${i}`;
+        const columnNameOrIndex = columnNamesOrIndexes.includes(columnName)
+          ? columnName
+          : columnNamesOrIndexes.includes(columnIndex)
+          ? columnIndex
+          : undefined;
+
+        if (columnNameOrIndex) {
+          const headerElement = thWrapper;
+
+          const tdWrappers = await tableWrapper.findAllByCssSelector(tdSelector);
+          const cellContentWrappers = await tableWrapper.findAllByCssSelector(cellContentSelector);
+
+          const getSortDirection = () =>
+            headerElement.getAttribute('aria-sort') as Promise<
+              'ascending' | 'descending' | undefined
+            >;
+
+          result[columnNameOrIndex] = {
+            columnNameOrIndex,
+            headerElement,
+            cellElements: tdWrappers,
+            cellContentElements: cellContentWrappers,
+            getSortDirection,
+            sort: async (sortDirection: 'ascending' | 'descending') => {
+              await retry.tryForTime(5000, async () => {
+                while ((await getSortDirection()) !== sortDirection) {
+                  await headerElement.click();
+                }
+              });
+            },
+            getCellTexts: async (textContainerSelector?: string) => {
+              const cellContentContainerWrappers = textContainerSelector
+                ? await tableWrapper.findAllByCssSelector(`${tdSelector} ${textContainerSelector}`)
+                : cellContentWrappers;
+
+              const cellContentContainerWrapperTexts: string[] = [];
+              for (let j = 0; j < cellContentContainerWrappers.length; j++) {
+                const cellContentContainerWrapper = cellContentContainerWrappers[j];
+                const cellContentContainerWrapperText =
+                  await cellContentContainerWrapper.getVisibleText();
+                cellContentContainerWrapperTexts.push(cellContentContainerWrapperText);
+              }
+
+              return cellContentContainerWrapperTexts;
+            },
+            getCellChildren: (childSelector: string) => {
+              return tableWrapper.findAllByCssSelector(`${cellContentSelector} ${childSelector}`);
+            },
+          };
+        }
+      }
+
+      return result;
+    },
   };
-}
-
-async function parseDatasetTable(tableWrapper: WebElementWrapper, columnNamesOrIndexes: string[]) {
-  const headerElementWrappers = await tableWrapper.findAllByCssSelector('thead th, thead td');
-
-  const result: Record<
-    string,
-    {
-      columnNameOrIndex: string;
-      sortDirection?: 'ascending' | 'descending';
-      headerElement: WebElementWrapper;
-      cellElements: WebElementWrapper[];
-      cellContentElements: WebElementWrapper[];
-      getSortDirection: () => Promise<'ascending' | 'descending' | undefined>;
-      sort: (sortDirection: 'ascending' | 'descending') => Promise<void>;
-      getCellTexts: (selector?: string) => Promise<string[]>;
-      getCellChildren: (selector: string) => Promise<WebElementWrapper[]>;
-    }
-  > = {};
-
-  for (let i = 0; i < headerElementWrappers.length; i++) {
-    const tdSelector = `table > tbody > tr td:nth-child(${i + 1})`;
-    const cellContentSelector = `${tdSelector} .euiTableCellContent`;
-    const thWrapper = headerElementWrappers[i];
-    const columnName = await thWrapper.getVisibleText();
-    const columnIndex = `${i}`;
-    const columnNameOrIndex = columnNamesOrIndexes.includes(columnName)
-      ? columnName
-      : columnNamesOrIndexes.includes(columnIndex)
-      ? columnIndex
-      : undefined;
-
-    if (columnNameOrIndex) {
-      const headerElement = thWrapper;
-
-      const tdWrappers = await tableWrapper.findAllByCssSelector(tdSelector);
-      const cellContentWrappers = await tableWrapper.findAllByCssSelector(cellContentSelector);
-
-      const getSortDirection = () =>
-        headerElement.getAttribute('aria-sort') as Promise<'ascending' | 'descending' | undefined>;
-
-      result[columnNameOrIndex] = {
-        columnNameOrIndex,
-        headerElement,
-        cellElements: tdWrappers,
-        cellContentElements: cellContentWrappers,
-        getSortDirection,
-        sort: async (sortDirection: 'ascending' | 'descending') => {
-          retry.tryForTime(5000, async () => {
-            while ((await getSortDirection()) !== sortDirection) {
-              await headerElement.click();
-            }
-          });
-        },
-        getCellTexts: async (textContainerSelector?: string) => {
-          const cellContentContainerWrappers = textContainerSelector
-            ? await tableWrapper.findAllByCssSelector(`${tdSelector} ${textContainerSelector}`)
-            : cellContentWrappers;
-
-          const cellContentContainerWrapperTexts: string[] = [];
-          for (let j = 0; j < cellContentContainerWrappers.length; j++) {
-            const cellContentContainerWrapper = cellContentContainerWrappers[j];
-            const cellContentContainerWrapperText =
-              await cellContentContainerWrapper.getVisibleText();
-            cellContentContainerWrapperTexts.push(cellContentContainerWrapperText);
-          }
-
-          return cellContentContainerWrapperTexts;
-        },
-        getCellChildren: (childSelector: string) => {
-          return tableWrapper.findAllByCssSelector(`${cellContentSelector} ${childSelector}`);
-        },
-      };
-    }
-  }
-
-  return result;
 }
 
 /**
@@ -534,17 +550,3 @@ export async function getAllByText(container: WebElementWrapper, selector: strin
 
   return matchingElements;
 }
-
-const texts = {
-  noActivityText: 'No activity in the selected timeframe',
-  datasetHealthPoor: 'Poor',
-  datasetHealthDegraded: 'Degraded',
-  datasetHealthGood: 'Good',
-  activeDatasets: 'Active Datasets',
-  estimatedData: 'Estimated Data',
-  docsCountTotal: 'Docs count (total)',
-  size: 'Size',
-  services: 'Services',
-  hosts: 'Hosts',
-  degradedDocs: 'Degraded docs',
-};
