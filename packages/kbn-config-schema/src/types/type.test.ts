@@ -39,9 +39,8 @@ describe('meta', () => {
 });
 
 describe('transform', () => {
-  const durationTransformation = jest.fn((v) => {
-    return moment.duration(v);
-  });
+  afterEach(() => jest.clearAllMocks());
+  const durationTransformation = jest.fn(moment.duration);
   // Explicitly define the type to catch type errors
   const durationSchema: Type<string, moment.Duration> = schema
     .string({
@@ -71,7 +70,7 @@ describe('transform', () => {
     expect(durationTransformation).toHaveBeenNthCalledWith(2, '1m');
   });
   it('still reports errors as expected', () => {
-    expect(() => durationSchema.validate('hello there')).toThrowError(/must have maximum length/);
+    expect(() => durationSchema.validate('hello there')).toThrowError(/must have a maximum length/);
   });
   it('only runs the last provided transform function', () => {
     const transform1 = jest.fn((v) => Number(v));
