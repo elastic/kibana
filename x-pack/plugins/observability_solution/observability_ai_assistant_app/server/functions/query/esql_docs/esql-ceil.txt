@@ -1,14 +1,21 @@
-CEIL
+## CEIL
 
-Syntax
-Parameters
-number
-Numeric expression. If null, the function returns null.
-DescriptionRound a number up to the nearest integer.
-This is a noop for long (including unsigned) and integer. For double this picks the closest double value to the integer similar to Math.ceil.
-Supported types
-Example
+The `CEIL` function in ES|QL is used to round a number up to the nearest integer. This function does not perform any operation for long (including unsigned) and integer types. For double, this function picks the closest double value to the integer, similar to the `Math.ceil` function in JavaScript.
+
+### Examples
+
+Here are a couple of examples of how you can use the `CEIL` function in ES|QL queries:
+
 ```esql
 ROW a=1.8
-| EVAL a=CEIL(a)
+| EVAL a = CEIL(a)
 ```
+
+In this example, the `CEIL` function is used to round the value of `a` (1.8) up to the nearest integer (2).
+
+```esql
+ROW b=3.3
+| EVAL b = CEIL(b)
+```
+
+In this second example, the `CEIL` function is used to round the value of `b` (3.3) up to the nearest integer (4).
