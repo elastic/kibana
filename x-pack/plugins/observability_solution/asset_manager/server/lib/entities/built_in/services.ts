@@ -6,9 +6,10 @@
  */
 
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
+import { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitionSchema.parse({
-  id: 'builtin-services',
+  id: `${BUILT_IN_ID_PREFIX}services`,
   name: 'Services from logs',
   type: 'service',
   managed: true,

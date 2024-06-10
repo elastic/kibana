@@ -13,11 +13,13 @@ import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_hist
 import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
 import { generateHistoryTransformId } from './transform/generate_history_transform_id';
 import { generateLatestTransformId } from './transform/generate_latest_transform_id';
+import { BUILT_IN_ID_PREFIX } from './built_in';
 
 export async function findEntityDefinitions({
   soClient,
   esClient,
   managed,
+  builtIn,
   id,
   page = 1,
   perPage = 10,
@@ -25,6 +27,7 @@ export async function findEntityDefinitions({
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   managed?: boolean;
+  builtIn?: boolean;
   id?: string;
   page?: number;
   perPage?: number;
@@ -32,6 +35,9 @@ export async function findEntityDefinitions({
   const filter = compact([
     typeof managed === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.managed:(${managed})`
+      : undefined,
+    typeof builtIn === 'boolean'
+      ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`
       : undefined,
     id ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})` : undefined,
   ]).join(' AND ');
