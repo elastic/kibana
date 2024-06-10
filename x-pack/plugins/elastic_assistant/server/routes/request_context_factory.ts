@@ -32,18 +32,15 @@ interface ConstructorOptions {
   plugins: ElasticAssistantPluginSetupDependencies;
   kibanaVersion: string;
   assistantService: AIAssistantService;
-  // attackDiscoveryTask: AttackDiscoveryTask;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
   private readonly logger: Logger;
   private readonly assistantService: AIAssistantService;
-  // private readonly attackDiscoveryTask: AttackDiscoveryTask;
 
   constructor(private readonly options: ConstructorOptions) {
     this.logger = options.logger;
     this.assistantService = options.assistantService;
-    // this.attackDiscoveryTask = options.attackDiscoveryTask;
   }
 
   public async create(
@@ -65,8 +62,6 @@ export class RequestContextFactory implements IRequestContextFactory {
       core: coreContext,
 
       actions: startPlugins.actions,
-
-      // attackDiscoveryTask: this.attackDiscoveryTask,
 
       logger: this.logger,
 
