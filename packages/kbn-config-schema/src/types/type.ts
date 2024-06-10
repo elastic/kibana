@@ -38,12 +38,40 @@ export interface SchemaStructureEntry {
 }
 
 /**
+ * A special type that represents all types that have been transformed. We lose
+ * any type specific options or arguments by doing this so it is important
+ * to do any transformations last. Right now there is no simple way to provide
+ * an abstract "transform" method AND preserve extended types info as this
+ * would require TS to support some kind of higher kinded type e.g.:
+ *
+ * transform<R>(this: this<V, *>, fn: (v: T) => R): this<T, R>;
+ *
+ * So the trade-off was made to provide relatively good ergonomics while losing
+ * some type information.
+ */
+export type TransformedType<T, TT> = Type<T, TT>;
+
+/**
  * Options for dealing with unknown keys:
  * - allow: unknown keys will be permitted
  * - ignore: unknown keys will not fail validation, but will be stripped out
  * - forbid (default): unknown keys will fail validation
  */
 export type OptionsForUnknowns = 'allow' | 'ignore' | 'forbid';
+
+export type TypeOrLazyType = Type<any> | (() => Type<any>);
+
+export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
+  ? ReturnType<RT>['type']
+  : RT extends Type<any>
+  ? RT['type']
+  : never;
+
+export type TypeOfOutput<RT extends TypeOrLazyType> = RT extends () => Type<any>
+  ? ReturnType<RT>['transformedType']
+  : RT extends Type<any>
+  ? RT['transformedType']
+  : never;
 
 export interface ExtendsDeepOptions {
   unknowns?: OptionsForUnknowns;
@@ -68,14 +96,17 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
-export abstract class Type<V> {
+export abstract class Type<V, TV = V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
   // fail if it wasn't initialized we use a "trick" to which basically just
   // sets the value to `null` while still keeping the type.
   public readonly type: V = null! as V;
+  public transformedType: TV = null! as TV;
 
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
+
+  private transformFn?: (v: any) => any;
 
   /**
    * Internal "schema" backed by Joi.
@@ -121,7 +152,7 @@ export abstract class Type<V> {
     this.internalSchema = schema;
   }
 
-  public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {
+  public extendsDeep(newOptions: ExtendsDeepOptions): Type<V, TV> {
     return this;
   }
 
@@ -135,7 +166,7 @@ export abstract class Type<V> {
       throw new ValidationError(error as any, namespace);
     }
 
-    return validatedValue;
+    return this.transformFn ? this.transformFn(validatedValue) : validatedValue;
   }
 
   /**
@@ -191,6 +222,11 @@ export abstract class Type<V> {
     // see https://github.com/sideway/joi/blob/master/lib/errors.js
     const message = error.toString();
     return new SchemaTypeError(message || code, convertedPath);
+  }
+
+  public transform<R>(fn: (v: V) => R) {
+    this.transformFn = fn;
+    return this as unknown as TransformedType<V, R>;
   }
 }
 
