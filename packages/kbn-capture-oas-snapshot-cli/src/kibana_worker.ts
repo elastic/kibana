@@ -57,7 +57,7 @@ export type Result = 'ready';
     const { startKibana } = createTestServerlessInstances({
       kibana: { settings, cliArgs },
     });
-    const {} = await startKibana();
+    await startKibana();
   } else {
     const root = createRootWithCorePlugins(settings, cliArgs);
     await root.preboot();
