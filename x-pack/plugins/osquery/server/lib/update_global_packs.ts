@@ -55,11 +55,11 @@ export const updateGlobalPacksCreateCallback = async (
           {
             references: [
               ...(pack.references ?? []),
-              {
-                id: packagePolicy.policy_ids[0],
-                name: agentPolicies[packagePolicy.policy_ids[0]]?.name,
+              ...packagePolicy.policy_ids.map((policyId) => ({
+                id: policyId,
+                name: agentPolicies[policyId]?.name,
                 type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-              },
+              })),
             ],
           }
         )

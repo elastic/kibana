@@ -78,7 +78,7 @@ export interface NewPackagePolicy {
   namespace?: string;
   enabled: boolean;
   is_managed?: boolean;
-  // deprecated
+  /** @deprecated */
   policy_id?: string;
   policy_ids: string[];
   package?: PackagePolicyPackage;

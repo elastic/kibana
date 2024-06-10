@@ -67,7 +67,6 @@ export const wrapSuppressedNewTermsAlerts = ({
       String(eventAndTerms.event._version),
       `${spaceId}:${completeRule.alertId}`,
       eventAndTerms.newTerms,
-      suppressionTerms,
     ]);
 
     const baseAlert: BaseFieldsLatest = buildBulkBody(

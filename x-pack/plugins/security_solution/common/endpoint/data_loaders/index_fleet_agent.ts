@@ -113,7 +113,7 @@ interface BuildFleetAgentBulkCreateOperationsOptions {
   fleetAgentGenerator?: FleetAgentGenerator;
 }
 
-interface BuildFleetAgentBulkCreateOperationsResponse extends IndexedFleetAgentResponse {
+export interface BuildFleetAgentBulkCreateOperationsResponse extends IndexedFleetAgentResponse {
   operations: Required<BulkRequest>['operations'];
 }
 

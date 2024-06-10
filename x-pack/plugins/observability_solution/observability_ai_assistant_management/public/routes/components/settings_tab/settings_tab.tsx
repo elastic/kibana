@@ -50,6 +50,7 @@ export function SettingsTab() {
               {
                 defaultMessage:
                   'Toggle the AI Assistant button and Contextual Insights on or off in Observability apps by checking or unchecking the AI Assistant feature in Spaces > <your space> > Features.',
+                ignoreTag: true,
               }
             )}
           </p>

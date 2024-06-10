@@ -390,7 +390,7 @@ export function useOnSubmit({
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
-            defaultMessage: `'{packagePolicyName}' integration added.`,
+            defaultMessage: `''{packagePolicyName}'' integration added.`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
