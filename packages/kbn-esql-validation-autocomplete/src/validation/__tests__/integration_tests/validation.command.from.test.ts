@@ -18,11 +18,19 @@ import { setup } from '../helpers';
 import { runTestSuite as runFromCommandTestSuite } from '../test_suites/validation.command.from';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
+/*
+ * This integration test suite re-runs validation tests and checks if the ES server
+ * also returns an error when our client-side validation finds an error.
+ */
+
 const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 const enrichFieldsRaw = [...enrichFieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 
 export type IntegrationEnv = Awaited<ReturnType<typeof setupIntegrationEnv>>;
 
+/**
+ * Sets up the integration environment for the tests.
+ */
 const setupIntegrationEnv = async () => {
   const servers = await createTestServers({
     adjustTimeout: jest.setTimeout,
@@ -59,6 +67,9 @@ type StringType = 'text' | 'keyword';
 type NumberType = 'integer' | 'double' | 'long' | 'unsigned_long';
 type EsqlEnv = Awaited<ReturnType<typeof setupEsqlEnv>>;
 
+/**
+ * Sets up the ES|QL specific environment parts for the tests.
+ */
 const setupEsqlEnv = async () => {
   const integrationEnv = await setupIntegrationEnv();
   const { esClient: es } = integrationEnv;
@@ -215,6 +226,9 @@ describe('validation', () => {
           await esqlEnv?.cleanup();
         });
 
+        /**
+         * Sets up the unit test dependency for the test suites.
+         */
         const unitTestSetup = async () => {
           const kit = await setup();
           return {
