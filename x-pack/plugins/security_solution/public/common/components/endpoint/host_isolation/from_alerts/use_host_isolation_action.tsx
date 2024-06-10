@@ -61,7 +61,7 @@ export const useHostIsolationAction = ({
   });
 
   const { data: externalAgentData } = useAgentStatus([agentId], agentType, {
-    enabled: hostSupportsResponseActions,
+    enabled: hostSupportsResponseActions && !isEndpointAgent,
   });
 
   const externalAgentStatus = externalAgentData?.[agentId];

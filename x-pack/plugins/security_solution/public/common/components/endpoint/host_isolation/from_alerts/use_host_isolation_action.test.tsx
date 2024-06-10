@@ -17,9 +17,12 @@ import {
 } from '../../../../../management/hooks/agents/use_get_agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { ExperimentalFeaturesService as ExperimentalFeaturesServiceMock } from '../../../../experimental_features_service';
+import { endpointAlertDataMock } from '../../../../mock/endpoint';
 
 jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
 jest.mock('../../../../hooks/use_experimental_features');
+jest.mock('../../../../experimental_features_service');
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
@@ -27,6 +30,16 @@ const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
 describe('useHostIsolationAction', () => {
+  // FIXME:PT refactor ensure test file - its not actually testing the component
+
+  const setFeatureFlags = (isEnabled: boolean = true): void => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(isEnabled);
+    (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
+      responseActionsSentinelOneV1Enabled: isEnabled,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: isEnabled,
+    });
+  };
+
   describe.each([
     ['useGetSentinelOneAgentStatus', useGetSentinelOneAgentStatusMock],
     ['useGetAgentStatus', useGetAgentStatusMock],
@@ -45,63 +58,7 @@ describe('useHostIsolationAction', () => {
           useHostIsolationAction({
             closePopover: jest.fn(),
             detailsData:
-              agentTypeAlert === 'sentinel_one'
-                ? [
-                    {
-                      category: 'kibana',
-                      field: 'kibana.alert.rule.uuid',
-                      isObjectArray: false,
-                      values: ['ruleId'],
-                      originalValue: ['ruleId'],
-                    },
-                    {
-                      category: 'event',
-                      field: 'event.module',
-                      values: ['sentinel_one'],
-                      originalValue: ['sentinel_one'],
-                      isObjectArray: false,
-                    },
-                    {
-                      category: 'observer',
-                      field: 'observer.serial_number',
-                      values: ['some-agent-id'],
-                      originalValue: ['some-agent-id'],
-                      isObjectArray: false,
-                    },
-                  ]
-                : agentTypeAlert === 'crowdstrike'
-                ? [
-                    {
-                      category: 'kibana',
-                      field: 'kibana.alert.rule.uuid',
-                      isObjectArray: false,
-                      values: ['ruleId'],
-                      originalValue: ['ruleId'],
-                    },
-                    {
-                      category: 'event',
-                      field: 'event.module',
-                      values: ['crowdstrike'],
-                      originalValue: ['crowdstrike'],
-                      isObjectArray: false,
-                    },
-                    {
-                      category: 'crowdstrike',
-                      field: 'crowdstrike.event.DeviceId',
-                      values: ['expectedCrowdstrikeAgentId'],
-                      originalValue: ['expectedCrowdstrikeAgentId'],
-                      isObjectArray: false,
-                    },
-                  ]
-                : [
-                    {
-                      category: 'agent',
-                      field: 'agent.id',
-                      values: ['some-agent-id'],
-                      originalValue: ['some-agent-id'],
-                      isObjectArray: false,
-                    },
-                  ],
+              endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentTypeAlert),
             isHostIsolationPanelOpen: false,
             onAddIsolationStatusClick: jest.fn(),
           }),
@@ -111,43 +68,44 @@ describe('useHostIsolationAction', () => {
       );
 
     beforeEach(() => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       useAgentStatusHookMock.mockImplementation(() => hook);
+      setFeatureFlags(true);
     });
 
     afterEach(() => {
       jest.clearAllMocks();
+      (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReset();
     });
 
     it(`${name} is invoked as 'enabled' when SentinelOne alert and FF enabled`, () => {
       render('sentinel_one');
 
-      expect(hook).toHaveBeenCalledWith(['some-agent-id'], 'sentinel_one', {
+      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'sentinel_one', {
         enabled: true,
       });
     });
     it(`${name} is invoked as 'enabled' when Crowdstrike alert and FF enabled`, () => {
       render('crowdstrike');
 
-      expect(hook).toHaveBeenCalledWith(['expectedCrowdstrikeAgentId'], 'crowdstrike', {
+      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'crowdstrike', {
         enabled: true,
       });
     });
 
     it(`${name} is invoked as 'disabled' when SentinelOne alert and FF disabled`, () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+      setFeatureFlags(false);
       render('sentinel_one');
 
-      expect(hook).toHaveBeenCalledWith(['some-agent-id'], 'sentinel_one', {
+      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'sentinel_one', {
         enabled: false,
       });
     });
 
     it(`${name} is invoked as 'disabled' when Crowdstrike alert and FF disabled`, () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+      setFeatureFlags(false);
       render('crowdstrike');
 
-      expect(hook).toHaveBeenCalledWith(['expectedCrowdstrikeAgentId'], 'crowdstrike', {
+      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'crowdstrike', {
         enabled: false,
       });
     });
@@ -155,7 +113,7 @@ describe('useHostIsolationAction', () => {
     it(`${name} is invoked as 'disabled' when endpoint alert`, () => {
       render('endpoint');
 
-      expect(hook).toHaveBeenCalledWith([''], 'endpoint', {
+      expect(hook).toHaveBeenCalledWith(['abfe4a35-d5b4-42a0-a539-bd054c791769'], 'endpoint', {
         enabled: false,
       });
     });
