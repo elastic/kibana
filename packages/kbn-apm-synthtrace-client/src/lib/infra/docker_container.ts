@@ -13,6 +13,13 @@ import { Serializable } from '../serializable';
 interface DockerContainerDocument extends Fields {
   'container.id': string;
   'metricset.name'?: string;
+  'container.name'?: string;
+  'container.image.name'?: string;
+  'container.runtime'?: string;
+  'host.name'?: string;
+  'cloud.provider'?: string;
+  'cloud.instance.id'?: string;
+  'cloud.image.id'?: string;
 }
 
 export class DockerContainer extends Entity<DockerContainerDocument> {
