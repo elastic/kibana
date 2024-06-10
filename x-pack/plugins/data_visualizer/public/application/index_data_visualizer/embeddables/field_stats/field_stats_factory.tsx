@@ -6,7 +6,8 @@
  */
 import type { Reference } from '@kbn/content-management-utils';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,7 @@ import fastIsEqual from 'fast-deep-equal';
 import { isDefined } from '@kbn/ml-is-defined';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FilterStateStore } from '@kbn/es-query';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
@@ -255,6 +257,25 @@ export const getFieldStatsChartEmbeddableFactory = (
 
           const dataView =
             Array.isArray(dataViews) && dataViews.length > 0 ? dataViews[0] : undefined;
+          const onAddFilter = (
+            field: string | DataViewField,
+            value: string,
+            operator: '+' | '-'
+          ) => {
+            if (!dataView || !pluginStart.data) return;
+            let filters = generateFilters(
+              pluginStart.data.query.filterManager,
+              field,
+              value,
+              operator,
+              dataView
+            );
+            filters = filters.map((filter) => ({
+              ...filter,
+              $state: { store: FilterStateStore.APP_STATE },
+            }));
+            pluginStart.data.query.filterManager.addFilters(filters);
+          };
 
           // On destroy
           useEffect(() => {
@@ -278,6 +299,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 isEsqlMode={isEsqlMode}
                 onTableUpdate={onTableUpdate}
                 showPreviewByDefault={showPreviewByDefault}
+                onAddFilter={onAddFilter}
               />
             </EuiFlexItem>
           );
