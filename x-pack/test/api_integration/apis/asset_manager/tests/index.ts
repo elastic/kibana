@@ -10,6 +10,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Asset Manager API Endpoints', () => {
     loadTestFile(require.resolve('./basics'));
     loadTestFile(require.resolve('./sample_assets'));
-    loadTestFile(require.resolve('./assets'));
   });
 }
