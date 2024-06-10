@@ -28,7 +28,6 @@ interface ConstructorOpts {
   store: TaskStore;
   pollInterval?: number;
   taskTypes: Set<string>;
-  removedTypes: Set<string>;
   excludedTypes: Set<string>;
 }
 
@@ -49,7 +48,6 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
   private readonly pollInterval: number;
 
   private readonly taskTypes: Set<string>;
-  private readonly removedTypes: Set<string>;
   private readonly excludedTypes: Set<string>;
 
   private running: boolean = false;
@@ -57,19 +55,11 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
   // emit collected metrics
   private metrics$ = new Subject<TaskLifecycleEvent>();
 
-  constructor({
-    logger,
-    store,
-    pollInterval,
-    taskTypes,
-    removedTypes,
-    excludedTypes,
-  }: ConstructorOpts) {
+  constructor({ logger, store, pollInterval, taskTypes, excludedTypes }: ConstructorOpts) {
     this.store = store;
     this.logger = logger;
     this.pollInterval = pollInterval ?? DEFAULT_POLL_INTERVAL;
     this.taskTypes = taskTypes;
-    this.removedTypes = removedTypes;
     this.excludedTypes = excludedTypes;
 
     this.start();
@@ -88,9 +78,9 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
 
   private async runCollectionCycle() {
     const start = Date.now();
-    const searchedTypes = Array.from(this.taskTypes)
-      .concat(Array.from(this.removedTypes))
-      .filter((type) => !this.excludedTypes.has(type));
+    const searchedTypes = Array.from(this.taskTypes).filter(
+      (type) => !this.excludedTypes.has(type)
+    );
     try {
       const results = await this.store.aggregate({
         size: 0,

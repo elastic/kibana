@@ -258,7 +258,6 @@ export class TaskManagerPlugin
         logger: this.logger,
         store: taskStore,
         taskTypes: new Set(this.definitions.getAllTypes()),
-        removedTypes: new Set(REMOVED_TYPES),
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
       this.taskPollingLifecycle = new TaskPollingLifecycle({

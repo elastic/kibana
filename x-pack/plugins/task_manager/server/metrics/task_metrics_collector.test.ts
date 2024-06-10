@@ -111,7 +111,6 @@ describe('TaskManagerMetricsCollector', () => {
       pollInterval,
       store: mockTaskStore,
       taskTypes: new Set(['taskType1', 'taskType2', 'taskType3', 'taskType4']),
-      removedTypes: new Set(['taskType5']),
       excludedTypes: new Set(['taskType4', 'taskType5']),
     });
     const handler = jest.fn();
@@ -322,7 +321,6 @@ describe('TaskManagerMetricsCollector', () => {
       pollInterval,
       store: mockTaskStore,
       taskTypes,
-      removedTypes: taskTypes,
       excludedTypes: taskTypes,
     });
     const handler = jest.fn();
@@ -392,7 +390,6 @@ describe('TaskManagerMetricsCollector', () => {
       pollInterval,
       store: mockTaskStore,
       taskTypes,
-      removedTypes: taskTypes,
       excludedTypes: taskTypes,
     });
     const handler = jest.fn();
