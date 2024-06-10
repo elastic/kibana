@@ -289,6 +289,15 @@ export const updateAttackDiscoveries = ({
         model: apiConfig.model,
         provider: apiConfig.provider,
       });
+    })
+    .catch((updateErr) => {
+      const updateError = transformError(updateErr);
+      telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
+        actionTypeId: apiConfig.actionTypeId,
+        errorMessage: updateError.message,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
+      });
     });
 };
 
@@ -331,6 +340,15 @@ export const handleToolError = ({
       telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
         actionTypeId: apiConfig.actionTypeId,
         errorMessage: error.message,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
+      });
+    })
+    .catch((updateErr) => {
+      const updateError = transformError(updateErr);
+      telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
+        actionTypeId: apiConfig.actionTypeId,
+        errorMessage: updateError.message,
         model: apiConfig.model,
         provider: apiConfig.provider,
       });
