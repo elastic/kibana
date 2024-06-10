@@ -31,8 +31,24 @@ describe('AppRoutes', () => {
       {
         description: 'with Fleet:Agents:Read it should render AgentsApp',
         path: '/agents',
+        expectReadOnly: true,
+        expectApp: 'AgentsApp',
         authz: {
           fleet: {
+            readAgents: true,
+          },
+          integrations: {},
+        },
+      },
+      {
+        description:
+          'with Fleet:Agents:Read and Fleet:Agents:All  it should render AgentsApp without readonly',
+        path: '/agents',
+        expectReadOnly: false,
+        expectApp: 'AgentsApp',
+        authz: {
+          fleet: {
+            allAgents: true,
             readAgents: true,
           },
           integrations: {},
@@ -52,8 +68,23 @@ describe('AppRoutes', () => {
         description: 'with Fleet:AgentPolicies:Read it should render AgentPolicyApp',
         path: '/policies',
         expectApp: 'AgentPolicyApp',
+        expectReadOnly: true,
         authz: {
           fleet: {
+            readAgentPolicies: true,
+          },
+          integrations: {},
+        },
+      },
+      {
+        description:
+          'with Fleet:AgentPolicies:Read and Fleet:AgentPolicies:All it should render AgentPolicyApp without readonly',
+        path: '/policies',
+        expectApp: 'AgentPolicyApp',
+        expectReadOnly: false,
+        authz: {
+          fleet: {
+            allAgentPolicies: true,
             readAgentPolicies: true,
           },
           integrations: {},
@@ -72,10 +103,25 @@ describe('AppRoutes', () => {
       {
         description: 'with Fleet:Settings:Read it should render SettingsApp',
         path: '/settings',
+        expectReadOnly: true,
         expectApp: 'SettingsApp',
         authz: {
           fleet: {
             readSettings: true,
+          },
+          integrations: {},
+        },
+      },
+      {
+        description:
+          'with Fleet:Settings:Read and Fleet:Settings:All it should render SettingsApp without readonly',
+        path: '/settings',
+        expectReadOnly: false,
+        expectApp: 'SettingsApp',
+        authz: {
+          fleet: {
+            readSettings: true,
+            allSettings: true,
           },
           integrations: {},
         },
@@ -95,7 +141,7 @@ describe('AppRoutes', () => {
       it(scenario.description, () => {
         jest.mocked(useAuthz).mockReturnValue(scenario.authz as any);
         const testRenderer = createFleetTestRendererMock();
-        testRenderer.startServices.navigation.ui.TopNavMenu = () => null as any;
+        testRenderer.startServices.navigation.ui.TopNavMenu = jest.fn().mockReturnValue(null);
         testRenderer.history.push(`/mock${scenario.path}`);
         const result = testRenderer.render(<AppRoutes setHeaderActionMenu={() => {}} />, {});
         if (scenario.expectMissingPrivileges) {
@@ -105,6 +151,30 @@ describe('AppRoutes', () => {
         }
         if (scenario.expectApp) {
           expect(result.queryByText(scenario.expectApp)).not.toBeNull();
+        }
+
+        if (scenario.expectReadOnly) {
+          expect(testRenderer.startServices.navigation.ui.TopNavMenu).toBeCalledWith(
+            expect.objectContaining({
+              config: expect.arrayContaining([
+                expect.objectContaining({
+                  label: 'Read-only',
+                }),
+              ]),
+            }),
+            expect.anything()
+          );
+        } else {
+          expect(testRenderer.startServices.navigation.ui.TopNavMenu).not.toBeCalledWith(
+            expect.objectContaining({
+              config: expect.arrayContaining([
+                expect.objectContaining({
+                  label: 'Read-only',
+                }),
+              ]),
+            }),
+            expect.anything()
+          );
         }
       });
     }

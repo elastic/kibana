@@ -140,7 +140,7 @@ export function DiscoverGridFlyout({
       onAddColumn(columnName);
       services.toastNotifications.addSuccess(
         i18n.translate('discover.grid.flyout.toastColumnAdded', {
-          defaultMessage: `Column '{columnName}' was added`,
+          defaultMessage: `Column ''{columnName}'' was added`,
           values: { columnName },
         })
       );
@@ -153,7 +153,7 @@ export function DiscoverGridFlyout({
       onRemoveColumn(columnName);
       services.toastNotifications.addSuccess(
         i18n.translate('discover.grid.flyout.toastColumnRemoved', {
-          defaultMessage: `Column '{columnName}' was removed`,
+          defaultMessage: `Column ''{columnName}'' was removed`,
           values: { columnName },
         })
       );

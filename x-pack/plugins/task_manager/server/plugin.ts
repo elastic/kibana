@@ -163,6 +163,7 @@ export class TaskManagerPlugin
     });
     metricsRoute({
       router,
+      logger: this.logger,
       metrics$: this.metrics$,
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
@@ -295,6 +296,7 @@ export class TaskManagerPlugin
 
     metricsStream({
       config: this.config!,
+      logger: this.logger,
       reset$: this.resetMetrics$,
       taskPollingLifecycle: this.taskPollingLifecycle,
       taskManagerMetricsCollector: this.taskManagerMetricsCollector,

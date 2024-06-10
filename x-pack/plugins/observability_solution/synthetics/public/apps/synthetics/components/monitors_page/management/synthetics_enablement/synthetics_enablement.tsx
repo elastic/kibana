@@ -11,8 +11,7 @@ import { useEnablement } from '../../../../hooks/use_enablement';
 import * as labels from './labels';
 
 export const EnablementEmptyState = () => {
-  const { enablement, loading } = useEnablement();
-  const { isEnabled } = enablement;
+  const { isEnabled, loading } = useEnablement();
 
   return !isEnabled && !loading ? (
     <EuiEmptyPrompt

@@ -3,10 +3,9 @@
 exports[`EditFilterListHeader renders the header when creating a new filter list with ID, description and items set 1`] = `
 <Fragment>
   <MlPageHeader>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Create new filter list"
       id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
-      values={Object {}}
     />
   </MlPageHeader>
   <EuiFlexGroup
@@ -28,7 +27,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
             color="subdued"
           >
             <p>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
                 id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
                 values={
@@ -54,10 +53,9 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     helpText="Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Filter list ID"
         id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -105,10 +103,9 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 exports[`EditFilterListHeader renders the header when creating a new filter list with the ID not set 1`] = `
 <Fragment>
   <MlPageHeader>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Create new filter list"
       id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
-      values={Object {}}
     />
   </MlPageHeader>
   <EuiFlexGroup
@@ -130,7 +127,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
             color="subdued"
           >
             <p>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
                 id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
                 values={
@@ -160,10 +157,9 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     hasEmptyLabelSpace={false}
     isInvalid={true}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Filter list ID"
         id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -188,10 +184,9 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         <EuiTextColor
           color="subdued"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Add a description"
             id="xpack.ml.settings.filterLists.editFilterList.addDescriptionText"
-            values={Object {}}
           />
         </EuiTextColor>
       </EuiText>
@@ -214,7 +209,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 exports[`EditFilterListHeader renders the header when editing an existing unused filter list with no description or items 1`] = `
 <Fragment>
   <MlPageHeader>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Filter list {filterId}"
       id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
       values={
@@ -243,7 +238,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
             color="subdued"
           >
             <p>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
                 id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
                 values={
@@ -273,10 +268,9 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
         <EuiTextColor
           color="subdued"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Add a description"
             id="xpack.ml.settings.filterLists.editFilterList.addDescriptionText"
-            values={Object {}}
           />
         </EuiTextColor>
       </EuiText>
@@ -295,10 +289,9 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   />
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="This filter list is not used by any jobs."
         id="xpack.ml.settings.filterLists.editFilterList.filterIsNotUsedInJobsDescription"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -311,7 +304,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
 exports[`EditFilterListHeader renders the header when editing an existing used filter list with description and items set 1`] = `
 <Fragment>
   <MlPageHeader>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Filter list {filterId}"
       id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
       values={
@@ -340,7 +333,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
             color="subdued"
           >
             <p>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
                 id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
                 values={
@@ -391,10 +384,9 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
     className="ml-filter-list-usage"
   >
     <EuiText>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="This filter list is used in"
         id="xpack.ml.settings.filterLists.editFilterList.filterIsUsedInJobsDescription"
-        values={Object {}}
       />
     </EuiText>
     <FilterListUsagePopover
@@ -406,10 +398,9 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
       }
     />
     <EuiText>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="across"
         id="xpack.ml.settings.filterLists.editFilterList.acrossText"
-        values={Object {}}
       />
     </EuiText>
     <FilterListUsagePopover

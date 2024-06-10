@@ -349,7 +349,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       render: (_, slo: SLOWithSummaryResponse) => {
         const groups = [slo.groupBy].flat();
         return !groups.includes(ALL_VALUE) ? (
-          <SLOGroupings slo={slo} direction="column" />
+          <SLOGroupings slo={slo} direction="column" gutterSize={'none'} />
         ) : (
           <span>{NOT_AVAILABLE_LABEL}</span>
         );

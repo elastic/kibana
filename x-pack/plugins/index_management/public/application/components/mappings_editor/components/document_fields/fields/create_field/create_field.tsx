@@ -16,10 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { useDispatch } from '../../../../mappings_state_context';
+import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, FormDataProvider, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
@@ -70,7 +70,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
 }: Props) {
   const { isSemanticTextEnabled, indexName, ml, setErrorsInTrainedModelDeployment } =
     semanticTextInfo ?? {};
-
   const dispatch = useDispatch();
 
   const { form } = useForm<Field>({
@@ -315,7 +314,25 @@ interface InferenceProps {
 }
 
 function InferenceIdCombo({ setValue }: InferenceProps) {
+  const { inferenceToModelIdMap } = useMappingsState();
+  const dispatch = useDispatch();
   const [{ type }] = useFormData({ watch: 'type' });
+
+  // update new inferenceEndpoint
+  const setNewInferenceEndpoint = useCallback(
+    (newInferenceEndpoint: InferenceToModelIdMap) => {
+      dispatch({
+        type: 'inferenceToModelIdMap.update',
+        value: {
+          inferenceToModelIdMap: {
+            ...inferenceToModelIdMap,
+            ...newInferenceEndpoint,
+          },
+        },
+      });
+    },
+    [dispatch, inferenceToModelIdMap]
+  );
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {
     return null;
@@ -325,7 +342,13 @@ function InferenceIdCombo({ setValue }: InferenceProps) {
     <>
       <EuiSpacer />
       <UseField path="inferenceId">
-        {(field) => <SelectInferenceId onChange={field.setValue} setValue={setValue} />}
+        {(field) => (
+          <SelectInferenceId
+            onChange={field.setValue}
+            setValue={setValue}
+            setNewInferenceEndpoint={setNewInferenceEndpoint}
+          />
+        )}
       </UseField>
     </>
   );

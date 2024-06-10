@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
+
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
@@ -734,6 +736,143 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             fooKey2: ['fooValue2'],
           },
         ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs with add fields process if global data tags are defined', async () => {
+    const excludedInputs: PackagePolicyInput[] = [];
+    const expectedExcluded = [];
+
+    for (const input of GLOBAL_DATA_TAG_EXCLUDED_INPUTS) {
+      excludedInputs.push({
+        type: input,
+        enabled: true,
+        vars: {
+          inputVar: { value: 'input-value' },
+          inputVar2: { value: undefined },
+          inputVar3: {
+            type: 'yaml',
+            value: 'testField: test',
+          },
+          inputVar4: { value: '' },
+        },
+        streams: [],
+      });
+
+      expectedExcluded.push({
+        data_stream: {
+          namespace: 'default',
+        },
+        id: `${input}-some-uuid`,
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: input,
+        use_output: 'default',
+      });
+    }
+
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [
+              ...excludedInputs,
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+              {
+                ...mockInput2,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        [
+          { name: 'testName', value: 'testValue' },
+          { name: 'testName2', value: 'testValue2' },
+        ]
+      )
+    ).toEqual([
+      ...expectedExcluded,
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
+      },
+      {
+        id: 'test-metrics-some-template-some-uuid',
+        data_stream: {
+          namespace: 'default',
+        },
+        inputVar: 'input-value',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              target: '',
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+              },
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-metrics',
+        use_output: 'default',
       },
     ]);
   });

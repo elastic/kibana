@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { first, last, sumBy } from 'lodash';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -32,7 +31,6 @@ interface Props {
   data?: {
     pages: MetricsExplorerResponse[];
   };
-  source: MetricsSourceConfigurationProperties | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = ({
@@ -42,16 +40,14 @@ export const MetricsExplorerCharts = ({
   options,
   chartOptions,
   onRefetch,
-
   onFilter,
-  source,
   timeRange,
   onTimeChange,
 }: Props) => {
   if (isLoading) {
     return (
       <InfraLoadingPanel
-        height={800}
+        height="100%"
         width="100%"
         text={i18n.translate('xpack.infra.metricsExplorer.loadingCharts', {
           defaultMessage: 'Loading charts',
@@ -96,7 +92,6 @@ export const MetricsExplorerCharts = ({
                 title={options.groupBy ? series.id : null}
                 height={page.series.length > 1 ? 200 : 400}
                 series={series}
-                source={source}
                 timeRange={timeRange}
                 onTimeChange={onTimeChange}
               />

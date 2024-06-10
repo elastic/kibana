@@ -106,7 +106,6 @@ import {
   IndexPatternRef,
   FramePublicAPI,
   AddUserMessages,
-  isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
 } from '../types';
@@ -1000,9 +999,7 @@ export class Embeddable
 
     this.removeActiveDataWarningMessages();
     const searchWarningMessages = this.getSearchWarningMessages(adapters);
-    this.removeActiveDataWarningMessages = this.addUserMessages(
-      searchWarningMessages.filter(isMessageRemovable)
-    );
+    this.removeActiveDataWarningMessages = this.addUserMessages(searchWarningMessages);
 
     this.activeData = newActiveData;
 
@@ -1148,7 +1145,7 @@ export class Embeddable
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
+              interactive={!input.disableTriggers}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -1369,6 +1366,7 @@ export class Embeddable
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = this.input.onTableRowClick;
     }
+    const esqlQuery = this.isTextBasedLanguage() ? this.savedVis?.state.query : undefined;
 
     eventHandler?.({
       ...event.data,
@@ -1384,6 +1382,7 @@ export class Embeddable
             ...event.data,
             timeFieldName:
               event.data.timeFieldName || inferTimeField(this.deps.data.datatableUtilities, event),
+            query: esqlQuery,
           },
           embeddable: this,
         });

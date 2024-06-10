@@ -80,6 +80,7 @@ describe('GetSLO', () => {
         settings: {
           syncDelay: '1m',
           frequency: '1m',
+          preventInitialBackfill: false,
         },
         summary: {
           status: 'HEALTHY',

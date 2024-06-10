@@ -43,6 +43,7 @@ import {
   isInputOnlyPolicyTemplate,
   getNormalizedDataStreams,
   getNormalizedInputs,
+  isRootPrivilegesRequired,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -170,15 +171,6 @@ async function getPkgInfoAssetsMap({
 
   return packageInfosandAssetsMap;
 }
-
-export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
-  'auto_configure',
-  'create_doc',
-  'maintenance',
-  'monitor',
-  'read',
-  'read_cross_cluster',
-]);
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
   public async create(
@@ -329,10 +321,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       }
 
-      if (enrichedPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+      const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+      if (enrichedPackagePolicy.package && requiresRoot) {
         enrichedPackagePolicy.package = {
           ...enrichedPackagePolicy.package,
-          requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+          requires_root: requiresRoot,
         };
       }
     }
@@ -465,10 +458,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           elasticsearch = pkgInfo?.elasticsearch;
 
-          if (packagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+          const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+          if (packagePolicy.package && requiresRoot) {
             packagePolicy.package = {
               ...packagePolicy.package,
-              requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+              requires_root: requiresRoot,
             };
           }
         }
@@ -877,10 +871,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
-      if (restOfPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+      const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+      if (restOfPackagePolicy.package && requiresRoot) {
         restOfPackagePolicy.package = {
           ...restOfPackagePolicy.package,
-          requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+          requires_root: requiresRoot,
         };
       }
     }
@@ -1064,10 +1059,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
-            if (restOfPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+            const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+            if (restOfPackagePolicy.package && requiresRoot) {
               restOfPackagePolicy.package = {
                 ...restOfPackagePolicy.package,
-                requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+                requires_root: requiresRoot,
               };
             }
           }
@@ -2199,6 +2195,15 @@ export function _applyIndexPrivileges(
     return streamOut;
   }
 
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+  const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
+    'auto_configure',
+    'create_doc',
+    'maintenance',
+    'monitor',
+    'read',
+    ...(isServerless ? [] : ['read_cross_cluster']),
+  ]);
   const [valid, invalid] = partition(indexPrivileges, (permission) =>
     DATA_STREAM_ALLOWED_INDEX_PRIVILEGES.has(permission)
   );

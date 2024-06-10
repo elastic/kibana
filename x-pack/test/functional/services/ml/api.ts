@@ -212,6 +212,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return body.hits.hits.length > 0;
     },
 
+    async addForecast(jobId: string, requestBody: { duration: string }): Promise<void> {
+      log.debug(`Creating forecast for ${jobId}...`);
+      const { body, status } = await kbnSupertest
+        .post(`/internal/ml/anomaly_detectors/${jobId}/_forecast`)
+        .set(getCommonRequestHeader('1'))
+        .send(requestBody);
+      this.assertResponseStatusCode(200, status, body);
+      log.debug(`> Forecast for ${jobId} created`);
+    },
+
     async assertForecastResultsExist(jobId: string) {
       await retry.waitForWithTimeout(
         `forecast results for job ${jobId} to exist`,

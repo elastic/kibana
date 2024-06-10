@@ -7,8 +7,8 @@
  */
 
 import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { LensAttributes, LensConfig, LensConfigOptions } from './types';
 import {
   buildGauge,
@@ -20,6 +20,8 @@ import {
   buildXY,
   buildPartitionChart,
 } from './charts';
+
+export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
 export class LensConfigBuilder {
   private charts = {
@@ -36,10 +38,10 @@ export class LensConfigBuilder {
     table: buildTable,
   };
   private formulaAPI: FormulaPublicApi | undefined;
-  private dataViewsAPI: DataViewsPublicPluginStart;
+  private dataViewsAPI: DataViewsCommon;
 
   // formulaApi is optional, as it is not necessary to use it when creating charts with ES|QL
-  constructor(dataViewsAPI: DataViewsPublicPluginStart, formulaAPI?: FormulaPublicApi) {
+  constructor(dataViewsAPI: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
     this.formulaAPI = formulaAPI;
     this.dataViewsAPI = dataViewsAPI;
   }

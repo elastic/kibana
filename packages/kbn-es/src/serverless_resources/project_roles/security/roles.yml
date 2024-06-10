@@ -308,12 +308,17 @@ threat_intelligence_analyst:
       privileges:
         - read
     - names:
-        - .lists*
-        - .items*
         - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+        - view_index_metadata
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -685,12 +690,17 @@ endpoint_policy_manager:
       privileges:
         - read
     - names:
-        - .lists*
-        - .items*
         - .asset-criticality.asset-criticality-*
       privileges:
         - read
         - write
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+        - view_index_metadata
     - names:
         - .alerts-security*
         - .siem-signals-*

@@ -48,14 +48,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../../../containers/metrics_source/source', () => ({
-  withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
-  }),
-}));
-
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
   const mockedSetAlertSummaryFields = jest.fn();

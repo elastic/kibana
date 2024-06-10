@@ -180,13 +180,14 @@ export default function ({ getService }: FtrProviderContext) {
             expect(updated).to.eql(true);
           });
 
-        const getResult = await supertest
-          .get('/internal/security/api_key')
+        const queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
           .set('kbn-xsrf', 'xxx')
-          .send();
+          .expect(200);
 
-        expect(getResult.body.apiKeys).to.not.be(undefined);
-        const updatedKey = getResult.body.apiKeys.find(
+        expect(queryResult.body.apiKeys).to.not.be(undefined);
+        const updatedKey = queryResult.body.apiKeys.find(
           (apiKey: { id: string }) => apiKey.id === id
         );
         expect(updatedKey).to.not.be(undefined);
@@ -257,13 +258,14 @@ export default function ({ getService }: FtrProviderContext) {
         if (!basic) {
           expect(updateResult.body.updated).to.be(true);
 
-          const getResult = await supertest
-            .get('/internal/security/api_key')
+          const queryResult = await supertest
+            .post('/internal/security/api_key/_query')
+            .send({})
             .set('kbn-xsrf', 'xxx')
-            .send();
+            .expect(200);
 
-          expect(getResult.body.apiKeys).to.not.be(undefined);
-          const updatedKey = getResult.body.apiKeys.find(
+          expect(queryResult.body.apiKeys).to.not.be(undefined);
+          const updatedKey = queryResult.body.apiKeys.find(
             (apiKey: { id: string }) => apiKey.id === id
           );
           expect(updatedKey).to.not.be(undefined);
