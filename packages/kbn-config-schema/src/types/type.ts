@@ -229,7 +229,7 @@ export abstract class Type<V, TV = V> {
     if (!this.transformFn) {
       this.internalSchema = this.internalSchema.custom((v) => this.transformFn!(v));
     }
-    this.transformFn = fn;
+    this.transformFn = fn.bind(null);
     // hacky way of injecting transformed type schema
     return this as unknown as TransformedType<V, R>;
   }
