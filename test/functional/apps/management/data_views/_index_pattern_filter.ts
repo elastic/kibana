@@ -78,10 +78,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        '_test',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
@@ -107,10 +107,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        'agent',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
