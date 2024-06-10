@@ -461,8 +461,16 @@ export class SearchInterceptor {
           for await (const chunk of response.response.body) {
             chunks.push(chunk);
           }
-          const decoded = chunks.length > 1 ? decode(Buffer.concat(chunks)) : decode(chunks[0]);
 
+          const mergedChunks = chunks.length > 1 ? Buffer.concat(chunks) : chunks[0];
+
+          if (mergedChunks[0] === 123) {
+            // json
+            const json = JSON.parse(Buffer.from(mergedChunks.buffer).toString());
+            return json;
+          }
+
+          const decoded = decode(mergedChunks);
           return {
             id: decoded.id,
             rawResponse: strategy === ENHANCED_ES_SEARCH_STRATEGY ? decoded.response : decoded,

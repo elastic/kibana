@@ -13,6 +13,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { decode } from 'cbor';
 import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -23,7 +24,7 @@ import {
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { toAsyncKibanaSearchStatusResponse } from './response_utils';
+import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import {
   getDefaultSearchParams,
@@ -96,13 +97,13 @@ export const enhancedEsSearchStrategyProvider = (
         },
       }
     );
-    console.log(body);
 
     return {
-      id: body.id,
+      id,
       rawResponse: body,
-      isPartial: !body.complete,
-      isRunning: !body.complete && !body.aborted,
+      isPartial: false,
+      isRunning: false,
+      type: 'cbor',
       ...(headers?.warning ? { warning: headers.warning } : {}),
       // ...getTotalLoaded(response.response),
     };
@@ -127,27 +128,20 @@ export const enhancedEsSearchStrategyProvider = (
       meta: true,
       asStream: true,
     });
-    console.log(body);
 
-    // const chunks = [];
-    // for await (const chunk of body) {
-    //   chunks.push(chunk);
-    // }
-    //
-    // const decoded = decode(Buffer.concat(chunks));
-    // console.log(decoded);
+    const chunks = [];
+    for await (const chunk of body) {
+      chunks.push(chunk);
+    }
 
-    return {
-      id: body.id,
-      rawResponse: body,
-      isPartial: !body.complete,
-      isRunning: !body.complete && !body.aborted,
-      ...(headers?.warning ? { warning: headers.warning } : {}),
-      ...(meta?.request?.params
-        ? { requestParams: sanitizeRequestParams(meta.request.params) }
-        : {}),
-      // ...getTotalLoaded(response.response),
-    };
+    const decoded = decode(Buffer.concat(chunks));
+    const response = shimHitsTotal(decoded.response, options);
+
+    return toAsyncKibanaSearchResponse(
+      { ...decoded, response },
+      headers?.warning,
+      meta?.request?.params
+    );
   }
 
   function asyncSearch(
@@ -180,7 +174,13 @@ export const enhancedEsSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
-      map((response) => response.rawResponse),
+      // if response is cbor return rawResponse
+      map((response) => {
+        if (response.type === 'cbor') {
+          return response.rawResponse;
+        }
+        return response;
+      }),
       catchError((e) => {
         throw getKbnSearchError(e);
       })
