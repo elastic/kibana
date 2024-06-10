@@ -561,7 +561,9 @@ function validateSetting(
  * recursively terminate at either a literal or an aggregate function.
  */
 const isFunctionAggClosed = (fn: ESQLFunction): boolean =>
-  isAggFunction(fn) ||
+  isAggFunction(fn) || areFunctionArgsAggClosed(fn);
+
+const areFunctionArgsAggClosed = (fn: ESQLFunction): boolean =>
   fn.args.every((arg) => isLiteralItem(arg) || (isFunctionItem(arg) && isFunctionAggClosed(arg)));
 
 /**
