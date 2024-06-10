@@ -30,6 +30,8 @@ import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
 
+const UNASSOCIATED_NOTES_TIMELINE_ID = 'non-existent-timeline-id';
+
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
@@ -141,14 +143,12 @@ const createNote = async ({
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
-  console.log('references:', references);
   if (references.length === 0) {
     // Limit unassociated events to 1000
     const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
       type: noteSavedObjectType,
-      hasNoReference: { type: timelineSavedObjectType, id: '*' },
+      hasReference: { type: timelineSavedObjectType, id: UNASSOCIATED_NOTES_TIMELINE_ID },
     });
-    console.log('notesCount:', notesCount.total);
     if (notesCount.total >= 1000) {
       return {
         code: 403,
@@ -160,6 +160,12 @@ const createNote = async ({
           timelineId: '',
         },
       };
+    } else {
+      references.push({
+        type: timelineSavedObjectType,
+        name: 'associated',
+        id: UNASSOCIATED_NOTES_TIMELINE_ID,
+      });
     }
   }
   const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
