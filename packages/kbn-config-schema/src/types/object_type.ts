@@ -9,20 +9,12 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, OptionsForUnknowns } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions, OptionsForUnknowns, TypeOf } from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
 
 export type NullableProps = Record<string, Type<any> | undefined | null>;
-
-export type TypeOrLazyType = Type<any> | (() => Type<any>);
-
-export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
-  ? ReturnType<RT>['type']
-  : RT extends Type<any>
-  ? RT['type']
-  : never;
 
 type OptionalProperties<Base extends Props> = Pick<
   Base,
