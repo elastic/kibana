@@ -7,6 +7,7 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 import { expectToReject, getDataStreamSettingsOfEarliestIndex, rolloverDataStream } from './utils';
 import {
   DatasetQualityApiClient,
@@ -17,6 +18,8 @@ import { DatasetQualityFtrContextProvider } from './common/services';
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
   const synthtrace = getService('logSynthtraceEsClient');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const esClient = getService('es');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
@@ -26,7 +29,11 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const serviceName = 'my-service';
   const hostName = 'synth-host';
 
-  async function callApi(dataStream: string) {
+  async function callApi(
+    dataStream: string,
+    roleAuthc: RoleCredentials,
+    internalReqHeader: InternalRequestHeader
+  ) {
     return await datasetQualityApiClient.slsUser({
       endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
       params: {
@@ -34,12 +41,18 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
           dataStream,
         },
       },
+      roleAuthc,
+      internalReqHeader,
     });
   }
 
   describe('gets the data stream settings', () => {
+    let roleAuthc: RoleCredentials;
+    let internalReqHeader: InternalRequestHeader;
     before(async () => {
-      await synthtrace.index([
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      return synthtrace.index([
         timerange(start, end)
           .interval('1m')
           .rate(1)
@@ -59,10 +72,14 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       ]);
     });
 
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
     it('returns error when dataStream param is not provided', async () => {
       const expectedMessage = 'Data Stream name cannot be empty';
       const err = await expectToReject<DatasetQualityApiError>(() =>
-        callApi(encodeURIComponent(' '))
+        callApi(encodeURIComponent(' '), roleAuthc, internalReqHeader)
       );
       expect(err.res.status).to.be(400);
       expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
@@ -71,7 +88,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     it('returns {} if matching data stream is not available', async () => {
       const nonExistentDataSet = 'Non-existent';
       const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
-      const resp = await callApi(nonExistentDataStream);
+      const resp = await callApi(nonExistentDataStream, roleAuthc, internalReqHeader);
       expect(resp.body).empty();
     });
 
@@ -80,7 +97,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
         esClient,
         `${type}-${dataset}-${namespace}`
       );
-      const resp = await callApi(`${type}-${dataset}-${namespace}`);
+      const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
     });
 
@@ -90,7 +107,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
         esClient,
         `${type}-${dataset}-${namespace}`
       );
-      const resp = await callApi(`${type}-${dataset}-${namespace}`);
+      const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
     });
 

@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAdmin: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
   const supertest = getService('supertest');
-
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
 
