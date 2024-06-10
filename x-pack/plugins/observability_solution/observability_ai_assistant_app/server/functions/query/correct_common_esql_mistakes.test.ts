@@ -4,23 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import dedent from 'dedent';
-import { noop } from 'lodash';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 
 describe('correctCommonEsqlMistakes', () => {
-  const fakeLogger = {
-    debug: noop,
-  } as any;
-
-  function renderQuery(query: string) {
-    return '```esql\n' + dedent(query) + '\n```';
+  function normalize(input: string) {
+    return input.replaceAll(/[\t|\s]*\n[\t|\s]*/gms, '\n');
   }
 
   function expectQuery(input: string, expectedOutput: string) {
-    expect(correctCommonEsqlMistakes(renderQuery(input), fakeLogger)).toEqual(
-      renderQuery(expectedOutput)
-    );
+    expect(normalize(correctCommonEsqlMistakes(input).output)).toEqual(normalize(expectedOutput));
   }
 
   it('replaces aliasing via the AS keyword with the = operator', () => {
@@ -106,6 +98,11 @@ describe('correctCommonEsqlMistakes', () => {
       `FROM logs-* | KEEP date, whatever | RENAME whatever AS forever | SORT forever DESC`,
       `FROM logs-*\n| KEEP date, whatever\n| RENAME whatever AS forever\n| SORT forever DESC`
     );
+
+    expectQuery(
+      'FROM employees\n| KEEP first_name, last_name\n| RENAME first_name AS fn, last_name AS ln',
+      'FROM employees\n| KEEP first_name, last_name\n| RENAME first_name AS fn, last_name AS ln'
+    );
   });
 
   it(`escapes the column name if SORT uses an expression`, () => {
@@ -117,6 +114,20 @@ describe('correctCommonEsqlMistakes', () => {
     expectQuery(
       'FROM logs-* \n| STATS COUNT(*) by service.name\n| SORT COUNT(*) DESC, @timestamp ASC',
       'FROM logs-*\n| STATS COUNT(*) BY service.name\n| SORT `COUNT(*)` DESC, @timestamp ASC'
+    );
+
+    expectQuery(
+      `FROM employees\n| KEEP first_name, last_name, height\n| SORT first_name ASC NULLS FIRST`,
+      `FROM employees\n| KEEP first_name, last_name, height\n| SORT first_name ASC NULLS FIRST`
+    );
+
+    expectQuery(
+      `FROM employees
+      | STATS my_count = COUNT() BY LEFT(last_name, 1)
+      | SORT \`LEFT(last_name, 1)\``,
+      `FROM employees
+      | STATS my_count = COUNT() BY LEFT(last_name, 1)
+      | SORT \`LEFT(last_name, 1)\``
     );
   });
 
@@ -140,10 +151,10 @@ describe('correctCommonEsqlMistakes', () => {
       | EVAL total_events = span.destination.service.response_time.count
       | EVAL total_latency = span.destination.service.response_time.sum.us
       | EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
-      | STATS 
-          avg_throughput = AVG(total_events), 
-          avg_latency_per_request = AVG(total_latency / total_events), 
-          failure_rate = AVG(is_failure) 
+      | STATS
+          avg_throughput = AVG(total_events),
+          avg_latency_per_request = AVG(total_latency / total_events),
+          failure_rate = AVG(is_failure)
         BY span.destination.service.resource`,
       `FROM metrics-apm*
       | WHERE metricset.name == "service_destination" AND @timestamp > NOW() - 24 hours
@@ -151,6 +162,21 @@ describe('correctCommonEsqlMistakes', () => {
       | EVAL total_latency = span.destination.service.response_time.sum.us
       | EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
       | STATS avg_throughput = AVG(total_events), avg_latency_per_request = AVG(total_latency / total_events), failure_rate = AVG(is_failure) BY span.destination.service.resource`
+    );
+
+    expectQuery(
+      `FROM sample_data
+      | EVAL successful = CASE(
+          STARTS_WITH(message, "Connected to"), 1,
+          message == "Connection error", 0
+        )
+      | STATS success_rate = AVG(successful)`,
+      `FROM sample_data
+      | EVAL successful = CASE(
+          STARTS_WITH(message, "Connected to"), 1,
+          message == "Connection error", 0
+        )
+      | STATS success_rate = AVG(successful)`
     );
   });
 });
