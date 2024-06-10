@@ -125,10 +125,10 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
-        "id": "def-common.ESQLSearchReponse",
+        "id": "def-common.ESQLSearchResponse",
         "type": "Interface",
         "tags": [],
-        "label": "ESQLSearchReponse",
+        "label": "ESQLSearchResponse",
         "description": [],
         "path": "packages/kbn-es-types/src/search.ts",
         "deprecated": false,
@@ -136,7 +136,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchReponse.columns",
+            "id": "def-common.ESQLSearchResponse.columns",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -157,7 +157,7 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchReponse.all_columns",
+            "id": "def-common.ESQLSearchResponse.all_columns",
             "type": "Array",
             "tags": [],
             "label": "all_columns",
@@ -178,7 +178,7 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchReponse.values",
+            "id": "def-common.ESQLSearchResponse.values",
             "type": "Array",
             "tags": [],
             "label": "values",
