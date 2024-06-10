@@ -144,9 +144,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.setValue('createIndexNameFieldText', value);
     },
     async clickCreateIndexSaveButton() {
-      await testSubjects.click('createIndexSaveButton');
-      // Wait for modal to close
-      await testSubjects.missingOrFail('createIndexSaveButton');
+      await retry.tryForTime(60_000, async function waitForClickAndClose() {
+        await testSubjects.click('createIndexSaveButton');
+        // Wait for modal to close
+        await testSubjects.missingOrFail('createIndexSaveButton');
+      });
     },
     async expectIndexToExist(indexName: string) {
       const table = await find.byCssSelector('table');
