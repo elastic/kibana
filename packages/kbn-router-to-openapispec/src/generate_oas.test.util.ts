@@ -55,7 +55,8 @@ export const getRouterDefaults = () => ({
   method: 'get',
   options: {
     tags: ['foo', 'oas-tag:bar'],
-    description: 'route',
+    summary: 'route summary',
+    description: 'route description',
   },
   validationSchemas: {
     request: {
@@ -82,7 +83,7 @@ export const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
-    description: 'versioned route',
+    summary: 'versioned route',
     access: 'public',
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
