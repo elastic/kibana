@@ -28,7 +28,7 @@ import {
   ALERT_GROUP,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { Rule } from '@kbn/alerting-plugin/common';
+import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type {
   EventAnnotationConfig,
@@ -42,17 +42,12 @@ import { Threshold } from '../../common/components/threshold';
 import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { MetricThresholdRuleTypeParams } from '..';
 import { Groups } from './groups';
 import { Tags } from './tags';
+import { AlertParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
-export type MetricThresholdRule = Rule<
-  MetricThresholdRuleTypeParams & {
-    filterQueryText?: string;
-    groupBy?: string | string[];
-  }
->;
+export type MetricThresholdRule = Rule<RuleTypeParams & AlertParams>;
 
 interface Group {
   field: string;
@@ -148,17 +143,15 @@ export function AlertDetailsAppSection({
 
     setAlertSummaryFields(alertSummaryFields);
   }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
-  console.log('rule.params.criteria', rule.params.criteria);
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
       {rule.params.criteria.map((criterion, index) => {
-        console.log('criterion', criterion);
         const timeRange = getPaddedAlertTimeRange(
           alert.fields[ALERT_START]!,
           alert.fields[ALERT_END],
           {
-            size: criterion.timeSize,
-            unit: criterion.timeUnit,
+            size: criterion.timeSize!,
+            unit: criterion.timeUnit!,
           }
         );
         const metricExpression = [
@@ -213,7 +206,7 @@ export function AlertDetailsAppSection({
                         // due to https://github.com/elastic/elastic-charts/issues/2323
                         seriesType: 'bar_stacked',
                       }}
-                      searchConfiguration={{ query: '', language: 'kuery' }}
+                      searchConfiguration={{ query: { query: '', language: '' } }}
                       timeRange={timeRange}
                       dataView={metricsView.dataViewReference}
                       groupBy={rule.params.groupBy}
