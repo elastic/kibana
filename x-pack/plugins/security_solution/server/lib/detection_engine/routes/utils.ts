@@ -7,6 +7,7 @@
 
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { stringifyZodError } from '@kbn/zod-helpers';
 
 import type {
   RouteValidationFunction,
@@ -17,6 +18,7 @@ import type {
 } from '@kbn/core/server';
 
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { DetectionRulesClientValidationError } from '../rule_management/logic/detection_rules_client/utils';
 
 export interface OutputError {
   message: string;
@@ -115,6 +117,12 @@ export const transformBulkError = (
       ruleId,
       statusCode: 400,
       message: err.message,
+    });
+  } else if (err instanceof DetectionRulesClientValidationError) {
+    return createBulkErrorObject({
+      ruleId: err.ruleId,
+      statusCode: 500,
+      message: stringifyZodError(err),
     });
   } else {
     return createBulkErrorObject({

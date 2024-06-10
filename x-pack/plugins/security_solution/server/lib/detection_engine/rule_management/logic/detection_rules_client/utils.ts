@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
+import { ZodError } from 'zod';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -34,5 +37,13 @@ export class ClientError extends Error {
   constructor(message: string, statusCode: number) {
     super(message);
     this.statusCode = statusCode;
+  }
+}
+
+export class DetectionRulesClientValidationError extends ZodError {
+  public readonly ruleId: string;
+  constructor(zodError: ZodError, ruleId: string) {
+    super(zodError.errors);
+    this.ruleId = ruleId;
   }
 }

@@ -6,10 +6,13 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { z } from 'zod';
+import type { SafeParseError } from 'zod';
 import type { BulkError } from './utils';
 import { transformBulkError, convertToSnakeCase, SiemResponseFactory } from './utils';
 import { responseMock } from './__mocks__';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { DetectionRulesClientValidationError } from '../rule_management/logic/detection_rules_client/utils';
 
 describe('utils', () => {
   describe('transformBulkError', () => {
@@ -57,6 +60,25 @@ describe('utils', () => {
         rule_id: 'rule-1',
         error: { message: 'I have a type error', status_code: 400 },
       };
+      expect(transformed).toEqual(expected);
+    });
+
+    test('it detects a DetectionRulesClientValidationError and returns an error status of 500', () => {
+      const mockValidationResult = z
+        .object({
+          name: z.string(),
+        })
+        .safeParse({}) as SafeParseError<{ name: string }>;
+
+      const error = new DetectionRulesClientValidationError(mockValidationResult.error, 'rule-1');
+
+      const transformed = transformBulkError('rule-1', error);
+
+      const expected: BulkError = {
+        rule_id: 'rule-1',
+        error: { message: 'name: Required', status_code: 500 },
+      };
+
       expect(transformed).toEqual(expected);
     });
   });
