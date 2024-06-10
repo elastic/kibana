@@ -21,5 +21,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/test",
     "@kbn/dev-utils",
+    "@kbn/tooling-log",
   ]
 }
