@@ -88,6 +88,12 @@ import {
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
+import {
+  logDocumentProfileProvider,
+  logsDataSourceProfileProvider,
+  o11yRootProfileProvider,
+} from './context_awareness/profiles/example_profiles';
+import { registerEnabledProfiles } from './context_awareness/register_enabled_profiles';
 
 /**
  * @public
@@ -229,9 +235,7 @@ export class DiscoverPlugin
   private readonly historyService = new HistoryService();
   private readonly inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> =
     new Map([[null, defaultCustomizationContext.inlineTopNav]]);
-  private readonly experimentalFeatures: ExperimentalFeatures = {
-    ruleFormV2Enabled: false,
-  };
+  private readonly experimentalFeatures: ExperimentalFeatures;
 
   private scopedHistory?: ScopedHistory<unknown>;
   private urlTracker?: UrlTracker;
@@ -241,8 +245,12 @@ export class DiscoverPlugin
   private singleDocLocator?: DiscoverSingleDocLocator;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.experimentalFeatures =
-      initializerContext.config.get().experimental ?? this.experimentalFeatures;
+    const experimental = this.initializerContext.config.get().experimental;
+
+    this.experimentalFeatures = {
+      ruleFormV2Enabled: experimental?.ruleFormV2Enabled ?? false,
+      enabledProfiles: experimental?.enabledProfiles ?? [],
+    };
   }
 
   setup(
@@ -459,10 +467,28 @@ export class DiscoverPlugin
   }
 
   private registerProfiles() {
-    // TODO: Conditionally register example profiles for functional testing in a follow up PR
-    // this.rootProfileService.registerProvider(o11yRootProfileProvider);
-    // this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
-    // this.documentProfileService.registerProvider(logDocumentProfileProvider);
+    const rootProfileProviders = [o11yRootProfileProvider];
+    const dataSourceProfileProviders = [logsDataSourceProfileProvider];
+    const documentProfileProviders = [logDocumentProfileProvider];
+    const enabledProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
+
+    registerEnabledProfiles({
+      profileService: this.rootProfileService,
+      availableProviders: rootProfileProviders,
+      enabledProfileIds,
+    });
+
+    registerEnabledProfiles({
+      profileService: this.dataSourceProfileService,
+      availableProviders: dataSourceProfileProviders,
+      enabledProfileIds,
+    });
+
+    registerEnabledProfiles({
+      profileService: this.documentProfileService,
+      availableProviders: documentProfileProviders,
+      enabledProfileIds,
+    });
   }
 
   private createProfilesManager() {
