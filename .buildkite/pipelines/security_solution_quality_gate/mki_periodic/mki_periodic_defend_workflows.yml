@@ -1,0 +1,18 @@
+steps:
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
+    label: "Serverless MKI QA Defend Workflows Cypress Tests on Serverless"
+    key: test_defend_workflows
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-4
+    timeout_in_minutes: 300
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: "*"
+          limit: 1
