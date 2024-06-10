@@ -73,7 +73,7 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
   onDataViewChange,
   indexSettingsString,
   mappingsString,
-  pipelineString, // !!!! we need to have selector for existing pipeline. If mappings are the same, try and find pipeline based on index name auto select it. we could warn if user is trying to create a new pipeline with the same contents as an existing ones
+  pipelineString,
   onIndexSettingsStringChange,
   onMappingsStringChange,
   onPipelineStringChange,
@@ -107,6 +107,7 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
 
   useEffect(() => {
     if (selectedIndexOptions.length === 0) {
+      onIndexChange('', true);
       return;
     }
     onIndexChange(selectedIndexOptions[0].label, true);
@@ -214,6 +215,9 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
     }
   }, [findPipelineOption, pipelineId]);
 
+  // !!!!!!!!  add a check to see if the mappings are too different
+  // if so, block the import and show a warning
+
   return (
     <>
       <EuiFormRow
@@ -318,25 +322,42 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
                 onChange={onMappingsStringChange}
                 indexName={selectedIndexOptions[0].label}
               />
-            </EuiFlexItem>
 
-            <EuiFlexItem>
-              {missingFields.map((f) => (
-                <EuiFlexGroup key={f.name}>
-                  <EuiFlexItem>
-                    {f.name} ({f.type})
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButtonEmpty color={'primary'} onClick={() => addMissingField(f)}>
-                      Add field
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ))}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              {missingFields.length > 0 ? (
+                <>
+                  <EuiSpacer />
 
-          <EuiFlexGroup>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
+                        defaultMessage="Fields missing in mappings"
+                      />
+                    }
+                    fullWidth
+                  >
+                    <>
+                      <EuiSpacer size="s" />
+                      {missingFields.map((f) => (
+                        <EuiFlexGroup key={f.name}>
+                          <EuiFlexItem>
+                            {f.name} ({f.type})
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty color={'primary'} onClick={() => addMissingField(f)}>
+                              Add field
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      ))}
+                    </>
+                  </EuiFormRow>
+                </>
+              ) : null}
+            </EuiFlexItem>
+            {/* </EuiFlexGroup>
+
+          <EuiFlexGroup> */}
             {/* <EuiFlexItem>
           <IndexSettings
             initialized={initialized}
@@ -354,7 +375,6 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
         </EuiFlexItem> */}
 
             <EuiFlexItem>
-              <EuiSpacer />
               <EuiFormRow
                 label={
                   <FormattedMessage
@@ -402,7 +422,6 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
                 </>
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem />
           </EuiFlexGroup>
         </>
       ) : null}

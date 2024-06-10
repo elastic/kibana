@@ -75,7 +75,7 @@ const DEFAULT_STATE = {
   combinedFields: [],
   importer: undefined,
   reuseIndex: false,
-  createNewPipeline: false,
+  createNewPipeline: true,
 };
 
 export class ImportView extends Component {
@@ -233,7 +233,8 @@ export class ImportView extends Component {
 
   setReuseIndex = (reuseIndex) => {
     const createDataView = reuseIndex ? false : this.state.createDataView;
-    this.setState({ reuseIndex, createDataView });
+    const createNewPipeline = reuseIndex ? false : this.state.createNewPipeline;
+    this.setState({ reuseIndex, createDataView, createNewPipeline });
   };
 
   closeFilebeatFlyout = () => {
