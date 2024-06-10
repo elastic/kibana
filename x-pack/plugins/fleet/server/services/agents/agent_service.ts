@@ -168,7 +168,7 @@ export class AgentServiceImpl implements AgentService {
   public asScoped(req: KibanaRequest) {
     const preflightCheck = async () => {
       const authz = await getAuthzFromRequest(req);
-      if (!authz.fleet.all || !authz.fleet.readAgents) {
+      if (!authz.fleet.all && !authz.fleet.readAgents) {
         throw new FleetUnauthorizedError(
           `User does not have adequate permissions to access Fleet agents.`
         );
