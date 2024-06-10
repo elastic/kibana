@@ -134,7 +134,7 @@ interface SingleSearchAfterAndAudit {
   query?: string | object | undefined;
   aggs?: Record<string, any> | undefined;
   index?: string;
-  _source?: string[] | undefined;
+  _source?: false | string[];
   track_total_hits?: boolean | number;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
@@ -290,7 +290,7 @@ export class AlertsClient {
     operation,
     sort,
     lastSortIds = [],
-    runtime_mappings,
+    runtime_mappings: runtimeMappings,
     featureIds,
   }: SingleSearchAfterAndAudit) {
     try {
@@ -317,7 +317,7 @@ export class AlertsClient {
         _source,
         track_total_hits: trackTotalHits,
         size,
-        runtime_mappings,
+        runtime_mappings: runtimeMappings,
         sort: sort || [
           {
             '@timestamp': {
@@ -985,7 +985,7 @@ export class AlertsClient {
     size,
     sort,
     track_total_hits: trackTotalHits,
-    runtime_mappings,
+    runtime_mappings: runtimeMappings,
     _source,
   }: {
     aggs?: object;
@@ -1018,7 +1018,7 @@ export class AlertsClient {
         index: indexToUse,
         operation: ReadOperations.Find,
         sort,
-        runtime_mappings,
+        runtime_mappings: runtimeMappings,
         lastSortIds: searchAfter,
       });
 

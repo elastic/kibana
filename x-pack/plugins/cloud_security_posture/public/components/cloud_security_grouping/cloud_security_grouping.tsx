@@ -77,13 +77,6 @@ export const CloudSecurityGrouping = ({
       data-test-subj={CSP_GROUPING}
       css={css`
         position: relative;
-        && [data-test-subj='group-stats'] > .euiFlexItem:last-child {
-          display: none;
-        }
-        && [data-test-subj='group-stats'] > .euiFlexItem:not(:first-child) > span {
-          border-right: none;
-          margin-right: 0;
-        }
       `}
     >
       {groupSelectorComponent && (

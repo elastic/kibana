@@ -12,24 +12,22 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { ISearchRequestParams } from '@kbn/search-types';
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-import { GroupingAggregation } from '@kbn/securitysolution-grouping';
-import { AlertsGroupingAggregation } from '../../alerts_grouping/types';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
 export interface UseFindAlertsQueryProps {
   http: HttpStart;
   toasts: ToastsStart;
   enabled?: boolean;
-  params: ISearchRequestParams;
+  params: ISearchRequestParams & { feature_ids?: string[] };
 }
 
 /**
  * A generic hook to find alerts
  *
  * Still applies alerts authorization rules but, unlike triggers_actions_ui's `useFetchAlerts` hook,
- * it allows to perform arbitrary queries
+ * allows to perform arbitrary queries
  */
-export const useFindAlertsQuery = ({
+export const useFindAlertsQuery = <T>({
   http,
   toasts,
   enabled = true,
@@ -48,10 +46,9 @@ export const useFindAlertsQuery = ({
   return useQuery({
     queryKey: ['findAlerts', JSON.stringify(params)],
     queryFn: () =>
-      http.post<SearchResponseBody<{}, GroupingAggregation<AlertsGroupingAggregation>>>(
-        `${BASE_RAC_ALERTS_API_PATH}/find`,
-        { body: JSON.stringify(params) }
-      ),
+      http.post<SearchResponseBody<{}, T>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+        body: JSON.stringify(params),
+      }),
     onError: onErrorFn,
     refetchOnWindowFocus: false,
     enabled,

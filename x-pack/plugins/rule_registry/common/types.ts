@@ -198,6 +198,19 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
         ]),
       })
     ),
+    bucket_sort: t.exact(
+      t.partial({
+        sort: sortSchema,
+        from: t.number,
+        size: t.number,
+        gap_policy: t.string,
+      })
+    ),
+    value_count: t.exact(
+      t.partial({
+        field: t.string,
+      })
+    ),
   })
 );
 
