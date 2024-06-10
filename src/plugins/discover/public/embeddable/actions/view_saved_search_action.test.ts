@@ -12,64 +12,36 @@ import { BehaviorSubject } from 'rxjs';
 
 import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
-import { getSearchEmbeddableFactory } from '../get_search_embeddable_factory';
 import { SearchEmbeddableApi } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ViewSavedSearchAction } from './view_saved_search_action';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
-const initialState = {
-  timeRange: {
-    from: '2021-09-15',
-    to: '2021-09-16',
+
+const compatibleEmbeddableApi: SearchEmbeddableApi = {
+  type: SEARCH_EMBEDDABLE_TYPE,
+  getSavedSearch: jest.fn(),
+  parentApi: {
+    viewMode: new BehaviorSubject('view'),
   },
-  id: '1',
-  savedObjectId: 'mock-saved-object-id',
-  viewMode: ViewMode.VIEW,
-};
-const executeTriggerActions = async (triggerId: string, context: object) => {
-  return Promise.resolve(undefined);
-};
+} as unknown as SearchEmbeddableApi;
 
 jest
   .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
   .mockReturnValue(new BehaviorSubject('test'));
 
 describe('view saved search action', () => {
-  let searchApi: SearchEmbeddableApi;
-
-  beforeAll(async () => {
-    const factory = getSearchEmbeddableFactory({
-      startServices: { executeTriggerActions },
-      discoverServices: services,
-    });
-
-    ({ api: searchApi } = await factory.buildEmbeddable(
-      initialState,
-      (api) =>
-        ({
-          uuid: 'test',
-          type: SEARCH_EMBEDDABLE_TYPE,
-          viewMode: new BehaviorSubject(ViewMode.VIEW),
-          unsavedChanges: new BehaviorSubject({}),
-          resetUnsavedChanges: jest.fn(),
-          ...api,
-        } as SearchEmbeddableApi),
-      'test'
-    ));
-  });
-
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
-    expect(await action.isCompatible({ embeddable: searchApi })).toBe(true);
+    expect(await action.isCompatible({ embeddable: compatibleEmbeddableApi })).toBe(true);
   });
 
   it('is not compatible when embeddable not of type saved search', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     expect(
       await action.isCompatible({
-        embeddable: { ...searchApi, type: 'CONTACT_CARD_EMBEDDABLE' },
+        embeddable: { ...compatibleEmbeddableApi, type: 'CONTACT_CARD_EMBEDDABLE' },
       })
     ).toBe(false);
   });
@@ -78,7 +50,7 @@ describe('view saved search action', () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     expect(
       await action.isCompatible({
-        embeddable: { ...searchApi, viewMode: new BehaviorSubject(ViewMode.EDIT) },
+        embeddable: { ...compatibleEmbeddableApi, viewMode: new BehaviorSubject(ViewMode.EDIT) },
       })
     ).toBe(false);
   });
@@ -86,9 +58,9 @@ describe('view saved search action', () => {
   it('execute navigates to a saved search', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    await action.execute({ embeddable: searchApi });
+    await action.execute({ embeddable: compatibleEmbeddableApi });
     expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
-      getDiscoverLocatorParams(searchApi)
+      getDiscoverLocatorParams(compatibleEmbeddableApi)
     );
   });
 });
