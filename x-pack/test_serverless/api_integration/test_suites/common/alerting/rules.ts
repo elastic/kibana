@@ -31,7 +31,7 @@ import {
   waitForExecutionEventLog,
   waitForNumRuleRuns,
 } from './helpers/alerting_wait_for_helpers';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -60,14 +60,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
-      await supertest
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+      await supertest.delete(`/api/actions/connector/${connectorId}`).set(internalReqHeader);
+      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         conflicts: 'proceed',
