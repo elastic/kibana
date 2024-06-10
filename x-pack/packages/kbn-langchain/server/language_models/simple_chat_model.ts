@@ -149,7 +149,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       return content; // per the contact of _call, return a string
     }
 
-    // Bedrock streaming
     const readable = get('data', actionResult) as Readable;
 
     if (typeof readable?.read !== 'function') {
