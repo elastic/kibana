@@ -22,8 +22,6 @@ import {
   waitForKibanaAvailable,
   waitForEsAccess,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/parallel_serverless';
-import Path from 'path';
-import { readConfigFile, EsVersion } from '@kbn/test/src/functional_test_runner/lib';
 
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
@@ -72,42 +70,11 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
     return process.exit(1);
   }
 
-  const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-
-  const scriptName: string = process.env.TARGET_SCRIPT;
-  if (packageJson.scripts && packageJson.scripts[scriptName]) {
-    log.info(`Script ${scriptName} was found. Proceeding.`);
-  } else {
-    log.info(`Script ${scriptName} not found in package.json`);
-  }
-
-  // Getting parent script, domain and project type defined in the script in package.json
-  const parentScript = packageJson.scripts[scriptName]?.split(' ')[2];
-  const domain = packageJson.scripts[scriptName].split(' ')[3];
-  const projectType = packageJson.scripts[scriptName].split(' ')[4];
-
-  // Getting area and license folder from parent script in package.json
-  const area = packageJson.scripts[parentScript].split(' ')[3];
-  const licenseFolder = packageJson.scripts[parentScript].split(' ')[4];
-
-  // Defining config path and then reading the configuration file
-  const configPath = `./test_suites/${area}/${domain}/${licenseFolder}/configs/${projectType}.config.ts`;
-  const config = await readConfigFile(log, EsVersion.getDefault(), Path.resolve(configPath));
-
-  // From the configuration file getting the kibana server args for product types
-  const kbnServerArgs = config.getAll().kbnTestServer.serverArgs;
-  const filteredList: string[] = kbnServerArgs.filter((str: string) =>
-    str.startsWith('--xpack.securitySolutionServerless.productTypes')
-  );
-
-  let productTypes: ProductType[];
-  if (filteredList.length === 1) {
-    const pTypes = filteredList[0]?.split('=')[1];
-    productTypes = JSON.parse(pTypes);
-    return productTypes.length > 0 ? productTypes : undefined;
-  } else {
-    return undefined;
-  }
+  const apiConfigs = JSON.parse(fs.readFileSync('./scripts/api_configs.json', 'utf8'));
+  const productTypes: ProductType[] = apiConfigs[process.env.TARGET_SCRIPT][
+    'productTypes'
+  ] as ProductType[];
+  return productTypes && productTypes.length > 0 ? productTypes : undefined;
 }
 
 export const cli = () => {
@@ -150,7 +117,6 @@ export const cli = () => {
 
       if (!project) {
         log.error('Failed to create project.');
-
         return process.exit(1);
       }
       let statusCode: number = 0;
