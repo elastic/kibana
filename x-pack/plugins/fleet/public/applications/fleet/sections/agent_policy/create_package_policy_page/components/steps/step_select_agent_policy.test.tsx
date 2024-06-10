@@ -23,8 +23,15 @@ jest.mock('../../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../../hooks'),
     useGetAgentPolicies: jest.fn(),
-    useGetOutputs: jest.fn().mockResolvedValue({
-      data: [],
+    useGetOutputs: jest.fn().mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'logstash-1',
+            type: 'logstash',
+          },
+        ],
+      },
       isLoading: false,
     }),
     sendBulkGetAgentPolicies: jest.fn().mockImplementation((ids) =>
@@ -38,7 +45,11 @@ jest.mock('../../../../../hooks', () => {
       .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
     useGetPackagePolicies: jest.fn().mockImplementation((query) => ({
       data: {
-        items: query.kuery.includes('osquery_manager') ? [{ policy_ids: ['policy-1'] }] : [],
+        items: query.kuery.includes('osquery_manager')
+          ? [{ policy_ids: ['policy-1'] }]
+          : query.kuery.includes('apm')
+          ? [{ policy_ids: ['policy-2'] }]
+          : [],
       },
       error: undefined,
       isLoading: false,
@@ -149,8 +160,19 @@ describe('step select agent policy', () => {
       ]);
     });
 
-    // TODO: Fix this test
     test('should disable option if agent policy has limited package', async () => {
+      useGetAgentPoliciesMock.mockReturnValue({
+        data: {
+          items: [
+            { id: 'policy-1', name: 'Policy 1' },
+            { id: 'policy-2', name: 'Policy 2' },
+            { id: 'policy-3', name: 'Policy 3' },
+          ],
+        },
+        error: undefined,
+        isLoading: false,
+        resendRequest: jest.fn(),
+      } as any);
       const result = render({
         name: 'osquery_manager',
         policy_templates: [{ multiple: false }],
@@ -159,8 +181,37 @@ describe('step select agent policy', () => {
       await act(async () => {
         result.getByTestId('comboBoxToggleListButton').click();
       });
-      // expect(result.getByText('Policy 1')).toBeDisabled();
-      // expect(result.getAllByTestId('agentPolicyMultiItem')[0]).toBeDisabled();
+      expect(
+        result.getByText('Policy 1').closest('[data-test-subj="agentPolicyMultiItem"]')
+      ).toBeDisabled();
+    });
+
+    test('should disable option if agent policy has apm package and logstash output', async () => {
+      useGetAgentPoliciesMock.mockReturnValue({
+        data: {
+          items: [
+            { id: 'policy-1', name: 'Policy 1' },
+            { id: 'policy-2', name: 'Policy 2', data_output_id: 'logstash-1' },
+            { id: 'policy-3', name: 'Policy 3' },
+          ],
+        },
+        error: undefined,
+        isLoading: false,
+        resendRequest: jest.fn(),
+      } as any);
+      const result = render({
+        name: 'apm',
+      } as any);
+      expect(result.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
+      await act(async () => {
+        result.getByTestId('comboBoxToggleListButton').click();
+      });
+      expect(
+        result.getByText('Policy 2').closest('[data-test-subj="agentPolicyMultiItem"]')
+      ).toBeDisabled();
+      expect(
+        result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFilled"]')
+      ).toBeInTheDocument();
     });
   });
 });
