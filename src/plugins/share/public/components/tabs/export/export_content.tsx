@@ -33,9 +33,16 @@ type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | '
   layoutOption?: 'print';
   aggregateReportTypes: ShareMenuItemV2[];
   intl: InjectedIntl;
+  publicAPIEnabled: boolean;
 };
 
-const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: ExportProps) => {
+const ExportContentUi = ({
+  isDirty,
+  aggregateReportTypes,
+  intl,
+  onClose,
+  publicAPIEnabled,
+}: ExportProps) => {
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
 
@@ -116,7 +123,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton)
+    if (renderCopyURLButton && publicAPIEnabled)
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
@@ -151,7 +158,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, renderCopyURLButton]);
+  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
@@ -185,6 +192,28 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
     }
   };
 
+  const renderHelpText = () => {
+    const showHelpText = publicAPIEnabled && isDirty;
+    return (
+      showHelpText && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            color="warning"
+            title={
+              <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
+            }
+          >
+            <FormattedMessage
+              id="share.postURLWatcherMessage.unsavedChanges"
+              defaultMessage="URL may change if you upgrade Kibana."
+            />
+          </EuiCallOut>
+        </>
+      )
+    );
+  };
+
   return (
     <>
       <EuiForm>
@@ -192,22 +221,7 @@ const ExportContentUi = ({ isDirty, aggregateReportTypes, intl, onClose }: Expor
         <>{helpText}</>
         <EuiSpacer size="m" />
         <>{renderRadioOptions()}</>
-        {isDirty && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              color="warning"
-              title={
-                <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
-              }
-            >
-              <FormattedMessage
-                id="share.postURLWatcherMessage.unsavedChanges"
-                defaultMessage="URL may change if you upgrade Kibana."
-              />
-            </EuiCallOut>
-          </>
-        )}
+        {renderHelpText()}
         <EuiSpacer size="xl" />
       </EuiForm>
       <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="m">
