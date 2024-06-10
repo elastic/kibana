@@ -5180,6 +5180,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/investigate-plugin@link:x-pack/plugins/observability_solution/investigate":
+  version "0.0.0"
+  uid ""
+
 "@kbn/io-ts-utils@link:packages/kbn-io-ts-utils":
   version "0.0.0"
   uid ""
@@ -6721,6 +6725,10 @@
   uid ""
 
 "@kbn/unsaved-changes-badge@link:packages/kbn-unsaved-changes-badge":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unsaved-changes-prompt@link:packages/kbn-unsaved-changes-prompt":
   version "0.0.0"
   uid ""
 

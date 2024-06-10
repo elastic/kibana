@@ -187,7 +187,6 @@ const SuccessfulExecution = () => (
       'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
       {
         defaultMessage: 'Test was successful',
-        values: {},
       }
     )}
     color="success"

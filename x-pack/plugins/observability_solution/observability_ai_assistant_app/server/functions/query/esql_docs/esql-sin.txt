@@ -1,12 +1,21 @@
-SIN
+## SIN
 
-Syntax
-Parameters
-angle
-An angle, in radians. If null, the function returns null.
-DescriptionReturns ths Sine trigonometric function of an angle.Supported types
-Example
+The `SIN` function in ES|QL is used to calculate the sine of an angle. The angle should be provided in radians. If the provided angle is null, the function will return null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `SIN` function in ES|QL:
+
 ```esql
 ROW a=1.8
-| EVAL sin=SIN(a)
+| EVAL sin = SIN(a)
 ```
+
+In this example, the `SIN` function is used to calculate the sine of the angle `1.8` radians. The result is stored in the `sin` variable.
+
+```esql
+ROW a=3.14
+| EVAL sin_value = SIN(a)
+```
+
+In this second example, the `SIN` function is used to calculate the sine of the angle `3.14` radians (approximately equal to π, the angle for a half circle in the unit circle). The result is stored in the `sin_value` variable.
