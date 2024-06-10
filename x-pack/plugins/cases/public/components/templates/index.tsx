@@ -27,8 +27,8 @@ interface Props {
   isLoading: boolean;
   templates: CasesConfigurationUITemplate[];
   onAddTemplate: () => void;
-  handleEditTemplate: (key: string) => void;
-  handleDeleteTemplate: (key: string) => void;
+  onEditTemplate: (key: string) => void;
+  onDeleteTemplate: (key: string) => void;
 }
 
 const TemplatesComponent: React.FC<Props> = ({
@@ -36,8 +36,8 @@ const TemplatesComponent: React.FC<Props> = ({
   isLoading,
   templates,
   onAddTemplate,
-  handleEditTemplate,
-  handleDeleteTemplate,
+  onEditTemplate,
+  onDeleteTemplate,
 }) => {
   const { permissions } = useCasesContext();
   const canAddTemplates = permissions.create && permissions.update;
@@ -53,12 +53,12 @@ const TemplatesComponent: React.FC<Props> = ({
     setError(false);
   }, [onAddTemplate, error, templates]);
 
-  const onEditTemplate = useCallback(
+  const handleEditTemplate = useCallback(
     (key: string) => {
       setError(false);
-      handleEditTemplate(key);
+      onEditTemplate(key);
     },
-    [setError, handleEditTemplate]
+    [setError, onEditTemplate]
   );
 
   return (
@@ -80,8 +80,8 @@ const TemplatesComponent: React.FC<Props> = ({
           <>
             <TemplatesList
               templates={templates}
-              onEditTemplate={onEditTemplate}
-              onDeleteTemplate={handleDeleteTemplate}
+              onEditTemplate={handleEditTemplate}
+              onDeleteTemplate={onDeleteTemplate}
             />
             {error ? (
               <EuiFlexGroup justifyContent="center">

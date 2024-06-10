@@ -42,26 +42,21 @@ export const convertTemplateCustomFields = (
 
 export const templateDeserializer = (data: TemplateConfiguration): TemplateFormProps => {
   if (data !== null) {
-    console.log('templateDeserializer 1', { data });
     const { key, name, description, tags, caseFields } = data;
     const { connector, customFields, settings, ...rest } = caseFields ?? {};
     const connectorFields = getConnectorsFormDeserializer({ fields: connector?.fields ?? null });
     const convertedCustomFields = convertTemplateCustomFields(customFields);
 
-    const temp = {
+    return {
       key,
       name,
-      templateDescription: description ?? '',
+      templateDescription: description,
       templateTags: tags,
       connectorId: connector?.id ?? 'none',
       fields: connectorFields.fields,
       customFields: convertedCustomFields ?? {},
       ...rest,
     };
-
-    console.log('templateDeserializer 2', temp);
-
-    return temp;
   }
 
   return data;

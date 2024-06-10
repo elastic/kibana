@@ -21,6 +21,7 @@ interface Props {
   initialValue: TemplateFormProps | null;
   connectors: ActionConnector[];
   currentConfiguration: CasesConfigurationUI;
+  isEditMode?: boolean;
 }
 
 const FormComponent: React.FC<Props> = ({
@@ -28,6 +29,7 @@ const FormComponent: React.FC<Props> = ({
   initialValue,
   connectors,
   currentConfiguration,
+  isEditMode = false,
 }) => {
   const keyDefaultValue = useMemo(() => uuidv4(), []);
 
@@ -59,6 +61,7 @@ const FormComponent: React.FC<Props> = ({
         isSubmitting={isSubmitting}
         connectors={connectors}
         currentConfiguration={currentConfiguration}
+        isEditMode={isEditMode}
       />
     </Form>
   );

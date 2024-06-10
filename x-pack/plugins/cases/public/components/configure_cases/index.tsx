@@ -496,6 +496,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             initialValue={templateToEdit}
             connectors={connectors ?? []}
             currentConfiguration={currentConfiguration}
+            isEditMode={Boolean(templateToEdit)}
             onChange={onChange}
           />
         )}
@@ -586,8 +587,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 isLoading={isLoadingCaseConfiguration}
                 disabled={isLoadingCaseConfiguration}
                 onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
-                handleEditTemplate={onEditTemplate}
-                handleDeleteTemplate={onDeleteTemplate}
+                onEditTemplate={onEditTemplate}
+                onDeleteTemplate={onDeleteTemplate}
               />
             </EuiFlexItem>
           </div>
