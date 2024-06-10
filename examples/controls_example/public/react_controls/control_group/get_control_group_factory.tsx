@@ -198,7 +198,10 @@ export const getControlGroupEmbeddableFactory = (services: {
         []
       ).subscribe((newFilters) => filters$.next(newFilters));
 
-      const childrenTimesliceSubscription = combineCompatibleChildrenApis<PublishesTimeslice, [number, number] | undefined>(
+      const childrenTimesliceSubscription = combineCompatibleChildrenApis<
+        PublishesTimeslice,
+        [number, number] | undefined
+      >(
         api,
         'timeslice$',
         apiPublishesTimeslice,

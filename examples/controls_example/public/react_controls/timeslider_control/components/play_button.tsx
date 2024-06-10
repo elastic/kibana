@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from "@elastic/eui";
-import { ViewMode } from "@kbn/presentation-publishing";
-import { Observable } from "rxjs";
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { ViewMode } from '@kbn/presentation-publishing';
+import { Observable } from 'rxjs';
 import { TimeSliderStrings } from './time_slider_strings';
 
 interface Props {
@@ -22,8 +22,10 @@ interface Props {
 }
 
 export function PlayButton(props: Props) {
-  if (props.waitForControlOutputConsumersToLoad$ === undefined ||
-    (props.disablePlayButton && props.viewMode === 'view')) {
+  if (
+    props.waitForControlOutputConsumersToLoad$ === undefined ||
+    (props.disablePlayButton && props.viewMode === 'view')
+  ) {
     return null;
   }
 
@@ -38,9 +40,11 @@ export function PlayButton(props: Props) {
       aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(props.isPaused)}
     />
   );
-  return props.disablePlayButton
-    ? <EuiToolTip content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
-        {Button}
-      </EuiToolTip>
-    : Button;
+  return props.disablePlayButton ? (
+    <EuiToolTip content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
+      {Button}
+    </EuiToolTip>
+  ) : (
+    Button
+  );
 }

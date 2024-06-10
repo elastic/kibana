@@ -10,7 +10,11 @@ import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
-import { getViewModeSubject, useBatchedPublishingSubjects, ViewMode } from '@kbn/presentation-publishing';
+import {
+  getViewModeSubject,
+  useBatchedPublishingSubjects,
+  ViewMode,
+} from '@kbn/presentation-publishing';
 import { ControlFactory } from '../types';
 import {
   TimesliderControlState,
@@ -46,8 +50,31 @@ export const getTimesliderControlFactory = (
     buildControl: (initialState, buildApi, uuid, parentApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi, services);
-      const timeRangePercentage = initTimeRangePercentage(initialState);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
+      function syncTimesliceWithTimeRangePercentage(
+        startPercentage: number | undefined,
+        endPercentage: number | undefined
+      ) {
+        if (startPercentage === undefined || endPercentage === undefined) {
+          if (timeslice$.value !== undefined) {
+            timeslice$.next(undefined);
+          }
+          return;
+        }
+
+        const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
+        const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
+        const to = timeRangeBounds[FROM_INDEX] + endPercentage * timeRange;
+        timeslice$.next([
+          roundDownToNextStepSizeFactor(from, stepSize),
+          roundUpToNextStepSizeFactor(to, stepSize),
+        ]);
+        setSelectedRange(to - from);
+      }
+      const timeRangePercentage = initTimeRangePercentage(
+        initialState,
+        syncTimesliceWithTimeRangePercentage
+      );
       function setTimeslice(timeslice?: Timeslice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
         timeslice$.next(timeslice);
@@ -58,12 +85,17 @@ export const getTimesliderControlFactory = (
       }
       let selectedRange: number | undefined;
       function setSelectedRange(nextSelectedRange?: number) {
-        selectedRange = nextSelectedRange !== undefined && nextSelectedRange < timeRangeMeta$.value.timeRange ? nextSelectedRange : undefined;
-      };
+        selectedRange =
+          nextSelectedRange !== undefined && nextSelectedRange < timeRangeMeta$.value.timeRange
+            ? nextSelectedRange
+            : undefined;
+      }
 
       function onChange(timeslice?: Timeslice) {
         setTimeslice(timeslice);
-        const nextSelectedRange = timeslice ? timeslice[TO_INDEX] - timeslice[FROM_INDEX] : undefined;
+        const nextSelectedRange = timeslice
+          ? timeslice[TO_INDEX] - timeslice[FROM_INDEX]
+          : undefined;
         setSelectedRange(nextSelectedRange);
       }
 
@@ -71,20 +103,17 @@ export const getTimesliderControlFactory = (
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
         const value = timeslice$.value;
         const tickRange = ticks[1].value - ticks[0].value;
-    
+
         if (isAnchored$.value) {
           const prevTick = value
             ? [...ticks].reverse().find((tick) => {
                 return tick.value < value[TO_INDEX];
               })
             : ticks[ticks.length - 1];
-            setTimeslice([
-            timeRangeMin,
-            prevTick ? prevTick.value : timeRangeMax,
-          ]);
+          setTimeslice([timeRangeMin, prevTick ? prevTick.value : timeRangeMax]);
           return;
         }
-    
+
         if (value === undefined || value[FROM_INDEX] <= timeRangeMin) {
           const to = timeRangeMax;
           if (selectedRange === undefined || selectedRange === tickRange) {
@@ -99,34 +128,31 @@ export const getTimesliderControlFactory = (
           }
           return;
         }
-    
+
         const to = value[FROM_INDEX];
         const safeRange = selectedRange === undefined ? tickRange : selectedRange;
         const from = to - safeRange;
         setTimeslice([Math.max(from, timeRangeMin), to]);
-      };
+      }
 
       function onNext() {
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
         const value = timeslice$.value;
         const tickRange = ticks[1].value - ticks[0].value;
-      
+
         if (isAnchored$.value) {
           if (value === undefined || value[TO_INDEX] >= timeRangeMax) {
             setTimeslice([timeRangeMin, ticks[0].value]);
             return;
           }
-      
+
           const nextTick = ticks.find((tick) => {
             return tick.value > value[TO_INDEX];
           });
-          setTimeslice([
-            timeRangeMin,
-            nextTick ? nextTick.value : timeRangeMax,
-          ]);
+          setTimeslice([timeRangeMin, nextTick ? nextTick.value : timeRangeMax]);
           return;
         }
-      
+
         if (value === undefined || value[TO_INDEX] >= timeRangeMax) {
           const from = timeRangeMin;
           if (selectedRange === undefined || selectedRange === tickRange) {
@@ -141,18 +167,19 @@ export const getTimesliderControlFactory = (
           }
           return;
         }
-      
+
         const from = value[TO_INDEX];
         const safeRange = selectedRange === undefined ? tickRange : selectedRange;
         const to = from + safeRange;
         setTimeslice([from, Math.min(to, timeRangeMax)]);
-      };
+      }
 
       const isPopoverOpen$ = new BehaviorSubject(false);
       function setIsPopoverOpen(value: boolean) {
         isPopoverOpen$.next(value);
       }
-      const viewModeSubject = getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode);
+      const viewModeSubject =
+        getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode);
 
       const { defaultControlApi, defaultControlComparators, serializeDefaultControl } =
         initializeDefaultControlApi(initialState);
@@ -182,7 +209,7 @@ export const getTimesliderControlFactory = (
                 setIsPopoverOpen={setIsPopoverOpen}
               />
             );
-          }
+          },
         },
         {
           ...defaultControlComparators,
@@ -194,27 +221,10 @@ export const getTimesliderControlFactory = (
       const timeRangeMetaSubscription = timeRangeMeta$.subscribe((timeRangeMeta) => {
         const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
           timeRangePercentage.serializeState();
-        if (
-          timesliceStartAsPercentageOfTimeRange === undefined ||
-          timesliceEndAsPercentageOfTimeRange === undefined
-        ) {
-          if (timeslice$.value !== undefined) {
-            timeslice$.next(undefined);
-          }
-          return;
-        }
-
-        const from =
-          timeRangeMeta.timeRangeBounds[FROM_INDEX] +
-          timesliceStartAsPercentageOfTimeRange * timeRangeMeta.timeRange;
-        const to =
-          timeRangeMeta.timeRangeBounds[FROM_INDEX] +
-          timesliceEndAsPercentageOfTimeRange * timeRangeMeta.timeRange;
-        timeslice$.next([
-          roundDownToNextStepSizeFactor(from, timeRangeMeta.stepSize),
-          roundUpToNextStepSizeFactor(to, timeRangeMeta.stepSize),
-        ]);
-        setSelectedRange(to - from);
+        syncTimesliceWithTimeRangePercentage(
+          timesliceStartAsPercentageOfTimeRange,
+          timesliceEndAsPercentageOfTimeRange
+        );
       });
 
       return {

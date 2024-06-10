@@ -38,7 +38,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
@@ -84,7 +84,7 @@ const controlGroupPanels = {
       title: 'Time slider',
       enhancements: {},
     },
-  }
+  },
 };
 
 /**

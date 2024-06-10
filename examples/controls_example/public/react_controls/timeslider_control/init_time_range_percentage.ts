@@ -6,18 +6,33 @@
  * Side Public License, v 1.
  */
 
+import { debounce } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { TimeRangeMeta } from './get_time_range_meta';
 import { FROM_INDEX, TO_INDEX } from './time_utils';
 import { Timeslice, TimesliderControlState } from './types';
 
-export function initTimeRangePercentage(state: TimesliderControlState) {
+export function initTimeRangePercentage(
+  state: TimesliderControlState,
+  onReset: (
+    timesliceStartAsPercentageOfTimeRange: number | undefined,
+    timesliceEndAsPercentageOfTimeRange: number | undefined
+  ) => void
+) {
   const timesliceStartAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
     state.timesliceStartAsPercentageOfTimeRange
   );
   const timesliceEndAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
     state.timesliceEndAsPercentageOfTimeRange
   );
+
+  // debounce to avoid calling 'resetTimeslice' on each comparitor reset
+  const debouncedOnReset = debounce(() => {
+    onReset(
+      timesliceStartAsPercentageOfTimeRange$.value,
+      timesliceEndAsPercentageOfTimeRange$.value
+    );
+  }, 0);
 
   return {
     setTimeRangePercentage(timeslice: Timeslice | undefined, timeRangeMeta: TimeRangeMeta) {
@@ -45,12 +60,14 @@ export function initTimeRangePercentage(state: TimesliderControlState) {
         timesliceStartAsPercentageOfTimeRange$,
         (value: number | undefined) => {
           timesliceStartAsPercentageOfTimeRange$.next(value);
+          debouncedOnReset();
         },
       ],
       timesliceEndAsPercentageOfTimeRange: [
         timesliceEndAsPercentageOfTimeRange$,
         (value: number | undefined) => {
           timesliceEndAsPercentageOfTimeRange$.next(value);
+          debouncedOnReset();
         },
       ],
     },

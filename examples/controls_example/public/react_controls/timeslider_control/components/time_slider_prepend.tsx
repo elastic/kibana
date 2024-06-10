@@ -10,9 +10,13 @@ import { EuiButtonIcon } from '@elastic/eui';
 import React, { FC, useCallback, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';
+import {
+  PublishingSubject,
+  useBatchedPublishingSubjects,
+  ViewMode,
+} from '@kbn/presentation-publishing';
 import { TimeSliderStrings } from './time_slider_strings';
 import { PlayButton } from './play_button';
-import { PublishingSubject, useBatchedPublishingSubjects, ViewMode } from '@kbn/presentation-publishing';
 
 interface Props {
   onNext: () => void;
@@ -28,8 +32,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
 
-  const [viewMode] =
-    useBatchedPublishingSubjects(props.viewModeSubject);
+  const [viewMode] = useBatchedPublishingSubjects(props.viewModeSubject);
 
   const playNextFrame = useCallback(() => {
     // advance to next frame
