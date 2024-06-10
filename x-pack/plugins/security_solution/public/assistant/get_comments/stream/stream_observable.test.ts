@@ -405,23 +405,23 @@ describe('getStreamObservable', () => {
     const expectedStates: PromptObservableState[] = [
       { chunks: [], loading: true },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My ',
         loading: true,
       },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My n',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  ',
         loading: true,
       },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My new',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new ',
         loading: true,
       },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My new message',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new  message',
         loading: false,
       },
     ];
@@ -476,23 +476,23 @@ describe('getStreamObservable', () => {
     const expectedStates: PromptObservableState[] = [
       { chunks: [], loading: true },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My ',
         loading: true,
       },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My n',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  ',
         loading: true,
       },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My new',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new ',
         loading: true,
       },
       {
-        chunks: ['My', ' n', 'ew', ' message'],
-        message: 'My new message',
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new  message',
         loading: false,
       },
     ];

@@ -255,24 +255,9 @@ export const getStreamObservable = ({
             const nextChunks = getGeminiChunks(lines);
 
             nextChunks.forEach((chunk: string) => {
-              let currentWord = '';
-
-              for (const char of chunk) {
-                currentWord += char;
-                if (currentWord.length === 2) {
-                  chunks.push(currentWord);
-                  observer.next({
-                    chunks,
-                    message: chunks.join(''),
-                    loading: true,
-                  });
-                  currentWord = '';
-                }
-              }
-
-              if (currentWord) {
-                // Add any remaining characters as a single-letter word
-                chunks.push(currentWord);
+              const splitBySpace = chunk.split(' ');
+              for (const word of splitBySpace) {
+                chunks.push(`${word} `);
                 observer.next({
                   chunks,
                   message: chunks.join(''),
