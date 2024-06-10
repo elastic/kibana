@@ -57,7 +57,7 @@ const DEFAULT_STATE = {
   createDataView: true,
   dataView: '',
   dataViewId: '',
-  ingestPipelineId: '',
+  pipelineId: null,
   errors: [],
   importFailures: [],
   docCount: 0,
@@ -75,7 +75,6 @@ const DEFAULT_STATE = {
   combinedFields: [],
   importer: undefined,
   reuseIndex: false,
-  pipelineId: null,
   createNewPipeline: false,
 };
 
@@ -233,7 +232,8 @@ export class ImportView extends Component {
   };
 
   setReuseIndex = (reuseIndex) => {
-    this.setState({ reuseIndex });
+    const createDataView = reuseIndex ? false : this.state.createDataView;
+    this.setState({ reuseIndex, createDataView });
   };
 
   closeFilebeatFlyout = () => {
@@ -254,7 +254,7 @@ export class ImportView extends Component {
       index,
       dataView,
       dataViewId,
-      ingestPipelineId,
+      pipelineId,
       importing,
       imported,
       reading,
@@ -282,11 +282,8 @@ export class ImportView extends Component {
       combinedFields,
       importer,
       reuseIndex,
-      pipelineId,
       createNewPipeline,
     } = this.state;
-
-    const createPipeline = pipelineString !== '';
 
     const statuses = {
       reading,
@@ -299,7 +296,8 @@ export class ImportView extends Component {
       uploadProgress,
       uploadStatus,
       createDataView,
-      createPipeline,
+      createNewPipeline,
+      createNewIndex: !reuseIndex,
     };
 
     const disableImport =
@@ -426,11 +424,10 @@ export class ImportView extends Component {
                   <ImportSummary
                     index={index}
                     dataView={dataView === '' ? index : dataView}
-                    ingestPipelineId={ingestPipelineId}
+                    pipelineId={pipelineId}
                     docCount={docCount}
                     importFailures={importFailures}
                     createDataView={createDataView}
-                    createPipeline={createPipeline}
                   />
 
                   <EuiSpacer size="l" />
@@ -471,7 +468,7 @@ export class ImportView extends Component {
                     <FilebeatConfigFlyout
                       index={index}
                       results={this.props.results}
-                      ingestPipelineId={ingestPipelineId}
+                      pipelineId={pipelineId}
                       closeFlyout={this.closeFilebeatFlyout}
                     />
                   )}

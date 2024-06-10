@@ -182,14 +182,18 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
     [pipelineOptions]
   );
 
-  useEffect(() => {
+  const chooseSuggestedPipeline = useCallback(() => {
     if (index !== '') {
       const suggestedPipeline = findPipelineOption(`${index}-pipeline`);
       if (suggestedPipeline) {
         setSelectedPipelineOptions([suggestedPipeline]);
       }
     }
-  }, [pipelineOptions, index, findPipelineOption]);
+  }, [index, findPipelineOption]);
+
+  useEffect(() => {
+    chooseSuggestedPipeline();
+  }, [pipelineOptions, index, findPipelineOption, chooseSuggestedPipeline]);
 
   useEffect(() => {
     onPipelineIdChange(null);
@@ -197,6 +201,8 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
     if (createNewPipeline) {
       onPipelineStringChange(originalPipelineString);
       onPipelineIdChange(`${index}-pipeline`);
+    } else {
+      chooseSuggestedPipeline();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createNewPipeline]);

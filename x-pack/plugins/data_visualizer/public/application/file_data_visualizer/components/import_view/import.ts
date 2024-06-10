@@ -176,7 +176,7 @@ export async function importData(props: Props, config: Config, setState: (state:
         ingestPipelineCreatedStatus: pipelineCreated
           ? IMPORT_STATUS.COMPLETE
           : IMPORT_STATUS.FAILED,
-        ingestPipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
+        pipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
       });
     }
     success = indexCreated && pipelineCreated;

@@ -46,7 +46,7 @@ export interface IImporter {
     pipeline: IngestPipeline,
     createNewPipeline?: boolean,
     reuseIndex?: boolean,
-    pipelineId?: string,
+    ingestPipelineId?: string,
     reuseMappings?: boolean
   ): Promise<ImportResponse>;
   import(

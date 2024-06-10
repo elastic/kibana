@@ -87,7 +87,7 @@ export abstract class Importer implements IImporter {
     mappings: MappingTypeMapping,
     pipeline: IngestPipeline,
     createNewPipeline: boolean = true,
-    reuseIndex?: boolean,
+    reuseIndex: boolean = false,
     pipelineId?: string,
     reuseMappings?: boolean
   ) {
