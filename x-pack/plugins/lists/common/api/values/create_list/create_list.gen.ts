@@ -15,15 +15,21 @@
  */
 
 import { z } from 'zod';
-import { NonEmptyString } from '@kbn/security-solution-plugin/common/api/model/primitives.gen';
 
-import { List, ListMeta, ListType } from '../model/list_common.gen';
+import {
+  List,
+  ListDescription,
+  ListId,
+  ListMeta,
+  ListName,
+  ListType,
+} from '../model/list_common.gen';
 
 export type CreateListRequestBody = z.infer<typeof CreateListRequestBody>;
 export const CreateListRequestBody = z.object({
-  id: NonEmptyString.optional(),
-  name: NonEmptyString,
-  description: NonEmptyString,
+  id: ListId.optional(),
+  name: ListName,
+  description: ListDescription,
   type: ListType,
   serializer: z.string().optional(),
   deserializer: z.string().optional(),

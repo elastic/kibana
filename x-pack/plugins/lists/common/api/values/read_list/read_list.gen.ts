@@ -16,16 +16,15 @@
 
 import { z } from 'zod';
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { NonEmptyString } from '@kbn/security-solution-plugin/common/api/model/primitives.gen';
 
-import { List } from '../model/list_common.gen';
+import { List, ListId } from '../model/list_common.gen';
 
 export type GetListRequestQuery = z.infer<typeof GetListRequestQuery>;
 export const GetListRequestQuery = z.object({
   /**
    * List's `id` value
    */
-  id: NonEmptyString,
+  id: ListId,
   deleteReferences: BooleanFromString.optional().default(false),
   ignoreReferences: BooleanFromString.optional().default(false),
 });

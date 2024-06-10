@@ -1,46 +1,23 @@
 openapi: 3.0.0
 info:
-  title: Create list API endpoint
+  title: Find list API endpoint
   version: '2023-10-31'
 paths:
   /api/lists:
-    post:
+    put:
       x-labels: [serverless, ess]
-      operationId: CreateList
+      operationId: FindList
       x-codegen-enabled: true
-      summary: Creates a list
+      summary: Finds a list
       tags:
         - List API
-      requestBody:
-        description: List's properties
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
-                name:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListName'
-                description:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListDescription'
-                type:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
-                serializer:
-                  type: string
-                deserializer:
-                  type: string
-                meta:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListMeta'
-                version:
-                  type: integer
-                  minimum: 1
-                  default: 1
-              required:
-                - name
-                - description
-                - type
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: List's `id` value
+          schema:
+            $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Successful response
@@ -68,6 +45,12 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../security_solution/common/api/model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        404:
+          description: List not found response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../security_solution/common/api/model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         500:
           description: Internal server error response
           content:

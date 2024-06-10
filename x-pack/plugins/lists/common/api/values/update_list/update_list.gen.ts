@@ -15,15 +15,14 @@
  */
 
 import { z } from 'zod';
-import { NonEmptyString } from '@kbn/security-solution-plugin/common/api/model/primitives.gen';
 
-import { List, ListMeta } from '../model/list_common.gen';
+import { List, ListDescription, ListId, ListMeta, ListName } from '../model/list_common.gen';
 
 export type UpdateListRequestBody = z.infer<typeof UpdateListRequestBody>;
 export const UpdateListRequestBody = z.object({
-  id: NonEmptyString,
-  name: NonEmptyString,
-  description: NonEmptyString,
+  id: ListId,
+  name: ListName,
+  description: ListDescription,
   meta: ListMeta,
   version: z.number().int().min(1),
   _version: z.string(),

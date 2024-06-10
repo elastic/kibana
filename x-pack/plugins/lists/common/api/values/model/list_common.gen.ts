@@ -17,6 +17,9 @@
 import { z } from 'zod';
 import { NonEmptyString } from '@kbn/security-solution-plugin/common/api/model/primitives.gen';
 
+export type ListId = z.infer<typeof ListId>;
+export const ListId = NonEmptyString;
+
 export type ListType = z.infer<typeof ListType>;
 export const ListType = z.enum([
   'binary',
@@ -46,19 +49,57 @@ export const ListType = z.enum([
 export type ListTypeEnum = typeof ListType.enum;
 export const ListTypeEnum = ListType.enum;
 
+export type ListName = z.infer<typeof ListName>;
+export const ListName = NonEmptyString;
+
+export type ListDescription = z.infer<typeof ListDescription>;
+export const ListDescription = NonEmptyString;
+
 export type ListMeta = z.infer<typeof ListMeta>;
 export const ListMeta = z.object({}).catchall(z.unknown());
 
 export type List = z.infer<typeof List>;
 export const List = z.object({
-  id: NonEmptyString,
+  id: ListId,
   type: ListType,
-  name: NonEmptyString,
-  description: NonEmptyString,
+  name: ListName,
+  description: ListDescription,
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
   immutable: z.boolean(),
   meta: ListMeta.optional(),
+  '@timestamp': z.string().datetime().optional(),
+  version: z.number().int().min(1),
+  _version: z.string().optional(),
+  tie_breaker_id: z.string(),
+  created_at: z.string().datetime(),
+  created_by: z.string(),
+  updated_at: z.string().datetime(),
+  updated_by: z.string(),
+});
+
+export type ListItemId = z.infer<typeof ListItemId>;
+export const ListItemId = NonEmptyString;
+
+export type ListItemValue = z.infer<typeof ListItemValue>;
+export const ListItemValue = NonEmptyString;
+
+export type ListItemDescription = z.infer<typeof ListItemDescription>;
+export const ListItemDescription = NonEmptyString;
+
+export type ListItemMeta = z.infer<typeof ListItemMeta>;
+export const ListItemMeta = z.object({}).catchall(z.unknown());
+
+export type ListItem = z.infer<typeof ListItem>;
+export const ListItem = z.object({
+  id: ListItemId,
+  type: ListType,
+  list_id: ListId,
+  value: ListItemValue.optional(),
+  description: ListItemDescription,
+  serializer: z.string().optional(),
+  deserializer: z.string().optional(),
+  meta: ListItemMeta.optional(),
   '@timestamp': z.string().datetime().optional(),
   version: z.number().int().min(1),
   _version: z.string().optional(),

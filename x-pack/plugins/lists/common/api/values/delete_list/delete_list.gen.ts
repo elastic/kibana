@@ -15,16 +15,15 @@
  */
 
 import { z } from 'zod';
-import { NonEmptyString } from '@kbn/security-solution-plugin/common/api/model/primitives.gen';
 
-import { List } from '../model/list_common.gen';
+import { List, ListId } from '../model/list_common.gen';
 
 export type DeleteListRequestQuery = z.infer<typeof DeleteListRequestQuery>;
 export const DeleteListRequestQuery = z.object({
   /**
    * List's `id` value
    */
-  id: NonEmptyString,
+  id: ListId,
 });
 export type DeleteListRequestQueryInput = z.input<typeof DeleteListRequestQuery>;
 

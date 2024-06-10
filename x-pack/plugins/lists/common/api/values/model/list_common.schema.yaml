@@ -5,6 +5,9 @@ info:
 paths: {}
 components:
   schemas:
+    ListId:
+      $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
     ListType:
       type: string
       enum:
@@ -32,6 +35,12 @@ components:
         - short
         - text
 
+    ListName:
+      $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListDescription:
+      $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
     ListMeta:
       type: object
       additionalProperties: true
@@ -40,13 +49,13 @@ components:
       type: object
       properties:
         id:
-          $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/ListId'
         type:
           $ref: '#/components/schemas/ListType'
         name:
-          $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/ListName'
         description:
-          $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/ListDescription'
         serializer:
           type: string
         deserializer:
@@ -81,6 +90,70 @@ components:
         - name
         - description
         - immutable
+        - version
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+
+    ListItemId:
+      $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListItemValue:
+      $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListItemDescription:
+      $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListItemMeta:
+      type: object
+      additionalProperties: true
+
+    ListItem:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ListItemId'
+        type:
+          $ref: '#/components/schemas/ListType'
+        list_id:
+          $ref: '#/components/schemas/ListId'
+        value:
+          $ref: '#/components/schemas/ListItemValue'
+        description:
+          $ref: '#/components/schemas/ListItemDescription'
+        serializer:
+          type: string
+        deserializer:
+          type: string
+        meta:
+          $ref: '#/components/schemas/ListItemMeta'
+        '@timestamp':
+          type: string
+          format: date-time
+        version:
+          type: integer
+          minimum: 1
+        _version:
+          type: string
+        tie_breaker_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        updated_by:
+          type: string
+      required:
+        - id
+        - type
+        - list_id
+        - description
         - version
         - tie_breaker_id
         - created_at
