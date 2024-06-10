@@ -670,6 +670,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(charts.length).to.equal(chartsCount);
             });
           });
+          describe('Logs Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickLogsTab();
+            });
+
+            it('should render logs tab', async () => {
+              await pageObjects.assetDetails.logsExists();
+            });
+
+            it('preserves search term between page reloads', async () => {
+              const searchInput = await pageObjects.assetDetails.getLogsSearchField();
+
+              expect(await searchInput.getAttribute('value')).to.be('');
+
+              await searchInput.type('test');
+              await refreshPageWithDelay();
+
+              await retry.try(async () => {
+                expect(await searchInput.getAttribute('value')).to.be('test');
+              });
+              await searchInput.clearValue();
+            });
+          });
         });
       });
     });
