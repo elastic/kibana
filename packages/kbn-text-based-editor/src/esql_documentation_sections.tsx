@@ -745,6 +745,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -777,6 +778,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -810,6 +812,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -843,6 +846,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -876,6 +880,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -911,6 +916,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -952,6 +958,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -985,6 +992,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1018,6 +1026,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1051,6 +1060,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1083,6 +1093,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1116,6 +1127,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1148,6 +1160,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1180,6 +1193,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1213,6 +1227,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1245,6 +1260,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1278,6 +1294,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1310,6 +1327,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1343,6 +1361,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1371,6 +1390,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1404,6 +1424,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1439,6 +1460,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1471,6 +1493,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1505,6 +1528,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1537,6 +1561,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1569,6 +1594,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1604,6 +1630,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1637,6 +1664,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1669,6 +1697,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1703,6 +1732,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1737,6 +1767,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1772,6 +1803,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1800,6 +1832,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1832,6 +1865,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1864,6 +1898,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1896,6 +1931,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1929,6 +1965,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -1969,6 +2006,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2009,6 +2047,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2041,6 +2080,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2073,6 +2113,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2105,6 +2146,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2137,6 +2179,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2169,6 +2212,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2201,6 +2245,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2234,6 +2279,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2265,6 +2311,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2293,6 +2340,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2326,6 +2374,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2358,6 +2407,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2392,6 +2442,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2427,6 +2478,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2463,6 +2515,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2498,6 +2551,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2531,6 +2585,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2563,6 +2618,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2595,6 +2651,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2627,6 +2684,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2660,6 +2718,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2694,6 +2753,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2729,6 +2789,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2765,6 +2826,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2799,6 +2861,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2832,6 +2895,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2865,6 +2929,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2898,6 +2963,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2931,6 +2997,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2963,6 +3030,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -2995,6 +3063,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3026,6 +3095,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3058,6 +3128,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3093,6 +3164,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3127,6 +3199,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3161,6 +3234,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3195,6 +3269,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3227,6 +3302,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3261,6 +3337,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3294,6 +3371,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3327,6 +3405,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3362,6 +3441,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3395,6 +3475,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3429,6 +3510,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3461,6 +3543,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3493,6 +3576,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3525,6 +3609,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3559,6 +3644,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3591,6 +3677,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3622,6 +3709,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
@@ -3655,6 +3743,7 @@ export const functions = {
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              ignoreTag: true,
             }
           )}
         />
