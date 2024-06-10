@@ -10,7 +10,7 @@ import { OpenAPIV3 } from 'openapi-types';
 import deepEqual from 'fast-deep-equal';
 import chalk from 'chalk';
 import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
-import { ResolvedRef } from '../types';
+import { ResolvedRef } from '../ref_resolver/resolved_ref';
 import { BundledDocument } from '../bundle_document';
 
 export function mergeSharedComponents(

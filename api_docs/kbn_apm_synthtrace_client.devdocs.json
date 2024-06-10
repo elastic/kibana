@@ -1845,28 +1845,12 @@
         "label": "generateLongId",
         "description": [],
         "signature": [
-          "(seed: string | undefined) => string"
+          "() => string"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.generateLongId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "seed",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1878,28 +1862,12 @@
         "label": "generateShortId",
         "description": [],
         "signature": [
-          "(seed: string | undefined) => string"
+          "() => string"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.generateShortId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "seed",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
