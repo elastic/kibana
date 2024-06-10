@@ -15,7 +15,6 @@ import type {
   RiskEngineConfiguration,
 } from '../types';
 import { calculateRiskScores } from './calculate_risk_scores';
-import { calculateRiskScores as calculateRiskScoresElastic } from './calculate_risk_scores_elasticsearch';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
@@ -27,10 +26,7 @@ export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
 };
 export interface RiskScoreService {
-  calculateScores: (
-    params: CalculateScoresParams,
-    useElastic?: boolean
-  ) => Promise<RiskScoresPreviewResponse>;
+  calculateScores: (params: CalculateScoresParams) => Promise<RiskScoresPreviewResponse>;
   calculateAndPersistScores: (
     params: CalculateAndPersistScoresParams
   ) => Promise<RiskScoresCalculationResponse>;
@@ -60,13 +56,8 @@ export const riskScoreServiceFactory = ({
   riskScoreDataClient,
   spaceId,
 }: RiskScoreServiceFactoryParams): RiskScoreService => ({
-  calculateScores: (params, useElastic) => {
-    // if (useElastic) {
-    //   return calculateRiskScoresElastic({ ...params, esClient, logger, assetCriticalityService });
-    // }
-
-    return calculateRiskScores({ ...params, assetCriticalityService, esClient, logger });
-  },
+  calculateScores: (params) =>
+    calculateRiskScores({ ...params, assetCriticalityService, esClient, logger }),
   calculateAndPersistScores: (params) =>
     calculateAndPersistRiskScores({
       ...params,

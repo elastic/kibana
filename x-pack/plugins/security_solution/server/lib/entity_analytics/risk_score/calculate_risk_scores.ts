@@ -5,63 +5,40 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import type {
-  AggregationsAggregationContainer,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  ALERT_RISK_SCORE,
-  ALERT_WORKFLOW_STATUS,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import _ from 'lodash';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import type {
-  AfterKeys,
-  EntityRiskScoreRecord,
-  RiskScoreWeights,
-} from '../../../../common/api/entity_analytics/common';
-import {
-  type IdentifierType,
-  getRiskLevel,
-  RiskCategories,
-  RiskWeightTypes,
+  ElasticsearchCalculateResponse,
+  ElasticsearchEntityRiskScoreRecord,
 } from '../../../../common/entity_analytics/risk_engine';
+import { getRiskLevel, RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
-import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
-import type {
-  CalculateRiskScoreAggregations,
-  CalculateScoresParams,
-  RiskScoreBucket,
-} from '../types';
-import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
-import { getPainlessScripts, type PainlessScripts } from './painless';
+import { RIEMANN_ZETA_VALUE } from './constants';
+import type { CalculateScoresParams } from '../types';
 
 const formatForResponse = ({
-  bucket,
+  score,
   criticality,
   now,
-  identifierField,
   includeNewFields,
 }: {
-  bucket: RiskScoreBucket;
+  score: ElasticsearchEntityRiskScoreRecord;
   criticality?: AssetCriticalityRecord;
   now: string;
-  identifierField: string;
   includeNewFields: boolean;
 }): EntityRiskScoreRecord => {
-  const riskDetails = bucket.top_inputs.risk_details;
-
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
-    score: riskDetails.value.normalized_score,
+    score: score.calculated_score_norm,
     modifier: criticalityModifier,
   });
   const calculatedLevel = getRiskLevel(normalizedScoreWithCriticality);
-  const categoryTwoScore = normalizedScoreWithCriticality - riskDetails.value.normalized_score;
+  const categoryTwoScore = normalizedScoreWithCriticality - score.calculated_score_norm;
   const categoryTwoCount = criticalityModifier ? 1 : 0;
 
   const newFields = {
@@ -73,117 +50,48 @@ const formatForResponse = ({
 
   return {
     '@timestamp': now,
-    id_field: identifierField,
-    id_value: bucket.key[identifierField],
+    id_field: score.id_field,
+    id_value: score.id_value,
     calculated_level: calculatedLevel,
-    calculated_score: riskDetails.value.score,
+    calculated_score: score.calculated_score,
     calculated_score_norm: normalizedScoreWithCriticality,
-    category_1_score: riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
-    category_1_count: riskDetails.value.category_1_count,
-    notes: riskDetails.value.notes,
-    inputs: riskDetails.value.risk_inputs.map((riskInput) => ({
+    category_1_score: score.category_1_score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100,
+    category_1_count: score.category_1_count,
+    notes: score.notes ?? [],
+    inputs: score.inputs.map((riskInput) => ({
       id: riskInput.id,
       index: riskInput.index,
       description: `Alert from Rule: ${riskInput.rule_name ?? 'RULE_NOT_FOUND'}`,
       category: RiskCategories.category_1,
-      risk_score: riskInput.score,
-      timestamp: riskInput.time,
-      contribution_score: riskInput.contribution,
+      risk_score: riskInput.risk_score,
+      timestamp: riskInput.timestamp,
+      contribution_score: riskInput.contribution_score,
     })),
     ...(includeNewFields ? newFields : {}),
   };
 };
 
-const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
-  range: { '@timestamp': { lt: range.end, gte: range.start } },
-});
-
-const buildIdentifierTypeAggregation = ({
-  afterKeys,
-  identifierType,
-  pageSize,
-  weights,
-  alertSampleSizePerShard,
-  scriptedMetricPainless,
-}: {
-  afterKeys: AfterKeys;
-  identifierType: IdentifierType;
-  pageSize: number;
-  weights?: RiskScoreWeights;
-  alertSampleSizePerShard: number;
-  scriptedMetricPainless: PainlessScripts;
-}): AggregationsAggregationContainer => {
-  const globalIdentifierTypeWeight = getGlobalWeightForIdentifierType(identifierType, weights);
-  const identifierField = getFieldForIdentifier(identifierType);
-
-  return {
-    composite: {
-      size: pageSize,
-      sources: [
-        {
-          [identifierField]: {
-            terms: {
-              field: identifierField,
-            },
-          },
-        },
-      ],
-      after: getAfterKeyForIdentifierType({ identifierType, afterKeys }),
-    },
-    aggs: {
-      top_inputs: {
-        sampler: {
-          shard_size: alertSampleSizePerShard,
-        },
-
-        aggs: {
-          risk_details: {
-            scripted_metric: {
-              init_script: scriptedMetricPainless.init,
-              map_script: scriptedMetricPainless.map,
-              combine_script: scriptedMetricPainless.combine,
-              params: {
-                p: RIEMANN_ZETA_S_VALUE,
-                risk_cap: RIEMANN_ZETA_VALUE,
-                global_identifier_type_weight: globalIdentifierTypeWeight || 1,
-              },
-              reduce_script: scriptedMetricPainless.reduce,
-            },
-          },
-        },
-      },
-    },
-  };
-};
-
 const processScores = async ({
   assetCriticalityService,
-  buckets,
-  identifierField,
+  scores,
   logger,
   now,
 }: {
   assetCriticalityService: AssetCriticalityService;
-  buckets: RiskScoreBucket[];
-  identifierField: string;
+  scores: ElasticsearchEntityRiskScoreRecord[];
   logger: Logger;
   now: string;
 }): Promise<EntityRiskScoreRecord[]> => {
-  if (buckets.length === 0) {
+  if (scores.length === 0) {
     return [];
   }
 
   const isAssetCriticalityEnabled = await assetCriticalityService.isEnabled();
   if (!isAssetCriticalityEnabled) {
-    return buckets.map((bucket) =>
-      formatForResponse({ bucket, now, identifierField, includeNewFields: false })
-    );
+    return scores.map((score) => formatForResponse({ score, now, includeNewFields: false }));
   }
 
-  const identifiers = buckets.map((bucket) => ({
-    id_field: identifierField,
-    id_value: bucket.key[identifierField],
-  }));
+  const identifiers = scores.map((score) => _.pick(score, ['id_field', 'id_value']));
 
   let criticalities: AssetCriticalityRecord[] = [];
   try {
@@ -194,20 +102,14 @@ const processScores = async ({
     );
   }
 
-  return buckets.map((bucket) => {
+  return scores.map((score) => {
     const criticality = criticalities.find(
-      (c) => c.id_field === identifierField && c.id_value === bucket.key[identifierField]
+      (c) => c.id_field === score.id_field && c.id_value === score.id_value
     );
 
-    return formatForResponse({ bucket, criticality, identifierField, now, includeNewFields: true });
+    return formatForResponse({ score, criticality, now, includeNewFields: true });
   });
 };
-
-export const getGlobalWeightForIdentifierType = (
-  identifierType: IdentifierType,
-  weights?: RiskScoreWeights
-): number | undefined =>
-  weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
 
 export const calculateRiskScores = async ({
   afterKeys: userAfterKeys,
@@ -230,98 +132,43 @@ export const calculateRiskScores = async ({
 } & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
-    const scriptedMetricPainless = await getPainlessScripts();
-    const filter = [
-      filterFromRange(range),
-      { bool: { must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } } } },
-      { exists: { field: ALERT_RISK_SCORE } },
-    ];
-    if (!isEmpty(userFilter)) {
-      filter.push(userFilter as QueryDslQueryContainer);
-    }
-    const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
-    const request = {
-      size: 0,
-      _source: false,
-      index,
-      runtime_mappings: runtimeMappings,
-      query: {
-        function_score: {
-          query: {
-            bool: {
-              filter,
-              should: [
-                {
-                  match_all: {}, // This forces ES to calculate score
-                },
-              ],
-            },
-          },
-          field_value_factor: {
-            field: ALERT_RISK_SCORE, // sort by risk score
-          },
-        },
+
+    const res = await esClient.transport.request<ElasticsearchCalculateResponse>(
+      {
+        method: 'POST',
+        path: `/entity_analytics/risk_score/calculate?category_1_index=.alerts*&entity_types=${identifierType}`,
+        // body: { // TODO: These params will be needed
+        //   filter: userFilter,
+        //   index,
+        //   range,
+        //   weights,
+        // },
       },
-      aggs: identifierTypes.reduce((aggs, _identifierType) => {
-        aggs[_identifierType] = buildIdentifierTypeAggregation({
-          afterKeys: userAfterKeys,
-          identifierType: _identifierType,
-          pageSize,
-          weights,
-          alertSampleSizePerShard,
-          scriptedMetricPainless,
-        });
-        return aggs;
-      }, {} as Record<string, AggregationsAggregationContainer>),
-    };
-
-    if (debug) {
-      logger.info(`Executing Risk Score query:\n${JSON.stringify(request)}`);
-    }
-
-    const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
-
-    if (debug) {
-      logger.info(`Received Risk Score response:\n${JSON.stringify(response)}`);
-    }
-
-    if (response.aggregations == null) {
-      return {
-        ...(debug ? { request, response } : {}),
-        after_keys: {},
-        scores: {
-          host: [],
-          user: [],
-        },
-      };
-    }
-
-    const userBuckets = response.aggregations.user?.buckets ?? [];
-    const hostBuckets = response.aggregations.host?.buckets ?? [];
-
-    const afterKeys = {
-      host: response.aggregations.host?.after_key,
-      user: response.aggregations.user?.after_key,
-    };
+      {
+        requestTimeout: 120 * 1000,
+        maxRetries: 0,
+      }
+    );
 
     const hostScores = await processScores({
       assetCriticalityService,
-      buckets: hostBuckets,
-      identifierField: 'host.name',
+      scores: res.scores.host ?? [],
       logger,
       now,
     });
+
     const userScores = await processScores({
       assetCriticalityService,
-      buckets: userBuckets,
-      identifierField: 'user.name',
+      scores: res.scores.user ?? [],
       logger,
       now,
     });
 
     return {
-      ...(debug ? { request, response } : {}),
-      after_keys: afterKeys,
+      after_keys: {
+        host: {},
+        user: {},
+      },
       scores: {
         host: hostScores,
         user: userScores,

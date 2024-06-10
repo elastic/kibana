@@ -82,21 +82,18 @@ export const riskScorePreviewRoute = (
           const range = userRange ?? { start: 'now-15d', end: 'now' };
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
 
-          const result = await riskScoreService.calculateScores(
-            {
-              afterKeys,
-              debug,
-              filter,
-              identifierType,
-              index,
-              pageSize,
-              range,
-              runtimeMappings,
-              weights,
-              alertSampleSizePerShard,
-            },
-            true
-          );
+          const result = await riskScoreService.calculateScores({
+            afterKeys,
+            debug,
+            filter,
+            identifierType,
+            index,
+            pageSize,
+            range,
+            runtimeMappings,
+            weights,
+            alertSampleSizePerShard,
+          });
 
           securityContext.getAuditLogger()?.log({
             message: 'User triggered custom manual scoring',

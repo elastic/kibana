@@ -35,7 +35,7 @@ export const RIEMANN_ZETA_S_VALUE = 1.5;
  *
  * Read more: https://en.wikipedia.org/wiki/Riemann_zeta_function
  */
-export const RIEMANN_ZETA_VALUE = 2.5924;
+export const RIEMANN_ZETA_VALUE = 2.4129;
 
 /**
  * This value represents the maximum possible risk score after normalization.
