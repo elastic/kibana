@@ -7,11 +7,7 @@
 
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  AfterKeys,
-  EntityAfterKey,
-  RiskScoreWeights,
-} from '../../../common/api/entity_analytics/common';
+import type { EntityAfterKey, RiskScoreWeights } from '../../../common/api/entity_analytics/common';
 import type { IdentifierType, Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
 import type { StartPlugins } from '../../plugin';
@@ -75,11 +71,10 @@ export interface RiskEngineConfiguration {
 }
 
 export interface CalculateScoresParams {
-  afterKeys: AfterKeys;
   debug?: boolean;
   index: string;
   filter?: unknown;
-  identifierType?: IdentifierType;
+  identifierTypes?: IdentifierType[];
   pageSize: number;
   range: { start: string; end: string };
   runtimeMappings: MappingRuntimeFields;
@@ -88,16 +83,14 @@ export interface CalculateScoresParams {
 }
 
 export interface CalculateAndPersistScoresParams {
-  afterKeys: AfterKeys;
   debug?: boolean;
   index: string;
   filter?: unknown;
-  identifierType: IdentifierType;
+  identifierTypes?: IdentifierType[];
   pageSize: number;
   range: Range;
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskScoreWeights;
-  alertSampleSizePerShard?: number;
   returnScores?: boolean;
   refresh?: 'wait_for';
 }

@@ -23,8 +23,7 @@ const calculateAndPersistRecentHostRiskScores = (
   riskScoreDataClient: RiskScoreDataClient
 ) => {
   return calculateAndPersistRiskScores({
-    afterKeys: {},
-    identifierType: 'host',
+    identifierTypes: ['host'],
     esClient,
     logger,
     index: 'index',

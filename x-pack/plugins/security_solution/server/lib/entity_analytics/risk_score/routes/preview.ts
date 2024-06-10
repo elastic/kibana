@@ -55,8 +55,7 @@ export const riskScorePreviewRoute = (
         );
 
         const {
-          after_keys: userAfterKeys,
-          data_view_id: dataViewId,
+          data_view_id: dataViewId, // TODO: remove afterkeys
           debug,
           page_size: userPageSize,
           identifier_type: identifierType,
@@ -78,15 +77,13 @@ export const riskScorePreviewRoute = (
             soClient,
           });
 
-          const afterKeys = userAfterKeys ?? {};
           const range = userRange ?? { start: 'now-15d', end: 'now' };
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
 
           const result = await riskScoreService.calculateScores({
-            afterKeys,
             debug,
             filter,
-            identifierType,
+            identifierTypes: identifierType ? [identifierType] : undefined,
             index,
             pageSize,
             range,

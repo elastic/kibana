@@ -54,8 +54,6 @@ export const riskScoreCalculationRoute = (
         const siemResponse = buildSiemResponse(response);
         const coreContext = await context.core;
         const soClient = coreContext.savedObjects.client;
-        const securityConfig = await securityContext.getConfig();
-
         const riskScoreService = buildRiskScoreServiceForRequest(
           securityContext,
           coreContext,
@@ -63,8 +61,7 @@ export const riskScoreCalculationRoute = (
         );
 
         const {
-          after_keys: userAfterKeys,
-          data_view_id: dataViewId,
+          data_view_id: dataViewId, // TODO: remove after keys from the request
           debug,
           page_size: userPageSize,
           identifier_type: identifierType,
@@ -80,25 +77,16 @@ export const riskScoreCalculationRoute = (
             soClient,
           });
 
-          const afterKeys = userAfterKeys ?? {};
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
-          const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
-            securityConfig.entityAnalytics
-          );
-
-          const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
-
           const result = await riskScoreService.calculateAndPersistScores({
-            afterKeys,
             debug,
             pageSize,
-            identifierType,
+            identifierTypes: identifierType ? [identifierType] : undefined,
             index,
             filter,
             range,
             runtimeMappings,
             weights,
-            alertSampleSizePerShard,
           });
 
           return response.ok({ body: result });

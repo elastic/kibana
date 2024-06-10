@@ -112,12 +112,11 @@ const processScores = async ({
 };
 
 export const calculateRiskScores = async ({
-  afterKeys: userAfterKeys,
   assetCriticalityService,
   debug,
   esClient,
   filter: userFilter,
-  identifierType,
+  identifierTypes = ['host', 'user'],
   index,
   logger,
   pageSize,
@@ -136,7 +135,9 @@ export const calculateRiskScores = async ({
     const res = await esClient.transport.request<ElasticsearchCalculateResponse>(
       {
         method: 'POST',
-        path: `/entity_analytics/risk_score/calculate?category_1_index=.alerts*&entity_types=${identifierType}`,
+        path: `/entity_analytics/risk_score/calculate?category_1_index=${index}&entity_types=${identifierTypes.join(
+          ','
+        )}`,
         // body: { // TODO: These params will be needed
         //   filter: userFilter,
         //   index,
