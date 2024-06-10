@@ -368,7 +368,7 @@ export function RuleConditionChart({
     <div>
       <lens.EmbeddableComponent
         onLoad={setChartLoading}
-        id="customThresholdPreviewChart"
+        id="ruleConditionChart"
         style={{ height: 180 }}
         timeRange={timeRange}
         attributes={attributes}
