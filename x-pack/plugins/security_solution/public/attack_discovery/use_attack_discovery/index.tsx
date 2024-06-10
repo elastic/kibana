@@ -98,7 +98,7 @@ export const useAttackDiscovery = ({
   ]);
 
   useEffect(() => {
-    if (connectorId !== null && connectorId !== '') {
+    if (connectorId != null && connectorId !== '') {
       pollApi();
       setAlertsContextCount(null);
       setLastUpdated(null);
