@@ -171,10 +171,8 @@ describe('validation', () => {
     await esqlEnv?.integrationEnv?.shutdown();
   });
 
-  // const stringVariants = ['text', 'keyword'] as const;
-  // const numberVariants = ['integer', 'long', 'double', 'long'] as const;
-  const stringVariants = ['text'] as const;
-  const numberVariants = ['integer'] as const;
+  const stringVariants = ['text', 'keyword'] as const;
+  const numberVariants = ['integer', 'long', 'double', 'long'] as const;
 
   for (const stringFieldType of stringVariants) {
     for (const numberFieldType of numberVariants) {
