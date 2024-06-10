@@ -11,7 +11,7 @@ import {
   hasSimpleExecutableName,
   OperatingSystem,
   ConditionEntryField,
-  doesAnyValueContainWildcard,
+  validateWildcardInput,
   validateHasWildcardWithWrongOperator,
   validatePotentialWildcardInput,
   validateFilePathInput,
@@ -40,12 +40,12 @@ describe('validatePotentialWildcardInput', () => {
   });
 });
 
-describe('doesAnyValueContainWildcard', () => {
+describe('validateWildcardInput', () => {
   it('warns on wildcard for fields that are not file paths', () => {
-    expect(doesAnyValueContainWildcard('*')).toEqual(WILDCARD_WARNING);
+    expect(validateWildcardInput('*')).toEqual(WILDCARD_WARNING);
   });
   it('does not warn if no wildcard', () => {
-    expect(doesAnyValueContainWildcard('non-wildcard')).toEqual(undefined);
+    expect(validateWildcardInput('non-wildcard')).toEqual(undefined);
   });
 });
 
