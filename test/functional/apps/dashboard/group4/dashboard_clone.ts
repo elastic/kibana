@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
-      await PageObjects.dashboard.clickClone();
+      await PageObjects.dashboard.duplicateDashboard();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });
@@ -41,6 +41,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
       });
+    });
+
+    it('Clone should suggest a unique title', async function () {
+      await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
+      await PageObjects.dashboard.duplicateDashboard();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await listingTable.searchAndExpectItemsCount('dashboard', `${dashboardName} (2)`, 1);
     });
   });
 }

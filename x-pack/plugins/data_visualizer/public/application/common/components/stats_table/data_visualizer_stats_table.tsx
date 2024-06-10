@@ -35,10 +35,6 @@ import { IndexBasedNumberContentPreview } from './components/field_data_row/numb
 
 import { useTableSettings } from './use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
-import type {
-  FieldVisConfig,
-  FileBasedFieldVisConfig,
-} from '../../../../../common/types/field_vis_config';
 import { isIndexBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
@@ -46,12 +42,13 @@ import { calculateTableColumnsDimensions } from './utils';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
 import './_index.scss';
+import type { FieldStatisticTableEmbeddableProps } from '../../../index_data_visualizer/embeddables/grid_embeddable/types';
+import type { DataVisualizerTableItem } from './types';
 
 const FIELD_NAME = 'fieldName';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
-type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
 interface DataVisualizerTableProps<T extends object> {
   items: T[];
   pageState: DataVisualizerTableState;
@@ -64,6 +61,7 @@ interface DataVisualizerTableProps<T extends object> {
   loading?: boolean;
   totalCount?: number;
   overallStatsRunning: boolean;
+  renderFieldName?: FieldStatisticTableEmbeddableProps['renderFieldName'];
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -77,6 +75,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   loading,
   totalCount,
   overallStatsRunning,
+  renderFieldName,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -217,7 +216,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           return (
             <EuiText size="xs" data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>
-              {displayName}
+              {renderFieldName ? renderFieldName(fieldName, item) : displayName}
             </EuiText>
           );
         },

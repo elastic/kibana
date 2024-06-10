@@ -467,6 +467,19 @@ describe('Agent policy', () => {
       }
     });
 
+    it('should allow delete with force for agent policy which has managed package policy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
+        force: true,
+      });
+      expect(response.id).toEqual('mocked');
+    });
+
     it('should call audit logger', async () => {
       await agentPolicyService.delete(soClient, esClient, 'mocked');
 
@@ -530,22 +543,27 @@ describe('Agent policy', () => {
         monitoring_enabled: ['metrics'],
       });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        soClient
+      );
+      await agentPolicyService.bumpAllAgentPolicies(esClient, undefined);
 
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, undefined);
-
-      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
-        {
-          attributes: expect.objectContaining({
-            fleet_server_hosts: ['http://fleetserver:8220'],
-            revision: NaN,
-            updated_by: 'system',
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              fleet_server_hosts: ['http://fleetserver:8220'],
+              revision: NaN,
+              updated_by: 'system',
+            }),
+            id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+            type: 'ingest_manager_settings',
           }),
-          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
-          references: [],
-          score: 1,
-          type: 'ingest_manager_settings',
-        },
-      ]);
+        ],
+        expect.objectContaining({
+          namespace: 'default',
+        })
+      );
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
@@ -558,8 +576,10 @@ describe('Agent policy', () => {
         monitoring_enabled: ['metrics'],
       });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, 'output-id-123');
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        soClient
+      );
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
@@ -706,12 +726,10 @@ describe('Agent policy', () => {
         monitoring_enabled: ['metrics'],
       });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
-        soClient,
-        esClient,
-        'test-id-1'
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
+        soClient
       );
+      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, 'test-id-1');
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
