@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LDClient } from 'launchdarkly-node-server-sdk';
+import type { LDClient } from '@launchdarkly/node-server-sdk';
 
 export function createLaunchDarklyClientMock(): jest.Mocked<LDClient> {
   return {
@@ -19,7 +19,7 @@ export function createLaunchDarklyClientMock(): jest.Mocked<LDClient> {
 
 export const ldClientMock = createLaunchDarklyClientMock();
 
-jest.doMock('launchdarkly-node-server-sdk', () => ({
+jest.doMock('@launchdarkly/node-server-sdk', () => ({
   init: () => ldClientMock,
   basicLogger: jest.fn(),
 }));
