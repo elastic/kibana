@@ -35,12 +35,23 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
   return (source: Observable<ChatCompletionChunkEvent | TokenCountEvent>) => {
     let functionCallBuffer: string = '';
 
+    let hasEmittedFunctionCall = false;
+
     // As soon as we see a TOOL_USE_START token, we write all chunks
     // to a buffer, that we flush as a function request if we
     // spot the stop sequence.
 
     return new Observable<ChatCompletionChunkEvent | TokenCountEvent>((subscriber) => {
       function parseFunctionCall(id: string, buffer: string) {
+        if (hasEmittedFunctionCall) {
+          logger.warn(
+            `LLM tried calling multiple functions, this is currently not supported: ${buffer}`
+          );
+          return;
+        }
+
+        hasEmittedFunctionCall = true;
+
         logger.debug('Parsing function call:\n' + buffer);
 
         const match = buffer.match(
