@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -25,10 +28,13 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { toSavedSearchAttributes, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import {
+  SavedSearchAttributes,
+  toSavedSearchAttributes,
+  VIEW_MODE,
+} from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { DiscoverServices } from '../build_services';
@@ -72,8 +78,18 @@ export const getSearchEmbeddableFactory = ({
           savedObjectId,
           savedObjectTitle: so.title,
           savedObjectDescription: so.description,
-          title: serializedState?.rawState.title, // panel title
-          description: serializedState?.rawState.description, // panel description
+
+          // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
+          ...pick(serializedState.rawState, [
+            'title',
+            'description',
+            'sort',
+            'columns',
+            'rowHeight',
+            'sampleSize',
+            'rowsPerPage',
+            'headerRowHeight',
+          ]),
         };
       }
 
@@ -108,13 +124,51 @@ export const getSearchEmbeddableFactory = ({
       const { searchEmbeddableApi, searchEmbeddableComparators, searchEmbeddableStateManager } =
         await initializeSearchEmbeddableApi(initialState, { discoverServices });
 
-      const getByValueState = () => {
+      const serializeState = async (): Promise<
+        SerializedPanelState<SearchEmbeddableSerializedState>
+      > => {
         const searchSource = searchEmbeddableApi.searchSource$.getValue();
         const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
         const savedSearchAttributes = toSavedSearchAttributes(
           searchEmbeddableApi.getSavedSearch(),
           searchSourceJSON
         );
+
+        const savedObjectId = savedObjectId$.getValue();
+        if (savedObjectId) {
+          // only save the current state that is **different** than the initial state
+          const overwriteState = (
+            [
+              'sort',
+              'columns',
+              'rowHeight',
+              'sampleSize',
+              'rowsPerPage',
+              'headerRowHeight',
+            ] as Array<keyof SavedSearchAttributes>
+          ).reduce((prev, key) => {
+            if (
+              deepEqual(
+                savedSearchAttributes[key],
+                initialState[key as keyof SearchEmbeddableRuntimeState]
+              )
+            ) {
+              return prev;
+            }
+            return { ...prev, [key]: savedSearchAttributes[key] };
+          }, {});
+
+          return {
+            rawState: {
+              savedObjectId,
+              // Serialize the current dashboard state into the panel state **without** updating the saved object
+              ...serializeTitles(),
+              ...overwriteState,
+            },
+            references: [],
+          };
+        }
+
         const { state, references } = extract({
           id: uuid,
           type: SEARCH_EMBEDDABLE_TYPE,
@@ -131,18 +185,6 @@ export const getSearchEmbeddableFactory = ({
           },
           references,
         };
-      };
-
-      const serializeState = async (
-        forceByValue: boolean = false // TODO: Remove this
-      ): Promise<SerializedPanelState<SearchEmbeddableSerializedState>> => {
-        const savedObjectId = savedObjectId$.getValue();
-
-        if (savedObjectId && !forceByValue) {
-          return { rawState: { savedObjectId, ...serializeTitles() }, references: [] };
-        } else {
-          return getByValueState();
-        }
       };
 
       const getAppTarget = async () => {
@@ -193,17 +235,6 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(title);
             savedObjectId$.next(savedObjectId!);
             return savedObjectId!;
-          },
-          updateLibraryItem: async () => {
-            const savedObjectId = savedObjectId$.getValue();
-            if (!savedObjectId) return;
-
-            await save({
-              ...searchEmbeddableApi.getSavedSearch(),
-              id: savedObjectId,
-              title: defaultPanelTitle$.getValue(),
-              description: defaultPanelDescription$.getValue(),
-            });
           },
           checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
             checkForDuplicateTitle({

@@ -74,7 +74,7 @@ export async function duplicateDashboardPanel(this: DashboardContainer, idToDupl
     notifications: { toasts },
     embeddable: { reactEmbeddableRegistryHasKey },
   } = pluginServices.getServices();
-  const panelToClone = await this.getDashboardPanelFromId(idToDuplicate, true);
+  const panelToClone = await this.getDashboardPanelFromId(idToDuplicate);
 
   const duplicatedPanelState = reactEmbeddableRegistryHasKey(panelToClone.type)
     ? await duplicateReactEmbeddableInput(this, panelToClone, idToDuplicate)

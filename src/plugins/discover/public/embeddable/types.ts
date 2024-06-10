@@ -46,13 +46,14 @@ export type SearchEmbeddableAttributes = Pick<
   | 'viewMode'
 >;
 
-export type SearchEmbeddableSerializedState = SerializedTitles & {
-  // by value
-  attributes?: SearchEmbeddableAttributes;
+export type SearchEmbeddableSerializedState = SerializedTitles &
+  Pick<SerializableSavedSearch, 'sort' | 'columns'> & {
+    // by value
+    attributes?: SearchEmbeddableAttributes;
 
-  // by reference
-  savedObjectId?: string;
-};
+    // by reference
+    savedObjectId?: string;
+  };
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
   SerializedTitles & {

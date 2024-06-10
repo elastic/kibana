@@ -564,7 +564,7 @@ export class DashboardContainer
     return newEmbeddable as ApiType;
   }
 
-  public getDashboardPanelFromId = async (panelId: string, forceByValue: boolean = false) => {
+  public getDashboardPanelFromId = async (panelId: string) => {
     const {
       embeddable: { reactEmbeddableRegistryHasKey },
     } = pluginServices.getServices();
@@ -573,12 +573,13 @@ export class DashboardContainer
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
       const serialized = apiHasSerializableState(child)
-        ? await child.serializeState(forceByValue)
+        ? await child.serializeState()
         : { rawState: {} };
+
       return {
         type: panel.type,
         explicitInput: {
-          ...(forceByValue ? omit(panel.explicitInput, 'savedObjectId') : panel.explicitInput),
+          ...panel.explicitInput,
           ...serialized.rawState,
         },
         gridData: panel.gridData,

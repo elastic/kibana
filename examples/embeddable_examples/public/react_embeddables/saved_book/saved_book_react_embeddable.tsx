@@ -100,13 +100,12 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               savedBookId: savedBookId$.value,
               ...serializeTitles(),
             };
-            return { rawState: bookByReferenceState };
-          },
-          updateLibraryItem: async () => {
+
             await saveBookAttributes(
               savedBookId$.value,
               serializeBookAttributes(bookAttributesManager)
             );
+            return { rawState: bookByReferenceState };
           },
           // in place library transforms
           libraryId$: savedBookId$,
