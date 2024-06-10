@@ -17,7 +17,7 @@ export const postCaseConfigureRoute = createCasesRoute({
   path: CASE_CONFIGURE_URL,
   routerOptions: {
     access: 'public',
-    description: `Add case settings`,
+    summary: `Add case settings`,
   },
   handler: async ({ context, request, response }) => {
     try {

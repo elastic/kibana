@@ -12900,7 +12900,7 @@
             ],
             "signature": [
               "(initialState: RuntimeState, buildApi: (apiRegistration: ",
-              "ReactEmbeddableApiRegistration",
+              "BuildReactEmbeddableApiRegistration",
               "<SerializedState, Api>, comparators: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
@@ -12909,7 +12909,9 @@
                 "section": "def-common.StateComparators",
                 "text": "StateComparators"
               },
-              "<RuntimeState>) => Api, uuid: string, parentApi?: unknown) => Promise<{ Component: React.FC<{}>; api: Api; }>"
+              "<RuntimeState>) => Api, uuid: string, parentApi: unknown, setApi: (api: ",
+              "SetReactEmbeddableApiRegistration",
+              "<SerializedState, Api>) => Api) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -12939,7 +12941,7 @@
                 "description": [],
                 "signature": [
                   "(apiRegistration: ",
-                  "ReactEmbeddableApiRegistration",
+                  "BuildReactEmbeddableApiRegistration",
                   "<SerializedState, Api>, comparators: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
@@ -12979,6 +12981,23 @@
                 "description": [],
                 "signature": [
                   "unknown"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$5",
+                "type": "Function",
+                "tags": [],
+                "label": "setApi",
+                "description": [],
+                "signature": [
+                  "(api: ",
+                  "SetReactEmbeddableApiRegistration",
+                  "<SerializedState, Api>) => Api"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
@@ -14282,10 +14301,6 @@
             {
               "plugin": "discover",
               "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/observability_solution/infra/public/plugin.ts"
             },
             {
               "plugin": "profiling",

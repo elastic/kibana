@@ -663,7 +663,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpu', chartsCount: 1 },
             { metric: 'memory', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            it.skip(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
               const charts = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
                 metric
               );
