@@ -8,14 +8,14 @@
 import type { Dispatch, Middleware, PreloadedState, ReducersMapObject } from 'redux';
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
-import { managementReducer } from '../../../../../../store/reducer';
-import { appReducer } from '../../../../../../../common/store/app';
-import { ExperimentalFeaturesService } from '../../../../../../../common/experimental_features_service';
-import { managementMiddlewareFactory } from '../../../../../../store/middleware';
-import type { StartPlugins } from '../../../../../../../types';
-import type { State } from '../../../../../../../common/store';
-import type { AppAction } from '../../../../../../../common/store/actions';
-import type { Immutable } from '../../../../../../../../common/endpoint/types';
+import { managementReducer } from '../../../management/store/reducer';
+import { appReducer } from '../../store/app';
+import { ExperimentalFeaturesService } from '../../experimental_features_service';
+import { managementMiddlewareFactory } from '../../../management/store/middleware';
+import type { StartPlugins } from '../../../types';
+import type { State } from '../../store';
+import type { AppAction } from '../../store/actions';
+import type { Immutable } from '../../../../common/endpoint/types';
 
 type ComposeType = typeof compose;
 declare global {

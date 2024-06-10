@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
-import { useUpsellingComponent } from '../../../../../common/hooks/use_upselling';
+import { useUpsellingComponent } from '../common/hooks/use_upselling';
 
 export const CloudSecurityPosturePliAuthBlockExtension = memo<PropsWithChildren<unknown>>(
   ({ children }) => {

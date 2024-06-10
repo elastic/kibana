@@ -6,7 +6,7 @@
  */
 
 import { lazy } from 'react';
-import type { FleetUiExtensionGetterOptions } from './types';
+import type { FleetUiExtensionGetterOptions } from '../common/types';
 
 export const getLazyCloudSecurityPosturePliAuthBlockExtension = ({
   coreStart,
@@ -16,7 +16,7 @@ export const getLazyCloudSecurityPosturePliAuthBlockExtension = ({
   lazy(async () => {
     const [{ withSecurityContext }, { CloudSecurityPosturePliAuthBlockExtension }] =
       await Promise.all([
-        import('./components/with_security_context/with_security_context'),
+        import('../common/components/with_security_context/with_security_context'),
         import('./cloud_security_posture_pli_auth_block_extension'),
       ]);
     return {
