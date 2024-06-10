@@ -209,6 +209,9 @@ export const LogEntryFlyout = ({
   );
 };
 
+// eslint-disable-next-line import/no-default-export
+export default LogEntryFlyout;
+
 const loadingProgressMessage = i18n.translate('xpack.logsShared.logFlyout.loadingMessage', {
   defaultMessage: 'Searching log entry in shards',
 });

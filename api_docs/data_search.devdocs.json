@@ -16866,6 +16866,134 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.queryToFields",
+        "type": "Function",
+        "tags": [],
+        "label": "queryToFields",
+        "description": [],
+        "signature": [
+          "({\n  dataView,\n  sort,\n  request,\n}: { dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          "; sort?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EsQuerySortValue",
+            "text": "EsQuerySortValue"
+          },
+          " | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EsQuerySortValue",
+            "text": "EsQuerySortValue"
+          },
+          "[] | undefined; request: ",
+          "SearchRequest",
+          "; }) => Promise<Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/data/common/search/search_source/query_to_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.queryToFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataView,\n  sort,\n  request,\n}",
+            "description": [],
+            "path": "src/plugins/data/common/search/search_source/query_to_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.queryToFields.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewLazy",
+                    "text": "DataViewLazy"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/search_source/query_to_fields.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.queryToFields.$1.sort",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "sort",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.EsQuerySortValue",
+                    "text": "EsQuerySortValue"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.EsQuerySortValue",
+                    "text": "EsQuerySortValue"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "src/plugins/data/common/search/search_source/query_to_fields.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.queryToFields.$1.request",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: any; }"
+                ],
+                "path": "src/plugins/data/common/search/search_source/query_to_fields.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.splitStringInterval",
         "type": "Function",
         "tags": [],

@@ -71,7 +71,7 @@ export const createHeartbeatInstructions = (context: TutorialContext) => {
           'sudo rpm -vi heartbeat-{config.kibana.version}-x86_64.rpm',
         ],
         textPost: i18n.translate(
-          'home.tutorials.common.heartbeatInstructions.install.debTextPost',
+          'home.tutorials.common.heartbeatInstructions.install.rpmTextPost',
           {
             defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
             values: { link: 'https://www.elastic.co/downloads/beats/heartbeat' },
