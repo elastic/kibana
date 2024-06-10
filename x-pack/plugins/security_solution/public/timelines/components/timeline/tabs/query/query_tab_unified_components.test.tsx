@@ -135,25 +135,13 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
 
 const loadPageMock = jest.fn();
 
-const useTimelineEventsMock = jest.fn(() => [
-  false,
-  {
-    events: structuredClone(mockTimelineData.slice(0, 1)),
-    pageInfo: {
-      activePage: 0,
-      totalPages: 3,
-    },
-    refreshedAt: Date.now(),
-    totalCount: 3,
-    loadPage: loadPageMock,
-  },
-]);
-
 const useSourcererDataViewMocked = jest.fn().mockReturnValue({
   ...mockSourcererScope,
 });
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
+
+let useTimelineEventsMock = jest.fn();
 
 describe('query tab with unified timeline', () => {
   const kibanaServiceMock: StartServices = {
@@ -169,6 +157,20 @@ describe('query tab with unified timeline', () => {
   });
 
   beforeEach(() => {
+    useTimelineEventsMock = jest.fn(() => [
+      false,
+      {
+        events: structuredClone(mockTimelineData.slice(0, 1)),
+        pageInfo: {
+          activePage: 0,
+          totalPages: 3,
+        },
+        refreshedAt: Date.now(),
+        totalCount: 3,
+        loadPage: loadPageMock,
+      },
+    ]);
+
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         width: 1000,
@@ -264,7 +266,7 @@ describe('query tab with unified timeline', () => {
     beforeEach(() => {
       // should return all the records instead just 3
       // as the case in the default mock
-      useTimelineEventsMock.mockImplementation(() => [
+      useTimelineEventsMock = jest.fn(() => [
         false,
         {
           events: structuredClone(mockTimelineData),
@@ -277,6 +279,8 @@ describe('query tab with unified timeline', () => {
           loadPage: loadPageMock,
         },
       ]);
+
+      (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
     });
 
     afterEach(() => {
