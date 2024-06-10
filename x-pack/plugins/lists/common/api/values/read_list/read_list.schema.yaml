@@ -18,18 +18,6 @@ paths:
           description: List's `id` value
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
-        - name: deleteReferences
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: ignoreReferences
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
       responses:
         200:
           description: Successful response

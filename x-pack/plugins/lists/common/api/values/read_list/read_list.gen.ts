@@ -15,7 +15,6 @@
  */
 
 import { z } from 'zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { List, ListId } from '../model/list_common.gen';
 
@@ -25,8 +24,6 @@ export const GetListRequestQuery = z.object({
    * List's `id` value
    */
   id: ListId,
-  deleteReferences: BooleanFromString.optional().default(false),
-  ignoreReferences: BooleanFromString.optional().default(false),
 });
 export type GetListRequestQueryInput = z.input<typeof GetListRequestQuery>;
 

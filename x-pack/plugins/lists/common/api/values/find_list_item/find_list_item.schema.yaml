@@ -1,17 +1,23 @@
 openapi: 3.0.0
 info:
-  title: Find lists API endpoint
+  title: Find list items API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/_find:
     get:
       x-labels: [serverless, ess]
-      operationId: FindLists
+      operationId: FindListItems
       x-codegen-enabled: true
-      summary: Finds lists
+      summary: Finds list items
       tags:
         - List API
       parameters:
+        - name: list_id
+          in: query
+          required: true
+          description: List's ide
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
         - name: page
           in: query
           required: false
@@ -21,7 +27,7 @@ paths:
         - name: per_page
           in: query
           required: false
-          description: The number of lists to return per page
+          description: The number of list items to return per page
           schema:
             type: integer
         - name: sort_field
@@ -45,7 +51,7 @@ paths:
             (use the cursor value returned in the previous call). This parameter uses
             the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
           schema:
-            $ref: '#/components/schemas/FindListsCursor'
+            $ref: '#/components/schemas/FindListItemsCursor'
         - name: filter
           in: query
           required: false
@@ -53,7 +59,7 @@ paths:
             Filters the returned results according to the value of the specified field,
             using the <field name>:<field value> syntax.
           schema:
-            $ref: '#/components/schemas/FindListsFilter'
+            $ref: '#/components/schemas/FindListItemsFilter'
       responses:
         200:
           description: Successful response
@@ -65,7 +71,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '../model/list_common.schema.yaml#/components/schemas/List'
+                      $ref: '../model/list_common.schema.yaml#/components/schemas/ListItem'
                   page:
                     type: integer
                   per_page:
@@ -73,7 +79,7 @@ paths:
                   total:
                     type: integer
                   cursor:
-                    $ref: '#/components/schemas/FindListsCursor'
+                    $ref: '#/components/schemas/FindListItemsCursor'
                 required:
                   - data
                   - page
@@ -109,8 +115,8 @@ paths:
 
 components:
   schemas:
-    FindListsCursor:
+    FindListItemsCursor:
       $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
-    FindListsFilter:
+    FindListItemsFilter:
       $ref: '../../../../../security_solution/common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
