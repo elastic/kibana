@@ -12,15 +12,13 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices } from './helpers';
+import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
-
-  const TEST_SPACE_1 = 'test1';
-  const TEST_SPACE_2 = 'test1';
 
   describe('enrollment api keys', async function () {
     skipIfNoDockerRegistry(providerContext);
@@ -36,22 +34,8 @@ export default function (providerContext: FtrProviderContext) {
       await cleanFleetIndices(esClient);
     });
 
-    before(async () =>
-      Promise.all([
-        kibanaServer.spaces
-          .create({
-            id: TEST_SPACE_1,
-            name: TEST_SPACE_1,
-          })
-          .catch((err) => {}),
-        kibanaServer.spaces
-          .create({
-            id: TEST_SPACE_2,
-            name: TEST_SPACE_2,
-          })
-          .catch((err) => {}),
-      ])
-    );
+    setupTestSpaces(providerContext);
+
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
@@ -125,6 +109,82 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('write APIs', () => {});
+    describe('write APIs', () => {
+      describe('POST /enrollment_api_keys', () => {
+        it('should allow to create an enrollment api key for a policy in the default space', async () => {
+          const res = await apiClient.postEnrollmentApiKeys({
+            policy_id: defaultSpacePolicy1.item.id,
+          });
+          expect(res.item).to.have.key('id');
+        });
+        it('should allow to create an enrollment api key for a policy in the same space', async () => {
+          const res = await apiClient.postEnrollmentApiKeys(
+            {
+              policy_id: spaceTest1Policy1.item.id,
+            },
+            TEST_SPACE_1
+          );
+          expect(res.item).to.have.key('id');
+        });
+
+        it('should not allow to create an enrollment api key for a policy in a different space', async () => {
+          let err: Error | undefined;
+          try {
+            await apiClient.postEnrollmentApiKeys(
+              {
+                policy_id: defaultSpacePolicy1.item.id,
+              },
+              TEST_SPACE_1
+            );
+          } catch (_err) {
+            err = _err;
+          }
+          expect(err).to.be.an(Error);
+          expect(err?.message).to.match(/404 "Not Found"/);
+        });
+
+        it('should not allow to create an enrollment api key for a policy from a different space in the default space', async () => {
+          let err: Error | undefined;
+          try {
+            await apiClient.postEnrollmentApiKeys({
+              policy_id: spaceTest1Policy1.item.id,
+            });
+          } catch (_err) {
+            err = _err;
+          }
+          expect(err).to.be.an(Error);
+          expect(err?.message).to.match(/404 "Not Found"/);
+        });
+      });
+      describe('DELETE /enrollment_api_keys', () => {
+        it('should not allow to delete an enrollment api key in a different space', async () => {
+          let err: Error | undefined;
+          try {
+            await apiClient.deleteEnrollmentApiKey(defaultSpaceEnrollmentKey1.id, TEST_SPACE_1);
+          } catch (_err) {
+            err = _err;
+          }
+          expect(err).to.be.an(Error);
+          expect(err?.message).to.match(/404 "Not Found"/);
+        });
+
+        it('should not allow to delete an enrollment api key from a different space in the default space', async () => {
+          let err: Error | undefined;
+          try {
+            await apiClient.deleteEnrollmentApiKey(spaceTest1EnrollmentKey1.id);
+          } catch (_err) {
+            err = _err;
+          }
+          expect(err).to.be.an(Error);
+          expect(err?.message).to.match(/404 "Not Found"/);
+        });
+        it('should allow to delete an enrollment api key in the default space', async () => {
+          await apiClient.deleteEnrollmentApiKey(defaultSpaceEnrollmentKey1.id);
+        });
+        it('should allow to create an enrollment api key in the same space', async () => {
+          await apiClient.deleteEnrollmentApiKey(spaceTest1EnrollmentKey1.id, TEST_SPACE_1);
+        });
+      });
+    });
   });
 }

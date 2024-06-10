@@ -14,5 +14,10 @@ export async function cleanFleetIndices(esClient: Client) {
       q: '*',
       ignore_unavailable: true,
     }),
+    esClient.deleteByQuery({
+      index: '.kibana_ingest',
+      q: 'type:fleet-uninstall-tokens',
+      ignore_unavailable: true,
+    }),
   ]);
 }
