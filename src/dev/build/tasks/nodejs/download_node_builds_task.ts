@@ -14,16 +14,26 @@ export const DownloadNodeBuilds: GlobalTask = {
   global: true,
   description: 'Downloading node.js builds for all platforms',
   async run(config, log) {
-    const shasums = await getNodeShasums(log, config.getNodeVersion());
+    const downloads: Array<{ url: string; destination: string; shaChecksum: string }> = [];
+    for (const platform of config.getNodePlatforms()) {
+      for (const nodeInfo of getNodeDownloadInfo(config, platform)) {
+        const shasums = await getNodeShasums(log, config.getNodeVersion(), nodeInfo.variant);
+
+        if (!downloads.some((download) => download.url === nodeInfo.url)) {
+          downloads.push({
+            url: nodeInfo.url,
+            destination: nodeInfo.downloadPath,
+            shaChecksum: shasums[nodeInfo.downloadName],
+          });
+        }
+      }
+    }
     await Promise.all(
-      config.getNodePlatforms().map(async (platform) => {
-        const { url, downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
-        await downloadToDisk({
+      downloads.map(function (download) {
+        return downloadToDisk({
+          ...download,
           log,
-          url,
-          shaChecksum: shasums[downloadName],
           shaAlgorithm: 'sha256',
-          destination: downloadPath,
           maxAttempts: 3,
         });
       })
