@@ -22,6 +22,7 @@ import { checkEntityDiscoveryEnabledRoute } from './enablement/check';
 import { enableEntityDiscoveryRoute } from './enablement/enable';
 import { disableEntityDiscoveryRoute } from './enablement/disable';
 import { installBuiltinEntityDefinitionsRoute } from './enablement/install_builtin_definitions';
+import { uninstallBuiltinEntityDefinitionsRoute } from './enablement/uninstall_builtin_definitions';
 
 export function setupRoutes<T extends RequestHandlerContext>(dependencies: SetupRouteOptions<T>) {
   pingRoute<T>(dependencies);
@@ -39,4 +40,5 @@ export function setupRoutes<T extends RequestHandlerContext>(dependencies: Setup
   disableEntityDiscoveryRoute<T>(dependencies);
   checkEntityDiscoveryEnabledRoute<T>(dependencies);
   installBuiltinEntityDefinitionsRoute<T>(dependencies);
+  uninstallBuiltinEntityDefinitionsRoute<T>(dependencies);
 }
