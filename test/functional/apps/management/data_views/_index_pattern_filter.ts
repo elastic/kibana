@@ -181,10 +181,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'keyword',
         'date',
         '_id',
+        '_ignored',
         '_index',
         '',
         '_source',
-        'text',
       ]);
 
       // set other filters to check if they get reset after pressing the button
