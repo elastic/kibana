@@ -152,7 +152,7 @@ export function getDataStateContainer({
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications } = services;
+  const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
 
@@ -248,6 +248,12 @@ export function getDataStateContainer({
             });
             return;
           }
+
+          await profilesManager.resolveDataSourceProfile({
+            dataSource: getAppState().dataSource,
+            dataView: getSavedSearch().searchSource.getField('index'),
+            query: getAppState().query,
+          });
 
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
