@@ -52,7 +52,6 @@ export interface UpdateAttackDiscoveryParams {
   user: AuthenticatedUser;
   attackDiscoveryIndex: string;
   attackDiscoveryUpdateProps: AttackDiscoveryUpdateProps;
-  isPatch?: boolean;
 }
 
 export const updateAttackDiscovery = async ({
