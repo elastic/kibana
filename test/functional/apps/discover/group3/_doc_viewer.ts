@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.findFieldByNameInDocViewer('geo');
 
         await retry.waitFor('first updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 5;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
 
         await PageObjects.discover.findFieldByNameInDocViewer('.s');
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.findFieldByNameInDocViewer('relatedContent image');
 
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 5;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
       });
 
