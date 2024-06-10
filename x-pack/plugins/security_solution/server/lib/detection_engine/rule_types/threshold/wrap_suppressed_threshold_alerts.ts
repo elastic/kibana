@@ -82,12 +82,7 @@ export const wrapSuppressedThresholdALerts = ({
 
     const suppressedValues = sortBy(Object.entries(bucket.key).map(([_, value]) => value));
 
-    const id = objectHash([
-      hit._index,
-      hit._id,
-      `${spaceId}:${completeRule.alertId}`,
-      suppressedValues,
-    ]);
+    const id = objectHash([hit._index, hit._id, `${spaceId}:${completeRule.alertId}`]);
 
     const instanceId = objectHash([suppressedValues, completeRule.alertId, spaceId]);
 

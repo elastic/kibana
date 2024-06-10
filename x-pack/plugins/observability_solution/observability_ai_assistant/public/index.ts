@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+export type { CompatibleJSONSchema } from '../common/functions/types';
 
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
@@ -28,6 +29,7 @@ export type {
   RenderFunction,
 };
 
+export { aiAssistantCapabilities } from '../common/capabilities';
 export { AssistantAvatar } from './components/assistant_avatar';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
