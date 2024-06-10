@@ -32,20 +32,13 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { stringHash } from '@kbn/ml-string-hash';
 import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
-import { useDataSource } from '../../hooks/use_data_source';
+import usePrevious from 'react-use/lib/usePrevious';
+import useMountedState from 'react-use/lib/useMountedState';
 
-import { MiniHistogram } from '../mini_histogram';
-
-import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
-import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
-import { useViewInDiscoverAction } from './use_view_in_discover_action';
-import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
+import { GROUPS_TABLE, useColumns } from './use_columns';
 
-const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
-const ACTIONS_COLUMN_WIDTH = '60px';
-const NOT_AVAILABLE = '--';
 const MAX_GROUP_BADGES = 5;
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -55,6 +48,7 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK = 'desc';
 
 interface LogRateAnalysisResultsTableProps {
+  skippedColumns: string[];
   significantItems: SignificantItem[];
   groupTableItems: GroupTableItem[];
   loading: boolean;
@@ -68,6 +62,7 @@ interface LogRateAnalysisResultsTableProps {
 }
 
 export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
+  skippedColumns,
   significantItems,
   groupTableItems,
   loading,
@@ -77,7 +72,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   barHighlightColorOverride,
   zeroDocsFallback = false,
 }) => {
-  const { dataView } = useDataSource();
+  const prevSkippedColumns = usePrevious(skippedColumns);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -97,7 +92,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
     useLogRateAnalysisStateContext();
-  const dataViewId = dataView.id;
+  const isMounted = useMountedState();
 
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -106,6 +101,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     } else {
       itemIdToExpandedRowMapValues[item.id] = (
         <LogRateAnalysisResultsTable
+          skippedColumns={skippedColumns}
           significantItems={item.groupItemsSortedByUniqueness.reduce<SignificantItem[]>(
             (p, groupItem) => {
               const st = significantItems.find(
@@ -135,11 +131,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
-  const copyToClipBoardAction = useCopyToClipboardAction();
-  const viewInDiscoverAction = useViewInDiscoverAction(dataViewId);
-  const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataViewId);
-
-  const columns: Array<EuiBasicTableColumn<GroupTableItem>> = [
+  const groupColumns: Array<EuiBasicTableColumn<GroupTableItem>> = [
     {
       align: RIGHT_ALIGNMENT,
       width: EXPAND_COLUMN_WIDTH,
@@ -199,7 +191,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         </>
       ),
       render: (_, { uniqueItemsCount, groupItemsSortedByUniqueness }) => {
-        const valuesBadges = [];
+        const valuesBadges: React.ReactNode[] = [];
 
         for (const groupItem of groupItemsSortedByUniqueness) {
           const { fieldName, fieldValue, duplicate } = groupItem;
@@ -259,141 +251,20 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       truncateText: true,
       valign: 'top',
     },
-    {
-      'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnLogRate',
-      width: NARROW_COLUMN_WIDTH,
-      field: 'pValue',
-      name: (
-        <>
-          <FormattedMessage
-            id="xpack.aiops.logRateAnalysis.resultsTableGroups.logRateLabel"
-            defaultMessage="Log rate"
-          />
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignTop"
-            position="top"
-            content={i18n.translate(
-              'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateColumnTooltip',
-              {
-                defaultMessage:
-                  'A visual representation of the impact of the group on the message rate difference.',
-              }
-            )}
-          />
-        </>
-      ),
-      render: (_, { histogram, id }) => (
-        <MiniHistogram
-          chartData={histogram}
-          isLoading={loading && histogram === undefined}
-          label={i18n.translate('xpack.aiops.logRateAnalysis.resultsTableGroups.groupLabel', {
-            defaultMessage: 'Group',
-          })}
-          barColorOverride={barColorOverride}
-          barHighlightColorOverride={barHighlightColorOverride}
-        />
-      ),
-      sortable: false,
-      valign: 'top',
-    },
-    {
-      'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnDocCount',
-      width: NARROW_COLUMN_WIDTH,
-      field: 'docCount',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.docCountLabel', {
-        defaultMessage: 'Doc count',
-      }),
-      sortable: true,
-      valign: 'top',
-    },
   ];
 
-  if (!zeroDocsFallback) {
-    columns.push({
-      'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnPValue',
-      width: NARROW_COLUMN_WIDTH,
-      field: 'pValue',
-      name: (
-        <>
-          <FormattedMessage
-            id="xpack.aiops.logRateAnalysis.resultsTableGroups.pValueLabel"
-            defaultMessage="p-value"
-          />
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignTop"
-            position="top"
-            content={i18n.translate(
-              'xpack.aiops.logRateAnalysis.resultsTableGroups.pValueColumnTooltip',
-              {
-                defaultMessage:
-                  'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
-              }
-            )}
-          />
-        </>
-      ),
-      render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
-      sortable: true,
-      valign: 'top',
-    });
+  const columns = useColumns(
+    GROUPS_TABLE,
+    skippedColumns,
+    searchQuery,
+    timeRangeMs,
+    loading,
+    zeroDocsFallback,
+    barColorOverride,
+    barHighlightColorOverride
+  ) as Array<EuiBasicTableColumn<GroupTableItem>>;
 
-    columns.push({
-      'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
-      width: NARROW_COLUMN_WIDTH,
-      field: 'pValue',
-      name: (
-        <>
-          <FormattedMessage
-            id="xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabel"
-            defaultMessage="Impact"
-          />
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignTop"
-            position="top"
-            content={i18n.translate(
-              'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
-              {
-                defaultMessage: 'The level of impact of the group on the message rate difference',
-              }
-            )}
-          />
-        </>
-      ),
-      render: (_, { pValue }) => {
-        if (!pValue) return NOT_AVAILABLE;
-        const label = getFailedTransactionsCorrelationImpactLabel(pValue);
-        return label ? <EuiBadge color={label.color}>{label.impact}</EuiBadge> : null;
-      },
-      sortable: true,
-      valign: 'top',
-    });
-  }
-
-  columns.push({
-    'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
-    name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
-      defaultMessage: 'Actions',
-    }),
-    actions: [
-      ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
-      ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
-      copyToClipBoardAction,
-    ],
-    width: ACTIONS_COLUMN_WIDTH,
-    valign: 'top',
-  });
+  groupColumns.push(...columns);
 
   const onChange = useCallback((tableSettings) => {
     if (tableSettings.page) {
@@ -481,6 +352,32 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     []
   );
 
+  useEffect(
+    function updateVisbleColumnsInExpandedRows() {
+      // Update the itemIdToExpandedRowMap results table component for each expanded row with the updated skippedColumns prop
+      // Update the itemIdToExpandedRowMap state after we update the components
+      if (
+        isMounted() &&
+        prevSkippedColumns &&
+        prevSkippedColumns !== skippedColumns &&
+        Object.keys(itemIdToExpandedRowMap)?.length > 0
+      ) {
+        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+        for (const itemId in itemIdToExpandedRowMapValues) {
+          if (itemIdToExpandedRowMapValues.hasOwnProperty(itemId)) {
+            const component = itemIdToExpandedRowMapValues[itemId];
+            itemIdToExpandedRowMapValues[itemId] = (
+              <LogRateAnalysisResultsTable {...component.props} skippedColumns={skippedColumns} />
+            );
+          }
+        }
+        setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [prevSkippedColumns, skippedColumns, itemIdToExpandedRowMap]
+  );
+
   const getRowStyle = (group: GroupTableItem) => {
     if (pinnedGroup && pinnedGroup.id === group.id) {
       return {
@@ -503,7 +400,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     <EuiBasicTable
       data-test-subj="aiopsLogRateAnalysisResultsGroupsTable"
       compressed
-      columns={columns}
+      columns={groupColumns}
       items={pageOfItems}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}

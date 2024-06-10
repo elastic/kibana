@@ -68,10 +68,10 @@ export default function ({ getService }: FtrProviderContext) {
    * Tests
    */
   describe('Generate CSV from SearchSource', function () {
-    // 7 minutes timeout for each test in serverless
-    // This is because it may take up to 5 minutes to generate the CSV
+    // 12 minutes timeout for each test in serverless
+    // This is because it may take up to 10 minutes to generate the CSV
     // see kibanaReportCompletion config
-    this.timeout(7 * 60 * 1000);
+    this.timeout(12 * 60 * 1000);
 
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
