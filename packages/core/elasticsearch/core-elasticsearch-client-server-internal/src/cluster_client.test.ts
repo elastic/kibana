@@ -754,7 +754,9 @@ describe('ClusterClient', () => {
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
-      expect(scopedClusterClient.asSecondaryAuthUser).toBe(internalClient.child.mock.results[0].value);
+      expect(scopedClusterClient.asSecondaryAuthUser).toBe(
+        internalClient.child.mock.results[0].value
+      );
     });
 
     it('creates a scoped client using the proper `es-secondary-authorization` header', () => {
@@ -797,6 +799,36 @@ describe('ClusterClient', () => {
       );
     });
 
+    it('throws when used with a request without authorization header', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['foo'],
+      });
+      authHeaders.get.mockReturnValue({});
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      expect(() => {
+        client = scopedClusterClient.asSecondaryAuthUser;
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
+      );
+    });
+
     it('includes the `customHeaders` from the config without filtering them', () => {
       const config = createConfig({
         customHeaders: {
@@ -805,7 +837,9 @@ describe('ClusterClient', () => {
         },
         requestHeadersWhitelist: ['authorization'],
       });
-      authHeaders.get.mockReturnValue({});
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'foo',
+      });
 
       const clusterClient = new ClusterClient({
         config,
@@ -826,6 +860,7 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: {
             ...defaultHeaders,
+            [ES_SECONDARY_AUTH_HEADER]: 'foo',
             foo: 'bar',
             hello: 'dolly',
           },
@@ -835,7 +870,9 @@ describe('ClusterClient', () => {
 
     it('does not add the x-opaque-id header based on the request id', () => {
       const config = createConfig();
-      authHeaders.get.mockReturnValue({});
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'foo',
+      });
 
       const clusterClient = new ClusterClient({
         config,
@@ -895,6 +932,38 @@ describe('ClusterClient', () => {
         expect.objectContaining({
           headers: expect.objectContaining({ [ES_SECONDARY_AUTH_HEADER]: 'yes' }),
         })
+      );
+    });
+
+    it('throws when used with a `FakeRequest` without authorization header', () => {
+      const config = createConfig({
+        requestHeadersWhitelist: ['authorization', 'foo'],
+      });
+      authHeaders.get.mockReturnValue({
+        [AUTHORIZATION_HEADER]: 'will_not_be_used',
+      });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+      const request = {
+        headers: {
+          hello: 'dolly',
+        },
+      };
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+
+      expect(() => {
+        // trigger client instantiation via getter
+        client = scopedClusterClient.asSecondaryAuthUser;
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"asSecondaryAuthUser called from a client scoped to a request without 'authorization' header."`
       );
     });
   });

@@ -166,17 +166,20 @@ export class ClusterClient implements ICustomClusterClient {
     const headerSource = isRealRequest(request)
       ? this.authHeaders?.get(request) ?? {}
       : request.headers;
-    const authorizationHeader = Object.entries(headerSource).find(([key, _]) => {
-      return key.toLowerCase() === AUTHORIZATION_HEADER;
+    const authorizationHeader = Object.entries(headerSource).find(([key, value]) => {
+      return key.toLowerCase() === AUTHORIZATION_HEADER && value !== undefined;
     });
-    const scopedHeaders = authorizationHeader
-      ? { [ES_SECONDARY_AUTH_HEADER]: authorizationHeader[1] }
-      : {};
+
+    if (!authorizationHeader) {
+      throw new Error(
+        `asSecondaryAuthUser called from a client scoped to a request without 'authorization' header.`
+      );
+    }
 
     return {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
-      ...scopedHeaders,
+      [ES_SECONDARY_AUTH_HEADER]: authorizationHeader[1],
     };
   }
 }
