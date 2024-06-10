@@ -182,8 +182,7 @@ export const addGenerationInterval = (
 export const updateAttackDiscoveryStatusToRunning = async (
   dataClient: AttackDiscoveryDataClient,
   authenticatedUser: AuthenticatedUser,
-  apiConfig: ApiConfig,
-  latestReplacements: Replacements
+  apiConfig: ApiConfig
 ): Promise<{
   currentAd: AttackDiscoveryResponse;
   attackDiscoveryId: string;
@@ -200,7 +199,6 @@ export const updateAttackDiscoveryStatusToRunning = async (
         attackDiscoveries: [],
         apiConfig,
         status: attackDiscoveryStatus.running,
-        replacements: latestReplacements,
       },
       authenticatedUser,
     });

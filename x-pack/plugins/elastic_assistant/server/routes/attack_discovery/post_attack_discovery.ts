@@ -142,8 +142,7 @@ export const postAttackDiscoveryRoute = (
           const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(
             dataClient,
             authenticatedUser,
-            apiConfig,
-            latestReplacements
+            apiConfig
           );
 
           toolInstance
