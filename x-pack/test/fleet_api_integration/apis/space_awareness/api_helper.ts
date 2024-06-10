@@ -10,7 +10,9 @@ import type { Agent } from 'supertest';
 import {
   CreateAgentPolicyResponse,
   GetAgentPoliciesResponse,
+  GetAgentsResponse,
   GetOneAgentPolicyResponse,
+  GetOneAgentResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   GetEnrollmentAPIKeysResponse,
@@ -37,6 +39,7 @@ export class SpaceTestApiClient {
         name: `test ${uuidV4()}`,
         description: '',
         namespace: 'default',
+        inactivity_timeout: 24 * 1000,
       })
       .expect(200);
 
@@ -117,6 +120,21 @@ export class SpaceTestApiClient {
   async getUninstallToken(tokenId: string, spaceId?: string): Promise<GetUninstallTokenResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/uninstall_tokens/${tokenId}`)
+      .expect(200);
+
+    return res;
+  }
+  // Agents
+  async getAgent(agentId: string, spaceId?: string): Promise<GetOneAgentResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}`)
+      .expect(200);
+
+    return res;
+  }
+  async getAgents(spaceId?: string): Promise<GetAgentsResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agents`)
       .expect(200);
 
     return res;

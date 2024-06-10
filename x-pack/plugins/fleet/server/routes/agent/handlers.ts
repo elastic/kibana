@@ -44,6 +44,7 @@ import type {
 import { defaultFleetErrorHandler, FleetNotFoundError } from '../../errors';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
+import { getAgentStatusForAgentPolicy } from '../../services/agents';
 
 export function verifyNamespace(agent: Agent, currentNamespace?: string) {
   const isInNamespace =
@@ -66,6 +67,8 @@ export const getAgentHandler: FleetRequestHandler<
     const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
 
     let agent = await fleetContext.agentClient.asCurrentUser.getAgent(request.params.agentId);
+
+    verifyNamespace(agent, coreContext.savedObjects.client.getCurrentNamespace());
 
     if (request.query.withMetrics) {
       agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
@@ -93,6 +96,7 @@ export const deleteAgentHandler: RequestHandler<
   try {
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
+
     await AgentService.deleteAgent(esClient, request.params.agentId);
 
     const body = {
@@ -316,10 +320,15 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const fleetContext = await context.fleet;
-    const results = await fleetContext.agentClient.asCurrentUser.getAgentStatusForAgentPolicy(
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const soClient = fleetContext.internalSoClient;
+    const results = await getAgentStatusForAgentPolicy(
+      esClient,
+      soClient,
       request.query.policyId,
-      request.query.kuery
+      request.query.kuery,
+      coreContext.savedObjects.client.getCurrentNamespace()
     );
 
     const body: GetAgentStatusResponse = { results };

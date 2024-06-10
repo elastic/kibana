@@ -121,7 +121,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       ...restOfQuery,
     });
 
-    if (!noAgentCount) {
+    if (fleetContext.authz.fleet.readAgents && !noAgentCount) {
       await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
     }
 
@@ -157,8 +157,9 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
         ? items.map(sanitizeItemForReadAgentOnly)
         : items,
     };
-
-    await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
+    if (fleetContext.authz.fleet.readAgents) {
+      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
+    }
 
     return response.ok({ body });
   } catch (error) {
@@ -183,7 +184,9 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
 
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
-      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
+      if (fleetContext.authz.fleet.readAgents) {
+        await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
+      }
       const body: GetOneAgentPolicyResponse = {
         item: !fleetContext.authz.fleet.readAgentPolicies
           ? sanitizeItemForReadAgentOnly(agentPolicy)
