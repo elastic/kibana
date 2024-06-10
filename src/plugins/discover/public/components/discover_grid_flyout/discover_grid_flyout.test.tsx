@@ -25,6 +25,7 @@ import { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+import { discoverServiceMock } from '../../__mocks__/services';
 
 const mockFlyoutCustomization: FlyoutCustomization = {
   id: 'flyout',
@@ -76,6 +77,7 @@ describe('Discover flyout', function () {
   }) => {
     const onClose = jest.fn();
     const services = {
+      ...discoverServiceMock,
       filterManager: createFilterManagerMock(),
       addBasePath: (path: string) => `/base${path}`,
       history: () => ({ location: {} }),
