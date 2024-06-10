@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await synthtrace.index(generateLogsData({ to }));
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
       await navigateToLogsExplorer();
     });
 
