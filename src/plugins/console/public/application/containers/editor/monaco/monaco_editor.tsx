@@ -126,7 +126,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       >
         <EuiFlexItem>
           <EuiToolTip
-            content={i18n.translate('console.sendRequestButtonTooltip', {
+            content={i18n.translate('console.sendRequestButtonTooltipContent', {
               defaultMessage: 'Click to send request',
             })}
           >
@@ -134,7 +134,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
               color="primary"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
-              aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+              aria-label={i18n.translate('console.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
             >
