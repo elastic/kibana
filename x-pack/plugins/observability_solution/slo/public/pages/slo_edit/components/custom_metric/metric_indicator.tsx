@@ -13,10 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
@@ -34,6 +35,7 @@ interface MetricIndicatorProps {
   type: 'good' | 'total';
   metricFields: FieldSpec[];
   isLoadingIndex: boolean;
+  dataView?: DataView;
 }
 
 export const NEW_CUSTOM_METRIC = { name: 'A', aggregation: 'sum' as const, field: '' };
@@ -82,7 +84,12 @@ const equationTooltip = (
   />
 );
 
-export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIndicatorProps) {
+export function MetricIndicator({
+  type,
+  metricFields,
+  isLoadingIndex,
+  dataView,
+}: MetricIndicatorProps) {
   const { control, watch, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
   const [aggregationOptions, setAggregationOptions] = useState(CUSTOM_METRIC_AGGREGATION_OPTIONS);
@@ -125,96 +132,29 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
   return (
     <>
       <EuiFlexItem>
-        {fields?.map((metric, index) => (
-          <EuiFlexGroup alignItems="center" gutterSize="xs" key={metric.id}>
-            <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
-            <EuiFlexItem>
-              <EuiFormRow
-                fullWidth
-                isInvalid={
-                  getFieldState(`indicator.params.${type}.metrics.${index}.aggregation`).invalid
-                }
-                label={
-                  <span>
-                    {i18n.translate('xpack.slo.sloEdit.customMetric.aggregationLabel', {
-                      defaultMessage: 'Aggregation',
-                    })}{' '}
-                    {metric.name}
-                  </span>
-                }
-              >
-                <Controller
-                  name={`indicator.params.${type}.metrics.${index}.aggregation`}
-                  defaultValue="sum"
-                  rules={{ required: true }}
-                  control={control}
-                  render={({ field: { ref, ...field }, fieldState }) => (
-                    <EuiComboBox
-                      {...field}
-                      async
-                      fullWidth
-                      singleSelection={{ asPlainText: true }}
-                      placeholder={i18n.translate(
-                        'xpack.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
-                        { defaultMessage: 'Select an aggregation' }
-                      )}
-                      aria-label={i18n.translate(
-                        'xpack.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
-                        { defaultMessage: 'Select an aggregation' }
-                      )}
-                      isClearable
-                      isInvalid={fieldState.invalid}
-                      isDisabled={isLoadingIndex || !indexPattern}
-                      isLoading={!!indexPattern && isLoadingIndex}
-                      onChange={(selected: EuiComboBoxOptionOption[]) => {
-                        if (selected.length) {
-                          return field.onChange(selected[0].value);
-                        }
-                        field.onChange('');
-                      }}
-                      selectedOptions={
-                        !!indexPattern &&
-                        !!field.value &&
-                        CUSTOM_METRIC_AGGREGATION_OPTIONS.some((agg) => agg.value === field.value)
-                          ? [
-                              {
-                                value: field.value,
-                                label: aggValueToLabel(field.value),
-                              },
-                            ]
-                          : []
-                      }
-                      onSearchChange={(searchValue: string) => {
-                        setAggregationOptions(
-                          CUSTOM_METRIC_AGGREGATION_OPTIONS.filter(({ value }) =>
-                            value.includes(searchValue)
-                          )
-                        );
-                      }}
-                      options={aggregationOptions}
-                    />
-                  )}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            {watch(`indicator.params.${type}.metrics.${index}.aggregation`) !== 'doc_count' && (
+        {fields?.map((metric, index, arr) => (
+          <div key={metric.id}>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" key={metric.id}>
+              <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
                   isInvalid={
-                    getFieldState(`indicator.params.${type}.metrics.${index}.field`).invalid
+                    getFieldState(`indicator.params.${type}.metrics.${index}.aggregation`).invalid
                   }
                   label={
                     <span>
-                      {metricLabel} {metric.name} {metricTooltip}
+                      {i18n.translate('xpack.slo.sloEdit.customMetric.aggregationLabel', {
+                        defaultMessage: 'Aggregation',
+                      })}{' '}
+                      {metric.name}
                     </span>
                   }
                 >
                   <Controller
-                    name={`indicator.params.${type}.metrics.${index}.field`}
-                    defaultValue=""
+                    name={`indicator.params.${type}.metrics.${index}.aggregation`}
+                    defaultValue="sum"
                     rules={{ required: true }}
-                    shouldUnregister
                     control={control}
                     render={({ field: { ref, ...field }, fieldState }) => (
                       <EuiComboBox
@@ -223,12 +163,12 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                         fullWidth
                         singleSelection={{ asPlainText: true }}
                         placeholder={i18n.translate(
-                          'xpack.slo.sloEdit.sliType.customMetric.metricField.placeholder',
-                          { defaultMessage: 'Select a metric field' }
+                          'xpack.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
+                          { defaultMessage: 'Select an aggregation' }
                         )}
                         aria-label={i18n.translate(
-                          'xpack.slo.sloEdit.sliType.customMetric.metricField.placeholder',
-                          { defaultMessage: 'Select a metric field' }
+                          'xpack.slo.sloEdit.sliType.customMetric.aggregation.placeholder',
+                          { defaultMessage: 'Select an aggregation' }
                         )}
                         isClearable
                         isInvalid={fieldState.invalid}
@@ -243,66 +183,134 @@ export function MetricIndicator({ type, metricFields, isLoadingIndex }: MetricIn
                         selectedOptions={
                           !!indexPattern &&
                           !!field.value &&
-                          metricFields.some((metricField) => metricField.name === field.value)
+                          CUSTOM_METRIC_AGGREGATION_OPTIONS.some((agg) => agg.value === field.value)
                             ? [
                                 {
                                   value: field.value,
-                                  label: field.value,
+                                  label: aggValueToLabel(field.value),
                                 },
                               ]
                             : []
                         }
                         onSearchChange={(searchValue: string) => {
-                          setOptions(
-                            createOptionsFromFields(metricFields, ({ value }) =>
+                          setAggregationOptions(
+                            CUSTOM_METRIC_AGGREGATION_OPTIONS.filter(({ value }) =>
                               value.includes(searchValue)
                             )
                           );
                         }}
-                        options={options}
+                        options={aggregationOptions}
                       />
                     )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              <QueryBuilder
-                dataTestSubj="customKqlIndicatorFormGoodQueryInput"
-                indexPatternString={watch('indicator.params.index')}
-                label={`${filterLabel} ${metric.name}`}
-                name={`indicator.params.${type}.metrics.${index}.filter`}
-                placeholder={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.placeholder', {
-                  defaultMessage: 'KQL filter',
-                })}
-                required={false}
-                tooltip={
-                  <EuiIconTip
-                    content={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.tooltip', {
-                      defaultMessage: 'This KQL query should return a subset of events.',
-                    })}
-                    position="top"
-                  />
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={0}>
-              <EuiButtonIcon
-                data-test-subj="o11yMetricIndicatorButton"
-                iconType="trash"
-                color="danger"
-                style={{ marginTop: '1.5em' }}
-                onClick={handleDeleteMetric(index)}
-                disabled={disableDelete}
-                title={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
-                  defaultMessage: 'Delete metric',
-                })}
-                aria-label={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
-                  defaultMessage: 'Delete metric',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              {watch(`indicator.params.${type}.metrics.${index}.aggregation`) !== 'doc_count' && (
+                <EuiFlexItem>
+                  <EuiFormRow
+                    fullWidth
+                    isInvalid={
+                      getFieldState(`indicator.params.${type}.metrics.${index}.field`).invalid
+                    }
+                    label={
+                      <span>
+                        {metricLabel} {metric.name} {metricTooltip}
+                      </span>
+                    }
+                  >
+                    <Controller
+                      name={`indicator.params.${type}.metrics.${index}.field`}
+                      defaultValue=""
+                      rules={{ required: true }}
+                      shouldUnregister
+                      control={control}
+                      render={({ field: { ref, ...field }, fieldState }) => (
+                        <EuiComboBox
+                          {...field}
+                          async
+                          fullWidth
+                          singleSelection={{ asPlainText: true }}
+                          placeholder={i18n.translate(
+                            'xpack.slo.sloEdit.sliType.customMetric.metricField.placeholder',
+                            { defaultMessage: 'Select a metric field' }
+                          )}
+                          aria-label={i18n.translate(
+                            'xpack.slo.sloEdit.sliType.customMetric.metricField.placeholder',
+                            { defaultMessage: 'Select a metric field' }
+                          )}
+                          isClearable
+                          isInvalid={fieldState.invalid}
+                          isDisabled={isLoadingIndex || !indexPattern}
+                          isLoading={!!indexPattern && isLoadingIndex}
+                          onChange={(selected: EuiComboBoxOptionOption[]) => {
+                            if (selected.length) {
+                              return field.onChange(selected[0].value);
+                            }
+                            field.onChange('');
+                          }}
+                          selectedOptions={
+                            !!indexPattern &&
+                            !!field.value &&
+                            metricFields.some((metricField) => metricField.name === field.value)
+                              ? [
+                                  {
+                                    value: field.value,
+                                    label: field.value,
+                                  },
+                                ]
+                              : []
+                          }
+                          onSearchChange={(searchValue: string) => {
+                            setOptions(
+                              createOptionsFromFields(metricFields, ({ value }) =>
+                                value.includes(searchValue)
+                              )
+                            );
+                          }}
+                          options={options}
+                        />
+                      )}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={0}>
+                <EuiButtonIcon
+                  data-test-subj="o11yMetricIndicatorButton"
+                  iconType="trash"
+                  color="danger"
+                  style={{ marginTop: '1.5em' }}
+                  onClick={handleDeleteMetric(index)}
+                  disabled={disableDelete}
+                  title={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
+                    defaultMessage: 'Delete metric',
+                  })}
+                  aria-label={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
+                    defaultMessage: 'Delete metric',
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <QueryBuilder
+              dataTestSubj="customKqlIndicatorFormGoodQueryInput"
+              dataView={dataView}
+              label={`${filterLabel} ${metric.name}`}
+              name={`indicator.params.${type}.metrics.${index}.filter`}
+              placeholder={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.placeholder', {
+                defaultMessage: 'KQL filter',
+              })}
+              required={false}
+              tooltip={
+                <EuiIconTip
+                  content={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.tooltip', {
+                    defaultMessage: 'This KQL query should return a subset of events.',
+                  })}
+                  position="top"
+                />
+              }
+            />
+            {index !== arr.length - 1 && <EuiHorizontalRule size="quarter" />}
+          </div>
         ))}
         <EuiFlexGroup>
           <EuiFlexItem grow={0}>
