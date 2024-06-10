@@ -58,7 +58,8 @@ export const EsqlQueryExpression: React.FC<
     groupBy: DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
-    sourceFields: DEFAULT_VALUES.SOURCE_FIELDS,
+    // The sourceFields param is ignored for the ES|QL type
+    sourceFields: [],
   });
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
