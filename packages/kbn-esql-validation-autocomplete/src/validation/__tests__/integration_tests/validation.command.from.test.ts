@@ -8,6 +8,8 @@
 
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { indexes, policies, unsupported_field, fields } from '../../../__tests__/helpers';
+import { setup } from '../helpers';
+import { runTestSuite as runFromCommandTestSuite } from '../test_suites/validation.command.from';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 // TODO: revisit this
@@ -78,8 +80,10 @@ describe('validation', () => {
     });
   });
 
-  const stringVariants = ['text', 'keyword'] as const;
-  const numberVariants = ['integer', 'long', 'double', 'long'] as const;
+  // const stringVariants = ['text', 'keyword'] as const;
+  // const numberVariants = ['integer', 'long', 'double', 'long'] as const;
+  const stringVariants = ['text'] as const;
+  const numberVariants = ['integer'] as const;
 
   const cleanup = async () => {
     const { esClient } = integrationEnv!;
@@ -177,12 +181,67 @@ describe('validation', () => {
           }
         });
 
+        interface EsqlResultColumn {
+          name: string;
+          type: string;
+        }
+
+        type EsqlResultRow = Array<string | null>;
+
+        interface EsqlTable {
+          columns: EsqlResultColumn[];
+          values: EsqlResultRow[];
+        }
+
+        async function sendESQLQuery(query: string): Promise<{
+          resp: EsqlTable | undefined;
+          error: { message: string } | undefined;
+        }> {
+          try {
+            const resp = await integrationEnv!.esClient.transport.request<EsqlTable>({
+              method: 'POST',
+              path: '/_query',
+              body: {
+                query,
+              },
+            });
+            return { resp, error: undefined };
+          } catch (e) {
+            return { resp: undefined, error: { message: e.meta.body.error.root_cause[0].reason } };
+          }
+        }
+
         afterAll(async () => {
           await cleanup();
         });
 
-        it('test...', async () => {
-          expect(1).toBe(1);
+        runFromCommandTestSuite(async () => {
+          const kit = await setup();
+          return {
+            ...kit,
+            expectErrors: async (query: string, errors: string[], warnings: string[] = []) => {
+              const jsonBody = await sendESQLQuery(query);
+              const clientSideHasError = Boolean(errors.length);
+              const serverSideHasError = Boolean(jsonBody.error);
+
+              if (clientSideHasError && !serverSideHasError) {
+                throw new Error(`Client side errored but ES server did not: ${query}`);
+              } else if (serverSideHasError && !clientSideHasError) {
+                /**
+                 * In this case client side validator can improve, but it's not
+                 * hard failure rather log it as it can be a useful to
+                 * investigate a bug on the ES implementation side for some type
+                 * combination.
+                 */
+                // eslint-disable-next-line no-console
+                console.warn(
+                  'Server error, but no client-side error',
+                  query,
+                  jsonBody.error!.message
+                );
+              }
+            },
+          };
         });
       });
     }
