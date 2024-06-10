@@ -32,7 +32,7 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { getHasWrongOperator } from '@kbn/securitysolution-list-utils';
+import { hasWrongOperatorWithWildcard } from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
@@ -184,7 +184,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     (items: ExceptionsBuilderReturnExceptionItem[]): void => {
       dispatch({
         type: 'setWildcardWithWrongOperator',
-        warningExists: getHasWrongOperator(items),
+        warningExists: hasWrongOperatorWithWildcard(items),
       });
       dispatch({
         type: 'setExceptionItems',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getMappingConflictsInfo, fieldSupportsMatches, getHasWrongOperator } from '.';
+import { getMappingConflictsInfo, fieldSupportsMatches, hasWrongOperatorWithWildcard } from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -181,10 +181,10 @@ describe('Helpers', () => {
       ).toBeFalsy();
     });
   });
-  describe('getHasWrongOperator', () => {
+  describe('hasWrongOperatorWithWildcard', () => {
     test('it returns true if there is at least one exception entry with a wildcard and the wrong operator', () => {
       expect(
-        getHasWrongOperator([
+        hasWrongOperatorWithWildcard([
           {
             description: '',
             name: '',
@@ -194,7 +194,7 @@ describe('Helpers', () => {
         ])
       ).toBeTruthy();
       expect(
-        getHasWrongOperator([
+        hasWrongOperatorWithWildcard([
           {
             description: '',
             name: '',
@@ -206,7 +206,7 @@ describe('Helpers', () => {
     });
     test('it returns false if there are no exception entries with a wildcard and the wrong operator', () => {
       expect(
-        getHasWrongOperator([
+        hasWrongOperatorWithWildcard([
           {
             description: '',
             name: '',
