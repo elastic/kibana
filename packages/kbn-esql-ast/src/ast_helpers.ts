@@ -14,6 +14,7 @@ import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
 import type {
   ArithmeticUnaryContext,
   DecimalValueContext,
+  InlineCastContext,
   IntegerValueContext,
   QualifiedIntegerLiteralContext,
 } from './antlr/esql_parser';
@@ -32,6 +33,7 @@ import type {
   ESQLCommandOption,
   ESQLAstItem,
   ESQLCommandMode,
+  ESQLInlineCast,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -56,6 +58,17 @@ export function createCommand(name: string, ctx: ParserRuleContext): ESQLCommand
     name,
     text: ctx.getText(),
     args: [],
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
+}
+
+export function createInlineCast(ctx: InlineCastContext): Omit<ESQLInlineCast, 'value'> {
+  return {
+    type: 'inlineCast',
+    name: 'inlineCast',
+    text: ctx.getText(),
+    castType: ctx.dataType().getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception),
   };

@@ -57,6 +57,7 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
   IndexIdentifierContext,
+  InlineCastContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -76,6 +77,7 @@ import {
   createPolicy,
   createSetting,
   textExistsAndIsValid,
+  createInlineCast,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -84,6 +86,7 @@ import type {
   ESQLFunction,
   ESQLCommandOption,
   ESQLAstItem,
+  ESQLInlineCast,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -385,6 +388,16 @@ export function visitPrimaryExpression(
     }
     return fn;
   }
+  if (ctx instanceof InlineCastContext) {
+    return collectInlineCast(ctx);
+  }
+}
+
+function collectInlineCast(ctx: InlineCastContext): ESQLInlineCast {
+  return {
+    ...createInlineCast(ctx),
+    value: visitPrimaryExpression(ctx.primaryExpression()),
+  };
 }
 
 export function collectLogicalExpression(ctx: BooleanExpressionContext) {
