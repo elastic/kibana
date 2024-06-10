@@ -21,6 +21,10 @@ export class SubFeaturePrivilege extends KibanaPrivilege {
     return this.subPrivilegeConfig.name;
   }
 
+  public get disabled() {
+    return this.subPrivilegeConfig.disabled;
+  }
+
   public get requireAllSpaces() {
     return this.subPrivilegeConfig.requireAllSpaces ?? false;
   }
