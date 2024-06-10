@@ -64,10 +64,41 @@ export default ({ getService }: FtrProviderContext): void => {
             name: 'B',
           });
 
-          // Call the upgrade review prebuilt rules endpoint and check that no rules are eligible for update
+          // Increment the version of the installed rule, do NOT update the related single line string field, and create the new rule assets
+          const updatedRuleAssetSavedObjects = [
+            createRuleAssetSavedObject({
+              rule_id: 'rule-1',
+              name: 'A',
+              version: 2,
+            }),
+          ];
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+          // Call the upgrade review prebuilt rules endpoint and check that single line string diff field is returned but field does not have an update
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules).toEqual([]);
-          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(0);
+          expect(reviewResponse.rules[0].diff.fields).toMatchObject({
+            name: {
+              base_version: 'A',
+              current_version: 'B',
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+              has_conflict: false,
+              has_update: false,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              merged_version: 'B',
+              target_version: 'A',
+            },
+            version: {
+              current_version: 1,
+              diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+              has_conflict: false,
+              has_update: true,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              merged_version: 2,
+              target_version: 2,
+            },
+          });
+          expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
         });
       });
 
@@ -140,9 +171,18 @@ export default ({ getService }: FtrProviderContext): void => {
             await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
             // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-            // but does NOT contain single line string field
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             expect(reviewResponse.rules[0].diff.fields).toMatchObject({
+              name: {
+                base_version: 'A',
+                current_version: 'B',
+                diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+                has_conflict: false,
+                has_update: false,
+                merge_outcome: ThreeWayMergeOutcome.Current,
+                merged_version: 'B',
+                target_version: 'B',
+              },
               version: {
                 base_version: 1,
                 current_version: 1,
@@ -345,10 +385,41 @@ export default ({ getService }: FtrProviderContext): void => {
             risk_score: 2,
           });
 
-          // Call the upgrade review prebuilt rules endpoint and check that no rules are eligible for update
+          // Increment the version of the installed rule, do NOT update the related number field, and create the new rule assets
+          const updatedRuleAssetSavedObjects = [
+            createRuleAssetSavedObject({
+              rule_id: 'rule-1',
+              risk_score: 1,
+              version: 2,
+            }),
+          ];
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+          // Call the upgrade review prebuilt rules endpoint and check that number diff field is returned but field does not have an update
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules).toEqual([]);
-          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(0);
+          expect(reviewResponse.rules[0].diff.fields).toMatchObject({
+            risk_score: {
+              base_version: 1,
+              current_version: 2,
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+              has_conflict: false,
+              has_update: false,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              merged_version: 2,
+              target_version: 1,
+            },
+            version: {
+              current_version: 1,
+              diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+              has_conflict: false,
+              has_update: true,
+              merge_outcome: ThreeWayMergeOutcome.Target,
+              merged_version: 2,
+              target_version: 2,
+            },
+          });
+          expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+          expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
         });
       });
 
@@ -420,10 +491,19 @@ export default ({ getService }: FtrProviderContext): void => {
             ];
             await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
-            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-            // but does NOT contain number field
+            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update and contains number field
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
             expect(reviewResponse.rules[0].diff.fields).toMatchObject({
+              risk_score: {
+                base_version: 1,
+                current_version: 2,
+                diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+                has_conflict: false,
+                has_update: false,
+                merge_outcome: ThreeWayMergeOutcome.Current,
+                merged_version: 2,
+                target_version: 2,
+              },
               version: {
                 base_version: 1,
                 current_version: 1,

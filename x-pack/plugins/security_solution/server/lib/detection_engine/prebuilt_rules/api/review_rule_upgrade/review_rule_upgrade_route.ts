@@ -7,7 +7,10 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
-import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import {
+  REVIEW_RULE_UPGRADE_URL,
+  ThreeWayDiffOutcome,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleUpgradeResponseBody,
   RuleUpgradeInfoForReview,
@@ -120,7 +123,12 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,
-          (fieldDiff) => fieldDiff.has_update || fieldDiff.has_conflict
+          (fieldDiff) =>
+            fieldDiff.has_update ||
+            fieldDiff.has_conflict ||
+            // For full transparancy we display all user-customized fields, even if nothing changes in the field's target or merged versions
+            fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueNoUpdate ||
+            fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueSameUpdate
         ),
         has_conflict: ruleDiff.has_conflict,
       },
