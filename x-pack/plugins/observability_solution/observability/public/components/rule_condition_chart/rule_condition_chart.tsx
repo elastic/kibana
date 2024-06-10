@@ -117,13 +117,13 @@ export function RuleConditionChart({
         const paragraphElements = errorDiv.querySelectorAll('p');
         if (!paragraphElements || paragraphElements.length < 2) return;
         paragraphElements[0].innerText = i18n.translate(
-          'xpack.observability.customThreshold.rule..charts.error_equation.title',
+          'xpack.observability.ruleCondition.chart.error_equation.title',
           {
             defaultMessage: 'An error occurred while rendering the chart',
           }
         );
         paragraphElements[1].innerText = i18n.translate(
-          'xpack.observability.customThreshold.rule..charts.error_equation.description',
+          'xpack.observability.ruleCondition.chart.error_equation.description',
           {
             defaultMessage: 'Check the rule equation.',
           }
@@ -336,7 +336,7 @@ export function RuleConditionChart({
     !dataView ||
     !attributes ||
     error?.equation ||
-    Object.keys(error?.metrics || {}).length !== 0 ||
+    Object.keys(error?.metrics || error?.metric || {}).length !== 0 ||
     !timeSize ||
     !timeRange
   ) {
