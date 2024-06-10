@@ -8,6 +8,8 @@
 
 import { setup } from '../helpers';
 import { validationFromCommandTestSuite } from '../test_suites/validation.command.from';
+import { validationMetricsCommandTestSuite } from '../test_suites/validation.command.metrics';
+import { validationStatsCommandTestSuite } from '../test_suites/validation.command.stats';
 import { type EsqlEnv, setupEsqlEnv } from './helpers';
 
 /*
@@ -73,6 +75,8 @@ describe('validation consistency', () => {
         };
 
         validationFromCommandTestSuite(unitTestSetup);
+        validationMetricsCommandTestSuite(unitTestSetup);
+        validationStatsCommandTestSuite(unitTestSetup);
       });
     }
   }
