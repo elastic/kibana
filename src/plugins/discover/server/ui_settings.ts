@@ -207,6 +207,16 @@ export const getUiSettings: (
       type: METRIC_TYPE.CLICK,
       name: 'discover:useLegacyDataGrid',
     },
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.disableDocumentExplorerDeprecation',
+        {
+          defaultMessage:
+            'This setting is deprecated and will not be supported in a future version.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
@@ -236,6 +246,16 @@ export const getUiSettings: (
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.readFieldsFromSourceDeprecation',
+        {
+          defaultMessage:
+            'This setting is deprecated and will not be supported in a future version.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [SHOW_FIELD_STATISTICS]: {
     name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
