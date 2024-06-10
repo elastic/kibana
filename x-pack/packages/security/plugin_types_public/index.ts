@@ -16,3 +16,4 @@ export type {
   UserProfileSuggestParams,
   UserProfileAPIClient,
 } from './src/user_profile';
+export type { RolePutPayload, RolesAPIClient } from './src/roles';
