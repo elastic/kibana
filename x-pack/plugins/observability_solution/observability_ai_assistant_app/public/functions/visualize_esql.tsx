@@ -130,7 +130,8 @@ export function VisualizeESQL({
       }
       return dataView;
     });
-  }, [indexPattern]);
+  }, [indexPattern, dataViews]);
+
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);

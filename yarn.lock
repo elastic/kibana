@@ -6728,6 +6728,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unsaved-changes-prompt@link:packages/kbn-unsaved-changes-prompt":
+  version "0.0.0"
+  uid ""
+
 "@kbn/upgrade-assistant-plugin@link:x-pack/plugins/upgrade_assistant":
   version "0.0.0"
   uid ""
@@ -13456,6 +13460,11 @@ cache-base@^1.0.1:
     to-object-path "^0.3.0"
     union-value "^1.0.0"
     unset-value "^1.0.0"
+
+cacheable-lookup@6:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/cacheable-lookup/-/cacheable-lookup-6.1.0.tgz#0330a543471c61faa4e9035db583aad753b36385"
+  integrity sha512-KJ/Dmo1lDDhmW2XDPMo+9oiy/CeqosPguPCrgcVzKyZrL6pM1gU2GmPY/xo6OQPTUaA/c0kwHuywB4E6nmT9ww==
 
 cacheable-lookup@^5.0.3:
   version "5.0.3"
