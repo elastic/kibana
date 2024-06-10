@@ -11,6 +11,8 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { HOST_ISOLATION_FAILURE } from './translations';
 import { createHostUnIsolation } from './api';
 
+// FIXME:PT move this to common/hooks/endpiont
+
 interface HostUnisolationStatus {
   loading: boolean;
   unIsolateHost: () => Promise<boolean>;

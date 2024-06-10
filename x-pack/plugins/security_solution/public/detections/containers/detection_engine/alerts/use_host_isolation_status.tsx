@@ -22,6 +22,8 @@ interface HostIsolationStatusResponse {
   pendingUnisolation: number;
 }
 
+// FIXME:PT move this to common/hooks/endpiont
+
 /**
  * Retrieves the current isolation status of a host and the agent/host status
  */
