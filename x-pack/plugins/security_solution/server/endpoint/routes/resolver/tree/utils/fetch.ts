@@ -27,7 +27,7 @@ import { StatsQuery } from '../queries/stats';
  * resolver tree.
  */
 export interface TreeOptions {
-  agentId: string;
+  agentId?: string;
   descendantLevels: number;
   descendants: number;
   ancestors: number;

@@ -85,7 +85,7 @@ export class EventsQuery extends BaseResolverQuery {
             {
               term: { 'process.entity_id': id },
             },
-            ...(this.schema.agentId ? [{ term: { 'agent.id': agentId } }] : []),
+            ...(this.schema.agentId && agentId ? [{ term: { 'agent.id': agentId } }] : []),
             ...this.getRangeFilter(),
           ],
         },
@@ -120,7 +120,7 @@ export class EventsQuery extends BaseResolverQuery {
    */
   async search(
     client: IScopedClusterClient,
-    body: { filter?: string; eventID?: string; entityType?: string; agentId: string },
+    body: { filter?: string; eventID?: string; entityType?: string; agentId?: string },
     alertsClient: AlertsClient
   ): Promise<SafeResolverEvent[]> {
     if (body.filter) {

@@ -52,7 +52,9 @@ export class StatsQuery extends BaseResolverQuery {
             {
               terms: { [this.schema.id]: nodes },
             },
-            ...(this.schema.agentId ? [{ term: { 'agent.id': this.agentId } }] : []),
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               term: { 'event.kind': 'event' },
             },

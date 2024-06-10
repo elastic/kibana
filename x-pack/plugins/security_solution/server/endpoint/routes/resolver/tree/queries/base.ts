@@ -13,7 +13,7 @@ import { resolverFields } from '../utils';
 
 export interface ResolverQueryParams {
   readonly schema?: ResolverSchema;
-  readonly agentId: string;
+  readonly agentId?: string;
   readonly indexPatterns: string | string[];
   readonly isInternalRequest?: boolean;
   readonly shouldExcludeColdAndFrozenTiers?: boolean;
@@ -26,7 +26,7 @@ export interface ResolverQueryParams {
 
 export class BaseResolverQuery implements ResolverQueryParams {
   readonly schema: ResolverSchema;
-  readonly agentId: string;
+  readonly agentId: string | undefined;
   readonly indexPatterns: string | string[];
   readonly isInternalRequest?: boolean;
   readonly shouldExcludeColdAndFrozenTiers?: boolean;
@@ -46,7 +46,6 @@ export class BaseResolverQuery implements ResolverQueryParams {
       : {
           id: 'process.entity_id',
           parent: 'process.parent.entity_id',
-          agentId: 'agent.id',
         };
     this.resolverFields = resolverFields(schemaOrDefault);
     this.schema = schemaOrDefault;
