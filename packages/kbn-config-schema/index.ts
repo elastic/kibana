@@ -43,6 +43,8 @@ import {
   StringType,
   Type,
   TypeOf,
+  TypeOfOutput,
+  TransformedType,
   TypeOptions,
   UnionType,
   URIOptions,
@@ -52,7 +54,16 @@ import {
   Lazy,
 } from './src/types';
 
-export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
+export type {
+  AnyType,
+  ConditionalType,
+  TypeOf,
+  TypeOfOutput,
+  Props,
+  SchemaStructureEntry,
+  NullableProps,
+  TransformedType,
+};
 export { ObjectType, Type };
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
