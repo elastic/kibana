@@ -244,7 +244,7 @@ export function RuleConditionChart({
     const baseLayer = {
       type: 'formula',
       value: formula,
-      label: 'Rule name',
+      label: formula,
       groupBy,
       format: {
         id: formatId,
@@ -348,7 +348,7 @@ export function RuleConditionChart({
           data-test-subj="thresholdRuleNoChartData"
           body={
             <FormattedMessage
-              id="xpack.observability.customThreshold.rule..charts.noData.title"
+              id="xpack.observability.customThreshold.rule.charts.noData.title"
               defaultMessage="No chart data available, check the rule {errorSourceField}"
               values={{
                 errorSourceField:

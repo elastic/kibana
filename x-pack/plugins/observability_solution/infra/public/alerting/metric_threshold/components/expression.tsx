@@ -308,6 +308,7 @@ export const Expressions: React.FC<Props> = (props) => {
           const metricExpression = [
             {
               aggType: e.aggType,
+              // RuleConditionChart uses A,B,C etc in its parser to identify multiple conditions
               name: String.fromCharCode('A'.charCodeAt(0) + idx),
               field: e.metric || '',
             },
