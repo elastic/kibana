@@ -100,14 +100,15 @@ export const convertToSavedSearch = async (
     references,
     searchSource,
     sharingSavedObjectProps,
-    Boolean(managed)
+    Boolean(managed),
+    serialized
   );
 
   return returnVal;
 };
 
 export const getSavedSearch = async <
-  Serialized extends boolean = boolean,
+  Serialized extends boolean = false,
   ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
 >(
   savedSearchId: string,

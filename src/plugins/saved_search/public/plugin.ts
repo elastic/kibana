@@ -43,7 +43,7 @@ export interface SavedSearchPublicPluginSetup {}
  * Saved search plugin public Setup contract
  */
 export interface SavedSearchPublicPluginStart {
-  get: <Serialized extends boolean = boolean>(
+  get: <Serialized extends boolean = false>(
     savedSearchId: string,
     serialized?: Serialized
   ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
@@ -57,7 +57,7 @@ export interface SavedSearchPublicPluginStart {
     props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
   ) => Promise<void>;
   byValue: {
-    toSavedSearch: <Serialized extends boolean = boolean>(
+    toSavedSearch: <Serialized extends boolean = false>(
       id: string | undefined,
       result: SavedSearchUnwrapResult,
       serialized?: Serialized
@@ -136,7 +136,7 @@ export class SavedSearchPublicPlugin
     const service = new SavedSearchesService(deps);
 
     return {
-      get: <Serialized extends boolean = boolean>(
+      get: <Serialized extends boolean = false>(
         savedSearchId: string,
         serialized?: Serialized
       ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> =>

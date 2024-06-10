@@ -26,7 +26,7 @@ export interface SavedSearchesServiceDeps {
 export class SavedSearchesService {
   constructor(private deps: SavedSearchesServiceDeps) {}
 
-  get = <Serialized extends boolean = boolean>(
+  get = <Serialized extends boolean = false>(
     savedSearchId: string,
     serialized?: Serialized
   ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> => {

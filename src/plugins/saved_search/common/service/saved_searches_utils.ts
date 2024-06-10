@@ -22,9 +22,10 @@ export const fromSavedSearchAttributes = (
   references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
-  managed: boolean
+  managed: boolean,
+  serialized: boolean = false
 ): SavedSearch | SerializableSavedSearch => ({
-  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed),
+  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed, serialized),
   sharingSavedObjectProps,
   references,
 });

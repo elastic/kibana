@@ -18,18 +18,17 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
-import {
-  ActionContext,
-  type PanelActionDependencies,
-  ReportingCsvPanelAction,
-} from './get_csv_panel_action';
+import { type PanelActionDependencies, ReportingCsvPanelAction } from './get_csv_panel_action';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { HasSavedSearch } from '@kbn/discover-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 
 const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;
 
 describe('GetCsvReportPanelAction', () => {
   let csvConfig: ClientConfigType['csv'];
-  let context: ActionContext;
+  let context: EmbeddableApiContext;
   let mockLicenseState: LicenseCheckState;
   let mockSearchSource: SearchSource;
   let mockStartServicesPayload: [CoreStart, PanelActionDependencies, unknown];
@@ -106,8 +105,11 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
         hasTimeRange: () => true,
+        parentApi: {
+          viewMode: new BehaviorSubject('view'),
+        },
       },
-    } as unknown as ActionContext;
+    } as EmbeddableApiContext;
   });
 
   afterEach(() => {
@@ -145,7 +147,7 @@ describe('GetCsvReportPanelAction', () => {
       getField: jest.fn((name) => (name === 'index' ? dataViewMock : undefined)),
       getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
     } as unknown as SearchSource;
-    context.embeddable.getSavedSearch = () => {
+    (context.embeddable as HasSavedSearch).getSavedSearch = () => {
       return {
         searchSource: mockSearchSource,
         columns: ['column_a', 'column_b'],
