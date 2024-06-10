@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
-import type { Logger } from '@kbn/logging';
-
-const DELIMITER_TOKENS = ['`', "'", '"', ['(', ')']];
+const STRING_DELIMITER_TOKENS = ['`', "'", '"'];
 const ESCAPE_TOKEN = '\\\\';
 
 // this function splits statements by a certain token,
@@ -18,6 +15,9 @@ function split(value: string, splitToken: string) {
   const statements: string[] = [];
 
   let delimiterToken: string | undefined;
+
+  let groupingCount: number = 0;
+
   let currentStatement: string = '';
 
   const trimmed = value.trim().split('');
@@ -27,6 +27,7 @@ function split(value: string, splitToken: string) {
 
     if (
       !delimiterToken &&
+      groupingCount === 0 &&
       trimmed
         .slice(index, index + splitToken.length)
         .join('')
@@ -44,13 +45,16 @@ function split(value: string, splitToken: string) {
       // end identifier
       delimiterToken = undefined;
     } else if (!delimiterToken && trimmed[index - 1] !== ESCAPE_TOKEN) {
-      const applicableToken = DELIMITER_TOKENS.find(
-        (token) => token === char || (isArray(token) && token[0] === char)
-      );
+      const applicableToken = STRING_DELIMITER_TOKENS.includes(char) ? char : undefined;
+
       if (applicableToken) {
         // start identifier
-        delimiterToken = isArray(applicableToken) ? applicableToken[1] : applicableToken;
+        delimiterToken = applicableToken;
         continue;
+      } else if (char === '(') {
+        groupingCount++;
+      } else if (char === ')') {
+        groupingCount--;
       }
     }
   }
@@ -104,7 +108,7 @@ function isValidColumnName(column: string) {
 }
 
 function escapeColumns(line: string) {
-  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/s) ?? ['', '', ''];
+  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/ms) ?? ['', '', ''];
 
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {
@@ -130,7 +134,7 @@ function verifyKeepColumns(
   const availableColumns = columnsInKeep.concat();
 
   for (const { name, command } of nextCommands) {
-    if (['STATS', 'KEEP', 'DROP', 'DISSECT', 'GROK', 'ENRICH'].includes(name || '')) {
+    if (['STATS', 'KEEP', 'DROP', 'DISSECT', 'GROK', 'ENRICH', 'RENAME'].includes(name || '')) {
       // these operations alter columns in a way that is hard to analyze, so we abort
       break;
     }
@@ -179,14 +183,15 @@ function escapeExpressionsInSort(sortCommand: string) {
   const columnsInSort = split(sortCommand.replace(/^SORT\s*/, ''), ',')
     .map((statement) => split(statement, '=')?.[0].trim())
     .map((columnAndSortOrder) => {
-      let [, column, sortOrder = ''] = columnAndSortOrder.match(/^(.*?)\s*(ASC|DESC)?$/i) || [];
+      let [, column, sortOrder = ''] =
+        columnAndSortOrder.match(/^(.*?)\s+(ASC|DESC\s*([A-Z\s]+)?)?$/i) || [];
       if (!column) {
         return columnAndSortOrder;
       }
 
       if (sortOrder) sortOrder = ` ${sortOrder}`;
 
-      if (!column.match(/^[a-zA-Z0-9_\.@]+$/)) {
+      if (!column.match(/^`?[a-zA-Z0-9_\.@]+`?$/)) {
         column = `\`${column}\``;
       }
 
@@ -220,59 +225,63 @@ function ensureEqualityOperators(whereCommand: string) {
   return `WHERE ${next}`;
 }
 
-export function correctCommonEsqlMistakes(content: string, log: Logger) {
-  return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
-    const commands = splitIntoCommands(query.trim());
+export function correctCommonEsqlMistakes(query: string): {
+  isCorrection: boolean;
+  input: string;
+  output: string;
+} {
+  const commands = splitIntoCommands(query.trim());
 
-    const formattedCommands: string[] = commands.map(({ name, command }, index) => {
-      let formattedCommand = command;
+  const formattedCommands: string[] = commands.map(({ name, command }, index) => {
+    let formattedCommand = command;
 
-      switch (name) {
-        case 'FROM':
-          formattedCommand = formattedCommand
-            .replaceAll(/FROM "(.*)"/g, 'FROM $1')
-            .replaceAll(/FROM '(.*)'/g, 'FROM $1')
-            .replaceAll(/FROM `(.*)`/g, 'FROM $1');
-          break;
+    switch (name) {
+      case 'FROM':
+        formattedCommand = formattedCommand
+          .replaceAll(/FROM "(.*)"/g, 'FROM $1')
+          .replaceAll(/FROM '(.*)'/g, 'FROM $1')
+          .replaceAll(/FROM `(.*)`/g, 'FROM $1');
+        break;
 
-        case 'WHERE':
-          formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
-          formattedCommand = ensureEqualityOperators(formattedCommand);
-          break;
+      case 'WHERE':
+        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+        formattedCommand = ensureEqualityOperators(formattedCommand);
+        break;
 
-        case 'EVAL':
-          formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
-          formattedCommand = escapeColumns(formattedCommand);
-          break;
+      case 'EVAL':
+        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+        formattedCommand = escapeColumns(formattedCommand);
+        break;
 
-        case 'STATS':
-          formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
-          const [before, after] = split(formattedCommand, ' BY ');
-          formattedCommand = escapeColumns(before);
-          if (after) {
-            formattedCommand += ` BY ${after}`;
-          }
-          break;
+      case 'STATS':
+        formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
+        const [before, after] = split(formattedCommand, ' BY ');
+        formattedCommand = escapeColumns(before);
+        if (after) {
+          formattedCommand += ` BY ${after}`;
+        }
+        break;
 
-        case 'KEEP':
-          formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
-          break;
+      case 'KEEP':
+        formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
+        break;
 
-        case 'SORT':
-          formattedCommand = escapeExpressionsInSort(formattedCommand);
-          break;
-      }
-      return formattedCommand;
-    });
-
-    const correctedFormattedQuery = formattedCommands.join('\n| ');
-
-    const originalFormattedQuery = commands.map((cmd) => cmd.command).join('\n| ');
-
-    if (originalFormattedQuery !== correctedFormattedQuery) {
-      log.debug(`Modified query from: ${originalFormattedQuery}\nto:\n${correctedFormattedQuery}`);
+      case 'SORT':
+        formattedCommand = escapeExpressionsInSort(formattedCommand);
+        break;
     }
-
-    return '```esql\n' + correctedFormattedQuery + '\n```';
+    return formattedCommand;
   });
+
+  const output = formattedCommands.join('\n| ');
+
+  const originalFormattedQuery = commands.map((cmd) => cmd.command).join('\n| ');
+
+  const isCorrection = output !== originalFormattedQuery;
+
+  return {
+    input: query,
+    output,
+    isCorrection,
+  };
 }
