@@ -84,7 +84,8 @@ export const processVersionedRouter = (
       const contentType = extractContentType(route.options.options?.body);
       const hasVersionFilter = Boolean(filters?.version);
       const operation: OpenAPIV3.OperationObject = {
-        summary: route.options.description ?? '',
+        summary: route.options.summary ?? '',
+        description: route.options.description,
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
         requestBody: hasBody
           ? {

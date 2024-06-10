@@ -552,6 +552,7 @@ export interface DocLinks {
     performancePresets: string;
     scalingKubernetesResourcesAndLimits: string;
     roleAndPrivileges: string;
+    proxiesSettings: string;
   }>;
   readonly ecs: {
     readonly guide: string;

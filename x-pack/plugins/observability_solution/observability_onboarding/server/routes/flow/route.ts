@@ -15,14 +15,12 @@ import {
 import type { TemplateAgentPolicyInput } from '@kbn/fleet-plugin/common';
 import { dump } from 'js-yaml';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
-import {
-  ElasticAgentStepPayload,
-  ObservabilityOnboardingFlow,
-} from '../../saved_objects/observability_onboarding_status';
+import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
+import { ElasticAgentStepPayload, Integration, StepProgressPayloadRT } from '../types';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
@@ -72,7 +70,9 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         status: t.string,
       }),
       t.partial({ message: t.string }),
-      t.partial({ payload: t.record(t.string, t.unknown) }),
+      t.partial({
+        payload: StepProgressPayloadRT,
+      }),
     ]),
   }),
   async handler(resources) {
@@ -112,7 +112,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
           [name]: {
             status,
             message,
-            payload: payload as unknown as ElasticAgentStepPayload,
+            payload,
           },
         },
       },
@@ -162,7 +162,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
           type,
           state: savedObservabilityOnboardingState.state,
           esClient,
-          payload: progress['ea-status']?.payload,
+          payload: progress['ea-status']?.payload as ElasticAgentStepPayload,
         });
         if (hasLogs) {
           progress['logs-ingest'] = { status: 'complete' };
@@ -239,14 +239,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       });
     }
 
-    await saveObservabilityOnboardingFlow({
-      savedObjectsClient,
-      savedObjectId: params.path.onboardingId,
-      observabilityOnboardingState: {
-        ...savedObservabilityOnboardingState,
-      } as ObservabilityOnboardingFlow,
-    });
-
     let agentPolicyInputs: TemplateAgentPolicyInput[] = [];
     try {
       agentPolicyInputs = await ensureInstalledIntegrations(integrationsToInstall, packageClient);
@@ -260,6 +252,21 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       }
       throw error;
     }
+
+    await saveObservabilityOnboardingFlow({
+      savedObjectsClient,
+      savedObjectId: params.path.onboardingId,
+      observabilityOnboardingState: {
+        ...savedObservabilityOnboardingState,
+        progress: {
+          ...savedObservabilityOnboardingState.progress,
+          'install-integrations': {
+            status: 'complete',
+            payload: integrationsToInstall,
+          },
+        },
+      } as ObservabilityOnboardingFlow,
+    });
 
     const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
@@ -276,17 +283,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     });
   },
 });
-
-type Integration =
-  | {
-      pkgName: string;
-      installSource: 'registry';
-    }
-  | {
-      pkgName: string;
-      installSource: 'custom';
-      logFilePaths: string[];
-    };
 
 async function ensureInstalledIntegrations(
   integrationsToInstall: Integration[],

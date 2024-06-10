@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
       await navigateToLogsExplorer();
     });
 
@@ -48,30 +48,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('should render custom control columns properly', async () => {
       it('should render control column with proper header', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          // First control column has no title, so empty string, last control column has title
+          // First control column has no title, so empty string, leading control column has title
           expect(await dataGrid.getControlColumnHeaderFields()).to.eql(['', 'actions']);
         });
       });
 
-      it('should render the expand icon in the last control column', async () => {
+      it('should render the expand icon in the leading control column', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 4);
+          const cellElement = await dataGrid.getCellElement(0, 1);
           const expandButton = await cellElement.findByTestSubject('docTableExpandToggleColumn');
           expect(expandButton).to.not.be.empty();
         });
       });
 
-      it('should render the malformed icon in the last control column if malformed doc exists', async () => {
+      it('should render the malformed icon in the leading control column if malformed doc exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 4);
+          const cellElement = await dataGrid.getCellElement(1, 1);
           const malformedButton = await cellElement.findByTestSubject('docTableDegradedDocExist');
           expect(malformedButton).to.not.be.empty();
         });
       });
 
-      it('should render the disabled malformed icon in the last control column when malformed doc does not exists', async () => {
+      it('should render the disabled malformed icon in the leading control column when malformed doc does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 4);
+          const cellElement = await dataGrid.getCellElement(0, 1);
           const malformedDisableButton = await cellElement.findByTestSubject(
             'docTableDegradedDocDoesNotExist'
           );
@@ -79,17 +79,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should render the stacktrace icon in the last control column when stacktrace exists', async () => {
+      it('should render the stacktrace icon in the leading control column when stacktrace exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(4, 4);
+          const cellElement = await dataGrid.getCellElement(4, 1);
           const stacktraceButton = await cellElement.findByTestSubject('docTableStacktraceExist');
           expect(stacktraceButton).to.not.be.empty();
         });
       });
 
-      it('should render the stacktrace icon disabled in the last control column when stacktrace does not exists', async () => {
+      it('should render the stacktrace icon disabled in the leading control column when stacktrace does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 4);
+          const cellElement = await dataGrid.getCellElement(1, 1);
           const stacktraceButton = await cellElement.findByTestSubject(
             'docTableStacktraceDoesNotExist'
           );

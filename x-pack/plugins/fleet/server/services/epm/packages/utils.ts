@@ -13,6 +13,7 @@ import { load } from 'js-yaml';
 
 import type { RegistryDataStream } from '../../../../common';
 import type { AssetsMap } from '../../../../common/types';
+import { appContextService } from '../../app_context';
 
 type InputField =
   | FieldMetadataPlain
@@ -121,4 +122,19 @@ const getDataStreamFieldsAssetPaths = (
   return [...assetsMap.keys()].filter((path) =>
     isFieldsAsset(path, dataStreamPath, excludedFieldsAssets)
   );
+};
+
+// Set an in memory cache to save the timestamp of latest install by upload
+const lastInstalledByUpload: Map<string, number> = new Map();
+
+export const setLastUploadInstallCache = () => {
+  const logger = appContextService.getLogger();
+  const key = 'upload';
+  const time = Date.now();
+  logger.debug(`Setting timestamp ${time} to cache for install by ${key}`);
+  return lastInstalledByUpload.set(key, time);
+};
+
+export const getLastUploadInstallCache = () => {
+  return lastInstalledByUpload.get('upload');
 };

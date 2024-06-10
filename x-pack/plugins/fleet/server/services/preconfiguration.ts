@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import apm from 'elastic-apm-node';
 
@@ -177,7 +178,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const namespacedSoClient = preconfiguredAgentPolicy.space_id
         ? appContextService.getInternalUserSOClientForSpaceId(preconfiguredAgentPolicy.space_id)
-        : defaultSoClient;
+        : appContextService.getInternalUserSOClientForSpaceId(DEFAULT_NAMESPACE_STRING);
 
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         namespacedSoClient,

@@ -63,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         expect(body.items.length).to.eql(1);
-        const { id, updated_at: updatedAt, ...rest } = body.items[0];
+        const { id, updated_at: updatedAt, version, ...rest } = body.items[0];
         expectSnapshot(rest).toMatch();
       });
 
@@ -1469,7 +1469,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(items[0].package_policies.length).equal(1);
         expect(items[0].package_policies[0]).to.have.property('package');
         expect(items[0].package_policies[0].package.name).equal('system');
-        const { package_policies: packagePolicies, id, updated_at: updatedAt, ...rest } = items[0];
+        const {
+          package_policies: packagePolicies,
+          id,
+          updated_at: updatedAt,
+          version: policyVersion,
+          ...rest
+        } = items[0];
         expectSnapshot({
           ...rest,
           package_policies: packagePolicies.map(
