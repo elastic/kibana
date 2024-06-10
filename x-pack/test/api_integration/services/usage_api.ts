@@ -18,7 +18,7 @@ export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
 }
 
 export interface GetTelemetryStatsOpts {
-  authorization: string;
+  authHeader: Record<string, string>;
 }
 
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
@@ -46,7 +46,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
     },
     opts?: GetTelemetryStatsOpts
   ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
-    const client = opts?.authorization ? supertestWithoutAuth : supertest;
+    const client = opts?.authHeader ? supertestWithoutAuth : supertest;
 
     const request = client
       .post('/internal/telemetry/clusters/_stats')
@@ -54,8 +54,8 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
       .set(ELASTIC_HTTP_VERSION_HEADER, '2')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
-    if (opts?.authorization) {
-      request.set({ Authorization: opts.authorization });
+    if (opts?.authHeader) {
+      request.set(opts.authHeader);
     }
 
     const { body } = await request.send({ refreshCache: true, ...payload }).expect(200);

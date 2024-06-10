@@ -6,13 +6,13 @@
  */
 
 import { expect } from 'expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import type { RoleCredentials } from '../../../../shared/services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('/api/telemetry/v2/config API Telemetry config', function () {
     let roleAuthc: RoleCredentials;
@@ -52,8 +52,8 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
       await supertestWithoutAuth
         .put('/internal/core/_settings')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set('elastic-api-version', '1')
         .set(roleAuthc.apiKeyHeader)
+        .set('elastic-api-version', '1')
         .send({ 'telemetry.labels.journeyName': 'my-ftr-test' })
         .expect(200, { ok: true });
 

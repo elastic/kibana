@@ -12,9 +12,9 @@ import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/sch
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_integration/services/usage_api';
-import type { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');
@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       const [unencryptedPayload] = await usageApi.getTelemetryStats(
         { unencrypted: true },
-        { authorization: roleAuthc.apiKeyHeader.Authorization }
+        { authHeader: roleAuthc.apiKeyHeader }
       );
       stats = unencryptedPayload.stats;
     });

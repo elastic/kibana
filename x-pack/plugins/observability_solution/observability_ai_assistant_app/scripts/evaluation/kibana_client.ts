@@ -48,10 +48,7 @@ import {
 } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { inspect } from 'util';
-import type {
-  ObservabilityAIAssistantAPIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '@kbn/observability-ai-assistant-plugin/public';
 import { EvaluationResult } from './types';
 
 // eslint-disable-next-line spaced-comment
@@ -102,7 +99,7 @@ export class KibanaClient {
     });
   }
 
-  private getUrl(props: { query?: UrlObject['query']; pathname: string }) {
+  private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
     const parsed = parse(this.url);
 
     const baseUrl = parsed.pathname?.replaceAll('/', '') ?? '';
@@ -111,7 +108,7 @@ export class KibanaClient {
       ...parsed,
       pathname: `/${[
         baseUrl,
-        ...(this.spaceId ? ['s', this.spaceId] : []),
+        ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
         props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
       ].join('/')}`,
       query: props.query,
@@ -122,7 +119,7 @@ export class KibanaClient {
 
   callKibana<T>(
     method: string,
-    props: { query?: UrlObject['query']; pathname: string },
+    props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
     data?: any
   ) {
     const url = this.getUrl(props);
@@ -184,6 +181,58 @@ export class KibanaClient {
     this.log.info('Knowledge base installed');
   }
 
+  async createSpaceIfNeeded() {
+    if (!this.spaceId) {
+      return;
+    }
+
+    this.log.debug(`Checking if space ${this.spaceId} exists`);
+
+    const spaceExistsResponse = await this.callKibana<{
+      id?: string;
+    }>('GET', {
+      pathname: `/api/spaces/space/${this.spaceId}`,
+      ignoreSpaceId: true,
+    }).catch((error) => {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        return {
+          status: 404,
+          data: {
+            id: undefined,
+          },
+        };
+      }
+      throw error;
+    });
+
+    if (spaceExistsResponse.data.id) {
+      this.log.debug(`Space id ${this.spaceId} found`);
+      return;
+    }
+
+    this.log.info(`Creating space ${this.spaceId}`);
+
+    const spaceCreatedResponse = await this.callKibana<{ id: string }>(
+      'POST',
+      {
+        pathname: '/api/spaces/space',
+        ignoreSpaceId: true,
+      },
+      {
+        id: this.spaceId,
+        name: this.spaceId,
+      }
+    );
+
+    if (spaceCreatedResponse.status === 200) {
+      this.log.info(`Created space ${this.spaceId}`);
+    } else {
+      throw new Error(
+        `Error creating space: ${spaceCreatedResponse.status} - ${spaceCreatedResponse.data}`
+      );
+    }
+  }
+
   createChatClient({
     connectorId,
     evaluationConnectorId,
@@ -193,7 +242,7 @@ export class KibanaClient {
     connectorId: string;
     evaluationConnectorId: string;
     persist: boolean;
-    suite: Mocha.Suite;
+    suite?: Mocha.Suite;
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -209,36 +258,27 @@ export class KibanaClient {
 
     const that = this;
 
-    async function getFunctions() {
-      const {
-        data: { functionDefinitions },
-      }: AxiosResponse<APIReturnType<'GET /internal/observability_ai_assistant/functions'>> =
-        await that.axios.get(
-          that.getUrl({ pathname: '/internal/observability_ai_assistant/functions' })
-        );
-
-      return { functionDefinitions };
-    }
-
     let currentTitle: string = '';
     let firstSuiteName: string = '';
 
-    suite.beforeEach(function () {
-      const currentTest: Mocha.Test = this.currentTest;
-      const titles: string[] = [];
-      titles.push(this.currentTest.title);
-      let parent = currentTest.parent;
-      while (parent) {
-        titles.push(parent.title);
-        parent = parent.parent;
-      }
-      currentTitle = titles.reverse().join(' ');
-      firstSuiteName = titles.filter((item) => item !== '')[0];
-    });
+    if (suite) {
+      suite.beforeEach(function () {
+        const currentTest: Mocha.Test = this.currentTest;
+        const titles: string[] = [];
+        titles.push(this.currentTest.title);
+        let parent = currentTest.parent;
+        while (parent) {
+          titles.push(parent.title);
+          parent = parent.parent;
+        }
+        currentTitle = titles.reverse().join(' ');
+        firstSuiteName = titles.filter((item) => item !== '')[0];
+      });
 
-    suite.afterEach(function () {
-      currentTitle = '';
-    });
+      suite.afterEach(function () {
+        currentTitle = '';
+      });
+    }
 
     const onResultCallbacks: Array<{
       callback: (result: EvaluationResult) => void;
@@ -278,13 +318,12 @@ export class KibanaClient {
                     {
                       message: error.message,
                       status: error.status,
-                      response: error.response?.data,
                     },
                     { depth: 10 }
                   )
                 );
               } else {
-                that.log.error(inspect(error, { depth: 10 }));
+                that.log.error(inspect(error, { depth: 5 }));
               }
 
               if (error.message.includes('Status code: 429')) {
@@ -359,14 +398,13 @@ export class KibanaClient {
 
     return {
       chat: async (message) => {
-        const { functionDefinitions } = await getFunctions();
         const messages = [
           ...getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat('chat', { messages, functions: functionDefinitions });
+        return chat('chat', { messages, functions: [] });
       },
       complete: async (...args) => {
         that.log.info(`Complete`);
