@@ -14,7 +14,7 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
 } from '../../../common/constants';
-import { OptionalFieldLabel } from '../create/optional_field_label';
+import { OptionalFieldLabel } from '../optional_field_label';
 import * as i18n from './translations';
 import type { TemplateFormProps } from './types';
 import {

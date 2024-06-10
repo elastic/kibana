@@ -18,7 +18,7 @@ import {
 } from '../../../common/constants';
 import * as i18n from './translations';
 
-import { OptionalFieldLabel } from './optional_field_label';
+import { OptionalFieldLabel } from '../optional_field_label';
 import { SEVERITY_TITLE } from '../severity/translations';
 const { emptyField, maxLengthField } = fieldValidators;
 

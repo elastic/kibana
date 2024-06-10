@@ -11,7 +11,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { FormProps } from './schema';
+import type { FormProps } from '../create/schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { Category } from './category';

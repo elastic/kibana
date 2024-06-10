@@ -10,7 +10,7 @@ import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { Description } from './description';
-import { schema } from './schema';
+import { schema } from '../create/schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';

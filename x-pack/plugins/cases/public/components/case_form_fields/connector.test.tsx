@@ -20,8 +20,8 @@ import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_ty
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
-import type { FormProps } from './schema';
-import { schema } from './schema';
+import type { FormProps } from '../create/schema';
+import { schema } from '../create/schema';
 import type { AppMockRenderer } from '../../common/mock';
 import {
   noConnectorsCasePermission,

@@ -22,12 +22,12 @@ import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 
 import type { ActionConnector } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
-import { Title } from './title';
-import { Description, fieldName as descriptionFieldName } from './description';
-import { Tags } from './tags';
-import { Connector } from './connector';
+import { Title } from '../case_form_fields/title';
+import { Description, fieldName as descriptionFieldName } from '../case_form_fields/description';
+import { Tags } from '../case_form_fields/tags';
+import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
-import { SyncAlertsToggle } from './sync_alerts_toggle';
+import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
 import type { CaseUI } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -42,11 +42,11 @@ import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
-import { Severity } from './severity';
-import { Assignees } from './assignees';
+import { Severity } from '../case_form_fields/severity';
+import { Assignees } from '../case_form_fields/assignees';
 import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
-import { Category } from './category';
+import { Category } from '../case_form_fields/category';
 import { CustomFields } from './custom_fields';
 
 const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>

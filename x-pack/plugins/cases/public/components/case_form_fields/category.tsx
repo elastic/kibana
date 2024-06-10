@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { CategoryFormField } from '../category/category_form_field';
-import { OptionalFieldLabel } from './optional_field_label';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 interface Props {
   isLoading: boolean;

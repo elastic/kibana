@@ -13,8 +13,8 @@ import { act } from '@testing-library/react';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Title } from './title';
-import type { FormProps } from './schema';
-import { schema } from './schema';
+import type { FormProps } from '../create/schema';
+import { schema } from '../create/schema';
 
 describe('Title', () => {
   let globalForm: FormHook;

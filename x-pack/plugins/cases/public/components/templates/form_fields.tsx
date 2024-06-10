@@ -16,7 +16,7 @@ import type { ActionConnector } from '../../containers/configure/types';
 import type { CasesConfigurationUI } from '../../containers/types';
 import { TemplateFields } from './template_fields';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { SyncAlertsToggle } from '../create/sync_alerts_toggle';
+import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
