@@ -49,6 +49,7 @@ export const useWithResponderActionDataFromAlert = ({
 }: UseWithResponderActionDataFromAlertProps): ResponderActionData => {
   const {
     isSupported: hostSupportsResponseActions,
+    unsupportedReason,
     details: { agentType, agentId, platform, hostName },
   } = useAlertResponseActionsSupport(eventData);
 
@@ -62,7 +63,10 @@ export const useWithResponderActionDataFromAlert = ({
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
     if (!hostSupportsResponseActions) {
-      return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
+      return [
+        true,
+        agentType && unsupportedReason ? unsupportedReason : NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+      ];
     }
 
     if (isEndpointHost) {
@@ -73,6 +77,8 @@ export const useWithResponderActionDataFromAlert = ({
   }, [
     hostSupportsResponseActions,
     isEndpointHost,
+    agentType,
+    unsupportedReason,
     endpointHostData.isDisabled,
     endpointHostData.tooltip,
   ]);

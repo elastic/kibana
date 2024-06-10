@@ -15,7 +15,11 @@ import {
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { AlertResponseActionsSupport } from './use_alert_response_actions_support';
-import { useAlertResponseActionsSupport } from './use_alert_response_actions_support';
+import {
+  ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD,
+  RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
+  useAlertResponseActionsSupport,
+} from './use_alert_response_actions_support';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
@@ -38,6 +42,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       {
         isAlert: true,
         isSupported: true,
+        unsupportedReason: undefined,
         details: {
           agentId: 'abfe4a35-d5b4-42a0-a539-bd054c791769',
           agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType],
@@ -90,6 +95,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         {
           isAlert: false,
           isSupported: false,
+          unsupportedReason: RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
           details: {
             agentId: '',
             agentIdField: '',
@@ -112,6 +118,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       getExpectedResult({
         isAlert: false,
         isSupported: false,
+        unsupportedReason: RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
         details: {
           agentType: 'sentinel_one',
           agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
@@ -128,6 +135,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
     expect(renderHook().result.current).toEqual(
       getExpectedResult({
         isSupported: false,
+        unsupportedReason: ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD('Elastic Defend', 'agent.id'),
         details: { agentId: '' },
       })
     );

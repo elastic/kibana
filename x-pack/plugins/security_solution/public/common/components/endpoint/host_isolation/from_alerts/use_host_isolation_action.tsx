@@ -36,6 +36,7 @@ export const useHostIsolationAction = ({
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
   const {
     isSupported: hostSupportsResponseActions,
+    unsupportedReason,
     details: {
       agentType,
       agentId,
@@ -141,7 +142,10 @@ export const useHostIsolationAction = ({
     // Determine if menu item should be disabled
     if (!doesHostSupportIsolation) {
       menuItem.disabled = true;
-      menuItem.toolTipContent = NOT_FROM_ENDPOINT_HOST_TOOLTIP;
+      // If we were able to calculate the agentType and we have a reason why the host is does not
+      // support response actions, then show that as the tooltip. Else, just show the normal "enroll" message
+      menuItem.toolTipContent =
+        agentType && unsupportedReason ? unsupportedReason : NOT_FROM_ENDPOINT_HOST_TOOLTIP;
     } else if (isEndpointAgent && loadingHostIsolationStatus) {
       menuItem.disabled = true;
       menuItem.toolTipContent = LOADING_ENDPOINT_DATA_TOOLTIP;
@@ -158,10 +162,12 @@ export const useHostIsolationAction = ({
     isHostIsolationPanelOpen,
     isolateHostHandler,
     isHostIsolated,
-    canIsolateHost,
     canUnIsolateHost,
+    canIsolateHost,
     doesHostSupportIsolation,
     isEndpointAgent,
     loadingHostIsolationStatus,
+    agentType,
+    unsupportedReason,
   ]);
 };

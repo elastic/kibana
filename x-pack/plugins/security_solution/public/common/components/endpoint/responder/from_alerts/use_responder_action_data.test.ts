@@ -28,6 +28,12 @@ import { endpointMetadataHttpMocks } from '../../../../../management/pages/endpo
 import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
+import {
+  RESPONSE_ACTION_AGENT_TYPE,
+  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
+import { getAgentTypeName } from '../../../../translations';
+import { ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 
 describe('use responder action data hooks', () => {
   let appContextMock: AppContextTestRender;
@@ -120,6 +126,28 @@ describe('use responder action data hooks', () => {
 
         expect(wasMetadataApiCalled).toBe(false);
       });
+
+      it.each([...RESPONSE_ACTION_AGENT_TYPE])(
+        'should show action disabled with tooltip for %s if agent id field is missing',
+        (agentType) => {
+          alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(
+            agentType,
+            {
+              [RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType]]: undefined,
+            }
+          );
+
+          expect(renderHook().result.current).toEqual(
+            getExpectedResponderActionData({
+              isDisabled: true,
+              tooltip: ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD(
+                getAgentTypeName(agentType),
+                RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType]
+              ),
+            })
+          );
+        }
+      );
     });
 
     describe('and agentType IS Endpoint', () => {
