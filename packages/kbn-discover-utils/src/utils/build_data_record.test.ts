@@ -30,5 +30,17 @@ describe('Data table record utils', () => {
         expect(doc).toHaveProperty('isAnchor');
       });
     });
+
+    test('should support processing each record', () => {
+      const result = buildDataTableRecordList(esHitsMock, dataViewMock, {
+        processRecord: (record) => ({ ...record, id: 'custom-id' }),
+      });
+      result.forEach((doc) => {
+        expect(doc).toHaveProperty('id', 'custom-id');
+        expect(doc).toHaveProperty('raw');
+        expect(doc).toHaveProperty('flattened');
+        expect(doc).toHaveProperty('isAnchor');
+      });
+    });
   });
 });
