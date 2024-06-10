@@ -74,10 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     for (const type of ['PNG', 'PDF'] as const) {
       describe(`${type} report`, () => {
-        afterEach(async () => {
-          await PageObjects.lens.closeShareModal();
-        });
-
         it(`should not allow to download reports for incomplete visualization`, async () => {
           await PageObjects.visualize.gotoVisualizationLandingPage();
           await PageObjects.visualize.navigateToNewVisualization();
@@ -101,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.clickShareModal();
 
           expect(await PageObjects.lens.isShareActionEnabled(`export`));
+          await PageObjects.lens.closeShareModal();
         });
 
         it(`should be able to download report of the current visualization`, async () => {
@@ -134,6 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql(
             'Copy Post URL'
           );
+          await PageObjects.lens.closeShareModal();
         });
 
         it(`should produce a valid URL for reporting`, async () => {
