@@ -46,8 +46,9 @@ export interface SchemaStructureEntry {
  *
  * transform<R>(this: this<V, *>, fn: (v: T) => R): this<T, R>;
  *
- * So the trade-off was made to provide relatively good ergonomics while losing
- * some type information.
+ * So the trade-off was made to provide relatively good ergonomics and keep
+ * implementation simple while losing some type information. This is similar to
+ * how Zod, another popular validation lib approaches `.transform`.
  */
 export type TransformedType<T, TT> = Type<T, TT>;
 
