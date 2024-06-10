@@ -15,7 +15,7 @@ export const deleteAllCommentsRoute = createCasesRoute({
   path: CASE_COMMENTS_URL,
   routerOptions: {
     access: 'public',
-    description: `Delete all alerts and comments from a case`,
+    summary: `Delete all alerts and comments from a case`,
   },
   params: {
     params: schema.object({

@@ -42,6 +42,7 @@ pageLoadAssetSize:
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
+  esqlDataGrid: 24598
   esUiShared: 326654
   eventAnnotation: 30000
   eventAnnotationListing: 25841
@@ -82,6 +83,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 148711
   interactiveSetup: 80000
+  investigate: 17970
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
