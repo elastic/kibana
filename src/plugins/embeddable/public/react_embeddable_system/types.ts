@@ -11,7 +11,12 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
+import {
+  HasType,
+  PublishesPhaseEvents,
+  PublishesUnsavedChanges,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
 import React from 'react';
 
@@ -25,20 +30,30 @@ export interface DefaultEmbeddableApi<
   RuntimeState extends object = SerializedState
 > extends DefaultPresentationPanelApi,
     HasType,
+    PublishesPhaseEvents,
     PublishesUnsavedChanges,
     HasSerializableState<SerializedState>,
     HasSnapshottableState<RuntimeState> {}
 
 /**
- * A subset of the default embeddable API used in registration to allow implementors to omit aspects
- * of the API that will be automatically added by the system.
+ * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `setApi`.
  */
-export type ReactEmbeddableApiRegistration<
+export type SetReactEmbeddableApiRegistration<
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
+
+/**
+ * Defines the subset of the default embeddable API that the `buildApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `buildApi`.
+ */
+export type BuildReactEmbeddableApiRegistration<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 > = Omit<
-  Api,
-  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
+  SetReactEmbeddableApiRegistration<SerializedState, Api>,
+  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
 >;
 
 /**
@@ -81,11 +96,17 @@ export interface ReactEmbeddableFactory<
    */
   buildEmbeddable: (
     initialState: RuntimeState,
+    /**
+     * `buildApi` should be used by most embeddables that are used in dashboards, since it implements the unsaved
+     * changes logic that the dashboard expects using the provided comparators
+     */
     buildApi: (
-      apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
+      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
       comparators: StateComparators<RuntimeState>
     ) => Api,
     uuid: string,
-    parentApi?: unknown
+    parentApi: unknown | undefined,
+    /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, Api>) => Api
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

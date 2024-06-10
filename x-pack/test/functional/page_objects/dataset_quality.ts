@@ -11,9 +11,9 @@ import expect from '@kbn/expect';
 import { TimeUnitId } from '@elastic/eui';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
-  OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
+  DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
-} from '@kbn/observability-logs-explorer-plugin/common';
+} from '@kbn/data-quality-plugin/common';
 import {
   DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,
@@ -77,6 +77,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
     datasetQualityFlyoutDegradedFieldTable: 'datasetQualityFlyoutDegradedFieldTable',
     datasetQualityFlyoutDegradedTableNoData: 'datasetQualityFlyoutDegradedTableNoData',
+    datasetQualitySparkPlot: 'datasetQualitySparkPlot',
     datasetQualityHeaderButton: 'datasetQualityHeaderButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
     datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
@@ -114,7 +115,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       pageState?: datasetQualityUrlSchemaV1.UrlSchema;
     } = {}) {
       const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY]: rison.encode(
+        [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
           datasetQualityUrlSchemaV1.urlSchemaRT.encode({
             ...defaultPageState,
             ...pageState,
@@ -123,8 +124,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       });
 
       return PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogsExplorer',
-        '/dataset-quality',
+        'management',
+        '/data/data_quality',
         queryStringParams,
         {
           // the check sometimes is too slow for the page so it misses the point
@@ -226,7 +227,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async parseDegradedFieldTable() {
       const table = await this.getDatasetQualityFlyoutDegradedFieldTable();
-      return parseDatasetTable(table, ['Field', 'Count', 'Last Occurrence']);
+      return parseDatasetTable(table, ['Field', 'Docs count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {

@@ -26,6 +26,10 @@ jest.mock('@kbn/ebt-tools', () => ({
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 
 describe('test getDataStateContainer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('return is valid', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
@@ -35,6 +39,7 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
+
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
@@ -46,10 +51,15 @@ describe('test getDataStateContainer', () => {
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
+
     const dataState = stateContainer.dataState;
-
     const unsubscribe = dataState.subscribe();
+    const resolveDataSourceProfileSpy = jest.spyOn(
+      discoverServiceMock.profilesManager,
+      'resolveDataSourceProfile'
+    );
 
+    expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
     expect(dataState.data$.totalHits$.value.result).toBe(undefined);
     expect(dataState.data$.documents$.value.result).toEqual(undefined);
 
@@ -58,6 +68,12 @@ describe('test getDataStateContainer', () => {
       expect(dataState.data$.main$.value.fetchStatus).toBe('complete');
     });
 
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledTimes(1);
+    expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
+      dataSource: stateContainer.appState.get().dataSource,
+      dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
+      query: stateContainer.appState.get().query,
+    });
     expect(dataState.data$.totalHits$.value.result).toBe(0);
     expect(dataState.data$.documents$.value.result).toEqual([]);
 
@@ -117,9 +133,13 @@ describe('test getDataStateContainer', () => {
     ).not.toHaveBeenCalled();
 
     const dataState = stateContainer.dataState;
-
     const unsubscribe = dataState.subscribe();
+    const resolveDataSourceProfileSpy = jest.spyOn(
+      discoverServiceMock.profilesManager,
+      'resolveDataSourceProfile'
+    );
 
+    expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
     expect(dataState.data$.documents$.value.result).toEqual(initialRecords);
 
     let hasLoadingMoreStarted = false;
@@ -131,6 +151,7 @@ describe('test getDataStateContainer', () => {
       }
 
       if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
+        expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
         expect(value.result).toEqual([...initialRecords, ...moreRecords]);
         // it uses the same current search session id
         expect(

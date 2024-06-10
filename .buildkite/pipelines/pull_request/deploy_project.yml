@@ -9,7 +9,6 @@ steps:
       machineType: n2-standard-16
       preemptible: true
     timeout_in_minutes: 60
-    soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'
@@ -29,4 +28,3 @@ steps:
       - linting_with_types
       - checks
       - check_types
-    soft_fail: true

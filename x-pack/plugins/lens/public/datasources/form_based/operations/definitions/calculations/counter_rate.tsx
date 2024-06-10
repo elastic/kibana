@@ -129,7 +129,9 @@ export const counterRateOperation: OperationDefinition<
       }
     }
 
-    return checkForDateHistogram(layer, opName)?.join(', ');
+    return checkForDateHistogram(layer, opName)
+      .map((e) => e.message)
+      .join(', ');
   },
   timeScalingMode: 'mandatory',
   filterable: true,

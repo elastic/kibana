@@ -20,70 +20,19 @@ import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
-
-const fields = [
-  ...supportedFieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-  { name: 'any#Char$Field', type: 'number' },
-  { name: 'kubernetes.something.something', type: 'number' },
-  { name: '@timestamp', type: 'date' },
-];
-const enrichFields = [
-  { name: 'otherField', type: 'string' },
-  { name: 'yetAnotherField', type: 'number' },
-];
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const unsupported_field = [{ name: 'unsupported_field', type: 'unsupported' }];
-const indexes = [
-  'a_index',
-  'index',
-  'other_index',
-  '.secret_index',
-  'my-index',
-  'unsupported_index',
-];
-const policies = [
-  {
-    name: 'policy',
-    sourceIndices: ['enrich_index'],
-    matchField: 'otherStringField',
-    enrichFields: ['otherField', 'yetAnotherField'],
-  },
-  {
-    name: 'policy$',
-    sourceIndices: ['enrich_index'],
-    matchField: 'otherStringField',
-    enrichFields: ['otherField', 'yetAnotherField'],
-  },
-];
+import {
+  fields,
+  enrichFields,
+  getCallbackMocks,
+  indexes,
+  policies,
+  unsupported_field,
+} from '../__tests__/helpers';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
   .fill(0)
   .map((_, i) => i + 1);
-
-function getCallbackMocks() {
-  return {
-    getFieldsFor: jest.fn(async ({ query }) => {
-      if (/enrich/.test(query)) {
-        return enrichFields;
-      }
-      if (/unsupported_index/.test(query)) {
-        return unsupported_field;
-      }
-      if (/dissect|grok/.test(query)) {
-        return [{ name: 'firstWord', type: 'string' }];
-      }
-      return fields;
-    }),
-    getSources: jest.fn(async () =>
-      indexes.map((name) => ({
-        name,
-        hidden: name.startsWith('.'),
-      }))
-    ),
-    getPolicies: jest.fn(async () => policies),
-  };
-}
 
 const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
 const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
@@ -296,6 +245,14 @@ describe('validation logic', () => {
       },
     });
 
+    // The following block tests a case that is allowed in Kibana
+    // by suppressing the parser error in packages/kbn-esql-ast/src/ast_parser.ts
+    describe('ESQL query can be empty', () => {
+      testErrorsAndWarnings('', []);
+      testErrorsAndWarnings(' ', []);
+      testErrorsAndWarnings('     ', []);
+    });
+
     describe('ESQL query should start with a source command', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
@@ -403,6 +360,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from *ex*`, []);
       testErrorsAndWarnings(`from in*ex`, []);
       testErrorsAndWarnings(`from ind*ex`, []);
+      testErrorsAndWarnings(`from *,-.*`, []);
       testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
 
       testErrorsAndWarnings(`from remote-*:indexes*`, []);
@@ -649,6 +607,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from index | limit 4', []);
     });
 
+    describe('lookup', () => {
+      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP t ON a', []);
+    });
+
     describe('keep', () => {
       testErrorsAndWarnings('from index | keep ', ["SyntaxError: missing ID_PATTERN at '<EOF>'"]);
       testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
@@ -665,16 +627,16 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | project stringField, numberField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | PROJECT stringField, numberField, dateField', [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
       ]);
       testErrorsAndWarnings('from index | keep s*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
@@ -2067,6 +2029,15 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval date_diff(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_diff(nullVar, nullVar, nullVar)', []);
+
+        testErrorsAndWarnings('from a_index | eval date_diff("year", "2022", "2022")', []);
+        testErrorsAndWarnings(
+          'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
+          [
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
+          ]
+        );
       });
 
       describe('abs', () => {
@@ -2446,93 +2417,41 @@ describe('validation logic', () => {
       });
 
       describe('coalesce', () => {
-        testErrorsAndWarnings('row var = coalesce("a")', []);
-        testErrorsAndWarnings('row coalesce("a")', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(stringField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(stringField)', []);
-        testErrorsAndWarnings('from a_index | sort coalesce(stringField)', []);
-        testErrorsAndWarnings('row var = coalesce(true)', []);
-        testErrorsAndWarnings('row coalesce(true)', []);
-        testErrorsAndWarnings('row var = coalesce(to_boolean(true))', []);
-        testErrorsAndWarnings('row var = coalesce(true, true)', []);
-        testErrorsAndWarnings('row coalesce(true, true)', []);
-        testErrorsAndWarnings('row var = coalesce(to_boolean(true), to_boolean(true))', []);
         testErrorsAndWarnings('row var = coalesce(5)', []);
         testErrorsAndWarnings('row coalesce(5)', []);
         testErrorsAndWarnings('row var = coalesce(to_integer(true))', []);
         testErrorsAndWarnings('row var = coalesce(5, 5)', []);
         testErrorsAndWarnings('row coalesce(5, 5)', []);
         testErrorsAndWarnings('row var = coalesce(to_integer(true), to_integer(true))', []);
+        testErrorsAndWarnings('row var = coalesce(now())', []);
+        testErrorsAndWarnings('row coalesce(now())', []);
+        testErrorsAndWarnings('row var = coalesce(to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = coalesce(now(), now())', []);
+        testErrorsAndWarnings('row coalesce(now(), now())', []);
+        testErrorsAndWarnings('row var = coalesce(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = coalesce("a")', []);
+        testErrorsAndWarnings('row coalesce("a")', []);
         testErrorsAndWarnings('row var = coalesce(to_string(true))', []);
         testErrorsAndWarnings('row var = coalesce("a", "a")', []);
         testErrorsAndWarnings('row coalesce("a", "a")', []);
         testErrorsAndWarnings('row var = coalesce(to_string(true), to_string(true))', []);
-
-        testErrorsAndWarnings('from a_index | where coalesce(numberField) > 0', []);
-
-        testErrorsAndWarnings('from a_index | where coalesce(numberField, numberField) > 0', []);
-
-        testErrorsAndWarnings('from a_index | where length(coalesce(stringField)) > 0', []);
-
-        testErrorsAndWarnings(
-          'from a_index | where length(coalesce(stringField, stringField)) > 0',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | eval var = coalesce(booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(to_boolean(booleanField))', []);
-
-        testErrorsAndWarnings('from a_index | eval var = coalesce(booleanField, booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(booleanField, booleanField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_boolean(booleanField), to_boolean(booleanField))',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | eval var = coalesce(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(to_integer(booleanField))', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(numberField, numberField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(numberField, numberField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_integer(booleanField), to_integer(booleanField))',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | eval var = coalesce(to_string(booleanField))', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(stringField, stringField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(stringField, stringField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_string(booleanField), to_string(booleanField))',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | sort coalesce(booleanField)', []);
-        testErrorsAndWarnings('row var = coalesce(5, true)', []);
-        testErrorsAndWarnings('row coalesce(5, true)', []);
-        testErrorsAndWarnings('row var = coalesce(to_integer(true), to_boolean(true))', []);
-        testErrorsAndWarnings('row var = coalesce(now())', []);
-        testErrorsAndWarnings('row coalesce(now())', []);
-        testErrorsAndWarnings('row var = coalesce(to_datetime(now()))', []);
-        testErrorsAndWarnings('row var = coalesce(now(), true)', []);
-        testErrorsAndWarnings('row coalesce(now(), true)', []);
-        testErrorsAndWarnings('row var = coalesce(to_datetime(now()), to_boolean(true))', []);
-        testErrorsAndWarnings('row var = coalesce("a", true)', []);
-        testErrorsAndWarnings('row coalesce("a", true)', []);
-        testErrorsAndWarnings('row var = coalesce(to_string(true), to_boolean(true))', []);
+        testErrorsAndWarnings('row var = coalesce(true)', []);
+        testErrorsAndWarnings('row coalesce(true)', []);
+        testErrorsAndWarnings('row var = coalesce(to_boolean(true))', []);
+        testErrorsAndWarnings('row var = coalesce(true, true)', []);
+        testErrorsAndWarnings('row coalesce(true, true)', []);
+        testErrorsAndWarnings('row var = coalesce(to_boolean(true), to_boolean(true))', []);
         testErrorsAndWarnings('row var = coalesce(to_ip("127.0.0.1"))', []);
         testErrorsAndWarnings('row coalesce(to_ip("127.0.0.1"))', []);
         testErrorsAndWarnings('row var = coalesce(to_ip(to_ip("127.0.0.1")))', []);
-        testErrorsAndWarnings('row var = coalesce(to_ip("127.0.0.1"), true)', []);
-        testErrorsAndWarnings('row coalesce(to_ip("127.0.0.1"), true)', []);
+        testErrorsAndWarnings('row var = coalesce(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row coalesce(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
         testErrorsAndWarnings(
-          'row var = coalesce(to_ip(to_ip("127.0.0.1")), to_boolean(true))',
+          'row var = coalesce(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
           []
         );
+
         testErrorsAndWarnings('row var = coalesce(to_cartesianpoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row coalesce(to_cartesianpoint("POINT (30 10)"))', []);
 
@@ -2541,11 +2460,18 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = coalesce(to_cartesianpoint("POINT (30 10)"), true)', []);
-        testErrorsAndWarnings('row coalesce(to_cartesianpoint("POINT (30 10)"), true)', []);
+        testErrorsAndWarnings(
+          'row var = coalesce(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
 
         testErrorsAndWarnings(
-          'row var = coalesce(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_boolean(true))',
+          'row coalesce(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
           []
         );
 
@@ -2557,86 +2483,127 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = coalesce(to_cartesianshape("POINT (30 10)"), true)', []);
-        testErrorsAndWarnings('row coalesce(to_cartesianshape("POINT (30 10)"), true)', []);
+        testErrorsAndWarnings(
+          'row var = coalesce(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
 
         testErrorsAndWarnings(
-          'row var = coalesce(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_boolean(true))',
+          'row coalesce(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
           []
         );
 
         testErrorsAndWarnings('row var = coalesce(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row coalesce(to_geopoint("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = coalesce(to_geopoint(to_geopoint("POINT (30 10)")))', []);
-        testErrorsAndWarnings('row var = coalesce(to_geopoint("POINT (30 10)"), true)', []);
-        testErrorsAndWarnings('row coalesce(to_geopoint("POINT (30 10)"), true)', []);
 
         testErrorsAndWarnings(
-          'row var = coalesce(to_geopoint(to_geopoint("POINT (30 10)")), to_boolean(true))',
+          'row var = coalesce(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row coalesce(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
           []
         );
 
         testErrorsAndWarnings('row var = coalesce(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row coalesce(to_geoshape("POINT (30 10)"))', []);
         testErrorsAndWarnings('row var = coalesce(to_geoshape(to_geopoint("POINT (30 10)")))', []);
-        testErrorsAndWarnings('row var = coalesce(to_geoshape("POINT (30 10)"), true)', []);
-        testErrorsAndWarnings('row coalesce(to_geoshape("POINT (30 10)"), true)', []);
 
         testErrorsAndWarnings(
-          'row var = coalesce(to_geoshape(to_geopoint("POINT (30 10)")), to_boolean(true))',
+          'row var = coalesce(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row coalesce(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
           []
         );
 
         testErrorsAndWarnings('row var = coalesce(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row coalesce(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = coalesce(to_version("a"))', []);
-        testErrorsAndWarnings('row var = coalesce(to_version("1.0.0"), true)', []);
-        testErrorsAndWarnings('row coalesce(to_version("1.0.0"), true)', []);
-        testErrorsAndWarnings('row var = coalesce(to_version("a"), to_boolean(true))', []);
-        testErrorsAndWarnings('from a_index | where coalesce(numberField, booleanField) > 0', []);
+        testErrorsAndWarnings('row var = coalesce(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row coalesce(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = coalesce(to_version("a"), to_version("a"))', []);
+        testErrorsAndWarnings('from a_index | where coalesce(numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where coalesce(numberField, numberField) > 0', []);
+        testErrorsAndWarnings('from a_index | where length(coalesce(stringField)) > 0', []);
         testErrorsAndWarnings(
-          'from a_index | where length(coalesce(stringField, booleanField)) > 0',
+          'from a_index | where length(coalesce(stringField, stringField)) > 0',
           []
         );
-        testErrorsAndWarnings('from a_index | eval var = coalesce(numberField, booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(numberField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(to_integer(booleanField))', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(numberField, numberField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_integer(booleanField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_integer(booleanField), to_integer(booleanField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | eval var = coalesce(dateField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(dateField)', []);
         testErrorsAndWarnings('from a_index | eval var = coalesce(to_datetime(dateField))', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(dateField, booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(dateField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(dateField, dateField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_datetime(dateField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_datetime(dateField), to_datetime(dateField))',
           []
         );
 
-        testErrorsAndWarnings('from a_index | eval var = coalesce(stringField, booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(stringField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(stringField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(to_string(booleanField))', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(stringField, stringField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_string(booleanField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = coalesce(booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(to_boolean(booleanField))', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(booleanField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(booleanField, booleanField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = coalesce(to_boolean(booleanField), to_boolean(booleanField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | eval var = coalesce(ipField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(ipField)', []);
         testErrorsAndWarnings('from a_index | eval var = coalesce(to_ip(ipField))', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(ipField, booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(ipField, booleanField)', []);
-
+        testErrorsAndWarnings('from a_index | eval var = coalesce(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(ipField, ipField)', []);
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_ip(ipField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_ip(ipField), to_ip(ipField))',
           []
         );
-
         testErrorsAndWarnings('from a_index | eval var = coalesce(cartesianPointField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(cartesianPointField)', []);
 
         testErrorsAndWarnings(
           'from a_index | eval var = coalesce(to_cartesianpoint(cartesianPointField))',
@@ -2644,17 +2611,17 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(cartesianPointField, booleanField)',
+          'from a_index | eval var = coalesce(cartesianPointField, cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval coalesce(cartesianPointField, booleanField)',
+          'from a_index | eval coalesce(cartesianPointField, cartesianPointField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_cartesianpoint(cartesianPointField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
           []
         );
 
@@ -2667,17 +2634,17 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(cartesianShapeField, booleanField)',
+          'from a_index | eval var = coalesce(cartesianShapeField, cartesianShapeField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval coalesce(cartesianShapeField, booleanField)',
+          'from a_index | eval coalesce(cartesianShapeField, cartesianShapeField)',
           []
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_cartesianshape(cartesianPointField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
           []
         );
 
@@ -2685,13 +2652,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval coalesce(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval var = coalesce(to_geopoint(geoPointField))', []);
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(geoPointField, booleanField)',
+          'from a_index | eval var = coalesce(geoPointField, geoPointField)',
           []
         );
-        testErrorsAndWarnings('from a_index | eval coalesce(geoPointField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(geoPointField, geoPointField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_geopoint(geoPointField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_geopoint(geoPointField), to_geopoint(geoPointField))',
           []
         );
 
@@ -2699,29 +2666,28 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval coalesce(geoShapeField)', []);
         testErrorsAndWarnings('from a_index | eval var = coalesce(to_geoshape(geoPointField))', []);
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(geoShapeField, booleanField)',
+          'from a_index | eval var = coalesce(geoShapeField, geoShapeField)',
           []
         );
-        testErrorsAndWarnings('from a_index | eval coalesce(geoShapeField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(geoShapeField, geoShapeField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_geoshape(geoPointField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_geoshape(geoPointField), to_geoshape(geoPointField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | eval var = coalesce(versionField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(versionField)', []);
         testErrorsAndWarnings('from a_index | eval var = coalesce(to_version(stringField))', []);
-        testErrorsAndWarnings('from a_index | eval var = coalesce(versionField, booleanField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(versionField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval var = coalesce(versionField, versionField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(versionField, versionField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = coalesce(to_version(stringField), to_boolean(booleanField))',
+          'from a_index | eval var = coalesce(to_version(stringField), to_version(stringField))',
           []
         );
 
         testErrorsAndWarnings('from a_index | sort coalesce(numberField)', []);
-        testErrorsAndWarnings('from a_index | eval coalesce(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval coalesce(nullVar)', []);
       });
@@ -2940,6 +2906,18 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval date_extract(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_extract(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", "2022")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
+          [
+            'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [string]',
+          ]
+        );
       });
 
       describe('date_format', () => {
@@ -2979,6 +2957,10 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | eval date_format(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_format(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval date_format(stringField, concat("20", "22"))', [
+          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
       });
 
       describe('date_parse', () => {
@@ -3080,6 +3062,19 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval date_trunc(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
+        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
+          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | eval date_trunc("2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval date_trunc(concat("20", "22"), concat("20", "22"))',
+          [
+            'Argument of [date_trunc] must be [time_literal], found value [concat("20", "22")] type [string]',
+            'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+          ]
+        );
       });
 
       describe('e', () => {
@@ -5082,6 +5077,33 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | eval mv_zip(null, null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval mv_zip(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings('row var = mv_zip(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings(
+          'from a_index | where length(mv_zip(stringField, stringField)) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where length(mv_zip(booleanField, booleanField)) > 0',
+          [
+            'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+            'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_zip(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_zip(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mv_zip(booleanField, booleanField)', [
+          'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+          'Argument of [mv_zip] must be [string], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_zip(stringField, stringField)', []);
       });
 
       describe('now', () => {
@@ -9395,6 +9417,10 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats max("2022")', []);
+        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
+          'Argument of [max] must be [number], found value [concat("20", "22")] type [string]',
+        ]);
       });
 
       describe('min', () => {
@@ -9535,6 +9561,10 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
+        testErrorsAndWarnings('from a_index | stats min("2022")', []);
+        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
+          'Argument of [min] must be [number], found value [concat("20", "22")] type [string]',
+        ]);
       });
 
       describe('count', () => {
@@ -9849,6 +9879,37 @@ describe('validation logic', () => {
             'Argument of [bucket] must be a constant, received [nullVar]',
           ]
         );
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', [
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats by bucket(concat("20", "22"), 1 year)', [
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "a")', []);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 5, "a", "a")', [
+          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), concat("20", "22"))',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "2022")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, "a", concat("20", "22"))',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "a")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), "a")',
+          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+        );
       });
 
       describe('cbrt', () => {
@@ -10042,6 +10103,308 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_base64(stringField)', []);
         testErrorsAndWarnings('from a_index | eval to_base64(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_base64(nullVar)', []);
+      });
+
+      describe('ip_prefix', () => {
+        testErrorsAndWarnings('row var = ip_prefix(to_ip("127.0.0.1"), 5, 5)', []);
+        testErrorsAndWarnings('row ip_prefix(to_ip("127.0.0.1"), 5, 5)', []);
+
+        testErrorsAndWarnings(
+          'row var = ip_prefix(to_ip(to_ip("127.0.0.1")), to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = ip_prefix(true, true, true)', [
+          'Argument of [ip_prefix] must be [ip], found value [true] type [boolean]',
+          'Argument of [ip_prefix] must be [number], found value [true] type [boolean]',
+          'Argument of [ip_prefix] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(ipField, numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = ip_prefix(to_ip(ipField), to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(booleanField, booleanField, booleanField)',
+          [
+            'Argument of [ip_prefix] must be [ip], found value [booleanField] type [boolean]',
+            'Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [ip_prefix] must be [number], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval ip_prefix(ipField, numberField, numberField, extraArg)',
+          ['Error: [ip_prefix] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort ip_prefix(ipField, numberField, numberField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval ip_prefix(null, null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval ip_prefix(nullVar, nullVar, nullVar)', []);
+      });
+
+      describe('mv_append', () => {
+        testErrorsAndWarnings('row var = mv_append(true, true)', []);
+        testErrorsAndWarnings('row mv_append(true, true)', []);
+        testErrorsAndWarnings('row var = mv_append(to_boolean(true), to_boolean(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_append(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_append(to_cartesianshape("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_append(now(), now())', []);
+        testErrorsAndWarnings('row mv_append(now(), now())', []);
+        testErrorsAndWarnings('row var = mv_append(to_datetime(now()), to_datetime(now()))', []);
+        testErrorsAndWarnings('row var = mv_append(5, 5)', []);
+        testErrorsAndWarnings('row mv_append(5, 5)', []);
+        testErrorsAndWarnings('row var = mv_append(to_integer(true), to_integer(true))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_append(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_append(to_geoshape("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_append(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+        testErrorsAndWarnings('row mv_append(to_ip("127.0.0.1"), to_ip("127.0.0.1"))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_ip(to_ip("127.0.0.1")), to_ip(to_ip("127.0.0.1")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_append("a", "a")', []);
+        testErrorsAndWarnings('row mv_append("a", "a")', []);
+        testErrorsAndWarnings('row var = mv_append(to_string(true), to_string(true))', []);
+        testErrorsAndWarnings('row var = mv_append(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row mv_append(to_version("1.0.0"), to_version("1.0.0"))', []);
+        testErrorsAndWarnings('row var = mv_append(to_version("a"), to_version("a"))', []);
+        testErrorsAndWarnings('from a_index | where mv_append(numberField, numberField) > 0', []);
+        testErrorsAndWarnings(
+          'from a_index | where length(mv_append(stringField, stringField)) > 0',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(booleanField, booleanField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_append(booleanField, booleanField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_boolean(booleanField), to_boolean(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_append(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_append(cartesianShapeField, cartesianShapeField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_cartesianshape(cartesianPointField), to_cartesianshape(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_append(dateField, dateField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(dateField, dateField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_datetime(dateField), to_datetime(dateField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_append(numberField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(geoPointField, geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_append(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(geoShapeField, geoShapeField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_append(geoShapeField, geoShapeField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_geoshape(geoPointField), to_geoshape(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_append(ipField, ipField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(ipField, ipField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_ip(ipField), to_ip(ipField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = mv_append(stringField, stringField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(stringField, stringField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_string(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(versionField, versionField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_append(versionField, versionField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_append(to_version(stringField), to_version(stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_append(booleanField, booleanField, extraArg)',
+          ['Error: [mv_append] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort mv_append(booleanField, booleanField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_append(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval mv_append(nullVar, nullVar)', []);
+      });
+
+      describe('repeat', () => {
+        testErrorsAndWarnings('row var = repeat("a", 5)', []);
+        testErrorsAndWarnings('row repeat("a", 5)', []);
+        testErrorsAndWarnings('row var = repeat(to_string(true), to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = repeat(true, true)', [
+          'Argument of [repeat] must be [string], found value [true] type [boolean]',
+          'Argument of [repeat] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where length(repeat(stringField, numberField)) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where length(repeat(booleanField, booleanField)) > 0',
+          [
+            'Argument of [repeat] must be [string], found value [booleanField] type [boolean]',
+            'Argument of [repeat] must be [number], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = repeat(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = repeat(to_string(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval repeat(booleanField, booleanField)', [
+          'Argument of [repeat] must be [string], found value [booleanField] type [boolean]',
+          'Argument of [repeat] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval repeat(stringField, numberField, extraArg)', [
+          'Error: [repeat] function expects exactly 2 arguments, got 3.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort repeat(stringField, numberField)', []);
+        testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
       });
     });
   });
