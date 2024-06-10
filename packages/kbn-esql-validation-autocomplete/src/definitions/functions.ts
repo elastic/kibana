@@ -2461,6 +2461,21 @@ const mvZipDefinition: FunctionDefinition = {
           type: 'string',
           optional: false,
         },
+      ],
+      returnType: 'string',
+    },
+    {
+      params: [
+        {
+          name: 'string1',
+          type: 'string',
+          optional: false,
+        },
+        {
+          name: 'string2',
+          type: 'string',
+          optional: false,
+        },
         {
           name: 'delim',
           type: 'string',
@@ -2547,6 +2562,37 @@ const powDefinition: FunctionDefinition = {
     'ROW base = 2.0, exponent = 2\n| EVAL result = POW(base, exponent)',
     'ROW base = 4, exponent = 0.5\n| EVAL s = POW(base, exponent)',
   ],
+};
+
+const repeatDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'repeat',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.repeat', {
+    defaultMessage:
+      'Returns a string constructed by concatenating `string` with itself the specified `number` of times.',
+  }),
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'string',
+          type: 'string',
+          optional: false,
+        },
+        {
+          name: 'number',
+          type: 'number',
+          optional: false,
+        },
+      ],
+      returnType: 'string',
+    },
+  ],
+  supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: ['ROW a = "Hello!"\n| EVAL triple_a = REPEAT(a, 3);'],
 };
 
 const replaceDefinition: FunctionDefinition = {
@@ -4795,6 +4841,7 @@ export const evalFunctionDefinitions = [
   nowDefinition,
   piDefinition,
   powDefinition,
+  repeatDefinition,
   replaceDefinition,
   rightDefinition,
   roundDefinition,
