@@ -530,7 +530,7 @@ export const XyToolbar = memo(function XyToolbar(
               });
             }}
             titlePlaceholder={
-              frame.activeData?.[dataLayers[0].layerId].columns.find(
+              frame.activeData?.[dataLayers[0].layerId]?.columns.find(
                 (col) => col.id === dataLayers[0].splitAccessor
               )?.name ?? defaultLegendTitle
             }
