@@ -54,7 +54,7 @@ export const getAlertsGroupingQuery = ({
     to,
   });
 
-export interface GroupedSubLevelProps extends AlertsGroupingProps {
+export interface AlertsGroupingLevelProps extends AlertsGroupingProps {
   getGrouping: (
     props: Omit<DynamicGroupingProps<AlertsGroupingAggregation>, 'groupSelector' | 'pagination'>
   ) => ReactElement;
@@ -95,7 +95,7 @@ export const AlertsGroupingLevel = memo(
     takeActionItems,
     getAggregationsByGroupingField,
     services: { http, notifications },
-  }: GroupedSubLevelProps) => {
+  }: AlertsGroupingLevelProps) => {
     const additionalFilters = useMemo(() => {
       try {
         return [
