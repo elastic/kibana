@@ -41,7 +41,7 @@ export function ItemsBadge({
         </React.Fragment>
       ))}
     >
-      <EuiBadge>{multipleItemsMessage}</EuiBadge>
+      <EuiBadge tabIndex={0}>{multipleItemsMessage}</EuiBadge>
     </EuiToolTip>
   );
 }
