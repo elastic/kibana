@@ -156,7 +156,7 @@ export abstract class Type<V, TV = V> {
     return this;
   }
 
-  public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
+  public validate(value: any, context: Record<string, any> = {}, namespace?: string): TV {
     const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',
@@ -226,6 +226,7 @@ export abstract class Type<V, TV = V> {
 
   public transform<R>(fn: (v: V) => R) {
     this.transformFn = fn;
+    // hacky way of injecting transformed type schema
     return this as unknown as TransformedType<V, R>;
   }
 }
