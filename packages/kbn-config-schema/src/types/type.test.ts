@@ -46,7 +46,7 @@ describe('transform', () => {
     .string({
       maxLength: 3,
       validate: (v) =>
-        /^\d+(M|w|d|H|m|s|ms)$/.test(v) ? undefined : `expected ${v} to be a duration like '1d'`,
+        /^\d+(M|w|d|H|m|s|ms)$/.test(v) ? undefined : `expected "${v}" to be a duration like "1d"`,
     })
     .transform(durationTransformation);
   it('transforms values', () => {
@@ -71,6 +71,9 @@ describe('transform', () => {
   });
   it('still reports errors as expected', () => {
     expect(() => durationSchema.validate('hello there')).toThrowError(/must have a maximum length/);
+    expect(() => durationSchema.validate('1v')).toThrowError(
+      `expected "1v" to be a duration like "1d"`
+    );
   });
   it('only runs the last provided transform function', () => {
     const transform1 = jest.fn((v) => Number(v));
