@@ -33,7 +33,6 @@ export const ContainerKpiCharts = ({
   dateRange,
   dataView,
   filters,
-  options,
   query,
   searchSessionId,
   loading = false,
@@ -50,7 +49,6 @@ export const ContainerKpiCharts = ({
       dateRange={dateRange}
       dataView={dataView}
       filters={filters}
-      options={options}
       query={query}
       searchSessionId={searchSessionId}
       loading={loading}
@@ -60,7 +58,6 @@ export const ContainerKpiCharts = ({
       dateRange={dateRange}
       dataView={dataView}
       filters={filters}
-      options={options}
       query={query}
       searchSessionId={searchSessionId}
       loading={loading}
@@ -72,7 +69,6 @@ const DockerKpiCharts = ({
   dateRange,
   dataView,
   filters,
-  options,
   query,
   searchSessionId,
   loading = false,
@@ -80,10 +76,7 @@ const DockerKpiCharts = ({
   const { euiTheme } = useEuiTheme();
   const charts = useDockerContainerKpiCharts({
     dataViewId: dataView?.id,
-    options: {
-      getSubtitle: options?.getSubtitle,
-      seriesColor: euiTheme.colors.lightestShade,
-    },
+    seriesColor: euiTheme.colors.lightestShade,
   });
 
   return (
@@ -116,10 +109,7 @@ const KubernetesKpiCharts = ({
   const { euiTheme } = useEuiTheme();
   const charts = useK8sContainerKpiCharts({
     dataViewId: dataView?.id,
-    options: {
-      getSubtitle: options?.getSubtitle,
-      seriesColor: euiTheme.colors.lightestShade,
-    },
+    seriesColor: euiTheme.colors.lightestShade,
   });
 
   return (
