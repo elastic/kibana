@@ -16,7 +16,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
@@ -57,7 +57,7 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {
@@ -89,7 +89,7 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
 
           await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
-          const createdRule = await rulesManagementClient.createCustomRule({
+          const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,
           });
 

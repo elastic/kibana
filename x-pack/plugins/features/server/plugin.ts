@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
   Capabilities as UICapabilities,
 } from '@kbn/core/server';
+import { ConfigType } from './config';
 import { FeatureRegistry } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
@@ -127,6 +128,12 @@ export class FeaturesPlugin
 
   public start(core: CoreStart): RecursiveReadonly<PluginStartContract> {
     this.registerOssFeatures(core.savedObjects);
+
+    const { overrides } = this.initializerContext.config.get<ConfigType>();
+    if (overrides) {
+      this.featureRegistry.applyOverrides(overrides);
+    }
+
     this.featureRegistry.lockRegistration();
 
     this.capabilities = uiCapabilitiesForFeatures(
