@@ -15,6 +15,7 @@ import { getDataViewStateFromIndexFields } from '../../common/containers/source/
 import { useFetchIndex } from '../../common/containers/source';
 import type { State } from '../../common/store/types';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { useUnstableSecuritySolutionDataView } from '../experimental/use_unstable_security_solution_data_view';
 
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
@@ -114,7 +115,7 @@ export const useSourcererDataView = (
     return dataViewBrowserFields;
   }, [sourcererDataView.fields, sourcererDataView.patternList]);
 
-  return useMemo(
+  const stableSourcererValues = useMemo(
     () => ({
       browserFields: browserFields(),
       dataViewId: sourcererDataView.id,
@@ -142,5 +143,11 @@ export const useSourcererDataView = (
       loading,
       legacyPatterns.length,
     ]
+  );
+
+  return useUnstableSecuritySolutionDataView(
+    scopeId,
+    // NOTE: data view derived from current implementation is used as a fallback
+    stableSourcererValues
   );
 };
