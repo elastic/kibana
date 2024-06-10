@@ -708,7 +708,7 @@ describe('ClusterClient', () => {
     });
   });
 
-  describe('#asScoped().asSecondaryAuth', () => {
+  describe('#asScoped().asSecondaryAuthUser', () => {
     it('lazily instantiate the client when first called', () => {
       const clusterClient = new ClusterClient({
         config: createConfig(),
@@ -727,7 +727,7 @@ describe('ClusterClient', () => {
       expect(internalClient.child).not.toHaveBeenCalled();
 
       // trigger client instantiation via getter
-      client = scopedClusterClient.asSecondaryAuth;
+      client = scopedClusterClient.asSecondaryAuthUser;
 
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith({
@@ -751,9 +751,9 @@ describe('ClusterClient', () => {
       const scopedClusterClient = clusterClient.asScoped(request);
 
       // trigger client instantiation via getter
-      client = scopedClusterClient.asSecondaryAuth;
+      client = scopedClusterClient.asSecondaryAuthUser;
 
-      expect(scopedClusterClient.asSecondaryAuth).toBe(internalClient.child.mock.results[0].value);
+      expect(scopedClusterClient.asSecondaryAuthUser).toBe(internalClient.child.mock.results[0].value);
     });
 
     it('creates a scoped client using the proper `es-secondary-authorization` header', () => {
@@ -781,7 +781,7 @@ describe('ClusterClient', () => {
 
       const scopedClusterClient = clusterClient.asScoped(request);
       // trigger client instantiation via getter
-      client = scopedClusterClient.asSecondaryAuth;
+      client = scopedClusterClient.asSecondaryAuthUser;
 
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(
@@ -818,7 +818,7 @@ describe('ClusterClient', () => {
 
       const scopedClusterClient = clusterClient.asScoped(request);
       // trigger client instantiation via getter
-      client = scopedClusterClient.asSecondaryAuth;
+      client = scopedClusterClient.asSecondaryAuthUser;
 
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(
@@ -850,7 +850,7 @@ describe('ClusterClient', () => {
 
       const scopedClusterClient = clusterClient.asScoped(request);
       // trigger client instantiation via getter
-      client = scopedClusterClient.asSecondaryAuth;
+      client = scopedClusterClient.asSecondaryAuthUser;
 
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(
@@ -887,7 +887,7 @@ describe('ClusterClient', () => {
 
       const scopedClusterClient = clusterClient.asScoped(request);
       // trigger client instantiation via getter
-      client = scopedClusterClient.asSecondaryAuth;
+      client = scopedClusterClient.asSecondaryAuthUser;
 
       expect(internalClient.child).toHaveBeenCalledTimes(1);
       expect(internalClient.child).toHaveBeenCalledWith(

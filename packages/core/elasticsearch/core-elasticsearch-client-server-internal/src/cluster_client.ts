@@ -112,8 +112,8 @@ export class ClusterClient implements ICustomClusterClient {
 
     return new ScopedClusterClient({
       asInternalUser: this.asInternalUser,
-      asCurrentUserClientFactory: createScopedClient,
-      asSecondaryAuthClientFactory: createSecondaryScopedClient,
+      asCurrentUserFactory: createScopedClient,
+      asSecondaryAuthUserFactory: createSecondaryScopedClient,
     });
   }
 

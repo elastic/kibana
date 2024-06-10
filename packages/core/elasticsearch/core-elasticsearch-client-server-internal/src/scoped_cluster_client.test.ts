@@ -19,8 +19,8 @@ describe('ScopedClusterClient', () => {
 
     const scopedClusterClient = new ScopedClusterClient({
       asInternalUser: internalClient,
-      asCurrentUserClientFactory: () => scopedClient,
-      asSecondaryAuthClientFactory: () => secondaryAuthClient,
+      asCurrentUserFactory: () => scopedClient,
+      asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
 
     expect(scopedClusterClient.asInternalUser).toBe(internalClient);
@@ -33,8 +33,8 @@ describe('ScopedClusterClient', () => {
 
     const scopedClusterClient = new ScopedClusterClient({
       asInternalUser: internalClient,
-      asCurrentUserClientFactory: () => scopedClient,
-      asSecondaryAuthClientFactory: () => secondaryAuthClient,
+      asCurrentUserFactory: () => scopedClient,
+      asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
 
     expect(scopedClusterClient.asCurrentUser).toBe(scopedClient);
@@ -47,11 +47,11 @@ describe('ScopedClusterClient', () => {
 
     const scopedClusterClient = new ScopedClusterClient({
       asInternalUser: internalClient,
-      asCurrentUserClientFactory: () => scopedClient,
-      asSecondaryAuthClientFactory: () => secondaryAuthClient,
+      asCurrentUserFactory: () => scopedClient,
+      asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
 
-    expect(scopedClusterClient.asSecondaryAuth).toBe(secondaryAuthClient);
+    expect(scopedClusterClient.asSecondaryAuthUser).toBe(secondaryAuthClient);
   });
 
   it('returns the same instance when calling `asCurrentUser` multiple times', () => {
@@ -61,8 +61,8 @@ describe('ScopedClusterClient', () => {
 
     const scopedClusterClient = new ScopedClusterClient({
       asInternalUser: internalClient,
-      asCurrentUserClientFactory: () => scopedClient,
-      asSecondaryAuthClientFactory: () => secondaryAuthClient,
+      asCurrentUserFactory: () => scopedClient,
+      asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
 
     const userClient1 = scopedClusterClient.asCurrentUser;
@@ -71,19 +71,19 @@ describe('ScopedClusterClient', () => {
     expect(userClient1).toBe(userClient2);
   });
 
-  it('returns the same instance when calling `asSecondaryAuth` multiple times', () => {
+  it('returns the same instance when calling `asSecondaryAuthUser` multiple times', () => {
     const internalClient = createEsClient();
     const scopedClient = createEsClient();
     const secondaryAuthClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient({
       asInternalUser: internalClient,
-      asCurrentUserClientFactory: () => scopedClient,
-      asSecondaryAuthClientFactory: () => secondaryAuthClient,
+      asCurrentUserFactory: () => scopedClient,
+      asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
 
-    const secondaryAuth1 = scopedClusterClient.asSecondaryAuth;
-    const secondaryAuth2 = scopedClusterClient.asSecondaryAuth;
+    const secondaryAuth1 = scopedClusterClient.asSecondaryAuthUser;
+    const secondaryAuth2 = scopedClusterClient.asSecondaryAuthUser;
 
     expect(secondaryAuth1).toBe(secondaryAuth2);
   });

@@ -31,7 +31,7 @@ export interface IScopedClusterClient {
    * Note that only a subset of Elasticsearch APIs support secondary authentication, and that only those endpoints
    * should be called with this client.
    */
-  readonly asSecondaryAuth: ElasticsearchClient;
+  readonly asSecondaryAuthUser: ElasticsearchClient;
 
   /**
    * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster

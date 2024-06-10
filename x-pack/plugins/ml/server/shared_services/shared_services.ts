@@ -270,7 +270,7 @@ function getRequestItemsProvider(
       scopedClient = {
         asInternalUser,
         asCurrentUser: asInternalUser,
-        asSecondaryAuth: asInternalUser,
+        asSecondaryAuthUser: asInternalUser,
       };
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       mlClient = getMlClient(scopedClient, mlSavedObjectService);

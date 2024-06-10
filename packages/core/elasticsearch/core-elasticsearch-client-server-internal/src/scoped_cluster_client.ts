@@ -12,37 +12,37 @@ import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasti
 export class ScopedClusterClient implements IScopedClusterClient {
   public readonly asInternalUser;
 
-  readonly #asCurrentUserClientFactory: () => ElasticsearchClient;
-  readonly #asSecondaryAuthClientFactory: () => ElasticsearchClient;
+  readonly #asCurrentUserFactory: () => ElasticsearchClient;
+  readonly #asSecondaryAuthUserFactory: () => ElasticsearchClient;
 
   #asCurrentUserClient?: ElasticsearchClient;
-  #asSecondaryAuthClient?: ElasticsearchClient;
+  #asSecondaryAuthUserClient?: ElasticsearchClient;
 
   constructor({
     asInternalUser,
-    asCurrentUserClientFactory,
-    asSecondaryAuthClientFactory,
+    asCurrentUserFactory,
+    asSecondaryAuthUserFactory,
   }: {
     asInternalUser: ElasticsearchClient;
-    asCurrentUserClientFactory: () => ElasticsearchClient;
-    asSecondaryAuthClientFactory: () => ElasticsearchClient;
+    asCurrentUserFactory: () => ElasticsearchClient;
+    asSecondaryAuthUserFactory: () => ElasticsearchClient;
   }) {
     this.asInternalUser = asInternalUser;
-    this.#asCurrentUserClientFactory = asCurrentUserClientFactory;
-    this.#asSecondaryAuthClientFactory = asSecondaryAuthClientFactory;
+    this.#asCurrentUserFactory = asCurrentUserFactory;
+    this.#asSecondaryAuthUserFactory = asSecondaryAuthUserFactory;
   }
 
   public get asCurrentUser() {
     if (this.#asCurrentUserClient === undefined) {
-      this.#asCurrentUserClient = this.#asCurrentUserClientFactory();
+      this.#asCurrentUserClient = this.#asCurrentUserFactory();
     }
     return this.#asCurrentUserClient;
   }
 
-  public get asSecondaryAuth() {
-    if (this.#asSecondaryAuthClient === undefined) {
-      this.#asSecondaryAuthClient = this.#asSecondaryAuthClientFactory();
+  public get asSecondaryAuthUser() {
+    if (this.#asSecondaryAuthUserClient === undefined) {
+      this.#asSecondaryAuthUserClient = this.#asSecondaryAuthUserFactory();
     }
-    return this.#asSecondaryAuthClient;
+    return this.#asSecondaryAuthUserClient;
   }
 }

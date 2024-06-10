@@ -176,7 +176,7 @@ describe('BurnRateRuleExecutor', () => {
       scopedClusterClient: {
         asCurrentUser: esClientMock,
         asInternalUser: esClientMock,
-        asSecondaryAuth: esClientMock,
+        asSecondaryAuthUser: esClientMock,
       },
       alertsClient: publicAlertsClientMock.create(),
       alertFactory: {
