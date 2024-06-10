@@ -60,6 +60,11 @@ jest.mock('../../../../hooks', () => {
         },
       },
     }),
+    sendBulkGetAgentPolicies: jest.fn().mockImplementation((ids) =>
+      Promise.resolve({
+        data: { items: ids.map((id: string) => ({ id, package_policies: [] })) },
+      })
+    ),
     useGetPackageInfoByKeyQuery: jest.fn(),
     sendGetSettings: jest.fn().mockResolvedValue({
       data: { item: {} },
