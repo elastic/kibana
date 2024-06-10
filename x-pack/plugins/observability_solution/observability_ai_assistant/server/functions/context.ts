@@ -40,9 +40,33 @@ export function registerContextFunction({
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.Internal,
+      parameters: {
+        type: 'object',
+        properties: {
+          queries: {
+            type: 'array',
+            description: 'The query for the semantic search',
+            items: {
+              type: 'string',
+            },
+          },
+          categories: {
+            type: 'array',
+            description:
+              'Categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
+            items: {
+              type: 'string',
+              enum: ['apm', 'lens'],
+            },
+          },
+        },
+        required: ['queries', 'categories'],
+      } as const,
     },
-    async ({ messages, screenContexts, chat }, signal) => {
+    async ({ arguments: args, messages, screenContexts, chat }, signal) => {
       const { analytics } = (await resources.context.core).coreStart;
+
+      const { queries, categories } = args;
 
       async function getContext() {
         const screenDescription = compact(
@@ -70,21 +94,30 @@ export function registerContextFunction({
           messages.filter((message) => message.message.role === MessageRole.User)
         );
 
-        const userPrompt = userMessage?.message.content;
-        const queries = [{ text: userPrompt, boost: 3 }, { text: screenDescription }].filter(
-          ({ text }) => text
-        ) as Array<{ text: string; boost?: number }>;
+        const nonEmptyQueries = compact(queries);
 
-        const suggestions = await retrieveSuggestions({ client, queries });
+        const queriesOrUserPrompt = nonEmptyQueries.length
+          ? nonEmptyQueries
+          : compact([userMessage?.message.content]);
+
+        queriesOrUserPrompt.push(screenDescription);
+
+        const suggestions = await retrieveSuggestions({
+          client,
+          categories,
+          queries: queriesOrUserPrompt,
+        });
+
         if (suggestions.length === 0) {
-          return { content };
+          return {
+            content,
+          };
         }
 
         try {
           const { relevantDocuments, scores } = await scoreSuggestions({
             suggestions,
-            screenDescription,
-            userPrompt,
+            queries: queriesOrUserPrompt,
             messages,
             chat,
             signal,
@@ -92,7 +125,7 @@ export function registerContextFunction({
           });
 
           analytics.reportEvent<RecallRanking>(RecallRankingEventType, {
-            prompt: queries.map((query) => query.text).join('|'),
+            prompt: queriesOrUserPrompt.join('|'),
             scoredDocuments: suggestions.map((suggestion) => {
               const llmScore = scores.find((score) => score.id === suggestion.id);
               return {
@@ -145,12 +178,15 @@ export function registerContextFunction({
 async function retrieveSuggestions({
   queries,
   client,
+  categories,
 }: {
-  queries: Array<{ text: string; boost?: number }>;
+  queries: string[];
   client: ObservabilityAIAssistantClient;
+  categories: Array<'apm' | 'lens'>;
 }) {
   const recallResponse = await client.recall({
     queries,
+    categories,
   });
 
   return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction'));
@@ -172,16 +208,14 @@ const scoreFunctionArgumentsRt = t.type({
 async function scoreSuggestions({
   suggestions,
   messages,
-  userPrompt,
-  screenDescription,
+  queries,
   chat,
   signal,
   logger,
 }: {
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   messages: Message[];
-  userPrompt: string | undefined;
-  screenDescription: string;
+  queries: string[];
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
   logger: Logger;
@@ -203,10 +237,7 @@ async function scoreSuggestions({
     - The document contains new information not mentioned before in the conversation
 
     Question:
-    ${userPrompt}
-
-    Screen description:
-    ${screenDescription}
+    ${queries.join('\n')}
 
     Documents:
     ${JSON.stringify(indexedSuggestions, null, 2)}`);

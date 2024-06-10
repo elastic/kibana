@@ -72,6 +72,10 @@ export function createService({
       return of(
         createFunctionRequestMessage({
           name: 'context',
+          args: {
+            queries: [],
+            categories: [],
+          },
         }),
         createFunctionResponseMessage({
           name: 'context',

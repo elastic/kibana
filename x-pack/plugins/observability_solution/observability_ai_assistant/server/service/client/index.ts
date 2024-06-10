@@ -694,7 +694,7 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: Array<{ text: string; boost?: number }>;
+    queries: string[];
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
@@ -757,9 +757,11 @@ export class ObservabilityAIAssistantClient {
   };
 
   fetchUserInstructions = async () => {
-    return this.dependencies.knowledgeBaseService.getUserInstructions(
+    const userInstructions = await this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user
     );
+
+    return userInstructions;
   };
 }

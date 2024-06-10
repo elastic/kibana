@@ -94,7 +94,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   content: '',
                   function_call: {
                     name: 'context',
-                    arguments: '{}',
+                    arguments: '{"queries":[],"categories":[]}',
                     trigger: MessageRole.Assistant,
                   },
                 },
@@ -290,6 +290,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
                   name: 'context',
+                  arguments: JSON.stringify({ queries: [], categories: [] }),
                 });
 
                 expect(contextResponse.name).to.eql('context');
@@ -353,6 +354,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                   expect(pick(contextRequest.function_call, 'name', 'arguments')).to.eql({
                     name: 'context',
+                    arguments: JSON.stringify({ queries: [], categories: [] }),
                   });
 
                   expect(contextResponse.name).to.eql('context');
