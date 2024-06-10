@@ -23,7 +23,7 @@ export const patchCommentRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Update an alert or comment in a case`,
+    summary: `Update an alert or comment in a case`,
   },
   handler: async ({ context, request, response }) => {
     try {
