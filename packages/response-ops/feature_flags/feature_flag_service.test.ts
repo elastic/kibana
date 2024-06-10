@@ -8,6 +8,8 @@
 
 import { createFeatureFlagService } from './feature_flag_service';
 
+type FeatureFlagValues = 'test.myFeature' | 'test.myOtherFeature';
+
 describe('FeatureFlagService', () => {
   it('returns true if the feature exists', () => {
     const featureFlagService = createFeatureFlagService(['test.myFeature']);
@@ -18,5 +20,10 @@ describe('FeatureFlagService', () => {
     const featureFlagService = createFeatureFlagService(['test.myFeature']);
     // @ts-expect-error: foo is not part of the valid feature flags
     expect(featureFlagService.isFeatureFlagSet('foo')).toBe(false);
+  });
+
+  it('returns true if the feature exists (as typed)', () => {
+    const featureFlagService = createFeatureFlagService<FeatureFlagValues>(['test.myFeature']);
+    expect(featureFlagService.isFeatureFlagSet('test.myFeature')).toBe(true);
   });
 });
