@@ -14,6 +14,8 @@ import {
 import { useHighlightedFields } from './use_highlighted_fields';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
 
+jest.mock('../../../../common/experimental_features_service');
+
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
 describe('useHighlightedFields', () => {

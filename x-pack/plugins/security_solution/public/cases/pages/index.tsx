@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
