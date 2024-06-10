@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BoolQuery, Filter } from '@kbn/es-query';
+import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertsGrouping } from '@kbn/alerts-ui-shared/src/alerts_grouping/components/alerts_grouping';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertsGrouping } from '@kbn/alerts-grouping';
+import { renderGroupPanel } from './grouping/render_group_panel';
 import { observabilityFeatureId, rulesLocatorID } from '../../../common';
 import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
@@ -24,7 +25,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
-import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import {
   alertSearchBarStateContainer,
@@ -38,6 +38,10 @@ import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { buildEsQuery } from '../../utils/build_es_query';
+import { getGroupStats } from './grouping/get_group_stats';
+import { getAggregationsByGroupingField } from './grouping/get_aggregations_by_grouping_field';
+import { DEFAULT_GROUPING_OPTIONS } from './grouping/constants';
+import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -45,185 +49,6 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
-
-const DEFAULT_GROUPING_OPTIONS = [
-  {
-    label: 'Rule name',
-    key: 'kibana.alert.rule.name',
-  },
-  {
-    label: 'Status',
-    key: 'kibana.alert.status',
-  },
-  {
-    label: 'Host name',
-    key: 'host.name',
-  },
-  {
-    label: 'Host ip',
-    key: 'host.ip',
-  },
-];
-
-const getAggregationsByGroupingField = (field: string): any[] => {
-  const aggMetrics: any[] = [
-    {
-      unitsCount: {
-        cardinality: {
-          field: 'kibana.alert.uuid',
-        },
-      },
-    },
-  ];
-  switch (field) {
-    case 'kibana.alert.rule.name':
-      aggMetrics.push(
-        ...[
-          {
-            description: {
-              terms: {
-                field: 'kibana.alert.rule.description',
-                size: 1,
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
-              },
-            },
-          },
-          {
-            hostsCountAggregation: {
-              cardinality: {
-                field: 'host.name',
-              },
-            },
-          },
-          {
-            ruleTags: {
-              terms: {
-                field: 'kibana.alert.rule.tags',
-              },
-            },
-          },
-        ]
-      );
-      break;
-    case 'host.name':
-      aggMetrics.push(
-        ...[
-          {
-            rulesCountAggregation: {
-              cardinality: {
-                field: 'kibana.alert.rule.rule_id',
-              },
-            },
-          },
-          {
-            countSeveritySubAggregation: {
-              cardinality: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            severitiesSubAggregation: {
-              terms: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            usersCountAggregation: {
-              cardinality: {
-                field: 'user.name',
-              },
-            },
-          },
-        ]
-      );
-      break;
-    case 'user.name':
-      aggMetrics.push(
-        ...[
-          {
-            rulesCountAggregation: {
-              cardinality: {
-                field: 'kibana.alert.rule.rule_id',
-              },
-            },
-          },
-          {
-            countSeveritySubAggregation: {
-              cardinality: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            severitiesSubAggregation: {
-              terms: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            hostsCountAggregation: {
-              cardinality: {
-                field: 'host.name',
-              },
-            },
-          },
-        ]
-      );
-      break;
-    case 'source.ip':
-      aggMetrics.push(
-        ...[
-          {
-            rulesCountAggregation: {
-              cardinality: {
-                field: 'kibana.alert.rule.rule_id',
-              },
-            },
-          },
-          {
-            countSeveritySubAggregation: {
-              cardinality: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            severitiesSubAggregation: {
-              terms: {
-                field: 'kibana.alert.severity',
-              },
-            },
-          },
-          {
-            hostsCountAggregation: {
-              cardinality: {
-                field: 'host.name',
-              },
-            },
-          },
-        ]
-      );
-      break;
-    default:
-      aggMetrics.push({
-        rulesCountAggregation: {
-          cardinality: {
-            field: 'kibana.alert.rule.rule_id',
-          },
-        },
-      });
-  }
-  return aggMetrics;
-};
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -382,27 +207,6 @@ function InternalAlertsPage() {
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
-  const renderAlertsTable = useCallback(
-    (groupingFilters: Filter[]) => {
-      const query = buildEsQuery({
-        filters: groupingFilters,
-      });
-      return (
-        <AlertsStateTable
-          id={observabilityFeatureId}
-          featureIds={observabilityAlertFeatureIds}
-          configurationId={AlertConsumers.OBSERVABILITY}
-          query={query}
-          showAlertStatusWithFlapping
-          pageSize={ALERTS_PER_PAGE}
-          cellContext={{ observabilityRuleTypeRegistry }}
-          alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-        />
-      );
-    },
-    [AlertsStateTable, alertsTableConfigurationRegistry, observabilityRuleTypeRegistry]
-  );
-
   return (
     <Provider value={alertSearchBarStateContainer}>
       <ObservabilityPageTemplate
@@ -453,23 +257,37 @@ function InternalAlertsPage() {
                 from={alertSearchBarStateProps.rangeFrom}
                 globalFilters={alertSearchBarStateProps.filters}
                 globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kql' }}
-                hasIndexMaintenance={false}
-                hasIndexWrite={false}
-                loading={false}
-                renderChildComponent={renderAlertsTable}
-                tableId={observabilityFeatureId}
+                groupingId={observabilityFeatureId}
                 to={alertSearchBarStateProps.rangeTo}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
                 getAggregationsByGroupingField={getAggregationsByGroupingField}
+                renderGroupPanel={renderGroupPanel}
+                getGroupStats={getGroupStats}
                 services={{
-                  uiSettings,
                   storage,
                   notifications,
                   dataViews,
                   http,
-                  data,
                 }}
-              />
+              >
+                {(groupingFilters) => {
+                  const query = buildEsQuery({
+                    filters: groupingFilters,
+                  });
+                  return (
+                    <AlertsStateTable
+                      id={observabilityFeatureId}
+                      featureIds={observabilityAlertFeatureIds}
+                      configurationId={AlertConsumers.OBSERVABILITY}
+                      query={query}
+                      showAlertStatusWithFlapping
+                      pageSize={ALERTS_PER_PAGE}
+                      cellContext={{ observabilityRuleTypeRegistry }}
+                      alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                    />
+                  );
+                }}
+              </AlertsGrouping>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

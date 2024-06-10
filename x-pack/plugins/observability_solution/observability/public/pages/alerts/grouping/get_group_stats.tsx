@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { RawBucket, StatRenderer } from '@kbn/securitysolution-grouping';
+import { AlertsGroupingAggregation } from '@kbn/alerts-grouping';
+import { GetGroupStats } from '@kbn/grouping/src';
 
 const getSeverity = (severity?: string) => {
   switch (severity) {
@@ -63,7 +63,7 @@ const multiSeverity = (
   </>
 );
 
-export const getStats = (selectedGroup: string, bucket: RawBucket<{}>): StatRenderer[] => {
+export const getGroupStats: GetGroupStats<AlertsGroupingAggregation> = (selectedGroup, bucket) => {
   const singleSeverityComponent =
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
       ? getSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())

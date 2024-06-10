@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_START } from '@kbn/rule-data-utils';
+import { AlertConsumers, ALERT_START } from '@kbn/rule-data-utils';
 import {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getDefaultPersistentControls } from '@kbn/alerts-ui-shared/src/alerts_grouping/hooks/use_persistent_controls';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
+import { useAlertDataView } from '@kbn/alerts-ui-shared';
+import { type AlertsGroupingProps, useAlertsGroupingState } from '@kbn/alerts-grouping';
 import {
   casesFeatureId,
   observabilityAlertFeatureIds,
@@ -27,6 +29,54 @@ import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observ
 import type { ConfigSchema } from '../../../plugin';
 import { getRenderCellValue } from '../common/render_cell_value';
 import { getColumns } from '../common/get_columns';
+
+interface GetUsePersistentControlsParams {
+  groupingId: string;
+  featureIds: AlertConsumers[];
+  maxGroupingLevels?: number;
+  services: Pick<AlertsGroupingProps['services'], 'dataViews' | 'http' | 'notifications'>;
+}
+
+export const getDefaultPersistentControls =
+  ({
+    groupingId,
+    featureIds,
+    maxGroupingLevels = 3,
+    services: { dataViews, http, notifications },
+  }: GetUsePersistentControlsParams) =>
+  () => {
+    const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
+
+    const onGroupChange = useCallback(
+      (selectedGroups: string[]) => {
+        updateGrouping({ activeGroups: selectedGroups });
+      },
+      [updateGrouping]
+    );
+
+    const { dataViews: alertDataViews } = useAlertDataView({
+      featureIds,
+      dataViewsService: dataViews,
+      http,
+      toasts: notifications.toasts,
+    });
+
+    const dataView = useMemo(() => alertDataViews?.[0], [alertDataViews]);
+
+    const groupSelector = useGetGroupSelectorStateless({
+      groupingId,
+      onGroupChange,
+      fields: dataView?.fields ?? [],
+      defaultGroupingOptions: grouping.options,
+      maxGroupingLevels,
+    });
+
+    return useMemo(() => {
+      return {
+        right: groupSelector,
+      };
+    }, [groupSelector]);
+  };
 
 export const getAlertsPageTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,

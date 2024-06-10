@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   EuiAvatar,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,14 +19,10 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
-import type { GroupPanelRenderer } from '@kbn/securitysolution-grouping/src';
-// import type { AlertsGroupingAggregation } from './types';
-// import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
-// import type { GenericBuckets } from '../../../../../common/search_strategy';
-// import { PopoverItems } from '../../../../common/components/popover_items';
-// import { COLUMN_TAGS } from '../../../pages/detection_engine/rules/translations';
+import { firstNonNullValue, GroupPanelRenderer } from '@kbn/grouping/src';
+import { AlertsGroupingAggregation } from '@kbn/alerts-grouping';
 
-export const renderGroupPanel: GroupPanelRenderer<{}> = (
+export const renderGroupPanel: GroupPanelRenderer<AlertsGroupingAggregation> = (
   selectedGroup,
   bucket,
   nullGroupMessage
@@ -37,10 +33,9 @@ export const renderGroupPanel: GroupPanelRenderer<{}> = (
         <RuleNameGroupContent
           ruleName={bucket.key[0]}
           ruleDescription={
-            // firstNonNullValue(firstNonNullValue(bucket.description?.buckets)?.key) ?? ''
-            'Description'
+            firstNonNullValue(firstNonNullValue(bucket.description?.buckets)?.key) ?? ''
           }
-          tags={/* bucket.ruleTags?.buckets*/ ''}
+          tags={bucket.ruleTags?.buckets}
         />
       ) : undefined;
     case 'host.name':
@@ -57,11 +52,11 @@ const RuleNameGroupContent = React.memo<{
   ruleDescription: string;
   tags?: any[] | undefined;
 }>(({ ruleName, ruleDescription, tags }) => {
-  // const renderItem = (tag: string, i: number) => (
-  //   <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
-  //     {tag}
-  //   </EuiBadge>
-  // );
+  const renderItem = (tag: string, i: number) => (
+    <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
+      {tag}
+    </EuiBadge>
+  );
   return (
     <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
@@ -71,16 +66,7 @@ const RuleNameGroupContent = React.memo<{
           </EuiTitle>
         </EuiFlexItem>
         {tags && tags.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            {/* <PopoverItems*/}
-            {/*  items={tags.map((tag) => tag.key.toString())}*/}
-            {/*  popoverTitle={COLUMN_TAGS}*/}
-            {/*  popoverButtonTitle={tags.length.toString()}*/}
-            {/*  popoverButtonIcon="tag"*/}
-            {/*  dataTestPrefix="tags"*/}
-            {/*  renderItem={renderItem}*/}
-            {/* />*/}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{tags.map(renderItem)}</EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
 
