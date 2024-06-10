@@ -42,12 +42,12 @@ export const usePollApi = ({
 } => {
   const [status, setStatus] = useState<AttackDiscoveryStatus | null>(null);
   const [data, setData] = useState<AttackDiscoveryData | null>(null);
-  const currentConnectorId = useRef<string | undefined>(undefined);
+  const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    currentConnectorId.current = connectorId;
     return () => {
-      currentConnectorId.current = undefined;
+      // when a connectorId changes, clear timeout
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
   }, [connectorId]);
 
@@ -103,9 +103,8 @@ export const usePollApi = ({
       } else if (parsedResponse.data.data.status === attackDiscoveryStatus.running) {
         handleResponse(parsedResponse.data.data);
         // poll every 3 seconds if attack discovery is running
-        setTimeout(() => {
-          // react is being annoying and the setTimeout is still running after the connectorId changes
-          if (currentConnectorId.current === connectorId) pollApi();
+        timeoutIdRef.current = setTimeout(() => {
+          pollApi();
         }, 3000);
       } else {
         throw new Error('Invalid status from attack discovery GET response');
