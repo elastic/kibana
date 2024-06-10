@@ -33,3 +33,6 @@ export const RESOURCES_FINDINGS_CONTAINER = 'resources_findings_container';
 export const RESOURCES_FINDINGS_TABLE = 'resource_findings_table';
 export const getResourceFindingsTableRowTestId = (id: string) =>
   `resource_findings_table_row_${id}`;
+
+export const FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST =
+  'misconfigs-findings-flyout-description-list';
