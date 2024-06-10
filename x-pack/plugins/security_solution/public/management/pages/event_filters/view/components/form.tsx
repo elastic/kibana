@@ -23,7 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EVENT_FILTERS_OPERATORS, hasWrongOperatorWithWildcard } from '@kbn/securitysolution-list-utils';
+import {
+  EVENT_FILTERS_OPERATORS,
+  hasWrongOperatorWithWildcard,
+} from '@kbn/securitysolution-list-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
