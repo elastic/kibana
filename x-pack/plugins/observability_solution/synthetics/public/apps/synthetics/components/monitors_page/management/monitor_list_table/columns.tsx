@@ -49,6 +49,7 @@ export function useMonitorListColumns({
   setMonitorPendingDeletion: (config: EncryptedSyntheticsSavedMonitor) => void;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
+  const { http } = useKibana().services;
   const canEditSynthetics = useCanEditSynthetics();
 
   const { isServiceAllowed } = useEnablement();
@@ -194,10 +195,31 @@ export function useMonitorListColumns({
             !isActionLoading(fields) &&
             isPublicLocationsAllowed(fields) &&
             isServiceAllowed,
-          onClick: (fields) => {
-            history.push({
-              pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
-            });
+          href: (fields) => {
+            return http?.basePath.prepend(`edit-monitor/${fields[ConfigKey.CONFIG_ID]}`)!;
+          },
+        },
+        {
+          'data-test-subj': 'syntheticsMonitorCopyAction',
+          isPrimary: true,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
+            >
+              {labels.CLONE_LABEL}
+            </NoPermissionsTooltip>
+          ),
+          description: labels.CLONE_LABEL,
+          icon: 'copy' as const,
+          type: 'icon' as const,
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isPublicLocationsAllowed(fields) &&
+            isServiceAllowed,
+          href: (fields) => {
+            return http?.basePath.prepend(`add-monitor?cloneId=${fields[ConfigKey.CONFIG_ID]}`)!;
           },
         },
         {
