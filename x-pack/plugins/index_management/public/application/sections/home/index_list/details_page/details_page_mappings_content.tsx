@@ -65,7 +65,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 }> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     services: { extensionsService },
-    core: { getUrlForApp },
+    core: {
+      getUrlForApp,
+      application: { capabilities },
+    },
     plugins: { ml },
     url,
     config,
@@ -74,8 +77,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
     []
   );
+
+  const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
+
   const semanticTextInfo = {
-    isSemanticTextEnabled,
+    isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
@@ -164,7 +170,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
-    if (!isSemanticTextEnabled) {
+    if (!isSemanticTextEnabled || !hasMLPermissions) {
       return;
     }
 
@@ -487,7 +493,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={true}>
-            <SemanticTextBanner isSemanticTextEnabled={isSemanticTextEnabled} />
+            <SemanticTextBanner
+              isSemanticTextEnabled={isSemanticTextEnabled}
+              hasMLPermissions={hasMLPermissions}
+            />
           </EuiFlexItem>
           {errorSavingMappings}
           {isAddingFields && (
