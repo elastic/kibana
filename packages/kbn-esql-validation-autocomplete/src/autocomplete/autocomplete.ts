@@ -853,8 +853,6 @@ async function getExpressionSuggestionsByType(
         const policies = await getPolicies();
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        const sourcesDefinitions = await getSources();
-
         const fromCommand = commands.find(({ name }) => name === 'from');
         const args = (fromCommand?.args ?? []) as ESQLSource[];
         const indices = args.filter((arg) => arg.sourceType === 'index');
@@ -871,6 +869,7 @@ async function getExpressionSuggestionsByType(
         } else {
           // FROM <suggest>
           // @TODO: filter down the suggestions here based on other existing sources defined
+          const sourcesDefinitions = await getSources();
           suggestions.push(...sourcesDefinitions);
         }
       }

@@ -151,7 +151,7 @@ export const buildSourcesDefinitions = (
     text: name,
     isSnippet: isIntegration,
     ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
-    kind: isIntegration ? 'Class' : 'Reference',
+    kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
       ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
           defaultMessage: `Integration`,
