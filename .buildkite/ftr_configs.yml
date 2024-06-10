@@ -23,6 +23,7 @@ disabled:
   - x-pack/test/upgrade/config.ts
   - test/functional/config.edge.js
   - x-pack/test/functional/config.edge.js
+  - x-pack/test/cloud_security_posture_functional/config.cloud.ts
 
   # Cypress configs, for now these are still run manually
   - x-pack/test/fleet_cypress/cli_config.ts

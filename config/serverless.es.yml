@@ -12,6 +12,22 @@ xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
 xpack.fleet.enabled: false
 xpack.observabilityAIAssistant.enabled: false
+xpack.osquery.enabled: false
+
+## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Dashboards feature is moved from Analytics category to the Search one.
+  dashboard.category: "enterpriseSearch"
+  ### Dev Tools feature is moved from Analytics category to the Search one.
+  dev_tools.category: "enterpriseSearch"
+  ### Discover feature is moved from Analytics category to the Search one.
+  discover.category: "enterpriseSearch"
+  ### Machine Learning feature is moved from Analytics category to the Management one.
+  ml.category: "management"
+  ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
+  stackAlerts:
+    name: "Alerts"
+    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search

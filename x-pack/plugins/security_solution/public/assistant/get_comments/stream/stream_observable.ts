@@ -253,13 +253,32 @@ export const getStreamObservable = ({
             geminiBuffer = lines.pop() || '';
 
             const nextChunks = getGeminiChunks(lines);
+
             nextChunks.forEach((chunk: string) => {
-              chunks.push(chunk);
-              observer.next({
-                chunks,
-                message: chunks.join(''),
-                loading: true,
-              });
+              let currentWord = '';
+
+              for (const char of chunk) {
+                currentWord += char;
+                if (currentWord.length === 2) {
+                  chunks.push(currentWord);
+                  observer.next({
+                    chunks,
+                    message: chunks.join(''),
+                    loading: true,
+                  });
+                  currentWord = '';
+                }
+              }
+
+              if (currentWord) {
+                // Add any remaining characters as a single-letter word
+                chunks.push(currentWord);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              }
             });
           } catch (err) {
             observer.error(err);

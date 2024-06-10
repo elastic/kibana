@@ -405,17 +405,22 @@ describe('getStreamObservable', () => {
     const expectedStates: PromptObservableState[] = [
       { chunks: [], loading: true },
       {
-        chunks: ['My', ' new', ' message'],
+        chunks: ['My', ' n', 'ew', ' message'],
         message: 'My',
         loading: true,
       },
       {
-        chunks: ['My', ' new', ' message'],
+        chunks: ['My', ' n', 'ew', ' message'],
+        message: 'My n',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' n', 'ew', ' message'],
         message: 'My new',
         loading: true,
       },
       {
-        chunks: ['My', ' new', ' message'],
+        chunks: ['My', ' n', 'ew', ' message'],
         message: 'My new message',
         loading: false,
       },
@@ -463,6 +468,7 @@ describe('getStreamObservable', () => {
       error: (err) => done(err),
     });
   });
+
   it('should emit loading state and chunks for partial response Gemini', (done) => {
     const chunk1 = `data: {"candidates": [{"content":{"role":"model","parts":[{"text":"My"}]}}]}\rdata: {"candidates": [{"content":{"role":"model","parts":[{"text":" new"}]}}]}`;
     const chunk2 = `\rdata: {"candidates": [{"content": {"role": "model","parts": [{"text": " message"}]},"finishReason": "STOP"}],"usageMetadata": {"promptTokenCount": 23,"candidatesTokenCount": 50,"totalTokenCount": 73}}`;
@@ -470,17 +476,22 @@ describe('getStreamObservable', () => {
     const expectedStates: PromptObservableState[] = [
       { chunks: [], loading: true },
       {
-        chunks: ['My', ' new', ' message'],
+        chunks: ['My', ' n', 'ew', ' message'],
         message: 'My',
         loading: true,
       },
       {
-        chunks: ['My', ' new', ' message'],
+        chunks: ['My', ' n', 'ew', ' message'],
+        message: 'My n',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' n', 'ew', ' message'],
         message: 'My new',
         loading: true,
       },
       {
-        chunks: ['My', ' new', ' message'],
+        chunks: ['My', ' n', 'ew', ' message'],
         message: 'My new message',
         loading: false,
       },
