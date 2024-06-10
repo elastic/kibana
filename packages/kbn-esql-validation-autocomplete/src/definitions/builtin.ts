@@ -507,7 +507,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: ['eval', 'stats', 'metrics', 'metrics', 'row', 'dissect', 'where', 'enrich'],
+    supportedCommands: ['eval', 'stats', 'metrics', 'row', 'dissect', 'where', 'enrich'],
     supportedOptions: ['by', 'with'],
     signatures: [
       {

@@ -2653,7 +2653,7 @@ const roundDefinition: FunctionDefinition = {
       returnType: 'number',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
