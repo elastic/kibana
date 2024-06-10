@@ -86,12 +86,3 @@ function get_vault_secret_id() {
 
     echo "$VAULT_SECRET_ID"
 }
-
-function with_legacy_vault() {
-    VAULT_ROLE_ID="$(get_vault_role_id)"
-    VAULT_SECRET_ID="$(get_vault_secret_id)"
-    VAULT_TOKEN=$(retry 5 30 VAULT_ADDR="$LEGACY_VAULT_ADDR" vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    retry 5 30 "VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print $VAULT_TOKEN"
-
-    VAULT_ADDR="$LEGACY_VAULT_ADDR" "$@"
-}
