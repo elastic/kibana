@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiAvatar,
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,10 +15,19 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { Steps } from './steps';
 import * as i18n from './translations';
+
+const useAvatarCss = () => {
+  const { euiTheme } = useEuiTheme();
+  return css`
+    border: 1px solid ${euiTheme.colors.lightShade};
+    padding: ${euiTheme.size.xs};
+  `;
+};
 
 const useTechPreviewBadgeCss = () => {
   const { euiTheme } = useEuiTheme();
@@ -25,15 +35,6 @@ const useTechPreviewBadgeCss = () => {
     margin-left: ${euiTheme.size.m};
   `;
 };
-
-// const useContentCss = () => {
-//   const { euiTheme } = useEuiTheme();
-//   return css`
-//     width: 100%;
-//     max-width: 80em;
-//     padding: ${euiTheme.size.l};
-//   `;
-// };
 
 const contentCss = css`
   width: 100%;
@@ -47,32 +48,44 @@ interface HeaderProps {
 }
 export const Header = React.memo<HeaderProps>(({ currentStep, setStep, isGenerating }) => {
   const techPreviewBadgeCss = useTechPreviewBadgeCss();
+  const avatarCss = useAvatarCss();
   return (
     <KibanaPageTemplate.Header>
       <EuiFlexGroup direction="column" alignItems="center">
         <EuiFlexItem css={contentCss}>
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="l">
+          <EuiFlexGroup direction="column" gutterSize="l">
             <EuiFlexItem>
               <EuiSpacer size="s" />
-              <EuiText>
-                <h1>
-                  <span>{i18n.TITLE}</span>
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiAvatar
+                    name={i18n.ASSISTANT_AVATAR}
+                    size="m"
+                    iconType={AssistantAvatar}
+                    color="#ffffff"
+                    css={avatarCss}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText>
+                    <h1>
+                      <span>{i18n.TITLE}</span>
+                    </h1>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiBetaBadge
-                    iconType={'beaker'}
+                    // iconType="beaker"
                     label={i18n.BETA}
                     tooltipContent={i18n.BETA_TOOLTIP}
                     size="m"
                     color="hollow"
                     css={techPreviewBadgeCss}
                   />
-                </h1>
-              </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem
-              css={css`
-                width: 100%;
-              `}
-            >
+            <EuiFlexItem>
               <Steps currentStep={currentStep} setStep={setStep} isGenerating={isGenerating} />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { LogsAnalysis } from './logs_analysis';
-export * from './util';
+export const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-import type { State } from '../../state';
-export const isConnectorStepReady = ({ connectorId }: State) => connectorId != null;
+export { DataStreamStep } from './data_stream_step';
+export * from './is_step_ready';

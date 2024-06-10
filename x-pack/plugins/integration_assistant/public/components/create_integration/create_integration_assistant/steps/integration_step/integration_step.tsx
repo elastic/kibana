@@ -17,13 +17,32 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  useEuiBackgroundColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { IntegrationSettings } from '../../types';
-
-import * as i18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
+import { PackageCardPreview } from './package_card_preview';
+import * as i18n from './translations';
 
 const MaxLogoSize = 1048576; // One megabyte
+
+const useLayoutStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const subduedBgCss = useEuiBackgroundColor('subdued');
+  return {
+    left: css`
+      padding: ${euiTheme.size.l};
+    }
+  `,
+    right: css`
+      padding: ${euiTheme.size.l};
+      background: ${subduedBgCss};
+      width: 45%;
+    `,
+  };
+};
 
 interface IntegrationStepProps {
   integrationSettings: IntegrationSettings | undefined;
@@ -32,6 +51,7 @@ interface IntegrationStepProps {
 
 export const IntegrationStep = React.memo<IntegrationStepProps>(
   ({ integrationSettings, setIntegrationSettings }) => {
+    const styles = useLayoutStyles();
     const [logoError, setLogoError] = React.useState<string>();
 
     const setIntegrationValues = useCallback(
@@ -72,9 +92,9 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(
 
     return (
       <StepContentWrapper title={i18n.TITLE} subtitle={i18n.DESCRIPTION}>
-        <EuiPanel paddingSize="l" hasShadow={false} hasBorder>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
+        <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+          <EuiFlexGroup direction="row" gutterSize="none">
+            <EuiFlexItem css={styles.left}>
               <EuiForm component="form" fullWidth>
                 <EuiFormRow label={i18n.TITLE_LABEL}>
                   <EuiFieldText
@@ -110,6 +130,13 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(
                   </>
                 </EuiFormRow>
               </EuiForm>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={styles.right}>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <PackageCardPreview integrationSettings={integrationSettings} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

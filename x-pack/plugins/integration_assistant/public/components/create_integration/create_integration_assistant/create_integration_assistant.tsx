@@ -13,8 +13,8 @@ import { Header } from './header';
 import { useAssistantState } from './hooks/use_assistant_state';
 import { BottomBar } from './bottom_bar';
 import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
-import { IntegrationStep, isConfigureIntegrationReady } from './steps/integration_step';
-import { isLogsAnalysisReady, LogsAnalysis } from './steps/logs_analysis';
+import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
+import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
 import { isPipelineGenerationReady, PipelineGeneration } from './steps/pipeline_integration';
 import { DeployIntegration } from './steps/deploy_integration';
 import type { SetPage } from '../../types';
@@ -34,9 +34,9 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
       if (state.step === 1) {
         return isConnectorStepReady(state);
       } else if (state.step === 2) {
-        return isConfigureIntegrationReady({ integrationSettings: state.integrationSettings });
+        return isIntegrationStepReady(state);
       } else if (state.step === 3) {
-        return isLogsAnalysisReady({ integrationSettings: state.integrationSettings });
+        return isDataStreamStepReady(state);
       } else if (state.step === 4) {
         return isPipelineGenerationReady({
           result: state.result,
@@ -78,9 +78,14 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
             />
           )}
           {state.step === 3 && (
-            <LogsAnalysis
+            <DataStreamStep
               integrationSettings={state.integrationSettings}
+              connectorId={state.connectorId}
               setIntegrationSettings={actions.setIntegrationSettings}
+              isGenerating={state.isGenerating}
+              setIsGenerating={actions.setIsGenerating}
+              setResult={actions.setResult}
+              setStep={actions.setStep}
             />
           )}
           {state.step === 4 && (
@@ -104,9 +109,11 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
         </KibanaPageTemplate.Section>
         <BottomBar
           currentStep={state.step}
+          setPage={setPage}
           setStep={actions.setStep}
           result={state.result}
           onGenerate={onGenerate}
+          isGenerating={state.isGenerating}
           isNextStepEnabled={isNextStepEnabled}
         />
       </KibanaPageTemplate>

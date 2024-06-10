@@ -31,10 +31,6 @@ const STEP_REVIEW = i18n.translate('xpack.integrationAssistant.step.review', {
   defaultMessage: 'Review',
 });
 
-// const INSTALL = i18n.translate('xpack.integrationAssistant.step.install', {
-//   defaultMessage: 'Deploy',
-// });
-
 const getStepStatus = (step: number, currentStep: number, loading?: boolean): EuiStepStatus => {
   if (step === currentStep) {
     return loading ? 'loading' : 'current';
@@ -67,19 +63,14 @@ export const Steps = React.memo<StepsProps>(({ currentStep, setStep, isGeneratin
       },
       {
         title: STEP_DATA_STREAM,
-        status: getStepStatus(3, currentStep),
+        status: getStepStatus(3, currentStep, isGenerating),
         onClick: getStepOnClick(3, currentStep, setStep),
       },
       {
         title: STEP_REVIEW,
-        status: getStepStatus(4, currentStep, isGenerating),
+        status: getStepStatus(4, currentStep),
         onClick: getStepOnClick(4, currentStep, setStep),
       },
-      // {
-      //   title: INSTALL,
-      //   status: getStepStatus(5, currentStep),
-      //   onClick: getStepOnClick(5, currentStep, setStep),
-      // },
     ];
   }, [currentStep, setStep, isGenerating]);
 

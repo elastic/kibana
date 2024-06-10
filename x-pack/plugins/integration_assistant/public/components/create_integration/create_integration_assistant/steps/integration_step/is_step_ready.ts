@@ -6,5 +6,6 @@
  */
 
 import type { State } from '../../state';
-export const isConfigureIntegrationReady = ({ integrationSettings }: State) =>
+
+export const isIntegrationStepReady = ({ integrationSettings }: State) =>
   Boolean(integrationSettings?.title && integrationSettings?.description);

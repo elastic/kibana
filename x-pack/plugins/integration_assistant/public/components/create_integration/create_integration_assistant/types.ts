@@ -19,6 +19,5 @@ export interface IntegrationSettings {
   dataStreamDescription?: string;
   dataStreamName?: string;
   inputType?: InputType;
-  logsSampleFileName?: string;
   logsSampleParsed?: string[];
 }

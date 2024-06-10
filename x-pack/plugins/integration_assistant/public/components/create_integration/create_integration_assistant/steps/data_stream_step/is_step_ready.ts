@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IntegrationSettings } from '../../types';
+import type { State } from '../../state';
+import { isValidName } from './util';
 
-export const isLogsAnalysisReady = ({
-  integrationSettings,
-}: {
-  integrationSettings: IntegrationSettings | undefined;
-}) =>
+export const isDataStreamStepReady = ({ integrationSettings }: State) =>
   Boolean(
     integrationSettings?.name &&
+      isValidName(integrationSettings.name) &&
+      integrationSettings?.dataStreamTitle &&
+      integrationSettings?.dataStreamDescription &&
       integrationSettings?.dataStreamName &&
-      integrationSettings?.logsSampleFileName &&
+      isValidName(integrationSettings.dataStreamName) &&
       integrationSettings?.logsSampleParsed
   );

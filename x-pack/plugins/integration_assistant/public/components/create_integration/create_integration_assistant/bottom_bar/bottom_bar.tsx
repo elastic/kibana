@@ -5,26 +5,76 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { ButtonsFooter } from '../../../../common/components/buttons_footer';
+import type { SetPage } from '../../../types';
 import type { State } from '../state';
+import * as i18n from './translations';
+
+// Generation button for Step 3
+const Step3ButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
+  if (!isGenerating) {
+    return <>{i18n.ANALYZE_LOGS}</>;
+  }
+  return (
+    <>
+      <EuiLoadingSpinner size="s" />
+      {i18n.LOADING}
+    </>
+  );
+});
+Step3ButtonText.displayName = 'Step3ButtonText';
 
 interface BottomBarProps {
+  setPage: SetPage;
   currentStep: number;
   setStep: (step: number) => void;
   result: State['result'];
   onGenerate: () => void;
+  isGenerating: boolean;
   isNextStepEnabled?: boolean;
 }
 
 export const BottomBar = React.memo<BottomBarProps>(
-  ({ currentStep, setStep, result, onGenerate, isNextStepEnabled = false }) => {
-    if (currentStep === 5) {
-      return null;
-    }
+  ({
+    setPage,
+    currentStep,
+    setStep,
+    result,
+    onGenerate,
+    isGenerating,
+    isNextStepEnabled = false,
+  }) => {
+    const onBack = useCallback(() => {
+      if (currentStep === 1) {
+        setPage('landing');
+      } else {
+        setStep(currentStep - 1);
+      }
+    }, [currentStep, setPage, setStep]);
+
+    const onNext = useCallback(() => {
+      if (currentStep === 3) {
+        onGenerate();
+      } else {
+        setStep(currentStep + 1);
+      }
+    }, [currentStep, onGenerate, setStep]);
+
+    // if (currentStep === 5) {
+    //   return <ButtonsFooter isNextDisabled={!isNextStepEnabled} onBack={onBack} onNext={onNext} />;
+    // }
 
     return (
-      <ButtonsFooter isNextDisabled={!isNextStepEnabled} onNext={() => setStep(currentStep + 1)} />
+      <ButtonsFooter
+        isNextDisabled={!isNextStepEnabled || isGenerating}
+        onBack={onBack}
+        onNext={onNext}
+        nextButtonText={
+          currentStep === 3 ? <Step3ButtonText isGenerating={isGenerating} /> : undefined
+        }
+      />
     );
   }
 );

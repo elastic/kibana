@@ -23,9 +23,9 @@ const contentCss = css`
 `;
 
 interface ButtonsFooterProps {
-  cancelButtonText?: string;
-  nextButtonText?: string;
-  backButtonText?: string;
+  cancelButtonText?: React.ReactNode;
+  nextButtonText?: React.ReactNode;
+  backButtonText?: React.ReactNode;
   onNext?: () => void;
   onBack?: () => void;
   hideCancel?: boolean;

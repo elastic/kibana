@@ -41,6 +41,10 @@ export const LOGO_DESCRIPTION = i18n.translate(
   }
 );
 
+export const PREVIEW = i18n.translate('xpack.integrationAssistant.step.integration.preview', {
+  defaultMessage: 'Preview',
+});
+
 export const LOGO_ERROR = i18n.translate('xpack.integrationAssistant.step.integration.logo.error', {
   defaultMessage: 'Error processing logo file',
 });

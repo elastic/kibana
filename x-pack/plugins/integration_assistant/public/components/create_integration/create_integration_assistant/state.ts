@@ -6,7 +6,7 @@
  */
 
 import type { Pipeline } from '../../../../common/types';
-// import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
+import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
 import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
@@ -20,14 +20,14 @@ export interface State {
   };
 }
 
-// export const initialState = { ...dummyInitialState, step: 2 };
-export const initialState: State = {
-  step: 1,
-  connectorId: undefined,
-  integrationSettings: undefined,
-  isGenerating: false,
-  result: undefined,
-};
+export const initialState = { ...dummyInitialState, step: 4 };
+// export const initialState: State = {
+//   step: 1,
+//   connectorId: undefined,
+//   integrationSettings: undefined,
+//   isGenerating: false,
+//   result: undefined,
+// };
 
 type Action =
   | { type: 'SET_STEP'; payload: State['step'] }

@@ -6,4 +6,4 @@
  */
 
 export { ConnectorStep } from './connector_step';
-export * from './util';
+export * from './is_step_ready';
