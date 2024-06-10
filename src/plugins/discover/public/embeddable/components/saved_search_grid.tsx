@@ -21,8 +21,7 @@ import { TotalDocuments } from '../../application/main/components/total_document
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
-import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
-import { useProfileAccessor } from '../context_awareness';
+import { useProfileAccessor } from '../../context_awareness';
 import './saved_search_grid.scss';
 
 export interface DiscoverGridEmbeddableProps

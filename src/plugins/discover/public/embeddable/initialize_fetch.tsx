@@ -28,6 +28,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
+import { createDataViewDataSource, createEsqlDataSource } from '../../common/data_sources';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -52,6 +53,12 @@ export function initializeFetch({
 }) {
   const requestAdapter = new RequestAdapter();
   let abortController = new AbortController(); // ???
+
+  // const solutionNavId = await firstValueFrom(
+  //   this.services.core.chrome.getActiveSolutionNavId$()
+  // );
+
+  // await this.services.profilesManager.resolveRootProfile({ solutionNavId });
 
   const fetchSubscription = combineLatest([fetch$(api), api.sort$])
     .pipe(
@@ -89,23 +96,35 @@ export function initializeFetch({
           // Log request to inspector
           requestAdapter.reset();
 
+          await discoverServices.profilesManager.resolveDataSourceProfile({
+            dataSource: isOfAggregateQueryType(searchSourceQuery)
+              ? createEsqlDataSource()
+              : dataView.id
+              ? createDataViewDataSource({ dataViewId: dataView.id })
+              : undefined,
+            dataView,
+            query: searchSourceQuery,
+          });
+
           const esqlMode = isEsqlMode({ searchSource });
           if (
             esqlMode &&
             searchSourceQuery &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
-            const result = await fetchEsql(
-              searchSourceQuery,
+            // Request ES|QL data
+            const result = await fetchEsql({
+              query: searchSourceQuery,
+              inputTimeRange: getTimeRangeFromFetchContext(fetchContext),
+              inputQuery: fetchContext.query,
+              filters: fetchContext.filters,
               dataView,
-              discoverServices.data,
-              discoverServices.expressions,
-              discoverServices.inspector,
-              abortController.signal,
-              fetchContext.filters,
-              fetchContext.query,
-              getTimeRangeFromFetchContext(fetchContext)
-            );
+              abortSignal: abortController.signal,
+              inspectorAdapters: discoverServices.inspector,
+              data: discoverServices.data,
+              expressions: discoverServices.expressions,
+              profilesManager: discoverServices.profilesManager,
+            });
             return {
               columnsMeta: result.esqlQueryColumns
                 ? getTextBasedColumnsMeta(result.esqlQueryColumns)

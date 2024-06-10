@@ -76,6 +76,12 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
+import {
+  DataSourceProfileService,
+  DocumentProfileService,
+  ProfilesManager,
+  RootProfileService,
+} from './context_awareness';
 import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
 import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import {
@@ -87,13 +93,6 @@ import { HistoryService } from './history_service';
 import { registerFeature } from './register_feature';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { injectTruncateStyles } from './utils/truncate_styles';
-import { ConfigSchema, ExperimentalFeatures } from '../common/config';
-import {
-  DataSourceProfileService,
-  DocumentProfileService,
-  ProfilesManager,
-  RootProfileService,
-} from './context_awareness';
 
 /**
  * @public
