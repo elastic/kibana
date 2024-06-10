@@ -6,7 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { getConnectorsFormSerializer } from '../utils';
+import type { TemplateConfiguration } from '../../../common/types/domain';
+import type { CaseUI } from '../../containers/types';
+import { getConnectorsFormDeserializer, getConnectorsFormSerializer } from '../utils';
 import type { TemplateFormProps } from './types';
 
 export function removeEmptyFields<T extends Record<string, unknown>>(obj: T): Partial<T> {
@@ -21,6 +23,49 @@ export function removeEmptyFields<T extends Record<string, unknown>>(obj: T): Pa
       ])
   ) as T;
 }
+
+export const convertTemplateCustomFields = (
+  customFields?: CaseUI['customFields']
+): Record<string, string | boolean> | null => {
+  if (!customFields || !customFields.length) {
+    return null;
+  }
+
+  return customFields.reduce((acc, customField) => {
+    const initial = {
+      [customField.key]: customField.value,
+    };
+
+    return { ...acc, ...initial };
+  }, {});
+};
+
+export const templateDeserializer = (data: TemplateConfiguration): TemplateFormProps => {
+  if (data !== null) {
+    console.log('templateDeserializer 1', { data });
+    const { key, name, description, tags, caseFields } = data;
+    const { connector, customFields, settings, ...rest } = caseFields ?? {};
+    const connectorFields = getConnectorsFormDeserializer({ fields: connector?.fields ?? null });
+    const convertedCustomFields = convertTemplateCustomFields(customFields);
+
+    const temp = {
+      key,
+      name,
+      templateDescription: description ?? '',
+      templateTags: tags,
+      connectorId: connector?.id ?? 'none',
+      fields: connectorFields.fields,
+      customFields: convertedCustomFields ?? {},
+      ...rest,
+    };
+
+    console.log('templateDeserializer 2', temp);
+
+    return temp;
+  }
+
+  return data;
+};
 
 export const templateSerializer = (data: TemplateFormProps): TemplateFormProps => {
   if (data !== null) {

@@ -9,12 +9,12 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionConnector } from '../../../common/types/domain';
+import type { FormState } from '../configure_cases/flyout';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
-import { templateSerializer } from './utils';
+import { templateDeserializer, templateSerializer } from './utils';
 import type { TemplateFormProps } from './types';
 import type { CasesConfigurationUI } from '../../containers/types';
-import type { FormState } from '../configure_cases/flyout';
 
 interface Props {
   onChange: (state: FormState<TemplateFormProps>) => void;
@@ -37,10 +37,12 @@ const FormComponent: React.FC<Props> = ({
       name: '',
       templateDescription: '',
       templateTags: [],
+      tags: [],
     },
     options: { stripEmptyFields: false },
     schema,
     serializer: templateSerializer,
+    deserializer: templateDeserializer,
   });
 
   const { submit, isValid, isSubmitting } = form;

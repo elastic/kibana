@@ -11,11 +11,13 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useGetTags } from '../../containers/use_get_tags';
 import * as i18n from './translations';
+import { schema } from './schema';
 interface Props {
   isLoading: boolean;
+  currentTags: string[];
 }
 
-const TagsComponent: React.FC<Props> = ({ isLoading }) => {
+const TagsComponent: React.FC<Props> = ({ isLoading, currentTags }) => {
   const { data: tagOptions = [], isLoading: isLoadingTags } = useGetTags();
   const options = useMemo(
     () =>
@@ -25,17 +27,22 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
     [tagOptions]
   );
 
+  const tagsConfig = {
+    ...schema.tags,
+    defaultValue: currentTags ?? [],
+  };
+
   return (
     <UseField
       path="tags"
       component={ComboBoxField}
-      defaultValue={[]}
+      config={tagsConfig}
       componentProps={{
         idAria: 'caseTags',
         'data-test-subj': 'caseTags',
         euiFieldProps: {
+          placeHolder: '',
           fullWidth: true,
-          placeholder: '',
           disabled: isLoading || isLoadingTags,
           options,
           noSuggestions: false,

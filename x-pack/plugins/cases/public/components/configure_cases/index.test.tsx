@@ -691,7 +691,7 @@ describe('ConfigureCases', () => {
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
       );
 
-      expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
       userEvent.click(screen.getByText('Delete'));
 

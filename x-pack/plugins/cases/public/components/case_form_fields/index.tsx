@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Title } from '../create/title';
 import { Tags } from '../create/tags';
 import { Category } from '../create/category';
@@ -29,14 +30,19 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   setCustomFieldsOptional = false,
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
+  const [{ assignees, tags }] = useFormData({
+    watch: ['assignees', 'tags'],
+  });
 
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column">
       <Title isLoading={isLoading} />
 
-      {caseAssignmentAuthorized ? <Assignees isLoading={isLoading} /> : null}
+      {caseAssignmentAuthorized ? (
+        <Assignees currentAssignees={assignees} isLoading={isLoading} />
+      ) : null}
 
-      <Tags isLoading={isLoading} />
+      <Tags isLoading={isLoading} currentTags={tags} />
 
       <Category isLoading={isLoading} />
 

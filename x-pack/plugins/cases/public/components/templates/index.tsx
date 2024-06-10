@@ -27,9 +27,18 @@ interface Props {
   isLoading: boolean;
   templates: CasesConfigurationUITemplate[];
   onAddTemplate: () => void;
+  handleEditTemplate: (key: string) => void;
+  handleDeleteTemplate: (key: string) => void;
 }
 
-const TemplatesComponent: React.FC<Props> = ({ disabled, isLoading, templates, onAddTemplate }) => {
+const TemplatesComponent: React.FC<Props> = ({
+  disabled,
+  isLoading,
+  templates,
+  onAddTemplate,
+  handleEditTemplate,
+  handleDeleteTemplate,
+}) => {
   const { permissions } = useCasesContext();
   const canAddTemplates = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);
@@ -43,6 +52,14 @@ const TemplatesComponent: React.FC<Props> = ({ disabled, isLoading, templates, o
     onAddTemplate();
     setError(false);
   }, [onAddTemplate, error, templates]);
+
+  const onEditTemplate = useCallback(
+    (key: string) => {
+      setError(false);
+      handleEditTemplate(key);
+    },
+    [setError, handleEditTemplate]
+  );
 
   return (
     <EuiDescribedFormGroup
@@ -61,7 +78,11 @@ const TemplatesComponent: React.FC<Props> = ({ disabled, isLoading, templates, o
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {templates.length ? (
           <>
-            <TemplatesList templates={templates} />
+            <TemplatesList
+              templates={templates}
+              onEditTemplate={onEditTemplate}
+              onDeleteTemplate={handleDeleteTemplate}
+            />
             {error ? (
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>

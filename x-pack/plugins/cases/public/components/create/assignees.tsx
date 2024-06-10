@@ -35,9 +35,11 @@ import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 import { useIsUserTyping } from '../../common/use_is_user_typing';
+import type { Assignee } from '../user_profiles/types';
 
 interface Props {
   isLoading: boolean;
+  currentAssignees?: Assignee[];
 }
 
 interface FieldProps {
@@ -200,9 +202,13 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
 
 AssigneesFieldComponent.displayName = 'AssigneesFieldComponent';
 
-const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
+const AssigneesComponent: React.FC<Props> = ({
+  isLoading: isLoadingForm,
+  currentAssignees = [],
+}) => {
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
@@ -225,6 +231,14 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
     bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles)?.map((userProfile) =>
       userProfileToComboBoxOption(userProfile)
     ) ?? [];
+
+  const currentSelectedOptions = options.filter((option) =>
+    currentAssignees.find((assignee) => assignee.uid === option.key)
+  );
+
+  if (currentSelectedOptions.length && !selectedOptions) {
+    setSelectedOptions(currentSelectedOptions);
+  }
 
   const onSearchComboChange = (value: string) => {
     if (!isEmpty(value)) {

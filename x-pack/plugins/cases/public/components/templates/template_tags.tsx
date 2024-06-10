@@ -10,27 +10,34 @@ import React, { memo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from './translations';
+import { schema } from './schema';
 interface Props {
   isLoading: boolean;
-  tags: string[];
+  currentTags: string[];
+  tagOptions: string[];
 }
 
-const TemplateTagsComponent: React.FC<Props> = ({ isLoading, tags }) => {
-  const options = tags.map((label) => ({
+const TemplateTagsComponent: React.FC<Props> = ({ isLoading, currentTags, tagOptions }) => {
+  const options = tagOptions.map((label) => ({
     label,
   }));
+
+  const templateTagsConfig = {
+    ...schema.templateTags,
+    defaultValue: currentTags ?? [],
+  };
 
   return (
     <UseField
       path="templateTags"
       component={ComboBoxField}
-      defaultValue={[]}
+      config={templateTagsConfig}
       componentProps={{
         idAria: 'template-tags',
         'data-test-subj': 'template-tags',
         euiFieldProps: {
-          fullWidth: true,
           placeholder: '',
+          fullWidth: true,
           disabled: isLoading,
           isLoading,
           options,
