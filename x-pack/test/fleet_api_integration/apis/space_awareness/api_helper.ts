@@ -7,7 +7,11 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { Agent } from 'supertest';
-import { CreateAgentPolicyResponse, GetOneAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import {
+  CreateAgentPolicyResponse,
+  GetAgentPoliciesResponse,
+  GetOneAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import {
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
@@ -50,6 +54,13 @@ export class SpaceTestApiClient {
   async getAgentPolicy(policyId: string, spaceId?: string): Promise<GetOneAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
+      .expect(200);
+
+    return res;
+  }
+  async getAgentPolicies(spaceId?: string): Promise<GetAgentPoliciesResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
       .expect(200);
 
     return res;

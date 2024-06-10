@@ -26,11 +26,17 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
       await cleanFleetIndices(esClient);
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
       await cleanFleetIndices(esClient);
     });
 

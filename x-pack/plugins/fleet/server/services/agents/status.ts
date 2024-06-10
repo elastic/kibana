@@ -6,10 +6,9 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type {
   AggregationsTermsAggregateBase,
   AggregationsTermsBucketBase,
@@ -53,11 +52,13 @@ export async function getAgentStatusForAgentPolicy(
 
   const clauses: QueryDslQueryContainer[] = [];
 
-  if (spaceId) {
-    if (spaceId === 'default') {
-      // TODO use constant
+  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  if (useSpaceAwareness && spaceId) {
+    if (spaceId === DEFAULT_SPACE_ID) {
       clauses.push(
-        toElasticsearchQuery(fromKueryExpression(`namespaces:"default" or not namespaces:*`))
+        toElasticsearchQuery(
+          fromKueryExpression(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`)
+        )
       );
     } else {
       clauses.push(toElasticsearchQuery(fromKueryExpression(`namespaces:"${spaceId}"`)));

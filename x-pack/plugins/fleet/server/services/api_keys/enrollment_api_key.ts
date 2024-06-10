@@ -54,10 +54,11 @@ export async function listEnrollmentApiKeys(
       filters.push(kuery);
     }
 
-    if (spaceId) {
-      if (spaceId === 'default') {
+    const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+    if (useSpaceAwareness && spaceId) {
+      if (spaceId === DEFAULT_SPACE_ID) {
         // TODO use constant
-        filters.push(`namespaces:"default" or not namespaces:*`);
+        filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
       } else {
         filters.push(`namespaces:"${spaceId}"`);
       }

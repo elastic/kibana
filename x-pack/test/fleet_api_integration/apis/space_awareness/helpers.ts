@@ -13,11 +13,7 @@ export async function cleanFleetIndices(esClient: Client) {
       index: '.fleet-enrollment-api-keys',
       q: '*',
       ignore_unavailable: true,
-    }),
-    esClient.deleteByQuery({
-      index: '.kibana_ingest',
-      q: 'type:fleet-uninstall-tokens',
-      ignore_unavailable: true,
+      refresh: true,
     }),
   ]);
 }
