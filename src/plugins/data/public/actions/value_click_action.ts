@@ -57,7 +57,6 @@ export function createValueClickActionDefinition(
           // they are appending a where clause to the query
           const queryString = appendFilterToESQLQueryFromValueClickAction(context.data);
           await getStartServices().uiActions.getTrigger('UPDATE_ESQL_QUERY_TRIGGER').exec({
-            embeddable: context.embeddable,
             queryString,
           });
         } else {
