@@ -86,7 +86,7 @@ export const StdErrorLogs = ({
           }
         : undefined,
     });
-  }, [checkGroup, timestamp]);
+  }, [checkGroup, timestamp, discover, exploratoryView]);
 
   const search = {
     box: {

@@ -28,7 +28,7 @@ export const useLogViewReference = ({ id, name, extraFields = [] }: Props) => {
 
   const { loading, value: defaultLogView } = useAsync(
     () => logsShared.logViews.client.getLogView(DEFAULT_LOG_VIEW),
-    []
+    [logsShared.logViews.client]
   );
 
   const logViewReference = useLazyRef<LogViewReference | null>(() => {

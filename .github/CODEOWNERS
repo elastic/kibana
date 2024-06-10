@@ -411,6 +411,7 @@ examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 packages/kbn-esql-ast @elastic/kibana-esql
 examples/esql_ast_inspector @elastic/kibana-esql
+src/plugins/esql_datagrid @elastic/kibana-esql
 packages/kbn-esql-utils @elastic/kibana-esql
 packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
@@ -505,6 +506,7 @@ src/plugins/inspector @elastic/kibana-presentation
 src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
+x-pack/plugins/observability_solution/investigate @elastic/obs-ai-assistant
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
 packages/kbn-jest-serializers @elastic/kibana-operations
@@ -891,6 +893,7 @@ examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
+packages/kbn-unsaved-changes-prompt @elastic/kibana-management
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/observability_solution/uptime @elastic/obs-ux-infra_services-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
@@ -1248,6 +1251,10 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 
 # Core
 /config/ @elastic/kibana-core
+/config/serverless.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /packages/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
@@ -1306,6 +1313,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/common/platform_security/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/search/platform_security/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/security/platform_security/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/observability/platform_security/ @elastic/kibana-security
 /packages/core/http/core-http-server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
@@ -1489,6 +1499,11 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai
 /x-pack/plugins/stack_connectors/common/bedrock @elastic/security-generative-ai
 
+# Gemini
+/x-pack/plugins/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai
+/x-pack/plugins/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai
+/x-pack/plugins/stack_connectors/common/gemini @elastic/security-generative-ai
+
 ## Defend Workflows owner connectors
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/plugins/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
@@ -1619,6 +1634,7 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/detections/components/osquery @elastic/security-defend-workflows
 
 # Cloud Defend
 /x-pack/plugins/cloud_defend/ @elastic/kibana-cloud-security-posture
