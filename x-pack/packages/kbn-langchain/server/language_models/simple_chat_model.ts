@@ -162,11 +162,9 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     let streamingFinished = false;
     const finalOutputStopRegex = /(?<!\\)\"/;
     const handleLLMNewToken = async (token: string) => {
-      console.log('stephhh handleLlMNewToken', token);
       if (finalOutputIndex === -1) {
         // Remove whitespace to simplify parsing
         currentOutput += token.replace(/\s/g, '');
-        console.log('stephhh currentOutput', currentOutput);
         if (currentOutput.includes(finalOutputStartToken)) {
           finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
         }
@@ -175,7 +173,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         if (finalOutputEndIndex !== -1) {
           streamingFinished = true;
         } else {
-          console.log('stephhh PUSH THIS TOKEN', token);
           await runManager?.handleLLMNewToken(token);
         }
       }

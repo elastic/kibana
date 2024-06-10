@@ -14,30 +14,34 @@ export const parseGeminiStream: StreamParser = async (
   tokenHandler
 ) => {
   let responseBody = '';
-  let responseBody2 = '';
   stream.on('data', (chunk) => {
     const decoded = chunk.toString();
     const parsed = parseGeminiResponse(decoded);
     if (tokenHandler) {
-      tokenHandler(parsed);
+      const splitByQuotes = parsed.split(`"`);
+      splitByQuotes.forEach((chunkk, index) => {
+        // add quote back on except for last chunk
+        const splitBySpace = `${chunkk}${index === splitByQuotes.length - 1 ? '' : '"'}`.split(` `);
+
+        for (const char of splitBySpace) {
+          tokenHandler(`${char} `);
+        }
+      });
     }
-    responseBody += decoded;
-    responseBody2 += parsed;
+    responseBody += parsed;
   });
   return new Promise((resolve, reject) => {
     stream.on('end', () => {
-      console.log('stephhh END responseBody', responseBody2);
-      const parsed = parseGeminiResponse(responseBody);
-      console.log('stephhh END parsed', parsed);
-      resolve(parseGeminiResponse(responseBody));
+      resolve(responseBody);
     });
     stream.on('error', (err) => {
       reject(err);
     });
     if (abortSignal) {
       abortSignal.addEventListener('abort', () => {
+        logger.info('Bedrock stream parsing was aborted.');
         stream.destroy();
-        resolve(parseGeminiResponse(responseBody));
+        resolve(responseBody);
       });
     }
   });
@@ -74,56 +78,3 @@ export const parseGeminiResponse = (responseBody: string) => {
       return prev;
     }, '');
 };
-//
-// export const parseGeminiStream: StreamParser = async (
-//   responseStream,
-//   logger,
-//   abortSignal,
-//   tokenHandler
-// ) => {
-//   const responseChunks: string[] = [];
-//   const decoder = new TextDecoder();
-//   if (abortSignal) {
-//     abortSignal.addEventListener('abort', () => {
-//       responseStream.destroy(new Error('Aborted'));
-//       return parseGeminiChunks(responseChunks, logger);
-//     });
-//   }
-//   responseStream.on('data', (chunk) => {
-//     const value = decoder.decode(chunk, { stream: true });
-//     console.log('stephhh value', value);
-//     const lines = value.split('\r');
-//     console.log('stephhh lines', lines);
-//     const parsedLines = parseGeminiChunks(lines, logger);
-//     console.log('stephhh parsedLines', parsedLines);
-//     const parsedChunk = parsedLines[0];
-//     responseChunks.push(parsedChunk);
-//     if (tokenHandler) {
-//       tokenHandler(parsedChunk);
-//     }
-//   });
-//
-//   await finished(responseStream).catch((err) => {
-//     if (abortSignal?.aborted) {
-//       logger.info('Gemini stream parsing was aborted.');
-//     } else {
-//       throw err;
-//     }
-//   });
-//
-//   return responseChunks.join(); // parseGeminiChunks(responseChunks, logger);
-// };
-//
-// const parseGeminiChunks = (chunks: string[], logger: Logger) => {
-//   return chunks
-//     .filter((str) => !!str && str !== '[DONE]')
-//     .map((line) => {
-//       try {
-//         const newLine = line.replaceAll('data: ', '');
-//         const geminiResponse: GeminiResponseSchema = JSON.parse(newLine);
-//         return geminiResponse.candidates[0]?.content.parts.map((part) => part.text).join('') ?? '';
-//       } catch (err) {
-//         return '';
-//       }
-//     });
-// };
