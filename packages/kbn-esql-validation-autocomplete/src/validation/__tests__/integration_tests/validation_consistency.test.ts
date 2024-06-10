@@ -7,7 +7,7 @@
  */
 
 import { setup } from '../helpers';
-import { runTestSuite as runFromCommandTestSuite } from '../test_suites/validation.command.from';
+import { validationFromCommandTestSuite } from '../test_suites/validation.command.from';
 import { type EsqlEnv, setupEsqlEnv } from './helpers';
 
 /*
@@ -15,7 +15,7 @@ import { type EsqlEnv, setupEsqlEnv } from './helpers';
  * also returns an error when our client-side validation finds an error.
  */
 
-describe('validation', () => {
+describe('validation consistency', () => {
   let esqlEnv: EsqlEnv | undefined;
 
   beforeAll(async () => {
@@ -72,7 +72,7 @@ describe('validation', () => {
           };
         };
 
-        runFromCommandTestSuite(unitTestSetup);
+        validationFromCommandTestSuite(unitTestSetup);
       });
     }
   }

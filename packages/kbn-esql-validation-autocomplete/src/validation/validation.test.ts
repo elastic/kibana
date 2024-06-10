@@ -27,7 +27,7 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
-import { runTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
+import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
 import { Setup, setup } from './__tests__/helpers';
 
 const NESTING_LEVELS = 4;

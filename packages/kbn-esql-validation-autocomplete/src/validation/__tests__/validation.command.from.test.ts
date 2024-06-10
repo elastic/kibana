@@ -7,10 +7,10 @@
  */
 
 import * as helpers from './helpers';
-import { runTestSuite } from './test_suites/validation.command.from';
+import { validationFromCommandTestSuite } from './test_suites/validation.command.from';
 
 const { setup, writeFixtureFile } = helpers.withErrorsCollected(helpers.setup, 'FROM');
 
 afterAll(writeFixtureFile);
 
-runTestSuite(setup);
+validationFromCommandTestSuite(setup);

@@ -9,7 +9,7 @@
 import { METADATA_FIELDS } from '../../../shared/constants';
 import * as helpers from '../helpers';
 
-export const runTestSuite = (setup: helpers.Setup) => {
+export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
       describe('FROM <sources> [ METADATA <indices> ]', () => {
