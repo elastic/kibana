@@ -14,11 +14,11 @@ import { CreateAnnotationForm } from '../components/create_annotation';
 export const useEditAnnotation = ({
   reset,
   editAnnotation,
-  setIsCreateAnnotationsOpen,
+  setIsCreateOpen,
 }: {
   reset: UseFormReset<CreateAnnotationForm>;
   editAnnotation?: Annotation | null;
-  setIsCreateAnnotationsOpen: (val: boolean) => void;
+  setIsCreateOpen: (val: boolean) => void;
 }) => {
   useEffect(() => {
     if (!editAnnotation) return;
@@ -30,6 +30,6 @@ export const useEditAnnotation = ({
         ? moment(editAnnotation['@timestampEnd'])
         : undefined,
     });
-    setIsCreateAnnotationsOpen(true);
-  }, [editAnnotation, setIsCreateAnnotationsOpen, reset]);
+    setIsCreateOpen(true);
+  }, [editAnnotation, setIsCreateOpen, reset]);
 };

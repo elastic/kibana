@@ -28,7 +28,8 @@ export interface ObservabilityAnnotationsProps {
   sloInstanceId?: string;
   tooltipSpecs?: Partial<TooltipSpec>;
   annotations?: Annotation[];
-  setIsCreateAnnotationsOpen: (value: boolean) => void;
+  isCreateOpen: boolean;
+  setIsCreateOpen: (value: boolean) => void;
 }
 
 export function ObservabilityAnnotations({
@@ -36,7 +37,8 @@ export function ObservabilityAnnotations({
   sloInstanceId,
   tooltipSpecs,
   annotations,
-  setIsCreateAnnotationsOpen,
+  isCreateOpen,
+  setIsCreateOpen,
 }: ObservabilityAnnotationsProps) {
   const { setValue } = useFormContext<CreateAnnotationForm>();
 
@@ -48,7 +50,7 @@ export function ObservabilityAnnotations({
       ),
       onSelect: (s, v) => {
         setValue('@timestamp', moment(new Date(s?.[0]?.datum.key ?? v?.[0]?.datum.key)));
-        setIsCreateAnnotationsOpen(true);
+        setIsCreateOpen(true);
       },
     },
   ];
@@ -57,8 +59,9 @@ export function ObservabilityAnnotations({
     <EuiErrorBoundary>
       <Tooltip {...(tooltipSpecs ?? {})} actions={actions} type={TooltipType.VerticalCursor} />
       <DisplayAnnotation annotations={annotations} />
-      <NewLineAnnotation sloId={sloId} sloInstanceId={sloInstanceId} />
-      <NewRectAnnotation sloId={sloId} sloInstanceId={sloInstanceId} />
+
+      <NewLineAnnotation sloId={sloId} sloInstanceId={sloInstanceId} isCreateOpen={isCreateOpen} />
+      <NewRectAnnotation sloId={sloId} sloInstanceId={sloInstanceId} isCreateOpen={isCreateOpen} />
     </EuiErrorBoundary>
   );
 }

@@ -52,13 +52,14 @@ export function AnnotationRange() {
                 required: true,
               }}
               render={({ field }) => {
+                const { value, ref, ...rest } = field;
                 return (
                   <EuiDatePicker
                     showTimeSelect
                     selected={field.value}
                     compressed
                     dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-                    {...field}
+                    {...rest}
                   />
                 );
               }}
@@ -85,13 +86,14 @@ export function AnnotationRange() {
                 required: true,
               }}
               render={({ field }) => {
+                const { value, ref, ...rest } = field;
                 return (
                   <EuiDatePicker
                     showTimeSelect
                     selected={field.value}
                     compressed
                     dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-                    {...field}
+                    {...rest}
                   />
                 );
               }}
@@ -116,13 +118,14 @@ export function AnnotationRange() {
           required: true,
         }}
         render={({ field }) => {
+          const { value, ref, ...rest } = field;
           return (
             <EuiDatePicker
               showTimeSelect
               selected={field.value}
               compressed
               dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-              {...field}
+              {...rest}
             />
           );
         }}

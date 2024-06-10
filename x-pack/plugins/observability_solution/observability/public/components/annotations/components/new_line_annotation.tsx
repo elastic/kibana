@@ -15,28 +15,26 @@ import { Annotation, CreateAnnotationParams } from '../../../../common/annotatio
 export function NewLineAnnotation({
   sloId,
   sloInstanceId,
+  isCreateOpen,
 }: {
   sloId?: string;
   sloInstanceId?: string;
+  isCreateOpen: boolean;
 }) {
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
   const isRange = watch('annotation.type') === 'range';
   const timestamp = watch('@timestamp');
+  console.log('timestamp', timestamp);
 
   if (!timestamp || isRange) {
     return null;
   }
-
-  const annotation = watch('annotation');
   const values = getValues();
-  const timestampVal = watch('@timestamp');
 
   return (
     <ObsLineAnnotation
       annotation={{
         ...values,
-        '@timestamp': timestampVal,
-        annotation,
         ...(sloId ? { slo: { id: sloId, instanceId: sloInstanceId } } : {}),
       }}
     />

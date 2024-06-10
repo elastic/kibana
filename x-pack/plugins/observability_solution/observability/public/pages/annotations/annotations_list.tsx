@@ -42,9 +42,10 @@ export function AnnotationsList() {
     if (selection.length === 0) {
       return;
     }
-    const onClick = () => {
-      deleteAnnotation({ annotations: selection });
+    const onClick = async () => {
+      await deleteAnnotation({ annotations: selection });
       setSelection([]);
+      refetch();
     };
     return (
       <EuiButton

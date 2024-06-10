@@ -30,7 +30,7 @@ export const useAnnotations = ({
     max: number | string;
   };
 } = {}) => {
-  const [isCreateAnnotationsOpen, setIsCreateAnnotationsOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const methods = useForm<CreateAnnotationForm>({
     defaultValues: getDefaultAnnotation(sloId, sloInstanceId),
     mode: 'all',
@@ -56,28 +56,30 @@ export const useAnnotations = ({
   useEditAnnotation({
     reset,
     editAnnotation,
-    setIsCreateAnnotationsOpen,
+    setIsCreateOpen,
   });
 
   const onCancel = useCallback(() => {
     setValue('@timestamp', null);
     setValue('@timestampEnd', null);
-    setIsCreateAnnotationsOpen(false);
+    setIsCreateOpen(false);
   }, [setValue]);
 
   const AddAnnotationButton = useMemo(() => {
+    if (!isCreateOpen) return () => null;
+
     return () => (
       <CreateAnnotation
         onSave={() => {
-          setIsCreateAnnotationsOpen(false);
+          setIsCreateOpen(false);
           refetch();
         }}
         onCancel={onCancel}
         editAnnotation={editAnnotation ?? selectedEditAnnotation}
-        isCreateAnnotationsOpen={isCreateAnnotationsOpen}
+        isCreateAnnotationsOpen={isCreateOpen}
       />
     );
-  }, [editAnnotation, isCreateAnnotationsOpen, onCancel, refetch, selectedEditAnnotation]);
+  }, [editAnnotation, isCreateOpen, onCancel, refetch, selectedEditAnnotation]);
 
   return {
     annotations: data,
@@ -94,7 +96,7 @@ export const useAnnotations = ({
             '@timestamp': moment(editData['@timestamp']),
             '@timestampEnd': moment(editData['@timestampEnd']),
           });
-          setIsCreateAnnotationsOpen(true);
+          setIsCreateOpen(true);
           setSelectedEditAnnotation(editData);
         }
       }
@@ -107,7 +109,7 @@ export const useAnnotations = ({
             '@timestamp': moment(editData['@timestamp']),
           });
           setSelectedEditAnnotation(editData);
-          setIsCreateAnnotationsOpen(true);
+          setIsCreateOpen(true);
         }
       }
     },
@@ -120,7 +122,7 @@ export const useAnnotations = ({
           setValue('@timestamp', moment(from));
           setValue('@timestampEnd', moment(to));
           setValue('annotation.type', 'range');
-          setIsCreateAnnotationsOpen(true);
+          setIsCreateOpen(true);
         } else {
           // Call the original handler
           originalHandler?.(event);
@@ -137,7 +139,7 @@ export const useAnnotations = ({
         setValue('@timestampEnd', moment(new Date(Number(end))));
         setValue('annotation.type', 'range');
       }
-      setIsCreateAnnotationsOpen(true);
+      setIsCreateOpen(true);
     },
     AddAnnotationButton: () => {
       return (
@@ -160,7 +162,8 @@ export const useAnnotations = ({
             annotations={annotations}
             sloInstanceId={sloInstanceId}
             sloId={sloId}
-            setIsCreateAnnotationsOpen={setIsCreateAnnotationsOpen}
+            isCreateOpen={isCreateOpen}
+            setIsCreateOpen={setIsCreateOpen}
           />
           <AddAnnotationButton />
         </FormProvider>

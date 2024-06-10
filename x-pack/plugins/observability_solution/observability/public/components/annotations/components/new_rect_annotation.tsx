@@ -26,15 +26,17 @@ import { Annotation, CreateAnnotationParams } from '../../../../common/annotatio
 export function NewRectAnnotation({
   sloId,
   sloInstanceId,
+  isCreateOpen,
 }: {
   sloId?: string;
   sloInstanceId?: string;
+  isCreateOpen: boolean;
 }) {
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
   const isRange = watch('annotation.type') === 'range';
   const timestamp = watch('@timestamp');
 
-  if (!timestamp || !isRange) {
+  if (!timestamp || !isRange || !isCreateOpen) {
     return null;
   }
   const annotation = watch('annotation');

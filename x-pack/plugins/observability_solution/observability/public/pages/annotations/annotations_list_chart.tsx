@@ -10,17 +10,21 @@ import {
   Axis,
   BrushEndListener,
   Chart,
-  LineSeries,
   Position,
   ScaleType,
   Settings,
+  TooltipHeader,
+  TooltipContainer,
+  TooltipTable,
+  XYChartElementEvent,
+  BarSeries,
 } from '@elastic/charts';
 import { EuiButton, EuiHorizontalRule, formatDate } from '@elastic/eui';
-import moment from 'moment';
 import { AnnotationClickListener } from '@elastic/charts/dist/specs/settings';
 import { InPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
+import { TooltipValue } from '@elastic/charts/dist/specs';
 import { createAnnotationPortal } from './create_annotation_btn';
 import { useAnnotations } from '../../components/annotations/use_annotations';
 import { Annotation } from '../../../common/annotations';
@@ -38,16 +42,10 @@ export function AnnotationsListChart({
   isEditing: Annotation | null;
   setIsEditing: (annotation: Annotation | null) => void;
 }) {
-  const { ObservabilityAnnotations, AddAnnotationButton, createAnnotation } = useAnnotations({
+  const { ObservabilityAnnotations, createAnnotation } = useAnnotations({
     editAnnotation: isEditing,
   });
 
-  const chartData = data.map((d) => ({
-    x: d['@timestampEnd']
-      ? moment(d['@timestampEnd']).valueOf()
-      : moment(d['@timestamp']).valueOf(),
-    y: 100,
-  }));
   const brushEndListener: BrushEndListener = ({ x }) => {
     if (!x) {
       return;
@@ -74,10 +72,19 @@ export function AnnotationsListChart({
     };
   }, [end, start]);
 
-  const domainPoints = [
-    { x: domain.min, y: 100 },
-    { x: domain.max, y: 100 },
-  ];
+  const domainPoints = useMemo(() => {
+    const points = [
+      { x: domain.min, y: 1 },
+      { x: domain.max, y: 1 },
+    ];
+    // add 1000 points between the min and max domain
+
+    for (let i = 1; i < 1000; i++) {
+      const x = domain.min + (domain.max - domain.min) * (i / 1000);
+      points.push({ x, y: 1 });
+    }
+    return points;
+  }, [domain]);
 
   return (
     <>
@@ -94,15 +101,35 @@ export function AnnotationsListChart({
             defaultMessage: 'Create annotation',
           })}
         </EuiButton>
-        <AddAnnotationButton />
+        {/* <AddAnnotationButton />*/}
       </InPortal>
       <Chart size={{ height: 300 }}>
         <Settings
+          onElementClick={([geometry, _]) => {
+            const point = geometry as XYChartElementEvent;
+            if (!point) return;
+            createAnnotation(point[0]?.x);
+          }}
           onBrushEnd={brushEndListener}
           onAnnotationClick={onAnnotationClick}
           xDomain={domain}
+          theme={{
+            chartMargins: {
+              top: 50,
+            },
+            barSeriesStyle: {
+              rect: {
+                opacity: 0,
+              },
+            },
+          }}
         />
-        <ObservabilityAnnotations annotations={data} />
+        <ObservabilityAnnotations
+          annotations={data}
+          tooltipSpecs={{
+            customTooltip: (props) => <Tooltip {...props} />,
+          }}
+        />
         <Axis
           id="horizontal"
           position={Position.Bottom}
@@ -117,17 +144,48 @@ export function AnnotationsListChart({
             defaultMessage: 'Y Domain',
           })}
           position={Position.Left}
+          hide={true}
         />
-        <LineSeries
-          id="Time"
+        <BarSeries
+          id="bars"
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor="x"
           yAccessors={['y']}
-          data={[...chartData, ...domainPoints]}
+          data={domainPoints}
         />
       </Chart>
       <EuiHorizontalRule margin="s" />
     </>
+  );
+}
+
+function Tooltip({
+  header,
+  values,
+}: {
+  header: {
+    formattedValue?: string;
+  } | null;
+  values: TooltipValue[];
+}) {
+  return (
+    <TooltipContainer>
+      <TooltipHeader>{header?.formattedValue}</TooltipHeader>
+      <TooltipTable
+        columns={[
+          { type: 'color' },
+          {
+            type: 'text',
+            cell: (t) =>
+              i18n.translate('xpack.observability.tooltip.p.clickToAddAnnotationLabel', {
+                defaultMessage: 'Click to add annotation',
+              }),
+            style: { textAlign: 'left' },
+          },
+        ]}
+        items={values}
+      />
+    </TooltipContainer>
   );
 }
