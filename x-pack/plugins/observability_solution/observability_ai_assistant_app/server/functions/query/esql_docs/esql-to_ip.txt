@@ -1,17 +1,22 @@
-TO_IP
+## TO_IP
 
-Syntax
-Parameters
-field
-Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts an input string to an IP value.Supported types
-Example
+The `TO_IP` function in ES|QL is used to convert an input string to an IP value.
+
+### Examples
+
+Here are a couple of examples of how you can use the `TO_IP` function in your ES|QL queries:
+
 ```esql
-ROW str1 = "1.1.1.1", str2 = "foo"
-| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
+ROW str1 = "1.1.1.1"
+| EVAL ip1 = TO_IP(str1)
 | WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
 ```
 
-Note that in this example, the last conversion of the string isn’t possible.
-When this happens, the result is a null value. In this case a Warning header is added to the response.
-The header will provide information on the source of the failure:"Line 1:68: evaluation of [TO_IP(str2)] failed, treating result as null. Only first 20 failures recorded."A following header will contain the failure reason and the offending value:"java.lang.IllegalArgumentException: 'foo' is not an IP string literal."
+In this example, the `TO_IP` function is used to convert the string "1.1.1.1" to an IP value. The `WHERE` clause then uses the `CIDR_MATCH` function to check if the IP value falls within the specified CIDR range.
+
+```esql
+ROW str2 = "foo"
+| EVAL ip2 = TO_IP(str2)
+```
+
+In this second example, the `TO_IP` function attempts to convert the string "foo" to an IP value. However, since "foo" is not a valid IP string literal, the function returns a null value and a warning is added to the response header.

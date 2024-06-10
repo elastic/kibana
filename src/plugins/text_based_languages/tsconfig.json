@@ -18,7 +18,10 @@
     "@kbn/index-management",
     "@kbn/i18n",
     "@kbn/config-schema",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/ui-actions-plugin",
+    "@kbn/data-plugin",
+    "@kbn/es-query"
   ],
   "exclude": [
     "target/**/*",

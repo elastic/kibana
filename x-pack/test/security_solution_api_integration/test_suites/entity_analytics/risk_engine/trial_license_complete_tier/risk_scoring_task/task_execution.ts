@@ -274,9 +274,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 criticality_modifier: 2,
                 calculated_level: 'Moderate',
                 calculated_score: 79.81345973382406,
-                calculated_score_norm: 46.809565696393314,
+                calculated_score_norm: 47.08016240063269,
                 category_1_count: 10,
-                category_1_score: 30.55645472198471,
+                category_1_score: 30.787478681462762,
               },
             ]);
           });

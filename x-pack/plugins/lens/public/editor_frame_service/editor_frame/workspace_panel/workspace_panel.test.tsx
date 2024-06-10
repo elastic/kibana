@@ -668,6 +668,7 @@ describe('workspace_panel', () => {
     it('should show configuration error messages if present', async () => {
       const messages: UserMessage[] = [
         {
+          uniqueId: 'unique_id_1',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
@@ -675,6 +676,7 @@ describe('workspace_panel', () => {
           longMessage: "i'm an error",
         },
         {
+          uniqueId: 'unique_id_2',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
