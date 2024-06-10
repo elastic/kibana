@@ -1634,6 +1634,7 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/plugins/security_solution/public/detections/components/osquery @elastic/security-defend-workflows
 
 # Cloud Defend
 /x-pack/plugins/cloud_defend/ @elastic/kibana-cloud-security-posture
