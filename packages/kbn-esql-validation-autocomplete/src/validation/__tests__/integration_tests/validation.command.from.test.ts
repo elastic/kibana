@@ -151,11 +151,42 @@ const setupEsqlEnv = async () => {
     }
   };
 
+  interface EsqlResultColumn {
+    name: string;
+    type: string;
+  }
+  type EsqlResultRow = Array<string | null>;
+  interface EsqlTable {
+    columns: EsqlResultColumn[];
+    values: EsqlResultRow[];
+  }
+
+  const sendEsqlQuery = async (
+    query: string
+  ): Promise<{
+    resp: EsqlTable | undefined;
+    error: { message: string } | undefined;
+  }> => {
+    try {
+      const resp = await es.transport.request<EsqlTable>({
+        method: 'POST',
+        path: '/_query',
+        body: {
+          query,
+        },
+      });
+      return { resp, error: undefined };
+    } catch (e) {
+      return { resp: undefined, error: { message: e.meta.body.error.root_cause[0].reason } };
+    }
+  };
+
   return {
     integrationEnv,
     cleanup,
     createIndexRequest,
     setupIndicesPolicies,
+    sendEsqlQuery,
   };
 };
 
@@ -167,7 +198,6 @@ describe('validation', () => {
   });
 
   afterAll(async () => {
-    await esqlEnv?.cleanup();
     await esqlEnv?.integrationEnv?.shutdown();
   });
 
@@ -177,36 +207,6 @@ describe('validation', () => {
   for (const stringFieldType of stringVariants) {
     for (const numberFieldType of numberVariants) {
       describe(`Using string field type: ${stringFieldType} and number field type: ${numberFieldType}`, () => {
-        interface EsqlResultColumn {
-          name: string;
-          type: string;
-        }
-        type EsqlResultRow = Array<string | null>;
-        interface EsqlTable {
-          columns: EsqlResultColumn[];
-          values: EsqlResultRow[];
-        }
-
-        const sendESQLQuery = async (
-          query: string
-        ): Promise<{
-          resp: EsqlTable | undefined;
-          error: { message: string } | undefined;
-        }> => {
-          try {
-            const resp = await esqlEnv!.integrationEnv!.esClient.transport.request<EsqlTable>({
-              method: 'POST',
-              path: '/_query',
-              body: {
-                query,
-              },
-            });
-            return { resp, error: undefined };
-          } catch (e) {
-            return { resp: undefined, error: { message: e.meta.body.error.root_cause[0].reason } };
-          }
-        };
-
         beforeAll(async () => {
           await esqlEnv?.setupIndicesPolicies(stringFieldType, numberFieldType);
         });
@@ -215,12 +215,12 @@ describe('validation', () => {
           await esqlEnv?.cleanup();
         });
 
-        runFromCommandTestSuite(async () => {
+        const unitTestSetup = async () => {
           const kit = await setup();
           return {
             ...kit,
             expectErrors: async (query: string, errors: string[], warnings: string[] = []) => {
-              const jsonBody = await sendESQLQuery(query);
+              const jsonBody = await esqlEnv!.sendEsqlQuery(query);
               const clientSideHasError = Boolean(errors.length);
               const serverSideHasError = Boolean(jsonBody.error);
 
@@ -242,7 +242,9 @@ describe('validation', () => {
               }
             },
           };
-        });
+        };
+
+        runFromCommandTestSuite(unitTestSetup);
       });
     }
   }
