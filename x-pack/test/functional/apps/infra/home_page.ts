@@ -328,6 +328,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          after(async () => {
+            await retry.try(async () => {
+              await pageObjects.infraHome.closeFlyout();
+            });
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
+          });
+        });
+
         describe('APM Link Tab', () => {
           before(async () => {
             await pageObjects.infraHome.clickOnNode();
