@@ -588,7 +588,7 @@ Often after having validated a value you want to transform it in some way. For e
 the `transform` method provides a way to localize such common transformation to the code that defines your schema.
 
 ```typescript
-const durationSchema: Type<string, moment.Duration> = schema
+const durationSchema = schema
   .string({
     maxLength: 3,
     validate: (v) =>
@@ -597,7 +597,7 @@ const durationSchema: Type<string, moment.Duration> = schema
   // Here we transform the validated string into a moment.Duration
   .transform(moment.duration);
 
-const duration: moment.Duration = durationSchema.validate('1d');
+const duration = durationSchema.validate('1d');
 
 // We can then use our TypeOf helpers to extract the type and the output type distinctly
 const stringSchema: TypeOf<typeof durationSchema> = '1d';
