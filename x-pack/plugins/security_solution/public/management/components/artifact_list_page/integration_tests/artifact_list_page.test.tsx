@@ -268,11 +268,11 @@ describe('When using the ArtifactListPage component', () => {
 
         await act(async () => {
           await waitFor(() => {
-            expect(renderResult.getByTestId(firstPolicyTestId)).toBeTruthy();
+            expect(renderResult.getAllByTestId(firstPolicyTestId).length > 0).toBeTruthy();
           });
         });
 
-        userEvent.click(renderResult.getByTestId(firstPolicyTestId));
+        userEvent.click(renderResult.getAllByTestId(firstPolicyTestId)[0]);
 
         await waitFor(() => {
           expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
