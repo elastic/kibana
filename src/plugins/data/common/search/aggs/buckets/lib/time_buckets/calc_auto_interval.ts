@@ -6,197 +6,115 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+
+import {
+  dayLabel,
+  hourLabel,
+  yearLabel,
+  minuteLabel,
+  secondLabel,
+  millisecondLabel,
+  infinityLabel,
+  monthLabel,
+} from './i18n_messages';
 
 export const boundsDescendingRaw = [
   {
     bound: Infinity,
     interval: moment.duration(1, 'year'),
-    boundLabel: i18n.translate('data.search.timeBuckets.infinityLabel', {
-      defaultMessage: 'More than a year',
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.yearLabel', {
-      defaultMessage: 'a year',
-    }),
+    boundLabel: infinityLabel(),
+    intervalLabel: yearLabel(),
   },
   {
     bound: moment.duration(1, 'year'),
     interval: moment.duration(1, 'month'),
-    boundLabel: i18n.translate('data.search.timeBuckets.yearLabel', {
-      defaultMessage: 'a year',
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.monthLabel', {
-      defaultMessage: 'a month',
-    }),
+    boundLabel: yearLabel(),
+    intervalLabel: monthLabel(),
   },
   {
     bound: moment.duration(3, 'week'),
     interval: moment.duration(1, 'week'),
-    boundLabel: i18n.translate('data.search.timeBuckets.dayLabel', {
-      defaultMessage: '{amount, plural, one {a day} other {# days}}',
-      values: { amount: 21 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.dayLabel', {
-      defaultMessage: '{amount, plural, one {a day} other {# days}}',
-      values: { amount: 7 },
-    }),
+    boundLabel: dayLabel(21),
+    intervalLabel: dayLabel(7),
   },
   {
     bound: moment.duration(1, 'week'),
     interval: moment.duration(1, 'd'),
-    boundLabel: i18n.translate('data.search.timeBuckets.dayLabel', {
-      defaultMessage: '{amount, plural, one {a day} other {# days}}',
-      values: { amount: 7 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.dayLabel', {
-      defaultMessage: '{amount, plural, one {a day} other {# days}}',
-      values: { amount: 1 },
-    }),
+    boundLabel: dayLabel(7),
+    intervalLabel: dayLabel(1),
   },
   {
     bound: moment.duration(24, 'hour'),
     interval: moment.duration(12, 'hour'),
-    boundLabel: i18n.translate('data.search.timeBuckets.dayLabel', {
-      defaultMessage: '{amount, plural, one {a day} other {# days}}',
-      values: { amount: 1 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.hourLabel', {
-      defaultMessage: '{amount, plural, one {an hour} other {# hours}}',
-      values: { amount: 12 },
-    }),
+    boundLabel: dayLabel(1),
+    intervalLabel: hourLabel(12),
   },
   {
     bound: moment.duration(6, 'hour'),
     interval: moment.duration(3, 'hour'),
-    boundLabel: i18n.translate('data.search.timeBuckets.hourLabel', {
-      defaultMessage: '{amount, plural, one {an hour} other {# hours}}',
-      values: { amount: 6 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.hourLabel', {
-      defaultMessage: '{amount, plural, one {an hour} other {# hours}}',
-      values: { amount: 3 },
-    }),
+    boundLabel: hourLabel(6),
+    intervalLabel: hourLabel(3),
   },
   {
     bound: moment.duration(2, 'hour'),
     interval: moment.duration(1, 'hour'),
-    boundLabel: i18n.translate('data.search.timeBuckets.hourLabel', {
-      defaultMessage: '{amount, plural, one {an hour} other {# hours}}',
-      values: { amount: 2 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.hourLabel', {
-      defaultMessage: '{amount, plural, one {an hour} other {# hours}}',
-      values: { amount: 1 },
-    }),
+    boundLabel: hourLabel(2),
+    intervalLabel: hourLabel(1),
   },
   {
     bound: moment.duration(45, 'minute'),
     interval: moment.duration(30, 'minute'),
-    boundLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 45 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 30 },
-    }),
+    boundLabel: minuteLabel(45),
+    intervalLabel: minuteLabel(30),
   },
   {
     bound: moment.duration(20, 'minute'),
     interval: moment.duration(10, 'minute'),
-    boundLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 20 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 10 },
-    }),
+    boundLabel: minuteLabel(20),
+    intervalLabel: minuteLabel(10),
   },
   {
     bound: moment.duration(9, 'minute'),
     interval: moment.duration(5, 'minute'),
-    boundLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 9 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 5 },
-    }),
+    boundLabel: minuteLabel(9),
+    intervalLabel: minuteLabel(5),
   },
   {
     bound: moment.duration(3, 'minute'),
     interval: moment.duration(1, 'minute'),
-    boundLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 3 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.minuteLabel', {
-      defaultMessage: '{amount, plural, one {a minute} other {# minutes}}',
-      values: { amount: 1 },
-    }),
+    boundLabel: minuteLabel(3),
+    intervalLabel: minuteLabel(1),
   },
   {
     bound: moment.duration(45, 'second'),
     interval: moment.duration(30, 'second'),
-    boundLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 45 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 30 },
-    }),
+    boundLabel: secondLabel(45),
+    intervalLabel: secondLabel(30),
   },
   {
     bound: moment.duration(15, 'second'),
     interval: moment.duration(10, 'second'),
-    boundLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 15 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 10 },
-    }),
+    boundLabel: secondLabel(15),
+    intervalLabel: secondLabel(10),
   },
   {
     bound: moment.duration(7.5, 'second'),
     interval: moment.duration(5, 'second'),
-    boundLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 7.5 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 5 },
-    }),
+    boundLabel: secondLabel(7.5),
+    intervalLabel: secondLabel(5),
   },
   {
     bound: moment.duration(5, 'second'),
     interval: moment.duration(1, 'second'),
-    boundLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 5 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.secondLabel', {
-      defaultMessage: '{amount, plural, one {a second} other {# seconds}}',
-      values: { amount: 1 },
-    }),
+    boundLabel: secondLabel(5),
+    intervalLabel: secondLabel(1),
   },
   {
     bound: moment.duration(500, 'ms'),
     interval: moment.duration(100, 'ms'),
-    boundLabel: i18n.translate('data.search.timeBuckets.millisecondLabel', {
-      defaultMessage: '{amount, plural, one {a millisecond} other {# milliseconds}}',
-      values: { amount: 500 },
-    }),
-    intervalLabel: i18n.translate('data.search.timeBuckets.millisecondLabel', {
-      defaultMessage: '{amount, plural, one {a millisecond} other {# milliseconds}}',
-      values: { amount: 100 },
-    }),
+    boundLabel: millisecondLabel(500),
+    intervalLabel: millisecondLabel(100),
   },
 ];
 
