@@ -29,7 +29,6 @@ import {
   type LanguageDocumentationSections,
 } from '@kbn/language-documentation-popover';
 import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import { TooltipWrapper } from '@kbn/visualization-utils';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -237,6 +236,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
   }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+
+  const onCommentLine = useCallback(() => {
+    const currentPosition = editor1.current?.getPosition();
+    const lineNumber = currentPosition?.lineNumber;
+    if (lineNumber) {
+      const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
+      const hasComment = lineContent?.startsWith('//');
+      const commentedLine = hasComment ? lineContent?.replace('//', '') : `//${lineContent}`;
+      // executeEdits allows to keep edit in history
+      editor1.current?.executeEdits('comment', [
+        {
+          range: {
+            startLineNumber: lineNumber,
+            startColumn: 0,
+            endLineNumber: lineNumber,
+            endColumn: (lineContent?.length ?? 0) + 1,
+          },
+          text: commentedLine,
+        },
+      ]);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -624,13 +645,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [isCodeEditorExpanded, queryString]);
 
-  const linesBreaksButtonsStatus = useMemo(() => {
+  const isWrappedInPipes = useMemo(() => {
     const pipes = code?.split('|');
     const pipesWithNewLine = code?.split('\n|');
-    return {
-      addLineBreaksDisabled: pipes?.length === pipesWithNewLine?.length,
-      removeLineBreaksDisabled: pipesWithNewLine?.length === 1,
-    };
+    return pipes?.length === pipesWithNewLine?.length;
   }, [code]);
 
   useEffect(() => {
@@ -698,68 +716,53 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
               <EuiFlexItem grow={false}>
-                <TooltipWrapper
-                  tooltipContent={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                    {
-                      defaultMessage: 'Add line breaks on pipes',
-                    }
-                  )}
-                  condition={!linesBreaksButtonsStatus.addLineBreaksDisabled}
+                <EuiToolTip
+                  position="top"
+                  content={
+                    isWrappedInPipes
+                      ? i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                          {
+                            defaultMessage: 'Remove line breaks on pipes',
+                          }
+                        )
+                      : i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                          {
+                            defaultMessage: 'Add line breaks on pipes',
+                          }
+                        )
+                  }
                 >
                   <EuiButtonIcon
-                    iconType="pipeBreaks"
+                    iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
                     color="text"
                     size="s"
                     data-test-subj="TextBasedLangEditor-toggleWordWrap"
-                    aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                      {
-                        defaultMessage: 'Add line breaks on pipes',
-                      }
-                    )}
-                    isDisabled={linesBreaksButtonsStatus.addLineBreaksDisabled}
+                    aria-label={
+                      isWrappedInPipes
+                        ? i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                            {
+                              defaultMessage: 'Remove line breaks on pipes',
+                            }
+                          )
+                        : i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                            {
+                              defaultMessage: 'Add line breaks on pipes',
+                            }
+                          )
+                    }
                     onClick={() => {
-                      const updatedCode = getWrappedInPipesCode(code, false);
+                      const updatedCode = getWrappedInPipesCode(code, isWrappedInPipes);
                       if (code !== updatedCode) {
                         setCode(updatedCode);
                         onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
                       }
                     }}
                   />
-                </TooltipWrapper>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TooltipWrapper
-                  tooltipContent={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                    {
-                      defaultMessage: 'Remove line breaks on pipes',
-                    }
-                  )}
-                  condition={!linesBreaksButtonsStatus.removeLineBreaksDisabled}
-                >
-                  <EuiButtonIcon
-                    iconType="pipeNoBreaks"
-                    color="text"
-                    size="s"
-                    data-test-subj="TextBasedLangEditor-toggleWordWrap"
-                    aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                      {
-                        defaultMessage: 'Remove line breaks on pipes',
-                      }
-                    )}
-                    isDisabled={linesBreaksButtonsStatus.removeLineBreaksDisabled}
-                    onClick={() => {
-                      const updatedCode = getWrappedInPipesCode(code, true);
-                      if (code !== updatedCode) {
-                        setCode(updatedCode);
-                        onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
-                      }
-                    }}
-                  />
-                </TooltipWrapper>
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -824,12 +827,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        css={{ margin: '0 0 1px 0' }}
-        ref={containerRef}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
         <EuiOutsideClickDetector
           onOutsideClick={() => {
             restoreInitialMode();
@@ -925,6 +923,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       // eslint-disable-next-line no-bitwise
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
                       onQuerySubmit
+                    );
+
+                    // on CMD/CTRL + / comment out the entire line
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                      onCommentLine
                     );
 
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
