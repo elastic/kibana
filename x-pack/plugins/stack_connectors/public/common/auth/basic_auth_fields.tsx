@@ -21,7 +21,7 @@ interface BasicAuthProps {
 }
 
 export const BasicAuthFields: React.FC<BasicAuthProps> = ({ readOnly }) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
+  <EuiFlexGroup justifyContent="spaceBetween" data-test-subj="basicAuthFields">
     <EuiFlexItem>
       <UseField
         path="secrets.user"

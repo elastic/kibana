@@ -32,7 +32,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { AuthType as CasesWebhookAuthType, SSLCertType } from '../../../common/auth/constants';
+import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import * as i18n from './translations';
@@ -58,16 +58,16 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
     ],
   });
 
-  const authType = config == null ? CasesWebhookAuthType.Basic : config.authType;
+  const authType = config == null ? AuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
-  const hasCA = __internal__ != null ? __internal__.hasCA : true;
+  const hasCA = __internal__ != null ? __internal__.hasCA : false;
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
       ? null
-      : getFieldDefaultValue('config.authType') ?? CasesWebhookAuthType.Basic;
+      : getFieldDefaultValue('config.authType') ?? AuthType.Basic;
   const certTypeDefaultValue: SSLCertType =
     getFieldDefaultValue('config.certType') ?? SSLCertType.CRT;
   const hasCADefaultValue =
@@ -99,17 +99,15 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
               'data-test-subj': 'authNone',
             },
             {
-              value: CasesWebhookAuthType.Basic,
+              value: AuthType.Basic,
               label: i18n.AUTHENTICATION_BASIC,
-              children: authType === CasesWebhookAuthType.Basic && (
-                <BasicAuthFields readOnly={readOnly} />
-              ),
+              children: authType === AuthType.Basic && <BasicAuthFields readOnly={readOnly} />,
               'data-test-subj': 'authBasic',
             },
             {
-              value: CasesWebhookAuthType.SSL,
+              value: AuthType.SSL,
               label: i18n.AUTHENTICATION_SSL,
-              children: authType === CasesWebhookAuthType.SSL && (
+              children: authType === AuthType.SSL && (
                 <SSLCertFields
                   readOnly={readOnly}
                   certTypeDefaultValue={certTypeDefaultValue}
