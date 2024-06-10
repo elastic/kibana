@@ -7,8 +7,11 @@
  */
 
 import { get } from 'lodash';
+import { expectAssignable } from 'tsd';
+import moment from 'moment';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { schema } from '../..';
+import { Type, TypeOf, TypeOfOutput, TypeOptions } from './type';
 import { META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
 
 class MyType extends Type<any> {
@@ -32,5 +35,58 @@ describe('meta', () => {
     const meta = type.getSchema().describe();
     expect(get(meta, 'flags.description')).toBeUndefined();
     expect(get(meta, 'metas')).toBeUndefined();
+  });
+});
+
+describe('transform', () => {
+  it('transforms values', () => {
+    const durationTransformation = jest.fn((v) => {
+      return moment.duration(v);
+    });
+    // Explicitly define the type to catch type errors
+    const durationSchema: Type<string, moment.Duration> = schema
+      .string({
+        maxLength: 3,
+        validate: (v) =>
+          /^\d+(M|w|d|H|m|s|ms)$/.test(v) ? undefined : `expected ${v} to be a duration like '1d'`,
+      })
+      .transform(durationTransformation);
+
+    const duration = durationSchema.validate('1d');
+    expect(moment.isDuration(duration)).toBe(true);
+    expect(durationTransformation).toHaveBeenCalledTimes(1);
+    expect(durationTransformation).toHaveBeenCalledWith('1d');
+  });
+  it('only runs the last provided transform function', () => {
+    const transform1 = jest.fn((v) => Number(v));
+    const transform2 = jest.fn((v) => Boolean(v));
+    const transform3 = jest.fn((v) => String(v));
+    // Explicitly define the type to catch type errors, we should reflect the type
+    // of the last provided transform function
+    const stringSchema: Type<string, string> = schema
+      .string()
+      .transform(transform1)
+      .transform(transform2)
+      .transform(transform3);
+
+    const result = stringSchema.validate('foo');
+    expect(transform1).not.toHaveBeenCalled();
+    expect(transform2).not.toHaveBeenCalled();
+    expect(transform3).toHaveBeenCalledTimes(1);
+    expect(transform3).toHaveBeenCalledWith('foo');
+    expect(result).toBe('foo');
+  });
+
+  it('loses some type specific options/methods, but preserves generics', () => {
+    const noop: (a: unknown) => undefined = () => undefined;
+    const obj = schema.object({ a: schema.string() });
+    noop(obj.extends);
+
+    const transformedObj = obj.transform((v) => JSON.stringify(v, null, 2));
+    // @ts-expect-error on the transformed type, we no longer have access to object type's `extend` method
+    noop(transformedObj.extends);
+
+    expectAssignable<TypeOf<typeof transformedObj>>({ a: 'foo' });
+    expectAssignable<TypeOfOutput<typeof transformedObj>>(`{\n  "a": "foo"\n}`);
   });
 });
