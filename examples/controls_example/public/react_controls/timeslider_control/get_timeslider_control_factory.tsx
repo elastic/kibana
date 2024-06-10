@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
-import { getViewModeSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { getViewModeSubject, useBatchedPublishingSubjects, ViewMode } from '@kbn/presentation-publishing';
 import { ControlFactory } from '../types';
 import {
   TimesliderControlState,
@@ -56,11 +56,103 @@ export const getTimesliderControlFactory = (
       function setIsAnchored(isAnchored: boolean | undefined) {
         isAnchored$.next(isAnchored);
       }
+      let selectedRange: number | undefined;
+      function setSelectedRange(nextSelectedRange?: number) {
+        selectedRange = nextSelectedRange !== undefined && nextSelectedRange < timeRangeMeta$.value.timeRange ? nextSelectedRange : undefined;
+      };
+
+      function onChange(timeslice?: Timeslice) {
+        setTimeslice(timeslice);
+        const nextSelectedRange = timeslice ? timeslice[TO_INDEX] - timeslice[FROM_INDEX] : undefined;
+        setSelectedRange(nextSelectedRange);
+      }
+
+      function onPrevious() {
+        const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
+        const value = timeslice$.value;
+        const tickRange = ticks[1].value - ticks[0].value;
+    
+        if (isAnchored$.value) {
+          const prevTick = value
+            ? [...ticks].reverse().find((tick) => {
+                return tick.value < value[TO_INDEX];
+              })
+            : ticks[ticks.length - 1];
+            setTimeslice([
+            timeRangeMin,
+            prevTick ? prevTick.value : timeRangeMax,
+          ]);
+          return;
+        }
+    
+        if (value === undefined || value[FROM_INDEX] <= timeRangeMin) {
+          const to = timeRangeMax;
+          if (selectedRange === undefined || selectedRange === tickRange) {
+            const lastTickValue = ticks[ticks.length - 1].value;
+            const secondToLastTickValue = ticks[ticks.length - 2].value;
+            const from = lastTickValue === to ? secondToLastTickValue : lastTickValue;
+            setTimeslice([from, to]);
+            setSelectedRange(tickRange);
+          } else {
+            const from = to - selectedRange;
+            setTimeslice([Math.max(from, timeRangeMin), to]);
+          }
+          return;
+        }
+    
+        const to = value[FROM_INDEX];
+        const safeRange = selectedRange === undefined ? tickRange : selectedRange;
+        const from = to - safeRange;
+        setTimeslice([Math.max(from, timeRangeMin), to]);
+      };
+
+      function onNext() {
+        const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
+        const value = timeslice$.value;
+        const tickRange = ticks[1].value - ticks[0].value;
+      
+        if (isAnchored$.value) {
+          if (value === undefined || value[TO_INDEX] >= timeRangeMax) {
+            setTimeslice([timeRangeMin, ticks[0].value]);
+            return;
+          }
+      
+          const nextTick = ticks.find((tick) => {
+            return tick.value > value[TO_INDEX];
+          });
+          setTimeslice([
+            timeRangeMin,
+            nextTick ? nextTick.value : timeRangeMax,
+          ]);
+          return;
+        }
+      
+        if (value === undefined || value[TO_INDEX] >= timeRangeMax) {
+          const from = timeRangeMin;
+          if (selectedRange === undefined || selectedRange === tickRange) {
+            const firstTickValue = ticks[0].value;
+            const secondTickValue = ticks[1].value;
+            const to = firstTickValue === from ? secondTickValue : firstTickValue;
+            setTimeslice([from, to]);
+            setSelectedRange(tickRange);
+          } else {
+            const to = from + selectedRange;
+            setTimeslice([from, Math.min(to, timeRangeMax)]);
+          }
+          return;
+        }
+      
+        const from = value[TO_INDEX];
+        const safeRange = selectedRange === undefined ? tickRange : selectedRange;
+        const to = from + safeRange;
+        setTimeslice([from, Math.min(to, timeRangeMax)]);
+      };
 
       const isPopoverOpen$ = new BehaviorSubject(false);
       function setIsPopoverOpen(value: boolean) {
         isPopoverOpen$.next(value);
       }
+      const viewModeSubject = getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode);
 
       const { defaultControlApi, defaultControlComparators, serializeDefaultControl } =
         initializeDefaultControlApi(initialState);
@@ -83,9 +175,9 @@ export const getTimesliderControlFactory = (
           getCustomPrepend: () => {
             return (
               <TimeSliderPrepend
-                onNext={() => {}}
-                onPrevious={() => {}}
-                viewModeSubject={getViewModeSubject(parentApi) ?? new BehaviorSubject('view')}
+                onNext={onNext}
+                onPrevious={onPrevious}
+                viewModeSubject={viewModeSubject}
                 disablePlayButton={false}
                 setIsPopoverOpen={setIsPopoverOpen}
               />
@@ -166,7 +258,7 @@ export const getTimesliderControlFactory = (
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
                 setIsAnchored={setIsAnchored}
                 value={[from, to]}
-                onChange={setTimeslice}
+                onChange={onChange}
                 stepSize={timeRangeMeta.stepSize}
                 ticks={timeRangeMeta.ticks}
                 timeRangeMin={timeRangeMeta.timeRangeMin}
