@@ -23,7 +23,7 @@ import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis, PresentationContainer } from '@kbn/presentation-containers';
 import {
   apiPublishesDataLoading,
   HasUniqueId,
@@ -131,29 +131,6 @@ export const ReactControlExample = ({
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
-    let childrenDataLoadingSubcription: undefined | Subscription;
-    const childrenSubscription = children$.subscribe((children) => {
-      if (childrenDataLoadingSubcription) {
-        childrenDataLoadingSubcription.unsubscribe();
-        childrenDataLoadingSubcription = undefined;
-      }
-
-      const dataLoadingSubjects = Object.values(children)
-        .filter((childApi) => {
-          return apiPublishesDataLoading(childApi);
-        })
-        .map((childApi) => {
-          return (childApi as PublishesDataLoading).dataLoading;
-        });
-
-      childrenDataLoadingSubcription = combineLatest(dataLoadingSubjects).subscribe((values) => {
-        const isAtLeastOneChildLoading = values.some((isLoading) => {
-          return isLoading;
-        });
-        dataLoading$.next(isAtLeastOneChildLoading);
-      });
-    });
-
     setDashboardApi({
       dataLoading: dataLoading$,
       viewMode,
@@ -176,14 +153,26 @@ export const ReactControlExample = ({
         return Promise.resolve(undefined);
       },
     });
+  });
+
+  useEffect(() => {
+    const subscription = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+      dashboardApi,
+      'dataLoading',
+      apiPublishesDataLoading,
+      undefined,
+      // flatten method
+      (values) => {
+        return values.some((isLoading) => isLoading);
+      }
+    ).subscribe((isAtLeastOneChildLoading) => {
+      dataLoading$.next(isAtLeastOneChildLoading);
+    });
 
     return () => {
-      childrenSubscription.unsubscribe();
-      if (childrenDataLoadingSubcription) {
-        childrenDataLoadingSubcription.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
-  });
+  }, [dashboardApi]);
 
   // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
