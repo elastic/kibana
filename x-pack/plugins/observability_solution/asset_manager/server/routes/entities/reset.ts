@@ -34,7 +34,6 @@ import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  server,
   logger,
   spaces,
 }: SetupRouteOptions<T>) {
@@ -49,7 +48,6 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
     },
     async (context, req, res) => {
       try {
-        const { logger } = server;
         const soClient = (await context.core).savedObjects.client;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
