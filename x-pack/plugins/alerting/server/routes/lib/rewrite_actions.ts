@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema/src/types/object_type';
+import { TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { NormalizedAlertAction, NormalizedSystemAction } from '../../rules_client';
 import { actionsSchema, systemActionsSchema } from './actions_schema';
