@@ -492,7 +492,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             baseTheme={chartBaseTheme}
             debugState={window._echDebugStateFlag ?? false}
             showLegend={false}
-            showLegendExtra={false}
             locale={i18n.getLocale()}
           />
           <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />

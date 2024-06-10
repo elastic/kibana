@@ -456,6 +456,14 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 {kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
 
+`server.protocol`::
+experimental[] The http protocol to use, either `http1` or `http2`. Set to `http2` to enable `HTTP/2` support for the {kib} server. 
+*Default: `http1`*
++
+NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via <<server-ssl-enabled, `server.ssl.enabled`>>
+and <<server-ssl-supportedProtocols, `server.ssl.supportedProtocols`>>, if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of
+the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.
+
 [[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp`::
 Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 

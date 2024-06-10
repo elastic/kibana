@@ -277,7 +277,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
       return supertest
         .post('/internal/detection_engine/users/_find')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },

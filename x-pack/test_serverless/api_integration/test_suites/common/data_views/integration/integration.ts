@@ -7,18 +7,24 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
  * Test usage of different index patterns APIs in combination
  */
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('integration', () => {
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
 
@@ -26,14 +32,15 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('create an index pattern, add a runtime field, add a field formatter, then re-create the same index pattern', async () => {
       const title = `basic_index*`;
-      const response1 = await supertest
+      const response1 = await supertestWithoutAuth
         .post('/api/index_patterns/index_pattern')
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           override: true,
           index_pattern: {
@@ -41,10 +48,10 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       const id = response1.body.index_pattern.id;
-      const response2 = await supertest
+      const response2 = await supertestWithoutAuth
         .post(`/api/index_patterns/index_pattern/${id}/runtime_field`)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'runtimeBar',
           runtimeField: {
@@ -57,10 +64,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response2.status).to.be(200);
 
-      const response3 = await supertest
+      const response3 = await supertestWithoutAuth
         .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fields: {
             runtimeBar: {
@@ -72,10 +79,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response3.status).to.be(200);
 
-      const response4 = await supertest
+      const response4 = await supertestWithoutAuth
         .post(`/api/index_patterns/index_pattern/${response1.body.index_pattern.id}/fields`)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           fields: {
             runtimeBar: {
@@ -89,10 +96,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response4.status).to.be(200);
 
-      const response5 = await supertest
+      const response5 = await supertestWithoutAuth
         .get('/api/index_patterns/index_pattern/' + response1.body.index_pattern.id)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader());
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader);
 
       expect(response5.status).to.be(200);
 
@@ -114,10 +121,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resultIndexPattern.fieldAttrs.runtimeBar.customLabel).to.be('test');
 
       // check that retrieved object is transient and a clone can be created
-      const response6 = await supertest
+      const response6 = await supertestWithoutAuth
         .post('/api/index_patterns/index_pattern')
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .send({
           override: true,
           index_pattern: resultIndexPattern,

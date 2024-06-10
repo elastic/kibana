@@ -69,6 +69,9 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
           fullWidth={true}
           startDateControl={
             <EuiDatePicker
+              popperProps={{
+                'data-test-subj': 'mlJobWizardDatePickerRangeStartDate',
+              }}
               selected={startMoment}
               onChange={handleChangeStart}
               startDate={startMoment}
@@ -86,6 +89,9 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
           }
           endDateControl={
             <EuiDatePicker
+              popperProps={{
+                'data-test-subj': 'mlJobWizardDatePickerRangeEndDate',
+              }}
               selected={endMoment}
               onChange={handleChangeEnd}
               startDate={startMoment}

@@ -1256,9 +1256,11 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
+          " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
+          "AlertPageFilterType",
+          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
           "ExpandedDetailType",
-          ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPage: number; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
+          ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1268,9 +1270,7 @@
           },
           "[]>; readonly sessionViewConfig: ",
           "SessionViewConfig",
-          " | null; readonly totalCount: number; readonly additionalFilters: Record<",
-          "AlertPageFilterType",
-          ", boolean>; }"
+          " | null; readonly totalCount: number; }"
         ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
         "deprecated": false,

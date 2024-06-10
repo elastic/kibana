@@ -13,6 +13,7 @@ import {
   DataStreamStat,
   DegradedDocs,
   NonAggregatableDatasets,
+  DegradedFieldResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import { rangeRt, typeRt } from '../../types/default_api_types';
@@ -22,6 +23,7 @@ import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
+import { getDegradedFields } from './get_degraded_fields';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -123,6 +125,32 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const degradedFieldsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/degraded_fields',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+    query: rangeRt,
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DegradedFieldResponse> {
+    const { context, params } = resources;
+    const { dataStream } = params.path;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getDegradedFields({
+      esClient,
+      dataStream,
+      ...params.query,
+    });
+  },
+});
+
 const dataStreamSettingsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/settings',
   params: t.type({
@@ -198,6 +226,7 @@ export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...nonAggregatableDatasetsRoute,
+  ...degradedFieldsRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
 };

@@ -171,10 +171,10 @@ describe('useSettingsUpdater', () => {
       await result.current.saveSettings();
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/api/elastic_assistant/current_user/conversations/_bulk_action',
+        '/internal/elastic_assistant/current_user/conversations/_bulk_action',
         {
           method: 'POST',
-          version: '2023-10-31',
+          version: '1',
           body: '{"delete":{"ids":["1"]}}',
         }
       );

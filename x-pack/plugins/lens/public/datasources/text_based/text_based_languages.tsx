@@ -30,6 +30,7 @@ import {
   DatasourceDimensionTriggerProps,
   DataSourceInfo,
   UserMessage,
+  OperationMetadata,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import type {
@@ -53,6 +54,7 @@ import {
   addColumnsToCache,
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
+import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -307,6 +309,7 @@ export function getTextBasedDatasource({
       });
       return errors.map((err) => {
         const message: UserMessage = {
+          uniqueId: TEXT_BASED_LANGUAGE_ERROR,
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
@@ -533,6 +536,18 @@ export function getTextBasedDatasource({
           const layer = state.layers[layerId];
           const column = layer?.columns?.find((c) => c.columnId === columnId);
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
+          let scale: OperationMetadata['scale'] = 'ordinal';
+          switch (column?.meta?.type) {
+            case 'date':
+              scale = 'interval';
+              break;
+            case 'number':
+              scale = 'ratio';
+              break;
+            default:
+              scale = 'ordinal';
+              break;
+          }
 
           if (column) {
             return {
@@ -542,6 +557,7 @@ export function getTextBasedDatasource({
               inMetricDimension: column.inMetricDimension,
               hasTimeShift: false,
               hasReducedTimeRange: false,
+              scale,
             };
           }
           return null;

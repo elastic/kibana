@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getAgentStatus } from '../../services/agent/agent_status';
+import { getSentinelOneAgentStatus } from '../../services/agent/agent_status';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -63,8 +63,10 @@ export const getAgentStatusRouteHandler = (
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
     if (
-      agentType === 'sentinel_one' &&
-      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+      (agentType === 'sentinel_one' &&
+        !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
+      (agentType === 'crowdstrike' &&
+        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
     ) {
       return errorHandler(
         logger,
@@ -79,17 +81,21 @@ export const getAgentStatusRouteHandler = (
       esClient,
       soClient,
       endpointService: endpointContext.service,
+      connectorActionsClient:
+        agentType === 'crowdstrike' ? (await context.actions).getActionsClient() : undefined,
     });
 
     // 8.15: use the new `agentStatusClientEnabled` FF enabled
-    const getAgentStatusPromise = endpointContext.experimentalFeatures.agentStatusClientEnabled
-      ? agentStatusClient.getAgentStatuses(agentIds)
-      : getAgentStatus({
+    const data = endpointContext.experimentalFeatures.agentStatusClientEnabled
+      ? await agentStatusClient.getAgentStatuses(agentIds)
+      : agentType === 'sentinel_one'
+      ? await getSentinelOneAgentStatus({
           agentType,
           agentIds,
           logger,
           connectorActionsClient: (await context.actions).getActionsClient(),
-        });
+        })
+      : [];
 
     logger.debug(
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
@@ -98,7 +104,7 @@ export const getAgentStatusRouteHandler = (
     try {
       return response.ok({
         body: {
-          data: await getAgentStatusPromise,
+          data,
         },
       });
     } catch (e) {

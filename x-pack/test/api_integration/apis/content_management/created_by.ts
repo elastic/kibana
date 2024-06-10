@@ -12,6 +12,7 @@ import {
   setupInteractiveUser,
   sampleDashboard,
   cleanupInteractiveUser,
+  LoginAsInteractiveUserResponse,
 } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -32,11 +33,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('for interactive user', function () {
       const supertest = getService('supertestWithoutAuth');
-      let sessionHeaders: { [key: string]: string } = {};
+      let interactiveUser: LoginAsInteractiveUserResponse;
 
       before(async () => {
         await setupInteractiveUser({ getService });
-        sessionHeaders = await loginAsInteractiveUser({ getService });
+        interactiveUser = await loginAsInteractiveUser({ getService });
       });
 
       after(async () => {
@@ -46,13 +47,14 @@ export default function ({ getService }: FtrProviderContext) {
       it('created_by is with profile_id', async () => {
         const createResponse = await supertest
           .post('/api/content_management/rpc/create')
-          .set(sessionHeaders)
+          .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
           .send(sampleDashboard);
 
         expect(createResponse.status).to.be(200);
         expect(createResponse.body.result.result.item).to.be.ok();
         expect(createResponse.body.result.result.item).to.have.key('createdBy');
+        expect(createResponse.body.result.result.item.createdBy).to.be(interactiveUser.uid);
       });
     });
   });

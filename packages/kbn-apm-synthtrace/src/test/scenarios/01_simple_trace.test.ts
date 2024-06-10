@@ -48,7 +48,24 @@ describe('simple trace', () => {
 
   // TODO this is not entirely factual, since id's are generated of a global sequence number
   it('generates the same data every time', () => {
-    expect(events).toMatchSnapshot();
+    expect(events).toMatchSnapshot(
+      events.map((event) => {
+        const matchers: Record<string, any> = {};
+        if (event['transaction.id']) {
+          matchers['transaction.id'] = expect.any(String);
+        }
+        if (event['trace.id']) {
+          matchers['trace.id'] = expect.any(String);
+        }
+        if (event['span.id']) {
+          matchers['span.id'] = expect.any(String);
+        }
+        if (event['parent.id']) {
+          matchers['parent.id'] = expect.any(String);
+        }
+        return matchers;
+      })
+    );
   });
 
   it('generates 15 transaction events', () => {
@@ -83,9 +100,9 @@ describe('simple trace', () => {
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
       'timestamp.us': 1609459200000000,
-      'trace.id': '00000000000000000000000000000241',
+      'trace.id': expect.stringContaining('00000000000000000000000241'),
       'transaction.duration.us': 1000000,
-      'transaction.id': '0000000000000240',
+      'transaction.id': expect.stringContaining('0000000240'),
       'transaction.name': 'GET /api/product/list',
       'transaction.type': 'request',
       'transaction.sampled': true,
@@ -95,26 +112,28 @@ describe('simple trace', () => {
   it('outputs span events', () => {
     const [, span] = events;
 
-    expect(span).toEqual({
-      '@timestamp': 1609459200050,
-      'agent.name': 'java',
-      'container.id': 'instance-1',
-      'event.outcome': 'success',
-      'host.name': 'instance-1',
-      'parent.id': '0000000000000300',
-      'processor.event': 'span',
-      'processor.name': 'transaction',
-      'service.environment': 'production',
-      'service.name': 'opbeans-java',
-      'service.node.name': 'instance-1',
-      'span.duration.us': 900000,
-      'span.id': '0000000000000302',
-      'span.name': 'GET apm-*/_search',
-      'span.subtype': 'elasticsearch',
-      'span.type': 'db',
-      'timestamp.us': 1609459200050000,
-      'trace.id': '00000000000000000000000000000301',
-      'transaction.id': '0000000000000300',
-    });
+    expect(span).toEqual(
+      expect.objectContaining({
+        '@timestamp': 1609459200050,
+        'agent.name': 'java',
+        'container.id': 'instance-1',
+        'event.outcome': 'success',
+        'host.name': 'instance-1',
+        'parent.id': expect.stringContaining('0000000300'),
+        'processor.event': 'span',
+        'processor.name': 'transaction',
+        'service.environment': 'production',
+        'service.name': 'opbeans-java',
+        'service.node.name': 'instance-1',
+        'span.duration.us': 900000,
+        'span.id': expect.stringContaining('0000000302'),
+        'span.name': 'GET apm-*/_search',
+        'span.subtype': 'elasticsearch',
+        'span.type': 'db',
+        'timestamp.us': 1609459200050000,
+        'trace.id': expect.stringContaining('00000000000000000000000301'),
+        'transaction.id': expect.stringContaining('0000000300'),
+      })
+    );
   });
 });

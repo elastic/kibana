@@ -85,7 +85,9 @@ export function useCategorizeRequest() {
               query,
               wrap,
               intervalMs,
-              additionalFilter
+              additionalFilter,
+              true,
+              additionalFilter === undefined // don't include the outer sparkline if there is an additional filter
             ),
             { abortSignal: abortController.current.signal }
           )

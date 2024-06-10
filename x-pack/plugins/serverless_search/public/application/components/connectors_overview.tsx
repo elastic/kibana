@@ -44,7 +44,7 @@ export const ConnectorsOverview = () => {
         data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
         rightSideItems={[
-          <EuiFlexGroup direction="row" alignItems="flexStart">
+          <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="center">
             <EuiFlexItem>
               <EuiFlexGroup
                 alignItems="center"

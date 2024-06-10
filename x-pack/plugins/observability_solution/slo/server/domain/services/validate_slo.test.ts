@@ -103,6 +103,7 @@ describe('validateSLO', () => {
           settings: {
             frequency: sixHours(),
             syncDelay: oneMinute(),
+            preventInitialBackfill: false,
           },
         });
         expect(() => validateSLO(slo)).toThrowError('Invalid settings.frequency');
@@ -113,6 +114,7 @@ describe('validateSLO', () => {
           settings: {
             frequency: oneMinute(),
             syncDelay: sixHours(),
+            preventInitialBackfill: false,
           },
         });
         expect(() => validateSLO(slo)).toThrowError('Invalid settings.sync_delay');

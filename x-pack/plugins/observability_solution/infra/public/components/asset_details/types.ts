@@ -80,9 +80,6 @@ export interface AssetDetailsProps {
   overrides?: OverridableTabState;
   renderMode: RenderMode;
   links?: LinkOptions[];
-  // This is temporary. Once we start using the asset details in other plugins,
-  // It will have to retrieve the metricAlias internally rather than receive it via props
-  metricAlias: string;
 }
 
 export type TabsStateChangeFn = (state: TabState) => void;

@@ -456,27 +456,6 @@ const logicFunctions: FunctionDefinition[] = [
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        { name: 'left', type: 'null' },
-        { name: 'right', type: 'boolean' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'boolean' },
-        { name: 'right', type: 'null' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'null' },
-        { name: 'right', type: 'null' },
-      ],
-      returnType: 'boolean',
-    },
   ],
 }));
 

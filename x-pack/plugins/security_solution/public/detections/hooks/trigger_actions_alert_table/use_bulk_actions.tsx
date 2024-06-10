@@ -10,14 +10,17 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import type { inputsModel } from '../../../common/store';
+import { inputsSelectors } from '../../../common/store';
 
 // check to see if the query is a known "empty" shape
 export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
@@ -82,6 +85,14 @@ export const getBulkActionHook =
       };
     }, [filters, from, to]);
 
+    const getGlobalQueriesSelector = useMemo(() => inputsSelectors.globalQuery(), []);
+    const globalQueries = useDeepEqualSelector(getGlobalQueriesSelector);
+
+    const refetch = useCallback(() => {
+      refresh();
+      globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    }, [globalQueries, refresh]);
+
     const alertActionParams = useMemo(() => {
       return {
         scopeId: SourcererScopeName.detections,
@@ -89,9 +100,9 @@ export const getBulkActionHook =
         from,
         to,
         tableId,
-        refetch: refresh,
+        refetch,
       };
-    }, [from, to, filters, refresh]);
+    }, [from, to, filters, refetch]);
 
     const bulkAlertTagParams = useMemo(() => {
       return {

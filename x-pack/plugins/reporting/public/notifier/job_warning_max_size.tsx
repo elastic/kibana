@@ -23,7 +23,7 @@ export const getWarningMaxSizeToast = (
   title: toMountPoint(
     <FormattedMessage
       id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
-      defaultMessage="Created partial {reportType} for '{reportObjectTitle}'"
+      defaultMessage="Created partial {reportType} for ''{reportObjectTitle}''"
       values={{ reportType: job.jobtype, reportObjectTitle: job.title }}
     />,
     core

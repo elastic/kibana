@@ -148,6 +148,52 @@ export const deleteRiskScoreIndices = async ({
   }
 };
 
+export const areRiskScoreIndicesEmpty = async ({
+  es,
+  namespace = 'default',
+  log,
+}: {
+  es: Client;
+  namespace?: string;
+  log: ToolingLog;
+}): Promise<boolean> => {
+  const riskScoreIndex = `risk-score.risk-score-${namespace}`;
+  const riskScoreLatestIndex = `risk-score.risk-score-latest-${namespace}`;
+  let riskScoreCount = 0;
+  let riskScoreLatestCount = 0;
+
+  try {
+    const [riskScoreCountRes, riskScoreLatestCountRes] = await Promise.all([
+      es.count({ index: riskScoreIndex }),
+      es.count({ index: riskScoreLatestIndex }),
+    ]);
+    riskScoreCount = riskScoreCountRes.count;
+    riskScoreLatestCount = riskScoreLatestCountRes.count;
+  } catch (e) {
+    if (e.meta.statusCode === 404) {
+      return true;
+    }
+    throw e;
+  }
+
+  const isEmpty = riskScoreCount === 0 && riskScoreLatestCount === 0;
+
+  if (!isEmpty) {
+    log.warning(
+      `Risk score indices are not empty. Risk score index count: ${riskScoreCount}, Risk score latest index count: ${riskScoreLatestCount}`
+    );
+    const [riskScoreDocs, riskScoreLatestDocs] = await Promise.all([
+      es.search({ index: riskScoreIndex, size: 25 }),
+      es.search({ index: riskScoreLatestIndex, size: 25 }),
+    ]);
+
+    log.info(`Risk score index documents: ${JSON.stringify(riskScoreDocs.hits.hits)}`);
+    log.info(`Risk score latest index documents: ${JSON.stringify(riskScoreLatestDocs.hits.hits)}`);
+  }
+
+  return isEmpty;
+};
+
 /**
  * Deletes all risk scores from a given index or indices, defaults to `risk-score.risk-score-*`
  * For use inside of afterEach blocks of tests

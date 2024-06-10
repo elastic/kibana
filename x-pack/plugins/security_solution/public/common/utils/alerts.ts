@@ -9,7 +9,7 @@ import { merge } from '@kbn/std';
 import { isPlainObject } from 'lodash';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { GroupOption } from '@kbn/securitysolution-grouping';
+import type { GroupOption } from '@kbn/grouping';
 import * as i18n from './translations';
 
 export const buildAlertsQuery = (alertIds: string[]) => {

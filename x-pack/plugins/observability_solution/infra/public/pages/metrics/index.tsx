@@ -20,22 +20,22 @@ import {
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
-import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
+import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
-import { MetricsExplorerOptionsContainer } from './metrics_explorer/hooks/use_metrics_explorer_options';
-import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { NodeDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
-import { SourceLoadingPage } from '../../components/source_loading_page';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
@@ -48,17 +48,18 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 
 export const InfrastructurePage = () => {
   const config = usePluginConfig();
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const { application, share } = useKibana<{ share: SharePublicStart }>().services;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
   const isHostsViewEnabled = useUiSetting(enableInfrastructureHostsView);
+
+  const uiCapabilities = application?.capabilities;
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
   });
-
-  const kibana = useKibana();
-
-  const { source, createDerivedIndexPattern } = useSourceContext();
 
   useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
@@ -86,26 +87,20 @@ export const InfrastructurePage = () => {
                       <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                         {settingsTabTitle}
                       </EuiHeaderLink>
-                      <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                      <Route path="/inventory" component={AnomalyDetectionFlyout} />
                       <Route
-                        path={'/hosts'}
-                        render={() => {
-                          return <AnomalyDetectionFlyout hideJobType hideSelectGroup />;
-                        }}
+                        path="/hosts"
+                        render={() => <AnomalyDetectionFlyout hideJobType hideSelectGroup />}
                       />
                       <Route
-                        path={'/detail/host'}
-                        render={() => {
-                          return <AnomalyDetectionFlyout hideJobType hideSelectGroup />;
-                        }}
+                        path="/detail/host"
+                        render={() => <AnomalyDetectionFlyout hideJobType hideSelectGroup />}
                       />
                       {config.featureFlags.alertsAndRulesDropdownEnabled && (
                         <MetricsAlertDropdown />
                       )}
                       <EuiHeaderLink
-                        href={kibana.services?.application?.getUrlForApp(
-                          '/observabilityOnboarding'
-                        )}
+                        href={onboardingLocator?.useUrl({ category: 'infra' })}
                         color="primary"
                         iconType="indexOpen"
                       >
@@ -120,24 +115,8 @@ export const InfrastructurePage = () => {
             <Routes>
               <Route path="/inventory" component={SnapshotPage} />
               {config.featureFlags.metricsExplorerEnabled && (
-                <Route
-                  path="/explorer"
-                  render={() => (
-                    <MetricsExplorerOptionsContainer>
-                      <WithMetricsExplorerOptionsUrlState />
-                      {source?.configuration ? (
-                        <PageContent
-                          configuration={source.configuration}
-                          createDerivedIndexPattern={createDerivedIndexPattern}
-                        />
-                      ) : (
-                        <SourceLoadingPage />
-                      )}
-                    </MetricsExplorerOptionsContainer>
-                  )}
-                />
+                <Route path="/explorer" component={MetricsExplorerPage} />
               )}
-
               <Route path="/detail/:type/:node" component={NodeDetail} />
               {isHostsViewEnabled && <Route path="/hosts" component={HostsPage} />}
               <Route path="/settings" component={MetricsSettingsPage} />
@@ -160,16 +139,5 @@ export const InfrastructurePage = () => {
         </AlertPrefillProvider>
       </ReactQueryProvider>
     </EuiErrorBoundary>
-  );
-};
-
-const PageContent = (props: {
-  configuration: MetricsSourceConfigurationProperties;
-  createDerivedIndexPattern: CreateDerivedIndexPattern;
-}) => {
-  const { createDerivedIndexPattern, configuration } = props;
-
-  return (
-    <MetricsExplorerPage derivedIndexPattern={createDerivedIndexPattern()} source={configuration} />
   );
 };

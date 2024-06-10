@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
@@ -48,26 +48,20 @@ const ActionsContainer = styled.div`
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
-  checked,
   columnValues,
   ecsData,
   eventId,
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
-  loadingEventIds,
   onEventDetailsPanelOpened,
-  onRowSelected,
   onRuleChange,
-  showCheckboxes,
   showNotes,
   timelineId,
   toggleShowNotes,
   refetch,
-  setEventsLoading,
 }) => {
   const dispatch = useDispatch();
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
@@ -89,15 +83,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const onUnPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
-  );
-
-  const handleSelectEvent = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      onRowSelected({
-        eventIds: [eventId],
-        isSelected: event.currentTarget.checked,
-      }),
-    [eventId, onRowSelected]
   );
 
   const handlePinClicked = useCallback(
@@ -234,23 +219,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   return (
     <ActionsContainer>
-      {showCheckboxes && !tGridEnabled && (
-        <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            {loadingEventIds.includes(eventId) ? (
-              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
-            ) : (
-              <EuiCheckbox
-                aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
-                data-test-subj="select-event"
-                id={eventId}
-                checked={checked}
-                onChange={handleSelectEvent}
-              />
-            )}
-          </EventsTdContent>
-        </div>
-      )}
       <>
         {showExpandEvent && (
           <GuidedOnboardingTourStep

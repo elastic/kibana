@@ -68,7 +68,7 @@ export const IndexSetupDatasetFilter: React.FC<{
     >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
-        defaultMessage="{includeType, select, includeAll {All datasets} includeSome {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"
+        defaultMessage="{includeType, select, includeAll {All datasets} other {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"
         values={{
           includeType: datasetFilter.type,
           includedDatasetCount:

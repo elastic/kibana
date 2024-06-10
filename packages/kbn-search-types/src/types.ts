@@ -10,7 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
@@ -106,7 +106,7 @@ export interface ISearchOptions {
   /**
    * Index pattern reference is used for better error messages
    */
-  indexPattern?: DataView;
+  indexPattern?: AbstractDataView;
 
   /**
    * TransportRequestOptions, other than `signal`, to pass through to the ES client.

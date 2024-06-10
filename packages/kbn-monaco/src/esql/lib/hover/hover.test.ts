@@ -74,7 +74,6 @@ function createCustomCallbackMocks(
     getFieldsFor: jest.fn(async () => finalFields),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
-    getMetaFields: jest.fn(async () => ['_index', '_score']),
   };
 }
 

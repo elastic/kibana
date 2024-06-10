@@ -28,6 +28,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { Node, NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../helpers/get_random_sampler';
 
 type Destination = {
   dependencyName: string;
@@ -53,12 +54,14 @@ export const getDestinationMap = ({
   end,
   filter,
   offset,
+  randomSampler,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   filter: QueryDslQueryContainer[];
   offset?: string;
+  randomSampler: RandomSampler;
 }) => {
   return withApmSpan('get_destination_map', async () => {
     const { startWithOffset, endWithOffset } = getOffsetInMs({
@@ -67,6 +70,33 @@ export const getDestinationMap = ({
       offset,
     });
 
+    const query: QueryDslQueryContainer = {
+      bool: {
+        filter: [
+          { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...filter,
+          ...excludeRumExitSpansQuery(),
+        ],
+      },
+    };
+
+    const hitCountResponse = await apmEventClient.search('get_exit_span_doc_count', {
+      apm: {
+        events: [ProcessorEvent.span],
+      },
+      body: {
+        size: 0,
+        track_total_hits: true,
+        query,
+      },
+    });
+
+    const totalDocCount = hitCountResponse.hits.total.value;
+    const rawSamplingProbability = Math.min(10_000_000 / totalDocCount, 1);
+    const samplingProbability =
+      rawSamplingProbability < 0.5 ? rawSamplingProbability : randomSampler.probability;
+
     const response = await apmEventClient.search('get_exit_span_samples', {
       apm: {
         events: [ProcessorEvent.span],
@@ -74,45 +104,44 @@ export const getDestinationMap = ({
       body: {
         track_total_hits: false,
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...filter,
-              ...excludeRumExitSpansQuery(),
-            ],
-          },
-        },
+        query,
         aggs: {
-          connections: {
-            composite: {
-              size: 10000,
-              sources: asMutableArray([
-                {
-                  dependencyName: {
-                    terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-                  },
-                },
-                // make sure we get samples for both successful
-                // and failed calls
-                { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
-              ] as const),
+          sampling: {
+            random_sampler: {
+              ...randomSampler,
+              probability: samplingProbability,
             },
             aggs: {
-              sample: {
-                top_metrics: {
-                  size: 1,
-                  metrics: asMutableArray([
-                    { field: SPAN_TYPE },
-                    { field: SPAN_SUBTYPE },
-                    { field: SPAN_ID },
-                  ] as const),
-                  sort: [
+              connections: {
+                composite: {
+                  size: 10000,
+                  sources: asMutableArray([
                     {
-                      '@timestamp': 'asc' as const,
+                      dependencyName: {
+                        terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                      },
                     },
-                  ],
+                    // make sure we get samples for both successful
+                    // and failed calls
+                    { eventOutcome: { terms: { field: EVENT_OUTCOME } } },
+                  ] as const),
+                },
+                aggs: {
+                  sample: {
+                    top_metrics: {
+                      size: 1,
+                      metrics: asMutableArray([
+                        { field: SPAN_TYPE },
+                        { field: SPAN_SUBTYPE },
+                        { field: SPAN_ID },
+                      ] as const),
+                      sort: [
+                        {
+                          '@timestamp': 'asc' as const,
+                        },
+                      ],
+                    },
+                  },
                 },
               },
             },
@@ -123,7 +152,7 @@ export const getDestinationMap = ({
 
     const destinationsBySpanId = new Map<string, Destination>();
 
-    response.aggregations?.connections.buckets.forEach((bucket) => {
+    response.aggregations?.sampling.connections.buckets.forEach((bucket) => {
       const sample = bucket.sample.top[0].metrics;
 
       const spanId = sample[SPAN_ID] as string;
@@ -210,6 +239,6 @@ export const getDestinationMap = ({
       nodesBydependencyName.set(destination.dependencyName, node);
     });
 
-    return nodesBydependencyName;
+    return { nodesBydependencyName, sampled: samplingProbability !== 1 };
   });
 };

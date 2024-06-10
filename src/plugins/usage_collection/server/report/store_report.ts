@@ -37,6 +37,7 @@ export async function storeReport(
         {
           id: savedObjectId,
           overwrite: true,
+          refresh: false,
         }
       );
     }),

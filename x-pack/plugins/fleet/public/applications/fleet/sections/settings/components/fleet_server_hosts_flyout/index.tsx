@@ -26,7 +26,6 @@ import {
   EuiSwitch,
   EuiComboBox,
   EuiCallOut,
-  EuiBetaBadge,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
@@ -34,6 +33,7 @@ import { useStartServices } from '../../../../hooks';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
+import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
@@ -188,45 +188,35 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.proxyIdLabel"
-                defaultMessage="Proxy {badge}"
-                values={{
-                  badge: (
-                    <EuiBetaBadge
-                      size="s"
-                      className="eui-alignTop"
-                      label={i18n.translate(
-                        'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
-                        {
-                          defaultMessage: 'Beta',
-                        }
-                      )}
-                    />
-                  ),
-                }}
+                defaultMessage="Proxy"
               />
             }
           >
-            <EuiComboBox
-              fullWidth
-              data-test-subj="fleetServerHostsFlyout.proxyIdInput"
-              {...inputs.proxyIdInput.props}
-              onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
-              selectedOptions={
-                inputs.proxyIdInput.value !== ''
-                  ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
-                  : []
-              }
-              options={proxiesOptions}
-              singleSelection={{ asPlainText: true }}
-              isDisabled={inputs.proxyIdInput.props.disabled}
-              isClearable={true}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.proxyIdPlaceholder',
-                {
-                  defaultMessage: 'Select proxy',
+            <>
+              <EuiComboBox
+                fullWidth
+                data-test-subj="fleetServerHostsFlyout.proxyIdInput"
+                {...inputs.proxyIdInput.props}
+                onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+                selectedOptions={
+                  inputs.proxyIdInput.value !== ''
+                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                    : []
                 }
-              )}
-            />
+                options={proxiesOptions}
+                singleSelection={{ asPlainText: true }}
+                isDisabled={inputs.proxyIdInput.props.disabled}
+                isClearable={true}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.fleetServerHostsFlyout.proxyIdPlaceholder',
+                  {
+                    defaultMessage: 'Select proxy',
+                  }
+                )}
+              />
+              <EuiSpacer size="xs" />
+              <ProxyWarning />
+            </>
           </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
             <EuiSwitch

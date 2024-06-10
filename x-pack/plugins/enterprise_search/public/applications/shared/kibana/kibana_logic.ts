@@ -18,6 +18,7 @@ import {
   ChromeBreadcrumb,
   ScopedHistory,
   IUiSettingsClient,
+  ChromeStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -32,7 +33,7 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/pub
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
-import { ESConfig } from '../../../plugin';
+import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -50,6 +51,7 @@ export interface KibanaLogicProps {
   console?: ConsolePluginStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
@@ -67,6 +69,7 @@ export interface KibanaLogicProps {
   setDocTitle(title: string): void;
   share?: SharePluginStart;
   uiSettings?: IUiSettingsClient;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
 }
 
@@ -80,6 +83,7 @@ export interface KibanaValues {
   consolePlugin: ConsolePluginStart | null;
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
@@ -98,6 +102,7 @@ export interface KibanaValues {
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
   uiSettings: IUiSettingsClient | null;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
 }
 
@@ -113,6 +118,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     consolePlugin: [props.console || null, {}],
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
+    getChromeStyle$: [props.getChromeStyle$, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
@@ -137,6 +143,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
     uiSettings: [props.uiSettings, {}],
+    updateSideNavDefinition: [props.updateSideNavDefinition, {}],
     user: [props.user || null, {}],
   }),
   selectors: ({ selectors }) => ({

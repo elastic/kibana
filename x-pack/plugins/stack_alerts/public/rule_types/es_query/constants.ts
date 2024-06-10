@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/triggers-actions-ui-plugin/public';
-
+import { COMPARATORS } from '@kbn/alerting-comparators';
 export const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   QUERY: `{

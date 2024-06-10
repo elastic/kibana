@@ -31,6 +31,7 @@ export enum EmbeddableConsoleView {
 }
 
 export interface EmbeddedConsoleStore {
+  consoleHasBeenOpened: boolean;
   view: EmbeddableConsoleView;
   loadFromContent?: string;
 }

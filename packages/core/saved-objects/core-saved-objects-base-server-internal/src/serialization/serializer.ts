@@ -122,6 +122,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
+      ...(_source.updated_by && { updated_by: _source.updated_by }),
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(_source.created_by && { created_by: _source.created_by }),
       ...(version && { version }),
@@ -144,6 +145,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       migrationVersion,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       updated_at,
+      updated_by: updatedBy,
       created_at: createdAt,
       created_by: createdBy,
       version,
@@ -164,6 +166,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(updated_at && { updated_at }),
+      ...(updatedBy && { updated_by: updatedBy }),
       ...(createdAt && { created_at: createdAt }),
       ...(createdBy && { created_by: createdBy }),
     };

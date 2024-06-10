@@ -120,6 +120,27 @@ describe('useHighlightedFields', () => {
     });
   });
 
+  it('should omit crowdstrike agent id field if data is not crowdstrike alert', () => {
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat({
+          category: 'crowdstrike',
+          field: 'crowdstrike.event.DeviceId',
+          values: ['expectedCrowdstrikeAgentId'],
+          originalValue: ['expectedCrowdstrikeAgentId'],
+          isObjectArray: false,
+        }),
+        investigationFields: ['agent.status', 'crowdstrike.event.DeviceId'],
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      'kibana.alert.rule.type': {
+        values: ['query'],
+      },
+    });
+  });
+
   it('should return sentinelone agent id field if data is s1 alert', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
@@ -149,6 +170,39 @@ describe('useHighlightedFields', () => {
       },
       'observer.serial_number': {
         values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+      },
+    });
+  });
+
+  it('should return crowdstrike agent id field if data is crowdstrike alert', () => {
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
+          {
+            category: 'event',
+            field: 'event.module',
+            values: ['crowdstrike'],
+            originalValue: ['crowdstrike'],
+            isObjectArray: false,
+          },
+          {
+            category: 'crowdstrike',
+            field: 'crowdstrike.event.DeviceId',
+            values: ['expectedCrowdstrikeAgentId'],
+            originalValue: ['expectedCrowdstrikeAgentId'],
+            isObjectArray: false,
+          },
+        ]),
+        investigationFields: ['agent.status', 'crowdstrike.event.DeviceId'],
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      'kibana.alert.rule.type': {
+        values: ['query'],
+      },
+      'crowdstrike.event.DeviceId': {
+        values: ['expectedCrowdstrikeAgentId'],
       },
     });
   });

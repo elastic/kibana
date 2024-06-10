@@ -14,6 +14,10 @@ import { SerializableRecord } from '@kbn/utility-types';
 import type { DashboardContainerInput, DashboardOptions } from '../../common';
 import { SavedDashboardPanel } from '../../common/content_management';
 
+export interface UnsavedPanelState {
+  [key: string]: object | undefined;
+}
+
 export type DashboardReduxState = ReduxEmbeddableState<
   DashboardContainerInput,
   DashboardContainerOutput,
@@ -49,6 +53,11 @@ export interface DashboardPublicState {
   highlightPanelId?: string;
   focusedPanelId?: string;
 }
+
+export type DashboardLoadType =
+  | 'sessionFirstLoad'
+  | 'dashboardFirstLoad'
+  | 'dashboardSubsequentLoad';
 
 export interface DashboardRenderPerformanceStats {
   lastTimeToData: number;

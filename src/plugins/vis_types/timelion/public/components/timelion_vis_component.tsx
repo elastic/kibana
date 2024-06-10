@@ -18,6 +18,7 @@ import {
   LayoutDirection,
   Placement,
   Tooltip,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -207,7 +208,7 @@ export const TimelionVisComponent = ({
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
-          showLegendExtra={true}
+          legendValues={[LegendValue.CurrentAndLastValue]}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}

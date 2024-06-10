@@ -20,7 +20,7 @@ import type {
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
@@ -132,7 +132,7 @@ function buildFunctionLookup() {
   if (!fnLookups) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionsDefinitions,
+        evalFunctionDefinitions,
         statsAggregationFunctionDefinitions,
         groupingFunctionDefinitions
       )
@@ -217,12 +217,17 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
 }
 
 function compareLiteralType(argType: string, item: ESQLLiteral) {
+  if (item.literalType === 'null') {
+    return true;
+  }
+
   if (item.literalType !== 'string') {
     if (argType === item.literalType) {
       return true;
     }
     return false;
   }
+
   if (argType === 'chrono_literal') {
     return chronoLiterals.some(({ name }) => name === item.text);
   }
@@ -423,7 +428,7 @@ export function isEqualType(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ct === 'any' || argType === ct);
+    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
   }
 }
 
@@ -516,7 +521,7 @@ export function columnExists(
 }
 
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index)) {
+  if (sources.has(index) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));

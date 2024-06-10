@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   isTaskManagerMetricEvent,
   isTaskManagerStatEvent,
@@ -31,6 +32,7 @@ import { metricsAggregatorMock } from './metrics_aggregator.mock';
 import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.test';
 import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 
+const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {
   allow_reading_invalid_state: false,
@@ -788,7 +790,7 @@ describe('createAggregator', () => {
         reset$: new Subject<boolean>(),
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
-        metricsAggregator: new TaskRunMetricsAggregator(),
+        metricsAggregator: new TaskRunMetricsAggregator(logger),
       });
 
       return new Promise<void>((resolve) => {
@@ -1816,7 +1818,7 @@ describe('createAggregator', () => {
         reset$,
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
-        metricsAggregator: new TaskRunMetricsAggregator(),
+        metricsAggregator: new TaskRunMetricsAggregator(logger),
       });
 
       return new Promise<void>((resolve) => {
@@ -2781,7 +2783,7 @@ describe('createAggregator', () => {
         reset$: new Subject<boolean>(),
         eventFilter: (event: TaskLifecycleEvent) =>
           isTaskRunEvent(event) || isTaskManagerStatEvent(event),
-        metricsAggregator: new TaskRunMetricsAggregator(),
+        metricsAggregator: new TaskRunMetricsAggregator(logger),
       });
 
       return new Promise<void>((resolve) => {

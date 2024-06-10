@@ -19,12 +19,14 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public'
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
-import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
+import { ADD_LOG_STREAM_ACTION_ID, LOG_STREAM_EMBEDDABLE } from './components/log_stream/constants';
 import {
   type InfraLocators,
   InfraLogsLocatorDefinition,
@@ -44,6 +46,7 @@ import type {
   InfraClientStartExports,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
+import type { LogStreamSerializedState } from './components/log_stream/types';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -173,10 +176,17 @@ export class Plugin implements InfraClientPluginClass {
       )
     );
 
-    pluginsSetup.embeddable.registerEmbeddableFactory(
-      LOG_STREAM_EMBEDDABLE,
-      new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
-    );
+    pluginsSetup.embeddable.registerReactEmbeddableFactory(LOG_STREAM_EMBEDDABLE, async () => {
+      const { getLogStreamEmbeddableFactory } = await import(
+        './components/log_stream/log_stream_react_embeddable'
+      );
+      const [coreStart, pluginDeps, pluginStart] = await core.getStartServices();
+      return getLogStreamEmbeddableFactory({
+        coreStart,
+        pluginDeps,
+        pluginStart,
+      });
+    });
 
     // Register Locators
     const logsLocator = this.config.featureFlags.logsUIEnabled
@@ -387,6 +397,37 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     const telemetry = this.telemetry.start();
+
+    plugins.uiActions.registerAction<EmbeddableApiContext>({
+      id: ADD_LOG_STREAM_ACTION_ID,
+      getDisplayName: () =>
+        i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
+          defaultMessage: 'Log stream',
+        }),
+      getDisplayNameTooltip: () =>
+        i18n.translate('xpack.infra.logStreamEmbeddable.description', {
+          defaultMessage: 'Add a table of live streaming logs.',
+        }),
+      getIconType: () => 'logsApp',
+      isCompatible: async ({ embeddable }) => {
+        return apiCanAddNewPanel(embeddable);
+      },
+      execute: async ({ embeddable }) => {
+        if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
+        embeddable.addNewPanel<LogStreamSerializedState>(
+          {
+            panelType: LOG_STREAM_EMBEDDABLE,
+            initialState: {
+              title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
+                defaultMessage: 'Log stream',
+              }),
+            },
+          },
+          true
+        );
+      },
+    });
+    plugins.uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_LOG_STREAM_ACTION_ID);
 
     const startContract: InfraClientStartExports = {
       inventoryViews,

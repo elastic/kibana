@@ -8,10 +8,13 @@
 import { BehaviorSubject, combineLatest, distinctUntilChanged, from, map } from 'rxjs';
 
 import type {
+  AnalyticsServiceStart,
   DocLinksStart,
   HttpSetup,
   HttpStart,
+  I18nStart,
   NotificationsStart,
+  ThemeServiceStart,
   Toast,
 } from '@kbn/core/public';
 
@@ -27,6 +30,9 @@ interface StartDeps {
   http: HttpStart;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
 }
 
 const DEFAULT_SECURITY_CHECKUP_STATE = Object.freeze<SecurityCheckupState>({
@@ -63,7 +69,7 @@ export class SecurityCheckupService {
     }
   }
 
-  private initializeAlert({ http, notifications, docLinks }: StartDeps) {
+  private initializeAlert({ http, notifications, ...startServices }: StartDeps) {
     const appState$ = from(this.getSecurityCheckupState(http));
 
     // 10 days is reasonably long enough to call "forever" for a page load.
@@ -81,7 +87,7 @@ export class SecurityCheckupService {
           this.alertToast = notifications.toasts.addWarning(
             {
               title: insecureClusterAlertTitle,
-              text: insecureClusterAlertText(docLinks, (persist: boolean) =>
+              text: insecureClusterAlertText(startServices, (persist: boolean) =>
                 this.setAlertVisibility(false, persist)
               ),
               iconType: 'warning',

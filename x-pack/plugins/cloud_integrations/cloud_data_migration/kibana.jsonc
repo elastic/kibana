@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/cloud-data-migration-plugin",
-  "owner": "@elastic/platform-onboarding",
+  "owner": "@elastic/kibana-management",
   "description": "Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud",
   "plugin": {
     "id": "cloudDataMigration",

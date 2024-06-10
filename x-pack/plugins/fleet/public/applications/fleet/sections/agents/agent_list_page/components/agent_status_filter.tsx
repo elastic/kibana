@@ -16,12 +16,15 @@ import {
   EuiTourStep,
   EuiLink,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { useInactiveAgentsCalloutHasBeenDismissed, useLastSeenInactiveAgentsCount } from '../hooks';
+import { useDismissableTour } from '../../../../../../hooks/use_dismissable_tour';
+
+import { useLastSeenInactiveAgentsCount } from '../hooks';
 
 const statusFilters = [
   {
@@ -122,8 +125,8 @@ export const AgentStatusFilter: React.FC<{
   } = props;
   const [lastSeenInactiveAgentsCount, setLastSeenInactiveAgentsCount] =
     useLastSeenInactiveAgentsCount();
-  const [inactiveAgentsCalloutHasBeenDismissed, setInactiveAgentsCalloutHasBeenDismissed] =
-    useInactiveAgentsCalloutHasBeenDismissed();
+  const { isHidden: inactiveAgentsCalloutHasBeenDismissed, dismiss: dismissInactiveAgentsCallout } =
+    useDismissableTour('INACTIVE_AGENTS');
 
   const newlyInactiveAgentsCount = useMemo(() => {
     const newVal = totalInactiveAgents - lastSeenInactiveAgentsCount;
@@ -159,7 +162,7 @@ export const AgentStatusFilter: React.FC<{
 
   const updateIsStatusFilterOpen = (isOpen: boolean) => {
     if (isOpen && newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed) {
-      setInactiveAgentsCalloutHasBeenDismissed(true);
+      dismissInactiveAgentsCallout();
     }
 
     setIsStatusFilterOpen(isOpen);
@@ -206,7 +209,7 @@ export const AgentStatusFilter: React.FC<{
   return (
     <InactiveAgentsTourStep
       isOpen={newlyInactiveAgentsCount > 0 && !inactiveAgentsCalloutHasBeenDismissed}
-      setInactiveAgentsCalloutHasBeenDismissed={setInactiveAgentsCalloutHasBeenDismissed}
+      setInactiveAgentsCalloutHasBeenDismissed={dismissInactiveAgentsCallout}
     >
       <EuiPopover
         ownFocus

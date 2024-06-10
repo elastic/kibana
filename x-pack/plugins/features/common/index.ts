@@ -18,3 +18,4 @@ export type {
   SubFeaturePrivilegeGroupType,
 } from './sub_feature';
 export { SubFeature } from './sub_feature';
+export type { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';

@@ -38,6 +38,7 @@ if (showHelp) {
         --all-platforms                      {dim Produce archives for all platforms, not just this one}
         --rpm                                {dim Only build the rpm packages}
         --deb                                {dim Only build the deb packages}
+        --serverless                         {dim Only build the serverless packages}
         --docker-images                      {dim Only build the Docker images}
         --docker-context-use-local-artifact  {dim Use a local artifact when building the Docker context}
         --docker-cross-compile               {dim Produce arm64 and amd64 Docker images}

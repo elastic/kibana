@@ -5,18 +5,53 @@
  * 2.0.
  */
 
+import { ResolvedDataView } from '../../../utils/data_view';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { DataView, type FieldSpec } from '@kbn/data-views-plugin/common';
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: TIMESTAMP_FIELD,
+  fields: [
+    {
+      name: 'system.cpu.user.pct',
+      type: 'test',
+      searchable: true,
+      aggregatable: true,
+    },
+    {
+      name: 'system.load.1',
+      type: 'test',
+      searchable: true,
+      aggregatable: true,
+    },
+  ] as Partial<FieldSpec[]>,
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as jest.Mocked<DataView>;
+
+jest.mock('../../../containers/metrics_source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
+  }),
+  useMetricsDataViewContext: () => ({
+    metricsView: {
+      indices: 'metricbeat-*',
+      timeFieldName: mockDataView.timeFieldName,
+      fields: mockDataView.fields,
+      dataViewReference: mockDataView,
+    } as ResolvedDataView,
+    loading: false,
+    error: undefined,
   }),
 }));
 
@@ -25,22 +60,6 @@ describe('ExpressionRow', () => {
     const wrapper = mountWithIntl(
       <ExpressionRow
         canDelete={false}
-        fields={[
-          {
-            name: 'system.cpu.user.pct',
-            type: 'test',
-            searchable: true,
-            aggregatable: true,
-            displayable: true,
-          },
-          {
-            name: 'system.load.1',
-            type: 'test',
-            searchable: true,
-            aggregatable: true,
-            displayable: true,
-          },
-        ]}
         remove={() => {}}
         addExpression={() => {}}
         key={1}
@@ -52,7 +71,6 @@ describe('ExpressionRow', () => {
           timeWindowSize: [],
         }}
         expression={expression}
-        dataView={{ fields: [], title: 'metricbeat-*' }}
       />
     );
 
@@ -70,7 +88,7 @@ describe('ExpressionRow', () => {
   it('should display thresholds as a percentage for pct metrics', async () => {
     const expression = {
       metric: 'system.cpu.user.pct',
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
@@ -89,7 +107,7 @@ describe('ExpressionRow', () => {
   it('should display thresholds as a decimal for all other metrics', async () => {
     const expression = {
       metric: 'system.load.1',
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
@@ -107,7 +125,7 @@ describe('ExpressionRow', () => {
   it('should render a helpText for the of expression', async () => {
     const expression = {
       metric: 'system.load.1',
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',

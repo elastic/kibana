@@ -7,8 +7,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useGetGroupSelectorStateless } from '@kbn/securitysolution-grouping/src/hooks/use_get_group_selector';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { useAlertDataView } from '../../..';
 import { useAlertsGroupingState } from '../contexts/alerts_grouping_context';
 import { AlertsGroupingProps } from '../types';

@@ -11,7 +11,7 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         registeredInstructions: ['first', 'second'],
-        knowledgeBaseInstructions: [],
+        userInstructions: [],
         requestInstructions: [],
         availableFunctionNames: [],
       })
@@ -27,7 +27,7 @@ describe('getSystemMessageFromInstructions', () => {
             return availableFunctionNames[0];
           },
         ],
-        knowledgeBaseInstructions: [],
+        userInstructions: [],
         requestInstructions: [],
         availableFunctionNames: ['myFunction'],
       })
@@ -38,7 +38,7 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         registeredInstructions: ['first'],
-        knowledgeBaseInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
         requestInstructions: [{ doc_id: 'second', text: 'second_request' }],
         availableFunctionNames: [],
       })
@@ -51,7 +51,7 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         registeredInstructions: ['first'],
-        knowledgeBaseInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
         requestInstructions: [],
         availableFunctionNames: [],
       })
@@ -69,7 +69,7 @@ describe('getSystemMessageFromInstructions', () => {
             return undefined;
           },
         ],
-        knowledgeBaseInstructions: [],
+        userInstructions: [],
         requestInstructions: [],
         availableFunctionNames: [],
       })

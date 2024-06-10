@@ -31,6 +31,10 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    * Allows for custom styles to be passed to the EuiFlyout component
    */
   customStyles?: Interpolation<Theme>;
+  /**
+   * Callback function to let application's code the flyout is closed
+   */
+  onClose?: EuiFlyoutProps['onClose'];
 }
 
 /**
@@ -93,7 +97,12 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
       {...flyoutProps}
       size={flyoutWidth}
       ownFocus={false}
-      onClose={closeFlyout}
+      onClose={(e) => {
+        closeFlyout();
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
+      }}
       css={customStyles}
     >
       <EuiFlexGroup

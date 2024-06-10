@@ -106,11 +106,6 @@ export const DurationChartComponent = ({
           <Settings
             xDomain={{ min, max }}
             showLegend
-            // Please double check if the data passed to the chart contains all the buckets, even the empty ones.
-            // the showLegendExtra will display the last element of the data array as the default legend value
-            // and if empty buckets are filtered out you can probably see a value that doesn't correspond
-            // to the value in the last time bucket visualized.
-            // showLegendExtra
             legendPosition={Position.Right}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
@@ -149,7 +144,15 @@ export const DurationChartComponent = ({
             <FormattedMessage
               id="xpack.uptime.durationChart.emptyPrompt.description"
               defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
-              values={{ emphasizedText: <strong>up</strong> }}
+              values={{
+                emphasizedText: (
+                  <strong>
+                    {i18n.translate('xpack.uptime.durationChartComponent.strong.upLabel', {
+                      defaultMessage: 'up',
+                    })}
+                  </strong>
+                ),
+              }}
             />
           }
           title={i18n.translate('xpack.uptime.durationChart.emptyPrompt.title', {

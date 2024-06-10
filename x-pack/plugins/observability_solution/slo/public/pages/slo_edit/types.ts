@@ -23,4 +23,7 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
     timesliceWindow?: string;
   };
   groupBy: string[] | string;
+  settings: {
+    preventInitialBackfill: boolean;
+  };
 }

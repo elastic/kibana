@@ -21,7 +21,7 @@ import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
       options: {
         tags: ['access:elasticAssistant'],
@@ -29,7 +29,7 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(ReadConversationRequestParams),

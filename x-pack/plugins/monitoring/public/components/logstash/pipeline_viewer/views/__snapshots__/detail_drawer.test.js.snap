@@ -30,10 +30,9 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
     <EuiText>
       <div>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="This is a conditional statement in your pipeline."
             id="xpack.monitoring.logstash.pipeline.detailDrawer.conditionalStatementDescription"
-            values={Object {}}
           />
         </p>
         <EuiCodeBlock>
@@ -44,10 +43,9 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
         <EuiSpacer />
       </div>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="There are currently no metrics to show for this if condition."
           id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForIfDescription"
-          values={Object {}}
         />
       </p>
     </EuiText>
@@ -85,7 +83,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
     <EuiText>
       <div>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="This {vertexType} does not have an ID explicitly specified. Specifying an ID allows you to track differences across pipeline changes. You can explicitly specify an ID for this plugin like so:"
             id="xpack.monitoring.logstash.pipeline.detailDrawer.specifyVertexIdDescription"
             values={
@@ -109,10 +107,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             key="events_latency"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Latency"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -158,10 +155,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             key="events_out_rate"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Emitted Rate"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -207,10 +203,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             key="events_in"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Received"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -256,10 +251,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             key="events_out"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Emitted"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -337,7 +331,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
   <EuiFlyoutBody>
     <EuiText>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="This {vertexType}'s ID is {vertexId}."
           id="xpack.monitoring.logstash.pipeline.detailDrawer.vertexIdDescription"
           values={
@@ -356,10 +350,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             key="events_latency"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Latency"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -405,10 +398,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             key="events_out_rate"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Emitted Rate"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -454,10 +446,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             key="events_in"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Received"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -503,10 +494,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             key="events_out"
           >
             <EuiTableRowCell>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Events Emitted"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
-                values={Object {}}
               />
             </EuiTableRowCell>
             <EuiTableRowCell>
@@ -584,17 +574,15 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
   <EuiFlyoutBody>
     <EuiText>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline."
           id="xpack.monitoring.logstash.pipeline.detailDrawer.structureDescription"
-          values={Object {}}
         />
       </p>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="There are currently no metrics to show for the queue."
           id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForQueueDescription"
-          values={Object {}}
         />
       </p>
     </EuiText>

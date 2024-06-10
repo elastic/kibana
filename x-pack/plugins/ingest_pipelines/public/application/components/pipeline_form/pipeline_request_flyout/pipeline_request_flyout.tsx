@@ -44,7 +44,7 @@ export const PipelineRequestFlyout: FunctionComponent<Props> = ({
 
   const title = name
     ? i18n.translate('xpack.ingestPipelines.requestFlyout.namedTitle', {
-        defaultMessage: "Request for '{name}'",
+        defaultMessage: "Request for ''{name}''",
         values: { name },
       })
     : i18n.translate('xpack.ingestPipelines.requestFlyout.unnamedTitle', {

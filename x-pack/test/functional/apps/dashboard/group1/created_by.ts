@@ -76,6 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, {
+        saveAsNew: true,
         waitDialogIsClosed: false,
         exitFromEditMode: false,
       });

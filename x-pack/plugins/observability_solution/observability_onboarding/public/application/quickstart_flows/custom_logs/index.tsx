@@ -23,14 +23,7 @@ interface WizardState {
   logFilePaths: string[];
   namespace: string;
   customConfigurations: string;
-  logsType?:
-    | 'system'
-    | 'sys'
-    | 'http-endpoint'
-    | 'opentelemetry'
-    | 'amazon-firehose'
-    | 'log-file'
-    | 'service';
+  logsType?: 'system' | 'sys' | 'http-endpoint' | 'opentelemetry' | 'log-file' | 'service';
   uploadType?: 'log-file' | 'api-key';
   elasticAgentPlatform: 'linux-tar' | 'macos' | 'windows' | 'deb' | 'rpm';
   autoDownloadConfig: boolean;

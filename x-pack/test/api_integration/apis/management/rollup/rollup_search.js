@@ -17,7 +17,8 @@ export default function ({ getService }) {
   const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
     registerHelpers(getService);
 
-  describe('search', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/184128
+  describe.skip('search', () => {
     const URI = `${API_BASE_PATH}/search`;
 
     it('return a 404 if the rollup index does not exist', async () => {

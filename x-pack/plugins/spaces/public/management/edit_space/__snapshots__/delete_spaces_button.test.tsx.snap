@@ -7,10 +7,9 @@ exports[`DeleteSpacesButton renders as expected 1`] = `
     color="danger"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete space"
       id="xpack.spaces.management.deleteSpacesButton.deleteSpaceButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </Fragment>

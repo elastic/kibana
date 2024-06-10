@@ -68,6 +68,8 @@ describe('setupFleet', () => {
     soClient.get.mockResolvedValue({ attributes: {} } as any);
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
     soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
+    soClient.create.mockResolvedValue({ attributes: {} } as any);
+    soClient.delete.mockResolvedValue({});
   });
 
   afterEach(async () => {
@@ -133,5 +135,60 @@ describe('setupFleet', () => {
         },
       ],
     });
+  });
+
+  it('should create and delete lock if not exists', async () => {
+    soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
+
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: true,
+      nonFatalErrors: [],
+    });
+    expect(soClient.create).toHaveBeenCalledWith('fleet-setup-lock', expect.anything(), {
+      id: 'fleet-setup-lock',
+    });
+    expect(soClient.delete).toHaveBeenCalledWith('fleet-setup-lock', 'fleet-setup-lock', {
+      refresh: true,
+    });
+  });
+
+  it('should return not initialized if lock exists', async () => {
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: false,
+      nonFatalErrors: [],
+    });
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('should return not initialized if lock could not be created', async () => {
+    soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
+    soClient.create.mockRejectedValue({ isBoom: true, output: { statusCode: 409 } } as any);
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: false,
+      nonFatalErrors: [],
+    });
+    expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('should delete previous lock if created more than 1 hour ago', async () => {
+    soClient.get.mockResolvedValue({
+      attributes: { started_at: new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString() },
+    } as any);
+
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: true,
+      nonFatalErrors: [],
+    });
+    expect(soClient.create).toHaveBeenCalled();
+    expect(soClient.delete).toHaveBeenCalledTimes(2);
   });
 });

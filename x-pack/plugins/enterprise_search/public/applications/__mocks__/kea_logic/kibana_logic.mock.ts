@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -38,6 +40,7 @@ export const mockKibanaValues = {
   consolePlugin: null,
   data: dataPluginMock.createStartContract(),
   esConfig: { elasticsearch_host: 'https://your_deployment_url' },
+  getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: null,
@@ -69,6 +72,7 @@ export const mockKibanaValues = {
   share: sharePluginMock.createStartContract(),
   ml: mlPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  updateSideNavDefinition: jest.fn(),
   user: null,
 };
 

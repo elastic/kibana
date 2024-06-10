@@ -15,11 +15,9 @@ const getTabsOnHostsUrl = (tabName: HostsTableType) => `${HOSTS_PATH}/${tabName}
 
 export const navTabsHosts = ({
   hasMlUserPermissions,
-  isRiskyHostsEnabled,
   isEnterprise,
 }: {
   hasMlUserPermissions: boolean;
-  isRiskyHostsEnabled: boolean;
   isEnterprise?: boolean;
 }): HostsNavTab => {
   const hiddenTabs = [];
@@ -65,10 +63,6 @@ export const navTabsHosts = ({
 
   if (!hasMlUserPermissions) {
     hiddenTabs.push(HostsTableType.anomalies);
-  }
-
-  if (!isRiskyHostsEnabled) {
-    hiddenTabs.push(HostsTableType.risk);
   }
 
   if (!isEnterprise) {

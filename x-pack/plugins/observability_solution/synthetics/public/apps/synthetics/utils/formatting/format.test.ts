@@ -15,6 +15,10 @@ describe('formatDuration', () => {
     expect(formatDuration(921_039)).toBe('921 ms');
   });
 
+  it('returns milliseconds with no spaces on noSpace: true', () => {
+    expect(formatDuration(921_039, { noSpace: true })).toBe('921ms');
+  });
+
   it('returns s string for seconds', () => {
     expect(formatDuration(1_032_100)).toBe('1 s');
   });

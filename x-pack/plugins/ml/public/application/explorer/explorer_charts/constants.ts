@@ -6,3 +6,4 @@
  */
 
 export const TRANSPARENT_BACKGROUND = 'rgba(0, 0, 0, 0)';
+export const CHART_HEIGHT = 170;

@@ -38,7 +38,7 @@ export const registerResolverRoutes = (
       validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree(getRuleRegistry, config, getLicensing)
+    handleTree(getRuleRegistry, getLicensing)
   );
 
   router.post(

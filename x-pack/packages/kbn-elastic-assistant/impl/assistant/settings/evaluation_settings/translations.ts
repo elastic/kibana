@@ -211,7 +211,10 @@ export const APM_URL_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.apmUrlDescription',
   {
     defaultMessage:
-      'URL for the Kibana APM app. Used to link to APM traces for evaluation results. Defaults to "$\\{basePath\\}/app/apm"',
+      'URL for the Kibana APM app. Used to link to APM traces for evaluation results. Defaults to "{defaultUrlPath}"',
+    values: {
+      defaultUrlPath: '${basePath}/app/apm',
+    },
   }
 );
 

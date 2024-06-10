@@ -319,9 +319,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/172941
-    // FLAKY: https://github.com/elastic/kibana/issues/173008
-    describe.skip('Edit rule button', function () {
+    describe('Edit rule button', function () {
       const ruleName = uuidv4();
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
 

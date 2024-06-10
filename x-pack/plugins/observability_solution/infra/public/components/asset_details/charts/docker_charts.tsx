@@ -73,8 +73,9 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
         <ChartsGrid columns={2}>
           {charts.map((chart) => (
             <Chart
+              id={chart.id}
               key={chart.id}
-              {...chart}
+              lensAttributes={chart}
               assetId={assetId}
               dateRange={dateRange}
               queryField={findInventoryFields('container').id}

@@ -130,6 +130,14 @@ describe('GettingStartedPage', () => {
       <GettingStartedPage />,
       {
         state: {
+          syntheticsEnablement: {
+            loading: false,
+            enablement: {
+              canEnable: true,
+              isEnabled: true,
+              isServiceAllowed: true,
+            },
+          },
           serviceLocations: {
             locations: [],
             locationsLoaded: true,

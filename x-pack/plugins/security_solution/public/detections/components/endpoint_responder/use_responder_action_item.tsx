@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
 import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -32,15 +33,20 @@ export const useResponderActionItem = (
     [eventDetailsData]
   );
 
-  const agentType: ResponseActionAgentType = useMemo(
-    () =>
-      eventDetailsData
-        ? isAlertFromSentinelOneEvent({ data: eventDetailsData })
-          ? 'sentinel_one'
-          : 'endpoint'
-        : 'endpoint',
-    [eventDetailsData]
-  );
+  const agentType: ResponseActionAgentType = useMemo(() => {
+    if (!eventDetailsData) {
+      return 'endpoint';
+    }
+
+    if (isAlertFromSentinelOneEvent({ data: eventDetailsData })) {
+      return 'sentinel_one';
+    }
+    if (isAlertFromCrowdstrikeEvent({ data: eventDetailsData })) {
+      return 'crowdstrike';
+    }
+
+    return 'endpoint';
+  }, [eventDetailsData]);
 
   const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
     endpointId,

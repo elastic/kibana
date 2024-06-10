@@ -20,21 +20,38 @@ export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  async function getTelemetryStats(payload: {
-    unencrypted: true;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
-  async function getTelemetryStats(payload: {
-    unencrypted: false;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: string }>>;
-  async function getTelemetryStats(payload: {
-    unencrypted?: boolean;
-    refreshCache?: boolean;
-  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
+  async function getTelemetryStats(
+    payload: {
+      unencrypted: true;
+      refreshCache?: boolean;
+    },
+    options?: { authHeader: Record<string, string> }
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
+  async function getTelemetryStats(
+    payload: {
+      unencrypted: false;
+      refreshCache?: boolean;
+    },
+    options?: { authHeader: Record<string, string> }
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
+  async function getTelemetryStats(
+    payload: {
+      unencrypted: false;
+      refreshCache?: boolean;
+    },
+    options?: { authHeader: Record<string, string> }
+  ): Promise<Array<{ clusterUuid: string; stats: string }>>;
+  async function getTelemetryStats(
+    payload: {
+      unencrypted?: boolean;
+      refreshCache?: boolean;
+    },
+    options?: { authHeader: Record<string, string> }
+  ): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
     const { body } = await supertest
       .post('/internal/telemetry/clusters/_stats')
       .set('kbn-xsrf', 'xxx')
+      .set(options?.authHeader ?? {})
       .set(ELASTIC_HTTP_VERSION_HEADER, '2')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ refreshCache: true, ...payload })

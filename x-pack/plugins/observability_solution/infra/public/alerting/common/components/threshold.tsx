@@ -10,7 +10,7 @@ import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
   theme?: PartialTheme;
@@ -19,22 +19,27 @@ export interface ChartProps {
 
 export interface Props {
   chartProps: ChartProps;
-  comparator: Comparator | string;
+  comparator: COMPARATORS | string;
   id: string;
-  threshold: number;
+  thresholds: number[];
   title: string;
   value: number;
   valueFormatter: (d: number) => string;
+  warning?: {
+    thresholds: number[];
+    comparator: COMPARATORS;
+  };
 }
 
 export const Threshold = ({
   chartProps: { theme, baseTheme },
   comparator,
   id,
-  threshold,
+  thresholds,
   title,
   value,
   valueFormatter,
+  warning,
 }: Props) => {
   const color = useEuiBackgroundColor('danger');
 
@@ -48,7 +53,7 @@ export const Threshold = ({
         minWidth: '100%',
       }}
       hasShadow={false}
-      data-test-subj={`threshold-${threshold}-${value}`}
+      data-test-subj={`threshold-${thresholds.join('-')}-${value}`}
     >
       <Chart>
         <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
@@ -59,12 +64,24 @@ export const Threshold = ({
               {
                 title,
                 extra: (
-                  <span>
+                  <>
                     {i18n.translate('xpack.infra.alerting.thresholdExtraTitle', {
-                      values: { comparator, threshold: valueFormatter(threshold) },
+                      values: {
+                        comparator,
+                        threshold: thresholds.map((t) => valueFormatter(t)).join(' - '),
+                      },
                       defaultMessage: `Alert when {comparator} {threshold}`,
                     })}
-                  </span>
+                    <br />
+                    {warning &&
+                      i18n.translate('xpack.infra.alerting.warningExtraTitle', {
+                        values: {
+                          comparator: warning.comparator,
+                          threshold: warning.thresholds.map((t) => valueFormatter(t)).join(' - '),
+                        },
+                        defaultMessage: `Warn when {comparator} {threshold}`,
+                      })}
+                  </>
                 ),
                 color,
                 value,

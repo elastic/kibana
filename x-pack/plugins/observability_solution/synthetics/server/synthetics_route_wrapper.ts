@@ -95,6 +95,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           });
         }
       }
+      server.logger.error(e);
       throw e;
     }
   },

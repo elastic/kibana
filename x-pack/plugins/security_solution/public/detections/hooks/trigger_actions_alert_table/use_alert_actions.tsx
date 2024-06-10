@@ -10,7 +10,7 @@ import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

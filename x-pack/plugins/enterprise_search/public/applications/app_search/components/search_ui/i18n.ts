@@ -61,6 +61,6 @@ export const GENERATE_PREVIEW_BUTTON_LABEL = i18n.translate(
 export const NO_SEARCH_KEY_ERROR = (engineName: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.engine.searchUI.noSearchKeyErrorMessage', {
     defaultMessage:
-      "It looks like you don't have any Public Search Keys with access to the '{engineName}' engine. Please visit the {credentialsTitle} page to set one up.",
+      "It looks like you don't have any Public Search Keys with access to the ''{engineName}'' engine. Please visit the {credentialsTitle} page to set one up.",
     values: { engineName, credentialsTitle: CREDENTIALS_TITLE },
   });

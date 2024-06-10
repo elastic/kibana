@@ -27,8 +27,9 @@ import { useLocation } from 'react-router-dom';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
-import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;

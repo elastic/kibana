@@ -30,7 +30,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
@@ -194,10 +194,39 @@ class AppContextService {
     });
   }
 
-  public getInternalUserSOClient(request: KibanaRequest) {
+  public getInternalUserSOClient(request?: KibanaRequest) {
+    if (!request) {
+      request = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: { href: {} },
+        raw: { req: { url: '/' } },
+        isFakeRequest: true,
+      } as unknown as KibanaRequest;
+    }
+
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+  }
+
+  public getInternalUserSOClientWithoutSpaceExtension() {
+    const fakeRequest = {
+      headers: {},
+      getBasePath: () => '',
+      path: '/',
+      route: { settings: {} },
+      url: { href: {} },
+      raw: { req: { url: '/' } },
+      isFakeRequest: true,
+    } as unknown as KibanaRequest;
+
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getScopedClient(fakeRequest, {
+      excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
     });
   }
 

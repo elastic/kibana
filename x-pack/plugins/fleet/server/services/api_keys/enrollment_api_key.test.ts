@@ -78,6 +78,40 @@ describe('enrollment api keys', () => {
           'User creating enrollment API key [name=test-api-key (mock-uuid)] [policy_id=test-agent-policy]',
       });
     });
+
+    it('should set namespaces if agent policy specify a space ID', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.create.mockResolvedValue({
+        _id: 'test-enrollment-api-key-id',
+      } as any);
+
+      esClient.security.createApiKey.mockResolvedValue({
+        api_key: 'test-api-key-value',
+        id: 'test-api-key-id',
+      } as any);
+
+      mockedAgentPolicyService.get.mockResolvedValue({
+        id: 'test-agent-policy',
+        space_id: 'test123',
+      } as any);
+
+      await generateEnrollmentAPIKey(soClient, esClient, {
+        name: 'test-api-key',
+        expiration: '7d',
+        agentPolicyId: 'test-agent-policy',
+        forceRecreate: true,
+      });
+
+      expect(esClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            namespaces: ['test123'],
+          }),
+        })
+      );
+    });
   });
 
   describe('deleteEnrollmentApiKey', () => {

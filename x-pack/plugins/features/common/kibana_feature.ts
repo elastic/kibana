@@ -142,6 +142,13 @@ export interface KibanaFeatureConfig {
     description: string;
     privileges: readonly ReservedKibanaPrivilege[];
   };
+
+  /**
+   * Indicates whether the feature is available as a standalone feature. The feature can still be
+   * referenced by other features, but it will not be displayed in any feature management UIs. By default, all features
+   * are visible.
+   */
+  hidden?: boolean;
 }
 
 export class KibanaFeature {
@@ -155,6 +162,10 @@ export class KibanaFeature {
 
   public get id() {
     return this.config.id;
+  }
+
+  public get hidden() {
+    return this.config.hidden;
   }
 
   public get name() {

@@ -7,6 +7,7 @@
 
 import { chartData as mockChartData } from './__mocks__/mock_chart_data_rare';
 import seriesConfig from './__mocks__/mock_series_config_rare.json';
+import { BehaviorSubject } from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,9 +21,7 @@ const utilityProps = {
   timeBuckets: timeBucketsMock,
   chartTheme: kibanaContextMock.services.charts.theme.useChartsBaseTheme(),
   onPointerUpdate: jest.fn(),
-  cursor: {
-    x: 10432423,
-  },
+  cursor$: new BehaviorSubject({ isDataHistorgram: true, cursor: { x: 10432423 } }),
 };
 
 describe('ExplorerChart', () => {

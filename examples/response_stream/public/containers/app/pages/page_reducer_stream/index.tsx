@@ -9,16 +9,6 @@
 import React, { useEffect, useState, FC } from 'react';
 
 import {
-  Chart,
-  Settings,
-  Axis,
-  BarSeries,
-  Position,
-  ScaleType,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
-
-import {
   EuiBadge,
   EuiButton,
   EuiCheckbox,
@@ -31,8 +21,8 @@ import {
 
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 
+import { getInitialState } from '../../../../../common/api/stream_state';
 import {
-  initialState,
   resetStream,
   reducerStreamReducer,
 } from '../../../../../common/api/reducer_stream/reducer';
@@ -42,7 +32,10 @@ import { Page } from '../../../../components/page';
 
 import { useDeps } from '../../../../hooks/use_deps';
 
-import { getStatusMessage } from './get_status_message';
+import { BarChartRace } from '../../components/bar_chart_race';
+import { getStatusMessage } from '../../components/get_status_message';
+
+const initialState = getInitialState();
 
 export const PageReducerStream: FC = () => {
   const {
@@ -72,8 +65,12 @@ export const PageReducerStream: FC = () => {
     }
   };
 
-  // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
-  // This is for low level errors on the stream/HTTP level.
+  // TODO This needs to be adapted as it might miss when error messages arrive
+  // in bulk, but it should be good enough for this demo. This is for low level
+  // errors on the HTTP level.Note this will only surface errors that happen for
+  // the original request. Once the stream returns data, it will not be able to
+  // return errors. This is why we need separate error handling for application
+  // level errors.
   useEffect(() => {
     if (errors.length > 0) {
       notifications.toasts.addDanger(errors[errors.length - 1]);
@@ -91,27 +88,33 @@ export const PageReducerStream: FC = () => {
   const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
   return (
-    <Page title={'Reducer stream'}>
+    <Page title={'NDJSON useReducer stream'}>
       <EuiText>
         <p>
-          This demonstrates a single endpoint with streaming support that sends Redux inspired
-          actions from server to client. The server and client share types of the data to be
-          received. The client uses a custom hook that receives stream chunks and passes them on to
-          `useReducer()` that acts on the Redux type actions it receives. The custom hook includes
-          code to buffer actions and is able to apply them in bulk so the DOM does not get hammered
-          with updates. Hit &quot;Start development&quot; to trigger the bar chart race!
+          This demonstrates a single endpoint with streaming support that sends old school Redux
+          inspired actions from server to client. The server and client share types of the data to
+          be received. The client uses a custom hook that receives stream chunks and passes them on
+          to `useReducer()` that acts on the actions it receives. The custom hook includes code to
+          buffer actions and is able to apply them in bulk so the DOM does not get hammered with
+          updates. Hit &quot;Start development&quot; to trigger the bar chart race!
         </p>
       </EuiText>
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton
+            data-test-subj="responseStreamStartButton"
+            color="primary"
+            size="s"
+            onClick={onClickHandler}
+            aria-label={buttonLabel}
+          >
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
-            <EuiBadge>{progress}%</EuiBadge>
+            <EuiBadge data-test-subj="responseStreamProgressBadge">{progress}%</EuiBadge>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -119,35 +122,11 @@ export const PageReducerStream: FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <div style={{ height: '300px' }}>
-        <Chart>
-          <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
-            rotation={90}
-          />
-          <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />
-          <Axis id="left2" title="Developers" position={Position.Left} />
-
-          <BarSeries
-            id="commits"
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            data={Object.entries(entities)
-              .map(([x, y]) => {
-                return {
-                  x,
-                  y,
-                };
-              })
-              .sort((a, b) => b.y - a.y)}
-          />
-        </Chart>
-      </div>
+      <BarChartRace entities={entities} />
       <EuiText>
-        <p>{getStatusMessage(isRunning, isCancelled, data.progress)}</p>
+        <p data-test-subj="responseStreamStatusMessage">
+          {getStatusMessage(isRunning, isCancelled, progress)}
+        </p>
         <EuiCheckbox
           id="responseStreamSimulateErrorsCheckbox"
           label="Simulate errors (gets applied to new streams only, not currently running ones)."

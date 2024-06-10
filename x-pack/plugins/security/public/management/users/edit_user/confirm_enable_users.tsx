@@ -35,7 +35,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         await new UserAPIClient(services.http!).enableUser(username);
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.confirmEnableUsers.successMessage', {
-            defaultMessage: "Activated user '{username}'",
+            defaultMessage: "Activated user ''{username}''",
             values: { username },
           })
         );
@@ -43,7 +43,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
       } catch (error) {
         services.notifications!.toasts.addDanger({
           title: i18n.translate('xpack.security.management.users.confirmEnableUsers.errorMessage', {
-            defaultMessage: "Could not activate user '{username}'",
+            defaultMessage: "Could not activate user ''{username}''",
             values: { username },
           }),
           text: (error as any).body?.message || error.message,
@@ -56,7 +56,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
     <EuiConfirmModal
       role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmEnableUsers.title', {
-        defaultMessage: "Activate {count, plural, one{user '{username}'} other{{count} users}}?",
+        defaultMessage: "Activate {count, plural, one{user ''{username}''} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}

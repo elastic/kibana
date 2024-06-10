@@ -24,7 +24,7 @@ import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientData, ESConfig } from '../plugin';
+import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
@@ -46,11 +46,13 @@ export const renderApp = (
     core,
     plugins,
     isSidebarEnabled = true,
+    updateSideNavDefinition,
   }: {
     core: CoreStart;
     isSidebarEnabled: boolean;
     params: AppMountParameters;
     plugins: PluginsStart;
+    updateSideNavDefinition: UpdateSideNavDefinitionFn;
   },
   { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
@@ -124,6 +126,7 @@ export const renderApp = (
     console: plugins.console,
     data: plugins.data,
     esConfig,
+    getChromeStyle$: chrome.getChromeStyle$,
     guidedOnboarding,
     history,
     indexMappingComponent,
@@ -144,6 +147,7 @@ export const renderApp = (
     setDocTitle: chrome.docTitle.change,
     share,
     uiSettings,
+    updateSideNavDefinition,
     user,
   });
   const unmountLicensingLogic = mountLicensingLogic({

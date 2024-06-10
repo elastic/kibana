@@ -36,6 +36,10 @@ export function registerBatchReindexIndicesRoutes(
   router.get(
     {
       path: `${BASE_PATH}/batch/queue`,
+      options: {
+        access: 'public',
+        summary: `Get the batch reindex queue`,
+      },
       validate: {},
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
@@ -71,6 +75,10 @@ export function registerBatchReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/batch`,
+      options: {
+        access: 'public',
+        summary: `Batch start or resume reindex`,
+      },
       validate: {
         body: schema.object({
           indexNames: schema.arrayOf(schema.string()),

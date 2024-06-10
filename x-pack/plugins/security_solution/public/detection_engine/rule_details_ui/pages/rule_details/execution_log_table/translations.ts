@@ -55,6 +55,13 @@ export const RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH = i18n.translate(
   }
 );
 
+export const RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.showSourceEventTimeRangeSwitchTitle',
+  {
+    defaultMessage: 'Show source event time range',
+  }
+);
+
 export const COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.statusColumn',
   {
@@ -66,6 +73,27 @@ export const COLUMN_STATUS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.statusColumnTooltip',
   {
     defaultMessage: 'Overall status of execution.',
+  }
+);
+
+export const COLUMN_TYPE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.type',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const COLUMN_SOURCE_EVENT_TIME_RANGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.sourceEventTimeRange',
+  {
+    defaultMessage: 'Source event time range',
+  }
+);
+
+export const COLUMN_SOURCE_EVENT_TIME_RANGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.sourceEventTimeRangeTooltip',
+  {
+    defaultMessage: "Only for manual rule runs. Don't include additional lookback time.",
   }
 );
 

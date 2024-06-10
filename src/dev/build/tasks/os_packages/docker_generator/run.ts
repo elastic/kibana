@@ -64,7 +64,9 @@ export async function runDockerGenerator(
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactPrefix = `kibana-${version}-linux`;
+  let artifactVariant = '';
+  if (flags.serverless) artifactVariant = '-serverless';
+  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;

@@ -40,19 +40,12 @@ export const getEnvAuth = (role: SecurityRoleName): User => {
   return user;
 };
 
-export const getDefaultUserName = (): string => {
-  if (Cypress.env(IS_SERVERLESS)) {
-    return Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
-  }
-  return defaultUser.username;
-};
-
 export const login = (role?: SecurityRoleName): void => {
   let testRole = '';
 
   if (Cypress.env(IS_SERVERLESS)) {
     if (!role) {
-      testRole = Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
+      testRole = 'platform_engineer';
     } else {
       testRole = role;
     }

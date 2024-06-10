@@ -56,7 +56,7 @@ export function NavControl({}: {}) {
           })
         : undefined;
     },
-    [service, hasBeenOpened]
+    [service, hasBeenOpened, notifications.toasts]
   );
 
   const [isOpen, setIsOpen] = useState(false);

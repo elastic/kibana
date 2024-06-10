@@ -15,6 +15,7 @@ import {
   getSLOSummaryPipelineId,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '@kbn/slo-plugin/common/constants';
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 interface ExpectedTransforms {
@@ -50,6 +51,8 @@ export default function ({ getService }: FtrProviderContext) {
   const sloApi = getService('sloApi');
   const kibanaServer = getService('kibanaServer');
   const transform = getService('transform');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('create_slo', () => {
     // DATE_VIEW should match the index template:
@@ -57,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
       infraDataIndex = await generate({
@@ -70,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: DATE_VIEW,
       });
       await kibanaServer.savedObjects.cleanStandardList();
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     after(async () => {
@@ -78,57 +83,57 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await supertest
         .delete('/api/observability/slos/my-custom-id1')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await supertest
         .delete('/api/observability/slos/my-custom-id2')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await supertest
         .delete('/api/observability/slos/my-custom-id3')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await supertest
         .delete('/api/observability/slos/my-custom-id4')
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await esDeleteAllIndices([infraDataIndex]);
       await cleanup({ esClient, logger });
       await kibanaServer.savedObjects.clean({ types: [SO_SLO_TYPE] });
       await transform.api.cleanTransformIndices();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('non partition by SLO', () => {
       const sloId = 'my-custom-id1';
 
       before(async () => {
-        await sloApi.create({
-          id: sloId,
-          name: 'my custom name',
-          description: 'my custom description',
-          indicator: {
-            type: 'sli.kql.custom',
-            params: {
-              index: infraDataIndex,
-              good: 'system.cpu.total.norm.pct > 1',
-              total: 'system.cpu.total.norm.pct: *',
-              timestampField: '@timestamp',
+        await sloApi.create(
+          {
+            id: sloId,
+            name: 'my custom name',
+            description: 'my custom description',
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: infraDataIndex,
+                good: 'system.cpu.total.norm.pct > 1',
+                total: 'system.cpu.total.norm.pct: *',
+                timestampField: '@timestamp',
+              },
             },
+            timeWindow: {
+              duration: '7d',
+              type: 'rolling',
+            },
+            budgetingMethod: 'occurrences',
+            objective: {
+              target: 0.999,
+            },
+            groupBy: ALL_VALUE,
           },
-          timeWindow: {
-            duration: '7d',
-            type: 'rolling',
-          },
-          budgetingMethod: 'occurrences',
-          objective: {
-            target: 0.999,
-          },
-          groupBy: ALL_VALUE,
-        });
+          roleAuthc
+        );
       });
 
       it('saves the SLO definition', async () => {
@@ -158,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .set('x-elastic-internal-origin', 'foo')
           .set('elastic-api-version', '1')
+          .set(roleAuthc.apiKeyHeader)
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
         assertTransformsResponseBody(body, expectedTransforms);
@@ -182,7 +188,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('finds the created SLO', async () => {
-        const createdSlo = await sloApi.waitForSloCreated({ sloId });
+        const createdSlo = await sloApi.waitForSloCreated({
+          sloId,
+          roleAuthc,
+        });
         expect(createdSlo.id).to.be(sloId);
         expect(createdSlo.groupBy).to.be(ALL_VALUE);
       });
@@ -191,32 +200,38 @@ export default function ({ getService }: FtrProviderContext) {
     describe('SLO with long description', () => {
       it('creates an SLO with description over 256 characters', async () => {
         const sloId = 'my-custom-id2';
-        await sloApi.create({
-          id: sloId,
-          name: 'my super long SLO name and description',
-          description:
-            'Lorem Ipsum has been the industry standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ',
-          indicator: {
-            type: 'sli.kql.custom',
-            params: {
-              index: infraDataIndex,
-              good: 'system.cpu.total.norm.pct > 1',
-              total: 'system.cpu.total.norm.pct: *',
-              timestampField: '@timestamp',
+        await sloApi.create(
+          {
+            id: sloId,
+            name: 'my super long SLO name and description',
+            description:
+              'Lorem Ipsum has been the industry standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ',
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: infraDataIndex,
+                good: 'system.cpu.total.norm.pct > 1',
+                total: 'system.cpu.total.norm.pct: *',
+                timestampField: '@timestamp',
+              },
             },
+            timeWindow: {
+              duration: '7d',
+              type: 'rolling',
+            },
+            budgetingMethod: 'occurrences',
+            objective: {
+              target: 0.999,
+            },
+            groupBy: '*',
           },
-          timeWindow: {
-            duration: '7d',
-            type: 'rolling',
-          },
-          budgetingMethod: 'occurrences',
-          objective: {
-            target: 0.999,
-          },
-          groupBy: '*',
-        });
+          roleAuthc
+        );
 
-        const createdSlo = await sloApi.waitForSloCreated({ sloId });
+        const createdSlo = await sloApi.waitForSloCreated({
+          sloId,
+          roleAuthc,
+        });
         expect(createdSlo.id).to.be(sloId);
       });
     });
@@ -224,31 +239,37 @@ export default function ({ getService }: FtrProviderContext) {
     describe('SLO with special characters in the description', () => {
       it("creates an SLO that has ' character in the description", async () => {
         const sloId = 'my-custom-id3';
-        await sloApi.create({
-          id: sloId,
-          name: 'my SLO with weird characters in the description',
-          description:
-            "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.",
-          indicator: {
-            type: 'sli.kql.custom',
-            params: {
-              index: infraDataIndex,
-              good: 'system.cpu.total.norm.pct > 1',
-              total: 'system.cpu.total.norm.pct: *',
-              timestampField: '@timestamp',
+        await sloApi.create(
+          {
+            id: sloId,
+            name: 'my SLO with weird characters in the description',
+            description:
+              "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.",
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: infraDataIndex,
+                good: 'system.cpu.total.norm.pct > 1',
+                total: 'system.cpu.total.norm.pct: *',
+                timestampField: '@timestamp',
+              },
             },
+            timeWindow: {
+              duration: '7d',
+              type: 'rolling',
+            },
+            budgetingMethod: 'occurrences',
+            objective: {
+              target: 0.999,
+            },
+            groupBy: '*',
           },
-          timeWindow: {
-            duration: '7d',
-            type: 'rolling',
-          },
-          budgetingMethod: 'occurrences',
-          objective: {
-            target: 0.999,
-          },
-          groupBy: '*',
+          roleAuthc
+        );
+        const createdSlo = await sloApi.waitForSloCreated({
+          sloId,
+          roleAuthc,
         });
-        const createdSlo = await sloApi.waitForSloCreated({ sloId });
         expect(createdSlo.id).to.be(sloId);
       });
     });
@@ -256,30 +277,36 @@ export default function ({ getService }: FtrProviderContext) {
     describe('partition by SLO', () => {
       it('creates a partition by SLO', async () => {
         const sloId = 'my-custom-id4';
-        await sloApi.create({
-          id: sloId,
-          name: 'Group by SLO',
-          description: 'This is a group by SLO.',
-          indicator: {
-            type: 'sli.kql.custom',
-            params: {
-              index: infraDataIndex,
-              good: 'system.cpu.total.norm.pct > 1',
-              total: 'system.cpu.total.norm.pct: *',
-              timestampField: '@timestamp',
+        await sloApi.create(
+          {
+            id: sloId,
+            name: 'Group by SLO',
+            description: 'This is a group by SLO.',
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: infraDataIndex,
+                good: 'system.cpu.total.norm.pct > 1',
+                total: 'system.cpu.total.norm.pct: *',
+                timestampField: '@timestamp',
+              },
             },
+            timeWindow: {
+              duration: '7d',
+              type: 'rolling',
+            },
+            budgetingMethod: 'occurrences',
+            objective: {
+              target: 0.999,
+            },
+            groupBy: 'host.name',
           },
-          timeWindow: {
-            duration: '7d',
-            type: 'rolling',
-          },
-          budgetingMethod: 'occurrences',
-          objective: {
-            target: 0.999,
-          },
-          groupBy: 'host.name',
+          roleAuthc
+        );
+        const createdSlo = await sloApi.waitForSloCreated({
+          sloId,
+          roleAuthc,
         });
-        const createdSlo = await sloApi.waitForSloCreated({ sloId });
         expect(createdSlo.id).to.be(sloId);
         expect(createdSlo.groupBy).not.to.be(ALL_VALUE);
         expect(createdSlo.groupBy).to.be('host.name');
@@ -320,6 +347,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .set('x-elastic-internal-origin', 'foo')
           .set('elastic-api-version', '1')
+          .set(roleAuthc.apiKeyHeader)
           .send();
         transform.api.assertResponseStatusCode(200, status, body);
         assertTransformsResponseBody(body, expectedTransforms);

@@ -95,7 +95,6 @@ export const LatestVulnerabilitiesContainer = () => {
         <LatestVulnerabilitiesTable
           groupSelectorComponent={groupSelectorComponent}
           nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
-          height={DEFAULT_GROUPING_TABLE_HEIGHT}
         />
       );
     }

@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListSearchBar as Component } from './slo_list_search_bar';
 
 export default {

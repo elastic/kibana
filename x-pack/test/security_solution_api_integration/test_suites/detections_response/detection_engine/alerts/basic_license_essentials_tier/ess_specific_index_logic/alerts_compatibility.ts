@@ -345,6 +345,9 @@ export default ({ getService }: FtrProviderContext) => {
             version: 1,
             exceptions_list: [],
             immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
             type: 'query',
             language: 'kuery',
             index: ['.siem-signals-*'],
@@ -508,6 +511,9 @@ export default ({ getService }: FtrProviderContext) => {
             version: 1,
             exceptions_list: [],
             immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
             type: 'query',
             language: 'kuery',
             index: ['.alerts-security.alerts-default'],

@@ -6,30 +6,44 @@
  * Side Public License, v 1.
  */
 
-import {
-  apiHasParentApi,
-  apiHasUniqueId,
-  PublishesViewMode,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiHasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
-import { PublishesSettings } from './publishes_settings';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
   initialState?: SerializedState;
 }
 
-export interface PresentationContainer
-  extends Partial<PublishesViewMode & PublishesSettings>,
-    CanAddNewPanel {
+export interface PresentationContainer extends CanAddNewPanel {
+  /**
+   * Removes a panel from the container.
+   */
   removePanel: (panelId: string) => void;
+
+  /**
+   * Determines whether or not a container is capable of removing panels.
+   */
   canRemovePanels?: () => boolean;
+
+  /**
+   * Replaces a panel in the container with a new panel.
+   */
   replacePanel: <SerializedState extends object = object>(
     idToRemove: string,
     newPanel: PanelPackage<SerializedState>
   ) => Promise<string>;
 
+  /**
+   * Returns the number of panels in the container.
+   */
+  getPanelCount: () => number;
+
+  /**
+   * A publishing subject containing the child APIs of the container. Note that
+   * children are created asynchronously. This means that the children$ observable might
+   * contain fewer children than the actual number of panels in the container.
+   */
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 
@@ -79,4 +93,35 @@ export const listenForCompatibleApi = <ApiType extends unknown>(
     subscription.unsubscribe();
     lastCleanupFunction?.();
   };
+};
+
+export const combineCompatibleChildrenApis = <ApiType extends unknown, PublishingSubjectType>(
+  api: unknown,
+  observableKey: keyof ApiType,
+  isCompatible: (api: unknown) => api is ApiType,
+  emptyState: PublishingSubjectType,
+  flattenMethod?: (array: PublishingSubjectType[]) => PublishingSubjectType
+): Observable<PublishingSubjectType> => {
+  if (!api || !apiIsPresentationContainer(api)) return of();
+
+  return api.children$.pipe(
+    switchMap((children) => {
+      const compatibleChildren: Array<Observable<PublishingSubjectType>> = [];
+      for (const child of Object.values(children)) {
+        if (isCompatible(child) && isObservable(child[observableKey]))
+          compatibleChildren.push(child[observableKey] as BehaviorSubject<PublishingSubjectType>);
+      }
+
+      if (compatibleChildren.length === 0) return of(emptyState);
+
+      return combineLatest(compatibleChildren).pipe(
+        map(
+          flattenMethod
+            ? flattenMethod
+            : (nextCompatible) =>
+                nextCompatible.flat().filter((value) => Boolean(value)) as PublishingSubjectType
+        )
+      );
+    })
+  );
 };

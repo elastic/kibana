@@ -19,6 +19,9 @@ export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW = getDataTestSubjectSelect
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_HOST_OS_BUILD_ROW = getDataTestSubjectSelector(
   'event-fields-table-row-host.os.build'
 );
+export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS = getDataTestSubjectSelector(
+  'event-fields-table-row-threat.enrichments'
+);
 const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_ACTIONS =
   'actionItem-security-detailsFlyout-cellActions-';
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_FILTER_IN = getDataTestSubjectSelector(

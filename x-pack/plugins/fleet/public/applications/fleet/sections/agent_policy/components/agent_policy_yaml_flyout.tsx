@@ -78,7 +78,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
               {agentPolicyData?.item ? (
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.yamlflyoutTitleWithName"
-                  defaultMessage="'{name}' agent policy"
+                  defaultMessage="''{name}'' agent policy"
                   values={{ name: agentPolicyData.item.name }}
                 />
               ) : (

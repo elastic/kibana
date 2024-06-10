@@ -1,35 +1,42 @@
-ROW
+## ROW
 
-Syntax
-```esql
+The `ROW` command in ES|QL is used to produce a row with one or more columns with specified values. This can be particularly useful for testing purposes. 
+
+### Syntax
+
+The syntax for the `ROW` command is as follows:
+
+```
 ROW column1 = value1[, ..., columnN = valueN]
 ```
 
-Parameters
-columnX
-The column name.
-valueX
-The value for the column. Can be a literal, an expression, or a
-function.
-DescriptionThe
-```esql
-ROW source command produces a row with one or more columns with values
-```
+#### Parameters
 
-that you specify. This can be useful for testing.Examples
-```esql
+- `columnX`: The name of the column.
+- `valueX`: The value for the column. This can be a literal, an expression, or a function.
+
+### Examples
+
+Here are some examples of how the `ROW` command can be used in ES|QL:
+
+1. Creating a row with specified values:
+
+    ```esql
 ROW a = 1, b = "two", c = null
 ```
 
-Use square brackets to create multi-value columns:
-```esql
+2. Using square brackets to create multi-value columns:
+
+    ```esql
 ROW a = [2, 1]
 ```
 
-```esql
-ROW supports the use of functions:
-```
+3. Using functions within the `ROW` command:
 
-```esql
+    ```esql
 ROW a = ROUND(1.23, 0)
 ```
+
+### Limitations
+
+There are no known limitations for the `ROW` command in ES|QL.

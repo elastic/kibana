@@ -1,162 +1,126 @@
 # Fleet
 
-## Plugin
+Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents and their policies.
 
-- The plugin is enabled by default. See the TypeScript type for the [the available plugin configuration options](https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/types/index.ts#L9-L27)
-- Adding `xpack.fleet.enabled=false` will disable the plugin including the EPM and Fleet features. It will also remove the `PACKAGE_POLICY_API_ROUTES` and `AGENT_POLICY_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
-- Adding `--xpack.fleet.agents.enabled=false` will disable the Fleet API & UI
-  - [code for adding the routes](https://github.com/elastic/kibana/blob/1f27d349533b1c2865c10c45b2cf705d7416fb36/x-pack/plugins/ingest_manager/server/plugin.ts#L115-L133)
-  - [Integration tests](server/integration_tests/router.test.ts)
-- Both EPM and Fleet require `ingestManager` be enabled. They are not standalone features.
-- For Enterprise license, a custom package registry URL can be used by setting `xpack.fleet.registryUrl=http://localhost:8080`
-  - This property is currently only for internal Elastic development and is unsupported
+Official documentation: https://www.elastic.co/guide/en/fleet/current/index.html.
 
-## Fleet Requirements
+## Plugin overview
 
-Fleet needs to have Elasticsearch API keys enabled.
+The Fleet plugin is enabled by default. The Fleet API and UI can be disabled by setting the `xpack.fleet.agents.enabled` Kibana setting to `false`.
 
-Also you need to configure the hosts your agent is going to use to comunication with Elasticsearch and Kibana (Not needed if you use Elastic cloud). You can use the following flags:
+Available Fleet settings are listed in the [official documentation](https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html). For an exhaustive list including internal settings, refer to the [FleetConfigType](https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/types/index.ts) type definition.
 
-```
---xpack.fleet.agents.elasticsearch.host=http://localhost:9200
---xpack.fleet.agents.kibana.host=http://localhost:5601
-```
+This plugin follows the `common`, `server`, `public` structure described in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro). Refer to [The anatomy of a plugin](https://docs.elastic.dev/kibana-dev-docs/key-concepts/anatomy-of-a-plugin) in the guide for further details.
+
+Note: this plugin was previously named Ingest Manager, there are still a few references to that old name in the code.
+
+## Fleet setup
+
+Refer to [the documentation](https://www.elastic.co/guide/en/fleet/current/fleet-deployment-models.html) for details on how to configure Fleet depending on the deployment model (self-managed, Elasticsearch Service or Elastic Cloud serverless).
+
+Running a [self-managed stack](https://www.elastic.co/guide/en/fleet/current/add-fleet-server-on-prem.html) (see below for local development setup), in particular, required setting up a Fleet Server and configuring [Fleet settings](https://www.elastic.co/guide/en/kibana/8.13/fleet-settings-kb.html).
 
 ## Development
 
 ### Getting started
 
-See the [Contributing to Kibana documentation](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) or head straight to the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/welcome) for setting up your dev environment, run Elasticsearch and start Kibana.
+Refer to the [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation for getting started with developing for Kibana. As detailed under the Contributing section of the documentation, we follow the pattern of developing feature branches under your personal fork of Kibana.
 
-This plugin follows the `common`, `server`, `public` structure described in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro). Refer to [The anatomy of a plugin](https://docs.elastic.dev/kibana-dev-docs/key-concepts/anatomy-of-a-plugin) in the guide for further details.
+Fleet development usually requires running Kibana from source alongside a snapshot of Elasticsearch, as detailed in the  [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation. The next section provides an overview of this process.
 
-We follow the pattern of developing feature branches under your personal fork of Kibana. Refer to [Set up a Development Environment](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env) in the guide for further details. Other best practices including developer principles, standards and style guide can be found under the Contributing section of the guide.
+In addition, it is typically needed to set up a Fleet Server and enroll Elastic Agents in Fleet. Refer to one of the following guides depending on your requirements for details:
+- [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) for developing Kibana in stateful (not serverless) mode
+- [Developing Kibana in serverless mode](dev_docs/local_setup/developing_kibana_in_serverless.md) for developing Kibana in serverless mode
+- [Developing Kibana and Fleet Server simultaneously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) for doing simultaneous Kibana and Fleet Server development
 
-Note: The plugin was previously named Ingest Manager, it's possible that some variables are still named with that old plugin name.
+### Running Fleet locally in stateful mode
 
-#### Dev environment setup
+Prerequisites:
+- Fork the Kibana repository and clone it locally
+- Install the `node` and `yarn` versions required by `.nvmrc`
 
-These are some additional recommendations to the steps detailed in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env).
+Once that is set up, the high level steps are:
+- Run Elasticsearch from snapshot
+- Configure Kibana settings
+- Run Kibana from source
+- Enroll a Fleet Server
+- Enroll Elastic Agents
 
-Note: this section details how to run Kibana in stateful mode. For serverless development, see the [Developing Kibana in serverless mode](dev_docs/developing_kibana_and_fleet_server.md) guide.
+#### Running Elasticsearch from snapshot
 
-1. Create a `config/kibana.dev.yml` file by copying the existing `config/kibana.yml` file.
-2. It is recommended to explicitly set a base path for Kibana (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To do this, add the following to your `kibana.dev.yml`:
+As detailed in [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html), there are different ways to run Elasticsearch when developing Kibana, with snapshot being the most common.
 
+To do this, run the following from the Kibana root folder:
+```sh
+yarn es snapshot --license trial
+```
+
+The `--license trial` flag provides the equivalent of a Platinum license (defaults to Basic).
+
+In addition, it can be useful to set a folder for preserving data between runs (by default, data is stored inside the snapshot and lost on exit) with the `-E path.data=<pathToSavedData>` setting. Common path choices are:
+- `../data` (or any other name, e.g. `../mycluster`), which saves the data in the `.es` folder (in the Kibana root folder)
+- `/tmp/es-data`
+
+Note: the required API key service and token service (cf. [Security settings in Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-settings.html)) set by `-E xpack.security.authc.api_key.enabled` and `-E xpack.security.authc.token.enabled` are enabled by default.
+
+Finally, setting up a Fleet Server requires setting the HTTP host to Fleet Server default host with `-E http.host=0.0.0.0`.
+
+The complete command usually looks like:
+```sh
+yarn es snapshot --license trial -E path.data=../data -E http.host=0.0.0.0
+```
+
+#### Configure Kibana settings
+
+Create a `config/kibana.dev.yml` file if you don't have one by copying the existing `config/kibana.yml` file.
+
+To get started, it is recommended to set the following settings:
+
+1\. The URL at which Kibana is available for end users: unless explicitly specified, this path is randomized in dev mode (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To set it, add the following to your `kibana.dev.yml`:
 ```yml
-server.basePath: /<yourPath>
+server.basePath: /yourPath
 ```
+where `yourPath` is a path of your choice (e.g. your name; must not end with a slash).
 
-where `yourPath` is a path of your choice (e.g. your name).
-
-3. Bootstrap Kibana:
-
-```bash
-yarn kbn bootstrap
-```
-
-#### Running Elasticsearch and Kibana
-
-- Start Elasticsearch in one shell (NB: you might want to add other flags to enable data persistency and/or running Fleet Server locally, see below):
-  ```
-  yarn es snapshot -E xpack.security.authc.api_key.enabled=true -E xpack.security.authc.token.enabled=true
-  ```
-- Start Kibana in another shell:
-  ```
-  yarn start
-  ```
-  If you don't have a base path set up, add `--no-base-path` to `yarn start`.
-
-#### Useful tips
-
-To avoid the enforcing of version headers when running in dev mode, add the following to your `kibana.dev.yml`:
-
-```
+2\. The API version resolution: in dev mode, a version is required for all API requests. In other environements (e.g. production), the version falls back to `oldest` in stateful mode and `newest` in serverless mode for public APIs, while internal APIs always require a version. Set the API version resolution with:
+```yml
 server.versioned.versionResolution: oldest
 ```
-This will provide a default version for the public apis.
 
-
-If Kibana fails to start, it is possible that your local setup got corrupted. An easy fix is to run:
-
-```
-yarn kbn clean && yarn kbn bootstrap
-```
-
-To avoid losing all your data when you restart Elasticsearch, you can provide a path to store the data when running the `yarn es snapshot ` command, e.g.:
-
-```
--E path.data=/tmp/es-data
-```
-
-Refer to the [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html) page of the guide for other options.
-
-### Running Fleet Server Locally in a Container
-
-It can be useful to run Fleet Server in a container on your local machine in order to free up your actual "bare metal" machine to run Elastic Agent for testing purposes. Otherwise, you'll only be able to a single instance of Elastic Agent dedicated to Fleet Server on your local machine, and this can make testing integrations and policies difficult.
-
-Note: if you need to do simultaneous Kibana and Fleet Server development, refer to the [Developing Kibana and Fleet Server simulatanously](dev_docs/developing_kibana_and_fleet_server.md) guide.
-
-_The following is adapted from the Fleet Server [README](https://github.com/elastic/fleet-server#running-elastic-agent-with-fleet-server-in-container)_
-
-1. Add the following configuration to your `kibana.dev.yml`
-
+3\. Fleet logging:
 ```yml
-server.host: 0.0.0.0
-xpack.fleet.agents.enabled: true
-xpack.fleet.packages:
-  - name: fleet_server
-    version: latest
-xpack.fleet.agentPolicies:
-  - name: Fleet Server policy
-    id: fleet-server-policy
-    description: Fleet server policy
-    namespace: default
-    package_policies:
-      - name: Fleet Server
-        package:
-          name: fleet_server
+logging:
+  loggers:
+    - name: plugins.fleet
+      appenders: [console]
+      level: debug
 ```
 
-2. Append the following option to the command you use to start Elasticsearch
+You can find these settings along with others required to run a Fleet Server and enroll Elastic Agents in the [sample kibana.dev.yml file](dev_docs/local_setup/sample_kibana_dev_yml.md).
 
-```
--E http.host=0.0.0.0
-```
+#### Run Kibana from source
 
-This command should look something like this:
+From the Kibana root folder, bootstrap (install dependencies) and run Kibana with:
 
-```
-yarn es snapshot --license trial -E xpack.security.authc.api_key.enabled=true -E xpack.security.authc.token.enabled=true -E path.data=/tmp/es-data -E http.host=0.0.0.0
+```sh
+yarn kbn bootstrap && yarn start
 ```
 
-3. Run the Fleet Server Docker container. Make sure you include a `BASE-PATH` value if your local Kibana instance is using one. `YOUR-IP` should correspond to the IP address used by your Docker network to represent the host. For Windows and Mac machines, this should be `192.168.65.2`. If you're not sure what this IP should be, run the following to look it up:
+Once the line "Kibana is now availabe" is logged, you can access Kibana in the browser at localhost:5601/your-base-path and log with the default `elastic` username and the password `changeme`.
 
-```
-docker run -it --rm alpine nslookup host.docker.internal
-```
+As a general rule, it is recommended to run `yarn kbn bootstrap` on branch change. Because merges to `main` are frequent, it is a good idea to run `yarn kbn bootstrap && yarn start` instead of just `yarn start` when frequently pulling latest `main`.
 
-To run the Fleet Server Docker container:
+If Kibana fails to start after switching branch or pulling the latest, try clearing caches with `yarn kbn clean` before bootstraping again.
 
-```
-docker run -e KIBANA_HOST=http://{YOUR-IP}:5601/{BASE-PATH} -e KIBANA_USERNAME=elastic -e KIBANA_PASSWORD=changeme -e ELASTICSEARCH_HOST=http://{YOUR-IP}:9200 -e KIBANA_FLEET_SETUP=1 -e FLEET_SERVER_ENABLE=1 -e FLEET_SERVER_POLICY_ID=fleet-server-policy -p 8220:8220 docker.elastic.co/beats/elastic-agent:{VERSION}
-```
+If you are still encountering errors after `yarn kbn clean`, you can try a more aggressive reset with `yarn kbn reset`.
 
-Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server container's port `8220` to your local machine's port `8220` in order for Fleet to communicate with Fleet Server.
+#### Set up a Fleet Server and enroll Elastic Agents
 
-Explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent. Only released versions are shown by default: tick the `Include snapshots` checkbox to see the latest version, e.g. `8.8.0-SNAPSHOT`.
+[Fleet Server](https://github.com/elastic/fleet-server) is the component that manages Elastic Agents within Fleet. It needs to be set up in order to enroll Elastic Agents into Fleet and is itself a special instance of Elastic Agent.
 
-Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `https://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes, or with Docker (recommended) see next section.
+This means that developing with enrolled agents requires at least two Elastic Agent instances: a Fleet Server and data shipping agents. As only one instance is allowed per host, the usual method is to run these instances in virtual machines or Docker containers. The [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) guide details this.
 
-### Running Elastic Agent Locally in a Container (managed mode)
-
-1. Create a new agent policy from the Fleet UI, by going to the Fleet app in Kibana > Agent policies > Add agent policy
-2. Click "Add Agent"
-3. Scroll down to the bottom of the flyout that opens to view the enrollment command, copy the contents of the `--enrollment-token` option
-4. Run this docker command:
-   ```
-   docker run -e FLEET_ENROLL=true -e FLEET_INSECURE=true -e FLEET_URL=https://192.168.65.2:8220 -e FLEET_ENROLLMENT_TOKEN=<pasted from step 3> --rm docker.elastic.co/beats/elastic-agent:{VERSION}
-   ```
+Note: if you need to do simultaneous Kibana and Fleet Server development, refer to the [Developing Kibana and Fleet Server simultaneously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) guide
 
 ### Tests
 
@@ -164,13 +128,13 @@ Once the Fleet Server container is running, you should be able to treat it as if
 
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. Unless you intend to run all unit tests within the project, you should provide the Jest configuration for Fleet. The following command runs all Fleet unit tests:
 
-```
+```sh
 yarn jest --config x-pack/plugins/fleet/jest.config.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
-```
+```sh
 yarn jest --config x-pack/plugins/fleet/jest.config.js x-pack/plugins/fleet/common/services/validate_package_policy.test.ts
 ```
 
@@ -180,11 +144,12 @@ API integration tests are run using the functional test runner (FTR). When devel
 
 Note: Docker needs to be running to run these tests.
 
-1. In one terminal, run the server from the Kibana root directory with
+1\. In one terminal, run the server from the Kibana root folder with
 
-   ```
+   ```sh
    FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/<configFile>
    ```
+
    where `configFile` is the relevant config file relevant from the following:
    - config.agent.ts
    - config.agent_policy.ts
@@ -192,36 +157,42 @@ Note: Docker needs to be running to run these tests.
    - config.fleet.ts
    - config.package_policy.ts
 
-1. In a second terminal, run the tests from the Kibana root directory with
+2\. In a second terminal, run the tests from the Kibana root folder with
 
-   ```bash
+   ```sh
    FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile>
    ```
 
    Optionally, you can filter which tests you want to run using `--grep`
 
-   ```bash
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile> --grep='fleet'
+   ```sh
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile> --grep='my filter string'
    ```
 
-Note: you can also supply which Docker image to use for the Package Registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
+Note: you can supply which Docker image to use for the Package Registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
+
+```sh
+FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
+```
+
+You can also speed up the tests execution with the `FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true` flag, which avoids rerunning the package registry each time. Running the tests the first time will output the Docker command for running the package registry.
 
 ```bash
-FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
+FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
 ```
 
 #### API integration tests (serverless)
 
-The process for running serverless API integration tests is similar as above. Security and observability project types have Fleet enabled. At the time of writing, the same tests exist for Fleet under these two project types.
+The process for running serverless API integration tests is similar to above. Security and observability project types have Fleet enabled. At the time of writing, the same tests exist for Fleet under these two project types.
 
 Security:
-```bash
+```sh
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 ```
 
 Observability:
-```bash
+```sh
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
 ```
@@ -232,30 +203,30 @@ We support UI end-to-end testing with Cypress. Refer to [cypress/README.md](./cy
 
 #### Jest integration tests
 
-Some features need to test different Kibana configuration, test with multiple Kibana instances, ... For this purpose, Jest integration tests can be used, which allow starting ES and Kibana as required for each test
+Some features require testing under specific conditions, such as different Kibana configurations or multiple Kibana instances. Jest integration tests allow starting Elasticsearch and Kibana as required for each test.
 
-To run these tests `docker` needs to be running on your environment.
+These tests, however, are slow and difficult to maintain. API integration tests should therefore be preferred whenever possible.
 
-You can run the tests with the following commands:
+Note: Docker needs to be running to run these tests.
 
-```bash
+Run the tests from the Kibana root folder with:
+
+```sh
 node scripts/jest_integration.js x-pack/plugins/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
-You could also use node debugger to inspect ES indices (add the `debugger` directive in your test)
+Running the tests with [Node Inspector](https://nodejs.org/en/learn/getting-started/debugging) allows inspecting Elasticsearch indices. To do this, add a `debugger;` statement in the test (cf. [Jest documentation](https://jestjs.io/docs/troubleshooting)) and run `node` with `--inspect` or `--inspect-brk`:
 
-```bash
+```sh
 node --inspect scripts/jest_integration.js x-pack/plugins/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
-
-However, these tests are slow and harder to maintain. Therefore, we should try to avoid them and use API integration tests instead whenever possible.
 
 ### Storybook
 
 Fleet contains [Storybook](https://storybook.js.org/) stories for developing UI components in isolation. To start the Storybook environment for Fleet, run the following from your `kibana` project root:
 
 ```sh
-$ yarn storybook fleet
+yarn storybook fleet
 ```
 
 Write stories by creating `.stories.tsx` files colocated with the components you're working on. Consult the [Storybook docs](https://storybook.js.org/docs/react/get-started/introduction) for more information.

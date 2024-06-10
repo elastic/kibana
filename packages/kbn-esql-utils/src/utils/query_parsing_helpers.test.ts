@@ -10,6 +10,7 @@ import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasTransformationalCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -93,6 +94,27 @@ describe('esql query helpers', () => {
           'from a | drop @timestamp | drop a | drop b | keep c | drop d'
         )
       ).toBe('from a | keep c ');
+    });
+  });
+
+  describe('hasTransformationalCommand', () => {
+    it('should return false for non transformational command', () => {
+      expect(hasTransformationalCommand('from a | eval b = 1')).toBeFalsy();
+    });
+
+    it('should return true for stats', () => {
+      expect(hasTransformationalCommand('from a | stats count() as total by a=b')).toBeTruthy();
+    });
+
+    it('should return true for keep', () => {
+      expect(hasTransformationalCommand('from a | keep field1, field2')).toBeTruthy();
+    });
+
+    it('should return false for commented out transformational command', () => {
+      expect(
+        hasTransformationalCommand(`from logstash-*
+      // | stats  var0 = avg(bytes) by geo.dest`)
+      ).toBeFalsy();
     });
   });
 });

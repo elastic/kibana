@@ -17,6 +17,7 @@ import {
   BrushEndListener,
   TooltipProps,
   Tooltip,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiPageSection } from '@elastic/eui';
 import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
@@ -137,7 +138,7 @@ export const ChartSectionVis = ({
             onBrushEnd={handleTimeChange}
             baseTheme={chartTheme.baseTheme}
             showLegend
-            showLegendExtra
+            legendValues={[LegendValue.CurrentAndLastValue]}
             legendPosition="right"
             locale={i18n.getLocale()}
           />

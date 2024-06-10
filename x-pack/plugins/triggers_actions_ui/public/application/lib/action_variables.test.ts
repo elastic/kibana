@@ -38,45 +38,6 @@ const mockParamsVariables = (withBraces: boolean = false) => [
 ];
 
 const expectedTransformResult = [
-  { description: 'The ID of the rule.', name: 'rule.id' },
-  { description: 'The name of the rule.', name: 'rule.name' },
-  { description: 'The space ID of the rule.', name: 'rule.spaceId' },
-  { description: 'The tags of the rule.', name: 'rule.tags' },
-  { description: 'The type of rule.', name: 'rule.type' },
-  {
-    description:
-      'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
-    name: 'rule.url',
-    usesPublicBaseUrl: true,
-  },
-  { description: 'The date the rule scheduled the action.', name: 'date' },
-  { description: 'The ID of the alert that scheduled actions for the rule.', name: 'alert.id' },
-  {
-    description: 'The action group of the alert that scheduled actions for the rule.',
-    name: 'alert.actionGroup',
-  },
-  {
-    description: 'The action subgroup of the alert that scheduled actions for the rule.',
-    name: 'alert.actionSubgroup',
-  },
-  {
-    description:
-      'The human readable name of the action group of the alert that scheduled actions for the rule.',
-    name: 'alert.actionGroupName',
-  },
-  {
-    description:
-      'A flag on the alert that indicates whether the alert status is changing repeatedly.',
-    name: 'alert.flapping',
-  },
-  {
-    description: 'The number of consecutive runs that meet the rule conditions.',
-    name: 'alert.consecutiveMatches',
-  },
-  {
-    description: 'The configured server.publicBaseUrl value or empty string if not configured.',
-    name: 'kibanaBaseUrl',
-  },
   {
     deprecated: true,
     description: 'This has been deprecated in favor of rule.id.',
@@ -104,8 +65,8 @@ const expectedTransformResult = [
   },
   {
     deprecated: true,
-    description: 'This has been deprecated in favor of alert.actionSubgroup.',
-    name: 'alertActionSubgroup',
+    description: 'This has been deprecated in favor of rule.tags.',
+    name: 'tags',
   },
   {
     deprecated: true,
@@ -114,13 +75,48 @@ const expectedTransformResult = [
   },
   {
     deprecated: true,
-    description: 'This has been deprecated in favor of rule.tags.',
-    name: 'tags',
-  },
-  {
-    deprecated: true,
     description: 'This has been deprecated in favor of rule.params.',
     name: 'params',
+  },
+  { description: 'The date the rule scheduled the action.', name: 'date' },
+  {
+    description: 'The configured server.publicBaseUrl value or empty string if not configured.',
+    name: 'kibanaBaseUrl',
+  },
+  { description: 'The ID of the rule.', name: 'rule.id' },
+  { description: 'The name of the rule.', name: 'rule.name' },
+  { description: 'The space ID of the rule.', name: 'rule.spaceId' },
+  { description: 'The type of rule.', name: 'rule.type' },
+  { description: 'The tags of the rule.', name: 'rule.tags' },
+  {
+    description: 'The parameters of the rule.',
+    name: 'rule.params',
+  },
+  {
+    description:
+      'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+    name: 'rule.url',
+    usesPublicBaseUrl: true,
+  },
+  { description: 'The ID of the alert that scheduled actions for the rule.', name: 'alert.id' },
+  { description: 'The UUID of the alert that scheduled actions for the rule.', name: 'alert.uuid' },
+  {
+    description: 'The action group of the alert that scheduled actions for the rule.',
+    name: 'alert.actionGroup',
+  },
+  {
+    description:
+      'The human readable name of the action group of the alert that scheduled actions for the rule.',
+    name: 'alert.actionGroupName',
+  },
+  {
+    description:
+      'A flag on the alert that indicates whether the alert status is changing repeatedly.',
+    name: 'alert.flapping',
+  },
+  {
+    description: 'The number of consecutive runs that meet the rule conditions.',
+    name: 'alert.consecutiveMatches',
   },
 ];
 
@@ -154,43 +150,14 @@ const expectedParamsTransformResult = (withBraces: boolean = false) => [
 ];
 
 const expectedSummaryTransformResult = [
+  ...expectedTransformResult,
   {
-    description: 'The configured server.publicBaseUrl value or empty string if not configured.',
-    name: 'kibanaBaseUrl',
+    description: 'The count of all alerts.',
+    name: 'alerts.all.count',
   },
   {
-    description: 'The date the rule scheduled the action.',
-    name: 'date',
-  },
-  {
-    description: 'The params of the rule.',
-    name: 'rule.params',
-  },
-  {
-    description: 'The ID of the rule.',
-    name: 'rule.id',
-  },
-  {
-    description: 'The name of the rule.',
-    name: 'rule.name',
-  },
-  {
-    description: 'The type of rule.',
-    name: 'rule.type',
-  },
-  {
-    description:
-      'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
-    name: 'rule.url',
-    usesPublicBaseUrl: true,
-  },
-  {
-    description: 'The tags of the rule.',
-    name: 'rule.tags',
-  },
-  {
-    description: 'The space ID of the rule.',
-    name: 'rule.spaceId',
+    description: 'An array of objects for all alerts.',
+    name: 'alerts.all.data',
   },
   {
     description: 'The count of new alerts.',
@@ -215,14 +182,6 @@ const expectedSummaryTransformResult = [
   {
     description: 'An array of objects for recovered alerts.',
     name: 'alerts.recovered.data',
-  },
-  {
-    description: 'The count of all alerts.',
-    name: 'alerts.all.count',
-  },
-  {
-    description: 'An array of objects for all alerts.',
-    name: 'alerts.all.data',
   },
 ];
 

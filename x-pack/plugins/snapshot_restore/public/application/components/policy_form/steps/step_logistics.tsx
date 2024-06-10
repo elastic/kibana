@@ -337,7 +337,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           placeholder={i18n.translate(
             'xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNamePlaceholder',
             {
-              defaultMessage: '<daily-snap-\\{now/d\\}>',
+              defaultMessage: `'<daily-snap-{now/d}>'`,
               description:
                 'Example date math snapshot name. Keeping the same syntax is important: <SOME-TRANSLATION-{now/d}>',
             }

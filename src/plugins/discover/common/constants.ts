@@ -15,6 +15,7 @@ export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 50
 export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
   AGGREGATED_LEVEL = 'aggregated',
+  PATTERN_LEVEL = 'patterns',
 }
 
 export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => {

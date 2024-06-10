@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const pageObjects = getPageObjects(['common', 'findings', 'header']);
+  const pageObjects = getPageObjects(['common', 'cspSecurity', 'findings', 'header']);
   const chance = new Chance();
   const timeFiveHoursAgo = (Date.now() - 18000000).toString();
 
@@ -120,6 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let distributionBar: typeof findings.distributionBar;
+    let cspSecurity = pageObjects.cspSecurity;
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.clean({
@@ -129,6 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
       distributionBar = findings.distributionBar;
+      cspSecurity = pageObjects.cspSecurity;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
@@ -389,6 +391,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await distributionBar.filterBy('passed');
 
         expect(await latestFindingsTable.getFindingsCount('passed')).to.eql(passedFindingsCount);
+      });
+    });
+
+    describe('Access with custom roles', async () => {
+      this.afterEach(async () => {
+        // force logout to prevent the next test from failing
+        await cspSecurity.logout();
+      });
+
+      it('Access with valid user role', async () => {
+        await cspSecurity.logout();
+        await cspSecurity.login('csp_read_user');
+        await findings.navigateToLatestFindingsPage();
+        pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await latestFindingsTable.getRowsCount()).to.be.greaterThan(0);
+      });
+
+      it('Access with invalid user role', async () => {
+        await cspSecurity.logout();
+        await cspSecurity.login('csp_missing_latest_findings_access_user');
+
+        await findings.navigateToLatestFindingsPage();
+
+        pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await findings.getUnprivilegedPrompt());
       });
     });
   });

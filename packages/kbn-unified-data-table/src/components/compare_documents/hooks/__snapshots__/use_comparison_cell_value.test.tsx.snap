@@ -1,5 +1,52 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`useComparisonCellValue should render a tooltip when the field is derived from a Smart Field 1`] = `
+<div
+  data-test-subj="fieldColumnId_0_0"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+      >
+        <span
+          data-euiicon-type="tokenString"
+          title="string"
+        >
+          string
+        </span>
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
+      >
+        message
+         
+        <span
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          data-test-subj="smartFieldFallbackTooltipIcon"
+        >
+          <span
+            data-euiicon-type="questionInCircle"
+            tabindex="0"
+          >
+            Info
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`useComparisonCellValue should render cells with diff mode "Chars" 1`] = `
 <div
   class="unifiedDataTable__comparisonBaseDocCell"

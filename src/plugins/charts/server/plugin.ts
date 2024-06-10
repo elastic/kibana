@@ -32,6 +32,7 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
           defaultMessage:
             'Maps values to specific colors in charts using the <strong>Compatibility</strong> palette.',
+          values: { strong: (chunks) => `<strong>${chunks}</strong>` },
         }),
         deprecation: {
           message: i18n.translate(

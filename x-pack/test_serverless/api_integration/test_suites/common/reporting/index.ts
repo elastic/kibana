@@ -13,5 +13,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
 
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./generate_csv_discover'));
+    loadTestFile(require.resolve('./datastream'));
   });
 };

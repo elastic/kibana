@@ -10,8 +10,7 @@ import type {
   GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api';
-
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { RoleCredentials } from '../../../../shared/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { DATES, ARCHIVE_NAME } from './constants';
@@ -23,67 +22,77 @@ const timeRange = {
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
-  const username = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).username || '';
-  const password = kbnTestConfig.getUrlParts(kibanaTestSuperuserServerless).password || '';
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   const fetchInfraHosts = async (
-    body: GetInfraMetricsRequestBodyPayload
+    body: GetInfraMetricsRequestBodyPayload,
+    roleAuthc: RoleCredentials
   ): Promise<GetInfraMetricsResponsePayload | undefined> => {
-    const response = await supertest
+    const response = await supertestWithoutAuth
       .post('/api/metrics/infra')
-      .set('kbn-xsrf', 'foo')
-      .set('x-elastic-internal-origin', 'foo')
-      .auth(username, password)
+      .set(svlCommonApi.getInternalRequestHeader())
+      .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);
     return response.body;
   };
 
   describe('API /metrics/infra', () => {
+    let roleAuthc: RoleCredentials;
     describe('works', () => {
       describe('with host asset', () => {
-        before(async () => esArchiver.load(ARCHIVE_NAME));
-        after(async () => esArchiver.unload(ARCHIVE_NAME));
+        before(async () => {
+          roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+          return esArchiver.load(ARCHIVE_NAME);
+        });
+        after(async () => {
+          await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+          return esArchiver.unload(ARCHIVE_NAME);
+        });
 
         it('received data', async () => {
-          const infraHosts = await fetchInfraHosts({
-            type: 'host',
-            limit: 100,
-            metrics: [
-              {
-                type: 'rx',
+          const infraHosts = await fetchInfraHosts(
+            {
+              type: 'host',
+              limit: 100,
+              metrics: [
+                {
+                  type: 'rx',
+                },
+                {
+                  type: 'tx',
+                },
+                {
+                  type: 'memory',
+                },
+                {
+                  type: 'cpu',
+                },
+                {
+                  type: 'diskSpaceUsage',
+                },
+                {
+                  type: 'memoryFree',
+                },
+              ],
+              query: {
+                bool: {
+                  must: [],
+                  filter: [],
+                  should: [],
+                  must_not: [],
+                },
               },
-              {
-                type: 'tx',
+              range: {
+                from: timeRange.from,
+                to: timeRange.to,
               },
-              {
-                type: 'memory',
-              },
-              {
-                type: 'cpu',
-              },
-              {
-                type: 'diskSpaceUsage',
-              },
-              {
-                type: 'memoryFree',
-              },
-            ],
-            query: {
-              bool: {
-                must: [],
-                filter: [],
-                should: [],
-                must_not: [],
-              },
+              sourceId: 'default',
             },
-            range: {
-              from: timeRange.from,
-              to: timeRange.to,
-            },
-            sourceId: 'default',
-          });
+            roleAuthc
+          );
 
           if (infraHosts) {
             const { nodes } = infraHosts;

@@ -29,7 +29,7 @@ import {
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
-import { useMonitorEnableHandler, useLocationName } from '../../../../hooks';
+import { useMonitorEnableHandler, useLocationName, useEnablement } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
@@ -116,6 +116,8 @@ export function ActionsPopover({
 
   const canUsePublicLocations = useCanUsePublicLocById(monitor.configId);
 
+  const { isServiceAllowed } = useEnablement();
+
   const labels = useMemo(
     () => ({
       enabledSuccessLabel: enabledSuccessLabel(monitor.name),
@@ -185,7 +187,7 @@ export function ActionsPopover({
         </NoPermissionsTooltip>
       ),
       icon: 'beaker',
-      disabled: testInProgress || !canUsePublicLocations,
+      disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
         dispatch(setFlyoutConfig(null));
@@ -199,7 +201,7 @@ export function ActionsPopover({
         </NoPermissionsTooltip>
       ),
       icon: 'pencil',
-      disabled: !canEditSynthetics,
+      disabled: !canEditSynthetics || !isServiceAllowed,
       href: editUrl,
     },
     {
@@ -228,7 +230,7 @@ export function ActionsPopover({
           {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
         </NoPermissionsTooltip>
       ),
-      disabled: !canEditSynthetics || !canUsePublicLocations,
+      disabled: !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-// @ts-ignore
-export const getValueForSelectedField = (source, path: string): string => {
-  return path.split('.').reduce((acc, key) => acc[key], source);
+import { get } from 'lodash';
+
+export const getValueForSelectedField = (source: unknown, path: string): string => {
+  return get(source, path, '');
 };

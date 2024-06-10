@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
-import { useAppContext } from './use_app_context';
+import { useKibana } from './use_kibana';
 
 export function useGetKnowledgeBaseEntries({
   query,
@@ -18,7 +18,7 @@ export function useGetKnowledgeBaseEntries({
   sortBy: string;
   sortDirection: 'asc' | 'desc';
 }) {
-  const { observabilityAIAssistant } = useAppContext();
+  const { observabilityAIAssistant } = useKibana().services;
 
   const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
 

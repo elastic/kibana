@@ -7,14 +7,12 @@
 
 import { omit } from 'lodash';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import {
   waitForAlertInIndex,
@@ -122,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [0.5],
                 timeSize: 5,
                 timeUnit: 'm',

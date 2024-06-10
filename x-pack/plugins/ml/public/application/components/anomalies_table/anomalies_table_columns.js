@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly, EuiIconTip } from '@elastic/eui';
 
 import React from 'react';
 import { get } from 'lodash';
@@ -116,19 +116,22 @@ export function getColumns(
       field: 'severity',
       'data-test-subj': 'mlAnomaliesListColumnSeverity',
       name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
-            defaultMessage:
-              'A normalized score between 0-100, which indicates the relative significance of the anomaly record results.',
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
+            defaultMessage: 'Severity',
           })}
-        >
-          <span>
-            {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-              defaultMessage: 'Severity',
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
+              defaultMessage:
+                'A normalized score between 0-100, which indicates the relative significance of the anomaly record results.',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+          />
+        </span>
       ),
       render: (score, item) => (
         <SeverityCell score={score} isMultiBucketAnomaly={isMultiBucketAnomaly(item.source)} />
@@ -196,18 +199,21 @@ export function getColumns(
       field: 'actualSort',
       'data-test-subj': 'mlAnomaliesListColumnActual',
       name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
-            defaultMessage: 'The actual values in the anomaly record results.',
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
+            defaultMessage: 'Actual',
           })}
-        >
-          <span>
-            {i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
-              defaultMessage: 'Actual',
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
+              defaultMessage: 'The actual values in the anomaly record results.',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+          />
+        </span>
       ),
       render: (actual, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(
@@ -226,18 +232,21 @@ export function getColumns(
       field: 'typicalSort',
       'data-test-subj': 'mlAnomaliesListColumnTypical',
       name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
-            defaultMessage: 'The typical values in the anomaly record results.',
+        <span>
+          {i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
+            defaultMessage: 'Typical',
           })}
-        >
-          <span>
-            {i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
-              defaultMessage: 'Typical',
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
+              defaultMessage: 'The typical values in the anomaly record results.',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+          />
+        </span>
       ),
       render: (typical, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(

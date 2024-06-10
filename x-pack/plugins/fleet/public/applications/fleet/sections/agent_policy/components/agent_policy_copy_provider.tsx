@@ -98,7 +98,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           <span className="eui-textBreakWord">
             <FormattedMessage
               id="xpack.fleet.copyAgentPolicy.confirmModal.copyPolicyTitle"
-              defaultMessage="Duplicate '{name}' agent policy"
+              defaultMessage="Duplicate ''{name}'' agent policy"
               values={{
                 name: agentPolicy.name,
               }}

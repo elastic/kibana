@@ -631,8 +631,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
               defaultMessage="Host name format"
             />
-            &nbsp;
-            <EuiBetaBadge label="beta" size="s" color="accent" />
           </h3>
         }
         description={

@@ -211,7 +211,6 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
                   <Settings
                     baseTheme={baseTheme}
                     showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
-                    showLegendExtra={false}
                     legendPosition={Position.Left}
                     noResults={
                       <EuiIcon

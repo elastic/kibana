@@ -159,6 +159,7 @@ describe('getCloudFleetServersHosts', () => {
       deploymentId: 'deployment-id-1',
       cloudHost: 'us-east-1.aws.found.io',
       apm: {},
+      onboarding: {},
       isServerlessEnabled: true,
       serverless: {
         projectId: undefined,
@@ -176,6 +177,7 @@ describe('getCloudFleetServersHosts', () => {
       deploymentId: 'deployment-id-1',
       cloudHost: 'us-east-1.aws.found.io',
       apm: {},
+      onboarding: {},
       isServerlessEnabled: false,
       serverless: {
         projectId: undefined,
@@ -198,6 +200,7 @@ describe('getCloudFleetServersHosts', () => {
       cloudHost: 'test.fr',
       cloudDefaultPort: '9243',
       apm: {},
+      onboarding: {},
       isServerlessEnabled: false,
       serverless: {
         projectId: undefined,
@@ -233,6 +236,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       isCloudEnabled: true,
       deploymentId: 'deployment-id-1',
       apm: {},
+      onboarding: {},
       isServerlessEnabled: false,
       serverless: {
         projectId: undefined,
@@ -256,6 +260,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       deploymentId: 'deployment-id-1',
       cloudHost: 'us-east-1.aws.found.io',
       apm: {},
+      onboarding: {},
       isServerlessEnabled: false,
       serverless: {
         projectId: undefined,

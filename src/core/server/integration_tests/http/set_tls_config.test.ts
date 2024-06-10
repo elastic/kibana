@@ -8,12 +8,7 @@
 
 import supertest from 'supertest';
 import { KBN_CERT_PATH, KBN_KEY_PATH, ES_KEY_PATH, ES_CERT_PATH } from '@kbn/dev-utils';
-import {
-  createServer,
-  getListenerOptions,
-  getServerOptions,
-  setTlsConfig,
-} from '@kbn/server-http-tools';
+import { createServer, getServerOptions, setTlsConfig } from '@kbn/server-http-tools';
 import {
   HttpConfig,
   config as httpConfig,
@@ -47,8 +42,7 @@ describe('setTlsConfig', () => {
     const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
 
     const serverOptions = getServerOptions(firstConfig);
-    const listenerOptions = getListenerOptions(firstConfig);
-    const server = createServer(serverOptions, listenerOptions);
+    const server = createServer(serverOptions);
 
     server.route({
       method: 'GET',
@@ -80,6 +74,7 @@ describe('setTlsConfig', () => {
       name: 'kibana',
       host: '127.0.0.1',
       port: 10002,
+      protocol: 'http1',
       ssl: {
         enabled: true,
         certificate: ES_CERT_PATH,

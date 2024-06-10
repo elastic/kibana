@@ -23,7 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         // used for connector simulators
         `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
-        `--xpack.actions.enabledActionTypes=${JSON.stringify(['.bedrock', '.gen-ai'])}`,
+        `--xpack.actions.enabledActionTypes=${JSON.stringify(['.bedrock', '.gen-ai', '.gemini'])}`,
       ],
     },
     testFiles: [require.resolve('..')],

@@ -10,13 +10,31 @@ import { act } from 'react-dom/test-utils';
 import { SemanticTextBanner } from '../../../public/application/sections/home/index_list/details_page/semantic_text_banner';
 
 describe('When semantic_text is enabled', () => {
-  const setup = registerTestBed(SemanticTextBanner, {
-    defaultProps: { isSemanticTextEnabled: true },
-    memoryRouter: { wrapComponent: false },
+  let exists: any;
+  let find: any;
+  let wrapper: any;
+  let getItemSpy: jest.SpyInstance;
+  let setItemSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    getItemSpy = jest.spyOn(Storage.prototype, 'getItem');
+    setItemSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const setup = registerTestBed(SemanticTextBanner, {
+      defaultProps: { isSemanticTextEnabled: true },
+      memoryRouter: { wrapComponent: false },
+    });
+    const testBed = setup();
+    ({ exists, find } = testBed);
+    wrapper = testBed.component;
   });
-  const { exists, find } = setup();
+
+  afterEach(() => {
+    getItemSpy.mockRestore();
+    setItemSpy.mockRestore();
+  });
 
   it('should display the banner', () => {
+    expect(getItemSpy).toHaveBeenCalledWith('semantic-text-banner-display');
     expect(exists('indexDetailsMappingsSemanticTextBanner')).toBe(true);
   });
 
@@ -30,7 +48,11 @@ describe('When semantic_text is enabled', () => {
     await act(async () => {
       find('SemanticTextBannerDismissButton').simulate('click');
     });
-    expect(exists('indexDetailsMappingsSemanticTextBanner')).toBe(true);
+
+    wrapper.update();
+
+    expect(setItemSpy).toHaveBeenCalledWith('semantic-text-banner-display', 'false');
+    expect(exists('indexDetailsMappingsSemanticTextBanner')).toBe(false);
   });
 });
 

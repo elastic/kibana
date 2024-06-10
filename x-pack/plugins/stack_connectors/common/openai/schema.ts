@@ -148,7 +148,8 @@ export const RunActionResponseSchema = schema.object(
           message: schema.object(
             {
               role: schema.string(),
-              content: schema.maybe(schema.string()),
+              // nullable because message can contain function calls instead of final response when used with RAG
+              content: schema.maybe(schema.nullable(schema.string())),
             },
             { unknowns: 'ignore' }
           ),

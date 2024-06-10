@@ -463,5 +463,42 @@ describe('bulk action hooks', () => {
       const newBulkActions = result.current.bulkActions[0].items;
       expect(initialBulkActions).toEqual(newBulkActions);
     });
+
+    it('hides bulk actions if hideBulkActions == true', () => {
+      // make sure by default some actions are returned for this
+      // config
+      const { result: resultWithoutHideBulkActions } = renderHook(
+        () =>
+          useBulkActions({
+            alerts: [],
+            query: {},
+            casesConfig,
+            refresh,
+            featureIds: ['observability'],
+          }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(resultWithoutHideBulkActions.current.bulkActions.length).toBeGreaterThan(0);
+
+      const { result: resultWithHideBulkActions } = renderHook(
+        () =>
+          useBulkActions({
+            alerts: [],
+            query: {},
+            casesConfig,
+            refresh,
+            featureIds: ['observability'],
+            hideBulkActions: true,
+          }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(resultWithHideBulkActions.current.bulkActions.length).toBe(0);
+    });
   });
 });

@@ -74,7 +74,7 @@ export async function getIndicesLifecycleStatus({
     filter_path: 'indices.*.phase',
   });
 
-  return indices;
+  return indices || {};
 }
 
 export async function getIndicesInfo({

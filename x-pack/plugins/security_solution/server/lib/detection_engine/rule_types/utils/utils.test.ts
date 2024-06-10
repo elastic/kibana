@@ -11,6 +11,8 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -45,6 +47,7 @@ import {
   getField,
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
+  getDisabledActionsWarningText,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -1748,6 +1751,76 @@ describe('utils', () => {
         `The following exceptions won't be applied to rule execution: ${
           getExceptionListItemSchemaMock().name
         }`
+      );
+    });
+  });
+
+  describe('getDisabledActionsWarningText', () => {
+    const alertsCreated = true;
+    const alertsNotCreated = false;
+
+    const singleDisabledAction = [{ actionTypeId: '.webhook' }];
+    const multipleDisabledActionsDiffType = [
+      { actionTypeId: '.webhook' },
+      { actionTypeId: '.pagerduty' },
+    ];
+    const multipleDisabledActionsSameType = [
+      { actionTypeId: '.webhook' },
+      { actionTypeId: '.webhook' },
+    ];
+    test('returns string for single disabled action with alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated,
+        disabledActions: singleDisabledAction as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'This rule generated alerts but did not send external notifications because rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for single disabled action with no alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated: alertsNotCreated,
+        disabledActions: singleDisabledAction as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for multiple distinct disabled action types with alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated,
+        disabledActions: multipleDisabledActionsDiffType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'This rule generated alerts but did not send external notifications because rule action connectors .webhook, .pagerduty are not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for multiple distinct disabled action types with alerts NOT generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated: alertsNotCreated,
+        disabledActions: multipleDisabledActionsDiffType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'Rule action connectors .webhook, .pagerduty are not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+    test('returns string for multiple same type disabled action types with alerts generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated,
+        disabledActions: multipleDisabledActionsSameType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'This rule generated alerts but did not send external notifications because rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
+      );
+    });
+
+    test('returns string for multiple same type disabled action types with alerts NOT generated', () => {
+      const warning = getDisabledActionsWarningText({
+        alertsCreated: alertsNotCreated,
+        disabledActions: multipleDisabledActionsSameType as SanitizedRuleAction[],
+      });
+      expect(warning).toEqual(
+        'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
       );
     });
   });

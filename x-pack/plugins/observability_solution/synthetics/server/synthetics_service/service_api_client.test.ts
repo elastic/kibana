@@ -112,7 +112,7 @@ describe('checkAccountAccessStatus', () => {
   it('includes a header with the kibana version', async () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
-      { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
+      { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
       { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 

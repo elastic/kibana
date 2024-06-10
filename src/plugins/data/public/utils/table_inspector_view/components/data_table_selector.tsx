@@ -96,7 +96,7 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
                 data-test-subj="inspectorTableChooser"
               >
                 <FormattedMessage
-                  id="data.inspector.table.tableLabel"
+                  id="data.inspector.table.inspectorTableChooserButton"
                   defaultMessage="Table {index}"
                   values={{ index: currentIndex + 1 }}
                 />

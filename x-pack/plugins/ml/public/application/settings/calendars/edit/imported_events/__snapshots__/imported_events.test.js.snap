@@ -8,7 +8,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
   <EuiFlexItem>
     <EuiText>
       <h4>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Events to import: {eventsCount}"
           id="xpack.ml.calendarsEdit.importedEvents.eventsToImportTitle"
           values={
@@ -54,10 +54,9 @@ exports[`ImportedEvents Renders imported events 1`] = `
       id="ml-include-past-events"
       indeterminate={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Include past events"
           id="xpack.ml.calendarsEdit.importedEvents.includePastEventsLabel"
-          values={Object {}}
         />
       }
       onChange={[MockFunction]}

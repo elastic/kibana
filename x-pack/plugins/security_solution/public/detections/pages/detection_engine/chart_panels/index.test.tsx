@@ -13,7 +13,7 @@ import type { Status } from '../../../../../common/api/detection_engine';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -22,7 +22,7 @@ import { LensEmbeddable } from '../../../../common/components/visualization_acti
 import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
 
 jest.mock('./alerts_local_storage');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({

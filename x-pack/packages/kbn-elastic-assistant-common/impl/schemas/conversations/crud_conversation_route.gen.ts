@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Create Conversation API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import {

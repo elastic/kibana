@@ -5,7 +5,29 @@
  * 2.0.
  */
 
-import { createContext } from 'react';
-import type { HttpStart } from '@kbn/core/public';
+import { createContext, useContext } from 'react';
+import type {
+  AnalyticsServiceStart,
+  HttpStart,
+  I18nStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 
-export const HttpContext = createContext<HttpStart | undefined>(undefined);
+export interface StartServices {
+  http: HttpStart;
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
+export const AppContext = createContext<StartServices | undefined>(undefined);
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+
+  if (!context) {
+    throw new Error('App Context Error!');
+  }
+
+  return context;
+};

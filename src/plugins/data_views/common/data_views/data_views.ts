@@ -39,6 +39,12 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
+const createFetchFieldErrorTitle = ({ id, title }: { id?: string; title?: string }) =>
+  i18n.translate('dataViews.fetchFieldErrorTitle', {
+    defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+    values: { id, title },
+  });
+
 /*
  * Attributes of the data view saved object
  * @public
@@ -661,9 +667,9 @@ export class DataViewsService {
         this.onError(
           err,
           {
-            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-              values: { id: dataView.id, title: dataView.getIndexPattern() },
+            title: createFetchFieldErrorTitle({
+              id: dataView.id,
+              title: dataView.getIndexPattern(),
             }),
           },
           dataView.getIndexPattern()
@@ -722,10 +728,7 @@ export class DataViewsService {
       this.onError(
         err,
         {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id, title },
-          }),
+          title: createFetchFieldErrorTitle({ id, title }),
         },
         title
       );
@@ -884,10 +887,7 @@ export class DataViewsService {
           this.onError(
             err,
             {
-              title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-                defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-                values: { id: savedObject.id, title: spec.title },
-              }),
+              title: createFetchFieldErrorTitle({ id: savedObject.id, title: spec.title }),
             },
             spec.title || ''
           );

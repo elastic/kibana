@@ -8,7 +8,7 @@
 
 import { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { generateEsHits, additionalFieldGroups } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
@@ -442,5 +442,20 @@ describe('useComparisonCellValue', () => {
     expect(calculateDiff).toHaveBeenCalledTimes(6);
     renderComparisonCell(cellProps6);
     expect(calculateDiff).toHaveBeenCalledTimes(6);
+  });
+  it('should render a tooltip when the field is derived from a Smart Field', async () => {
+    const { renderCellValue } = renderComparisonCellValue({
+      comparisonFields: ['message'],
+      additionalFieldGroups,
+    });
+    const baseCell = renderComparisonCell({
+      columnId: fieldColumnId,
+      colIndex: 0,
+      rowIndex: 0,
+      renderCellValue,
+    });
+
+    expect(await screen.findByTestId('smartFieldFallbackTooltipIcon')).toBeInTheDocument();
+    expect(baseCell.getCell()).toMatchSnapshot();
   });
 });

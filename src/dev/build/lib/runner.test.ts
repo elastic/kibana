@@ -45,6 +45,7 @@ const setup = async () => {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    targetServerlessPlatforms: false,
     versionQualifier: '-SNAPSHOT',
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,

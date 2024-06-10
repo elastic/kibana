@@ -493,10 +493,15 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
               (runResult) => !failedSpecFilePaths.includes(runResult.spec.absolute)
             )
         ),
-        ...retryResults,
+        ..._.filter(retryResults, (retryResult) => !!retryResult),
       ] as CypressCommandLine.CypressRunResult[];
 
-      renderSummaryTable(finalResults);
+      try {
+        renderSummaryTable(finalResults);
+      } catch (e) {
+        log.error('Failed to render summary table');
+        log.error(e);
+      }
 
       const hasFailedTests = (
         runResults: Array<

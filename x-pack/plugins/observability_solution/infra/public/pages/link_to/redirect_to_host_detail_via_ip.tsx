@@ -14,7 +14,7 @@ import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/publi
 import { useHostIpToName } from './use_host_ip_to_name';
 import { LoadingPage } from '../../components/loading_page';
 import { Error } from '../error';
-import { useSourceContext } from '../../containers/metrics_source';
+import { useMetricsDataViewContext } from '../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { getSearchParams } from './redirect_to_node_detail';
 
@@ -28,16 +28,13 @@ export const RedirectToHostDetailViaIP = ({
   },
   location,
 }: RedirectToHostDetailType) => {
-  const { source } = useSourceContext();
+  const { metricsView } = useMetricsDataViewContext();
   const {
     services: { share },
   } = useKibanaContextForPlugin();
   const baseLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
 
-  const { error, name } = useHostIpToName(
-    hostIp,
-    (source && source.configuration && source.configuration.metricAlias) || null
-  );
+  const { error, name } = useHostIpToName(hostIp, (metricsView && metricsView.indices) || null);
 
   useEffect(() => {
     if (name) {

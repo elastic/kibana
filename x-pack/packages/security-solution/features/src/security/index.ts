@@ -7,7 +7,10 @@
 import type { SecuritySubFeatureId } from '../product_features_keys';
 import type { ProductFeatureParams } from '../types';
 import { getSecurityBaseKibanaFeature } from './kibana_features';
-import { securitySubFeaturesMap, getSecurityBaseKibanaSubFeatureIds } from './kibana_sub_features';
+import {
+  getSecuritySubFeaturesMap,
+  getSecurityBaseKibanaSubFeatureIds,
+} from './kibana_sub_features';
 import type { SecurityFeatureParams } from './types';
 
 export const getSecurityFeature = (
@@ -15,5 +18,5 @@ export const getSecurityFeature = (
 ): ProductFeatureParams<SecuritySubFeatureId> => ({
   baseKibanaFeature: getSecurityBaseKibanaFeature(params),
   baseKibanaSubFeatureIds: getSecurityBaseKibanaSubFeatureIds(params),
-  subFeaturesMap: securitySubFeaturesMap,
+  subFeaturesMap: getSecuritySubFeaturesMap(params),
 });

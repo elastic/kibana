@@ -62,22 +62,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-  isSemanticTextEnabled?: boolean;
-}> = ({
-  index,
-  data,
-  jsonData,
-  refetchMapping,
-  showAboutMappings,
-  isSemanticTextEnabled = false,
-}) => {
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
     plugins: { ml },
     url,
+    config,
   } = useAppContext();
-
+  const { enableSemanticText: isSemanticTextEnabled } = config;
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
     []
   );
@@ -190,12 +183,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       }
 
       await fetchInferenceToModelIdMap();
-
-      setIsModalVisible(pendingDeployments.length > 0);
     } catch (exception) {
       setSaveMappingError(exception.message);
     }
-  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled, pendingDeployments]);
+  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled]);
 
   const updateMappings = useCallback(async () => {
     try {
@@ -564,11 +555,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-      {isModalVisible && (
+      {isModalVisible && isSemanticTextEnabled && (
         <TrainedModelsDeploymentModal
           pendingDeployments={pendingDeployments}
           errorsInTrainedModelDeployment={errorsInTrainedModelDeployment}
-          isSemanticTextEnabled={isSemanticTextEnabled}
           setIsModalVisible={setIsModalVisible}
           refreshModal={refreshModal}
           url={url}

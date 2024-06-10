@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { RawBucket, StatRenderer } from '@kbn/securitysolution-grouping';
+import type { RawBucket, StatRenderer } from '@kbn/grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 

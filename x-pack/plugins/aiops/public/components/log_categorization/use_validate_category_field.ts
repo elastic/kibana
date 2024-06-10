@@ -51,6 +51,7 @@ export function useValidateFieldRequest() {
           }),
           headers,
           version: '1',
+          signal: abortController.current.signal,
         }
       );
 

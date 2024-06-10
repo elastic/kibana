@@ -192,6 +192,22 @@
           },
           {
             "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectSaveModal.componentDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidMount",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjects",
             "id": "def-public.SavedObjectSaveModal.render",
             "type": "Function",
             "tags": [],

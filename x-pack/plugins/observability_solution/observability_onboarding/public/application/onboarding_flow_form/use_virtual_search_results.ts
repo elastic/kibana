@@ -11,10 +11,9 @@ import { CustomCard } from '../packages_list/types';
 
 export function useVirtualSearchResults(): CustomCard[] {
   const {
-    services: { application, http },
+    services: { application },
   } = useKibana();
   const getUrlForApp = application?.getUrlForApp;
-  const basePath = http?.basePath;
 
   return [
     {
@@ -39,31 +38,6 @@ export function useVirtualSearchResults(): CustomCard[] {
         },
       ],
       url: `${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz`,
-      version: '',
-      integration: '',
-      isCollectionCard: false,
-    },
-    {
-      id: 'aws-firehose-virtual',
-      type: 'virtual',
-      title: i18n.translate('xpack.observability_onboarding.packageList.amazonFirehoseTitle', {
-        defaultMessage: 'Amazon Firehose',
-      }),
-      description: i18n.translate(
-        'xpack.observability_onboarding.packageList.amazonFirehoseDescription',
-        {
-          defaultMessage: 'Collect Amazon Firehose logs.',
-        }
-      ),
-      name: 'aws-firehose',
-      categories: [],
-      icons: [
-        {
-          type: 'svg',
-          src: basePath?.prepend('/plugins/observabilityOnboarding/assets/aws_firehose.svg') ?? '',
-        },
-      ],
-      url: 'https://www.elastic.co/guide/en/kinesis/current/aws-firehose-setup-guide.html',
       version: '',
       integration: '',
       isCollectionCard: false,

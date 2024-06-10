@@ -13,6 +13,7 @@ import {
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
@@ -23,10 +24,14 @@ import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_tr
 import { APMTransactionDurationIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { parseIndex } from './common';
-import { getTimesliceTargetComparator } from './common';
+import { getTimesliceTargetComparator, getFilterRange } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
+  public async getTransformParams(
+    slo: SLODefinition,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -34,7 +39,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator),
+      await this.buildSource(slo, slo.indicator, dataViewService),
       this.buildDestination(),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo, slo.indicator),
@@ -70,16 +75,12 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
-  private buildSource(slo: SLODefinition, indicator: APMTransactionDurationIndicator) {
-    const queryFilter: estypes.QueryDslQueryContainer[] = [
-      {
-        range: {
-          '@timestamp': {
-            gte: `now-${slo.timeWindow.duration.format()}/d`,
-          },
-        },
-      },
-    ];
+  private async buildSource(
+    slo: SLODefinition,
+    indicator: APMTransactionDurationIndicator,
+    dataViewService: DataViewsService
+  ) {
+    const queryFilter: estypes.QueryDslQueryContainer[] = [getFilterRange(slo, '@timestamp')];
 
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
@@ -112,14 +113,18 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
         },
       });
     }
+    const dataView = await this.getIndicatorDataView({
+      dataViewService,
+      dataViewId: indicator.params.dataViewId,
+    });
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
     }
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
       query: {
         bool: {
           filter: [

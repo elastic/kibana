@@ -45,7 +45,7 @@ export const useUpdateField = () => {
     modalTitle = i18n.translate(
       'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.title',
       {
-        defaultMessage: "Confirm change '{fieldName}' type to '{fieldType}'.",
+        defaultMessage: "Confirm change ''{fieldName}'' type to ''{fieldType}''.",
         values: {
           fieldName: source.name,
           fieldType: source.type,

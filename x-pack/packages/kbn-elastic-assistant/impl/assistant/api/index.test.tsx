@@ -24,7 +24,7 @@ const mockHttp = {
   fetch: jest.fn(),
 } as unknown as HttpSetup;
 
-const apiConfig: Record<'openai' | 'bedrock', ApiConfig> = {
+const apiConfig: Record<'openai' | 'bedrock' | 'gemini', ApiConfig> = {
   openai: {
     connectorId: 'foo',
     actionTypeId: '.gen-ai',
@@ -34,6 +34,10 @@ const apiConfig: Record<'openai' | 'bedrock', ApiConfig> = {
   bedrock: {
     connectorId: 'foo',
     actionTypeId: '.bedrock',
+  },
+  gemini: {
+    connectorId: 'foo',
+    actionTypeId: '.gemini',
   },
 };
 
@@ -94,7 +98,7 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is bedrock and isEnabledKnowledgeBase is true', async () => {
+    it('calls the stream API when assistantStreamingEnabled is true and actionTypeId is bedrock and isEnabledKnowledgeBase is true', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         apiConfig: apiConfig.bedrock,
@@ -105,13 +109,13 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          ...staticDefaults,
-          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          ...streamingDefaults,
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
         }
       );
     });
 
-    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is bedrock and isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
+    it('calls the stream API when assistantStreamingEnabled is true and actionTypeId is bedrock and isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         apiConfig: apiConfig.bedrock,
@@ -124,8 +128,44 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
+          ...streamingDefaults,
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+        }
+      );
+    });
+
+    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is gemini and isEnabledKnowledgeBase is true', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        apiConfig: apiConfig.gemini,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
           ...staticDefaults,
-          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gemini","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+        }
+      );
+    });
+
+    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is gemini and isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        apiConfig: apiConfig.gemini,
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: true,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          ...staticDefaults,
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gemini","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
         }
       );
     });

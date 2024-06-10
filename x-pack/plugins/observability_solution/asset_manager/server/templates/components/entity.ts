@@ -21,15 +21,23 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               ignore_above: 1024,
               type: 'keyword',
             },
-            indexPatterns: {
+            displayName: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+            definitionId: {
               ignore_above: 1024,
               type: 'keyword',
             },
-            defintionId: {
-              ignore_above: 1024,
-              type: 'keyword',
+            lastSeenTimestamp: {
+              type: 'date',
             },
-            latestTimestamp: {
+            firstSeenTimestamp: {
               type: 'date',
             },
           },

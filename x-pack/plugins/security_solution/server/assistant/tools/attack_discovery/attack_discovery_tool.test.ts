@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
-import type { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
+import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { DynamicTool } from '@langchain/core/tools';
 
 import { ATTACK_DISCOVERY_TOOL } from './attack_discovery_tool';

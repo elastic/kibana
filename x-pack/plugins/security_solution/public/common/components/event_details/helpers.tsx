@@ -24,6 +24,7 @@ import {
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../utils/sentinelone_alert_check';
+import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../utils/crowdstrike_alert_check';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -183,6 +184,7 @@ export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
   [AGENT_STATUS_FIELD_NAME]: true,
   [QUARANTINED_PATH_FIELD_NAME]: true,
   [SENTINEL_ONE_AGENT_ID_FIELD]: true,
+  [CROWDSTRIKE_AGENT_ID_FIELD]: true,
 };
 
 /**

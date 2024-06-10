@@ -273,6 +273,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+            "iconToString": undefined,
             "id": "enterpriseSearchApplicationsContent",
             "items": undefined,
             "name": <EuiFlexGroup
@@ -281,6 +282,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             >
               Content
             </EuiFlexGroup>,
+            "nameToString": "Content",
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/connect",
@@ -339,6 +341,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(engineItem).toMatchInlineSnapshot(`
       Object {
         "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+        "iconToString": "warning",
         "id": "enterpriseSearchApplicationsContent",
         "items": undefined,
         "name": <EuiFlexGroup
@@ -351,6 +354,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             type="warning"
           />
         </EuiFlexGroup>,
+        "nameToString": "Content",
       }
     `);
   });

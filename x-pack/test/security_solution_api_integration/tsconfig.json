@@ -44,5 +44,8 @@
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/utility-types",
+    "@kbn/timelines-plugin",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/test-subj-selector",
   ]
 }

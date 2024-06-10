@@ -9,6 +9,8 @@ import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiToolTip, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useEnablement } from '../../../hooks';
+import { SERVICE_NOT_ALLOWED } from '../../monitors_page/management/disabled_callout';
 
 export const FleetPermissionsCallout = () => {
   return (
@@ -37,7 +39,18 @@ export const NoPermissionsTooltip = ({
   canUsePublicLocations?: boolean;
   children: ReactNode;
 }) => {
+  const { isServiceAllowed } = useEnablement();
+
   const disabledMessage = getRestrictionReasonLabel(canEditSynthetics, canUsePublicLocations);
+
+  if (!isServiceAllowed) {
+    return (
+      <EuiToolTip content={SERVICE_NOT_ALLOWED}>
+        <span>{children}</span>
+      </EuiToolTip>
+    );
+  }
+
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>

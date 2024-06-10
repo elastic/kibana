@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { ComponentStory, ComponentStoryObj } from '@storybook/react';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { PromptEditor as Component, PromptEditorProps } from './prompt_editor';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 
 /*
   JSON Schema validation in the PromptEditor compponent does not work
@@ -32,7 +33,65 @@ const Template: ComponentStory<typeof Component> = (props: PromptEditorProps) =>
   return <Component {...props} />;
 };
 
-const defaultProps = {};
+export const PromptEditorDisabled: ComponentStoryObj<typeof Component> = {
+  args: {
+    disabled: true,
+    hidden: false,
+    loading: false,
+    initialRole: MessageRole.User,
+    initialFunctionCall: undefined,
+    initialContent: '',
+    onChangeHeight: () => {},
+    onSendTelemetry: () => {},
+    onSubmit: () => {},
+  },
+  render: Template,
+};
 
-export const PromptEditor = Template.bind({});
-PromptEditor.args = defaultProps;
+export const PromptEditorLoading: ComponentStoryObj<typeof Component> = {
+  args: {
+    disabled: false,
+    hidden: false,
+    loading: true,
+    initialRole: MessageRole.User,
+    initialFunctionCall: undefined,
+    initialContent: '',
+    onChangeHeight: () => {},
+    onSendTelemetry: () => {},
+    onSubmit: () => {},
+  },
+  render: Template,
+};
+
+export const PromptEditorWithInitialContent: ComponentStoryObj<typeof Component> = {
+  args: {
+    disabled: false,
+    hidden: false,
+    loading: true,
+    initialRole: MessageRole.User,
+    initialFunctionCall: undefined,
+    initialContent: 'Can you help me with this?',
+    onChangeHeight: () => {},
+    onSendTelemetry: () => {},
+    onSubmit: () => {},
+  },
+  render: Template,
+};
+
+export const PromptEditorWithInitialFunction: ComponentStoryObj<typeof Component> = {
+  args: {
+    disabled: false,
+    hidden: false,
+    loading: false,
+    initialRole: MessageRole.User,
+    initialFunctionCall: {
+      name: 'get stuff',
+      trigger: MessageRole.User,
+    },
+    initialContent: '',
+    onChangeHeight: () => {},
+    onSendTelemetry: () => {},
+    onSubmit: () => {},
+  },
+  render: Template,
+};

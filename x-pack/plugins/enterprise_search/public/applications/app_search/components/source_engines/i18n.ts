@@ -61,7 +61,7 @@ export const REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE = (engineName: string) =>
   i18n.translate(
     'xpack.enterpriseSearch.appSearch.engine.souceEngines.removeSourceEngineSuccessMessage',
     {
-      defaultMessage: "Engine '{engineName}' was removed from this meta engine",
+      defaultMessage: "Engine ''{engineName}'' was removed from this meta engine",
       values: { engineName },
     }
   );

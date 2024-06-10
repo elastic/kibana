@@ -10,7 +10,7 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
 
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 import { AgentExecutor } from './types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';

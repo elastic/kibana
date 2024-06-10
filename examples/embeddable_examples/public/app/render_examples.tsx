@@ -27,19 +27,14 @@ import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
 import type { SearchApi, SearchSerializedState } from '../react_embeddables/search/types';
 
 export const RenderExamples = () => {
-  const initialState = useMemo(() => {
-    return {
-      rawState: {
-        timeRange: undefined,
-      },
-      references: [],
-    };
-    // only run onMount
-  }, []);
-
   const parentApi = useMemo(() => {
     return {
       reload$: new Subject<void>(),
+      getSerializedStateForChild: () => ({
+        rawState: {
+          timeRange: undefined,
+        },
+      }),
       timeRange$: new BehaviorSubject<TimeRange>({
         from: 'now-24h',
         to: 'now',
@@ -85,8 +80,7 @@ export const RenderExamples = () => {
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
             {`<ReactEmbeddableRenderer<State, Api>
   type={SEARCH_EMBEDDABLE_ID}
-  state={initialState}
-  parentApi={parentApi}
+  getParentApi={() => parentApi}
   onApiAvailable={(newApi) => {
     setApi(newApi);
   }}
@@ -107,8 +101,7 @@ export const RenderExamples = () => {
           <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
             key={hidePanelChrome ? 'hideChrome' : 'showChrome'}
             type={SEARCH_EMBEDDABLE_ID}
-            state={initialState}
-            parentApi={parentApi}
+            getParentApi={() => parentApi}
             onApiAvailable={(newApi) => {
               setApi(newApi);
             }}

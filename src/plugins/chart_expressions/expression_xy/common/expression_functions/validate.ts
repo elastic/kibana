@@ -116,8 +116,7 @@ export const errors = {
     }),
   axisIsNotAssignedError: (axisId: string) =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.axisIsNotAssignedError', {
-      defaultMessage:
-        'Axis with id: "{axisId}" is not assigned to any accessor. Please assign axis using the following construction: `decorations=\\{dataDecorationConfig forAccessor="your-accessor" axisId="{axisId}"\\}`',
+      defaultMessage: `Axis with id: "{axisId}" is not assigned to any accessor. Please assign axis using the following construction: \`decorations='{dataDecorationConfig forAccessor="your-accessor" axisId="{axisId}"}'\``,
       values: { axisId },
     }),
 };

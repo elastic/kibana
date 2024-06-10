@@ -5,35 +5,38 @@ Kibana configuration entries providing developers with a fully typed model of th
 
 ## Table of Contents
 
-- [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
-- [Schema building blocks](#schema-building-blocks)
-  - [Basic types](#basic-types)
-    - [`schema.string()`](#schemastring)
-    - [`schema.number()`](#schemanumber)
-    - [`schema.boolean()`](#schemaboolean)
-    - [`schema.literal()`](#schemaliteral)
-    - [`schema.buffer()`](#schemabuffer)
-    - [`schema.stream()`](#schemastream)
-  - [Composite types](#composite-types)
-    - [`schema.arrayOf()`](#schemaarrayof)
-    - [`schema.object()`](#schemaobject)
-    - [`schema.recordOf()`](#schemarecordof)
-    - [`schema.mapOf()`](#schemamapof)
-  - [Advanced types](#advanced-types)
-    - [`schema.oneOf()`](#schemaoneof)
-    - [`schema.any()`](#schemaany)
-    - [`schema.maybe()`](#schemamaybe)
-    - [`schema.nullable()`](#schemanullable)
-    - [`schema.never()`](#schemanever)
-    - [`schema.uri()`](#schemauri)
-    - [`schema.byteSize()`](#schemabytesize)
-    - [`schema.duration()`](#schemaduration)
-    - [`schema.conditional()`](#schemaconditional)
-  - [References](#references)
-    - [`schema.contextRef()`](#schemacontextref)
-    - [`schema.siblingRef()`](#schemasiblingref)
-- [Custom validation](#custom-validation)
-- [Default values](#default-values)
+- [`@kbn/config-schema` — The Kibana config validation library](#kbnconfig-schema--the-kibana-config-validation-library)
+  - [Table of Contents](#table-of-contents)
+  - [Why `@kbn/config-schema`?](#why-kbnconfig-schema)
+  - [Schema building blocks](#schema-building-blocks)
+    - [Basic types](#basic-types)
+      - [`schema.string()`](#schemastring)
+      - [`schema.number()`](#schemanumber)
+      - [`schema.boolean()`](#schemaboolean)
+      - [`schema.literal()`](#schemaliteral)
+      - [`schema.buffer()`](#schemabuffer)
+      - [`schema.stream()`](#schemastream)
+    - [Composite types](#composite-types)
+      - [`schema.arrayOf()`](#schemaarrayof)
+      - [`schema.object()`](#schemaobject)
+      - [`schema.recordOf()`](#schemarecordof)
+      - [`schema.mapOf()`](#schemamapof)
+    - [Advanced types](#advanced-types)
+      - [`schema.oneOf()`](#schemaoneof)
+      - [`schema.any()`](#schemaany)
+      - [`schema.maybe()`](#schemamaybe)
+      - [`schema.nullable()`](#schemanullable)
+      - [`schema.never()`](#schemanever)
+      - [`schema.uri()`](#schemauri)
+      - [`schema.byteSize()`](#schemabytesize)
+      - [`schema.duration()`](#schemaduration)
+      - [`schema.conditional()`](#schemaconditional)
+      - [`schema.lazy()`](#schemalazy)
+    - [References](#references)
+      - [`schema.contextRef()`](#schemacontextref)
+      - [`schema.siblingRef()`](#schemasiblingref)
+  - [Custom validation](#custom-validation)
+  - [Default values](#default-values)
 
 ## Why `@kbn/config-schema`?
 
@@ -44,7 +47,7 @@ There are a number of reasons why we decided to roll our own solution for the co
 * **Limited API surface** - having a future rich library is awesome, but it's a really hard task to audit such library and make sure everything is sane and secure enough. As everyone knows complexity is the enemy of security and hence we'd like to have a full control over what exactly we expose and commit to maintain.
 * **Custom error messages** - detailed validation error messages are a great help to developers, but at the same time they can contain information that's way too sensitive to expose to everyone. We'd like to control these messages and make them only as detailed as really needed. For example, we don't want validation error messages to contain the passwords for internal users to show-up in the logs. These logs are commonly ingested into Elasticsearch, and accessible to a large number of users which shouldn't have access to the internal user's password.
 * **Type information** - having run-time guarantees is great, but additionally having compile-time guarantees is even better. We'd like to provide developers with a fully typed model of the validated data so that it's harder to misuse it _after_ validation.
-* **Upgradability** - no matter how well a validation library is implemented, it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on an external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase. 
+* **Upgradability** - no matter how well a validation library is implemented, it will have bugs and may need to be improved at some point anyway. Some external libraries are very well supported, some aren't or won't be in the future. It's always a risk to depend on an external party with their own release cadence when you need to quickly fix a security vulnerability in a patch version. We'd like to have a better control over lifecycle of such an important piece of our codebase.
 
 ## Schema building blocks
 
@@ -243,7 +246,7 @@ __Options:__
 
 __Usage:__
 ```typescript
-const valueSchema = schema.object({ 
+const valueSchema = schema.object({
   isEnabled: schema.boolean({ defaultValue: false }),
   name: schema.string({ minLength: 10 }),
 });
@@ -461,6 +464,46 @@ const valueSchema = schema.object({
 __Notes:__
 * Conditional schemas may be hard to read and understand and hence should be used only sparingly.
 
+#### `schema.lazy()`
+
+Allows recursive runtime types to be defined.
+
+Takes a required generic type argument and a required string that represents the id of the schema.
+
+It is recommended to pick a globally unique ID for your schema. Consider creating only IDs that are prefixed with your
+domain, e.g. `myPlugin_myRecursiveType`.
+
+IDs must be unique within a _schema ancestry_. You can use the same ID in multiple, separate schemas as long as they do not
+share a common ancestor object. However, if you want to generate OAS from your schema you must ensure a globally
+unique ID in order to avoid overriding schemas with the same ID.
+
+Note: use of `meta.id` is required to associate the schema with the ID used in the `schema.lazy()` call in order to
+create a recursive type (see usage).
+
+__Output type:__ `T`
+
+__Usage:__
+```typescript
+interface RecursiveType {
+  name: string;
+  self: undefined | RecursiveType;
+}
+
+// Do not assign this ID to any other schema to avoid collisions.
+const id = 'myPlugin_myRecursiveType';
+const object = schema.object(
+  {
+    name: schema.string(),
+    self: schema.lazy<RecursiveType>(id),
+  },
+  { meta: { id } }
+);
+```
+
+__Notes:__
+* Preferably use this sparingly and only to create recursive types.
+* Intended to be used only as properties within `schema.object()` types.
+
 ### References
 
 #### `schema.contextRef()`
@@ -471,7 +514,7 @@ __Output type:__ `TReferenceValue`
 
 __Usage:__
 ```typescript
-const valueSchema = schema.object({ 
+const valueSchema = schema.object({
   env: schema.string({ defaultValue: schema.contextRef('envName') }),
 });
 valueSchema.validate({}, { envName: 'dev' });
@@ -479,7 +522,7 @@ valueSchema.validate({}, { envName: 'dev' });
 
 __Notes:__
 * The `@kbn/config-schema` neither validates nor coerces the "dereferenced" value and the developer is responsible for making sure that it has the appropriate type.
-* The root context that Kibana provides during config validation includes lots of useful properties like `environment name` that can be used to provide a strict schema for production and more relaxed one for development. 
+* The root context that Kibana provides during config validation includes lots of useful properties like `environment name` that can be used to provide a strict schema for production and more relaxed one for development.
 
 #### `schema.siblingRef()`
 
@@ -529,7 +572,7 @@ to denote the failed validation or not return anything at all (`void`) otherwise
 Another use case for custom validation functions is when the schema depends on some run-time data:
 
 ```typescript
-const gesSchema = randomRunTimeSeed => schema.string({ 
+const gesSchema = randomRunTimeSeed => schema.string({
   validate: value => value !== randomRunTimeSeed ? 'value is not allowed' : undefined
 });
 

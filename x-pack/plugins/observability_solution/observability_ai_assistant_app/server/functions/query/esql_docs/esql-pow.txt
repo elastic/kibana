@@ -1,22 +1,20 @@
-POW
+## POW
 
-Syntax
-Parameters
-base
-Numeric expression for the base. If null, the function returns null.
-exponent
-Numeric expression for the exponent. If null, the function returns null.
-DescriptionReturns the value of base raised to the power of exponent.
-It is still possible to overflow a double result here; in that case, null will be returned.
-Supported types
-Examples
+The `POW` function in ES|QL returns the value of a base raised to the power of an exponent. It takes two numeric expressions as parameters: the base and the exponent. If either of these parameters is null, the function will return null. It's important to note that it is still possible to overflow a double result here; in that case, null will be returned.
+
+### Examples
+
+Here are a couple of examples of full ES|QL queries using the `POW` function:
+
+1. This query calculates the result of 2.0 raised to the power of 2:
+
 ```esql
 ROW base = 2.0, exponent = 2
 | EVAL result = POW(base, exponent)
 ```
 
-The exponent can be a fraction, which is similar to performing a root.
-For example, the exponent of 0.5 will give the square root of the base:
+2. This query calculates the square root of 4 by raising 4 to the power of 0.5:
+
 ```esql
 ROW base = 4, exponent = 0.5
 | EVAL s = POW(base, exponent)

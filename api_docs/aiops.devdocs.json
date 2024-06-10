@@ -1428,7 +1428,127 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "start": {
+      "parentPluginId": "aiops",
+      "id": "def-public.AiopsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiopsPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/aiops/public/types/index.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "aiops",
+          "id": "def-public.AiopsPluginStart.getPatternAnalysisAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "getPatternAnalysisAvailable",
+          "description": [],
+          "signature": [
+            "() => Promise<(dataView: ",
+            {
+              "pluginId": "dataViews",
+              "scope": "common",
+              "docId": "kibDataViewsPluginApi",
+              "section": "def-common.DataView",
+              "text": "DataView"
+            },
+            ") => Promise<boolean>>"
+          ],
+          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "aiops",
+          "id": "def-public.AiopsPluginStart.PatternAnalysisComponent",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "PatternAnalysisComponent",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<",
+            "LogCategorizationEmbeddableWrapperProps",
+            ", any> | React.FunctionComponent<",
+            "LogCategorizationEmbeddableWrapperProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "aiops",
+          "id": "def-public.AiopsPluginStart.ChangePointDetectionComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "ChangePointDetectionComponent",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "ChangePointDetectionProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/aiops/public/types/index.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "aiops",
+              "id": "def-public.AiopsPluginStart.ChangePointDetectionComponent.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "aiops",
+              "id": "def-public.AiopsPluginStart.ChangePointDetectionComponent.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "aiops",
+      "id": "def-public.AiopsPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "AiopsPluginSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/aiops/public/types/index.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],

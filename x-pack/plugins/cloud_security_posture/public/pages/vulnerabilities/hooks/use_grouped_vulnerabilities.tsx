@@ -7,7 +7,7 @@
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/securitysolution-grouping/src';
+import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';

@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  apiHasType,
+  apiIsOfType,
+  areTriggersDisabled,
+} from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import { type FilterByMapExtentActionApi } from './types';
@@ -53,7 +58,7 @@ export const filterByMapExtentAction = createAction<EmbeddableApiContext>({
     return 'filter';
   },
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
-    if (!isApiCompatible(embeddable) || embeddable.disableTriggers) return false;
+    if (!isApiCompatible(embeddable) || areTriggersDisabled(embeddable)) return false;
     return (
       apiIsOfType(embeddable, MAP_SAVED_OBJECT_TYPE) ||
       (apiHasVisualizeConfig(embeddable) && isLegacyMapApi(embeddable))

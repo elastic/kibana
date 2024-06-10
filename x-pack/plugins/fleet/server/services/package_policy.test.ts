@@ -5196,6 +5196,14 @@ describe('_applyIndexPrivileges()', () => {
     };
   }
 
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
   it('should do nothing if packageStream has no privileges', () => {
     const packageStream = createPackageStream();
     const inputStream = createInputStream();
@@ -5298,6 +5306,34 @@ describe('_applyIndexPrivileges()', () => {
         elasticsearch: {
           privileges: {
             indices: ['auto_configure', 'read_cross_cluster'],
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
+  });
+
+  it('should apply correct privileges for serverless', () => {
+    appContextService.start(createAppContextStartContractMock({}, true));
+    const mixedPrivileges = [
+      'create_doc',
+      'auto_configure',
+      'read_cross_cluster',
+      'idontexist',
+      'delete',
+    ];
+
+    const packageStream = createPackageStream(mixedPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: ['create_doc', 'auto_configure'],
           },
         },
       },

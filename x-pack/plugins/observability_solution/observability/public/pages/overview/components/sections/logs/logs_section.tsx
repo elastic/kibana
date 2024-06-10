@@ -142,11 +142,6 @@ export function LogsSection({ bucketSize }: Props) {
           showLegend
           legendPosition={Position.Right}
           xDomain={{ min, max }}
-          // Please double check if the data passed to the chart contains all the buckets, even the empty ones.
-          // the showLegendExtra will display the last element of the data array as the default legend value
-          // and if empty buckets are filtered out you can probably see a value that doesn't correspond
-          // to the value in the last time bucket visualized.
-          // showLegendExtra
           locale={i18n.getLocale()}
         />
         {series &&

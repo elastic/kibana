@@ -128,7 +128,7 @@ const AlertDetailsAppSection = ({
                 chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
-                threshold={rule.params.count.value}
+                thresholds={[rule.params.count.value]}
                 value={Number(alert.fields[ALERT_EVALUATION_VALUE]?.toFixed(2))}
                 valueFormatter={formatThreshold}
               />
@@ -195,7 +195,7 @@ const AlertDetailsAppSection = ({
                 chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
-                threshold={rule.params.count.value}
+                thresholds={[rule.params.count.value]}
                 value={Number(alert.fields[ALERT_EVALUATION_VALUE])}
                 valueFormatter={formatThreshold}
               />

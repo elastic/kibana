@@ -93,7 +93,7 @@ export function GroupView({
           />
         ))}
 
-      {total > 0 ? (
+      {total > 0 && total > perPage ? (
         <EuiFlexItem>
           <EuiTablePagination
             data-test-subj="sloGroupListPagination"
@@ -103,7 +103,7 @@ export function GroupView({
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              onStateChange({ perPage: newPerPage });
+              onStateChange({ perPage: newPerPage, page: 0 });
             }}
           />
         </EuiFlexItem>

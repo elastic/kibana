@@ -10,15 +10,30 @@ import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
 import { timelineActions } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../../common/mock';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
-const mockDispatch = jest.fn();
-jest.mock('../../../../common/lib/kibana');
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../../store');
+
+const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
   return {
@@ -26,7 +41,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   const mockSourcererReturn = {
     browserFields: {},
     loading: true,
@@ -80,8 +95,8 @@ describe('useDetailPanel', () => {
 
       result.current?.openEventDetailsPanel('123');
 
-      expect(mockDispatch).toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
     });
   });
 

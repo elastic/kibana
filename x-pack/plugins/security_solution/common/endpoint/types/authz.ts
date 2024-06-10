@@ -56,6 +56,8 @@ export interface EndpointAuthz {
   canWriteExecuteOperations: boolean;
   /** If the user has write permissions to use file operations */
   canWriteFileOperations: boolean;
+  /** If user has write permission to use scan file path operations */
+  canWriteScanOperations: boolean;
   /** If the user has write permissions for trusted applications */
   canWriteTrustedApplications: boolean;
   /** If the user has read permissions for trusted applications */

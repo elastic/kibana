@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { RiskEnginePrivilegesCallOut } from '../../../../entity_analytics/components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
 import { HostRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
@@ -95,6 +96,12 @@ export const HostRiskScoreQueryTabBody = ({
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
+
+  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
+
+  if (RiskScoreUpsell) {
+    return <RiskScoreUpsell />;
+  }
 
   if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
     return (

@@ -17,7 +17,6 @@
     "@kbn/core-mount-utils-browser-internal",
     "@kbn/core-notifications-browser",
     "@kbn/data-plugin",
-    "@kbn/dataset-quality-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/i18n",
@@ -51,6 +50,7 @@
     "@kbn/analytics-client",
     "@kbn/core-analytics-browser",
     "@kbn/react-hooks",
+    "@kbn/data-quality-plugin",
   ],
   "exclude": [
     "target/**/*"

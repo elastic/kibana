@@ -152,6 +152,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     currentSelectedSignificantItem,
     currentSelectedGroup,
     undefined,
+    true,
     timeRange
   );
 

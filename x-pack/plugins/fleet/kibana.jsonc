@@ -23,7 +23,8 @@
       "taskManager",
       "files",
       "uiActions",
-      "dashboard"
+      "dashboard",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "features",

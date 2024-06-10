@@ -20,6 +20,7 @@ import {
 } from '../types';
 import {
   ConcreteTaskInstance,
+  createTaskRunError,
   isUnrecoverableError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
@@ -3389,7 +3390,7 @@ describe('Task Runner', () => {
     );
   });
 
-  test('returns user error if all the errors are user error', async () => {
+  test('returns user error if all the errors reported by getLastRunResults are user error', async () => {
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
@@ -3409,6 +3410,39 @@ describe('Task Runner', () => {
       warnings: [],
       outcomeMessage: '',
     }));
+
+    const runnerResult = await taskRunner.run();
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  test('returns a taskRunError as user error when ruleType.executor throws a user error', async () => {
+    const taskRunError = createTaskRunError(new Error(GENERIC_ERROR_MESSAGE), TaskErrorSource.USER);
+
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        throw taskRunError;
+      }
+    );
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
 
     const runnerResult = await taskRunner.run();
 

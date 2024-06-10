@@ -34,6 +34,7 @@ import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
+import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -719,6 +720,7 @@ export const getMetricVisualization = ({
       );
       if (isMetricNonNumeric) {
         errors.push({
+          uniqueId: METRIC_NUMERIC_MAX,
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'dimensionButton', dimensionId: state.maxAccessor }],

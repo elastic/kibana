@@ -15,9 +15,11 @@ import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { LicenseType } from '@kbn/licensing-plugin/server';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
+import { LEGACY_COMPARATORS } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -75,9 +77,10 @@ export function thresholdRuleType(
   logger: Logger,
   locators: CustomThresholdLocators
 ) {
+  const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: oneOfLiterals(Object.values(Comparator)),
+    comparator: oneOfLiterals(comparators),
     timeUnit: schema.string(),
     timeSize: schema.number(),
   };

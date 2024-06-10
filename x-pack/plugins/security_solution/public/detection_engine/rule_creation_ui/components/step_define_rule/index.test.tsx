@@ -207,8 +207,8 @@ jest.mock('../../../../common/components/link_to', () => {
     }),
   };
 });
-jest.mock('../../../../common/containers/sourcerer', () => {
-  const actual = jest.requireActual('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers', () => {
+  const actual = jest.requireActual('../../../../sourcerer/containers');
   return {
     ...actual,
     useSourcererDataView: jest

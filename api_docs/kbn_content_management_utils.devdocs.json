@@ -3035,6 +3035,20 @@
           },
           {
             "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
             "id": "def-common.SOWithMetadata.error",
             "type": "Object",
             "tags": [],

@@ -19,7 +19,6 @@ describe('getAlertsForNotification', () => {
 
     const { newAlerts, activeAlerts } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      true,
       'default',
       0,
       {
@@ -90,7 +89,6 @@ describe('getAlertsForNotification', () => {
       currentRecoveredAlerts,
     } = getAlertsForNotification(
       DEFAULT_FLAPPING_SETTINGS,
-      true,
       'default',
       0,
       {},
@@ -226,7 +224,6 @@ describe('getAlertsForNotification', () => {
     const { newAlerts, activeAlerts, recoveredAlerts, currentRecoveredAlerts } =
       getAlertsForNotification(
         DISABLE_FLAPPING_SETTINGS,
-        true,
         'default',
         0,
         {},
@@ -347,120 +344,6 @@ describe('getAlertsForNotification', () => {
     `);
   });
 
-  test('should return flapping pending recovered alerts as active alerts only when notifyWhen is onActionGroupChange', () => {
-    const alert1 = new Alert('1', { meta: { flapping: true, pendingRecoveredCount: 3 } });
-    const alert2 = new Alert('2', { meta: { flapping: false } });
-    const alert3 = new Alert('3', { meta: { flapping: true } });
-
-    const {
-      newAlerts,
-      activeAlerts,
-      currentActiveAlerts,
-      recoveredAlerts,
-      currentRecoveredAlerts,
-    } = getAlertsForNotification(
-      DEFAULT_FLAPPING_SETTINGS,
-      false,
-      'default',
-      0,
-      {},
-      {},
-      {
-        // recovered alerts
-        '1': alert1,
-        '2': alert2,
-        '3': alert3,
-      },
-      {
-        // current recovered alerts
-        '1': alert1,
-        '2': alert2,
-        '3': alert3,
-      }
-    );
-
-    expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
-    expect(alertsWithAnyUUID(activeAlerts)).toMatchInlineSnapshot(`
-      Object {
-        "3": Object {
-          "meta": Object {
-            "activeCount": 0,
-            "flapping": true,
-            "flappingHistory": Array [],
-            "maintenanceWindowIds": Array [],
-            "pendingRecoveredCount": 1,
-            "uuid": Any<String>,
-          },
-          "state": Object {},
-        },
-      }
-    `);
-    expect(Object.values(activeAlerts).map((a) => a.getScheduledActionOptions()))
-      .toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actionGroup": "default",
-          "context": Object {},
-          "state": Object {},
-        },
-      ]
-    `);
-    expect(currentActiveAlerts).toMatchInlineSnapshot(`Object {}`);
-    expect(
-      Object.values(currentActiveAlerts).map((a) => a.getScheduledActionOptions())
-    ).toMatchInlineSnapshot(`Array []`);
-    expect(alertsWithAnyUUID(recoveredAlerts)).toMatchInlineSnapshot(`
-      Object {
-        "1": Object {
-          "meta": Object {
-            "activeCount": 0,
-            "flapping": true,
-            "flappingHistory": Array [],
-            "maintenanceWindowIds": Array [],
-            "pendingRecoveredCount": 0,
-            "uuid": Any<String>,
-          },
-          "state": Object {},
-        },
-        "2": Object {
-          "meta": Object {
-            "activeCount": 0,
-            "flapping": false,
-            "flappingHistory": Array [],
-            "maintenanceWindowIds": Array [],
-            "uuid": Any<String>,
-          },
-          "state": Object {},
-        },
-      }
-    `);
-    expect(alertsWithAnyUUID(currentRecoveredAlerts)).toMatchInlineSnapshot(`
-      Object {
-        "1": Object {
-          "meta": Object {
-            "activeCount": 0,
-            "flapping": true,
-            "flappingHistory": Array [],
-            "maintenanceWindowIds": Array [],
-            "pendingRecoveredCount": 0,
-            "uuid": Any<String>,
-          },
-          "state": Object {},
-        },
-        "2": Object {
-          "meta": Object {
-            "activeCount": 0,
-            "flapping": false,
-            "flappingHistory": Array [],
-            "maintenanceWindowIds": Array [],
-            "uuid": Any<String>,
-          },
-          "state": Object {},
-        },
-      }
-    `);
-  });
-
   test('should increment activeCount for all active alerts', () => {
     const alert1 = new Alert('1', {
       meta: { activeCount: 1, uuid: 'uuid-1' },
@@ -470,7 +353,6 @@ describe('getAlertsForNotification', () => {
     const { newAlerts, activeAlerts, currentActiveAlerts, delayedAlertsCount } =
       getAlertsForNotification(
         DEFAULT_FLAPPING_SETTINGS,
-        true,
         'default',
         0,
         {
@@ -557,7 +439,6 @@ describe('getAlertsForNotification', () => {
     const { recoveredAlerts, currentRecoveredAlerts, delayedAlertsCount } =
       getAlertsForNotification(
         DEFAULT_FLAPPING_SETTINGS,
-        true,
         'default',
         0,
         {},
@@ -630,7 +511,6 @@ describe('getAlertsForNotification', () => {
     const { newAlerts, activeAlerts, currentActiveAlerts, delayedAlertsCount } =
       getAlertsForNotification(
         DEFAULT_FLAPPING_SETTINGS,
-        true,
         'default',
         5,
         {
@@ -683,7 +563,6 @@ describe('getAlertsForNotification', () => {
     const { recoveredAlerts, currentRecoveredAlerts, delayedAlertsCount } =
       getAlertsForNotification(
         DEFAULT_FLAPPING_SETTINGS,
-        true,
         'default',
         5,
         {},
@@ -710,7 +589,6 @@ describe('getAlertsForNotification', () => {
     const { newAlerts, activeAlerts, currentActiveAlerts, delayedAlertsCount } =
       getAlertsForNotification(
         DEFAULT_FLAPPING_SETTINGS,
-        true,
         'default',
         1,
         {},

@@ -15,14 +15,13 @@ import React from 'react';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { BehaviorSubject } from 'rxjs';
 
 const utilityProps = {
   timeBuckets: timeBucketsMock,
   chartTheme: kibanaContextMock.services.charts.theme.useChartsBaseTheme(),
   onPointerUpdate: jest.fn(),
-  cursor: {
-    x: 10432423,
-  },
+  cursor$: new BehaviorSubject({ isDataHistorgram: true, cursor: { x: 10432423 } }),
 };
 
 describe('ExplorerChart', () => {

@@ -18,8 +18,13 @@ import {
   DENSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS,
   SPARSE_INPUT_OUTPUT_ONE_INDEX,
   SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS,
+  SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS_MODEL_ID_KEYWORD,
 } from '../../__mocks__/fetch_query_source_fields.mock';
-import { parseFieldsCapabilities } from './fetch_query_source_fields';
+import {
+  fetchFields,
+  getModelIdFields,
+  parseFieldsCapabilities,
+} from './fetch_query_source_fields';
 
 describe('fetch_query_source_fields', () => {
   describe('parseFieldsCapabilities', () => {
@@ -248,6 +253,94 @@ describe('fetch_query_source_fields', () => {
           dense_vector_query_fields: [],
           source_fields: ['text'],
           skipped_fields: 2,
+        },
+      });
+    });
+  });
+
+  describe('getModelIdFields', () => {
+    it('should return the model_id field for field specific - dense', () => {
+      expect(getModelIdFields(DENSE_PASSAGE_FIRST_SINGLE_INDEX_FIELD_CAPS)).toEqual([
+        {
+          aggField: 'page_content_e5_embbeding.model_id.keyword',
+          path: 'page_content_e5_embbeding.model_id',
+        },
+        { aggField: 'page_content_ner.model_id', path: 'page_content_ner.model_id' },
+      ]);
+    });
+
+    it('should return the model_id field for field specific - elser', () => {
+      expect(getModelIdFields(DENSE_VECTOR_DOCUMENT_FIRST_FIELD_CAPS)).toEqual([
+        { aggField: 'passages.vector.model_id.keyword', path: 'passages.vector.model_id' },
+      ]);
+    });
+
+    it('should return top level model_id', () => {
+      expect(getModelIdFields(SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS)).toEqual([
+        { aggField: 'model_id.keyword', path: 'model_id' },
+      ]);
+    });
+
+    it('should return the model_id as aggField if its a keyword field', () => {
+      expect(getModelIdFields(SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS_MODEL_ID_KEYWORD)).toEqual([
+        { aggField: 'model_id', path: 'model_id' },
+      ]);
+    });
+  });
+
+  describe('fetchFields', () => {
+    it('should perform a search request with the correct parameters', async () => {
+      const client = {
+        asCurrentUser: {
+          fieldCaps: jest.fn().mockResolvedValue(DENSE_PASSAGE_FIRST_SINGLE_INDEX_FIELD_CAPS),
+          search: jest.fn().mockResolvedValue(DENSE_PASSAGE_FIRST_SINGLE_INDEX_DOC),
+        },
+      } as any;
+      const indices = ['search-example-main'];
+      await fetchFields(client, indices);
+      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
+        index: 'search-example-main',
+        body: {
+          size: 0,
+          aggs: {
+            'page_content_e5_embbeding.model_id': {
+              terms: {
+                field: 'page_content_e5_embbeding.model_id.keyword',
+                size: 1,
+              },
+            },
+            'page_content_ner.model_id': {
+              terms: {
+                field: 'page_content_ner.model_id',
+                size: 1,
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should perform a search request with the correct parameters with top level model id', async () => {
+      const client = {
+        asCurrentUser: {
+          fieldCaps: jest.fn().mockResolvedValue(SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS),
+          search: jest.fn().mockResolvedValue(SPARSE_INPUT_OUTPUT_ONE_INDEX),
+        },
+      } as any;
+      const indices = ['index'];
+      await fetchFields(client, indices);
+      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
+        index: 'index',
+        body: {
+          size: 0,
+          aggs: {
+            model_id: {
+              terms: {
+                field: 'model_id.keyword',
+                size: 1,
+              },
+            },
+          },
         },
       });
     });

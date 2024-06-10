@@ -9,11 +9,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { StartDependencies } from '../plugin';
 
-export type StartServices<TAdditionalServices> = CoreStart & {
+export type CoreStartWithStartDeps = CoreStart & {
   plugins: { start: StartDependencies };
-} & TAdditionalServices & {};
+} & StartDependencies;
 
 const useTypedKibana = <AdditionalServices extends object = {}>() =>
-  useKibana<StartServices<AdditionalServices>>();
+  useKibana<AdditionalServices & CoreStartWithStartDeps>();
 
 export { useTypedKibana as useKibana };

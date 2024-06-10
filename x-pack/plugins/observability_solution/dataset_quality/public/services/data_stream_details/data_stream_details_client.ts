@@ -8,21 +8,26 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
-  getDataStreamsSettingsResponseRt,
+  getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
+  getDataStreamsSettingsResponseRt,
   integrationDashboardsRT,
 } from '../../../common/api_types';
 import {
-  GetDataStreamsStatsError,
-  GetDataStreamSettingsParams,
-  GetDataStreamSettingsResponse,
+  DataStreamDetails,
+  DataStreamSettings,
+  DegradedFieldResponse,
+  GetDataStreamDegradedFieldsParams,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
+  GetDataStreamSettingsParams,
+  GetDataStreamSettingsResponse,
+  GetDataStreamsStatsError,
   GetIntegrationDashboardsParams,
   GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';
-import { DataStreamDetails, DataStreamSettings } from '../../../common/data_streams_stats';
 import { IDataStreamDetailsClient } from './types';
+import { GetDataStreamsDetailsError } from '../../../common/data_stream_details';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   constructor(private readonly http: HttpStart) {}
@@ -64,6 +69,33 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     )(response);
 
     return dataStreamDetails as DataStreamDetails;
+  }
+
+  public async getDataStreamDegradedFields({
+    dataStream,
+    start,
+    end,
+  }: GetDataStreamDegradedFieldsParams) {
+    const response = await this.http
+      .get<DegradedFieldResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/degraded_fields`,
+        {
+          query: { start, end },
+        }
+      )
+      .catch((error) => {
+        throw new GetDataStreamsDetailsError(
+          `Failed to fetch data stream degraded fields": ${error}`
+        );
+      });
+
+    return decodeOrThrow(
+      getDataStreamDegradedFieldsResponseRt,
+      (message: string) =>
+        new GetDataStreamsDetailsError(
+          `Failed to decode data stream degraded fields response: ${message}"`
+        )
+    )(response);
   }
 
   public async getIntegrationDashboards({ integration }: GetIntegrationDashboardsParams) {

@@ -6,10 +6,9 @@ exports[`UnauthorizedPrompt renders as expected 1`] = `
     <p
       data-test-subj="permissionDeniedMessage"
     >
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="You don't have permission to manage spaces."
         id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedDescription"
-        values={Object {}}
       />
     </p>
   }
@@ -17,10 +16,9 @@ exports[`UnauthorizedPrompt renders as expected 1`] = `
   iconType="spacesApp"
   title={
     <h2>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Permission denied"
         id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedTitle"
-        values={Object {}}
       />
     </h2>
   }

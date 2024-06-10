@@ -11,9 +11,8 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
 export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
-  const model = findInventoryModel('host');
-
   const { value: charts = [] } = useAsync(async () => {
+    const model = findInventoryModel('host');
     const { cpu, disk, memory, network } = await model.metrics.getCharts();
 
     return [

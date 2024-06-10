@@ -5,14 +5,10 @@
  * 2.0.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  GroupOption,
-  GroupPanelRenderer,
-  GroupStatsRenderer,
-} from '@kbn/securitysolution-grouping/src';
+import { GroupOption, GroupPanelRenderer, GroupStatsRenderer } from '@kbn/grouping/src';
 
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 

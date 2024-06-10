@@ -12,6 +12,7 @@ import { createEditSloAlertsPanelAction } from './edit_slo_alerts_panel';
 import { createEditSloOverviewPanelAction } from './edit_slo_overview_panel';
 import { createOverviewPanelAction } from './create_overview_panel_action';
 import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
+import { createAddAlertsPanelAction } from './create_alerts_panel_action';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
 
 export function registerSloUiActions(
@@ -23,10 +24,12 @@ export function registerSloUiActions(
   const editSloOverviewPanelAction = createEditSloOverviewPanelAction(core.getStartServices);
   const addOverviewPanelAction = createOverviewPanelAction(core.getStartServices);
   const addErrorBudgetPanelAction = createAddErrorBudgetPanelAction(core.getStartServices);
+  const addAlertsPanelAction = createAddAlertsPanelAction(core.getStartServices);
 
   // Assign triggers
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloOverviewPanelAction);
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addOverviewPanelAction);
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addErrorBudgetPanelAction);
+  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addAlertsPanelAction);
 }

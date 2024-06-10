@@ -48,21 +48,11 @@ const processAdditionalProperties = (ctx: IContext, schema: OpenAPIV3.SchemaObje
 export const processRecord = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   schema.type = 'object';
   processAdditionalProperties(ctx, schema);
-  if (schema.additionalProperties) {
-    schema.additionalProperties = ctx.processRef(
-      schema.additionalProperties as OpenAPIV3.SchemaObject
-    );
-  }
 };
 
 export const processMap = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   schema.type = 'object';
   processAdditionalProperties(ctx, schema);
-  if (schema.additionalProperties) {
-    schema.additionalProperties = ctx.processRef(
-      schema.additionalProperties as OpenAPIV3.SchemaObject
-    );
-  }
 };
 
 export const processAllTypes = (schema: OpenAPIV3.SchemaObject): void => {

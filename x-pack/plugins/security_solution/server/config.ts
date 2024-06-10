@@ -128,7 +128,7 @@ export const configSchema = schema.object({
    * Complete External Response Actions task: Timeout value for how long the task should run
    */
   completeExternalResponseActionsTaskTimeout: schema.string({
-    defaultValue: '20m',
+    defaultValue: '5m',
     validate: isValidTaskManagerDuration,
   }),
 

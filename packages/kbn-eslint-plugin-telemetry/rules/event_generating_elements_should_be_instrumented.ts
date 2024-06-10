@@ -7,7 +7,7 @@
  */
 
 import type { Rule } from 'eslint';
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
 
 import { checkNodeForExistingDataTestSubjProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
@@ -33,7 +33,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
     fixable: 'code',
   },
   create(context) {
-    const { getCwd, getFilename, getScope, report } = context;
+    const { getCwd, getFilename, sourceCode, report } = context;
 
     return {
       JSXIdentifier: (node: TSESTree.Node) => {
@@ -52,7 +52,9 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
           return;
         }
 
-        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, getScope);
+        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, () =>
+          sourceCode.getScope(node as TSNode)
+        );
 
         if (hasDataTestSubjProp) {
           // JSXOpeningElement already has a prop for data-test-subj. Bail.
@@ -67,7 +69,8 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const appName = getAppName(fileName, cwd);
 
         // 2. Component name
-        const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
         const componentName = `${functionName.charAt(0).toUpperCase()}${functionName.slice(1)}`;
 

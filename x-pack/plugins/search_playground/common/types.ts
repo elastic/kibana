@@ -51,3 +51,10 @@ export interface SearchPlaygroundConfigType {
     enabled: boolean;
   };
 }
+
+export interface ModelProvider {
+  name: string;
+  model: string;
+  promptTokenLimit: number;
+  provider: LLMs;
+}

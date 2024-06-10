@@ -19,5 +19,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/core-http-browser",
     "@kbn/config-schema",
+    "@kbn/react-kibana-context-render",
   ]
 }

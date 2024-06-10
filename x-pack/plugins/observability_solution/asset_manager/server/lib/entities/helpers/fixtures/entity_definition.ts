@@ -7,22 +7,21 @@
 
 import { entityDefinitionSchema } from '@kbn/entities-schema';
 export const entityDefinition = entityDefinitionSchema.parse({
-  id: 'admin-console-logs-service',
+  id: 'admin-console-services',
   name: 'Services for Admin Console',
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
-  timestampField: '@timestamp',
-  identityFields: ['log.logger'],
-  identityTemplate: 'service:{{log.logger}}',
-  metadata: ['tags', 'host.name', 'kubernetes.pod.name'],
-  staticFields: {
-    projectId: '1234',
+  history: {
+    timestampField: '@timestamp',
+    interval: '1m',
   },
-  lookback: '5m',
+  identityFields: ['log.logger', { field: 'event.category', optional: true }],
+  displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',
+  metadata: ['tags', 'host.name'],
   metrics: [
     {
       name: 'logRate',
-      equation: 'A / 5',
+      equation: 'A',
       metrics: [
         {
           name: 'A',
@@ -33,12 +32,12 @@ export const entityDefinition = entityDefinitionSchema.parse({
     },
     {
       name: 'errorRate',
-      equation: 'A / 5',
+      equation: 'A',
       metrics: [
         {
           name: 'A',
           aggregation: 'doc_count',
-          filter: 'log.level: error',
+          filter: 'log.level: "ERROR"',
         },
       ],
     },

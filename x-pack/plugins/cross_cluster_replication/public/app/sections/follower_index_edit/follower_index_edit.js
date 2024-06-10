@@ -113,7 +113,7 @@ export class FollowerIndexEdit extends PureComponent {
             error: i18n.translate(
               'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
               {
-                defaultMessage: `The follower index '{name}' does not exist.`,
+                defaultMessage: `The follower index ''{name}'' does not exist.`,
                 values: { name },
               }
             ),
@@ -158,7 +158,7 @@ export class FollowerIndexEdit extends PureComponent {
     const title = i18n.translate(
       'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
       {
-        defaultMessage: `Update follower index '{id}'?`,
+        defaultMessage: `Update follower index ''{id}''?`,
         values: { id: followerIndexId },
       }
     );

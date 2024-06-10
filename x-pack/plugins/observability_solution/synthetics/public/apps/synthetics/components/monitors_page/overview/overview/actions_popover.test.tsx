@@ -12,6 +12,7 @@ import { ActionsPopover } from './actions_popover';
 import * as editMonitorLocatorModule from '../../../../hooks/use_edit_monitor_locator';
 import * as monitorDetailLocatorModule from '../../../../hooks/use_monitor_detail_locator';
 import * as monitorEnableHandlerModule from '../../../../hooks/use_monitor_enable_handler';
+import * as enablementHook from '../../../../hooks/use_enablement';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { MonitorOverviewItem } from '../types';
 
@@ -19,6 +20,17 @@ describe('ActionsPopover', () => {
   let testMonitor: MonitorOverviewItem;
 
   beforeEach(() => {
+    jest.spyOn(enablementHook, 'useEnablement').mockReturnValue({
+      isServiceAllowed: true,
+      areApiKeysEnabled: true,
+      canManageApiKeys: true,
+      canEnable: true,
+      isEnabled: true,
+      invalidApiKeyError: false,
+      loading: false,
+      error: null,
+    });
+
     testMonitor = {
       location: {
         id: 'us_central',
@@ -106,6 +118,7 @@ describe('ActionsPopover', () => {
         locationId={testMonitor.location.id}
       />
     );
+
     expect(getByRole('link')?.getAttribute('href')).toBe('/a/test/edit/url');
   });
 

@@ -609,6 +609,9 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
+      // Mock summary repository es searches
+      esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
+      esClientMock.search.mockResolvedValueOnce(generateEsSummaryResponse());
 
       // @ts-ignore
       servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
@@ -673,6 +676,13 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: 'foo',
+          sliValue: 0.9,
+          sloStatus: 'HEALTHY',
+          sloErrorBudgetRemaining: 0.4,
+          sloErrorBudgetConsumed: 0.6,
         }),
       });
 
@@ -684,6 +694,13 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: 'bar',
+          sliValue: 0.9,
+          sloStatus: 'HEALTHY',
+          sloErrorBudgetRemaining: 0.4,
+          sloErrorBudgetConsumed: 0.6,
         }),
       });
     });
@@ -788,6 +805,26 @@ function generateEsResponse(
             )
           ),
       },
+    },
+  };
+}
+
+function generateEsSummaryResponse() {
+  return {
+    ...commonEsResponse,
+    hits: {
+      hits: [
+        {
+          _index: '.slo-observability.summary-v3.2',
+          _id: 'X19fX19fJWJbqiqq1WN9x1e_kHkXpwAA',
+          _source: {
+            sliValue: 0.9,
+            status: 'HEALTHY',
+            errorBudgetConsumed: 0.6,
+            errorBudgetRemaining: 0.4,
+          },
+        },
+      ],
     },
   };
 }

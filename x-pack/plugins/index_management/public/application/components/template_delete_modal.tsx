@@ -36,7 +36,7 @@ export const TemplateDeleteModal = ({
             ? i18n.translate(
                 'xpack.idxMgmt.deleteTemplatesModal.successDeleteSingleNotificationMessageText',
                 {
-                  defaultMessage: "Deleted template '{templateName}'",
+                  defaultMessage: "Deleted template ''{templateName}''",
                   values: { templateName: templatesToDelete[0].name },
                 }
               )
@@ -67,7 +67,7 @@ export const TemplateDeleteModal = ({
               }
             )
           : i18n.translate('xpack.idxMgmt.deleteTemplatesModal.errorNotificationMessageText', {
-              defaultMessage: "Error deleting template '{name}'",
+              defaultMessage: "Error deleting template ''{name}''",
               values: { name: (errors && errors[0].name) || templatesToDelete[0] },
             });
         notificationService.showDangerToast(errorMessage);

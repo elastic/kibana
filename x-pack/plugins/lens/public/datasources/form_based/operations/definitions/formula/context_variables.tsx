@@ -24,9 +24,20 @@ import type {
   GenericIndexPatternColumn,
 } from '../../../../..';
 import type { DateRange } from '../../../../../../common/types';
-import type { GenericOperationDefinition, OperationDefinition } from '..';
+import type {
+  FieldBasedOperationErrorMessage,
+  GenericOperationDefinition,
+  OperationDefinition,
+} from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../../../types';
+import {
+  INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
+  INTERVAL_OP_MISSING_TIME_RANGE,
+  INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+  TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
+  TIMERANGE_OP_MISSING_TIME_RANGE,
+} from '../../../../../user_messages_ids';
 
 // copied over from layer_helpers
 // TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
@@ -72,23 +83,25 @@ function getTimeRangeErrorMessages(
   _columnId: string,
   indexPattern: IndexPattern,
   dateRange?: DateRange | undefined
-) {
-  const errors = [];
+): FieldBasedOperationErrorMessage[] {
+  const errors: FieldBasedOperationErrorMessage[] = [];
   if (!indexPattern.timeFieldName) {
-    errors.push(
-      i18n.translate('xpack.lens.indexPattern.dateRange.dataViewNoTimeBased', {
+    errors.push({
+      uniqueId: TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
+      message: i18n.translate('xpack.lens.indexPattern.dateRange.dataViewNoTimeBased', {
         defaultMessage: 'The current dataView is not time based',
-      })
-    );
+      }),
+    });
   }
   if (!dateRange) {
-    errors.push(
-      i18n.translate('xpack.lens.indexPattern.dateRange.noTimeRange', {
+    errors.push({
+      uniqueId: TIMERANGE_OP_MISSING_TIME_RANGE,
+      message: i18n.translate('xpack.lens.indexPattern.dateRange.noTimeRange', {
         defaultMessage: 'The current time range interval is not available',
-      })
-    );
+      }),
+    });
   }
-  return errors.length ? errors : undefined;
+  return errors;
 }
 
 export const timeRangeOperation = createContextValueBasedOperation<TimeRangeIndexPatternColumn>({
@@ -107,7 +120,7 @@ export interface NowIndexPatternColumn extends ReferenceBasedIndexPatternColumn 
 }
 
 function getNowErrorMessage() {
-  return undefined;
+  return [];
 }
 
 export const nowOperation = createContextValueBasedOperation<NowIndexPatternColumn>({
@@ -132,37 +145,40 @@ function getIntervalErrorMessages(
   dateRange?: DateRange | undefined,
   operationDefinitionMap?: Record<string, GenericOperationDefinition> | undefined,
   targetBars?: number
-) {
-  const errors = [];
+): FieldBasedOperationErrorMessage[] {
+  const errors: FieldBasedOperationErrorMessage[] = [];
   if (!targetBars) {
-    errors.push(
-      i18n.translate('xpack.lens.indexPattern.interval.noTargetBars', {
+    errors.push({
+      uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+      message: i18n.translate('xpack.lens.indexPattern.interval.noTargetBars', {
         defaultMessage: `Missing "{uiSettingVar}" value`,
         values: {
           uiSettingVar: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
         },
-      })
-    );
+      }),
+    });
   }
   if (!dateRange) {
-    errors.push(
-      i18n.translate('xpack.lens.indexPattern.interval.noTimeRange', {
+    errors.push({
+      uniqueId: INTERVAL_OP_MISSING_TIME_RANGE,
+      message: i18n.translate('xpack.lens.indexPattern.interval.noTimeRange', {
         defaultMessage: 'The current time range interval is not available',
-      })
-    );
+      }),
+    });
   }
   if (
     !Object.values(layer.columns).some((column) =>
       isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
     )
   ) {
-    errors.push(
-      i18n.translate('xpack.lens.indexPattern.interval.noDateHistogramColumn', {
+    errors.push({
+      uniqueId: INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
+      message: i18n.translate('xpack.lens.indexPattern.interval.noDateHistogramColumn', {
         defaultMessage: 'Cannot compute an interval without a date histogram column configured',
-      })
-    );
+      }),
+    });
   }
-  return errors.length ? errors : undefined;
+  return errors;
 }
 
 export const intervalOperation = createContextValueBasedOperation<IntervalIndexPatternColumn>({

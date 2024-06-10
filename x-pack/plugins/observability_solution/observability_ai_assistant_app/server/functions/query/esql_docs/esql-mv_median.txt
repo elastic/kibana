@@ -1,18 +1,29 @@
-MV_MEDIAN
+## MV_MEDIAN
 
-Syntax
-Parameters
-number
-Multivalue expression.
-DescriptionConverts a multivalued field into a single valued field containing the median value.Supported types
-Examples
+The `MV_MEDIAN` function in ES|QL converts a multivalued field into a single valued field containing the median value. If the row has an even number of values for a column, the result will be the average of the middle two entries. If the column is not floating point, the average rounds down.
+
+### Syntax
+
+`MV_MEDIAN(number)`
+
+#### Parameters
+
+`number`: Multivalue expression.
+
+### Examples
+
+Here are a couple of examples of how you can use the `MV_MEDIAN` function in ES|QL queries:
+
 ```esql
 ROW a=[3, 5, 1]
 | EVAL median_a = MV_MEDIAN(a)
 ```
 
-If the row has an even number of values for a column, the result will be the average of the middle two entries. If the column is not floating point, the average rounds down:
+In this example, the `MV_MEDIAN` function calculates the median of the values in the `a` array, which are `[3, 5, 1]`. The median value is `3`.
+
 ```esql
 ROW a=[3, 7, 1, 6]
 | EVAL median_a = MV_MEDIAN(a)
 ```
+
+In this example, the `MV_MEDIAN` function calculates the median of the values in the `a` array, which are `[3, 7, 1, 6]`. Since there is an even number of values, the function calculates the average of the middle two entries, which results in `4`.

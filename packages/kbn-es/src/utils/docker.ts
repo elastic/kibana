@@ -486,6 +486,10 @@ export function resolveEsArgs(
   ) {
     const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
+    // The mock IDP setup requires a custom role mapping, but since native role mappings are disabled by default in
+    // Serverless, we have to re-enable them explicitly here.
+    esArgs.set('xpack.security.authc.native_role_mappings.enabled', 'true');
+
     esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,

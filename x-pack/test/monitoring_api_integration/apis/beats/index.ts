@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { installPackage } from '../../packages';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Beats', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/182783
+  describe.skip('Beats', () => {
     before(() => installPackage(getService('supertest'), 'beat'));
 
     loadTestFile(require.resolve('./overview'));

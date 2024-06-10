@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
 import { SloSelector as Component } from './slo_selector';
 
 export default {

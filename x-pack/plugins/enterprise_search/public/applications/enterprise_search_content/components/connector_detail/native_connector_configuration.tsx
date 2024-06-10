@@ -38,11 +38,11 @@ import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_co
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { hasConfiguredConfiguration } from '../../utils/has_configured_configuration';
 
-import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
 import { ResearchConfiguration } from '../search_index/connector/native_connector_configuration/research_configuration';
+import { SyncsContextMenu } from '../shared/header_actions/syncs_context_menu';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';

@@ -139,6 +139,56 @@ export function createLogRecord(
     .timestamp(timestamp);
 }
 
+/*
+The helped function generates 2 sets of Malformed Docs for the given dataset.
+1 set has more Malformed fields than the second one. This help in having different counts and hence sorting
+ */
+export function createDegradedFieldsRecord({
+  to,
+  count = 1,
+  dataset,
+}: {
+  to: string;
+  count?: number;
+  dataset: string;
+}) {
+  return timerange(moment(to).subtract(count, 'minute'), moment(to))
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => {
+      return Array(count)
+        .fill(0)
+        .flatMap((_, index) => [
+          log
+            .create()
+            .dataset(dataset)
+            .message(MESSAGE_LOG_LEVELS[0].message)
+            .logLevel(MORE_THAN_1024_CHARS)
+            .service(SERVICE_NAMES[0])
+            .namespace(defaultNamespace)
+            .defaults({
+              'trace.id': generateShortId(),
+              'agent.name': 'synth-agent',
+              'cloud.availability_zone': MORE_THAN_1024_CHARS,
+            })
+            .timestamp(timestamp),
+          log
+            .create()
+            .dataset(dataset)
+            .message(MESSAGE_LOG_LEVELS[1].message)
+            .logLevel(MESSAGE_LOG_LEVELS[1].level)
+            .service(SERVICE_NAMES[0])
+            .namespace(defaultNamespace)
+            .defaults({
+              'trace.id': generateShortId(),
+              'agent.name': 'synth-agent',
+              'cloud.availability_zone': MORE_THAN_1024_CHARS,
+            })
+            .timestamp(timestamp),
+        ]);
+    });
+}
+
 export const datasetNames = ['synth.1', 'synth.2', 'synth.3'];
 export const defaultNamespace = 'default';
 

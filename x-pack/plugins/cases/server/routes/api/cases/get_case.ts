@@ -30,6 +30,10 @@ export const getCaseRoute = createCasesRoute({
   method: 'get',
   path: CASE_DETAILS_URL,
   params,
+  routerOptions: {
+    access: 'public',
+    summary: `Get a case`,
+  },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
       const isIncludeCommentsParamProvidedByTheUser =

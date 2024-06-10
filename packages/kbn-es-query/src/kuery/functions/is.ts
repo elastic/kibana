@@ -106,11 +106,6 @@ export function toElasticsearchQuery(
     });
   }
 
-  // Special case for wildcards where there are no fields or all fields share the same prefix
-  if (isExistsQuery && (!fields?.length || fields?.length === indexPattern?.fields.length)) {
-    return { match_all: {} };
-  }
-
   const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
     const isKeywordField = field.esTypes?.length === 1 && field.esTypes.includes('keyword');
     const wrapWithNestedQuery = (query: any) => {

@@ -33,6 +33,7 @@ export const useGetSentinelOneAgentStatus = (
     queryKey: ['get-agent-status', agentIds],
     refetchInterval: 5000,
     ...options,
+    enabled: agentType === 'sentinel_one',
     queryFn: () =>
       http
         .get<{ data: AgentStatusInfo }>(AGENT_STATUS_ROUTE, {

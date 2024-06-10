@@ -32,7 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+      await dashboard.saveDashboard(DASHBOARD_NAME, {
+        exitFromEditMode: false,
+        saveAsNew: true,
+      });
     });
 
     after(async () => {

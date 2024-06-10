@@ -27,7 +27,7 @@ import { useQueryToggle } from '../../containers/query_toggle';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
   MatrixHistogramConfigs & {

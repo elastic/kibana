@@ -70,7 +70,12 @@ export class AssetManagerServerPlugin
     });
 
     const router = core.http.createRouter();
-    setupRoutes<RequestHandlerContext>({ router, assetClient, logger: this.logger });
+    setupRoutes<RequestHandlerContext>({
+      router,
+      assetClient,
+      logger: this.logger,
+      spaces: plugins.spaces,
+    });
 
     return {
       assetClient,

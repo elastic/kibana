@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CLOUD_SERVERLESS } from '../../env_var_names_constants';
+import { IS_SERVERLESS } from '../../env_var_names_constants';
 
-type DefaultUsername = 'testing-internal' | 'system_indices_superuser';
+type DefaultUsername = 'platform_engineer' | 'system_indices_superuser';
 
 export const getDefaultUsername = (): DefaultUsername => {
-  const isMKIserverless: boolean = Cypress.env(CLOUD_SERVERLESS);
-  return isMKIserverless ? 'testing-internal' : 'system_indices_superuser';
+  const isServerless: boolean = Cypress.env(IS_SERVERLESS);
+  return isServerless ? 'platform_engineer' : 'system_indices_superuser';
 };

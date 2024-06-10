@@ -256,7 +256,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         const errorMessage = i18n.translate(
           'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.errorDataRetentionNotification',
           {
-            defaultMessage: "Error updating data retention: '{error}'",
+            defaultMessage: "Error updating data retention: ''{error}''",
             values: { error: error.message },
           }
         );

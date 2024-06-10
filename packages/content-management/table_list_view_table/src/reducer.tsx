@@ -11,8 +11,6 @@ import type { State } from './table_list_view_table';
 import type { Action } from './actions';
 
 export function getReducer<T extends UserContentCommonSchema>() {
-  let sortColumnChanged = false;
-
   return (state: State<T>, action: Action<T>): State<T> => {
     switch (action.type) {
       case 'onFetchItems': {
@@ -35,7 +33,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
 
           // Only change the table sort if it hasn't been changed already.
           // For example if its state comes from the URL, we don't want to override it here.
-          if (hasUpdatedAtMetadata && !sortColumnChanged) {
+          if (hasUpdatedAtMetadata && !state.sortColumnChanged) {
             tableSort = {
               field: 'updatedAt' as const,
               direction: 'desc' as const,
@@ -89,10 +87,6 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onTableChange': {
-        if (action.data.sort) {
-          sortColumnChanged = true;
-        }
-
         const tableSort = action.data.sort ?? state.tableSort;
         const pageIndex = action.data.page?.pageIndex ?? state.pagination.pageIndex;
         const pageSize = action.data.page?.pageSize ?? state.pagination.pageSize;
@@ -109,6 +103,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
           },
           tableSort,
           tableFilter,
+          sortColumnChanged: state.sortColumnChanged || Boolean(action.data.sort),
         };
       }
       case 'showConfirmDeleteItemsModal': {

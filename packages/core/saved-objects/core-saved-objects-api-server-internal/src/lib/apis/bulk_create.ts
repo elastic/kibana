@@ -85,6 +85,7 @@ export const performBulkCreate = async <T>(
   } = options;
   const time = getCurrentTime();
   const createdBy = userHelper.getCurrentUserProfileUid();
+  const updatedBy = createdBy;
 
   let preflightCheckIndexCounter = 0;
   const expectedResults = objects.map<ExpectedResult>((object) => {
@@ -234,6 +235,7 @@ export const performBulkCreate = async <T>(
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),
+        ...(updatedBy && { updated_by: updatedBy }),
         references: object.references || [],
         originId,
       }) as SavedObjectSanitizedDoc<T>;

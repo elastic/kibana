@@ -30,7 +30,11 @@ import {
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig } from '@kbn/inference_integration_flyout/types';
+import {
+  ElasticsearchModelDefaultOptions,
+  ModelConfig,
+  Service,
+} from '@kbn/inference_integration_flyout/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
@@ -39,15 +43,26 @@ import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
+import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
+import { InferenceToModelIdMap } from '../fields';
+
+const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
+  {
+    elser: ElasticsearchModelDefaultOptions.elser,
+    elasticsearch: ElasticsearchModelDefaultOptions.e5,
+  };
+
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
   setValue: (value: string) => void;
+  setNewInferenceEndpoint: (newInferenceEndpoint: InferenceToModelIdMap) => void;
 }
 export const SelectInferenceId = ({
   onChange,
   'data-test-subj': dataTestSubj,
   setValue,
+  setNewInferenceEndpoint,
 }: Props) => {
   const {
     core: { application },
@@ -135,14 +150,26 @@ export const SelectInferenceId = ({
         setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
         setIsCreateInferenceApiLoading(false);
         setInferenceAddError(undefined);
+        const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
+        const defaultEndpointId =
+          inferenceServiceTypeElasticsearchModelMap[modelConfig.service] || '';
+        const newModelId: InferenceToModelIdMap = {};
+        newModelId[inferenceId] = {
+          trainedModelId: defaultEndpointId,
+          isDeployable:
+            modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch,
+          isDeployed: getTrainedModelStats(trainedModelStats)[defaultEndpointId] === 'deployed',
+          defaultInferenceEndpoint: false,
+        };
         resendRequest();
+        setNewInferenceEndpoint(newModelId);
       } catch (error) {
         const errorObj = extractErrorProperties(error);
         setInferenceAddError(errorObj.message);
         setIsCreateInferenceApiLoading(false);
       }
     },
-    [isInferenceFlyoutVisible, resendRequest, ml]
+    [isInferenceFlyoutVisible, resendRequest, ml, setNewInferenceEndpoint]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {

@@ -57,9 +57,6 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
             { name: 'stringField', type: 'string' },
           ]
         : undefined,
-      getMetaFields: callbacksEnabled.metaFields
-        ? async () => ['_version', '_id', '_index', '_source']
-        : undefined,
       getPolicies: callbacksEnabled.policies
         ? async () => [
             {
@@ -102,10 +99,6 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
     {
       id: 'policies',
       label: 'getPolicies callback => my-policy',
-    },
-    {
-      id: 'metaFields',
-      label: 'getMetaFields callback => _version, _id, _index, _source',
     },
   ];
 

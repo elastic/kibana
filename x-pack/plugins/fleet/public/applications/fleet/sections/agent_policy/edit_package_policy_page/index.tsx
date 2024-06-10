@@ -55,6 +55,13 @@ import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
+import {
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+} from '../../../../../../common/services';
+
+import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
@@ -201,7 +208,7 @@ export const EditPackagePolicyForm = memo<{
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
-          defaultMessage: `Successfully updated '{packagePolicyName}'`,
+          defaultMessage: `Successfully updated ''{packagePolicyName}''`,
           values: {
             packagePolicyName: packagePolicy.name,
           },
@@ -210,7 +217,7 @@ export const EditPackagePolicyForm = memo<{
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy`,
                 values: {
                   agentPolicyName: agentPolicy.name,
                 },
@@ -221,7 +228,7 @@ export const EditPackagePolicyForm = memo<{
       if (error.statusCode === 409) {
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packagePolicyName}'`,
+            defaultMessage: `Error updating ''{packagePolicyName}''`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
@@ -236,7 +243,7 @@ export const EditPackagePolicyForm = memo<{
       } else {
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packagePolicyName}'`,
+            defaultMessage: `Error updating ''{packagePolicyName}''`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
@@ -387,6 +394,7 @@ export const EditPackagePolicyForm = memo<{
       ),
     [packagePolicyId, packagePolicy]
   );
+  const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
@@ -426,6 +434,12 @@ export const EditPackagePolicyForm = memo<{
                 onCancel={() => setFormState('VALID')}
               />
             )}
+            {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+              <>
+                <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             {isUpgrade && upgradeDryRunData && (
               <>
                 <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />

@@ -13,13 +13,13 @@ import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('../../../../common/containers/sourcerer', () => ({
+jest.mock('../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn(),
   getScopeFromPath: jest.fn(),
 }));

@@ -11,9 +11,13 @@ import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
@@ -26,12 +30,12 @@ import { StateMachinePlayground } from '../../observability_logs/xstate_helpers'
 import { NotFoundPage } from '../404';
 
 export const LogsPageContent: React.FunctionComponent = () => {
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const { application, share } = useKibana<{ share: SharePublicStart }>().services;
+  const uiCapabilities = application?.capabilities;
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
-
-  const {
-    application: { getUrlForApp },
-  } = useKibanaContextForPlugin().services;
 
   const enableDeveloperRoutes = isDevMode();
 
@@ -81,7 +85,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
                 </EuiHeaderLink>
                 <LazyAlertDropdownWrapper />
                 <EuiHeaderLink
-                  href={getUrlForApp('/observabilityOnboarding')}
+                  href={onboardingLocator?.useUrl({ category: 'logs' })}
                   color="primary"
                   iconType="indexOpen"
                 >

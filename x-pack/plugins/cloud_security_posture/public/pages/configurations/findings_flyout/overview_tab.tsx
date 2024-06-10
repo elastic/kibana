@@ -28,7 +28,7 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
@@ -76,18 +76,6 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
       defaultMessage: 'Evaluated at',
     }),
     description: moment(data['@timestamp']).format(CSP_MOMENT_FORMAT),
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceIdTitle', {
-      defaultMessage: 'Resource ID',
-    }),
-    description: data.resource.id,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle', {
-      defaultMessage: 'Resource Name',
-    }),
-    description: data.resource.name,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
@@ -178,7 +166,7 @@ export const OverviewTab = ({
   ruleFlyoutLink: string;
 }) => {
   const { discover } = useKibana().services;
-  const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
   const discoverIndexLink = useMemo(
     () =>

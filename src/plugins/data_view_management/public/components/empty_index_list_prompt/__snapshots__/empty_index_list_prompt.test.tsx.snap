@@ -11,10 +11,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
   <EuiPageHeader>
     <EuiTitle>
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Ready to try Kibana? First, you need data."
           id="indexPatternManagement.createDataView.emptyState.noDataTitle"
-          values={Object {}}
         />
       </h2>
     </EuiTitle>
@@ -32,10 +31,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
         <EuiCard
           className="inpEmptyState__card"
           description={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Add data from a variety of sources."
               id="indexPatternManagement.createDataView.emptyState.integrationCardDescription"
-              values={Object {}}
             />
           }
           icon={
@@ -47,10 +45,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
           }
           onClick={[Function]}
           title={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Add integration"
               id="indexPatternManagement.createDataView.emptyState.integrationCardTitle"
-              values={Object {}}
             />
           }
         />
@@ -59,10 +56,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
         <EuiCard
           className="inpEmptyState__card"
           description={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Import a CSV, NDJSON, or log file."
               id="indexPatternManagement.createDataView.emptyState.uploadCardDescription"
-              values={Object {}}
             />
           }
           icon={
@@ -74,10 +70,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
           }
           onClick={[Function]}
           title={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Upload a file"
               id="indexPatternManagement.createDataView.emptyState.uploadCardTitle"
-              values={Object {}}
             />
           }
         />
@@ -86,10 +81,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
         <EuiCard
           className="inpEmptyState__card"
           description={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Load a data set and a Kibana dashboard."
               id="indexPatternManagement.createDataView.emptyState.sampleDataCardDescription"
-              values={Object {}}
             />
           }
           icon={
@@ -101,10 +95,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
           }
           onClick={[Function]}
           title={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Add sample data"
               id="indexPatternManagement.createDataView.emptyState.sampleDataCardTitle"
-              values={Object {}}
             />
           }
         />
@@ -132,16 +125,14 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
                     href="http://elastic.co"
                     target="_blank"
                   >
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="Read documentation"
                       id="indexPatternManagement.createDataView.emptyState.readDocs"
-                      values={Object {}}
                     />
                   </EuiLink>,
-                  "title": <FormattedMessage
+                  "title": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Want to learn more?"
                     id="indexPatternManagement.createDataView.emptyState.learnMore"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -160,10 +151,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
                     data-test-subj="refreshIndicesButton"
                     onClick={[Function]}
                   >
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="Check for new data"
                       id="indexPatternManagement.createDataView.emptyState.checkDataButton"
-                      values={Object {}}
                     />
                      
                     <EuiIcon
@@ -171,10 +161,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
                       type="refresh"
                     />
                   </EuiLink>,
-                  "title": <FormattedMessage
+                  "title": <Memo(MemoizedFormattedMessage)
                     defaultMessage="Think you already have data?"
                     id="indexPatternManagement.createDataView.emptyState.haveData"
-                    values={Object {}}
                   />,
                 },
               ]
@@ -188,7 +177,7 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
         size="xs"
         textAlign="center"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="You can also {link}"
           id="indexPatternManagement.createDataView.emptyState.createAnywayTxt"
           values={
@@ -197,10 +186,9 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
                 data-test-subj="createAnyway"
                 onClick={[Function]}
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="create a data view against hidden, system or default indices."
                   id="indexPatternManagement.createDataView.emptyState.createAnywayLink"
-                  values={Object {}}
                 />
               </EuiLink>,
             }

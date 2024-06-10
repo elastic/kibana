@@ -9,11 +9,11 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { AGENT_ID } from '../../../common/es_fields';
 import {
-  ElasticAgentStepPayload,
   LogFilesState,
   ObservabilityOnboardingType,
   SystemLogsState,
 } from '../../saved_objects/observability_onboarding_status';
+import { ElasticAgentStepPayload } from '../types';
 
 export async function getHasLogs({
   type,

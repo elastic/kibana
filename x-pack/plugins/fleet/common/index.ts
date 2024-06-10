@@ -32,7 +32,6 @@ export {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   // Fleet server index
-  FLEET_SERVER_SERVERS_INDEX,
   FLEET_SERVER_ARTIFACTS_INDEX,
   AGENTS_INDEX,
   AGENT_POLICY_INDEX,
@@ -130,6 +129,7 @@ export type {
   FullAgentPolicyOutput,
   FullAgentPolicyOutputPermissions,
   FullAgentPolicyInputStream,
+  TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
   Installation,

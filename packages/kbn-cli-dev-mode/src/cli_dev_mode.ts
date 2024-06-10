@@ -29,7 +29,7 @@ import { Log, CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
-import { BasePathProxyServer } from './base_path_proxy_server';
+import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
 import { CliDevConfig } from './config';
 
@@ -110,7 +110,11 @@ export class CliDevMode {
     this.log = log || new CliLog(!!cliArgs.silent);
 
     if (cliArgs.basePath) {
-      this.basePathProxy = new BasePathProxyServer(this.log, config.http, config.dev);
+      this.basePathProxy = getBasePathProxyServer({
+        log: this.log,
+        devConfig: config.dev,
+        httpConfig: config.http,
+      });
     }
 
     this.watcher = new Watcher({

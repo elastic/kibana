@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
+  AssetDashboardLoadedParams,
   AssetDetailsFlyoutViewedParams,
   AssetDetailsPageViewedParams,
   HostEntryClickedParams,
@@ -71,6 +72,10 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportAssetDetailsPageViewed = (params: AssetDetailsPageViewedParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED, params);
+  };
+
+  public reportAssetDashboardLoaded = (params: AssetDashboardLoadedParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DASHBOARD_LOADED, params);
   };
 
   public reportPerformanceMetricEvent = (

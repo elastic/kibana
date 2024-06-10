@@ -22,6 +22,7 @@ export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
 } from '../common';
 
 export { streamIntoObservable } from './service/util/stream_into_observable';

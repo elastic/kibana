@@ -39,7 +39,7 @@ import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;

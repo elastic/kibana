@@ -7,13 +7,13 @@
 import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { first, last } from 'lodash';
 import React from 'react';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Color, colorTransformer } from '../../../../common/color_palette';
 
 interface ThresholdAnnotationsProps {
   threshold: number[];
   sortedThresholds: number[];
-  comparator: Comparator;
+  comparator: COMPARATORS;
   color: Color;
   id: string;
   firstTimestamp: number;
@@ -34,8 +34,10 @@ export const ThresholdAnnotations = ({
   domain,
 }: ThresholdAnnotationsProps) => {
   if (!comparator || !threshold) return null;
-  const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(comparator);
-  const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(comparator);
+  const isAbove = [COMPARATORS.GREATER_THAN, COMPARATORS.GREATER_THAN_OR_EQUALS].includes(
+    comparator
+  );
+  const isBelow = [COMPARATORS.LESS_THAN, COMPARATORS.LESS_THAN_OR_EQUALS].includes(comparator);
   return (
     <>
       <LineAnnotation
@@ -53,7 +55,7 @@ export const ThresholdAnnotations = ({
           },
         }}
       />
-      {sortedThresholds.length === 2 && comparator === Comparator.BETWEEN ? (
+      {sortedThresholds.length === 2 && comparator === COMPARATORS.BETWEEN ? (
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}
@@ -75,7 +77,7 @@ export const ThresholdAnnotations = ({
           />
         </>
       ) : null}
-      {sortedThresholds.length === 2 && comparator === Comparator.OUTSIDE_RANGE ? (
+      {sortedThresholds.length === 2 && comparator === COMPARATORS.NOT_BETWEEN ? (
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}

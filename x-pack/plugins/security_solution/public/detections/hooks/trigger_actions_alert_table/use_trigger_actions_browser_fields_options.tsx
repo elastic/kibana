@@ -7,7 +7,7 @@
 import { useCallback, useMemo } from 'react';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export const getUseTriggersActionsFieldBrowserOptions = (scopeId: SourcererScopeName) => {
   const useTriggersActionsFieldBrowserOptions: AlertsTableConfigurationRegistry['useFieldBrowserOptions'] =

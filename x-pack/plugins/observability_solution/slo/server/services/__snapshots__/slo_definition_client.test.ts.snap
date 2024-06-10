@@ -36,6 +36,7 @@ Object {
         "unit": "m",
         "value": 1,
       },
+      "preventInitialBackfill": false,
       "syncDelay": Duration {
         "unit": "m",
         "value": 1,

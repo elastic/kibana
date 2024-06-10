@@ -22,6 +22,7 @@ import {
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
+import { MODELS } from '../common/models';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -119,6 +120,9 @@ export function defineRoutes({
         throw Error(e);
       }
 
+      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const modelPromptLimit = model?.promptTokenLimit;
+
       const chain = ConversationalChain({
         model: chatModel,
         rag: {
@@ -126,6 +130,7 @@ export function defineRoutes({
           retriever: createRetriever(data.elasticsearch_query),
           content_field: sourceFields,
           size: Number(data.doc_size),
+          inputTokensLimit: modelPromptLimit,
         },
         prompt: chatPrompt,
       });
@@ -134,6 +139,16 @@ export function defineRoutes({
 
       try {
         stream = await chain.stream(aiClient, messages);
+
+        analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
+          connectorType:
+            connector.actionTypeId +
+            (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
+          model: data.summarization_model ?? '',
+          isCitationsEnabled: data.citations,
+        });
+
+        return handleStreamResponse({ logger, stream, response, request });
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
@@ -147,16 +162,6 @@ export function defineRoutes({
 
         throw e;
       }
-
-      analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
-        connectorType:
-          connector.actionTypeId +
-          (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
-        model: data.summarization_model ?? '',
-        isCitationsEnabled: data.citations,
-      });
-
-      return handleStreamResponse({ logger, stream, response, request });
     })
   );
 

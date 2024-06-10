@@ -68,7 +68,7 @@ export const errors = {
   invalidCompareOperator: (op: string, ops: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.compare.invalidCompareOperatorErrorMessage', {
-        defaultMessage: "Invalid compare operator: '{op}'. Use {ops}",
+        defaultMessage: "Invalid compare operator: ''{op}''. Use {ops}",
         values: {
           op,
           ops,

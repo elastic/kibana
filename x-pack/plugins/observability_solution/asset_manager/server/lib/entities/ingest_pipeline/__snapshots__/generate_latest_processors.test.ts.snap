@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLatestProcessors(definition) should genearte a valid pipeline 1`] = `
+Array [
+  Object {
+    "set": Object {
+      "field": "event.ingested",
+      "value": "{{{_ingest.timestamp}}}",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.spaceId",
+      "value": "default",
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "entity.definitionId",
+      "value": "admin-console-services",
+    },
+  },
+  Object {
+    "script": Object {
+      "source": "if (ctx.entity?.metadata?.tags.data != null) {
+  ctx[\\"tags\\"] = ctx.entity.metadata.tags.data.keySet();
+}
+if (ctx.entity?.metadata?.host?.name.data != null) {
+  ctx[\\"host\\"] = new HashMap();
+  ctx[\\"host\\"][\\"name\\"] = ctx.entity.metadata.host.name.data.keySet();
+}
+",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "entity.metadata",
+      "ignore_missing": true,
+    },
+  },
+  Object {
+    "set": Object {
+      "field": "_index",
+      "value": ".entities-observability.latest-v1.admin-console-services.default",
+    },
+  },
+]
+`;

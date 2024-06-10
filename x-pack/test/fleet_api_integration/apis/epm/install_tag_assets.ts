@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 const testSpaceId = 'fleet_test_space';
 
@@ -16,8 +16,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const pkgName = 'only_dashboard';
   const pkgVersion = '0.1.0';
 
@@ -80,12 +78,12 @@ export default function (providerContext: FtrProviderContext) {
     });
     describe('creates correct tags when installing a package in non default space after installing in default space', async () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackageInSpace('all_assets', pkgVersion, 'default');
         await installPackageInSpace(pkgName, pkgVersion, testSpaceId);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage('all_assets', pkgVersion);
         await uninstallPackage(pkgName, pkgVersion);
       });
@@ -108,7 +106,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Handles presence of legacy tags', async () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
 
         // first clean up any existing tag saved objects as they arent cleaned on uninstall
         await deleteTag('fleet-managed-default');
@@ -139,7 +137,7 @@ export default function (providerContext: FtrProviderContext) {
         await installPackageInSpace(pkgName, pkgVersion, 'default');
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
         await deleteTag('managed');
         await deleteTag('tag');
@@ -163,7 +161,7 @@ export default function (providerContext: FtrProviderContext) {
       const MIXED_TYPES_TAG = `fleet-shared-tag-${testPackage}-ef823f10-b5af-5fcb-95da-2340a5257599-default`;
 
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
 
         const testPkgArchiveZip = path.join(
           path.dirname(__filename),
@@ -178,7 +176,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(testPackage, testPackageVersion);
         await deleteTag('managed');
       });

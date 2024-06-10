@@ -13,9 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -77,18 +75,6 @@ export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({
           <EuiCode>{elasticsearchUrl}</EuiCode>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {status === ConnectorStatus.CREATED && (
-        <>
-          <EuiSpacer />
-          <EuiCallOut
-            title={i18n.translate('xpack.serverlessSearch.connectors.waitingForConnection', {
-              defaultMessage: 'Waiting for connection',
-            })}
-            color="warning"
-            iconType="iInCircle"
-          />
-        </>
-      )}
     </EuiPanel>
   );
 };

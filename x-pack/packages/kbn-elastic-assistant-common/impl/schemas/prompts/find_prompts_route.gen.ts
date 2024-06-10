@@ -14,7 +14,7 @@ import { ArrayFromString } from '@kbn/zod-helpers';
  *
  * info:
  *   title: Find Prompts API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { PromptResponse } from './bulk_crud_prompts_route.gen';

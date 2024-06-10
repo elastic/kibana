@@ -553,12 +553,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertValidationCalloutsExists() {
       await retry.tryForTime(4000, async () => {
-        await testSubjects.existOrFail('mlValidationCallout');
+        await testSubjects.existOrFail('~mlValidationCallout');
       });
     },
 
     async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
-      const validationCallouts = await testSubjects.findAll('mlValidationCallout');
+      const validationCallouts = await testSubjects.findAll('~mlValidationCallout');
       expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 

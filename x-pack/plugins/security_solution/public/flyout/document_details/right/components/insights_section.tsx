@@ -18,6 +18,11 @@ import { ExpandableSection } from './expandable_section';
 import { useRightPanelContext } from '../context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 const KEY = 'insights';
 
@@ -28,7 +33,12 @@ export const InsightsSection = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+  const { activeStep, isTourShown } = useTourContext();
+  const isGuidedOnboardingTourShown =
+    isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase;
+
+  const expanded =
+    useExpandSection({ title: KEY, defaultValue: false }) || isGuidedOnboardingTourShown;
 
   return (
     <ExpandableSection

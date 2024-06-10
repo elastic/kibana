@@ -11,7 +11,6 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useTemplateHeaderBreadcrumbs } from '../../../../components/asset_details/hooks/use_page_header';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { useNodeDetails } from '../hooks/use_node_details';
 import { MetricsSideNav } from './side_nav';
 import { MetricsTimeControls } from './time_controls';
@@ -54,7 +53,6 @@ const parseRange = (range: MetricsTimeInput) => {
 };
 
 export const NodeDetailsPage = (props: Props) => {
-  const { metricIndicesExist } = useSourceContext();
   const { breadcrumbs } = useTemplateHeaderBreadcrumbs();
   const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
   const { metrics, loading, makeRequest, error } = useNodeDetails(
@@ -84,7 +82,6 @@ export const NodeDetailsPage = (props: Props) => {
 
   return (
     <MetricsPageTemplate
-      hasData={metricIndicesExist}
       pageHeader={{
         pageTitle: props.name,
         rightSideItems: [

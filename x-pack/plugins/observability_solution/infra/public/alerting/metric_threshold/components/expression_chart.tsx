@@ -19,12 +19,11 @@ import {
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
-import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
@@ -50,41 +49,35 @@ import { CUSTOM_EQUATION } from '../i18n_strings';
 
 interface Props {
   expression: MetricExpression;
-  derivedIndexPattern: DataViewBase;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
   chartType?: MetricsExplorerChartType;
   filterQuery?: string;
   groupBy?: string | string[];
   groupInstance?: string | string[];
   hideTitle?: boolean;
-  source?: MetricsSourceConfiguration;
   timeRange?: TimeRange;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
-  derivedIndexPattern,
   annotations,
   chartType = MetricsExplorerChartType.bar,
   filterQuery,
   groupBy,
   groupInstance,
   hideTitle = false,
-  source,
   timeRange,
 }) => {
   const { charts } = useKibanaContextForPlugin().services;
   const chartTheme = useTimelineChartTheme();
 
-  const { isLoading, data } = useMetricsExplorerChartData(
+  const { isLoading, data } = useMetricsExplorerChartData({
     expression,
-    derivedIndexPattern,
-    source,
     filterQuery,
     groupBy,
     groupInstance,
-    timeRange
-  );
+    timeRange,
+  });
 
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
@@ -163,7 +156,7 @@ export const ExpressionChart: React.FC<Props> = ({
             stack={false}
           />
           <ThresholdAnnotations
-            comparator={expression.comparator}
+            comparator={convertToBuiltInComparators(expression.comparator)}
             threshold={expression.threshold}
             sortedThresholds={criticalThresholds}
             color={Color.color1}
@@ -174,7 +167,7 @@ export const ExpressionChart: React.FC<Props> = ({
           />
           {expression.warningComparator && expression.warningThreshold && (
             <ThresholdAnnotations
-              comparator={expression.warningComparator}
+              comparator={convertToBuiltInComparators(expression.comparator)}
               threshold={expression.warningThreshold}
               sortedThresholds={warningThresholds}
               color={Color.color5}

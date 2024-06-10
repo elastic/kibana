@@ -25,10 +25,8 @@ import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
-import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 
 interface Props {
-  derivedIndexPattern: DerivedIndexPattern;
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
@@ -43,7 +41,6 @@ interface Props {
 
 export const MetricsExplorerToolbar = ({
   timeRange,
-  derivedIndexPattern,
   options,
   onTimeChange,
   onRefresh,
@@ -81,7 +78,6 @@ export const MetricsExplorerToolbar = ({
             <EuiFlexItem grow={2}>
               <MetricsExplorerMetrics
                 autoFocus={isDefaultOptions}
-                fields={derivedIndexPattern.fields}
                 options={options}
                 onChange={onMetricsChange}
               />
@@ -94,22 +90,14 @@ export const MetricsExplorerToolbar = ({
             />
           </EuiText>
           <EuiFlexItem grow={1}>
-            <MetricsExplorerGroupBy
-              onChange={onGroupByChange}
-              fields={derivedIndexPattern.fields}
-              options={options}
-            />
+            <MetricsExplorerGroupBy onChange={onGroupByChange} options={options} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
-            <MetricsExplorerKueryBar
-              derivedIndexPattern={derivedIndexPattern}
-              onSubmit={onFilterQuerySubmit}
-              value={options.filterQuery}
-            />
+            <MetricsExplorerKueryBar onSubmit={onFilterQuerySubmit} value={options.filterQuery} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <MetricsExplorerChartOptionsComponent

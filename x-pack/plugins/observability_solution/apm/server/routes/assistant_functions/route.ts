@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { omit } from 'lodash';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 
 import {
@@ -54,14 +55,24 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (resources): Promise<{ content: APMDownstreamDependency[] }> => {
-    const { params } = resources;
-    const apmEventClient = await getApmEventClient(resources);
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const { query } = params;
 
     return {
       content: await getAssistantDownstreamDependencies({
         arguments: query,
         apmEventClient,
+        randomSampler,
       }),
     };
   },

@@ -113,3 +113,17 @@ export const getAgentTypeName = (agentType: ResponseActionAgentType) => {
       return agentType;
   }
 };
+
+export const RULE_EXECUTION_TYPE_BACKFILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.executionRunType.backfill',
+  {
+    defaultMessage: 'Manual',
+  }
+);
+
+export const RULE_EXECUTION_TYPE_STANDARD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.executionRunType.standard',
+  {
+    defaultMessage: 'Scheduled',
+  }
+);

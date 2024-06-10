@@ -26,7 +26,7 @@ export const errors = {
   invalidAssetId: (assetId: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.asset.invalidAssetId', {
-        defaultMessage: "Could not get the asset by ID: '{assetId}'",
+        defaultMessage: 'Could not get the asset by ID: {assetId}',
         values: { assetId },
         description:
           'This error occurs when there is no asset object associated with the given ID.',

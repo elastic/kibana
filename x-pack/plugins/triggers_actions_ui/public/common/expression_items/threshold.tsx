@@ -18,8 +18,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isNil } from 'lodash';
+import { Comparator } from '@kbn/alerting-comparators';
 import { builtInComparators } from '../constants';
-import { Comparator } from '../types';
 import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 

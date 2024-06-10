@@ -18,5 +18,5 @@ export const CHECKBOX_FOR_ROW = ({
   i18n.translate('xpack.securitySolution.controlColumns.checkboxForRowAriaLabel', {
     values: { ariaRowindex, checked, columnValues },
     defaultMessage:
-      '{checked, select, false {unchecked} true {checked}} checkbox for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+      '{checked, select, true {checked} other {unchecked}} checkbox for the alert or event in row {ariaRowindex}, with columns {columnValues}',
   });

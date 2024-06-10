@@ -65,14 +65,14 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isUpdating = false)
         ? i18n.translate(
             'xpack.crossClusterReplication.autoFollowPattern.updateAction.successNotificationTitle',
             {
-              defaultMessage: `Auto-follow pattern '{name}' updated successfully`,
+              defaultMessage: `Auto-follow pattern ''{name}'' updated successfully`,
               values: { name: id },
             }
           )
         : i18n.translate(
             'xpack.crossClusterReplication.autoFollowPattern.addAction.successNotificationTitle',
             {
-              defaultMessage: `Added auto-follow pattern '{name}'`,
+              defaultMessage: `Added auto-follow pattern ''{name}''`,
               values: { name: id },
             }
           );
@@ -108,7 +108,7 @@ export const deleteAutoFollowPattern = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.removeAction.errorSingleNotificationTitle',
               {
-                defaultMessage: `Error removing the '{name}' auto-follow pattern`,
+                defaultMessage: `Error removing the ''{name}'' auto-follow pattern`,
                 values: { name: response.errors[0].id },
               }
             );
@@ -130,7 +130,7 @@ export const deleteAutoFollowPattern = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.removeAction.successSingleNotificationTitle',
               {
-                defaultMessage: `Auto-follow pattern '{name}' was removed`,
+                defaultMessage: `Auto-follow pattern ''{name}'' was removed`,
                 values: { name: response.itemsDeleted[0] },
               }
             );
@@ -170,7 +170,7 @@ export const pauseAutoFollowPattern = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.pauseAction.errorSingleNotificationTitle',
               {
-                defaultMessage: `Error pausing the '{name}' auto-follow pattern`,
+                defaultMessage: `Error pausing the ''{name}'' auto-follow pattern`,
                 values: { name: response.errors[0].id },
               }
             );
@@ -192,7 +192,7 @@ export const pauseAutoFollowPattern = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.pauseAction.successSingleNotificationTitle',
               {
-                defaultMessage: `Auto-follow pattern '{name}' was paused`,
+                defaultMessage: `Auto-follow pattern ''{name}'' was paused`,
                 values: { name: response.itemsPaused[0] },
               }
             );
@@ -226,7 +226,7 @@ export const resumeAutoFollowPattern = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.resumeAction.errorSingleNotificationTitle',
               {
-                defaultMessage: `Error resuming the '{name}' auto-follow pattern`,
+                defaultMessage: `Error resuming the ''{name}'' auto-follow pattern`,
                 values: { name: response.errors[0].id },
               }
             );
@@ -248,7 +248,7 @@ export const resumeAutoFollowPattern = (id) =>
           : i18n.translate(
               'xpack.crossClusterReplication.autoFollowPattern.resumeAction.successSingleNotificationTitle',
               {
-                defaultMessage: `Auto-follow pattern '{name}' was resumed`,
+                defaultMessage: `Auto-follow pattern ''{name}'' was resumed`,
                 values: { name: response.itemsResumed[0] },
               }
             );

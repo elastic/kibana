@@ -18,7 +18,7 @@ import { useDataView } from '../../../common/containers/source/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';
 import { sourcererSelectors } from '../../../common/store';
 import type { State } from '../../../common/store';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { useCreateFieldButton } from './create_field_button';

@@ -22,7 +22,7 @@ export async function readEntityDefinition(
     filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})`,
   });
   if (response.total === 0) {
-    const message = `Unable to find entity defintion with [${id}]`;
+    const message = `Unable to find entity definition with [${id}]`;
     logger.error(message);
     throw new EntityDefinitionNotFound(message);
   }
@@ -30,7 +30,7 @@ export async function readEntityDefinition(
   try {
     return entityDefinitionSchema.parse(response.saved_objects[0].attributes);
   } catch (e) {
-    logger.error(`Unable to parse entity defintion with [${id}]`);
+    logger.error(`Unable to parse entity definition with [${id}]`);
     throw e;
   }
 }

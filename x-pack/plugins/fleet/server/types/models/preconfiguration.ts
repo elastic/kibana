@@ -134,6 +134,7 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     ...AgentPolicyBaseSchema,
+    space_id: schema.maybe(schema.string()),
     namespace: schema.maybe(AgentPolicyNamespaceSchema),
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     is_default: schema.maybe(schema.boolean()),

@@ -46,14 +46,13 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
-import { useHasSecurityCapability } from '../../../helper_hooks';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -138,7 +137,6 @@ const HostsComponent = () => {
   });
 
   const isEnterprisePlus = useLicense().isEnterprise();
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -190,7 +188,6 @@ const HostsComponent = () => {
               <TabNavigation
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: hasEntityAnalyticsCapability,
                   isEnterprise: isEnterprisePlus,
                 })}
               />

@@ -35,6 +35,9 @@ export const LastSuccessfulScreenshot = ({
       stepIndex: Number(stepIndex ?? stepInd),
       location: step.observer?.geo?.name,
     });
+    // FIXME: Dario thinks there is a better way to do this but
+    // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step._id, step['@timestamp']]);
 
   return (

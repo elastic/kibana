@@ -103,12 +103,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('can select jobs', async () => {
-          await ml.dashboardJobSelectionTable.setRowCheckboxState(testData.jobConfig.job_id, true);
-          await ml.dashboardJobSelectionTable.applyJobSelection();
-          await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
-          await a11y.testAppSnapshot();
+          await ml.alerting.selectJobs([testData.jobConfig.job_id]);
+          await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);
         });
 
+        it('populates with default default info', async () => {
+          await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
+          await ml.dashboardEmbeddables.assertSelectMaxSeriesToPlotValue(6);
+          await a11y.testAppSnapshot();
+        });
         it('create new anomaly charts panel', async () => {
           await ml.dashboardEmbeddables.clickInitializerConfirmButtonEnabled();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);

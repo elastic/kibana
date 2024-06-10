@@ -29,6 +29,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
 const indexPatternUpdateSchema = schema.object({
@@ -137,7 +138,7 @@ export const updateDataView = async ({
 };
 
 const updateDataViewRouteFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -146,7 +147,7 @@ const updateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -222,7 +223,8 @@ const updateDataViewRouteFactory =
 
 export const registerUpdateDataViewRoute = updateDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  UPDATE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerUpdateDataViewRouteLegacy = updateDataViewRouteFactory(

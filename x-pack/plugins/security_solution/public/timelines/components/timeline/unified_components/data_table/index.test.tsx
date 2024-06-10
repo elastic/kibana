@@ -12,14 +12,14 @@ import { defaultUdtHeaders } from '../default_headers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { timelineActions } from '../../../../store';
 import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 
-jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../sourcerer/containers');
 
 const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();

@@ -127,10 +127,9 @@ exports[`CcrShard that it renders normally 1`] = `
       buttonContent={
         <EuiTitle>
           <h2>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Advanced"
               id="xpack.monitoring.elasticsearch.ccrShard.latestStateAdvancedButtonLabel"
-              values={Object {}}
             />
           </h2>
         </EuiTitle>

@@ -24,13 +24,13 @@ import {
   EuiLink,
   EuiSwitch,
   EuiSpacer,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { DownloadSource, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
 import { useDowloadSourceFlyoutForm } from './use_download_source_flyout_form';
 
@@ -142,21 +142,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdLabel"
-                defaultMessage="Proxy {badge}"
-                values={{
-                  badge: (
-                    <EuiBetaBadge
-                      size="s"
-                      className="eui-alignTop"
-                      label={i18n.translate(
-                        'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
-                        {
-                          defaultMessage: 'Beta',
-                        }
-                      )}
-                    />
-                  ),
-                }}
+                defaultMessage="Proxy"
               />
             }
             helpText={
@@ -188,6 +174,8 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               )}
             />
           </EuiFormRow>
+          <EuiSpacer size="xs" />
+          <ProxyWarning />
           <EuiSpacer size="m" />
           <EuiFormRow fullWidth {...inputs.defaultDownloadSourceInput.formRowProps}>
             <EuiSwitch

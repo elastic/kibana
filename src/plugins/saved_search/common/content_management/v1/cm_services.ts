@@ -42,7 +42,11 @@ const savedSearchAttributesSchema = schema.object(
       searchSourceJSON: schema.string(),
     }),
     viewMode: schema.maybe(
-      schema.oneOf([schema.literal('documents'), schema.literal('aggregated')])
+      schema.oneOf([
+        schema.literal('documents'),
+        schema.literal('patterns'),
+        schema.literal('aggregated'),
+      ])
     ),
     hideAggregatedPreview: schema.maybe(schema.boolean()),
     rowHeight: schema.maybe(schema.number()),

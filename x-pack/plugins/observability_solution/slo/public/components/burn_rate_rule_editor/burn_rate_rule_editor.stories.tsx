@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { BurnRateRuleParams } from '../../typings';
 import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
+import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
 
 export default {
   component: Component,

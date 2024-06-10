@@ -19,8 +19,7 @@
       "observabilityShared",
       "slo",
       "share",
-      "kibanaUtils",
-      "datasetQuality"
+      "kibanaUtils"
     ],
     "optionalPlugins": [
       "serverless",

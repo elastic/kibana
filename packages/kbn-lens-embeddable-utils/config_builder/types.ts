@@ -8,8 +8,8 @@
 
 import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { DataViewsCommon } from './config_builder';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -289,7 +289,7 @@ export interface LensXYConfigBase {
   yBounds?: LensYBoundsConfig;
 }
 export interface BuildDependencies {
-  dataViewsAPI: DataViewsPublicPluginStart;
+  dataViewsAPI: DataViewsCommon;
   formulaAPI?: FormulaPublicApi;
 }
 

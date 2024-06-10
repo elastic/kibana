@@ -11,8 +11,17 @@ import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  merge,
+  skip,
+  Subject,
+  Subscription,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -39,7 +48,7 @@ import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { IClearableControl } from '../../types';
+import { CanClearSelections } from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
@@ -81,7 +90,7 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class OptionsListEmbeddable
   extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements CanClearSelections
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;

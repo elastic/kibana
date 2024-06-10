@@ -63,7 +63,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
   let roleAuthc: RoleCredentials;
 
-  describe('Serverless Playground Overview', () => {
+  describe('Serverless Playground Overview', function () {
+    // see details: https://github.com/elastic/kibana/issues/183893
+    this.tags(['failsOnMKI']);
+
     let removeOpenAIConnector: () => Promise<void>;
     let createConnector: () => Promise<void>;
 

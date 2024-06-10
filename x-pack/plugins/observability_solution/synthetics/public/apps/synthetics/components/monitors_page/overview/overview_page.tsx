@@ -52,10 +52,7 @@ export const OverviewPage: React.FC = () => {
     }
   }, [dispatch, locationsLoaded, locationsLoading]);
 
-  const {
-    enablement: { isEnabled },
-    loading: enablementLoading,
-  } = useEnablement();
+  const { isEnabled, loading: enablementLoading } = useEnablement();
 
   const {
     loaded: overviewLoaded,

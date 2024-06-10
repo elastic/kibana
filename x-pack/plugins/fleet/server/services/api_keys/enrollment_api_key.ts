@@ -176,14 +176,11 @@ export async function generateEnrollmentAPIKey(
   }
 ): Promise<EnrollmentAPIKey> {
   const id = uuidv4();
-  const { name: providedKeyName, forceRecreate } = data;
+  const { name: providedKeyName, forceRecreate, agentPolicyId } = data;
   const logger = appContextService.getLogger();
   logger.debug(`Creating enrollment API key ${data}`);
 
-  if (data.agentPolicyId) {
-    await validateAgentPolicyId(soClient, data.agentPolicyId);
-  }
-  const agentPolicyId = data.agentPolicyId;
+  const agentPolicy = await retrieveAgentPolicyId(soClient, agentPolicyId);
 
   if (providedKeyName && !forceRecreate) {
     let hasMore = true;
@@ -276,6 +273,7 @@ export async function generateEnrollmentAPIKey(
     api_key: apiKey,
     name,
     policy_id: agentPolicyId,
+    namespaces: agentPolicy?.space_id ? [agentPolicy?.space_id] : undefined,
     created_at: new Date().toISOString(),
   };
 
@@ -354,10 +352,8 @@ export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, api
   return enrollmentAPIKey;
 }
 
-async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agentPolicyId: string) {
-  try {
-    await agentPolicyService.get(soClient, agentPolicyId);
-  } catch (e) {
+async function retrieveAgentPolicyId(soClient: SavedObjectsClientContract, agentPolicyId: string) {
+  return agentPolicyService.get(soClient, agentPolicyId).catch(async (e) => {
     if (e.isBoom && e.output.statusCode === 404) {
       throw Boom.badRequest(
         i18n.translate('xpack.fleet.serverError.agentPolicyDoesNotExist', {
@@ -367,7 +363,7 @@ async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agent
       );
     }
     throw e;
-  }
+  });
 }
 
 function esDocToEnrollmentApiKey(doc: {

@@ -25,9 +25,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isFleetServerMissing = !(await hasFleetServers(
-      coreContext.elasticsearch.client.asInternalUser
-    ));
+    const isFleetServerMissing = !(await hasFleetServers(esClient, soClient));
 
     const isFleetServerStandalone =
       appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;

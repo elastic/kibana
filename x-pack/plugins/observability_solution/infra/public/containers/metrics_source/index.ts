@@ -6,4 +6,4 @@
  */
 
 export * from './source';
-export * from './types';
+export * from './metrics_view';

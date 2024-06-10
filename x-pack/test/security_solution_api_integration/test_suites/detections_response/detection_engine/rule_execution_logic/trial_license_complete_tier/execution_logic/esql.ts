@@ -37,6 +37,9 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
     dataGeneratorFactory({
       es,
@@ -49,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('@ess ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -104,6 +107,9 @@ export default ({ getService }: FtrProviderContext) => {
           version: 1,
           exceptions_list: [],
           immutable: false,
+          rule_source: {
+            type: 'internal',
+          },
           related_integrations: [],
           required_fields: [],
           setup: '',
@@ -134,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.risk_score': 55,
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
-        'kibana.alert.rule.created_by': 'elastic',
+        'kibana.alert.rule.created_by': ELASTICSEARCH_USERNAME,
         'kibana.alert.rule.description': 'Detecting root and admin users',
         'kibana.alert.rule.enabled': true,
         'kibana.alert.rule.exceptions_list': [],
@@ -151,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.threat': [],
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'esql',
-        'kibana.alert.rule.updated_by': 'elastic',
+        'kibana.alert.rule.updated_by': ELASTICSEARCH_USERNAME,
         'kibana.alert.rule.version': 1,
         'kibana.alert.workflow_tags': [],
         'kibana.alert.workflow_assignee_ids': [],

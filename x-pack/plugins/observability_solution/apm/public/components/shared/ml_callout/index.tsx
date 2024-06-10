@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
-import { LegacyAPMLink } from '../links/apm/apm_link';
+import { useAPMHref } from '../links/apm/apm_link';
 
 export function shouldDisplayMlCallout(anomalyDetectionSetupState: AnomalyDetectionSetupState) {
   return (
@@ -35,7 +35,7 @@ export function MLCallout({
   append?: React.ReactElement;
 }) {
   const [loading, setLoading] = useState(false);
-
+  const apmGetLearnMoreHref = useAPMHref({ path: '/settings/anomaly-detection' });
   const mlManageJobsHref = useMlManageJobsHref();
 
   let properties:
@@ -48,19 +48,19 @@ export function MLCallout({
       }
     | undefined;
 
-  const getLearnMoreLink = (color: 'primary' | 'success') => (
-    <EuiButton data-test-subj="apmGetLearnMoreLinkButton" color={color}>
-      <LegacyAPMLink
-        path="/settings/anomaly-detection"
-        style={{ whiteSpace: 'nowrap' }}
+  const getLearnMoreLink = (color: 'primary' | 'success') => {
+    return (
+      <EuiButton
+        data-test-subj="apmGetLearnMoreLinkButton"
         color={color}
+        href={apmGetLearnMoreHref}
       >
         {i18n.translate('xpack.apm.mlCallout.learnMoreButton', {
           defaultMessage: `Learn more`,
         })}
-      </LegacyAPMLink>
-    </EuiButton>
-  );
+      </EuiButton>
+    );
+  };
 
   switch (anomalyDetectionSetupState) {
     case AnomalyDetectionSetupState.NoJobs:
