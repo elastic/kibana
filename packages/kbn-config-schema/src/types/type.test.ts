@@ -57,13 +57,18 @@ describe('transform', () => {
     expect(durationTransformation).toHaveBeenCalledWith('1d');
   });
   it('transforms nested values', () => {
-    const obj = schema.object({ a: schema.object({ duration: durationSchema }) });
+    const obj = schema.object({
+      a: schema.object({ durationA: durationSchema, durationB: durationSchema }),
+    });
     const {
-      a: { duration },
-    } = obj.validate({ a: { duration: '1d' } });
-    expect(moment.isDuration(duration)).toBe(true);
-    expect(durationTransformation).toHaveBeenCalledTimes(1);
-    expect(durationTransformation).toHaveBeenCalledWith('1d');
+      a: { durationA, durationB },
+    } = obj.validate({ a: { durationA: '1d', durationB: '1m' } });
+    expect(moment.isDuration(durationA)).toBe(true);
+    expect(moment.isDuration(durationB)).toBe(true);
+
+    expect(durationTransformation).toHaveBeenCalledTimes(2);
+    expect(durationTransformation).toHaveBeenNthCalledWith(1, '1d');
+    expect(durationTransformation).toHaveBeenNthCalledWith(2, '1m');
   });
   it('still reports errors as expected', () => {
     expect(() => durationSchema.validate('hello there')).toThrowError(/must have maximum length/);
