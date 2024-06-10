@@ -42,7 +42,10 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
-import { VisualizeESQLFunctionArguments } from '../../common/functions/visualize_esql';
+import type {
+  VisualizeESQLFunctionArguments,
+  VisualizeQueryResponse,
+} from '../../common/functions/visualize_esql';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 enum ChartType {
@@ -57,24 +60,6 @@ enum ChartType {
   Waffle = 'Waffle',
   Table = 'Table',
 }
-
-interface VisualizeQueryResponsev0 {
-  content: DatatableColumn[];
-}
-
-interface VisualizeQueryResponsev1 {
-  data: {
-    columns: DatatableColumn[];
-    rows: ESQLRow[];
-    userOverrides?: unknown;
-  };
-  content: {
-    message: string;
-    errorMessages: string[];
-  };
-}
-
-type VisualizeQueryResponse = VisualizeQueryResponsev0 | VisualizeQueryResponsev1;
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -105,6 +90,19 @@ interface VisualizeESQLProps {
 function generateId() {
   return uuidv4();
 }
+const saveVisualizationLabel = i18n.translate(
+  'xpack.observabilityAiAssistant.lensESQLFunction.save',
+  {
+    defaultMessage: 'Save visualization',
+  }
+);
+
+const editVisualizationLabel = i18n.translate(
+  'xpack.observabilityAiAssistant.lensESQLFunction.edit',
+  {
+    defaultMessage: 'Edit visualization',
+  }
+);
 
 export function VisualizeESQL({
   lens,
@@ -132,7 +130,8 @@ export function VisualizeESQL({
       }
       return dataView;
     });
-  }, [indexPattern]);
+  }, [indexPattern, dataViews]);
+
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -259,150 +258,135 @@ export function VisualizeESQL({
 
   return (
     <>
-      {!isLensInputTable && (
-        <EuiFlexGroup direction="column">
-          {Boolean(errorMessages?.length) && (
-            <>
-              <EuiText size="s">
-                {i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.errorMessage', {
-                  defaultMessage: 'There were some errors in the generated query',
-                })}
-              </EuiText>
-              <EuiDescriptionList data-test-subj="observabilityAiAssistantErrorsList">
-                {errorMessages?.map((error, index) => {
-                  return (
-                    <EuiDescriptionListDescription key={index}>
-                      <EuiFlexGroup gutterSize="s" alignItems="center">
-                        <EuiFlexItem grow={false}>
-                          <EuiIcon type="error" color="danger" size="s" />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>{error}</EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiDescriptionListDescription>
-                  );
-                })}
-              </EuiDescriptionList>
-            </>
-          )}
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    isTableVisible
-                      ? i18n.translate(
-                          'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
-                          {
-                            defaultMessage: 'Visualization',
-                          }
-                        )
-                      : i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.table', {
-                          defaultMessage: 'Table of results',
-                        })
-                  }
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    iconType={isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'}
-                    onClick={() => setIsTableVisible(!isTableVisible)}
-                    data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
-                    aria-label={
+      <EuiFlexGroup direction="column">
+        {!!errorMessages?.length && (
+          <>
+            <EuiText size="s">
+              {i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.errorMessage', {
+                defaultMessage: 'There were some errors in the generated query',
+              })}
+            </EuiText>
+            <EuiDescriptionList data-test-subj="observabilityAiAssistantErrorsList">
+              {errorMessages.map((error, index) => {
+                return (
+                  <EuiDescriptionListDescription key={index}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="error" color="danger" size="s" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{error}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiDescriptionListDescription>
+                );
+              })}
+            </EuiDescriptionList>
+          </>
+        )}
+        {!isLensInputTable && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
                       isTableVisible
                         ? i18n.translate(
-                            'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
+                            'xpack.observabilityAiAssistant.lensESQLFunction.visualization',
                             {
-                              defaultMessage: 'Display chart',
+                              defaultMessage: 'Visualization',
                             }
                           )
-                        : i18n.translate(
-                            'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
-                            {
-                              defaultMessage: 'Display results',
-                            }
-                          )
+                        : i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.table', {
+                            defaultMessage: 'Table of results',
+                          })
                     }
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiToolTip
-                content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.edit', {
-                  defaultMessage: 'Edit visualization',
-                })}
-              >
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="pencil"
-                  onClick={() => {
-                    chatFlyoutSecondSlotHandler?.setVisibility?.(true);
-                    if (triggerOptions) {
-                      uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
-                    }
-                  }}
-                  data-test-subj="observabilityAiAssistantLensESQLEditButton"
-                  aria-label={i18n.translate(
-                    'xpack.observabilityAiAssistant.lensESQLFunction.edit',
-                    {
-                      defaultMessage: 'Edit visualization',
-                    }
-                  )}
-                />
-              </EuiToolTip>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.save', {
-                    defaultMessage: 'Save visualization',
-                  })}
-                >
+                  >
+                    <EuiButtonIcon
+                      size="xs"
+                      iconType={isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'}
+                      onClick={() => setIsTableVisible(!isTableVisible)}
+                      data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
+                      aria-label={
+                        isTableVisible
+                          ? i18n.translate(
+                              'xpack.observabilityAiAssistant.lensESQLFunction.displayChart',
+                              {
+                                defaultMessage: 'Display chart',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.observabilityAiAssistant.lensESQLFunction.displayTable',
+                              {
+                                defaultMessage: 'Display table',
+                              }
+                            )
+                      }
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiToolTip content={editVisualizationLabel}>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="save"
-                    onClick={() => setIsSaveModalOpen(true)}
-                    data-test-subj="observabilityAiAssistantLensESQLSaveButton"
-                    aria-label={i18n.translate(
-                      'xpack.observabilityAiAssistant.lensESQLFunction.save',
-                      {
-                        defaultMessage: 'Save visualization',
+                    iconType="pencil"
+                    onClick={() => {
+                      chatFlyoutSecondSlotHandler?.setVisibility?.(true);
+                      if (triggerOptions) {
+                        uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
                       }
-                    )}
+                    }}
+                    data-test-subj="observabilityAiAssistantLensESQLEditButton"
+                    aria-label={editVisualizationLabel}
                   />
                 </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={saveVisualizationLabel}>
+                    <EuiButtonIcon
+                      size="xs"
+                      iconType="save"
+                      onClick={() => setIsSaveModalOpen(true)}
+                      data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+                      aria-label={saveVisualizationLabel}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem data-test-subj={visualizationComponentDataTestSubj}>
+              {isTableVisible ? (
+                <ESQLDataGrid
+                  rows={rows}
+                  columns={columns}
+                  dataView={dataViewAsync.value}
+                  query={{ esql: query }}
+                  flyoutType="overlay"
+                  isTableView
+                />
+              ) : (
+                <lens.EmbeddableComponent
+                  {...lensInput}
+                  style={{
+                    height: 240,
+                  }}
+                  onLoad={onLoad}
+                />
+              )}
+            </EuiFlexItem>
+          </>
+        )}
+        {/* hide the grid in case of errors (as the user can't fix them) */}
+        {isLensInputTable && !errorMessages?.length && (
+          <EuiFlexItem data-test-subj="observabilityAiAssistantESQLDataGrid">
+            <ESQLDataGrid
+              rows={rows}
+              columns={columns}
+              dataView={dataViewAsync.value}
+              query={{ esql: query }}
+              flyoutType="overlay"
+            />
           </EuiFlexItem>
-          <EuiFlexItem data-test-subj={visualizationComponentDataTestSubj}>
-            {isTableVisible ? (
-              <ESQLDataGrid
-                rows={rows}
-                columns={columns}
-                dataView={dataViewAsync.value}
-                query={{ esql: query }}
-                flyoutType="overlay"
-                isTableView
-              />
-            ) : (
-              <lens.EmbeddableComponent
-                {...lensInput}
-                style={{
-                  height: 240,
-                }}
-                onLoad={onLoad}
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {isLensInputTable && (
-        <div data-test-subj="observabilityAiAssistantESQLDataGrid">
-          <ESQLDataGrid
-            rows={rows}
-            columns={columns}
-            dataView={dataViewAsync.value}
-            query={{ esql: query }}
-            flyoutType="overlay"
-          />
-        </div>
-      )}
+        )}
+      </EuiFlexGroup>
+
       {isSaveModalOpen ? (
         <lens.SaveModalComponent
           initialInput={lensInput}

@@ -27,15 +27,10 @@ echo "--- Build Kibana"
 node scripts/build \
   --debug \
   --release \
+  --serverless \
   --docker-cross-compile \
-  --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="$KIBANA_IMAGE_TAG" \
-  --skip-docker-ubuntu \
-  --skip-docker-chainguard \
-  --skip-docker-ubi \
-  --skip-docker-fips \
-  --skip-docker-cloud
+  --docker-tag="$KIBANA_IMAGE_TAG"
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
@@ -99,8 +94,8 @@ ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/val
   "$CDN_ASSETS_FOLDER"
 
 echo "--- Upload archives"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-x86_64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-aarch64.tar.gz"
 buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
 buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
 buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"

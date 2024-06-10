@@ -124,6 +124,40 @@ describe('updateSavedSearch', () => {
     });
   });
 
+  it('should pass breakdownField if state has breakdownField', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+    };
+    expect(savedSearch.breakdownField).toBeUndefined();
+    updateSavedSearch({
+      savedSearch,
+      globalStateContainer: createGlobalStateContainer(),
+      services: discoverServiceMock,
+      state: {
+        breakdownField: 'test',
+      },
+    });
+    expect(savedSearch.breakdownField).toEqual('test');
+  });
+
+  it('should pass an empty string if state already has breakdownField', async () => {
+    const savedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+      breakdownField: 'test',
+    };
+    updateSavedSearch({
+      savedSearch,
+      globalStateContainer: createGlobalStateContainer(),
+      services: discoverServiceMock,
+      state: {
+        breakdownField: undefined,
+      },
+    });
+    expect(savedSearch.breakdownField).toEqual('');
+  });
+
   it('should set query and filters from services', async () => {
     const savedSearch = {
       ...savedSearchMock,
