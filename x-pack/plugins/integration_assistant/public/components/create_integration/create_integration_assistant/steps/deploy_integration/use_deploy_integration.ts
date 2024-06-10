@@ -46,7 +46,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
             title: integrationSettings.title ?? '',
             description: integrationSettings.description ?? '',
             name: integrationSettings.name ?? '',
-            // TODO: logo
+            logo: integrationSettings.logo ?? '',
             dataStreams: [
               {
                 title: integrationSettings.dataStreamTitle ?? '',
