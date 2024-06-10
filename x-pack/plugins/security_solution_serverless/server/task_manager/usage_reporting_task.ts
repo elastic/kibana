@@ -29,12 +29,12 @@ export const VERSION = '1.0.0';
 
 export class SecurityUsageReportingTask {
   private wasStarted: boolean = false;
-  private cloudSetup: CloudSetup;
-  private taskType: string;
-  private version: string;
-  private logger: Logger;
   private abortController = new AbortController();
-  private config: ServerlessSecurityConfig;
+  private readonly cloudSetup: CloudSetup;
+  private readonly taskType: string;
+  private readonly version: string;
+  private readonly logger: Logger;
+  private readonly config: ServerlessSecurityConfig;
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
@@ -79,7 +79,7 @@ export class SecurityUsageReportingTask {
 
   public start = async ({ taskManager, interval }: SecurityUsageReportingTaskStartContract) => {
     if (!taskManager) {
-      this.logger.error(`missing required taskmanager service during start of ${this.taskType}`);
+      this.logger.error(`missing required task manager service during start of ${this.taskType}`);
       return;
     }
 
@@ -130,7 +130,7 @@ export class SecurityUsageReportingTask {
     let usageRecords: UsageRecord[] = [];
     let latestRecordTimestamp: Date | undefined;
     let shouldRunAgain = false;
-    // save usage record query time so we can use it to know where
+    // save usage record query time, so we can use it to know where
     // the next query range should start
     const meteringCallbackTime = new Date();
     try {
