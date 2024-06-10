@@ -14,4 +14,4 @@ export const SINGLE_TICK_REGEX = /`/g;
 export const SINGLE_BACKTICK = '`';
 export const DOUBLE_BACKTICK = '``';
 
-export const METADATA_FIELDS = ['_version', '_id', '_index', '_source'];
+export const METADATA_FIELDS = ['_version', '_id', '_index', '_source', '_ignored'];
