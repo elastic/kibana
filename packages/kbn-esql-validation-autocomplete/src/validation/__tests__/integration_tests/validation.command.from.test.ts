@@ -7,26 +7,19 @@
  */
 
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import { indexes, policies, unsupported_field, fields } from '../../../__tests__/helpers';
+import {
+  indexes,
+  policies,
+  unsupported_field,
+  fields as fieldsHelper,
+  enrichFields as enrichFieldsHelper,
+} from '../../../__tests__/helpers';
 import { setup } from '../helpers';
 import { runTestSuite as runFromCommandTestSuite } from '../test_suites/validation.command.from';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
-// TODO: revisit this
-const enrichFieldsRaw = [
-  {
-    name: 'otherField',
-    type: 'string',
-  },
-  {
-    name: 'yetAnotherField',
-    type: 'number',
-  },
-  {
-    name: 'otherStringField',
-    type: 'keyword',
-  },
-];
+const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
+const enrichFieldsRaw = [...enrichFieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 
 export type IntegrationEnvKit = Awaited<ReturnType<typeof setupIntegrationEnv>>;
 
