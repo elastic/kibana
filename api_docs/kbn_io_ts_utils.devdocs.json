@@ -944,6 +944,22 @@
     "objects": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.arrayToStringRt",
+        "type": "Object",
+        "tags": [],
+        "label": "arrayToStringRt",
+        "description": [],
+        "signature": [
+          "Type",
+          "<unknown[], string, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/array_to_string_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.DateFromStringOrNumber",
         "type": "Object",
         "tags": [],
