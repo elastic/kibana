@@ -214,6 +214,7 @@ export const getTimesliderControlFactory = (
           roundDownToNextStepSizeFactor(from, timeRangeMeta.stepSize),
           roundUpToNextStepSizeFactor(to, timeRangeMeta.stepSize),
         ]);
+        setSelectedRange(to - from);
       });
 
       return {

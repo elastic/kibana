@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TimeRange } from "@kbn/es-query";
 import { StateComparators } from "@kbn/presentation-publishing";
 import { coreMock } from '@kbn/core/public/mocks';
@@ -87,5 +89,64 @@ describe('TimesliderControlApi', () => {
     // update time slice to same percentage in new hour interval
     expect('2024-06-08T00:15:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
     expect('2024-06-08T00:30:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+  });
+
+  test('Clicking previous button should advance timeslice backward', async () => {
+    const { api } = factory.buildControl({
+      timesliceStartAsPercentageOfTimeRange: 0.25,
+      timesliceEndAsPercentageOfTimeRange: 0.5,
+    }, buildApiMock, uuid, controlGroupApi);
+    const { findByTestId } = render(api.getCustomPrepend!());
+    fireEvent.click(await findByTestId('timeSlider-previousTimeWindow'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect('2024-06-09T00:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
+    expect('2024-06-09T06:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+  });
+
+  test('Clicking previous button should wrap when time range start is reached', async () => {
+    const { api } = factory.buildControl({
+      timesliceStartAsPercentageOfTimeRange: 0.25,
+      timesliceEndAsPercentageOfTimeRange: 0.5,
+    }, buildApiMock, uuid, controlGroupApi);
+    const { findByTestId } = render(api.getCustomPrepend!());
+    fireEvent.click(await findByTestId('timeSlider-previousTimeWindow'));
+    fireEvent.click(await findByTestId('timeSlider-previousTimeWindow'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect('2024-06-09T18:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
+    expect('2024-06-10T00:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+  });
+
+  test('Clicking next button should advance timeslice forward', async () => {
+    const { api } = factory.buildControl({
+      timesliceStartAsPercentageOfTimeRange: 0.25,
+      timesliceEndAsPercentageOfTimeRange: 0.5,
+    }, buildApiMock, uuid, controlGroupApi);
+    const { findByTestId } = render(api.getCustomPrepend!());
+    fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect('2024-06-09T12:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
+    expect('2024-06-09T18:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
+  });
+
+  test('Clicking next button should wrap when time range end is reached', async () => {
+    const { api } = factory.buildControl({
+      timesliceStartAsPercentageOfTimeRange: 0.25,
+      timesliceEndAsPercentageOfTimeRange: 0.5,
+    }, buildApiMock, uuid, controlGroupApi);
+    const { findByTestId } = render(api.getCustomPrepend!());
+    fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
+    fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
+    fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect('2024-06-09T00:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());
+    expect('2024-06-09T06:00:00.000Z').toEqual(new Date(api.timeslice$.value![1]).toISOString());
   });
 });
