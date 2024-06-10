@@ -392,6 +392,8 @@ paths:
                   - items
         '400':
           $ref: '#/components/responses/error'
+        '429':
+          $ref: '#/components/responses/error'
       operationId: install-package-by-upload
       description: ''
       parameters:
