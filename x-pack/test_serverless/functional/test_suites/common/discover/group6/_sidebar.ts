@@ -289,7 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
         expect(
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('meta')).join(', ')
-        ).to.be('_id, _index, _score');
+        ).to.be('_id, _ignored, _index, _score');
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
@@ -326,7 +326,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
         expect(
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('meta')).join(', ')
-        ).to.be('_id, _index, _score');
+        ).to.be('_id, _ignored, _index, _score');
 
         // Expand Unmapped section
         await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
