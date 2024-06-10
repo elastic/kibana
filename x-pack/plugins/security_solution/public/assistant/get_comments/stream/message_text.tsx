@@ -25,6 +25,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import { EsqlCodeBlock } from '../custom_codeblock/esql_code_block';
 
 interface Props {
   content: string;
@@ -98,7 +99,7 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const getPluginDependencies = () => {
+const getPluginDependencies = ({ esqlInlineEditRef }) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -108,6 +109,14 @@ const getPluginDependencies = () => {
   processingPlugins[1][1].components = {
     ...components,
     cursor: Cursor,
+    esql: (props) => {
+      return (
+        <>
+          <EsqlCodeBlock {...props} esqlInlineEditRef={esqlInlineEditRef} />
+          <EuiSpacer size="m" />
+        </>
+      );
+    },
     customCodeBlock: (props) => {
       return (
         <>
@@ -143,12 +152,12 @@ const getPluginDependencies = () => {
   };
 };
 
-export function MessageText({ loading, content, index }: Props) {
+export function MessageText({ loading, content, index, esqlInlineEditRef }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  const { parsingPluginList, processingPluginList } = getPluginDependencies({ esqlInlineEditRef });
 
   return (
     <EuiText className={containerClassName}>

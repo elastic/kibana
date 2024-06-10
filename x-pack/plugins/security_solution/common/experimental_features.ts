@@ -133,7 +133,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
    */
-  assistantKnowledgeBaseByDefault: false,
+  assistantKnowledgeBaseByDefault: true,
 
   /**
    * Enables the new user details flyout displayed on the Alerts table.

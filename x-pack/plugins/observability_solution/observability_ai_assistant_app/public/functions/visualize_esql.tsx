@@ -112,6 +112,7 @@ export function VisualizeESQL({
   preferredChartType,
   ObservabilityAIAssistantMultipaneFlyoutContext,
   errorMessages,
+  esqlInlineEditRef,
 }: VisualizeESQLProps) {
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -230,10 +231,19 @@ export function VisualizeESQL({
             ReactDOM.unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
           }
         },
-        container: chatFlyoutSecondSlotHandler?.container,
+        container: esqlInlineEditRef ?? chatFlyoutSecondSlotHandler?.container,
       };
     }
-  }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
+  }, [
+    chatFlyoutSecondSlotHandler,
+    esqlInlineEditRef,
+    lensInput,
+    lensLoadEvent,
+    onActionClick,
+    query,
+  ]);
+
+  console.error('triggerOptions', triggerOptions);
 
   if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;
@@ -279,6 +289,7 @@ export function VisualizeESQL({
                 onClick={() => {
                   chatFlyoutSecondSlotHandler?.setVisibility?.(true);
                   if (triggerOptions) {
+                    console.error('triggerOptions', triggerOptions);
                     uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
                   }
                 }}

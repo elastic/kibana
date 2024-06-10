@@ -72,6 +72,7 @@ export const postActionsConnectorExecuteRoute = (
           },
         },
       },
+      // eslint-disable-next-line complexity
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -186,7 +187,7 @@ export const postActionsConnectorExecuteRoute = (
                       model: request.body.model,
                       messages: [
                         {
-                          role: 'assistant',
+                          role: 'system',
                           content: i18n.translate(
                             'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
                             {
@@ -370,6 +371,7 @@ export const postActionsConnectorExecuteRoute = (
             conversationId,
             dataClients,
             esClient,
+            search: assistantContext.search,
             esStore,
             isStream: request.body.subAction !== 'invokeAI',
             llmType: getLlmType(actionTypeId),

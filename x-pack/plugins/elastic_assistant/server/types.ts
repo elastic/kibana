@@ -39,6 +39,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -97,6 +98,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  data: DataPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityPluginStart;
 }
@@ -104,6 +106,7 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
+  search: ReturnType<DataPluginStart['search']['asScoped']>;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
@@ -225,4 +228,5 @@ export interface AssistantToolParams {
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
+  search: ReturnType<DataPluginStart['search']['asScoped']>;
 }

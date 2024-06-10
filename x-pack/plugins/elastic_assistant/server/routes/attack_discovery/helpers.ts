@@ -17,6 +17,7 @@ import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/s
 import { v4 as uuidv4 } from 'uuid';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { AssistantToolParams } from '../../types';
 
 export const REQUIRED_FOR_ATTACK_DISCOVERY: AnonymizationFieldResponse[] = [
@@ -45,6 +46,7 @@ export const getAssistantToolParams = ({
   onNewReplacements,
   request,
   size,
+  search,
 }: {
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
@@ -60,6 +62,7 @@ export const getAssistantToolParams = ({
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size: number;
+  search: DataPluginStart['search']['asScoped'];
 }): AssistantToolParams => ({
   alertsIndexPattern,
   anonymizationFields: [...(anonymizationFields ?? []), ...REQUIRED_FOR_ATTACK_DISCOVERY],
@@ -74,4 +77,5 @@ export const getAssistantToolParams = ({
   replacements: latestReplacements,
   request,
   size,
+  search, // not required for attach discovery
 });

@@ -6,7 +6,8 @@
  */
 
 import type { Node } from 'unist';
-import type { Parent } from 'mdast';
+import type { Parent, Content, PhrasingContent } from 'mdast';
+import { MARKDOWN_TYPES } from '@kbn/elastic-assistant/impl/assistant/use_conversation/helpers';
 
 export const customCodeBlockLanguagePlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {
@@ -17,14 +18,32 @@ export const customCodeBlockLanguagePlugin = () => {
       });
     }
 
-    if (
-      node.type === 'code' &&
-      (node.lang === 'eql' ||
-        node.lang === 'esql' ||
-        node.lang === 'kql' ||
-        node.lang === 'dsl' ||
-        node.lang === 'json')
-    ) {
+    if (node.type === 'code' && !node.lang) {
+      try {
+        const index = parent?.children.indexOf(node as Content);
+
+        if (index) {
+          const previousText = (parent?.children[index - 1]?.children as PhrasingContent[])
+            ?.map((child) => child.value)
+            .join(' ');
+          for (const [typeKey, keywords] of Object.entries(MARKDOWN_TYPES)) {
+            if (keywords.some((kw) => previousText.toLowerCase().includes(kw.toLowerCase()))) {
+              node.lang = typeKey;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        /* empty */
+      }
+    }
+
+    if (node.type === 'code' && node.lang === 'esql') {
+      node.type = 'esql';
+      return;
+    }
+
+    if (node.type === 'code' && ['eql', 'kql', 'dsl', 'json'].includes(node.lang as string)) {
       node.type = 'customCodeBlock';
     }
   };

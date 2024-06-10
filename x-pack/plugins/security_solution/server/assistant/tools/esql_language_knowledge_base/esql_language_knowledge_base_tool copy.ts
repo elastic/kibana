@@ -9,39 +9,9 @@ import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { forOwn, get } from 'lodash';
-import { JsonOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
+import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { APP_UI_ID } from '../../../../common';
-
-export const ECS_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
-  [
-    'system',
-    `As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent..
-
-Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
-<context>
-<indicesMapping>
-{indicesMapping}
-</indicesMapping>
-</context>`,
-  ],
-  [
-    'human',
-    `{input}.
-
-Example response format:
-<example_response>
-A: Please find the ESQL query below:
-\`\`\`esql
-FROM logs
-| SORT @timestamp DESC
-| LIMIT 5
-\`\`\`
-</example_response>"`,
-  ],
-  ['ai', 'Please find the ESQL query below:'],
-]);
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
@@ -61,10 +31,8 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { chain, esClient, search, llm } = params as EsqlKnowledgeBaseToolParams;
+    const { chain, esClient, search } = params as EsqlKnowledgeBaseToolParams;
     if (chain == null) return null;
-
-    console.error('params', Object.keys(params));
 
     console.error('search', search);
 
@@ -75,7 +43,10 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         question: z.string().describe(`The user's exact question about ESQL`),
       }),
       func: async (input, _, cbManager) => {
+        console.error('input.questions', input);
         const response = await esClient.indices.get({ index: '*' });
+
+        console.error('response', JSON.stringify(response, null, 2));
 
         function transformInputToOutput(input2: Record<string, any>) {
           const output: Record<string, any> = {};
@@ -115,31 +86,38 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
 
         const indices = transformInputToOutput(response);
 
-        const graph = ECS_MAIN_PROMPT.pipe(llm).pipe(new StringOutputParser());
+        const result = await chain.invoke(
+          {
+            query: `
+            CONTEXT:\`\`\`
+            Available indices: ${JSON.stringify(Object.keys(indices), null, 2)}
+            Object where the key is the name of the index and the value is the mapping: ${JSON.stringify(
+              indices
+            )}.
+            \`\`\`
 
-        const result = await graph.invoke({
-          input: input.question,
-          indicesMapping: JSON.stringify(Object.keys(indices), null, 2),
-        });
+            ${input.question}
+            `,
+          },
+          cbManager
+        );
 
         console.error('result', JSON.stringify(result, null, 2));
 
-        const esqlQuery = result
-          ?.match(/(?<=```esql)[\s\S]*?(?=```)/g)
+        const esqlQuery = result.text
+          .match(/(?<=""")[\s\S]*?(?=""")/g)
           .join('')
           .replace('\n', '')
           .trim();
 
-        console.error('esqlQuery', esqlQuery);
-
         try {
-          const esqlQueryColumns = await getESQLQueryColumns({ esqlQuery, search: search.search });
+          const esqlQueryColumns = await getESQLQueryColumns({ esqlQuery, search });
           console.error('esqlQueryColumns', esqlQueryColumns);
         } catch (e) {
           console.error('e', e);
         }
 
-        return result;
+        return result.text;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });

@@ -45,6 +45,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   request,
   size,
   traceOptions,
+  search,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai';
@@ -93,6 +94,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     request,
     size,
+    search,
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(

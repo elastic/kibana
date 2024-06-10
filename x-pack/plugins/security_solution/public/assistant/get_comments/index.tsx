@@ -63,6 +63,7 @@ export const getComments = ({
   isFlyoutMode,
   currentUserAvatar,
   setIsStreaming,
+  esqlInlineEditRef,
 }: {
   abortStream: () => void;
   currentConversation?: Conversation;
@@ -82,6 +83,8 @@ export const getComments = ({
   };
   // should only happen when no apiConfig is present
   const actionTypeId = currentConversation.apiConfig?.actionTypeId ?? '';
+
+  console.error('esqlInlineEditRef', esqlInlineEditRef);
 
   const extraLoadingComment = isFetchingResponse
     ? [
@@ -177,6 +180,7 @@ export const getComments = ({
               regenerateMessage={regenerateMessageOfConversation}
               setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}
+              esqlInlineEditRef={esqlInlineEditRef}
             />
           ),
         };
@@ -202,6 +206,7 @@ export const getComments = ({
             refetchCurrentConversation={refetchCurrentConversation}
             setIsStreaming={setIsStreaming}
             transformMessage={transformMessage}
+            esqlInlineEditRef={esqlInlineEditRef}
           />
         ),
       };

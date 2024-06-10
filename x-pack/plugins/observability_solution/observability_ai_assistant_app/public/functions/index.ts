@@ -9,7 +9,9 @@ import type { RegisterRenderFunctionDefinition } from '@kbn/observability-ai-ass
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { registerChangesRenderFunction } from './changes';
 import { registerLensRenderFunction } from './lens';
-import { registerVisualizeQueryRenderFunction } from './visualize_esql';
+import { registerVisualizeQueryRenderFunction, VisualizeESQL } from './visualize_esql';
+
+export { VisualizeESQL };
 
 export async function registerFunctions({
   registerRenderFunction,

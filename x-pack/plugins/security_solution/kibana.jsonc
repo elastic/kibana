@@ -53,7 +53,8 @@
       "notifications",
       "savedSearch",
       "unifiedDocViewer",
-      "charts"
+      "charts",
+      "observabilityAIAssistantApp"
     ],
     "optionalPlugins": [
       "cloudExperiments",

@@ -63,6 +63,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       actions: startPlugins.actions,
 
+      search: startPlugins.data.search.asScoped(request),
+
       logger: this.logger,
 
       getServerBasePath: () => core.http.basePath.serverBasePath,
