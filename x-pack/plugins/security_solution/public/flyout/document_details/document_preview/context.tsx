@@ -33,7 +33,7 @@ export interface DocumentPreviewPanelContext {
    */
   scopeId: string;
   /**
-   * Title of the flyout to be displayed as header
+   * Title of flyout (Rule name for alerts)
    */
   title: string;
   /**
@@ -156,7 +156,9 @@ export const useDocumentPreviewPanelContext = (): DocumentPreviewPanelContext =>
   const contextValue = useContext(DocumentPreviewPanelContext);
 
   if (!contextValue) {
-    throw new Error('RightPanelContext can only be used within RightPanelContext provider');
+    throw new Error(
+      'Document preview panel context can only be used within Document Preview Panel context provider'
+    );
   }
 
   return contextValue;

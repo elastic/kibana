@@ -10,4 +10,4 @@ export const DocumentDetailsLeftPanelKey = 'document-details-left' as const;
 export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as const;
 export const DocumentDetailsIsolateHostPanelKey = 'document-details-isolate-host' as const;
 
-export const DocumentPreviewPanelKey = 'document-details-preview' as const;
+export const DocumentPreviewPanelKey = 'document-preview' as const;

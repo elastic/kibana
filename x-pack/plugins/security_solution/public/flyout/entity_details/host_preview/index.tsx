@@ -39,11 +39,12 @@ export interface HostPreviewPanelProps extends Record<string, unknown> {
 }
 
 export interface HostPreviewPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'host-panel';
+  key: 'host-preview-panel';
   params: HostPreviewPanelProps;
 }
 
-export const HostPreviewPanelKey: HostPreviewPanelExpandableFlyoutProps['key'] = 'host-panel';
+export const HostPreviewPanelKey: HostPreviewPanelExpandableFlyoutProps['key'] =
+  'host-preview-panel';
 export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPreviewPanelRiskScoreQuery';
 export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPreviewPanelObservedHostQuery';
 

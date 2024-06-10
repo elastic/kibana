@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { AlertHeaderTitle } from '../right/components/alert_header_title';
-import { EventHeaderTitle } from '../right/components/event_header_title';
+import { AlertHeaderTitle } from './components/alert_header_title';
+import { EventHeaderTitle } from './components/event_header_title';
 import { useDocumentPreviewPanelContext } from './context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 

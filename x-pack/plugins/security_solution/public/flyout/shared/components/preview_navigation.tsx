@@ -66,7 +66,7 @@ export const PreviewNavigation: FC<PreviewNavigationProps> = memo(
       <EuiFlyoutHeader
         hasBorder
         css={css`
-          margin-top: -35px;
+          /* margin-top: -35px; */
           padding-left: ${euiTheme.size.s};
           padding-right: 0;
           margin-right: 30px;

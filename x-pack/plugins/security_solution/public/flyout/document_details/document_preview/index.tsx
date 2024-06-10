@@ -7,21 +7,20 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { DocumentPreviewPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentPreviewPanelContext } from './context';
 import { PanelNavigation } from './navigation';
 import { PanelContent } from './content';
+import { PanelHeader } from './header';
 import { useFlyoutIsExpandable } from '../right/hooks/use_flyout_is_expandable';
 
 export interface DocumentPreviewPanelProps extends FlyoutPanelProps {
   key: typeof DocumentPreviewPanelKey;
-  path?: PanelPath;
   params?: {
     id: string;
     indexName: string;
     scopeId: string;
-    title: string;
   };
 }
 
@@ -31,13 +30,12 @@ export interface DocumentPreviewPanelProps extends FlyoutPanelProps {
 export const DocumentPreviewPanel: FC = memo(() => {
   const { dataAsNestedObject, getFieldsData } = useDocumentPreviewPanelContext();
 
-  // if the flyout is expandable we render all 3 tabs (overview, table and json)
-  // if the flyout is not, we render only table and json
   const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
 
   return (
     <>
       <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
+      <PanelHeader />
       <PanelContent />
     </>
   );

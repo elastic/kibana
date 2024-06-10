@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
-import { OverviewTab } from '../right/tabs/overview_tab';
+import { OverviewTab } from './tabs/overview_tab';
 
 import { FlyoutBody } from '../../shared/components/flyout_body';
 

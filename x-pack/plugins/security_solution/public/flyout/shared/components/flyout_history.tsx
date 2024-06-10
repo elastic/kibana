@@ -45,7 +45,7 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
           key={index}
           onClick={() => openFlyout({ right: item.right, left: item.left, preview: item.preview })}
         >
-          {item.right?.title ?? 'Document details'}
+          {item.right?.params?.title ?? 'Document details'}
         </EuiContextMenuItem>
       );
     });
@@ -64,7 +64,7 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
     <>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty iconSide="left" onClick={goBackAction} iconType="arrowLeft" size="s">
-          {previousFlyout.right?.title ?? 'Document details'}
+          {previousFlyout.right?.params?.title ?? 'Document details'}
         </EuiButtonEmpty>
       </EuiFlexItem>
       {history.length > 2 && (

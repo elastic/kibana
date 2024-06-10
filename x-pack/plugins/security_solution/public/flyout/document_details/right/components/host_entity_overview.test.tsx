@@ -167,7 +167,7 @@ describe('<HostEntityContent />', () => {
       const { getByTestId } = renderHostEntityContent();
 
       getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
-      expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+      expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
         id: DocumentDetailsLeftPanelKey,
         path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
         params: {

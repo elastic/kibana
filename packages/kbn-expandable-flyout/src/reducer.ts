@@ -218,18 +218,18 @@ export const reducer = createReducer(initialState, (builder) => {
   });
 
   builder.addCase(urlChangedAction, (state, { payload: { preview, left, right, id } }) => {
-    if (id in state.byId) {
-      state.byId[id].right = right;
-      state.byId[id].left = left;
-      state.byId[id].preview = preview ? [preview] : undefined;
-    } else {
-      state.byId[id] = {
-        right,
-        left,
-        preview: preview ? [preview] : undefined,
-        history: right || left || preview ? [{ right, left, preview }] : [],
-      };
-    }
+    // if (id in state.byId) {
+    //   state.byId[id].right = right;
+    //   state.byId[id].left = left;
+    //   state.byId[id].preview = preview ? [preview] : undefined;
+    // } else {
+    //   state.byId[id] = {
+    //     right,
+    //     left,
+    //     preview: preview ? [preview] : undefined,
+    //     history: right || left || preview ? [{ right, left, preview }] : [],
+    //   };
+    // }
 
     state.needsSync = false;
   });

@@ -26,7 +26,7 @@ interface PanelNavigationProps {
 export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpandable }) => {
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId } = useDocumentPreviewPanelContext();
+  const { eventId, indexName, scopeId, title } = useDocumentPreviewPanelContext();
 
   const expandDetails = useCallback(() => {
     openFlyout({
@@ -36,6 +36,7 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
           id: eventId,
           indexName,
           scopeId,
+          title,
         },
       },
       left: {
@@ -51,7 +52,7 @@ export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpanda
       location: scopeId,
       panel: 'left',
     });
-  }, [eventId, openFlyout, indexName, scopeId, telemetry]);
+  }, [eventId, openFlyout, indexName, scopeId, telemetry, title]);
 
   return (
     <PreviewNavigation flyoutIsExpandable={flyoutIsExpandable} expandDetails={expandDetails} />
