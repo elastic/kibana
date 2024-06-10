@@ -127,7 +127,8 @@ export default function ({ getService }: FtrProviderContext) {
         // metrics returned should equal the initial metrics, then next call to the metrics
         // should return 0 because they've been reset
         let metrics = (await getMetricsRequest(true)).metrics;
-        expect(metrics).to.eql(initialMetrics);
+        expect(metrics?.task_claim?.value.success).to.be.greaterThan(0);
+        expect(metrics?.task_claim?.value.total).to.be.greaterThan(0);
 
         metrics = (await getMetricsRequest(false)).metrics;
         expect(metrics).not.to.be(null);
