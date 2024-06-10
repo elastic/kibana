@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEmpty } from 'lodash';
 
 import type {
   NewPackagePolicyInput,
@@ -149,7 +150,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   } = data;
   const packagePolicy = packageToPackagePolicy(
     packageInfo,
-    policyId && !policyIds[0] ? policyId : policyIds,
+    policyId && isEmpty(policyIds) ? policyId : policyIds,
     namespace,
     name,
     description
