@@ -62,6 +62,7 @@ export {
   FormDataProvider,
   getFieldValidityAndErrorMessage,
   useFormData,
+  useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export { fieldFormatters, fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
