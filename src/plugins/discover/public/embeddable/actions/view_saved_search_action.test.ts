@@ -9,6 +9,7 @@
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+
 import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
 import { getSearchEmbeddableFactory } from '../get_search_embeddable_factory';
@@ -30,6 +31,10 @@ const initialState = {
 const executeTriggerActions = async (triggerId: string, context: object) => {
   return Promise.resolve(undefined);
 };
+
+jest
+  .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
+  .mockReturnValue(new BehaviorSubject('test'));
 
 describe('view saved search action', () => {
   let searchApi: SearchEmbeddableApi;

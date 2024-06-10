@@ -15,8 +15,9 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import type { RecordsFetchResponse } from '../../types';
+import type { ProfilesManager } from '../../../context_awareness';
 
 interface EsqlErrorResponse {
   error: {
@@ -25,17 +26,29 @@ interface EsqlErrorResponse {
   type: 'error';
 }
 
-export function fetchEsql(
-  query: Query | AggregateQuery,
-  dataView: DataView,
-  data: DataPublicPluginStart,
-  expressions: ExpressionsStart,
-  inspectorAdapters: Adapters,
-  abortSignal?: AbortSignal,
-  filters?: Filter[],
-  inputQuery?: Query,
-  inputTimeRange?: TimeRange
-): Promise<RecordsFetchResponse> {
+export function fetchEsql({
+  query,
+  inputQuery,
+  filters,
+  inputTimeRange,
+  dataView,
+  abortSignal,
+  inspectorAdapters,
+  data,
+  expressions,
+  profilesManager,
+}: {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  inputTimeRange?: TimeRange;
+  dataView: DataView;
+  abortSignal?: AbortSignal;
+  inspectorAdapters: Adapters;
+  data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  profilesManager: ProfilesManager;
+}): Promise<RecordsFetchResponse> {
   const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getTime();
   return textBasedQueryStateToAstWithValidation({
     filters,
@@ -70,12 +83,14 @@ export function fetchEsql(
             const rows = table?.rows ?? [];
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
-            finalData = rows.map((row: Record<string, string>, idx: number) => {
-              return {
+            finalData = rows.map((row, idx) => {
+              const record: DataTableRecord = {
                 id: String(idx),
-                raw: row,
+                raw: row as EsHitRecord,
                 flattened: row,
-              } as unknown as DataTableRecord;
+              };
+
+              return profilesManager.resolveDocumentProfile({ record });
             });
           }
         });
@@ -92,7 +107,7 @@ export function fetchEsql(
         });
       }
       return {
-        records: [] as DataTableRecord[],
+        records: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
       };
