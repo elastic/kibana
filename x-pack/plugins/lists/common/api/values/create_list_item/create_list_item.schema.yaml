@@ -33,6 +33,7 @@ paths:
                     - 'true'
                     - 'false'
                     - wait_for
+                  description: Determines when changes made by the request are made visible to search
               required:
                 - list_id
                 - value

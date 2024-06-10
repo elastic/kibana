@@ -30,6 +30,9 @@ export const CreateListItemRequestBody = z.object({
   list_id: ListId,
   value: ListItemValue,
   meta: ListItemMeta.optional(),
+  /**
+   * Determines when changes made by the request are made visible to search
+   */
   refresh: z.enum(['true', 'false', 'wait_for']).optional(),
 });
 export type CreateListItemRequestBodyInput = z.input<typeof CreateListItemRequestBody>;

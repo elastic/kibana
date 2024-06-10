@@ -1,39 +1,66 @@
 openapi: 3.0.0
 info:
-  title: Patch list item API endpoint
+  title: Import list items API endpoint
   version: '2023-10-31'
 paths:
-  /api/lists/items:
-    patch:
-      x-labels: [serverless, ess]
-      operationId: PatchListItem
+  /api/lists/items/_import:
+    post:
+      operationId: ImportListItems
       x-codegen-enabled: true
-      summary: Patches a list item
+      summary: Imports list items
+      description: |
+        Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+
+        You can import items to a new or existing list.
       tags:
-        - List item API
+        - List items Import/Export API
       requestBody:
-        description: List item's properties
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                id:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListItemId'
-                value:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListItemValue'
-                meta:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListItemMeta'
-                refresh:
+                file:
                   type: string
-                  enum:
-                    - 'true'
-                    - 'false'
-                    - wait_for
-                  description: Determines when changes made by the request are made visible to search
-              required:
-                - id
+                  format: binary
+                  description: A `.txt` or `.csv` file containing newline separated list items
+      parameters:
+        - name: list_id
+          in: query
+          required: false
+          description: |
+            List's id.
+
+            Required when importing to an existing list.
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+        - name: type
+          in: query
+          required: false
+          description: |
+            Type of the importing list.
+
+            Required when importing a new list that is `list_id` is not specified.
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
+        - name: serializer
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: deserializer
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: refresh
+          in: query
+          required: false
+          description: Determines when changes made by the request are made visible to search
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: Successful response
@@ -61,12 +88,6 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../security_solution/common/api/model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-        404:
-          description: List item not found response
-          content:
-            application/json:
-              schema:
-                $ref: '../../../../../security_solution/common/api/model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         500:
           description: Internal server error response
           content:

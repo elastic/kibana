@@ -1,46 +1,32 @@
 openapi: 3.0.0
 info:
-  title: Patch list item API endpoint
+  title: Export list items API endpoint
   version: '2023-10-31'
 paths:
-  /api/lists/items:
-    patch:
-      x-labels: [serverless, ess]
-      operationId: PatchListItem
+  /api/lists/items/_export:
+    post:
+      operationId: ExportListItems
       x-codegen-enabled: true
-      summary: Patches a list item
+      summary: Exports list items
+      description: Exports list item values from the specified list
       tags:
-        - List item API
-      requestBody:
-        description: List item's properties
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListItemId'
-                value:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListItemValue'
-                meta:
-                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListItemMeta'
-                refresh:
-                  type: string
-                  enum:
-                    - 'true'
-                    - 'false'
-                    - wait_for
-                  description: Determines when changes made by the request are made visible to search
-              required:
-                - id
+        - List items Import/Export API
+      parameters:
+        - name: list_id
+          in: query
+          required: true
+          description: List's id to export
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
       responses:
         200:
           description: Successful response
           content:
-            application/json:
+            application/ndjson:
               schema:
-                $ref: '../model/list_common.schema.yaml#/components/schemas/ListItem'
+                type: string
+                format: binary
+                description: A `.txt` file containing list items from the specified list
         400:
           description: Invalid input data response
           content:
@@ -62,7 +48,7 @@ paths:
               schema:
                 $ref: '../../../../../security_solution/common/api/model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         404:
-          description: List item not found response
+          description: List not found response
           content:
             application/json:
               schema:

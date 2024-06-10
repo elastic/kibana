@@ -23,6 +23,9 @@ export const PatchListItemRequestBody = z.object({
   id: ListItemId,
   value: ListItemValue.optional(),
   meta: ListItemMeta.optional(),
+  /**
+   * Determines when changes made by the request are made visible to search
+   */
   refresh: z.enum(['true', 'false', 'wait_for']).optional(),
 });
 export type PatchListItemRequestBodyInput = z.input<typeof PatchListItemRequestBody>;
