@@ -12,8 +12,8 @@ const DEFAULT_ESQL_LIMIT = 500;
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export function getIndexPatternFromESQLQuery(esql?: string) {
   const { ast } = getAstAndSyntaxErrors(esql);
-  const fromCommand = ast.find(({ name }) => name === 'from');
-  const args = (fromCommand?.args ?? []) as ESQLSource[];
+  const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.text).join(',');
 }
