@@ -211,8 +211,7 @@ export const getUiSettings: (
       message: i18n.translate(
         'discover.advancedSettings.discover.disableDocumentExplorerDeprecation',
         {
-          defaultMessage:
-            'This setting is deprecated and will not be supported in a future version.',
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
         }
       ),
       docLinksKey: 'discoverSettings',
@@ -250,8 +249,7 @@ export const getUiSettings: (
       message: i18n.translate(
         'discover.advancedSettings.discover.readFieldsFromSourceDeprecation',
         {
-          defaultMessage:
-            'This setting is deprecated and will not be supported in a future version.',
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
         }
       ),
       docLinksKey: 'discoverSettings',
