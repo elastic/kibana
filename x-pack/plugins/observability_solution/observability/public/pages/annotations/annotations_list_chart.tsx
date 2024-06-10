@@ -101,7 +101,6 @@ export function AnnotationsListChart({
             defaultMessage: 'Create annotation',
           })}
         </EuiButton>
-        {/* <AddAnnotationButton />*/}
       </InPortal>
       <Chart size={{ height: 300 }}>
         <Settings

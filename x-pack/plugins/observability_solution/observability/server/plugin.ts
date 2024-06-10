@@ -36,8 +36,8 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { AnnotationResourceInstaller } from './lib/annotations/resource_installer';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { AnnotationResourceInstaller } from './lib/annotations/resource_installer';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
