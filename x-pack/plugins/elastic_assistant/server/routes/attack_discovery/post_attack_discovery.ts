@@ -7,30 +7,26 @@
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
-import { uniq } from 'lodash/fp';
 import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
-  AttackDiscoveryResponse,
-  AttackDiscovery,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import moment from 'moment/moment';
-import {
-  ATTACK_DISCOVERY_ERROR_EVENT,
-  ATTACK_DISCOVERY_SUCCESS_EVENT,
-} from '../../lib/telemetry/event_based_telemetry';
 import { ATTACK_DISCOVERY } from '../../../common/constants';
-import { addGenerationInterval, attackDiscoveryStatus, getAssistantToolParams } from './helpers';
+import {
+  getAssistantTool,
+  getAssistantToolParams,
+  handleToolError,
+  updateAttackDiscoveries,
+  updateAttackDiscoveryStatusToRunning,
+} from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { getLangSmithTracer } from '../evaluate/utils';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { getLlmType } from '../utils';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
@@ -82,6 +78,12 @@ export const postAttackDiscoveryRoute = (
               statusCode: 401,
             });
           }
+          if (!dataClient) {
+            return resp.error({
+              body: `Attack discovery data client not initialized`,
+              statusCode: 500,
+            });
+          }
           const pluginName = getPluginNameFromRequest({
             request,
             defaultPluginName: DEFAULT_PLUGIN_NAME,
@@ -108,42 +110,27 @@ export const postAttackDiscoveryRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          // get the attack discovery tool:
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
-          const assistantTool = assistantTools.find((tool) => tool.id === 'attack-discovery');
+          const assistantTool = getAssistantTool(
+            (await context.elasticAssistant).getRegisteredTools,
+            pluginName
+          );
+
           if (!assistantTool) {
             return response.notFound(); // attack discovery tool not found
           }
 
-          const traceOptions = {
-            projectName: langSmithProject,
-            tracers: [
-              ...getLangSmithTracer({
-                apiKey: langSmithApiKey,
-                projectName: langSmithProject,
-                logger,
-              }),
-            ],
-          };
-
-          const llm = new ActionsClientLlm({
-            actions,
-            connectorId: apiConfig.connectorId,
-            llmType: getLlmType(apiConfig.actionTypeId),
-            logger,
-            request,
-            temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
-            timeout: CONNECTOR_TIMEOUT,
-            traceOptions,
-          });
-
           const assistantToolParams = getAssistantToolParams({
+            actions,
             alertsIndexPattern,
             anonymizationFields,
+            apiConfig,
             esClient,
             latestReplacements,
+            connectorTimeout: CONNECTOR_TIMEOUT,
             langChainTimeout: LANG_CHAIN_TIMEOUT,
-            llm,
+            langSmithProject,
+            langSmithApiKey,
+            logger,
             onNewReplacements,
             request,
             size,
@@ -152,116 +139,42 @@ export const postAttackDiscoveryRoute = (
           // invoke the attack discovery tool:
           const toolInstance = assistantTool.getTool(assistantToolParams);
 
-          const foundAttackDiscovery = await dataClient?.findAttackDiscoveryByConnectorId({
-            connectorId: apiConfig.connectorId,
+          const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(
+            dataClient,
             authenticatedUser,
-          });
-          let currentAd: AttackDiscoveryResponse;
-          let attackDiscoveryId: string;
-          if (foundAttackDiscovery == null) {
-            const ad = await dataClient?.createAttackDiscovery({
-              attackDiscoveryCreate: {
-                attackDiscoveries: [],
-                apiConfig,
-                status: attackDiscoveryStatus.running,
-                replacements: latestReplacements,
-              },
-              authenticatedUser,
-            });
-            if (ad == null) {
-              throw new Error(
-                `Could not create attack discovery for connectorId: ${apiConfig.connectorId}`
-              );
-            } else {
-              currentAd = ad;
-            }
-            attackDiscoveryId = currentAd.id;
-          } else {
-            attackDiscoveryId = foundAttackDiscovery.id;
-
-            const ad = await dataClient?.updateAttackDiscovery({
-              attackDiscoveryUpdateProps: {
-                id: attackDiscoveryId,
-                status: attackDiscoveryStatus.running,
-                backingIndex: foundAttackDiscovery.backingIndex,
-              },
-              authenticatedUser,
-            });
-            if (ad == null) {
-              throw new Error(
-                `Could not update attack discovery for connectorId: ${apiConfig.connectorId}`
-              );
-            } else {
-              currentAd = ad;
-            }
-          }
+            apiConfig,
+            latestReplacements
+          );
 
           toolInstance
             ?.invoke('')
-            .then(async (rawAttackDiscoveries) => {
-              const getDataFromJSON = () => {
-                const { alertsContextCount, attackDiscoveries } = JSON.parse(rawAttackDiscoveries);
-                return { alertsContextCount, attackDiscoveries };
-              };
-
-              const endTime = moment();
-              const durationMs = endTime.diff(startTime);
-
-              if (rawAttackDiscoveries == null) {
-                throw new Error('tool returned no attack discoveries');
-              }
-              const updateProps = {
-                ...getDataFromJSON(),
-                status: attackDiscoveryStatus.succeeded,
-                generationIntervals: addGenerationInterval(currentAd.generationIntervals, {
-                  durationMs,
-                  date: new Date().toISOString(),
-                }),
-                id: attackDiscoveryId,
-                replacements: latestReplacements,
+            .then(async (rawAttackDiscoveries) =>
+              updateAttackDiscoveries({
+                apiConfig,
+                attackDiscoveryId,
+                authenticatedUser,
+                currentAd,
+                dataClient,
+                latestReplacements,
+                rawAttackDiscoveries,
+                size,
+                startTime,
+                telemetry,
+              })
+            )
+            .catch(async (err) =>
+              handleToolError({
+                apiConfig,
+                attackDiscoveryId,
+                authenticatedUser,
                 backingIndex: currentAd.backingIndex,
-              };
-
-              await dataClient?.updateAttackDiscovery({
-                attackDiscoveryUpdateProps: updateProps,
-                authenticatedUser,
-              });
-
-              telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
-                actionTypeId: apiConfig.actionTypeId,
-                alertsContextCount: updateProps.alertsContextCount,
-                alertsCount: uniq(
-                  updateProps.attackDiscoveries.flatMap(
-                    (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
-                  )
-                ).length,
-                configuredAlertsCount: size,
-                discoveriesGenerated: updateProps.attackDiscoveries.length,
-                durationMs,
-                model: apiConfig.model,
-                provider: apiConfig.provider,
-              });
-            })
-            .catch(async (err) => {
-              logger.error(err);
-              const error = transformError(err);
-              telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-                actionTypeId: apiConfig.actionTypeId,
-                errorMessage: error.message,
-                model: apiConfig.model,
-                provider: apiConfig.provider,
-              });
-              await dataClient?.updateAttackDiscovery({
-                attackDiscoveryUpdateProps: {
-                  attackDiscoveries: [],
-                  status: attackDiscoveryStatus.failed,
-                  id: attackDiscoveryId,
-                  replacements: latestReplacements,
-                  backingIndex: currentAd.backingIndex,
-                },
-                authenticatedUser,
-              });
-            });
+                dataClient,
+                err,
+                latestReplacements,
+                logger,
+                telemetry,
+              })
+            );
 
           return response.ok({
             body: currentAd,
