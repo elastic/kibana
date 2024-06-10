@@ -39,23 +39,34 @@ describe('meta', () => {
 });
 
 describe('transform', () => {
+  const durationTransformation = jest.fn((v) => {
+    return moment.duration(v);
+  });
+  // Explicitly define the type to catch type errors
+  const durationSchema: Type<string, moment.Duration> = schema
+    .string({
+      maxLength: 3,
+      validate: (v) =>
+        /^\d+(M|w|d|H|m|s|ms)$/.test(v) ? undefined : `expected ${v} to be a duration like '1d'`,
+    })
+    .transform(durationTransformation);
   it('transforms values', () => {
-    const durationTransformation = jest.fn((v) => {
-      return moment.duration(v);
-    });
-    // Explicitly define the type to catch type errors
-    const durationSchema: Type<string, moment.Duration> = schema
-      .string({
-        maxLength: 3,
-        validate: (v) =>
-          /^\d+(M|w|d|H|m|s|ms)$/.test(v) ? undefined : `expected ${v} to be a duration like '1d'`,
-      })
-      .transform(durationTransformation);
-
     const duration = durationSchema.validate('1d');
     expect(moment.isDuration(duration)).toBe(true);
     expect(durationTransformation).toHaveBeenCalledTimes(1);
     expect(durationTransformation).toHaveBeenCalledWith('1d');
+  });
+  it('transforms nested values', () => {
+    const obj = schema.object({ a: schema.object({ duration: durationSchema }) });
+    const {
+      a: { duration },
+    } = obj.validate({ a: { duration: '1d' } });
+    expect(moment.isDuration(duration)).toBe(true);
+    expect(durationTransformation).toHaveBeenCalledTimes(1);
+    expect(durationTransformation).toHaveBeenCalledWith('1d');
+  });
+  it('still reports errors as expected', () => {
+    expect(() => durationSchema.validate('hello there')).toThrowError(/must have maximum length/);
   });
   it('only runs the last provided transform function', () => {
     const transform1 = jest.fn((v) => Number(v));

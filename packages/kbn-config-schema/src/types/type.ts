@@ -112,7 +112,7 @@ export abstract class Type<V, TV = V> {
    * Internal "schema" backed by Joi.
    * @type {Schema}
    */
-  protected readonly internalSchema: AnySchema;
+  protected internalSchema: AnySchema;
 
   protected constructor(schema: AnySchema, options: TypeOptions<V> = {}) {
     if (options.defaultValue !== undefined) {
@@ -166,7 +166,7 @@ export abstract class Type<V, TV = V> {
       throw new ValidationError(error as any, namespace);
     }
 
-    return this.transformFn ? this.transformFn(validatedValue) : validatedValue;
+    return validatedValue;
   }
 
   /**
@@ -225,6 +225,9 @@ export abstract class Type<V, TV = V> {
   }
 
   public transform<R>(fn: (v: V) => R) {
+    if (!this.transformFn) {
+      this.internalSchema = this.internalSchema.custom((v) => this.transformFn!(v));
+    }
     this.transformFn = fn;
     // hacky way of injecting transformed type schema
     return this as unknown as TransformedType<V, R>;
