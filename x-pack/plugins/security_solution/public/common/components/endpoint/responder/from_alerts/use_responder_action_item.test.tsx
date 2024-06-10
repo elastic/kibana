@@ -24,7 +24,10 @@ describe('useResponderActionItem', () => {
   beforeEach(() => {
     const appContextMock = createAppRootMockRenderer();
 
-    alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
+    // This is on purpose - an alert for an unsupported agent type. The menu item should always be
+    // visible as long as the user has authz to it. In this case it will be disabled.
+    alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo');
+
     renderHook = () =>
       appContextMock.renderHook(() => useResponderActionItem(alertDetailItemData, () => {}));
 
