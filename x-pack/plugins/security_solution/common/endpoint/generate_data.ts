@@ -1578,7 +1578,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Generates a Fleet `package policy` that includes the Endpoint Policy data
    */
-  public generatePolicyPackagePolicy(seed?: string): PolicyData {
+  public generatePolicyPackagePolicy(seed: string = 'seed'): PolicyData {
     return new FleetPackagePolicyGenerator(seed).generateEndpointPackagePolicy();
   }
 
