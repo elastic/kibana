@@ -208,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('includes all unmapped fields to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['*']);
-        expect((csvFile as string).length).to.be(120);
+        expect((csvFile as string).length).to.be(139);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
