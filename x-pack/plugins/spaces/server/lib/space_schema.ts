@@ -11,7 +11,7 @@ import { MAX_SPACE_INITIALS } from '../../common';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;
 
-export const spaceSchema = schema.object({
+const spaceSchema = schema.object({
   id: schema.string({
     validate: (value) => {
       if (!SPACE_ID_REGEX.test(value)) {
@@ -43,3 +43,18 @@ export const spaceSchema = schema.object({
     })
   ),
 });
+
+const solutionSchema = schema.oneOf([
+  schema.literal('security'),
+  schema.literal('observability'),
+  schema.literal('search'),
+  schema.literal('classic'),
+]);
+
+export const getSpaceSchema = (isServerless: boolean) => {
+  if (isServerless) {
+    return spaceSchema;
+  }
+
+  return spaceSchema.extends({ solution: schema.maybe(solutionSchema) });
+};

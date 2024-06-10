@@ -7,7 +7,7 @@
  */
 
 import { suggest } from './autocomplete';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
@@ -17,6 +17,8 @@ import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { FunctionArgSignature } from '../definitions/types';
+import { getParamAtPosition } from './helper';
+import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
 
 const triggerCharacters = [',', '(', '=', ' '];
@@ -118,7 +120,7 @@ function getFunctionSignaturesByReturnType(
   }
   // eval functions (eval is a special keyword in JS)
   if (evalMath) {
-    list.push(...evalFunctionsDefinitions);
+    list.push(...evalFunctionDefinitions);
   }
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
@@ -1129,22 +1131,27 @@ describe('autocomplete', () => {
     );
 
     // Test suggestions for each possible param, within each signature variation, for each function
-    for (const fn of evalFunctionsDefinitions) {
+    for (const fn of evalFunctionDefinitions) {
       // skip this fn for the moment as it's quite hard to test
       if (fn.name !== 'bucket') {
         for (const signature of fn.signatures) {
           signature.params.forEach((param, i) => {
             if (i < signature.params.length) {
-              const canHaveMoreArgs =
-                i + 1 < (signature.minParams ?? 0) ||
-                signature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
+              // This ref signature thing is probably wrong in a few cases, but it matches
+              // the logic in getFunctionArgsSuggestions. They should both be updated
+              const refSignature = fn.signatures[0];
+              const requiresMoreArgs =
+                i + 1 < (refSignature.minParams ?? 0) ||
+                refSignature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
 
-              const allParamDefs = fn.signatures.map((s) => s.params[i]);
+              const allParamDefs = fn.signatures
+                .map((s) => getParamAtPosition(s, i))
+                .filter(nonNullable);
 
               // get all possible types for this param
               const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
                 allParamDefs,
-                (p) => p.constantOnly || /_literal/.test(param.type)
+                (p) => p.constantOnly || /_literal/.test(p.type)
               );
 
               const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
@@ -1155,10 +1162,10 @@ describe('autocomplete', () => {
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
                 suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-                        (f) => (canHaveMoreArgs ? `${f},` : f)
+                        (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
@@ -1166,9 +1173,9 @@ describe('autocomplete', () => {
                         { evalMath: true },
                         undefined,
                         [fn.name]
-                      ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-                        canHaveMoreArgs ? `${d},` : d
+                        requiresMoreArgs ? `${d},` : d
                       ),
                     ]
               );
@@ -1177,10 +1184,10 @@ describe('autocomplete', () => {
                   i ? ',' : ''
                 } )`,
                 suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
                   : [
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-                        (f) => (canHaveMoreArgs ? `${f},` : f)
+                        (f) => (requiresMoreArgs ? `${f},` : f)
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
@@ -1188,9 +1195,9 @@ describe('autocomplete', () => {
                         { evalMath: true },
                         undefined,
                         [fn.name]
-                      ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
                       ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-                        canHaveMoreArgs ? `${d},` : d
+                        requiresMoreArgs ? `${d},` : d
                       ),
                     ]
               );
@@ -1236,7 +1243,13 @@ describe('autocomplete', () => {
       ]);
       testSuggestions(
         'from a | eval var0=date_trunc()',
-        [...getLiteralsByType('time_literal').map((t) => `${t},`)],
+        [
+          ...getLiteralsByType('time_literal').map((t) => `${t},`),
+          ...getFunctionSignaturesByReturnType('eval', 'date', { evalMath: true }, undefined, [
+            'date_trunc',
+          ]).map((t) => `${t},`),
+          ...getFieldNamesByType('date').map((t) => `${t},`),
+        ],
         '('
       );
       testSuggestions('from a | eval var0=date_trunc(2 )', [

@@ -15,13 +15,12 @@ import {
   EuiFormErrorText,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -36,8 +35,9 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
@@ -53,7 +53,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression: MetricExpression = {
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   metrics: [
     {
       name: 'A',
@@ -602,7 +602,9 @@ export default function Expressions(props: Props) {
                 defaultMessage: 'Alert me if a group stops reporting data',
               }
             )}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
                 {
@@ -610,9 +612,7 @@ export default function Expressions(props: Props) {
                     'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                 }
               )}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         disabled={!hasGroupBy}

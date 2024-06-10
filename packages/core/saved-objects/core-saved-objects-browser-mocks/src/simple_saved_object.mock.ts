@@ -45,6 +45,7 @@ const createSimpleSavedObjectMock = (
     error: savedObject.error,
     references: savedObject.references,
     updatedAt: savedObject.updated_at,
+    updatedBy: savedObject.updated_by,
     createdAt: savedObject.created_at,
     createdBy: savedObject.created_by,
     namespaces: savedObject.namespaces,

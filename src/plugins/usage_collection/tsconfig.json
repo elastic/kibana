@@ -22,6 +22,7 @@
     "@kbn/i18n",
     "@kbn/core-http-server-mocks",
     "@kbn/analytics-collection-utils",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

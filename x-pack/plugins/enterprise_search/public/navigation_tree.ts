@@ -80,7 +80,6 @@ export const getNavigationTreeDefinition = ({
       map(({ indices, searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
-            { type: 'recentlyAccessed' },
             {
               breadcrumbStatus: 'hidden',
               children: [
@@ -242,6 +241,7 @@ export const getNavigationTreeDefinition = ({
             },
           ],
           footer: [
+            { type: 'recentlyAccessed' },
             {
               breadcrumbStatus: 'hidden',
               children: [

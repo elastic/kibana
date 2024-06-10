@@ -1483,7 +1483,7 @@ describe('helpers', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        '/internal/ecs_data_quality_dashboard/results/indices_latest/auditbeat-*',
+        '/internal/ecs_data_quality_dashboard/results_latest/auditbeat-*',
         expect.objectContaining({
           method: 'GET',
         })

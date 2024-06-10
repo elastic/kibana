@@ -26,6 +26,7 @@ import { useDatasetQualityContext } from '../../dataset_quality/context';
 import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryHeader } from './flyout_summary_header';
 import { FlyoutSummaryKpis, FlyoutSummaryKpisLoading } from './flyout_summary_kpis';
+import { DegradedFields } from '../degraded_fields/degraded_fields';
 
 const nonAggregatableWarningTitle = i18n.translate('xpack.datasetQuality.nonAggregatable.title', {
   defaultMessage: 'Your request may take longer to complete',
@@ -173,6 +174,10 @@ export function FlyoutSummary({
         lastReloadTime={lastReloadTime}
         onTimeRangeChange={handleTimeRangeChange}
       />
+
+      <EuiSpacer />
+
+      <DegradedFields />
     </>
   );
 }

@@ -7,10 +7,11 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getExternalEdrAgentInfo } from './get_external_edr_agent_info';
+import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
 import type { Platform } from '../../../management/components/endpoint_responder/components/header_info/platforms';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
-import type { ThirdPartyAgentInfo } from '../../../../common/types';
 import type {
   ResponseActionAgentType,
   EndpointCapabilities,
@@ -18,13 +19,13 @@ import type {
 import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import {
+  CROWDSTRIKE_AGENT_ID_PROPERTY_MISSING,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING,
 } from './translations';
-import { getFieldValue } from '../host_isolation/helpers';
 
 export interface ResponderContextMenuItemProps {
   endpointId: string;
@@ -32,32 +33,6 @@ export interface ResponderContextMenuItemProps {
   agentType: ResponseActionAgentType;
   eventData?: TimelineEventsDetailsItem[] | null;
 }
-
-const getThirdPartyAgentInfo = (
-  eventData: TimelineEventsDetailsItem[] | null
-): ThirdPartyAgentInfo => {
-  return {
-    agent: {
-      id: getSentinelOneAgentId(eventData) || '',
-      type: getFieldValue(
-        { category: 'event', field: 'event.module' },
-        eventData
-      ) as ResponseActionAgentType,
-    },
-    host: {
-      name: getFieldValue({ category: 'host', field: 'host.name' }, eventData),
-      os: {
-        name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
-        family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
-        version: getFieldValue({ category: 'host', field: 'host.os.version' }, eventData),
-      },
-    },
-    lastCheckin: getFieldValue(
-      { category: 'kibana', field: 'kibana.alert.last_detected' },
-      eventData
-    ),
-  };
-};
 
 /**
  * This hook is used to get the data needed to show the context menu items for the responder
@@ -85,6 +60,9 @@ export const useResponderActionData = ({
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
+  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
   const {
     data: hostInfo,
     isFetching,
@@ -103,6 +81,17 @@ export const useResponderActionData = ({
           // Event must have the property that identifies the agent id
           if (!getSentinelOneAgentId(eventData ?? null)) {
             return [true, SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING];
+          }
+
+          return [false, undefined];
+        case 'crowdstrike':
+          // Disable it if feature flag is disabled
+          if (!responseActionsCrowdstrikeManualHostIsolationEnabled) {
+            return [true, undefined];
+          }
+          // Event must have the property that identifies the agent id
+          if (!getCrowdstrikeAgentId(eventData ?? null)) {
+            return [true, CROWDSTRIKE_AGENT_ID_PROPERTY_MISSING];
           }
 
           return [false, undefined];
@@ -152,11 +141,12 @@ export const useResponderActionData = ({
     agentType,
     isSentinelOneV1Enabled,
     eventData,
+    responseActionsCrowdstrikeManualHostIsolationEnabled,
   ]);
 
   const handleResponseActionsClick = useCallback(() => {
-    if (!isEndpointHost) {
-      const agentInfoFromAlert = getThirdPartyAgentInfo(eventData || null);
+    if (!isEndpointHost && eventData != null) {
+      const agentInfoFromAlert = getExternalEdrAgentInfo(eventData, agentType);
       showResponseActionsConsole({
         agentId: agentInfoFromAlert.agent.id,
         agentType,

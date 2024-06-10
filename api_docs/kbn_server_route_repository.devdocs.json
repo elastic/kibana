@@ -644,7 +644,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{} & {}> | null>"
+              "<string | Readonly<{} & {}> | null>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
             "deprecated": false,

@@ -310,12 +310,65 @@ describe('getGenAiTokenTracking', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
+  it('should return the total, prompt, and completion token counts when given a valid Gemini response', async () => {
+    const actionTypeId = '.gemini';
+
+    const result = {
+      actionId: '123',
+      status: 'ok' as const,
+      data: {
+        usageMetadata: {
+          promptTokenCount: 50,
+          candidatesTokenCount: 50,
+          totalTokenCount: 100,
+        },
+      },
+    };
+    const validatedParams = {};
+
+    const tokenTracking = await getGenAiTokenTracking({
+      actionTypeId,
+      logger,
+      result,
+      validatedParams,
+    });
+
+    expect(tokenTracking).toEqual({
+      total_tokens: 100,
+      prompt_tokens: 50,
+      completion_tokens: 50,
+    });
+  });
+
+  it('should return null when given an invalid Gemini response', async () => {
+    const actionTypeId = '.gemini';
+    const result = {
+      actionId: '123',
+      status: 'ok' as const,
+      data: {},
+    };
+    const validatedParams = {};
+
+    const tokenTracking = await getGenAiTokenTracking({
+      actionTypeId,
+      logger,
+      result,
+      validatedParams,
+    });
+
+    expect(tokenTracking).toBeNull();
+    expect(logger.error).toHaveBeenCalled();
+  });
+
   describe('shouldTrackGenAiToken', () => {
     it('should be true with OpenAI action', () => {
       expect(shouldTrackGenAiToken('.gen-ai')).toEqual(true);
     });
     it('should be true with bedrock action', () => {
       expect(shouldTrackGenAiToken('.bedrock')).toEqual(true);
+    });
+    it('should be true with Gemini action', () => {
+      expect(shouldTrackGenAiToken('.gemini')).toEqual(true);
     });
     it('should be false with any other action', () => {
       expect(shouldTrackGenAiToken('.jira')).toEqual(false);

@@ -96,10 +96,9 @@ exports[`Should render cancel button when drawing 1`] = `
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Cancel"
         id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </EuiFlexItem>

@@ -14,9 +14,9 @@ import type {
   EqlOptionsSelected,
   FieldsEqlOptions,
 } from '../../../../../../common/search_strategy';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { EqlQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar';
 
 import {

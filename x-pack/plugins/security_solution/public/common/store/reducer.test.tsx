@@ -9,7 +9,7 @@ import { parseExperimentalConfigValue } from '../../../common/experimental_featu
 import type { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
 import { mockIndexPattern, mockSourcererState, TestProviders, createMockStore } from '../mock';
-import { useSourcererDataView } from '../containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { renderHook } from '@testing-library/react-hooks';
 import { initialGroupingState } from './grouping/reducer';
 import { initialAnalyzerState } from '../../resolver/store/helpers';

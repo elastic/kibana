@@ -90,6 +90,7 @@ export class ConsoleUIPlugin
           const { renderApp } = await import('./application');
 
           return renderApp({
+            ...startServices,
             http,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
@@ -98,7 +99,6 @@ export class ConsoleUIPlugin
             element,
             autocompleteInfo: this.autocompleteInfo,
             isMonacoEnabled,
-            startServices,
           });
         },
       });

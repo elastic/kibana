@@ -28,6 +28,8 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
+import { buildMlAuthz } from './lib/machine_learning/authz';
 
 export interface IRequestContextFactory {
   create(
@@ -66,6 +68,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
     const coreContext = await context.core;
+    const licensing = await context.licensing;
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -110,6 +113,20 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRacClient: startPlugins.ruleRegistry.getRacClientWithRequest,
 
       getAuditLogger,
+
+      getDetectionRulesClient: memoize(() => {
+        const mlAuthz = buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+
+        return createDetectionRulesClient(
+          startPlugins.alerting.getRulesClientWithRequest(request),
+          mlAuthz
+        );
+      }),
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({

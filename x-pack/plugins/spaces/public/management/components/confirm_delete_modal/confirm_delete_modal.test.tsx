@@ -40,16 +40,15 @@ describe('ConfirmDeleteModal', () => {
       >
         <EuiText>
           <p>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="This space and {allContents} will be permanently deleted."
               id="xpack.spaces.management.confirmDeleteModal.description"
               values={
                 Object {
                   "allContents": <strong>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="all contents"
                       id="xpack.spaces.management.confirmDeleteModal.allContents"
-                      values={Object {}}
                     />
                   </strong>,
                 }
@@ -57,10 +56,9 @@ describe('ConfirmDeleteModal', () => {
             />
           </p>
           <p>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="You can't recover deleted spaces."
               id="xpack.spaces.management.confirmDeleteModal.cannotUndoWarning"
-              values={Object {}}
             />
           </p>
         </EuiText>
