@@ -17,7 +17,7 @@ import {
   SearchHit,
   ESQLColumn,
   ESQLRow,
-  ESQLSearchReponse,
+  ESQLSearchResponse,
   ESQLSearchParams,
   ChangePointType,
 } from './search';
@@ -53,7 +53,7 @@ export type {
   SearchHit,
   ESQLColumn,
   ESQLRow,
-  ESQLSearchReponse,
+  ESQLSearchResponse,
   ESQLSearchParams,
   ChangePointType,
 };

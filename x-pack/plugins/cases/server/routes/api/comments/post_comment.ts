@@ -22,7 +22,7 @@ export const postCommentRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    description: `Add an alert or comment to a case`,
+    summary: `Add an alert or comment to a case`,
   },
   handler: async ({ context, request, response }) => {
     try {

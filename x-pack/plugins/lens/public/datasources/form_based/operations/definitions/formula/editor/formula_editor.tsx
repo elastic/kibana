@@ -232,12 +232,12 @@ export function FormulaEditor({
 
       let errors: ErrorWrapper[] = [];
 
-      const { root, error } = tryToParse(text, visibleOperationsMap);
-      if (error) {
-        errors = [error];
-      } else if (root) {
+      const parseResponse = tryToParse(text, visibleOperationsMap);
+      if ('error' in parseResponse) {
+        errors = [parseResponse.error];
+      } else {
         const validationErrors = runASTValidation(
-          root,
+          parseResponse.root,
           layer,
           indexPattern,
           visibleOperationsMap,
@@ -359,11 +359,11 @@ export function FormulaEditor({
                   visibleOperationsMap,
                   uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
                 );
-                if (messages) {
+                if (messages.length) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);
                   const endPosition = offsetToRowColumn(text, locations[id].max);
                   newWarnings.push({
-                    message: messages.join(', '),
+                    message: messages.map((e) => e.message).join(', '),
                     startColumn: startPosition.column + 1,
                     startLineNumber: startPosition.lineNumber,
                     endColumn: endPosition.column + 1,

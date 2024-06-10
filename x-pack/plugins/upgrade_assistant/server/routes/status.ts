@@ -26,7 +26,7 @@ export function registerUpgradeStatusRoute({
       path: `${API_BASE_PATH}/status`,
       options: {
         access: 'public',
-        description: `Get upgrade readiness status`,
+        summary: `Get upgrade readiness status`,
       },
       validate: false,
     },
