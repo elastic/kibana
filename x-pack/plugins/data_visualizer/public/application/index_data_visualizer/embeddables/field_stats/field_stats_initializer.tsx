@@ -39,7 +39,7 @@ export interface FieldStatsInitializerProps {
   onPreview: (update: Partial<FieldStatsInitialState>) => Promise<void>;
 }
 
-const defaultESQLQuery = { esql: 'from kibana_sample_data_ecommerce | limit 10' };
+const defaultESQLQuery = { esql: '' };
 const defaultTitle = i18n.translate('xpack.dataVisualizer.fieldStatistics.displayName', {
   defaultMessage: 'Field statistics',
 });
@@ -61,6 +61,8 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   const [viewType, setViewType] = useState(
     initialInput?.viewType ?? FieldStatsInitializerViewType.ESQL
   );
+  // @TODO: remove
+  console.log(`--@@initialInput?.query`, initialInput?.query);
   const [esqlQuery, setQuery] = useState<AggregateQuery>(initialInput?.query ?? defaultESQLQuery);
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
 
@@ -74,7 +76,6 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
-
   const onESQLQuerySubmit = useCallback(
     async (query: AggregateQuery, abortController: AbortController) => {
       await onPreview({
