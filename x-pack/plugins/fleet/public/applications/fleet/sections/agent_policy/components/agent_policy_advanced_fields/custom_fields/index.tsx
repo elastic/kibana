@@ -74,16 +74,26 @@ export const CustomFields: React.FunctionComponent<Props> = ({
           {unsupportedInputs.length > 0 ? (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut title="Unsupported Inputs" color="warning" iconType="alert" size="s">
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyForm.globalDataTagUnsupportedInputTitle"
+                    defaultMessage="Unsupported Inputs"
+                  />
+                }
+                color="warning"
+                iconType="alert"
+                size="s"
+              >
                 <p>
-                  Tagging data collected from input{' '}
-                  {unsupportedInputs.map((input, index) => (
-                    <strong key={index}>
-                      {input}
-                      {index < unsupportedInputs.length - 1 ? ', ' : ''}
-                    </strong>
-                  ))}{' '}
-                  is not supported.
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyForm.globalDataTagUnsupportedInputMessage"
+                    defaultMessage="Tagging data collected from {inputCount, plural, one {input {inputs} is} other {inputs {inputs} are}} not supported."
+                    values={{
+                      inputCount: unsupportedInputs.length,
+                      inputs: unsupportedInputs.join(', '),
+                    }}
+                  />
                 </p>
               </EuiCallOut>
             </>
@@ -93,7 +103,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
     >
       <GlobalDataTagsTable
         updateAgentPolicy={updateAgentPolicy}
-        initialTags={agentPolicy.global_data_tags ? agentPolicy.global_data_tags : []}
+        globalDataTags={agentPolicy.global_data_tags ? agentPolicy.global_data_tags : []}
       />
     </EuiDescribedFormGroup>
   );

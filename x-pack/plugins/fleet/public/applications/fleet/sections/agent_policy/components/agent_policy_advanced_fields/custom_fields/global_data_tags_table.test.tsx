@@ -6,27 +6,58 @@
  */
 
 import React from 'react';
-import type { RenderResult } from '@testing-library/react';
-import { render, fireEvent, act } from '@testing-library/react';
 
+import type { RenderResult } from '@testing-library/react';
+import { fireEvent, act } from '@testing-library/react';
+
+import { createFleetTestRendererMock, type TestRenderer } from '../../../../../../../mock';
 import type { GlobalDataTag } from '../../../../../../../../common/types';
 
 import { GlobalDataTagsTable } from './global_data_tags_table';
 
+jest.mock('../../../../../../../hooks/use_fleet_status', () => ({
+  FleetStatusProvider: (props: any) => {
+    return props.children;
+  },
+}));
+
+const TEST_IDS = {
+  NAME_INPUT: 'globalDataTagsNameInput',
+  VALUE_INPUT: 'globalDataTagsValueInput',
+};
+
 describe('GlobalDataTagsTable', () => {
   let renderResult: RenderResult;
   let mockUpdateAgentPolicy: jest.Mock;
-  const initialTags: GlobalDataTag[] = [
+  const globalDataTags: GlobalDataTag[] = [
     { name: 'tag1', value: 'value1' },
     { name: 'tag2', value: 'value2' },
   ];
+  let renderer: TestRenderer;
 
-  const renderComponent = async (tags: GlobalDataTag[]) => {
+  const renderComponent = (tags: GlobalDataTag[]) => {
     mockUpdateAgentPolicy = jest.fn();
-    await act(async () => {
-      renderResult = render(
-        <GlobalDataTagsTable updateAgentPolicy={mockUpdateAgentPolicy} initialTags={tags} />
+    renderer = createFleetTestRendererMock();
+
+    const TestComponent = () => {
+      const [agentPolicy, _updateAgentPolicy] = React.useState({
+        global_data_tags: tags,
+      });
+
+      const updateAgentPolicy = React.useCallback((policy) => {
+        mockUpdateAgentPolicy(policy);
+        _updateAgentPolicy(policy);
+      }, []);
+
+      return (
+        <GlobalDataTagsTable
+          updateAgentPolicy={updateAgentPolicy}
+          globalDataTags={agentPolicy.global_data_tags}
+        />
       );
+    };
+    act(() => {
+      renderResult = renderer.render(<TestComponent />);
     });
   };
 
@@ -35,22 +66,22 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should render initial tags', async () => {
-    await renderComponent(initialTags);
-    initialTags.forEach((tag) => {
+    renderComponent(globalDataTags);
+    globalDataTags.forEach((tag) => {
       expect(renderResult.getByText(tag.name)).toBeInTheDocument();
       expect(renderResult.getByText(tag.value)).toBeInTheDocument();
     });
   });
 
   it('should add new tags', async () => {
-    await renderComponent([]);
+    renderComponent([]);
 
     await act(async () => {
       fireEvent.click(renderResult.getByText('Add field'));
     });
 
-    const nameInput = renderResult.getByPlaceholderText('Enter name');
-    const valueInput = renderResult.getByPlaceholderText('Enter value');
+    const nameInput = renderResult.getByTestId(TEST_IDS.NAME_INPUT);
+    const valueInput = renderResult.getByTestId(TEST_IDS.VALUE_INPUT);
 
     await act(async () => {
       fireEvent.change(nameInput, { target: { value: 'newTag' } });
@@ -71,8 +102,8 @@ describe('GlobalDataTagsTable', () => {
       fireEvent.click(renderResult.getByText('Add another field'));
     });
 
-    const nameInput2 = renderResult.getByPlaceholderText('Enter name');
-    const valueInput2 = renderResult.getByPlaceholderText('Enter value');
+    const nameInput2 = renderResult.getByTestId(TEST_IDS.NAME_INPUT);
+    const valueInput2 = renderResult.getByTestId(TEST_IDS.VALUE_INPUT);
 
     await act(async () => {
       fireEvent.change(nameInput2, { target: { value: 'newTag2' } });
@@ -94,14 +125,14 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should edit an existing tag', async () => {
-    await renderComponent(initialTags);
+    renderComponent(globalDataTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Edit')[0]);
     });
 
-    const nameInput = renderResult.getByPlaceholderText('Enter name');
-    const valueInput = renderResult.getByPlaceholderText('Enter value');
+    const nameInput = renderResult.getByTestId(TEST_IDS.NAME_INPUT);
+    const valueInput = renderResult.getByTestId(TEST_IDS.VALUE_INPUT);
 
     await act(async () => {
       fireEvent.change(nameInput, { target: { value: 'updatedTag1' } });
@@ -115,12 +146,12 @@ describe('GlobalDataTagsTable', () => {
     });
 
     expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({
-      global_data_tags: [{ name: 'updatedTag1', value: 'updatedValue1' }, initialTags[1]],
+      global_data_tags: [{ name: 'updatedTag1', value: 'updatedValue1' }, globalDataTags[1]],
     });
   });
 
   it('should show validation errors for empty name and value', async () => {
-    await renderComponent(initialTags);
+    renderComponent(globalDataTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getByText('Add another field'));
@@ -134,35 +165,45 @@ describe('GlobalDataTagsTable', () => {
     expect(renderResult.getByText('Value cannot be empty')).toBeInTheDocument();
   });
 
-  it('should delete a tag', async () => {
-    await renderComponent(initialTags);
+  it('should delete a tag when confirming the modal', async () => {
+    renderComponent(globalDataTags);
+    renderer.startServices.overlays.openConfirm.mockResolvedValue(true);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Delete')[0]);
     });
 
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({
+      global_data_tags: [globalDataTags[1]],
+    });
+  });
+
+  it('should not delete a tag when confirming the modal', async () => {
+    renderComponent(globalDataTags);
+    renderer.startServices.overlays.openConfirm.mockResolvedValue(false);
+
     await act(async () => {
-      fireEvent.click(renderResult.getByText('Remove'));
+      fireEvent.click(renderResult.getAllByLabelText('Delete')[0]);
     });
 
-    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith({
-      global_data_tags: [initialTags[1]],
+    expect(mockUpdateAgentPolicy).not.toHaveBeenCalledWith({
+      global_data_tags: [globalDataTags[1]],
     });
   });
 
   it('should show validation errors for duplicate tag names', async () => {
-    await renderComponent(initialTags);
+    renderComponent(globalDataTags);
 
-    await act(async () => {
+    act(() => {
       fireEvent.click(renderResult.getByText('Add another field'));
     });
 
-    const nameInput = renderResult.getByPlaceholderText('Enter name');
-    await act(async () => {
-      fireEvent.change(nameInput, { target: { value: initialTags[0].name } });
+    const nameInput = renderResult.getByTestId(TEST_IDS.NAME_INPUT);
+    act(() => {
+      fireEvent.change(nameInput, { target: { value: globalDataTags[0].name } });
     });
 
-    await act(async () => {
+    act(() => {
       fireEvent.click(renderResult.getByLabelText('Confirm'));
     });
 
@@ -170,7 +211,7 @@ describe('GlobalDataTagsTable', () => {
   });
 
   it('should cancel adding a new tag', async () => {
-    await renderComponent(initialTags);
+    renderComponent(globalDataTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getByText('Add another field'));
@@ -180,12 +221,12 @@ describe('GlobalDataTagsTable', () => {
       fireEvent.click(renderResult.getByLabelText('Cancel'));
     });
 
-    expect(renderResult.queryByPlaceholderText('Enter name')).not.toBeInTheDocument();
-    expect(renderResult.queryByPlaceholderText('Enter value')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId(TEST_IDS.NAME_INPUT)).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId(TEST_IDS.VALUE_INPUT)).not.toBeInTheDocument();
   });
 
   it('should cancel editing a tag', async () => {
-    await renderComponent(initialTags);
+    renderComponent(globalDataTags);
 
     await act(async () => {
       fireEvent.click(renderResult.getAllByLabelText('Edit')[0]);
@@ -195,48 +236,47 @@ describe('GlobalDataTagsTable', () => {
       fireEvent.click(renderResult.getByLabelText('Cancel'));
     });
 
-    expect(renderResult.queryByPlaceholderText('Enter name')).not.toBeInTheDocument();
-    expect(renderResult.queryByPlaceholderText('Enter value')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId(TEST_IDS.NAME_INPUT)).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId(TEST_IDS.VALUE_INPUT)).not.toBeInTheDocument();
   });
 
   it('should allow multiple tags to be in "edit" state concurrently', async () => {
-    await renderComponent(initialTags);
+    renderComponent(globalDataTags);
 
     // Enter edit mode for the first tag
-    await act(async () => {
+    act(() => {
       fireEvent.click(renderResult.getAllByLabelText('Edit')[0]);
     });
 
-    const nameInput1 = renderResult.getByDisplayValue(initialTags[0].name);
-    const valueInput1 = renderResult.getByDisplayValue(initialTags[0].value);
-
-    await act(async () => {
+    act(() => {
+      const nameInput1 = renderResult.getByDisplayValue(globalDataTags[0].name);
       fireEvent.change(nameInput1, { target: { value: 'updatedTag1' } });
     });
-    await act(async () => {
+    act(() => {
+      const valueInput1 = renderResult.getByDisplayValue(globalDataTags[0].value);
       fireEvent.change(valueInput1, { target: { value: 'updatedValue1' } });
     });
 
     // Enter edit mode for the second tag without saving the first one
-    await act(async () => {
+    act(() => {
       fireEvent.click(renderResult.getByLabelText('Edit'));
     });
 
-    const nameInput2 = renderResult.getByDisplayValue(initialTags[1].name);
-    const valueInput2 = renderResult.getByDisplayValue(initialTags[1].value);
-
-    await act(async () => {
+    act(() => {
+      const nameInput2 = renderResult.getByDisplayValue(globalDataTags[1].name);
       fireEvent.change(nameInput2, { target: { value: 'updatedTag2' } });
     });
-    await act(async () => {
+
+    act(() => {
+      const valueInput2 = renderResult.getByDisplayValue(globalDataTags[1].value);
       fireEvent.change(valueInput2, { target: { value: 'updatedValue2' } });
     });
 
     // Confirm changes for both tags
-    await act(async () => {
+    act(() => {
       fireEvent.click(renderResult.getAllByLabelText('Confirm')[0]);
     });
-    await act(async () => {
+    act(() => {
       fireEvent.click(renderResult.getByLabelText('Confirm'));
     });
 
