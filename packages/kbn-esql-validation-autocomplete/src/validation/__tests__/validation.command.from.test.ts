@@ -9,8 +9,4 @@
 import * as helpers from './helpers';
 import { validationFromCommandTestSuite } from './test_suites/validation.command.from';
 
-const { setup, writeFixtureFile } = helpers.withErrorsCollected(helpers.setup, 'FROM');
-
-afterAll(writeFixtureFile);
-
-validationFromCommandTestSuite(setup);
+validationFromCommandTestSuite(helpers.setup);
