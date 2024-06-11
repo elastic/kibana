@@ -7,6 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { decompressFromBase64 } from 'lz-string';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -61,6 +63,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('permalink', function () {
+        it('should allow for copying the snapshot URL', async function () {
+          const actualUrl = await PageObjects.share.getSharedUrl();
+          expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
+          const urlSearchParams = new URLSearchParams(actualUrl);
+          expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+            query: {
+              language: 'kuery',
+              query: '',
+            },
+            sort: [['@timestamp', 'desc']],
+            columns: [],
+            interval: 'auto',
+            filters: [],
+            dataViewId: 'logstash-*',
+            timeRange: {
+              from: '2015-09-19T06:31:44.000Z',
+              to: '2015-09-23T18:31:44.000Z',
+            },
+            refreshInterval: {
+              value: 60000,
+              pause: true,
+            },
+          });
+        });
         it('should allow for copying the snapshot URL', async function () {
           const re = new RegExp(baseUrl + '/app/r.+$');
           await retry.try(async () => {
