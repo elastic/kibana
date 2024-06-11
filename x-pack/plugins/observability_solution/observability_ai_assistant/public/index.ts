@@ -66,8 +66,8 @@ export {
   MessageRole,
   KnowledgeBaseEntryRole,
   concatenateChatCompletionChunks,
-  getWordsToReplaceUuidsList,
   StreamingChatResponseEventType,
+  ShortIdTable,
 } from '../common';
 export type {
   CompatibleJSONSchema,
@@ -76,7 +76,6 @@ export type {
   KnowledgeBaseEntry,
   FunctionDefinition,
   ChatCompletionChunkEvent,
-  WordIdList,
 } from '../common';
 
 export type { TelemetryEventTypeWithPayload } from './analytics';

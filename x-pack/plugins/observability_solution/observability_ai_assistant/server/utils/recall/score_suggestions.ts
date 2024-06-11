@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { omit, shuffle } from 'lodash';
+import { omit } from 'lodash';
 import { Logger } from '@kbn/logging';
 import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
@@ -14,8 +14,7 @@ import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../
 import type { FunctionCallChatFunction } from '../../service/types';
 import type { RetrievedSuggestion } from './types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
-import { RecallQuery } from '../../../common/types';
-import { WORD_LIST } from '../../../common/utils/word_list';
+import { ShortIdTable } from '../../../common/utils/short_id_table';
 
 const scoreFunctionRequestRt = t.type({
   message: t.type({
@@ -33,14 +32,16 @@ const scoreFunctionArgumentsRt = t.type({
 export async function scoreSuggestions({
   suggestions,
   messages,
-  queries,
+  userPrompt,
+  context,
   chat,
   signal,
   logger,
 }: {
   suggestions: RetrievedSuggestion[];
   messages: Message[];
-  queries: Array<RecallQuery | string>;
+  userPrompt: string;
+  context: string;
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
   logger: Logger;
@@ -48,12 +49,12 @@ export async function scoreSuggestions({
   relevantDocuments: RetrievedSuggestion[];
   scores: Array<{ id: string; score: number }>;
 }> {
-  const wordList = shuffle(WORD_LIST.slice(0, suggestions.length));
+  const shortIdTable = new ShortIdTable();
 
-  const indexedSuggestions = suggestions.map((suggestion, index) => ({
-    ...omit(suggestion, 'score'), // To not bias the LLM
+  const suggestionsWithShortId = suggestions.map((suggestion) => ({
+    ...omit(suggestion, 'score', 'id'), // To not bias the LLM
     originalId: suggestion.id,
-    shortId: wordList[index],
+    shortId: shortIdTable.take(suggestion.id),
   }));
 
   const newUserMessageContent =
@@ -67,11 +68,21 @@ export async function scoreSuggestions({
     - The document has a high amount of information relevant to the question compared to other documents
     - The document contains new information not mentioned before in the conversation
 
-    Question:
-    ${queries.map((query) => (typeof query === 'string' ? query : query.text)).join('\n')}
+    User prompt:
+    ${userPrompt}
+
+    Context:
+    ${context}
 
     Documents:
-    ${JSON.stringify(indexedSuggestions, null, 2)}`);
+    ${JSON.stringify(
+      suggestionsWithShortId.map((suggestion) => ({
+        id: suggestion.shortId,
+        content: suggestion.text,
+      })),
+      null,
+      2
+    )}`);
 
   const newUserMessage: Message = {
     '@timestamp': new Date().toISOString(),
@@ -117,7 +128,9 @@ export async function scoreSuggestions({
   );
 
   const scores = parseSuggestionScores(scoresAsString).map(({ id, score }) => {
-    const originalSuggestion = indexedSuggestions.find((suggestion) => suggestion.shortId === id);
+    const originalSuggestion = suggestionsWithShortId.find(
+      (suggestion) => suggestion.shortId === id
+    );
     return {
       originalId: originalSuggestion?.originalId,
       score,

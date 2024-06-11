@@ -7,7 +7,7 @@
 
 import {
   createScreenContextAction,
-  getWordsToReplaceUuidsList,
+  ShortIdTable,
   Message,
   MessageRole,
   StreamingChatResponseEventType,
@@ -100,10 +100,10 @@ export function createAssistantService({
           });
         };
 
-        const wordIdList = await getWordsToReplaceUuidsList();
+        const shortIdTable = new ShortIdTable();
 
         const timelineItemsWithReplacedUuids = timeline.items.map((item) => {
-          const word = wordIdList.take(item.id);
+          const word = shortIdTable.take(item.id);
 
           return {
             ...item,
@@ -151,7 +151,7 @@ export function createAssistantService({
           const { id, ...rest } = relevantEmbeddable;
           return {
             ...rest,
-            lookupId: wordIdList.take(relevantEmbeddable.id),
+            lookupId: shortIdTable.take(relevantEmbeddable.id),
           };
         });
 
@@ -309,7 +309,7 @@ export function createAssistantService({
                     const { visualizations } = args;
 
                     const widgets = visualizations.map(({ id, overrides, columns }) => {
-                      const storedEmbeddableId = wordIdList.lookup(id);
+                      const storedEmbeddableId = shortIdTable.lookup(id);
 
                       const storedEmbeddable = relevantEmbeddables.find(
                         (embeddableSavedObject) => embeddableSavedObject.id === storedEmbeddableId

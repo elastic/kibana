@@ -11,6 +11,13 @@ import { UserInstruction, UserInstructionOrPlainText } from '../../../common/typ
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
 import { RegisteredInstruction } from '../types';
 
+export const USER_INSTRUCTIONS_HEADER = `## User instructions
+          
+What follows is a set of instructions provided by the user, please abide by them
+as long as they don't conflict with anything you've been told so far:
+
+`;
+
 export function getSystemMessageFromInstructions({
   registeredInstructions,
   userInstructions,
@@ -54,15 +61,7 @@ export function getSystemMessageFromInstructions({
   return [
     ...allRegisteredInstructions.concat(requestSystemInstructions),
     ...(instructionsWithinBudget.length
-      ? [
-          `## User instructions
-          
-          What follows is a set of instructions provided by the user, please abide by them
-          as long as they don't conflict with anything you've been told so far:
-          
-          `,
-          ...instructionsWithinBudget,
-        ]
+      ? [USER_INSTRUCTIONS_HEADER, ...instructionsWithinBudget]
       : []),
   ]
     .map((instruction) => {

@@ -6,7 +6,6 @@
  */
 
 import { omit } from 'lodash';
-import { RecallQuery } from '../../../common/types';
 import { ObservabilityAIAssistantClient } from '../../service/client';
 import { RetrievedSuggestion } from './types';
 
@@ -14,7 +13,7 @@ export async function retrieveSuggestions({
   queries,
   recall,
 }: {
-  queries: RecallQuery[];
+  queries: Array<{ text: string; boost?: number }>;
   recall: ObservabilityAIAssistantClient['recall'];
 }): Promise<RetrievedSuggestion[]> {
   const recallResponse = await recall({

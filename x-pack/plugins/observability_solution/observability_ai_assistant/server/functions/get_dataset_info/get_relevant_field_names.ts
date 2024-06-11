@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import { getWordsToReplaceUuidsList, MessageRole, type Message } from '../../../common';
+import { MessageRole, ShortIdTable, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { FunctionCallChatFunction } from '../../service/types';
 
@@ -34,8 +34,6 @@ export async function getRelevantFieldNames({
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
 }): Promise<{ fields: string[] }> {
-  const wordIdList = await getWordsToReplaceUuidsList();
-
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
   const hasAnyHitsResponse = await esClient.search({
@@ -89,8 +87,10 @@ export async function getRelevantFieldNames({
 
   const groupedFields = groupBy(allFields, (field) => field.name);
 
+  const shortIdTable = new ShortIdTable();
+
   const relevantFields = await Promise.all(
-    chunk(fieldNames, Math.min(250, wordIdList.length)).map(async (fieldsInChunk) => {
+    chunk(fieldNames, 250).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
         await chat('get_relevant_dataset_names', {
           signal,
@@ -115,7 +115,7 @@ export async function getRelevantFieldNames({
                 content: `This is the list:
 
             ${fieldsInChunk
-              .map((field) => JSON.stringify({ field, id: wordIdList.take(field) }))
+              .map((field) => JSON.stringify({ field, id: shortIdTable.take(field) }))
               .join('\n')}`,
               },
             },
@@ -151,7 +151,7 @@ export async function getRelevantFieldNames({
             }
           ).fieldIds
             .map((fieldId) => {
-              const fieldName = wordIdList.lookup(fieldId);
+              const fieldName = shortIdTable.lookup(fieldId);
               return fieldName ?? fieldId;
             })
             .filter((fieldName) => {

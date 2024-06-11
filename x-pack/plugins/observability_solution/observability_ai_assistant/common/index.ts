@@ -50,7 +50,4 @@ export { DEFAULT_LANGUAGE_OPTION, LANGUAGE_OPTIONS } from './ui_settings/languag
 
 export { isSupportedConnectorType } from './connectors';
 
-export const getWordsToReplaceUuidsList = () =>
-  import('./utils/word_list').then((m) => new m.WordIdList());
-
-export type { WordIdList } from './utils/word_list';
+export { ShortIdTable } from './utils/short_id_table';

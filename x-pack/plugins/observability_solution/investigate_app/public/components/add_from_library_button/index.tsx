@@ -47,6 +47,9 @@ export function AddFromLibraryButton({ onWidgetAdd }: AddFromLibraryButtonProps)
       replacePanel: async (...args) => {
         throw new Error('replacePanel not supported in this context');
       },
+      getPanelCount() {
+        return 0;
+      },
       addNewEmbeddable: async (type, explicitInput, attributes) => {
         const widget = createEmbeddableWidget({
           title: attributes.title ?? '',

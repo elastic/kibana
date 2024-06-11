@@ -9,9 +9,9 @@ import {
   ChatCompletionChunkEvent,
   concatenateChatCompletionChunks,
   FunctionDefinition,
-  getWordsToReplaceUuidsList,
   Message,
   MessageRole,
+  ShortIdTable,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { compact, keyBy } from 'lodash';
 import { from, last, lastValueFrom, map, mergeMap, Observable, toArray } from 'rxjs';
@@ -49,12 +49,12 @@ export async function getRelevantExistingEmbeddables({
   apiClient: InvestigateAppAPIClient;
   logger: Logger;
 }): Promise<StoredEmbeddable[]> {
-  const wordIdList = await getWordsToReplaceUuidsList();
+  const shortIdTable = new ShortIdTable();
 
   const objectsForLlm = storedEmbeddables.map((storedEmbeddable) => {
     const { id, type, title, description } = storedEmbeddable;
     return {
-      id: wordIdList.take(id),
+      id: shortIdTable.take(id),
       type,
       title,
       description,
@@ -177,7 +177,7 @@ export async function getRelevantExistingEmbeddables({
 
   const relevantEmbeddables = compact(
     flattenedIds.map((id) => {
-      const originalId = wordIdList.lookup(id);
+      const originalId = shortIdTable.lookup(id);
       if (originalId) {
         return storedEmbeddablesById[originalId];
       }

@@ -19,7 +19,7 @@ export async function recallAndScore({
   recall,
   chat,
   analytics,
-  prompt,
+  userPrompt,
   context,
   messages,
   logger,
@@ -28,7 +28,7 @@ export async function recallAndScore({
   recall: ObservabilityAIAssistantClient['recall'];
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
-  prompt: string;
+  userPrompt: string;
   context: string;
   messages: Message[];
   logger: Logger;
@@ -39,7 +39,7 @@ export async function recallAndScore({
   suggestions: RetrievedSuggestion[];
 }> {
   const queries = [
-    { text: prompt, boost: 3 },
+    { text: userPrompt, boost: 3 },
     { text: context, boost: 1 },
   ].filter((query) => query.text.trim());
 
@@ -48,12 +48,21 @@ export async function recallAndScore({
     queries,
   });
 
+  if (!suggestions.length) {
+    return {
+      relevantDocuments: [],
+      scores: [],
+      suggestions: [],
+    };
+  }
+
   try {
     const { scores, relevantDocuments } = await scoreSuggestions({
       suggestions,
       logger,
       messages,
-      queries,
+      userPrompt,
+      context,
       signal,
       chat,
     });

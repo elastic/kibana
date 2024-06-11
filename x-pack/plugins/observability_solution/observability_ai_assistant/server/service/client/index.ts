@@ -45,7 +45,6 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  RecallQuery,
   UserInstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
@@ -699,7 +698,7 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: Array<string | RecallQuery>;
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
@@ -762,11 +761,9 @@ export class ObservabilityAIAssistantClient {
   };
 
   fetchUserInstructions = async () => {
-    const userInstructions = await this.dependencies.knowledgeBaseService.getUserInstructions(
+    return this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user
     );
-
-    return userInstructions;
   };
 }

@@ -8,7 +8,7 @@ import { notImplemented } from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
-import { from, map, throwError } from 'rxjs';
+import { from, map } from 'rxjs';
 import { Readable } from 'stream';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
@@ -170,29 +170,6 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
-const chatEsqlRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/chat/esql',
-  options: {
-    tags: ['access:ai_assistant'],
-  },
-  params: t.type({
-    body: t.type({
-      prompt: t.string,
-      context: t.string,
-      connectorId: t.string,
-    }),
-  }),
-  handler: async (resources): Promise<Readable> => {
-    const { isCloudEnabled } = await initializeChatRequest(resources);
-
-    // const { connectorId, prompt, context } = resources.params.body;
-
-    const response$ = throwError(() => new Error('Endpoint not ready'));
-
-    return observableIntoStream(response$.pipe(flushBuffer(isCloudEnabled)));
-  },
-});
-
 const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat/recall',
   options: {
@@ -228,7 +205,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
         context,
         logger: resources.logger,
         messages: [],
-        prompt,
+        userPrompt: prompt,
         recall: client.recall,
         signal,
       })
@@ -350,7 +327,6 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
 export const chatRoutes = {
   ...chatRoute,
   ...chatRecallRoute,
-  ...chatEsqlRoute,
   ...chatCompleteRoute,
   ...publicChatCompleteRoute,
 };

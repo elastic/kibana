@@ -76,7 +76,7 @@ export function InvestigateAlertsInventory({
 
   onWidgetAddRef.current = onWidgetAdd;
 
-  const abortController = new AbortController();
+  const abortControllerRef = useRef(new AbortController());
 
   const esQueryAsync = useAsync(async () => {
     const esFilter = getEsFilterFromGlobalParameters({
@@ -100,7 +100,7 @@ export function InvestigateAlertsInventory({
         {
           id: relatedAlertUuid,
         },
-        abortController,
+        abortControllerRef.current,
         http
       );
 
@@ -160,7 +160,7 @@ export function InvestigateAlertsInventory({
     }
 
     return esFilter;
-  }, [filters, query, timeRange]);
+  }, [filters, query, timeRange, activeOnly, relatedAlertUuid, http, dataViews]);
 
   const [alertsTableConfigurationLoading, setAlertsTableConfigurationLoading] = useState(true);
 
@@ -217,7 +217,7 @@ export function InvestigateAlertsInventory({
           showInspectButton: false,
           columns: columnsInOrder,
           useActionsColumn: undefined,
-          disableBulkActions: true,
+          hideBulkActions: true,
           useCellActions: () => {
             return {
               getCellActions: () => [],

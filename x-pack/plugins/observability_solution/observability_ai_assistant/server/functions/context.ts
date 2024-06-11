@@ -32,33 +32,9 @@ export function registerContextFunction({
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.Internal,
-      parameters: {
-        type: 'object',
-        properties: {
-          queries: {
-            type: 'array',
-            description: 'The query for the semantic search',
-            items: {
-              type: 'string',
-            },
-          },
-          categories: {
-            type: 'array',
-            description:
-              'Categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
-            items: {
-              type: 'string',
-              enum: ['apm', 'lens'],
-            },
-          },
-        },
-        required: ['queries', 'categories'],
-      } as const,
     },
-    async ({ arguments: args, messages, screenContexts, chat }, signal) => {
+    async ({ messages, screenContexts, chat }, signal) => {
       const { analytics } = (await resources.context.core).coreStart;
-
-      const { queries } = args;
 
       async function getContext() {
         const screenDescription = compact(
@@ -86,17 +62,13 @@ export function registerContextFunction({
           messages.filter((message) => message.message.role === MessageRole.User)
         );
 
-        const nonEmptyQueries = compact(queries);
-
-        const queriesOrUserPrompt = nonEmptyQueries.length
-          ? nonEmptyQueries
-          : compact([userMessage?.message.content]);
+        const userPrompt = userMessage?.message.content!;
 
         const { scores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,
           logger: resources.logger,
-          prompt: queriesOrUserPrompt.join('\n\n'),
+          userPrompt,
           context: screenDescription,
           messages,
           signal,

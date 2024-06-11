@@ -16,12 +16,7 @@ import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
-import {
-  KnowledgeBaseEntry,
-  KnowledgeBaseEntryRole,
-  RecallQuery,
-  UserInstruction,
-} from '../../../common/types';
+import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
@@ -308,7 +303,7 @@ export class KnowledgeBaseService {
     user,
     modelId,
   }: {
-    queries: RecallQuery[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     namespace: string;
     user?: { name: string };
@@ -316,12 +311,12 @@ export class KnowledgeBaseService {
   }): Promise<RecalledEntry[]> {
     const esQuery = {
       bool: {
-        should: queries.map((query) => ({
+        should: queries.map(({ text, boost = 1 }) => ({
           text_expansion: {
             'ml.tokens': {
-              model_text: query.text,
+              model_text: text,
               model_id: modelId,
-              boost: query.boost,
+              boost,
             },
           },
         })),
@@ -391,7 +386,7 @@ export class KnowledgeBaseService {
     uiSettingsClient,
     modelId,
   }: {
-    queries: RecallQuery[];
+    queries: Array<{ text: string; boost?: number }>;
     asCurrentUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
     modelId: string;
@@ -420,16 +415,16 @@ export class KnowledgeBaseService {
       const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
       const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
 
-      return queries.map((query) => {
+      return queries.map(({ text, boost = 1 }) => {
         return {
           bool: {
             should: [
               {
                 text_expansion: {
                   [vectorField]: {
-                    model_text: query.text,
+                    model_text: text,
                     model_id: modelId,
-                    boost: query.boost,
+                    boost,
                   },
                 },
               },
@@ -477,7 +472,7 @@ export class KnowledgeBaseService {
     asCurrentUser,
     uiSettingsClient,
   }: {
-    queries: Array<string | RecallQuery>;
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     user?: { name: string };
     namespace: string;
