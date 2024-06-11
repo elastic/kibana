@@ -77,7 +77,9 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
     () =>
       packagePoliciesForThisPackage?.items.reduce(
         (acc: { [key: string]: boolean }, packagePolicy) => {
-          acc[packagePolicy.policy_id] = true;
+          packagePolicy.policy_ids.forEach((policyId) => {
+            acc[policyId] = true;
+          });
           return acc;
         },
         {}
