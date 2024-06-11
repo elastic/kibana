@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  useFormData,
+  useFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
@@ -34,6 +38,7 @@ const ConnectorComponent: React.FC<Props> = ({
   configurationConnector,
 }) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
+  const { setFieldValue } = useFormContext();
   const connector = getConnectorById(connectorId, connectors) ?? null;
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
@@ -49,6 +54,10 @@ const ConnectorComponent: React.FC<Props> = ({
     config: schema.connectorId as FieldConfig,
     connectors,
   });
+
+  useEffect(() => {
+    setFieldValue('connectorId', configurationConnector.id);
+  }, [configurationConnector.id, setFieldValue]);
 
   if (!hasReadPermissions) {
     return (
