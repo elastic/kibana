@@ -6013,6 +6013,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-homepage@link:x-pack/plugins/search_homepage":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-index-documents@link:packages/kbn-search-index-documents":
   version "0.0.0"
   uid ""

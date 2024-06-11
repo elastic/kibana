@@ -100,6 +100,16 @@ export const useEuiBreadcrumbs = (breadcrumbs: Breadcrumbs): EuiBreadcrumb[] => 
 };
 
 /**
+ * HACK for base homepage URL, this can be removed and updated to a static
+ * URL when Search Homepage is no longer feature flagged.
+ */
+const breadCrumbHome = { url: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL };
+const getHomeURL = () => breadCrumbHome.url;
+export const setBreadcrumbHomeUrl = (url: string) => {
+  breadCrumbHome.url = url;
+};
+
+/**
  * Product-specific breadcrumb helpers
  */
 
@@ -107,7 +117,7 @@ export const useSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: SEARCH_PRODUCT_NAME,
-      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      path: getHomeURL(),
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,
@@ -117,7 +127,7 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: ENTERPRISE_SEARCH_PRODUCT_NAME,
-      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      path: getHomeURL(),
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,
