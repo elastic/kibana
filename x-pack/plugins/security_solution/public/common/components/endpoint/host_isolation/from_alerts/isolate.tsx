@@ -9,7 +9,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { useHostIsolation } from '../../../../../detections/containers/detection_engine/alerts/use_host_isolation';
+import { useHostIsolation } from './use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import type { EndpointIsolatedFormProps } from '..';
 import { EndpointIsolateForm, ActionCompletionReturnButton } from '..';

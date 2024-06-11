@@ -6,17 +6,14 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { HOST_ISOLATION_FAILURE } from './translations';
-import { createHostIsolation } from './api';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
+import { HOST_ISOLATION_FAILURE } from '../../../../../detections/containers/detection_engine/alerts/translations';
+import { createHostUnIsolation } from '../../../../../detections/containers/detection_engine/alerts/api';
 
-// FIXME:PT move this to common/hooks/endpiont
-
-interface HostIsolationStatus {
+interface HostUnisolationStatus {
   loading: boolean;
-  /** Boolean return will indicate if isolation action was created successful */
-  isolateHost: () => Promise<boolean>;
+  unIsolateHost: () => Promise<boolean>;
 }
 
 interface UseHostIsolationProps {
@@ -26,19 +23,19 @@ interface UseHostIsolationProps {
   agentType: ResponseActionAgentType;
 }
 
-export const useHostIsolation = ({
+export const useHostUnisolation = ({
   endpointId,
   comment,
   caseIds,
   agentType,
-}: UseHostIsolationProps): HostIsolationStatus => {
+}: UseHostIsolationProps): HostUnisolationStatus => {
   const [loading, setLoading] = useState(false);
   const { addError } = useAppToasts();
 
-  const isolateHost = useCallback(async () => {
+  const unIsolateHost = useCallback(async () => {
     try {
       setLoading(true);
-      const isolationStatus = await createHostIsolation({
+      const isolationStatus = await createHostUnIsolation({
         endpointId,
         comment,
         caseIds: caseIds && caseIds.length > 0 ? caseIds : undefined,
@@ -52,5 +49,5 @@ export const useHostIsolation = ({
       return false;
     }
   }, [endpointId, comment, caseIds, agentType, addError]);
-  return { loading, isolateHost };
+  return { loading, unIsolateHost };
 };

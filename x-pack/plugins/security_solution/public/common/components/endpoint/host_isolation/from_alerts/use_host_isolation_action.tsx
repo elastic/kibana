@@ -15,7 +15,7 @@ import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_a
 import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
-import { useEndpointHostIsolationStatus } from '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status';
+import { useEndpointHostIsolationStatus } from './use_host_isolation_status';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';

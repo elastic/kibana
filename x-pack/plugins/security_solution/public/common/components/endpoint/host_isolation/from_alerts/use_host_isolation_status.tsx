@@ -7,11 +7,11 @@
 
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { getHostMetadata } from './api';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint/endpoint_pending_actions';
-import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import { HostStatus } from '../../../../../common/endpoint/types';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { getHostMetadata } from '../../../../../detections/containers/detection_engine/alerts/api';
+import { fetchPendingActionsByAgentId } from '../../../../lib/endpoint/endpoint_pending_actions';
+import { isEndpointHostIsolated } from '../../../../utils/validators';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 
 interface HostIsolationStatusResponse {
   loading: boolean;
@@ -21,8 +21,6 @@ interface HostIsolationStatusResponse {
   pendingIsolation: number;
   pendingUnisolation: number;
 }
-
-// FIXME:PT move this to common/hooks/endpiont
 
 /**
  * Retrieves the current isolation status of a host and the agent/host status

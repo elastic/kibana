@@ -12,7 +12,7 @@ import type { ResponseActionAgentType } from '../../../../../../common/endpoint/
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import type { EndpointIsolatedFormProps } from '..';
 import { EndpointUnisolateForm, ActionCompletionReturnButton } from '..';
-import { useHostUnisolation } from '../../../../../detections/containers/detection_engine/alerts/use_host_unisolation';
+import { useHostUnisolation } from './use_host_unisolation';
 import type { CasesFromAlertsResponse } from '../../../../../detections/containers/detection_engine/alerts/types';
 
 export const UnisolateHost = React.memo(
