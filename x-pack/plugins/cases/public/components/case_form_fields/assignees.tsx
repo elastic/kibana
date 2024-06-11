@@ -40,14 +40,14 @@ interface Props {
   isLoading: boolean;
 }
 
+type UserProfileComboBoxOption = EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
+
 interface FieldProps {
-  field: FieldHook;
-  options: EuiComboBoxOptionOption[];
+  field: FieldHook<CaseAssignees>;
+  options: UserProfileComboBoxOption[];
   isLoading: boolean;
   isDisabled: boolean;
   currentUserProfile?: UserProfile;
-  selectedOptions: EuiComboBoxOptionOption[];
-  setSelectedOptions: React.Dispatch<React.SetStateAction<EuiComboBoxOptionOption[]>>;
   onSearchComboChange: (value: string) => void;
 }
 
@@ -73,28 +73,32 @@ const userProfileToComboBoxOption = (userProfile: UserProfileWithAvatar) => ({
   data: userProfile.data,
 });
 
-const comboBoxOptionToAssignee = (option: EuiComboBoxOptionOption) => ({ uid: option.value });
+const comboBoxOptionToAssignee = (option: EuiComboBoxOptionOption<string>) => ({
+  uid: option.value ?? '',
+});
 
 const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
-  ({
-    field,
-    isLoading,
-    isDisabled,
-    options,
-    currentUserProfile,
-    selectedOptions,
-    setSelectedOptions,
-    onSearchComboChange,
-  }) => {
-    const { setValue } = field;
+  ({ field, isLoading, isDisabled, options, currentUserProfile, onSearchComboChange }) => {
+    const { setValue, value: selectedAssignees } = field;
     const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
+    const selectedOptions: UserProfileComboBoxOption[] = selectedAssignees
+      .map(({ uid }) => {
+        const selectedUserProfile = options.find((userProfile) => userProfile.key === uid);
+
+        if (selectedUserProfile) {
+          return selectedUserProfile;
+        }
+
+        return null;
+      })
+      .filter((value): value is UserProfileComboBoxOption => value != null);
+
     const onComboChange = useCallback(
-      (currentOptions: EuiComboBoxOptionOption[]) => {
-        setSelectedOptions(currentOptions);
+      (currentOptions: Array<EuiComboBoxOptionOption<string>>) => {
         setValue(currentOptions.map((option) => comboBoxOptionToAssignee(option)));
       },
-      [setSelectedOptions, setValue]
+      [setValue]
     );
 
     const onSelfAssign = useCallback(() => {
@@ -102,62 +106,51 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
         return;
       }
 
-      setSelectedOptions((prev) => [
-        ...(prev ?? []),
-        userProfileToComboBoxOption(currentUserProfile),
-      ]);
+      setValue([...selectedAssignees, { uid: currentUserProfile.uid }]);
+    }, [currentUserProfile, selectedAssignees, setValue]);
 
-      setValue([
-        ...(selectedOptions?.map((option) => comboBoxOptionToAssignee(option)) ?? []),
-        { uid: currentUserProfile.uid },
-      ]);
-    }, [currentUserProfile, selectedOptions, setSelectedOptions, setValue]);
+    const renderOption = useCallback((option, searchValue: string, contentClassName: string) => {
+      const { user, data } = option as UserProfileComboBoxOption;
 
-    const renderOption = useCallback(
-      (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
-        const { user, data } = option as EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
+      const displayName = getUserDisplayName(user);
 
-        const displayName = getUserDisplayName(user);
-
-        return (
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="flexStart"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <UserAvatar user={user} avatar={data.avatar} size="s" />
+          </EuiFlexItem>
           <EuiFlexGroup
             alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="s"
+            justifyContent="spaceBetween"
+            gutterSize="none"
             responsive={false}
           >
-            <EuiFlexItem grow={false}>
-              <UserAvatar user={user} avatar={data.avatar} size="s" />
+            <EuiFlexItem>
+              <EuiHighlight search={searchValue} className={contentClassName}>
+                {displayName}
+              </EuiHighlight>
             </EuiFlexItem>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="none"
-              responsive={false}
-            >
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue} className={contentClassName}>
-                  {displayName}
-                </EuiHighlight>
+            {user.email && user.email !== displayName ? (
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color={'subdued'}>
+                  <EuiHighlight search={searchValue} className={contentClassName}>
+                    {user.email}
+                  </EuiHighlight>
+                </EuiTextColor>
               </EuiFlexItem>
-              {user.email && user.email !== displayName ? (
-                <EuiFlexItem grow={false}>
-                  <EuiTextColor color={'subdued'}>
-                    <EuiHighlight search={searchValue} className={contentClassName}>
-                      {user.email}
-                    </EuiHighlight>
-                  </EuiTextColor>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
+            ) : null}
           </EuiFlexGroup>
-        );
-      },
-      []
-    );
+        </EuiFlexGroup>
+      );
+    }, []);
 
     const isCurrentUserSelected = Boolean(
-      selectedOptions?.find((option) => option.value === currentUserProfile?.uid)
+      selectedAssignees?.find((assignee) => assignee.uid === currentUserProfile?.uid)
     );
 
     return (
@@ -204,7 +197,6 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
   const hasOwners = owners.length > 0;
 
@@ -251,8 +243,6 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
       componentProps={{
         isLoading,
         isDisabled,
-        selectedOptions,
-        setSelectedOptions,
         options,
         onSearchComboChange,
         currentUserProfile,
