@@ -17,7 +17,7 @@ interface FieldFilterApplyButtonProps {
   tooltipContent?: string;
 }
 
-export const FieldFilterApplyButton: FC<FieldFilterApplyButtonProps> = ({
+export const ItemFilterApplyButton: FC<FieldFilterApplyButtonProps> = ({
   disabled,
   onClick,
   tooltipContent,
