@@ -38,6 +38,7 @@ export interface BuildOptions {
   createDockerFIPS: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
+  targetServerlessPlatforms: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
@@ -75,7 +76,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     }
 
     await run(Tasks.CopyLegacySource);
-    await run(Tasks.CopyBinScripts);
 
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
@@ -109,7 +109,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateArchivesSources);
     await run(Tasks.PatchNativeModules);
     await run(Tasks.InstallChromium);
-    await run(Tasks.CleanExtraBinScripts);
+    await run(Tasks.CopyBinScripts);
     await run(Tasks.CleanNodeBuilds);
 
     await run(Tasks.AssertFileTime);

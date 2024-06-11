@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { DataView, type FieldSpec } from '@kbn/data-views-plugin/common';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { ResolvedDataView } from '../../../utils/data_view';
@@ -111,7 +112,7 @@ describe('Expression', () => {
     expect(ruleParams.criteria).toEqual([
       {
         metric: 'memory',
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
         threshold: [],
         timeSize: 1,
         timeUnit: 'm',
@@ -131,7 +132,7 @@ describe('Expression', () => {
           timeSize: 1,
           timeUnit: 'm',
           threshold: [10],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
         },
       ],
       nodeType: undefined,
@@ -173,7 +174,7 @@ describe('Expression', () => {
       expect(ruleParams.criteria).toEqual([
         {
           metric: 'custom',
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [],
           timeSize: 1,
           timeUnit: 'm',
@@ -217,7 +218,7 @@ describe('ExpressionRow', () => {
   }
   const expression = {
     metric: 'custom',
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
     threshold: [],
     timeSize: 1,
     timeUnit: 'm',

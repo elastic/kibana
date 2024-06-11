@@ -8,6 +8,7 @@ const createBackfillClientMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
       bulkQueue: jest.fn(),
+      deleteBackfillForRules: jest.fn(),
     };
   });
 };

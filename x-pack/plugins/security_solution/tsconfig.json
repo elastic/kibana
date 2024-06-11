@@ -142,7 +142,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
-    "@kbn/securitysolution-grouping",
+    "@kbn/grouping",
     "@kbn/securitysolution-data-table",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
@@ -205,6 +205,6 @@
     "@kbn/langchain",
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
-    "@kbn/core-theme-browser"
+    "@kbn/core-theme-browser",
   ]
 }

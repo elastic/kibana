@@ -31,10 +31,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
-import {
-  getMaxPackageName,
-  isRootPrivilegesRequired,
-} from '../../../../../../../../common/services';
+import { getMaxPackageName } from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -88,6 +85,7 @@ const DEFAULT_PACKAGE_POLICY = {
   description: '',
   namespace: '',
   policy_id: '',
+  policy_ids: [''],
   enabled: true,
   inputs: [],
 };
@@ -189,7 +187,8 @@ export function useOnSubmit({
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
-      const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
+      const hasAgentPolicy =
+        newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '';
       if (
         hasPackage &&
         (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&
@@ -235,9 +234,9 @@ export function useOnSubmit({
   }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
 
   useEffect(() => {
-    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+    if (agentPolicy && !packagePolicy.policy_ids.includes(agentPolicy.id)) {
       updatePackagePolicy({
-        policy_id: agentPolicy.id,
+        policy_ids: [agentPolicy.id],
       });
     }
   }, [packagePolicy, agentPolicy, updatePackagePolicy]);
@@ -262,18 +261,12 @@ export function useOnSubmit({
         setFormState('INVALID');
         return;
       }
-      if (agentCount !== 0 && !isAgentlessIntegration(packageInfo) && formState !== 'CONFIRM') {
-        setFormState('CONFIRM');
-        return;
-      }
       if (
-        packageInfo &&
-        isRootPrivilegesRequired(packageInfo) &&
-        (agentPolicy?.unprivileged_agents ?? 0) > 0 &&
-        formState !== 'CONFIRM' &&
-        formState !== 'CONFIRM_UNPRIVILEGED'
+        agentCount !== 0 &&
+        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
+        formState !== 'CONFIRM'
       ) {
-        setFormState('CONFIRM_UNPRIVILEGED');
+        setFormState('CONFIRM');
         return;
       }
       let createdPolicy = overrideCreatedAgentPolicy;
@@ -297,14 +290,13 @@ export function useOnSubmit({
               await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
             }
           }
-
           createdPolicy = await createAgentPolicy({
             newAgentPolicy,
             packagePolicy,
             withSysMonitoring,
           });
           setAgentPolicy(createdPolicy);
-          updatePackagePolicy({ policy_id: createdPolicy.id });
+          updatePackagePolicy({ policy_ids: [createdPolicy.id] });
         } catch (e) {
           setFormState('VALID');
           notifications.toasts.addError(e, {
@@ -316,7 +308,9 @@ export function useOnSubmit({
         }
       }
 
-      const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
+      const agentPolicyIdToSave = createdPolicy?.id
+        ? [createdPolicy?.id]
+        : packagePolicy.policy_ids;
 
       const shouldForceInstallOnAgentless =
         isAgentlessAgentPolicy(createdPolicy) ||
@@ -329,7 +323,7 @@ export function useOnSubmit({
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
-        policy_id: agentPolicyIdToSave,
+        policy_ids: agentPolicyIdToSave,
         force: forceInstall,
       });
 
@@ -388,14 +382,14 @@ export function useOnSubmit({
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
-            defaultMessage: `'{packagePolicyName}' integration added.`,
+            defaultMessage: `''{packagePolicyName}'' integration added.`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
           }),
           text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy.`,
                 values: {
                   agentPolicyName: agentPolicy!.name,
                 },

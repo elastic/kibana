@@ -33,6 +33,7 @@ describe('getExecutionEventAggregation', () => {
         page: 1,
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }],
+        runTypeFilters: [],
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Invalid maxExecutions requested \\"1001\\" - must be less than ${MAX_EXECUTION_EVENTS_DISPLAYED}"`
@@ -46,6 +47,7 @@ describe('getExecutionEventAggregation', () => {
         page: 0,
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }],
+        runTypeFilters: [],
       });
     }).toThrowErrorMatchingInlineSnapshot(`"Invalid page field \\"0\\" - must be greater than 0"`);
   });
@@ -57,6 +59,7 @@ describe('getExecutionEventAggregation', () => {
         page: 1,
         perPage: 0,
         sort: [{ timestamp: { order: 'asc' } }],
+        runTypeFilters: [],
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Invalid perPage field \\"0\\" - must be greater than 0"`
@@ -70,6 +73,7 @@ describe('getExecutionEventAggregation', () => {
         page: 1,
         perPage: 10,
         sort: [{ notsortable: { order: 'asc' } }],
+        runTypeFilters: [],
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_s,schedule_delay_ms,num_triggered_actions]"`
@@ -83,6 +87,7 @@ describe('getExecutionEventAggregation', () => {
         page: 1,
         perPage: 10,
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
+        runTypeFilters: [],
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_s,schedule_delay_ms,num_triggered_actions]"`
@@ -96,6 +101,7 @@ describe('getExecutionEventAggregation', () => {
         page: 2,
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }, { duration_ms: { order: 'desc' } }],
+        runTypeFilters: [],
       })
     ).toEqual({
       totalExecutions: {
@@ -139,15 +145,18 @@ describe('getExecutionEventAggregation', () => {
           actionExecution: {
             filter: {
               bool: {
+                minimum_should_match: 1,
                 must: [
                   {
                     match: {
-                      'event.action': 'execute',
+                      'event.provider': 'actions',
                     },
                   },
+                ],
+                should: [
                   {
                     match: {
-                      'event.provider': 'actions',
+                      'event.action': 'execute',
                     },
                   },
                 ],
@@ -165,7 +174,15 @@ describe('getExecutionEventAggregation', () => {
           ruleExecution: {
             filter: {
               bool: {
+                minimum_should_match: 1,
                 must: [
+                  {
+                    match: {
+                      'event.provider': 'alerting',
+                    },
+                  },
+                ],
+                should: [
                   {
                     match: {
                       'event.action': 'execute',
@@ -173,7 +190,7 @@ describe('getExecutionEventAggregation', () => {
                   },
                   {
                     match: {
-                      'event.provider': 'alerting',
+                      'event.action': 'execute-backfill',
                     },
                   },
                 ],
@@ -213,6 +230,14 @@ describe('getExecutionEventAggregation', () => {
                   },
                 },
               },
+              backfill: {
+                top_hits: {
+                  size: 1,
+                  _source: {
+                    includes: ['kibana.alert.rule.execution.backfill'],
+                  },
+                },
+              },
             },
           },
           securityMetrics: {
@@ -221,15 +246,18 @@ describe('getExecutionEventAggregation', () => {
                 must: [
                   {
                     match: {
-                      'event.action': 'execution-metrics',
-                    },
-                  },
-                  {
-                    match: {
                       'event.provider': 'securitySolution.ruleExecution',
                     },
                   },
                 ],
+                should: [
+                  {
+                    match: {
+                      'event.action': 'execution-metrics',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
               },
             },
             aggs: {
@@ -257,15 +285,18 @@ describe('getExecutionEventAggregation', () => {
                 must: [
                   {
                     match: {
-                      'event.action': 'status-change',
-                    },
-                  },
-                  {
-                    match: {
                       'event.provider': 'securitySolution.ruleExecution',
                     },
                   },
                 ],
+                should: [
+                  {
+                    match: {
+                      'event.action': 'status-change',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
               },
             },
             aggs: {
@@ -300,15 +331,18 @@ describe('getExecutionEventAggregation', () => {
           timeoutMessage: {
             filter: {
               bool: {
+                minimum_should_match: 1,
                 must: [
                   {
                     match: {
-                      'event.action': 'execute-timeout',
+                      'event.provider': 'alerting',
                     },
                   },
+                ],
+                should: [
                   {
                     match: {
-                      'event.provider': 'alerting',
+                      'event.action': 'execute-timeout',
                     },
                   },
                 ],
@@ -325,10 +359,9 @@ describe('getProviderAndActionFilter', () => {
   test('should correctly format array of sort combinations for bucket sorting', () => {
     expect(getProviderAndActionFilter('securitySolution.ruleExecution', 'status-change')).toEqual({
       bool: {
-        must: [
-          { match: { 'event.action': 'status-change' } },
-          { match: { 'event.provider': 'securitySolution.ruleExecution' } },
-        ],
+        minimum_should_match: 1,
+        must: [{ match: { 'event.provider': 'securitySolution.ruleExecution' } }],
+        should: [{ match: { 'event.action': 'status-change' } }],
       },
     });
   });
@@ -363,6 +396,7 @@ describe('formatExecutionEventResponse', () => {
       events: [],
     });
   });
+
   test('should format results correctly', () => {
     const results = {
       aggregations: {
@@ -1317,6 +1351,212 @@ describe('formatExecutionEventResponse', () => {
           gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
+        },
+      ],
+    });
+  });
+
+  test('should format results correctly when backfull occur', () => {
+    const results = {
+      aggregations: {
+        executionUuid: {
+          meta: {},
+          doc_count_error_upper_bound: -1,
+          sum_other_doc_count: 1184,
+          buckets: [
+            {
+              key: '02b7c7a4-ae1a-4da5-b134-c2fb96eb0e04',
+              doc_count: 5,
+              timeoutMessage: {
+                meta: {},
+                doc_count: 0,
+              },
+              securityMetrics: {
+                meta: {},
+                doc_count: 1,
+                searchDuration: {
+                  value: 9.0,
+                },
+                indexDuration: {
+                  value: 0.0,
+                },
+                gapDuration: {
+                  value: 0.0,
+                },
+              },
+              ruleExecution: {
+                meta: {},
+                doc_count: 1,
+                numTriggeredActions: {
+                  value: 0.0,
+                },
+                scheduleDelay: {
+                  value: 9.96e8,
+                },
+                outcomeAndMessage: {
+                  hits: {
+                    total: {
+                      value: 1,
+                      relation: 'eq',
+                    },
+                    max_score: 1.0,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: 'pK84iX8Brb7RSEAg3a-L',
+                        _score: 1.0,
+                        _source: {
+                          event: {
+                            outcome: 'success',
+                          },
+                          message:
+                            "rule executed: siem.queryRule:7457b121-a3a8-11ec-a0f0-cbd1c2ae6ee8: 'Endpoint Security'",
+                        },
+                      },
+                    ],
+                  },
+                },
+                backfill: {
+                  hits: {
+                    total: {
+                      value: 1,
+                      relation: 'eq',
+                    },
+                    max_score: 1.0,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: 'J4T5fI8BE4fKEPKOLKON',
+                        _score: 0.003465116,
+                        _source: {
+                          kibana: {
+                            alert: {
+                              rule: {
+                                execution: {
+                                  backfill: {
+                                    id: '341536e6-5ac9-4d0e-a25c-dc1c70cda7d5',
+                                    start: '2024-04-01T17:50:00.000Z',
+                                    interval: '1m',
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                esSearchDuration: {
+                  value: 5.0,
+                },
+                executionDuration: {
+                  value: 1.922e9,
+                },
+                executeStartTime: {
+                  value: 1.647274677664e12,
+                  value_as_string: '2022-03-14T16:17:57.664Z',
+                },
+              },
+              actionExecution: {
+                meta: {},
+                doc_count: 0,
+                actionOutcomes: {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 0,
+                  buckets: [],
+                },
+              },
+              securityStatus: {
+                meta: {},
+                doc_count: 2,
+                message: {
+                  hits: {
+                    total: {
+                      value: 2,
+                      relation: 'eq',
+                    },
+                    max_score: null,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: 'o684iX8Brb7RSEAg2a-j',
+                        _score: null,
+                        _source: {
+                          message: 'succeeded',
+                        },
+                        sort: [1647274678629],
+                      },
+                    ],
+                  },
+                },
+                status: {
+                  hits: {
+                    total: {
+                      value: 2,
+                      relation: 'eq',
+                    },
+                    max_score: null,
+                    hits: [
+                      {
+                        _index: '.kibana-event-log-8.2.0-000001',
+                        _id: 'o684iX8Brb7RSEAg2a-j',
+                        _score: null,
+                        _source: {
+                          kibana: {
+                            alert: {
+                              rule: {
+                                execution: {
+                                  status: 'succeeded',
+                                },
+                              },
+                            },
+                          },
+                        },
+                        sort: [1647274678629],
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+        totalExecutions: {
+          value: 768,
+        },
+      },
+    };
+
+    expect(formatExecutionEventResponse(results)).toEqual({
+      total: 768,
+      events: [
+        {
+          execution_uuid: '02b7c7a4-ae1a-4da5-b134-c2fb96eb0e04',
+          timestamp: '2022-03-14T16:17:57.664Z',
+          duration_ms: 1922,
+          status: 'success',
+          message:
+            "rule executed: siem.queryRule:7457b121-a3a8-11ec-a0f0-cbd1c2ae6ee8: 'Endpoint Security'",
+          num_active_alerts: 0,
+          num_new_alerts: 0,
+          num_recovered_alerts: 0,
+          num_triggered_actions: 0,
+          num_succeeded_actions: 0,
+          num_errored_actions: 0,
+          total_search_duration_ms: 0,
+          es_search_duration_ms: 5,
+          schedule_delay_ms: 996,
+          timed_out: false,
+          indexing_duration_ms: 0,
+          search_duration_ms: 9,
+          gap_duration_s: 0,
+          security_status: 'succeeded',
+          security_message: 'succeeded',
+          backfill: {
+            to: '2024-04-01T17:50:00.000Z',
+            from: '2024-04-01T17:49:00.000Z',
+          },
         },
       ],
     });

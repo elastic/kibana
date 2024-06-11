@@ -35,7 +35,7 @@
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
           },
-          "[], fields: Map<string, ",
+          "<string>[], fields: Map<string, ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -72,7 +72,7 @@
                 "section": "def-common.ESQLCommand",
                 "text": "ESQLCommand"
               },
-              "[]"
+              "<string>[]"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts",
             "deprecated": false,
@@ -455,6 +455,14 @@
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
           },
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
+          },
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -487,6 +495,14 @@
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
           },
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
+          },
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -518,6 +534,14 @@
             "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
+          },
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
           },
           "; node: ",
           {
@@ -600,6 +624,14 @@
             "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
+          },
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
           },
           "; node: ",
           {
@@ -691,6 +723,14 @@
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
           },
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
+          },
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -764,6 +804,14 @@
             "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLCommand",
             "text": "ESQLCommand"
+          },
+          "<string> | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstMetricsCommand",
+            "text": "ESQLAstMetricsCommand"
           },
           "; option: ",
           {
@@ -2620,7 +2668,7 @@
                 "section": "def-common.ESQLCommand",
                 "text": "ESQLCommand"
               },
-              ") => ",
+              "<string>) => ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -2648,7 +2696,8 @@
                     "docId": "kibKbnEsqlAstPluginApi",
                     "section": "def-common.ESQLCommand",
                     "text": "ESQLCommand"
-                  }
+                  },
+                  "<string>"
                 ],
                 "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,
@@ -2831,7 +2880,7 @@
                 "section": "def-common.ESQLCommand",
                 "text": "ESQLCommand"
               },
-              ", references?: unknown) => ",
+              "<string>, references?: unknown) => ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -2880,7 +2929,8 @@
                     "docId": "kibKbnEsqlAstPluginApi",
                     "section": "def-common.ESQLCommand",
                     "text": "ESQLCommand"
-                  }
+                  },
+                  "<string>"
                 ],
                 "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,
@@ -3407,7 +3457,7 @@
               "\nThis is useful to identify the suggestion type and apply different styles to it."
             ],
             "signature": [
-              "\"Text\" | \"Operator\" | \"Field\" | \"Function\" | \"Method\" | \"Variable\" | \"Class\" | \"Value\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
+              "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Function\" | \"Method\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
@@ -3916,7 +3966,7 @@
         "label": "ItemKind",
         "description": [],
         "signature": [
-          "\"Text\" | \"Operator\" | \"Field\" | \"Function\" | \"Method\" | \"Variable\" | \"Class\" | \"Value\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
+          "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Function\" | \"Method\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
         "deprecated": false,

@@ -26,7 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   describe('Cases persistable attachments', function () {
     describe('lens visualization', () => {
       before(async () => {
-        await svlCommonPage.login();
+        await svlCommonPage.loginWithRole('admin');
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(

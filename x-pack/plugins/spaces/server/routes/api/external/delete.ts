@@ -20,6 +20,9 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
   router.delete(
     {
       path: '/api/spaces/space/{id}',
+      options: {
+        description: `Delete a space`,
+      },
       validate: {
         params: schema.object({
           id: schema.string(),

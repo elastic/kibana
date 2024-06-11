@@ -12,11 +12,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiHealth,
-  EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -52,16 +51,17 @@ import {
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import {
-  Comparator,
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../common/http_api';
+import {
   FilterQuery,
   InventoryMetricConditions,
   QUERY_INVALID,
 } from '../../../../common/alerting/metrics';
-import {
-  SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
-} from '../../../../common/http_api/snapshot_api';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
   useMetricsDataViewContext,
@@ -106,7 +106,7 @@ type Props = Omit<
 
 export const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
@@ -359,14 +359,14 @@ export const Expressions: React.FC<Props> = (props) => {
             {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
               defaultMessage: "Alert me if there's no data",
             })}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
                 defaultMessage:
                   'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
               })}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         checked={ruleParams.alertOnNoData}
@@ -447,7 +447,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete } = props;
   const {
     metric,
-    comparator = Comparator.GT,
+    comparator = COMPARATORS.GREATER_THAN,
     threshold = [],
     customMetric,
     warningThreshold = [],
@@ -478,14 +478,14 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as Comparator | undefined });
+      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS | undefined });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
@@ -713,7 +713,7 @@ const ThresholdElement: React.FC<{
     <>
       <div css={StyledExpressionCss}>
         <ThresholdExpression
-          thresholdComparator={comparator || Comparator.GT}
+          thresholdComparator={convertToBuiltInComparators(comparator) || COMPARATORS.GREATER_THAN}
           threshold={threshold}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}

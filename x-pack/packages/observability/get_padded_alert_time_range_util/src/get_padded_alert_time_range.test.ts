@@ -20,18 +20,27 @@ describe('getPaddedAlertTimeRange', () => {
       'Duration 4 hour, time range will be extended it with 30 minutes from each side',
       '2023-03-28T04:15:32.660Z',
       '2023-03-28T08:15:32.660Z',
+      undefined,
       { from: '2023-03-28T03:45:32.660Z', to: '2023-03-28T08:45:32.660Z' },
     ],
     [
       'Duration 5 minutes, time range will be extended it with 20 minutes from each side',
       '2023-03-28T08:22:33.660Z',
       '2023-03-28T08:27:33.660Z',
+      undefined,
       { from: '2023-03-28T08:02:33.660Z', to: '2023-03-28T08:47:33.660Z' },
+    ],
+    [
+      'Duration 5 minutes with 1 day lookBack, time range will be extended it with 20 days from each side',
+      '2023-01-28T22:22:33.660Z',
+      '2023-01-28T23:27:33.660Z',
+      { size: 1, unit: 'd' },
+      { from: '2023-01-08T22:22:33.660Z', to: '2023-02-17T23:27:33.660Z' },
     ],
   ];
 
-  it.each(testData)('%s', (_, start, end, output) => {
-    expect(getPaddedAlertTimeRange(start, end)).toEqual(output);
+  it.each(testData)('%s', (_, start, end, lookBackWindow, output) => {
+    expect(getPaddedAlertTimeRange(start, end, lookBackWindow)).toEqual(output);
   });
 
   describe('active alert', () => {

@@ -25,9 +25,10 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
 interface Props<TSample extends {}> {
-  waterfallFetchResult: WaterfallFetchResult;
+  waterfallFetchResult: WaterfallFetchResult['waterfall'];
   traceSamples?: TSample[];
   traceSamplesFetchStatus: FETCH_STATUS;
+  waterfallFetchStatus: FETCH_STATUS;
   environment: Environment;
   onSampleClick: (sample: TSample) => void;
   onTabClick: (tab: TransactionTab) => void;
@@ -41,6 +42,7 @@ interface Props<TSample extends {}> {
 
 export function WaterfallWithSummary<TSample extends {}>({
   waterfallFetchResult,
+  waterfallFetchStatus,
   traceSamples,
   traceSamplesFetchStatus,
   environment,
@@ -58,12 +60,12 @@ export function WaterfallWithSummary<TSample extends {}>({
   const isControlled = selectedSample !== undefined;
 
   const isLoading =
-    waterfallFetchResult.status === FETCH_STATUS.LOADING ||
+    waterfallFetchStatus === FETCH_STATUS.LOADING ||
     traceSamplesFetchStatus === FETCH_STATUS.LOADING;
   // When traceId is not present, call to waterfallFetchResult will not be initiated
   const isSucceded =
-    (waterfallFetchResult.status === FETCH_STATUS.SUCCESS ||
-      waterfallFetchResult.status === FETCH_STATUS.NOT_INITIATED) &&
+    (waterfallFetchStatus === FETCH_STATUS.SUCCESS ||
+      waterfallFetchStatus === FETCH_STATUS.NOT_INITIATED) &&
     traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export function WaterfallWithSummary<TSample extends {}>({
       : 0
     : sampleActivePage;
 
-  const { entryTransaction } = waterfallFetchResult.waterfall;
+  const { entryTransaction } = waterfallFetchResult;
 
   if (!entryTransaction && traceSamples?.length === 0 && isSucceded) {
     return (
@@ -136,7 +138,7 @@ export function WaterfallWithSummary<TSample extends {}>({
                 <MaybeViewTraceLink
                   isLoading={isLoading}
                   transaction={entryTransaction}
-                  waterfall={waterfallFetchResult.waterfall}
+                  waterfall={waterfallFetchResult}
                   environment={environment}
                 />
               </EuiFlexItem>
@@ -153,8 +155,8 @@ export function WaterfallWithSummary<TSample extends {}>({
       ) : (
         <EuiFlexItem grow={false}>
           <TransactionSummary
-            errorCount={waterfallFetchResult.waterfall.totalErrorsCount}
-            totalDuration={waterfallFetchResult.waterfall.rootWaterfallTransaction?.duration}
+            errorCount={waterfallFetchResult.totalErrorsCount}
+            totalDuration={waterfallFetchResult.rootWaterfallTransaction?.duration}
             transaction={entryTransaction}
           />
         </EuiFlexItem>
@@ -167,7 +169,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           onTabClick={onTabClick}
-          waterfall={waterfallFetchResult.waterfall}
+          waterfall={waterfallFetchResult}
           isLoading={isLoading}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}

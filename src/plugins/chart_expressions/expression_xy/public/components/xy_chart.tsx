@@ -51,7 +51,6 @@ import {
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
-  XYLegendValue,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -864,7 +863,7 @@ export function XYChart({
             xDomain={xDomain}
             // enable brushing only for time charts, for both ES|QL and DSL queries
             onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
-            onElementClick={interactive && !isEsqlMode ? clickHandler : undefined}
+            onElementClick={interactive ? clickHandler : undefined}
             legendAction={
               interactive
                 ? getLegendAction(
@@ -878,9 +877,7 @@ export function XYChart({
                   )
                 : undefined
             }
-            showLegendExtra={
-              isHistogramViz && legend.legendStats?.[0] === XYLegendValue.CurrentAndLastValue
-            }
+            legendValues={isHistogramViz ? legend.legendStats : []}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={

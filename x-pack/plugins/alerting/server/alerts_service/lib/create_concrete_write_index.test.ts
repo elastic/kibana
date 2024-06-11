@@ -7,7 +7,7 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { createConcreteWriteIndex } from './create_concrete_write_index';
+import { createConcreteWriteIndex, setConcreteWriteIndex } from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
@@ -680,7 +680,7 @@ describe('createConcreteWriteIndex', () => {
         }
       });
 
-      it(`should throw error when there are concrete indices but none of them are the write index`, async () => {
+      it(`should log an error and try to set write index when there are concrete indices but none of them are the write index`, async () => {
         if (useDataStream) return;
 
         clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
@@ -701,18 +701,101 @@ describe('createConcreteWriteIndex', () => {
           async () => SimulateTemplateResponse
         );
 
-        await expect(() =>
-          createConcreteWriteIndex({
-            logger,
-            esClient: clusterClient,
-            indexPatterns: IndexPatterns,
-            totalFieldsLimit: 2500,
-            dataStreamAdapter,
-          })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default"`
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default'
         );
+        expect(clusterClient.indices.updateAliases).toHaveBeenCalled();
       });
     });
   }
+});
+
+describe('setConcreteWriteIndex', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it(`should call updateAliases to set the concrete write index`, async () => {
+    await setConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000003',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000004',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000002',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+        },
+      ],
+    });
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Attempting to set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'
+    );
+    expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
+      body: {
+        actions: [
+          {
+            remove: {
+              alias: '.alerts-test.alerts-default',
+              index: '.internal.alerts-test.alerts-default-000004',
+            },
+          },
+          {
+            add: {
+              alias: '.alerts-test.alerts-default',
+              index: '.internal.alerts-test.alerts-default-000004',
+              is_write_index: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(logger.info).toHaveBeenCalledWith(
+      'Successfully set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'
+    );
+  });
+
+  it(`should throw an error if there is a failure setting the concrete write index`, async () => {
+    const error = new Error(`fail`) as EsError;
+    clusterClient.indices.updateAliases.mockRejectedValueOnce(error);
+
+    await expect(() =>
+      setConcreteWriteIndex({
+        logger,
+        esClient: clusterClient,
+        concreteIndices: [
+          {
+            index: '.internal.alerts-test.alerts-default-000001',
+            alias: '.alerts-test.alerts-default',
+            isWriteIndex: false,
+          },
+        ],
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to set index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default."`
+    );
+  });
 });
