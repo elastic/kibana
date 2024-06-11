@@ -525,6 +525,19 @@ class AgentPolicyService {
           agentPolicy.package_policies =
             (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
+        if (options.withAgentCount) {
+          await getAgentsByKuery(
+            appContextService.getInternalUserESClient(),
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_id),
+            {
+              showInactive: true,
+              perPage: 0,
+              page: 1,
+              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+            }
+          ).then(({ total }) => (agentPolicy.agents = total));
+        }
+
         return agentPolicy;
       },
       { concurrency: 50 }
