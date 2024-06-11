@@ -18,7 +18,7 @@ steps:
       machineType: n2-standard-2
       preemptible: true
   - command: .buildkite/scripts/steps/esql_generate_function_docs.sh
-    label: Generate Function Definitions
+    label: Generate Function Docs
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
