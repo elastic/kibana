@@ -64,7 +64,7 @@ export async function createCollectorPackagePolicy({
   const packageName = 'profiler_collector';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
-    policy_id: CLOUD_AGENT_POLICY_ID,
+    policy_ids: [CLOUD_AGENT_POLICY_ID],
     enabled: true,
     package: {
       name: packageName,
@@ -100,7 +100,7 @@ export async function createSymbolizerPackagePolicy({
   const packageName = 'profiler_symbolizer';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
-    policy_id: CLOUD_AGENT_POLICY_ID,
+    policy_ids: [CLOUD_AGENT_POLICY_ID],
     enabled: true,
     package: {
       name: packageName,
