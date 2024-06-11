@@ -129,7 +129,6 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           refreshAgentActivity = false;
           onClose();
         }}
-        size="m"
         paddingSize="none"
       >
         <EuiFlyoutHeader aria-labelledby="FleetAgentActivityFlyoutTitle">

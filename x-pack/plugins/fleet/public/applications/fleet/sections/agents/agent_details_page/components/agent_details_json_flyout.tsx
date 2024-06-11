@@ -44,7 +44,7 @@ export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }
     const { docLinks } = useStartServices();
 
     return (
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>

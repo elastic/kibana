@@ -106,7 +106,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
 
   return (
-    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
+    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose}>
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">

@@ -22,7 +22,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FLYOUT_MAX_WIDTH } from '../../constants';
 import type { FleetProxy } from '../../../../types';
 import { TextInput, TextAreaInput } from '../form';
 
@@ -43,7 +42,7 @@ export const FleetProxyFlyout: React.FunctionComponent<FleetProxyFlyoutProps> = 
   const { inputs } = form;
 
   return (
-    <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2>

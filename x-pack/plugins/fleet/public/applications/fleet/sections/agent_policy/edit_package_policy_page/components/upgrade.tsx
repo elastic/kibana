@@ -167,7 +167,7 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
     <>
       {isPreviousVersionFlyoutOpen && currentPackagePolicy && (
         <EuiPortal>
-          <EuiFlyout onClose={() => setIsPreviousVersionFlyoutOpen(false)} size="l" maxWidth={640}>
+          <EuiFlyout onClose={() => setIsPreviousVersionFlyoutOpen(false)}>
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">

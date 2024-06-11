@@ -46,7 +46,6 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../common/constants';
 
 import type { Output, FleetProxy } from '../../../../types';
-import { FLYOUT_MAX_WIDTH } from '../../constants';
 
 import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
 
@@ -230,7 +229,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   return (
-    <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2 id="FleetEditOutputFlyoutTitle">

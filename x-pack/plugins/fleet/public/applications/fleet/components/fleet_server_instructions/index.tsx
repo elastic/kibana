@@ -133,7 +133,7 @@ export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) =
   }
 
   return (
-    <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} size="m">
+    <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose}>
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAddFleetServerFlyoutTitle">
         <Header
           tabs={tabs}

@@ -30,7 +30,6 @@ import {
 
 import { MultiRowInput } from '../multi_row_input';
 import { useStartServices } from '../../../../hooks';
-import { FLYOUT_MAX_WIDTH } from '../../constants';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
@@ -61,7 +60,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   );
 
   return (
-    <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
         <>
           <EuiTitle size="m">

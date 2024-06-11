@@ -191,7 +191,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <FlyoutWithHigherZIndex onClose={() => onClose()} size="l" maxWidth={400} {...restOfProps}>
+    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps}>
       {header}
       {body}
       {footer}

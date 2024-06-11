@@ -71,7 +71,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       `?apiVersion=${API_VERSIONS.public.v1}`;
 
     return (
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose}>
         <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerAgentPolicyYamlFlyoutTitle">
           <EuiTitle size="m">
             <h2 id="IngestManagerAgentPolicyYamlFlyoutTitle">
