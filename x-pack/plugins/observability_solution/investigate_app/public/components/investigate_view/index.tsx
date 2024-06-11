@@ -22,7 +22,6 @@ import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
-import moment from 'moment';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { useMemoWithAbortSignal } from '../../hooks/use_memo_with_abort_signal';
@@ -415,12 +414,7 @@ export function InvestigateView({}: {}) {
                 rangeFrom={range.from}
                 rangeTo={range.to}
                 onQuerySubmit={({ kuery: nextKuery, dateRange: nextDateRange }) => {
-                  setRange({
-                    start: moment(nextDateRange.from),
-                    end: moment(nextDateRange.to),
-                    from: nextDateRange.from,
-                    to: nextDateRange.to,
-                  });
+                  setRange(nextDateRange);
                   setFilterOverrides((prevOverrides) => ({ ...prevOverrides, kuery: nextKuery }));
                 }}
                 onQueryChange={({ kuery: nextKuery }) => {

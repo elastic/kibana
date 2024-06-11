@@ -8,7 +8,8 @@
 import datemath from '@elastic/datemath';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { InputTimeRange } from '@kbn/data-plugin/public/query';
 import { useKibana } from './use_kibana';
 
 function getDatesFromDataPluginStart(data: DataPublicPluginStart) {
@@ -47,5 +48,12 @@ export function useDateRange() {
     };
   }, [data]);
 
-  return [time, setTime] as const;
+  const setRange = useCallback(
+    (inputRange: InputTimeRange) => {
+      return data.query.timefilter.timefilter.setTime(inputRange);
+    },
+    [data]
+  );
+
+  return [time, setRange] as const;
 }

@@ -41,7 +41,7 @@ export class InvestigatePlugin
           new Promise<void>((resolve, reject) => {
             setTimeout(() => {
               reject(new Error('Timed out running registration function'));
-            }, 30_000);
+            }, 30000);
           }),
         ]).catch((error) => {
           this.logger.error(
