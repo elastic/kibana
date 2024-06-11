@@ -67,9 +67,9 @@ export const useKnowledgeBaseEntries = ({ http, signal }: UseKnowledgeBaseEntrie
  * Use this hook to invalidate the Knowledge Base Entries cache. For example, adding,
  * editing, or deleting any Knowledge Base entries should lead to cache invalidation.
  *
- * @returns {Function} - Function to invalidate the Knowledge Base Status cache
+ * @returns {Function} - Function to invalidate the Knowledge Base Entries cache
  */
-export const useInvalidateKnowledgeBaseStatus = () => {
+export const useInvalidateKnowledgeBaseEntries = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {

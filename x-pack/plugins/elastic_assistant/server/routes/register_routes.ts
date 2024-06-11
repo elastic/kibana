@@ -27,6 +27,7 @@ import { bulkPromptsRoute } from './prompts/bulk_actions_route';
 import { findPromptsRoute } from './prompts/find_route';
 import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
 import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
+import { bulkActionKnowledgeBaseEntriesRoute } from './knowledge_base/entries/bulk_actions_route';
 import { createKnowledgeBaseEntryRoute } from './knowledge_base/entries/create_route';
 import { findKnowledgeBaseEntriesRoute } from './knowledge_base/entries/find_route';
 
@@ -51,7 +52,7 @@ export const registerRoutes = (
   // User Conversations search
   findUserConversationsRoute(router);
 
-  // Knowledge Base
+  // Knowledge Base Setup
   deleteKnowledgeBaseRoute(router);
   getKnowledgeBaseStatusRoute(router, getElserId);
   postKnowledgeBaseRoute(router, getElserId);
@@ -59,6 +60,7 @@ export const registerRoutes = (
   // Knowledge Base Entries
   findKnowledgeBaseEntriesRoute(router);
   createKnowledgeBaseEntryRoute(router);
+  bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
   postActionsConnectorExecuteRoute(router, getElserId);

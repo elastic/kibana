@@ -13,7 +13,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import { KnowledgeBaseEntryResponse, Metadata } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
@@ -217,13 +217,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Adds LangChain Documents to the knowledge base
    *
-   * @param documents
-   * @param authenticatedUser
+   * @param {Array<Document<Metadata>>} documents - LangChain Documents to add to the knowledge base
    */
   public addKnowledgeBaseDocuments = async ({
     documents,
   }: {
-    documents: Document[];
+    documents: Array<Document<Metadata>>;
   }): Promise<KnowledgeBaseEntryResponse[]> => {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
@@ -237,9 +236,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) =>
         transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
-          // TODO: Update the LangChain Document Metadata type extension
           metadata: {
-            kbResource: doc.metadata.kbResourcer ?? 'unknown',
+            kbResource: doc.metadata.kbResource ?? 'unknown',
             required: doc.metadata.required ?? false,
             source: doc.metadata.source ?? 'unknown',
           },
