@@ -144,10 +144,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.setValue('createIndexNameFieldText', value);
     },
     async clickCreateIndexSaveButton() {
-      await retry.tryForTime(60_000, async function waitForClickAndClose() {
-        await testSubjects.click('createIndexSaveButton');
-        // Wait for modal to close
-        await testSubjects.missingOrFail('createIndexSaveButton');
+      await testSubjects.click('createIndexSaveButton');
+      // Wait for modal to close
+      await testSubjects.missingOrFail('createIndexSaveButton', {
+        timeout: 30_000,
       });
     },
     async expectIndexToExist(indexName: string) {
