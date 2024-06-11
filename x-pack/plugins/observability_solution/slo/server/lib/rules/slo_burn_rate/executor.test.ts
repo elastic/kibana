@@ -335,7 +335,7 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       const buckets = [
@@ -463,7 +463,7 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules a suppressed alert when both windows of first window definition burn rate have reached the threshold but the dependency matches', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
       const ruleParams = someRuleParamsWithWindows({
         sloId: slo.id,
@@ -609,7 +609,7 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules an alert when both windows of second window definition burn rate have reached the threshold', async () => {
-      const slo = createSLO({ objective: { target: 0.9 } });
+      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
       const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
       soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
       const buckets = [
