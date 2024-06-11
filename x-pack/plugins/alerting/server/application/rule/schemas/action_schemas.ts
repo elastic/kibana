@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { notifyWhenSchema } from './notify_when_schema';
-import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
+import {
+  alertsPrebuiltQuerySchema,
+  alertsFilterQuerySchema,
+} from '../../alerts_filter_query/schemas';
 
 export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
@@ -32,6 +35,7 @@ export const actionAlertsFilterTimeFrameSchema = schema.object({
 
 export const actionAlertsFilterSchema = schema.object({
   query: schema.maybe(alertsFilterQuerySchema),
+  prebuiltQuery: schema.maybe(alertsPrebuiltQuerySchema),
   timeframe: schema.maybe(actionAlertsFilterTimeFrameSchema),
 });
 

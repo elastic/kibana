@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { alertsFilterQuerySchema } from './alerts_filter_query_schemas';
+export { alertsFilterQuerySchema, alertsPrebuiltQuerySchema } from './alerts_filter_query_schemas';

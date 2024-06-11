@@ -70,7 +70,19 @@ export const transformRuleActions = (
             }
           : {}),
         ...(uuid && { uuid }),
-        ...(alertsFilter && { alerts_filter: alertsFilter }),
+        ...(alertsFilter
+          ? {
+              ...(alertsFilter.query ? { query: alertsFilter.query } : {}),
+              ...(alertsFilter.prebuiltQuery
+                ? {
+                    prebuilt_query: {
+                      severity_improving: alertsFilter.prebuiltQuery.severityImproving,
+                    },
+                  }
+                : {}),
+              ...(alertsFilter.timeframe ? { timeframe: alertsFilter.timeframe } : {}),
+            }
+          : {}),
         ...(useAlertDataForTemplate !== undefined && {
           use_alert_data_for_template: useAlertDataForTemplate,
         }),

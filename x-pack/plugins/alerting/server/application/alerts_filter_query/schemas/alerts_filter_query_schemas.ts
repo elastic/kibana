@@ -26,3 +26,7 @@ export const alertsFilterQuerySchema = schema.object({
   ),
   dsl: schema.maybe(schema.string()),
 });
+
+export const alertsPrebuiltQuerySchema = schema.object({
+  severityImproving: schema.maybe(schema.boolean()),
+});

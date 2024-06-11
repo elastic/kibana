@@ -68,6 +68,7 @@ import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
 import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 import { validateActionFilterQuery } from '../../lib/value_validators';
 import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { ActionAlertsFilterSeverityImproving } from './action_alerts_filter_severity_improving';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -82,6 +83,11 @@ export type ActionTypeFormProps = {
   setActionAlertsFilterProperty: (
     key: string,
     value: RuleActionAlertsFilterProperty,
+    index: number
+  ) => void;
+  setActionAlertsSeverityImprovingProperty: (
+    key: string,
+    value: RuleActionParam,
     index: number
   ) => void;
   actionTypesIndex: ActionTypeIndex;
@@ -129,6 +135,7 @@ export const ActionTypeForm = ({
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
+  setActionAlertsSeverityImprovingProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -422,6 +429,8 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const showAlertSeverityImprovingFilter = !!selectedActionGroup?.severity;
+
   const showSelectActionGroup =
     actionGroups &&
     selectedActionGroup &&
@@ -511,7 +520,15 @@ export const ActionTypeForm = ({
         )}
         {showActionAlertsFilter && (
           <>
-            {!hideNotifyWhen && <EuiSpacer size="xl" />}
+            {!hideNotifyWhen && !showAlertSeverityImprovingFilter && <EuiSpacer size="xl" />}
+            {showAlertSeverityImprovingFilter && (
+              <ActionAlertsFilterSeverityImproving
+                state={actionItem.alertsFilter?.prebuiltQuery?.severityImproving}
+                onChange={(severityImproving) =>
+                  setActionAlertsSeverityImprovingProperty('improving', severityImproving, index)
+                }
+              />
+            )}
             <EuiFormRow error={queryError} isInvalid={!!queryError} fullWidth>
               <ActionAlertsFilterQuery
                 state={actionItem.alertsFilter?.query}
