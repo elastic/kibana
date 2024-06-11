@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout';
+import { UnifiedDocViewerFlyout } from './doc_viewer_flyout';
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default UnifiedDocViewerFlyout;
