@@ -26,6 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 
 import { createDataViewDataSource, createEsqlDataSource } from '../../common/data_sources';
@@ -48,6 +49,7 @@ export function initializeFetch({
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
     dataLoading: BehaviorSubject<boolean | undefined>;
     blockingError: BehaviorSubject<Error | undefined>;
+    fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
   };
   discoverServices: DiscoverServices;
 }) {
@@ -174,6 +176,7 @@ export function initializeFetch({
           });
 
           return {
+            warnings: interceptedWarnings,
             rows: resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView)),
             hitCount: resp.hits.total as number,
             fetchContext,
@@ -197,6 +200,9 @@ export function initializeFetch({
         }
         if (next.hasOwnProperty('fetchContext') && next.fetchContext !== undefined) {
           api.fetchContext$.next(next.fetchContext);
+        }
+        if (next.hasOwnProperty('warnings')) {
+          api.fetchWarnings$.next(next.warnings ?? []);
         }
         if (next.hasOwnProperty('error')) {
           api.blockingError.next(next.error);

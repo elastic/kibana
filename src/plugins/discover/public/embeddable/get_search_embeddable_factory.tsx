@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
@@ -24,6 +24,7 @@ import {
   apiHasAppContext,
   apiHasParentApi,
   FetchContext,
+  initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -34,6 +35,7 @@ import {
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
 import { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
+import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
@@ -49,13 +51,21 @@ import {
 } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 
-const EDITABLE_KEYS: Array<keyof SavedSearchAttributes> = [
+/** This constant refers to the parts of the saved search state that can be edited from a dashboard */
+const EDITABLE_SAVED_SEARCH_KEYS: Array<keyof SavedSearchAttributes> = [
   'sort',
   'columns',
   'rowHeight',
   'sampleSize',
   'rowsPerPage',
   'headerRowHeight',
+];
+
+/** This constant refers to the dashboard panel specific state */
+const EDITABLE_PANEL_KEYS = [
+  'title', // panel title
+  'description', // panel description
+  'timeRange', // panel custom time range
 ];
 
 export const getSearchEmbeddableFactory = ({
@@ -78,23 +88,20 @@ export const getSearchEmbeddableFactory = ({
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: async (serializedState) => {
+      const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
       const savedObjectId = serializedState.rawState.savedObjectId;
-
       if (savedObjectId) {
         // by reference
         const so = await get(savedObjectId, true);
-        const savedObjectOverride = pick(serializedState.rawState, [
-          'title', // panel title
-          'description', // panel description
-          ...EDITABLE_KEYS,
-        ]);
+        const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
         return {
-          ...so,
+          // ignore the time range from the saved object - only global time range + panel time range matter
+          ...omit(so, 'timeRange'),
           savedObjectId,
           savedObjectTitle: so.title,
           savedObjectDescription: so.description,
-
           // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
+          ...panelState,
           ...savedObjectOverride,
         };
       } else {
@@ -107,16 +114,19 @@ export const getSearchEmbeddableFactory = ({
           ) as SavedSearchUnwrapResult,
           true
         );
-
         return {
           ...savedSearch,
-          title: serializedState?.rawState.title, // panel title
-          description: serializedState?.rawState.description, // panel description
+          ...panelState,
         };
       }
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
+      const {
+        serialize: serializeTimeRange,
+        api: timeRangeApi,
+        comparators: timeRangeComparators,
+      } = initializeTimeRange(initialState);
       const defaultPanelTitle$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectTitle
       );
@@ -127,6 +137,7 @@ export const getSearchEmbeddableFactory = ({
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
+      const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       const { searchEmbeddableApi, searchEmbeddableComparators, searchEmbeddableStateManager } =
         await initializeSearchEmbeddableApi(initialState, { discoverServices });
@@ -144,7 +155,7 @@ export const getSearchEmbeddableFactory = ({
         const savedObjectId = savedObjectId$.getValue();
         if (savedObjectId) {
           // only save the current state that is **different** than the initial state
-          const overwriteState = EDITABLE_KEYS.reduce((prev, key) => {
+          const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
             if (
               deepEqual(
                 savedSearchAttributes[key],
@@ -161,6 +172,7 @@ export const getSearchEmbeddableFactory = ({
               savedObjectId,
               // Serialize the current dashboard state into the panel state **without** updating the saved object
               ...serializeTitles(),
+              ...serializeTimeRange(),
               ...overwriteState,
             },
             // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
@@ -180,6 +192,7 @@ export const getSearchEmbeddableFactory = ({
         return {
           rawState: {
             ...serializeTitles(),
+            ...serializeTimeRange(),
             ...(state as unknown as SearchEmbeddableSerializedState),
           },
           references,
@@ -210,11 +223,16 @@ export const getSearchEmbeddableFactory = ({
         {
           ...titlesApi,
           ...searchEmbeddableApi,
+          ...timeRangeApi,
           dataLoading: dataLoading$,
           blockingError: blockingError$,
           savedObjectId: savedObjectId$,
           defaultPanelTitle: defaultPanelTitle$,
           defaultPanelDescription: defaultPanelDescription$,
+          hasTimeRange: () => {
+            const fetchContext = fetchContext$.getValue();
+            return fetchContext?.timeslice !== undefined || fetchContext?.timeRange !== undefined;
+          },
           getTypeDisplayName: () =>
             i18n.translate('discover.embeddable.search.displayName', {
               defaultMessage: 'search',
@@ -256,6 +274,7 @@ export const getSearchEmbeddableFactory = ({
         },
         {
           ...titleComparators,
+          ...timeRangeComparators,
           ...searchEmbeddableComparators,
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
@@ -301,6 +320,7 @@ export const getSearchEmbeddableFactory = ({
           dataLoading: dataLoading$,
           blockingError: blockingError$,
           fetchContext$,
+          fetchWarnings$,
         },
         discoverServices,
       });
@@ -382,7 +402,7 @@ export const getSearchEmbeddableFactory = ({
                     }
                   >
                     <SearchEmbeddableGridComponent
-                      api={api}
+                      api={{ ...api, fetchWarnings$ }}
                       onAddFilter={isEsqlMode({ searchSource }) ? undefined : onAddFilter}
                       stateManager={searchEmbeddableStateManager}
                     />

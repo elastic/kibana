@@ -17,8 +17,10 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesSavedObjectId,
+  SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
+import { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import {
   SavedSearch,
   SerializableSavedSearch,
@@ -47,6 +49,7 @@ export type SearchEmbeddableAttributes = Pick<
 >;
 
 export type SearchEmbeddableSerializedState = SerializedTitles &
+  SerializedTimeRange &
   Pick<SerializableSavedSearch, 'sort' | 'columns'> & {
     // by value
     attributes?: SearchEmbeddableAttributes;
@@ -56,7 +59,8 @@ export type SearchEmbeddableSerializedState = SerializedTitles &
   };
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableAttributes &
-  SerializedTitles & {
+  SerializedTitles &
+  SerializedTimeRange & {
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;
@@ -69,9 +73,12 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesBlockingError &
   PublishesSavedSearchAttributes &
   HasInPlaceLibraryTransforms &
+  HasTimeRange &
+  PublishesWritableTimeRange &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
 export interface PublishesSavedSearchAttributes extends PublishesDataViews, HasSavedSearch {
+  // TODO: Make these part of the **state manager** instead - doesn't need to be in public api
   rows$: BehaviorSubject<DataTableRecord[]>;
   totalHitCount$: BehaviorSubject<number | undefined>;
   columns$: BehaviorSubject<string[] | undefined>;
