@@ -181,6 +181,12 @@ export interface ValidationErrors {
       expression: string;
     };
   };
+  aggInAggFunction: {
+    message: string;
+    type: {
+      nestedAgg: string;
+    };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

@@ -567,6 +567,41 @@ const areFunctionArgsAggClosed = (fn: ESQLFunction): boolean =>
   fn.args.every((arg) => isLiteralItem(arg) || (isFunctionItem(arg) && isFunctionAggClosed(arg)));
 
 /**
+ * Looks for first nested aggregate function in an aggregate function, recursively.
+ */
+const findNestedAggFunctionOfAggFunction = (agg: ESQLFunction): ESQLFunction | undefined => {
+  for (const arg of agg.args) {
+    if (isFunctionItem(arg)) {
+      return isAggFunction(arg) ? arg : findNestedAggFunctionOfAggFunction(arg);
+    }
+  }
+};
+
+/**
+ * Looks for first nested aggregate function in another aggregate a function,
+ * recursively.
+ *
+ * @param fn Function to check for nested aggregate functions.
+ * @param parentIsAgg Whether the parent function of `fn` is an aggregate function.
+ * @returns The first nested aggregate function in `fn`, or `undefined` if none is found.
+ */
+const findNestedAggFunction = (
+  fn: ESQLFunction,
+  parentIsAgg: boolean = false
+): ESQLFunction | undefined => {
+  if (isAggFunction(fn)) {
+    return parentIsAgg ? fn : findNestedAggFunctionOfAggFunction(fn);
+  }
+
+  for (const arg of fn.args) {
+    if (isFunctionItem(arg)) {
+      const nestedAgg = findNestedAggFunction(arg, parentIsAgg || isAggFunction(fn));
+      if (nestedAgg) return nestedAgg;
+    }
+  }
+};
+
+/**
  * Validates aggregates fields: `... <aggregates> ...`.
  */
 const validateAggregates = (
@@ -618,6 +653,19 @@ const validateAggregates = (
       const fn = isAssignment(aggregate) ? aggregate.args[1] : aggregate;
       if (isFunctionItem(fn) && !isFunctionAggClosed(fn)) {
         messages.push(errors.expressionNotAggClosed(command, fn));
+      }
+    }
+  }
+
+  if (messages.length) {
+    return messages;
+  }
+
+  for (const aggregate of aggregates) {
+    if (isFunctionItem(aggregate)) {
+      const aggInAggFunction = findNestedAggFunction(aggregate);
+      if (aggInAggFunction) {
+        messages.push(errors.aggInAggFunction(aggInAggFunction));
       }
     }
   }

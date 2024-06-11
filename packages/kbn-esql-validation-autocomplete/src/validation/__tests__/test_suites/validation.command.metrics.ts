@@ -159,6 +159,15 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             ]);
           });
 
+          test('errors when aggregation functions are nested', async () => {
+            const { expectErrors } = await setup();
+
+            // avg() inside avg()
+            await expectErrors('METRICS a_index avg(to_long(avg(2)))', [
+              'The aggregation function [avg] cannot be used as an argument in another aggregation function',
+            ]);
+          });
+
           test('errors when input is not an aggregate function', async () => {
             const { expectErrors } = await setup();
 

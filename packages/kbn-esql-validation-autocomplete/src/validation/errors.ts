@@ -403,6 +403,19 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         ),
         type: 'error',
       };
+    case 'aggInAggFunction':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.aggInAggFunction',
+          {
+            defaultMessage:
+              'The aggregation function [{nestedAgg}] cannot be used as an argument in another aggregation function',
+            values: {
+              nestedAgg: out.nestedAgg,
+            },
+          }
+        ),
+      };
   }
   return { message: '' };
 }
@@ -484,6 +497,11 @@ export const errors = {
     errors.byId('unknownAggregateFunction', col.location, {
       value: col.name,
       type,
+    }),
+
+  aggInAggFunction: (fn: ESQLFunction): ESQLMessage =>
+    errors.byId('aggInAggFunction', fn.location, {
+      nestedAgg: fn.name,
     }),
 };
 
