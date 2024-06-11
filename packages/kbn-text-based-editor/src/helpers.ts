@@ -8,6 +8,7 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+// import { EPM_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -244,15 +245,18 @@ const getIntegrations = async (core: CoreStart) => {
   const response = (await core.http
     .get(route, { query: undefined, version: '2023-10-31' })
     .catch((error) => {
-      throw new Error(`Failed to fetch integrations": ${error}`);
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch integrations', error);
     })) as FleetResponse;
 
-  return response.items.map((source) => ({
-    name: source.name,
-    hidden: false,
-    title: source.title,
-    dataStreams: source.dataStreams,
-  }));
+  return (
+    response?.items?.map((source) => ({
+      name: source.name,
+      hidden: false,
+      title: source.title,
+      dataStreams: source.dataStreams,
+    })) ?? []
+  );
 };
 
 export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core: CoreStart) => {
