@@ -45,3 +45,11 @@ export const CANCEL_MODAL_BUTTON = i18n.translate('xpack.cases.create.cancelModa
 export const CONFIRM_MODAL_BUTTON = i18n.translate('xpack.cases.create.confirmModalButton', {
   defaultMessage: 'Exit without saving',
 });
+
+export const TEMPLATE_LABEL = i18n.translate('xpack.cases.create.templateLabel', {
+  defaultMessage: 'Template name',
+});
+
+export const TEMPLATE_HELP_TEXT = i18n.translate('xpack.cases.create.templateHelpText', {
+  defaultMessage: 'Selecting a template will pre-fill certain case fields below',
+});

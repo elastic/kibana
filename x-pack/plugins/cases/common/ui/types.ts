@@ -130,7 +130,6 @@ export type CasesConfigurationUI = Pick<
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
-
 export type CasesConfigurationUITemplate = CasesConfigurationUI['templates'][number];
 
 export type SortOrder = 'asc' | 'desc';
