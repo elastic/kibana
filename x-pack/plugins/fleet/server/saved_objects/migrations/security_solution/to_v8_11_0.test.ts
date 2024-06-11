@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import {
+  createModelVersionTestMigrator,
+  type ModelVersionTestMigrator,
+} from '@kbn/core-test-helpers-model-versions';
 
-import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 import type { PackagePolicy } from '../../../../common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 
-import { migratePackagePolicyToV8110 as migration } from './to_v8_11_0';
-import { migratePackagePolicyEvictionsFromV8110 as eviction } from './to_v8_11_0';
+import { getSavedObjectTypes } from '../..';
 
 describe('8.10.0 Endpoint Package Policy migration', () => {
-  const policyDoc = ({ manifestVersion }: { manifestVersion: string | undefined }) => {
+  const policyDoc = ({
+    manifestVersion,
+  }: {
+    manifestVersion: string | undefined;
+  }): SavedObject<PackagePolicy> => {
     return {
       id: 'mock-saved-object-id',
       attributes: {
@@ -49,32 +56,63 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
           },
         ],
       },
-      type: ' nested',
+      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      references: [],
     };
   };
 
-  it('adds manifest version field to policy, set to latest', () => {
-    const initialDoc = policyDoc({ manifestVersion: undefined });
+  let migrator: ModelVersionTestMigrator;
 
-    const migratedDoc = policyDoc({ manifestVersion: 'latest' });
-
-    expect(migration(initialDoc, {} as SavedObjectModelTransformationContext)).toEqual({
-      attributes: {
-        inputs: migratedDoc.attributes.inputs,
-      },
+  beforeEach(() => {
+    migrator = createModelVersionTestMigrator({
+      type: getSavedObjectTypes()[PACKAGE_POLICY_SAVED_OBJECT_TYPE],
     });
   });
 
-  it('removes manifest version field from policy', () => {
-    const initialDoc = policyDoc({ manifestVersion: 'latest' });
+  it('on update: adds manifest version field to policy, set to latest', () => {
+    const initialDoc = policyDoc({ manifestVersion: undefined });
 
-    const migratedDoc = policyDoc({ manifestVersion: undefined });
+    const expectedMigratedDoc = policyDoc({ manifestVersion: 'latest' });
 
-    expect(eviction(initialDoc.attributes)).toEqual(migratedDoc.attributes);
+    const actualMigratedDoc = migrator.migrate<PackagePolicy, PackagePolicy>({
+      document: initialDoc,
+      fromVersion: 1,
+      toVersion: 2,
+    });
+
+    expect(actualMigratedDoc.attributes).toEqual(expectedMigratedDoc.attributes);
   });
 
-  it('does not modify non-endpoint package policies', () => {
-    const doc: SavedObjectUnsanitizedDoc<PackagePolicy> = {
+  it('forward compatibility: removes manifest version field from policy', () => {
+    const initialDoc = policyDoc({ manifestVersion: 'latest' });
+
+    const expectedMigratedDoc = policyDoc({ manifestVersion: undefined });
+
+    const actualMigratedDoc = migrator.migrate<PackagePolicy, PackagePolicy>({
+      document: initialDoc,
+      fromVersion: 2, // fails, because `forwardCompatibility` runs on goin back *to* v2, not when going back *from* v2
+      toVersion: 1,
+    });
+
+    expect(actualMigratedDoc.attributes).toEqual(expectedMigratedDoc.attributes);
+  });
+
+  it('forward compatibility 2: removes manifest version field from policy', () => {
+    const initialDoc = policyDoc({ manifestVersion: 'latest' });
+
+    const expectedMigratedDoc = policyDoc({ manifestVersion: undefined });
+
+    const actualMigratedDoc = migrator.migrate<PackagePolicy, PackagePolicy>({
+      document: initialDoc,
+      fromVersion: 3, // success
+      toVersion: 2,
+    });
+
+    expect(actualMigratedDoc.attributes).toEqual(expectedMigratedDoc.attributes);
+  });
+
+  it('on update: does not modify non-endpoint package policies', () => {
+    const doc: SavedObject<PackagePolicy> = {
       id: 'mock-saved-object-id',
       attributes: {
         name: 'Some Policy Name',
@@ -101,40 +139,40 @@ describe('8.10.0 Endpoint Package Policy migration', () => {
           },
         ],
       },
-      type: ' nested',
+      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      references: [],
     };
 
-    expect(
-      migration(
-        doc,
-        {} as SavedObjectModelTransformationContext
-      ) as SavedObjectUnsanitizedDoc<PackagePolicy>
-    ).toEqual({
-      attributes: {
-        name: 'Some Policy Name',
-        package: {
-          name: 'notEndpoint',
-          title: '',
-          version: '',
-        },
-        id: 'notEndpoint',
-        policy_id: '',
-        enabled: true,
-        namespace: '',
-        revision: 0,
-        updated_at: '',
-        updated_by: '',
-        created_at: '',
-        created_by: '',
-        inputs: [
-          {
-            type: 'notEndpoint',
-            enabled: true,
-            streams: [],
-            config: {},
-          },
-        ],
+    const actualMigratedDoc = migrator.migrate<PackagePolicy, PackagePolicy>({
+      document: doc,
+      fromVersion: 1,
+      toVersion: 2,
+    });
+
+    expect(actualMigratedDoc.attributes).toEqual({
+      name: 'Some Policy Name',
+      package: {
+        name: 'notEndpoint',
+        title: '',
+        version: '',
       },
+      id: 'notEndpoint',
+      policy_id: '',
+      enabled: true,
+      namespace: '',
+      revision: 0,
+      updated_at: '',
+      updated_by: '',
+      created_at: '',
+      created_by: '',
+      inputs: [
+        {
+          type: 'notEndpoint',
+          enabled: true,
+          streams: [],
+          config: {},
+        },
+      ],
     });
   });
 });
