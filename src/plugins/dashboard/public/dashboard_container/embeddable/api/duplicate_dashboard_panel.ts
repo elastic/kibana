@@ -7,10 +7,11 @@
  */
 
 import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import { stateHasTitles } from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { DashboardPanelState, prefixReferencesFromPanel } from '../../../../common';
+import { DashboardPanelState } from '../../../../common';
 import { dashboardClonePanelActionStrings } from '../../../dashboard_actions/_dashboard_actions_strings';
 import { pluginServices } from '../../../services/plugin_services';
 import { placeClonePanel } from '../../panel_placement';
@@ -52,18 +53,17 @@ const duplicateReactEmbeddableInput = async (
   panelToClone: DashboardPanelState,
   idToDuplicate: string
 ) => {
-  const child = dashboard.children$.value[idToDuplicate];
-  const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
-  const newTitle = await incrementPanelTitle(dashboard, lastTitle);
   const id = uuidv4();
-  if (panelToClone.references) {
-    dashboard.savedObjectReferences.push(...prefixReferencesFromPanel(id, panelToClone.references));
+  const child = dashboard.children$.value[idToDuplicate];
+  const runtimeSnapshot = apiHasSnapshottableState(child) ? child.snapshotRuntimeState() : {};
+  if (stateHasTitles(runtimeSnapshot) && runtimeSnapshot.title) {
+    const newTitle = await incrementPanelTitle(dashboard, runtimeSnapshot.title);
+    runtimeSnapshot.title = newTitle;
   }
+  dashboard.setRuntimeStateForChild(id, runtimeSnapshot);
   return {
     type: panelToClone.type,
     explicitInput: {
-      ...panelToClone.explicitInput,
-      title: newTitle,
       id,
     },
   };
