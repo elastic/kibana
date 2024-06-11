@@ -212,7 +212,7 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).not.match(re);
+          expect(actualUrl).to.not.match(re);
         });
       });
     });
@@ -286,7 +286,7 @@ export default function (ctx: FtrProviderContext) {
         );
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).match(re);
+          expect(actualUrl).to.match(re);
         });
       });
 
