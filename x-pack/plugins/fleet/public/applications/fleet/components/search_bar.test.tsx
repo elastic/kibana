@@ -402,7 +402,7 @@ describe('getFieldSpecs', () => {
       },
     ]);
   });
-  expect(getFieldSpecs(`.${PACKAGE_POLICY_SAVED_OBJECT_TYPE}`)).toHaveLength(18);
+  expect(getFieldSpecs(`.${PACKAGE_POLICY_SAVED_OBJECT_TYPE}`)).toHaveLength(19);
 
   it('returns empty array if indexPattern is not one of the previous', async () => {
     expect(getFieldSpecs('.kibana_ingest')).toEqual([]);
