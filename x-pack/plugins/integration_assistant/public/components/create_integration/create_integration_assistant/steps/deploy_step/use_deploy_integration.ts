@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { BuildIntegrationApiRequest } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
+import { getIntegrationNameFromResponse } from '../../../../../common/lib/api_parsers';
 
 interface PipelineGenerationProps {
   integrationSettings: State['integrationSettings'];
@@ -23,7 +23,7 @@ export type ProgressItem = 'build' | 'install';
 export const useDeployIntegration = ({ integrationSettings, result }: PipelineGenerationProps) => {
   const { http, notifications } = useKibana().services;
   const [integrationFile, setIntegrationFile] = useState<Blob | null>(null);
-  // const [integrationFile, setIntegrationFile] = useState<Buffer | undefined>(undefined);
+  const [integrationName, setIntegrationName] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<null | string>(null);
 
@@ -60,6 +60,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
             ],
           },
         };
+
         setIsLoading(true);
 
         const zippedIntegration = await runBuildIntegration(parameters, deps);
@@ -73,8 +74,11 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
         const installResult = await runInstallPackage(zippedIntegration, deps);
         if (abortController.signal.aborted) return;
 
-        if (isEmpty(installResult)) {
-          setError('Not able to install integration.');
+        const integrationNameFromResponse = getIntegrationNameFromResponse(installResult);
+        if (integrationNameFromResponse) {
+          setIntegrationName(integrationNameFromResponse);
+        } else {
+          throw new Error('Integration name not found in response');
         }
       } catch (e) {
         if (abortController.signal.aborted) return;
@@ -99,6 +103,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
   return {
     isLoading,
     integrationFile,
+    integrationName,
     error,
   };
 };

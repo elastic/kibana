@@ -69,7 +69,7 @@ export interface EcsMappingApiRequest {
   dataStreamName: string;
   rawSamples: string[];
   mapping?: object;
-  connectorId?: string;
+  connectorId: string;
 }
 
 export interface CategorizationApiRequest {
@@ -77,7 +77,7 @@ export interface CategorizationApiRequest {
   dataStreamName: string;
   rawSamples: string[];
   currentPipeline: Pipeline;
-  connectorId?: string;
+  connectorId: string;
 }
 
 export interface RelatedApiRequest {
@@ -85,13 +85,12 @@ export interface RelatedApiRequest {
   dataStreamName: string;
   rawSamples: string[];
   currentPipeline: Pipeline;
-  connectorId?: string;
+  connectorId: string;
 }
 
 export interface CheckPipelineApiRequest {
   rawSamples: string[];
   pipeline: Pipeline;
-  connectorId?: string;
 }
 
 // Server Response Schemas

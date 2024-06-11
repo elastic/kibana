@@ -56,7 +56,12 @@ export const Header = React.memo<HeaderProps>(({ currentStep, setStep, isGenerat
           <EuiFlexGroup direction="column" gutterSize="l">
             <EuiFlexItem>
               <EuiSpacer size="s" />
-              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+              <EuiFlexGroup
+                direction="row"
+                alignItems="center"
+                gutterSize="s"
+                justifyContent="center"
+              >
                 <EuiFlexItem grow={false}>
                   <EuiAvatar
                     name={i18n.ASSISTANT_AVATAR}

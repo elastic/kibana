@@ -9,7 +9,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { ButtonsFooter } from '../../../../common/components/buttons_footer';
 import type { SetPage } from '../../../types';
-import type { State } from '../state';
+import type { State, Actions } from '../state';
 import * as i18n from './translations';
 
 // Generation button for Step 3
@@ -27,25 +27,16 @@ const Step3ButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating })
 Step3ButtonText.displayName = 'Step3ButtonText';
 
 interface BottomBarProps {
+  currentStep: State['step'];
+  isGenerating: State['isGenerating'];
   setPage: SetPage;
-  currentStep: number;
-  setStep: (step: number) => void;
-  result: State['result'];
+  setStep: Actions['setStep'];
   onGenerate: () => void;
-  isGenerating: boolean;
   isNextStepEnabled?: boolean;
 }
 
 export const BottomBar = React.memo<BottomBarProps>(
-  ({
-    setPage,
-    currentStep,
-    setStep,
-    result,
-    onGenerate,
-    isGenerating,
-    isNextStepEnabled = false,
-  }) => {
+  ({ setPage, currentStep, setStep, onGenerate, isGenerating, isNextStepEnabled = false }) => {
     const onBack = useCallback(() => {
       if (currentStep === 1) {
         setPage('landing');
@@ -71,8 +62,8 @@ export const BottomBar = React.memo<BottomBarProps>(
       }
     }, [currentStep, isGenerating]);
 
-    if (currentStep > 4) {
-      return null;
+    if (currentStep === 5) {
+      return <ButtonsFooter cancelButtonText={i18n.CLOSE} />;
     }
     return (
       <ButtonsFooter

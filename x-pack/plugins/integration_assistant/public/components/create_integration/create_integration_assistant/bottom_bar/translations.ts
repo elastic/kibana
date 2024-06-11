@@ -18,3 +18,7 @@ export const LOADING = i18n.translate('xpack.integrationAssistant.bottomBar.load
 export const ADD_TO_ELASTIC = i18n.translate('xpack.integrationAssistant.bottomBar.addToElastic', {
   defaultMessage: 'Add to Elastic',
 });
+
+export const CLOSE = i18n.translate('xpack.integrationAssistant.bottomBar.close', {
+  defaultMessage: 'Close',
+});

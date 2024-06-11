@@ -4,11 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const isPipelineGenerationReady = ({
-  isGenerating,
-  result,
-}: {
-  isGenerating: boolean;
-  result?: object;
-}) => isGenerating === false && result != null;
+export { DeployStep } from './deploy_step';

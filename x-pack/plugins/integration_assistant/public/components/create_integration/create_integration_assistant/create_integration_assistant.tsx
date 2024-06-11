@@ -16,6 +16,7 @@ import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
 import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
 import { ReviewStep, isReviewStepReady } from './steps/review_step';
+import { DeployStep } from './steps/deploy_step';
 import type { SetPage } from '../../types';
 
 interface CreateIntegrationAssistantProps {
@@ -95,19 +96,18 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
               setResult={actions.setResult}
             />
           )}
-          {/* {state.step === 5 && (
-            <DeployIntegration
+          {state.step === 5 && (
+            <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}
               connectorId={state.connectorId}
             />
-          )} */}
+          )}
         </KibanaPageTemplate.Section>
         <BottomBar
           currentStep={state.step}
           setPage={setPage}
           setStep={actions.setStep}
-          result={state.result}
           onGenerate={onGenerate}
           isGenerating={state.isGenerating}
           isNextStepEnabled={isNextStepEnabled}

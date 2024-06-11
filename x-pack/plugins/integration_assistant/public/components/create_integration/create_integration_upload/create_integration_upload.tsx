@@ -14,28 +14,10 @@ import { SectionWrapper } from '../../../common/components/section_wrapper';
 import { ButtonsFooter } from '../../../common/components/buttons_footer';
 import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
 import { runInstallPackage, type RequestDeps } from '../../../common/lib/api';
-import type { InstallPackageResponse } from '../../../../common';
+import { getIntegrationNameFromResponse } from '../../../common/lib/api_parsers';
 import type { SetPage } from '../../types';
 import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
-
-/**
- * This is a hacky way to get the integration name from the response.
- * Since the integration name is not returned in the response we have to parse it from the ingest pipeline name.
- * TODO: Return the package name from the fleet API.
- */
-const getIntegrationNameFromResponse = (response: InstallPackageResponse) => {
-  const ingestPipelineName = response.response?.[0]?.id;
-  if (ingestPipelineName) {
-    const match = ingestPipelineName.match(/^.*-([a-z_]+)\..*-([\d\.]+)$/);
-    const integrationName = match?.at(1);
-    const version = match?.at(2);
-    if (integrationName && version) {
-      return `${integrationName}-${version}`;
-    }
-  }
-  return '';
-};
 
 interface CreateIntegrationUploadProps {
   setPage: SetPage;
