@@ -13,8 +13,6 @@ import type {
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { ExperimentalFeaturesService } from '../../../experimental_features_service';
 
-// FIXME:PT implement tests
-
 /**
  * Checks if a given Agent type is supported (aka: is feature flag enabled) and optionally
  * also checks if a given response action is implemented for that agent type.
