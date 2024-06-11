@@ -168,6 +168,15 @@ export class ConsolePageObject extends FtrService {
       const editorViewDiv = await codeEditor.findByClassName('view-line');
       return await editorViewDiv.getComputedStyle('font-size');
     },
+    pasteClipboardValue: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'v']);
+    },
+    copyRequestsToClipboard: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+    },
   };
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
