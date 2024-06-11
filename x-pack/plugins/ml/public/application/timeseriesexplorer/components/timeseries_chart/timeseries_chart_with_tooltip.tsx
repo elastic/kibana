@@ -21,6 +21,28 @@ import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
 
+const percentFocusZoomPanelHeight = 0.06;
+const percentFocusChartHeight = 0.77;
+const percentContextChartHeight = 0.15;
+
+function getChartHeights(height: number) {
+  const focusZoomPanelHeight = height * percentFocusZoomPanelHeight;
+  const focusChartHeight = height * percentFocusChartHeight;
+
+  const heights: {
+    focusZoomPanelHeight: number;
+    focusChartHeight: number;
+    focusHeight: number;
+    contextChartHeight: number;
+  } = {
+    focusZoomPanelHeight,
+    focusChartHeight,
+    focusHeight: focusZoomPanelHeight + focusChartHeight,
+    contextChartHeight: height * percentContextChartHeight,
+  };
+  return heights;
+}
+
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
@@ -148,6 +170,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             bounds={bounds}
             detectorIndex={detectorIndex}
             embeddableMode={embeddableMode}
+            heights={chartProps.svgHeight ? getChartHeights(chartProps.svgHeight) : undefined}
             renderFocusChartOnly={renderFocusChartOnly}
             selectedJob={selectedJob}
             showAnnotations={showAnnotations}

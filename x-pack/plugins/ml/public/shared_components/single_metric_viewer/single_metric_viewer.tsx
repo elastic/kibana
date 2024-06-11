@@ -30,6 +30,7 @@ import './_index.scss';
 const containerPadding = 10;
 const minElemAndChartDiff = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
+const chartPanelPercentageHeight = 0.85;
 interface AppStateZoom {
   from?: string;
   to?: string;
@@ -84,7 +85,10 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedJobId,
   uuid,
 }) => {
-  const [chartWidth, setChartWidth] = useState<number>(0);
+  const [chartDimensions, setChartDimensions] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
   const [zoom, setZoom] = useState<Zoom>();
   const [selectedForecastId, setSelectedForecastId] = useState<ForecastId>();
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
@@ -150,11 +154,11 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      if (Math.abs(chartWidth - e.width) > minElemAndChartDiff) {
-        setChartWidth(e.width);
+      if (Math.abs(chartDimensions.width - e.width) > minElemAndChartDiff) {
+        setChartDimensions(e);
       }
     }, RESIZE_THROTTLE_TIME_MS),
-    [chartWidth]
+    [chartDimensions.width, chartDimensions.height]
   );
 
   const autoZoomDuration = useMemo(() => {
@@ -220,7 +224,12 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                   jobsLoaded &&
                   selectedJobId === selectedJob?.job_id && (
                     <TimeSeriesExplorerEmbeddableChart
-                      chartWidth={chartWidth - containerPadding}
+                      chartWidth={chartDimensions.width - containerPadding}
+                      chartHeight={
+                        chartDimensions.height > 0
+                          ? Math.round(chartDimensions.height * chartPanelPercentageHeight)
+                          : undefined
+                      }
                       dataViewsService={pluginStart.data.dataViews}
                       toastNotificationService={toastNotificationService}
                       appStateHandler={appStateHandler}

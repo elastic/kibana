@@ -118,12 +118,14 @@ class TimeseriesChartIntl extends Component {
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
+    heights: PropTypes.object,
     modelPlotEnabled: PropTypes.bool.isRequired,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
     showModelBounds: PropTypes.bool.isRequired,
     svgWidth: PropTypes.number.isRequired,
+    svgHeight: PropTypes.number,
     swimlaneData: PropTypes.array,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object,
@@ -174,7 +176,12 @@ class TimeseriesChartIntl extends Component {
     const vizWidth = this.vizWidth;
 
     this.focusXScale = d3.time.scale().range([0, vizWidth]);
-    this.focusYScale = d3.scale.linear().range([focusHeight, focusZoomPanelHeight]);
+    this.focusYScale = d3.scale
+      .linear()
+      .range([
+        this.props.heights?.focusHeight ?? focusHeight,
+        this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight,
+      ]);
     const focusXScale = this.focusXScale;
     const focusYScale = this.focusYScale;
 
@@ -182,7 +189,7 @@ class TimeseriesChartIntl extends Component {
       .axis()
       .scale(focusXScale)
       .orient('bottom')
-      .innerTickSize(-focusChartHeight)
+      .innerTickSize(-(this.props.heights?.focusChartHeight ?? focusChartHeight))
       .outerTickSize(0)
       .tickPadding(10);
     this.focusYAxis = d3.svg
@@ -216,7 +223,12 @@ class TimeseriesChartIntl extends Component {
       .defined((d) => d.lower !== null && d.upper !== null);
 
     this.contextXScale = d3.time.scale().range([0, vizWidth]);
-    this.contextYScale = d3.scale.linear().range([contextChartHeight, contextChartLineTopMargin]);
+    this.contextYScale = d3.scale
+      .linear()
+      .range([
+        this.props.heights?.contextChartHeight ?? contextChartHeight,
+        contextChartLineTopMargin,
+      ]);
 
     this.fieldFormat = undefined;
 
@@ -292,6 +304,7 @@ class TimeseriesChartIntl extends Component {
       modelPlotEnabled,
       selectedJob,
       svgWidth,
+      svgHeight: incomingSvgHeight,
       showAnnotations,
     } = this.props;
 
@@ -301,7 +314,8 @@ class TimeseriesChartIntl extends Component {
     const focusYAxis = this.focusYAxis;
     const focusYScale = this.focusYScale;
 
-    const svgHeight = getSvgHeight(showAnnotations);
+    const svgHeight =
+      (incomingSvgHeight && incomingSvgHeight + 65) ?? getSvgHeight(showAnnotations);
 
     // Clear any existing elements from the visualization,
     // then build the svg elements for the bubble chart.
@@ -401,7 +415,11 @@ class TimeseriesChartIntl extends Component {
       .attr('class', 'context-chart')
       .attr(
         'transform',
-        'translate(' + margin.left + ',' + (focusHeight + margin.top + chartSpacing) + ')'
+        'translate(' +
+          margin.left +
+          ',' +
+          ((this.props.heights?.focusHeight ?? focusHeight) + margin.top + chartSpacing) +
+          ')'
       );
 
     // Mask to hide annotations overflow
@@ -412,15 +430,15 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', this.vizWidth)
-      .attr('height', focusHeight)
+      .attr('height', this.props.heights?.focusHeight ?? focusHeight)
       .style('fill', 'white');
 
     // Draw each of the component elements.
-    createFocusChart(focus, this.vizWidth, focusHeight);
+    createFocusChart(focus, this.vizWidth, this.props.heights?.focusHeight ?? focusHeight);
     drawContextElements(
       context,
       this.vizWidth,
-      contextChartHeight,
+      this.props.heights?.contextChartHeight ?? contextChartHeight,
       swimlaneHeight,
       annotationHeight
     );
@@ -500,7 +518,7 @@ class TimeseriesChartIntl extends Component {
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', fcsWidth)
-      .attr('height', focusZoomPanelHeight)
+      .attr('height', this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight)
       .attr('class', 'chart-border');
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
@@ -522,9 +540,9 @@ class TimeseriesChartIntl extends Component {
       .call(annotateBrush)
       .selectAll('rect')
       .attr('x', brushX)
-      .attr('y', focusZoomPanelHeight)
+      .attr('y', this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight)
       .attr('width', brushWidth)
-      .attr('height', focusChartHeight);
+      .attr('height', this.props.heights?.focusChartHeight ?? focusChartHeight);
 
     fcsGroup.append('g').classed('mlAnnotations', true);
 
@@ -532,9 +550,9 @@ class TimeseriesChartIntl extends Component {
     fcsGroup
       .append('rect')
       .attr('x', 0)
-      .attr('y', focusZoomPanelHeight)
+      .attr('y', this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight)
       .attr('width', fcsWidth)
-      .attr('height', focusChartHeight)
+      .attr('height', this.props.heights?.focusChartHeight ?? focusChartHeight)
       .attr('class', 'chart-border');
 
     // Add background for x axis.
@@ -770,8 +788,8 @@ class TimeseriesChartIntl extends Component {
     renderAnnotations(
       focusChart,
       focusAnnotationData,
-      focusZoomPanelHeight,
-      focusChartHeight,
+      this.props.heights?.focusZoomPanelHeight ?? focusZoomPanelHeight,
+      this.props.heights?.focusChartHeight ?? focusChartHeight,
       this.focusXScale,
       showAnnotations,
       showFocusChartTooltip,
@@ -904,7 +922,9 @@ class TimeseriesChartIntl extends Component {
       .attr('x', (d) => this.focusXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
       .attr('y', (d) => {
         const focusYValue = this.focusYScale(d.value);
-        return isNaN(focusYValue) ? -focusHeight - 3 : focusYValue - 3;
+        return isNaN(focusYValue)
+          ? -(this.props.heights?.focusHeight ?? focusHeight) - 3
+          : focusYValue - 3;
       });
 
     // Plot any forecast data in scope.
@@ -1306,7 +1326,10 @@ class TimeseriesChartIntl extends Component {
       .call(brush)
       .selectAll('rect')
       .attr('y', -1)
-      .attr('height', contextChartHeight + swimlaneHeight + 1)
+      .attr(
+        'height',
+        (this.props.heights?.contextChartHeight ?? contextChartHeight) + swimlaneHeight + 1
+      )
       .attr('width', this.vizWidth);
 
     const handleBrushExtent = brush.extent();
