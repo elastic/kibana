@@ -277,7 +277,7 @@ export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => 
   const samlResponse = await createSAMLResponse({ location, ecSession, email, kbnHost, log });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
   const userProfile = await getSecurityProfile({ kbnHost, cookie, log });
-  return new Session(cookie, email, userProfile.full_name);
+  return new Session(cookie, email, userProfile.full_name, userProfile.username);
 };
 
 export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => {
