@@ -133,7 +133,7 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
-                          defaultMessage="Logstash output for agent integration is not supported with APM"
+                          defaultMessage="Logstash output for integrations is not supported with APM"
                         />
                       </EuiText>
                     </>
@@ -156,7 +156,7 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
 
   const agentPolicyMultiOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
-      packageInfo
+      packageInfo && !isOutputLoading && !isAgentPoliciesLoading && !isLoadingPackagePolicies
         ? agentPolicies.map((policy) => {
             const isLimitedPackageAlreadyInPolicy =
               isPackageLimited(packageInfo) &&
@@ -191,6 +191,9 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
       agentPolicies,
       packagePoliciesForThisPackageByAgentPolicyId,
       getDataOutputForPolicy,
+      isOutputLoading,
+      isAgentPoliciesLoading,
+      isLoadingPackagePolicies,
     ]
   );
 

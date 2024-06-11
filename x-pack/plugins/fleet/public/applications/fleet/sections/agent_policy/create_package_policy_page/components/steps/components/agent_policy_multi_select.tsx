@@ -10,7 +10,7 @@ import { EuiComboBox } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import React, { useEffect } from 'react';
+import React, { useMemo } from 'react';
 
 import type { PackageInfo } from '../../../../../../../../../common';
 
@@ -28,13 +28,11 @@ export const AgentPolicyMultiSelect: React.FunctionComponent<Props> = ({
   selectedPolicyIds,
   setSelectedPolicyIds,
 }) => {
-  const [selectedOptions, setSelected] = React.useState<any>([]);
-
-  useEffect(() => {
-    setSelected(
-      agentPolicyMultiOptions.filter((option) => selectedPolicyIds.includes(option.key!))
-    );
+  const selectedOptions = useMemo(() => {
+    return agentPolicyMultiOptions.filter((option) => selectedPolicyIds.includes(option.key!));
   }, [agentPolicyMultiOptions, selectedPolicyIds]);
+
+  const [selected, setSelected] = React.useState<any>(selectedOptions);
 
   return (
     <EuiComboBox
@@ -47,7 +45,7 @@ export const AgentPolicyMultiSelect: React.FunctionComponent<Props> = ({
         }
       )}
       options={agentPolicyMultiOptions}
-      selectedOptions={selectedOptions}
+      selectedOptions={selected}
       onChange={(newOptions) => {
         setSelected(newOptions);
         setSelectedPolicyIds(newOptions.map((option: any) => option.key));
