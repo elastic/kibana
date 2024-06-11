@@ -188,7 +188,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   fitToContent,
   accessibilityOverlayEnabled = true,
-                                                        dataTestSubj
+  dataTestSubj,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
