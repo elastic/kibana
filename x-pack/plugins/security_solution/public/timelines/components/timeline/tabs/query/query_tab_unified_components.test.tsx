@@ -33,6 +33,11 @@ import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
+import userEvent from '@testing-library/user-event';
+
+jest.mock('../../../../../common/components/user_privileges');
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -195,6 +200,12 @@ describe('query tab with unified timeline', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock
     );
+
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+    });
   });
 
   describe('render', () => {
@@ -747,6 +758,56 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.queryByTestId('fieldListGroupedFieldGroups')).not.toBeInTheDocument();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+  });
+
+  describe('row leading actions', () => {
+    it(
+      'should be able to add notes',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('add-note-container')).toBeVisible();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should be cancel adding notes',
+      async () => {
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('add-note-container')).toBeVisible();
+        });
+
+        userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), 'Test Note 1');
+
+        expect(screen.getByTestId('cancel')).not.toBeDisabled();
+
+        fireEvent.click(screen.getByTestId('cancel'));
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('add-note-container')).not.toBeInTheDocument();
         });
       },
       SPECIAL_TEST_TIMEOUT
