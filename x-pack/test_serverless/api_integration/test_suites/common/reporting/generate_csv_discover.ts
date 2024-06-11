@@ -214,19 +214,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('includes an unmapped field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'unmapped']);
-        expect((csvFile as string).length).to.be(111);
+        expect((csvFile as string).length).to.be(92);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('includes an unmapped nested field to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['text', 'nested.unmapped']);
-        expect((csvFile as string).length).to.be(120);
+        expect((csvFile as string).length).to.be(101);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
 
       it('includes all unmapped fields to the report', async () => {
         const csvFile = await generateCsvReportWithUnmapped(['*']);
-        expect((csvFile as string).length).to.be(143);
+        expect((csvFile as string).length).to.be(124);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
@@ -354,8 +354,8 @@ export default function ({ getService }: FtrProviderContext) {
           }),
           role
         );
-        await reportingAPI.waitForJobToFinish(res.path);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, role);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
         expect((csvFile as string).length).to.be(1270683);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -403,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await reportingAPI.waitForJobToFinish(res.path, role);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
-        expect((csvFile as string).length).to.be(918298);
+        expect((csvFile as string).length).to.be(914755);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
@@ -700,7 +700,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await reportingAPI.waitForJobToFinish(res.path, role);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
-        expect((csvFile as string).length).to.be(356);
+        expect((csvFile as string).length).to.be(329);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
@@ -761,7 +761,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await reportingAPI.waitForJobToFinish(res.path, role);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
-        expect((csvFile as string).length).to.be(4845684);
+        expect((csvFile as string).length).to.be(4826973);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
     });
