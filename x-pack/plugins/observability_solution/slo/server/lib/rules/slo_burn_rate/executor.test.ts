@@ -47,6 +47,7 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -400,6 +401,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -416,6 +423,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -534,6 +547,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -550,6 +569,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -649,6 +674,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'foo',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'foo',
+            },
+          ],
         },
       });
       expect(servicesMock.alertsClient!.report).toBeCalledWith({
@@ -665,6 +696,12 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_ID_FIELD]: slo.id,
           [SLO_REVISION_FIELD]: slo.revision,
           [SLO_INSTANCE_ID_FIELD]: 'bar',
+          [ALERT_GROUP]: [
+            {
+              field: 'group.by.field',
+              value: 'bar',
+            },
+          ],
         },
       });
 

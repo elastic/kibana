@@ -11,6 +11,8 @@ import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
 import { alertWithTags } from '../mock/alert';
 import { alertSummaryFieldsMock } from '../mock/alert_summary_fields';
+import { useKibana } from '../../../utils/kibana_react';
+import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -19,6 +21,21 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../../utils/kibana_react');
 
+const useKibanaMock = useKibana as jest.Mock;
+
+const mockKibana = () => {
+  useKibanaMock.mockReturnValue({
+    services: {
+      ...kibanaStartMock.startContract().services,
+      http: {
+        basePath: {
+          prepend: jest.fn(),
+        },
+      },
+    },
+  });
+};
+
 describe('Alert summary', () => {
   jest
     .spyOn(useUiSettingHook, 'useUiSetting')
@@ -26,10 +43,13 @@ describe('Alert summary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockKibana();
   });
 
   it('should show alert data', async () => {
-    const alertSummary = render(<AlertSummary alertSummaryFields={alertSummaryFieldsMock} />);
+    const alertSummary = render(
+      <AlertSummary alert={alertWithTags} alertSummaryFields={alertSummaryFieldsMock} />
+    );
 
     expect(alertSummary.queryByText('Actual value')).toBeInTheDocument();
     expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.value']!));

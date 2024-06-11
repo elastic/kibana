@@ -207,6 +207,7 @@ export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition =>
     createdAt: now,
     updatedAt: now,
     version: SLO_MODEL_VERSION,
+    groupBy: ['group.by.field'],
     ...params,
   });
 };

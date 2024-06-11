@@ -58,7 +58,6 @@ const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 interface AppSectionProps {
   alert: MetricThresholdAlert;
   rule: MetricThresholdRule;
-  ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
