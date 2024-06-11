@@ -148,8 +148,6 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     [direction, sortField, type, dispatch]
   );
 
-  const [selected, setSelected] = useState<HostsEdges[]>([]);
-
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
@@ -187,6 +185,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
+  const [selected, setSelected] = useState<HostsEdges[]>([]);
 
   const { createAssetCriticality, deleteAssetCriticality } = useEntityAnalyticsRoutes();
 
@@ -198,7 +197,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     unknown
   >({
     mutationFn: (records) => {
-      console.log('mutating records', records);
+      // console.log('mutating records', records);
       const promises = records.map(({ criticalityLevel, idField, idValue }) => {
         if (criticalityLevel === 'unassigned') {
           return deleteAssetCriticality({ idField, idValue, refresh: 'wait_for' });
@@ -208,7 +207,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       });
 
       return Promise.all(promises).then((results) => {
-        console.log('results', results);
+        // console.log('results', results);
         return results;
       });
     },
@@ -216,9 +215,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   });
 
   const bulkAssignCriticality = (criticalityLevel: CriticalityLevelWithUnassigned) => {
-    console.log('clicked');
     const obj = selected.map(buildCriticalityMutationParams(criticalityLevel));
-    console.log('obj', obj);
     criticality.mutate(obj);
   };
 
@@ -239,7 +236,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
         headerTitle={i18n.HOSTS}
         headerUnit={i18n.UNIT(totalCount)}
         headerSupplement={
-          selected.length > 0 ? (
+          selected && selected.length > 0 ? (
             <EuiButton
               onClick={() => toggleCriticalityModal(true)}
               title={`Assign criticality to ${selected.length} selected items`}
@@ -259,9 +256,11 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
         sorting={sorting}
         selection={{
           selected,
-          onSelectionChange: (items) => setSelected(items as HostsEdges[]),
+          onSelectionChange: (items) => {
+            setSelected(items as HostsEdges[]);
+          },
         }}
-        itemId={(item: HostsEdges) => item.node._id}
+        itemId={(item) => (item as HostsEdges).node._id || ''}
         totalCount={fakeTotalCount}
         updateLimitPagination={updateLimitPagination}
         updateActivePage={updateActivePage}

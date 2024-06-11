@@ -10,7 +10,6 @@ import type {
   EuiTableSelectionType,
   EuiGlobalToastListToast as Toast,
   EuiTableRowCellProps,
-  ItemId,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -28,6 +27,7 @@ import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
+import type { ItemId } from '@elastic/eui/src/components/basic_table/table_types';
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { HostsTableColumns } from '../../hosts/components/hosts_table';
