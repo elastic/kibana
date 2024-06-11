@@ -91,13 +91,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect((await integrationsCounter.getVisibleText()).includes('1')).to.be(true);
       });
 
-      it('Clicking the integrations counter button leads to the integration page', async () => {
+      it('Integrations counter button has URL to add integration page', async () => {
         await retry.waitFor('Wait until url includes', async () =>
           rule.rulePage.doesElementContainsUrl(
             'rules-counters-integrations-evaluated-button',
             'add-integration/kspm'
           )
         );
+        await rule.rulePage.clickIntegrationsEvaluatedButton();
+        await pageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
       });
 
       it('Shows the failed findings counter when there are findings', async () => {
