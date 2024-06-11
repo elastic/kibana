@@ -55,15 +55,18 @@ jest.mock('../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
 
-jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', () => {
-  return {
-    useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
-      loading: false,
-      isIsolated: false,
-      agentStatus: 'healthy',
-    }),
-  };
-});
+jest.mock(
+  '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
+  () => {
+    return {
+      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
+        loading: false,
+        isIsolated: false,
+        agentStatus: 'healthy',
+      }),
+    };
+  }
+);
 
 describe('take action dropdown', () => {
   let defaultProps: TakeActionDropdownProps;

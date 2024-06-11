@@ -58,7 +58,7 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
 }));
 
 jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
+  '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
   () => {
     return {
       useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
