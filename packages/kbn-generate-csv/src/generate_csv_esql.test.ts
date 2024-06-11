@@ -23,7 +23,7 @@ import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import type { ESQLSearchReponse as ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,

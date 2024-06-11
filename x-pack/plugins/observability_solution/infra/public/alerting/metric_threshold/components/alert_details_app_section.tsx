@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import React from 'react';
 import moment from 'moment';
 import {
@@ -126,7 +127,7 @@ export function AlertDetailsAppSection({
                   <Threshold
                     chartProps={chartProps}
                     id={`threshold-${generateUniqueKey(criterion)}`}
-                    threshold={criterion.threshold[0]}
+                    thresholds={criterion.threshold}
                     value={alert.fields[ALERT_EVALUATION_VALUES]![index]}
                     valueFormatter={(d) =>
                       metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
@@ -137,7 +138,14 @@ export function AlertDetailsAppSection({
                         defaultMessage: 'Threshold breached',
                       }
                     )}
-                    comparator={criterion.comparator}
+                    comparator={convertToBuiltInComparators(criterion.comparator)}
+                    warning={
+                      criterion.warningThreshold &&
+                      criterion.warningComparator && {
+                        thresholds: criterion.warningThreshold,
+                        comparator: convertToBuiltInComparators(criterion.warningComparator),
+                      }
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={5}>
