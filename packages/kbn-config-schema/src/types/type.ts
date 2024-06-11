@@ -225,13 +225,13 @@ export abstract class Type<V, R = V> {
     return new SchemaTypeError(message || code, convertedPath);
   }
 
-  public transform<R>(fn: (v: V) => R) {
+  public transform<Output>(fn: (v: V) => Output) {
     if (!this.transformFn) {
       this.internalSchema = this.internalSchema.custom((v) => this.transformFn!(v));
     }
     this.transformFn = fn.bind(null);
     // hacky way of injecting transformed type schema
-    return this as unknown as TransformedType<V, R>;
+    return this as unknown as TransformedType<V, Output>;
   }
 }
 
