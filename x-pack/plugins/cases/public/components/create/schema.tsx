@@ -72,7 +72,7 @@ export const schemaTags = {
   ],
 };
 
-export type FormProps = Omit<
+export type CreateCaseFormSchema = Omit<
   CasePostRequest,
   'connector' | 'settings' | 'owner' | 'customFields'
 > & {
@@ -83,7 +83,7 @@ export type FormProps = Omit<
   customFields: Record<string, string | boolean>;
 };
 
-export const schema: FormSchema<FormProps> = {
+export const schema: FormSchema<CreateCaseFormSchema> = {
   title: {
     type: FIELD_TYPES.TEXT,
     label: i18n.NAME,
@@ -141,4 +141,5 @@ export const schema: FormSchema<FormProps> = {
   },
   assignees: {},
   category: {},
+  customFields: {},
 };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 

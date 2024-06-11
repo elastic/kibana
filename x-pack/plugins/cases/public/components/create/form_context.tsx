@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { CaseSeverity } from '../../../common/types/domain';
-import type { FormProps } from './schema';
+import type { CreateCaseFormSchema } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
@@ -34,16 +34,17 @@ import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_ca
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { useApplication } from '../../common/lib/kibana/use_application';
 
-const initialCaseValue: FormProps = {
-  description: '',
-  tags: [],
+export const initialCaseValue: CreateCaseFormSchema = {
   title: '',
+  assignees: [],
+  tags: [],
+  category: undefined,
   severity: CaseSeverity.LOW,
+  description: '',
+  syncAlerts: true,
+  customFields: {},
   connectorId: NONE_CONNECTOR_ID,
   fields: null,
-  syncAlerts: true,
-  assignees: [],
-  customFields: {},
 };
 
 interface Props {
@@ -212,7 +213,7 @@ export const FormContext: React.FC<Props> = ({
     ]
   );
 
-  const { form } = useForm<FormProps>({
+  const { form } = useForm<CreateCaseFormSchema>({
     defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,

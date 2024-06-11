@@ -28,15 +28,20 @@ import { Tags } from '../case_form_fields/tags';
 import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
-import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
+import type {
+  CasesConfigurationUI,
+  CasesConfigurationUITemplate,
+  CaseUI,
+  CaseUICustomField,
+} from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
-import { removeItemFromSessionStorage } from '../utils';
+import { removeEmptyFields, removeItemFromSessionStorage } from '../utils';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { SubmitCaseButton } from './submit_button';
-import { FormContext } from './form_context';
+import { FormContext, initialCaseValue } from './form_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -52,6 +57,7 @@ import { TemplateSelector } from './templates';
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CustomFields } from '../case_form_fields/custom_fields';
+import type { CreateCaseFormSchema } from './schema';
 
 const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
   big
@@ -69,6 +75,40 @@ export interface CreateCaseFormFieldsProps {
   withSteps: boolean;
   draftStorageKey: string;
 }
+
+type CaseUICustomFieldWithNoNullValues = CaseUICustomField & {
+  value: NonNullable<CaseUICustomField['value']>;
+};
+
+const transformTemplateCaseFieldsToCaseFormFields = (
+  caseTemplateFields: CasesConfigurationUITemplate['caseFields']
+): Partial<CreateCaseFormSchema> => {
+  const customFields = Object.fromEntries(
+    caseTemplateFields?.customFields
+      ?.filter(
+        (customField): customField is CaseUICustomFieldWithNoNullValues => customField.value != null
+      )
+      .map((customField) => [customField.key, customField.value]) ?? []
+  );
+
+  const caseFields = removeEmptyFields({
+    title: caseTemplateFields?.title,
+    assignees: caseTemplateFields?.assignees,
+    tags: caseTemplateFields?.tags,
+    category: caseTemplateFields?.category,
+    severity: caseTemplateFields?.severity,
+    description: caseTemplateFields?.description,
+    connectorId: caseTemplateFields?.connector?.id,
+    customFields,
+  });
+
+  return {
+    ...caseFields,
+    ...(caseTemplateFields?.connector?.id != null && caseTemplateFields?.connector?.fields != null
+      ? { fields: caseTemplateFields?.connector?.fields }
+      : {}),
+  };
+};
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
@@ -100,13 +140,20 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       [configurations, configurationOwner]
     );
 
-    const { isSubmitting } = useFormContext();
+    const { reset, updateFieldValues, isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
     const { euiTheme } = useEuiTheme();
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
-    const onTemplateChange = useCallback(() => {}, []);
+    const onTemplateChange = useCallback(
+      (caseFields: CasesConfigurationUITemplate['caseFields']) => {
+        const caseFormFields = transformTemplateCaseFieldsToCaseFormFields(caseFields);
+        reset({ resetValues: true, defaultValue: initialCaseValue });
+        updateFieldValues(caseFormFields);
+      },
+      [reset, updateFieldValues]
+    );
 
     const firstStep = useMemo(
       () => ({

@@ -94,7 +94,6 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   return (
     <>
       <UseField path="key" component={HiddenField} />
-
       <EuiSteps
         headingElement="h2"
         steps={allSteps}
