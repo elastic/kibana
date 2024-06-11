@@ -192,6 +192,21 @@ export const CONSOLE_COMMANDS = {
       },
     },
   },
+  scan: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.scan.about', {
+      defaultMessage: 'Scan the host for malware',
+    }),
+    args: {
+      path: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.scan.args.path.about',
+          {
+            defaultMessage: 'The absolute path to a file or directory to be scanned',
+          }
+        ),
+      },
+    },
+  },
 };
 
 export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
