@@ -77,7 +77,12 @@ export const AlertsSummaryContent = ({
           </EuiFlexGroup>
         }
       >
-        <AlertsOverview onLoaded={onLoaded} dateRange={dateRange} assetId={assetId} />
+        <AlertsOverview
+          onLoaded={onLoaded}
+          dateRange={dateRange}
+          assetId={assetId}
+          assetType={assetType}
+        />
       </Section>
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
         <AlertFlyout

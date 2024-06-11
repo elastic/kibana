@@ -61,7 +61,7 @@ export const Overview = () => {
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
-      {asset.type === 'host' ? (
+      {asset.type === 'host' || asset.type === 'container' ? ( // TODO Check integration
         <EuiFlexItem grow={false}>
           <AlertsSummaryContent
             assetId={asset.id}
