@@ -6,12 +6,12 @@
  */
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import { DEFAULT_ALLOWED_LOGS_DATA_VIEWS } from '../../constants';
+import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
 import { DataViewSpecWithId } from '../../data_source_selection';
 import { DataViewDescriptorType } from '../types';
 
 const LOGS_ALLOWED_LIST = [
-  createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_DATA_VIEWS),
+  createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS),
   // Add more strings or regex patterns as needed
 ];
 
@@ -59,7 +59,7 @@ export class DataViewDescriptor {
 
   testAgainstAllowedList(allowedList: string[]) {
     return this.title
-      ? testPatternAgainstAllowedList(this.title, [createRegExpPatternFrom(allowedList)])
+      ? testPatternAgainstAllowedList([createRegExpPatternFrom(allowedList)])(this.title)
       : false;
   }
 
@@ -79,7 +79,7 @@ export class DataViewDescriptor {
   }
 
   static #extractDataType(title: string): DataViewDescriptorType['dataType'] {
-    if (testPatternAgainstAllowedList(title, LOGS_ALLOWED_LIST)) {
+    if (testPatternAgainstAllowedList(LOGS_ALLOWED_LIST)(title)) {
       return 'logs';
     }
 

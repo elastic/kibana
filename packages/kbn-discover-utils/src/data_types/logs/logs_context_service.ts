@@ -18,12 +18,19 @@ export interface LogsContextServiceDeps {
   // to consume user configured indices
 }
 
+export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS = [
+  'log',
+  'logs',
+  'logstash',
+  'auditbeat',
+  'filebeat',
+  'winlogbeat',
+];
+
 export const createLogsContextService = (_deps: LogsContextServiceDeps = {}) => {
   // This is initially an hard-coded set of well-known base patterns,
   // we can extend this allowed list with any setting coming from uiSettings
-  const ALLOWED_LOGS_DATA_SOURCES = [
-    createRegExpPatternFrom(['log', 'logs', 'logstash', 'auditbeat', 'filebeat', 'winlogbeat']),
-  ];
+  const ALLOWED_LOGS_DATA_SOURCES = [createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS)];
 
   const isLogsIndexPattern = (indexPattern: unknown) => {
     return (
