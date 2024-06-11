@@ -270,12 +270,6 @@ function DiscoverDocumentsComponent({
     return getCellRenderers();
   }, [customCellRenderer, getCellRenderersAccessor]);
 
-  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
-    return getCellRenderers();
-  }, [customCellRenderer, getCellRenderersAccessor]);
-
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
   const callouts = useMemo(
