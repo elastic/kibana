@@ -60,6 +60,25 @@ interface Response {
   aggregations: Record<string, unknown>;
 }
 
+const monacoEditorOptions: CodeEditorProps['options'] = {
+  readOnly: true,
+  lineNumbers: 'on',
+  fontSize: 12,
+  minimap: {
+    enabled: false,
+  },
+  folding: true,
+  scrollBeyondLastLine: false,
+  wordWrap: 'on',
+  wrappingIndent: 'indent',
+  automaticLayout: false,
+};
+
+const monacoHeightConfig: CodeEditorProps['fitToContent'] = {
+  minLines: 10,
+  maxLines: 50,
+};
+
 const MyEuiModal = styled(EuiModal)`
   width: min(768px, calc(100vw - 16px));
   min-height: 41vh;
@@ -112,8 +131,6 @@ export const ModalInspectQuery = ({
   const { selectedPatterns } = useSourcererDataView(
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
-
-  const modalRef = React.useRef<HTMLDivElement | null>(null);
 
   const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
   const responses: string[] = [
@@ -194,30 +211,6 @@ export const ModalInspectQuery = ({
     },
   ];
 
-  const monacoHeightConfig: CodeEditorProps['fitToContent'] = useMemo(() => {
-    return {
-      minLines: 10,
-      maxLines: 50,
-    };
-  }, []);
-
-  const monacoOptions: CodeEditorProps['options'] = useMemo(
-    () => ({
-      readOnly: true,
-      lineNumbers: 'on',
-      fontSize: 12,
-      minimap: {
-        enabled: false,
-      },
-      folding: true,
-      scrollBeyondLastLine: false,
-      wordWrap: 'on',
-      wrappingIndent: 'indent',
-      automaticLayout: false,
-    }),
-    []
-  );
-
   const tabs = [
     {
       id: 'statistics',
@@ -247,7 +240,7 @@ export const ModalInspectQuery = ({
                 languageId={XJsonLang.ID}
                 value={manageStringify(inspectRequest.body)}
                 fitToContent={monacoHeightConfig}
-                options={monacoOptions}
+                options={monacoEditorOptions}
               />
             </Fragment>
           ))
@@ -268,7 +261,7 @@ export const ModalInspectQuery = ({
                 languageId={XJsonLang.ID}
                 value={responseText}
                 fitToContent={monacoHeightConfig}
-                options={monacoOptions}
+                options={monacoEditorOptions}
               />
             </Fragment>
           ))
