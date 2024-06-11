@@ -37,7 +37,6 @@ export default function (ctx: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const logstashIndexName = 'logstash-2015.09.22';
   const deployment = getService('deployment');
-  const log = getService('log');
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -46,18 +45,6 @@ export default function (ctx: FtrProviderContext) {
   // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('discover feature controls security', () => {
-    let baseUrl: string;
-    let re: RegExp;
-
-    async function setup() {
-      baseUrl = deployment.getHostPort();
-      log.debug('baseUrl = ' + baseUrl);
-      // browsers don't show the ':port' if it's 80 or 443 so we have to
-      // remove that part so we can get a match in the tests.
-      baseUrl = baseUrl.replace(':80', '').replace(':443', '');
-      log.debug('New baseUrl = ' + baseUrl);
-    }
-
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
@@ -66,8 +53,6 @@ export default function (ctx: FtrProviderContext) {
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
-      await setup();
-      re = new RegExp(baseUrl + '/app/r.*$');
     });
 
     after(async () => {
@@ -138,9 +123,12 @@ export default function (ctx: FtrProviderContext) {
       it('Permalinks shows short urls for the right priviledged user', async () => {
         let actualUrl: string = '';
         await PageObjects.share.clickShareTopNavButton();
+        const re = new RegExp(
+          deployment.getHostPort().replace(':80', '').replace(':443', '') + '/app/r.*$'
+        );
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).match(re);
+          expect(actualUrl).to.match(re);
         });
       });
 
@@ -218,6 +206,9 @@ export default function (ctx: FtrProviderContext) {
       it(`Doesn't show short urls for users without those permissions`, async () => {
         await PageObjects.share.clickShareTopNavButton();
         let actualUrl: string = '';
+        const re = new RegExp(
+          deployment.getHostPort().replace(':80', '').replace(':443', '') + '/app/r.*$'
+        );
         await PageObjects.share.clickShareTopNavButton();
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
@@ -225,7 +216,6 @@ export default function (ctx: FtrProviderContext) {
         });
       });
     });
-
     savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
 
     describe('discover read-only privileges with url_create', () => {
@@ -291,6 +281,9 @@ export default function (ctx: FtrProviderContext) {
       it('Shows short urls for users with the right priviledges', async () => {
         await PageObjects.share.clickShareTopNavButton();
         let actualUrl: string = '';
+        const re = new RegExp(
+          deployment.getHostPort().replace(':80', '').replace(':443', '') + '/app/r.*$'
+        );
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).match(re);
