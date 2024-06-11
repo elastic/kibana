@@ -16,7 +16,7 @@ type ServiceDetails = APIReturnType<'GET /internal/apm/services/{serviceName}/me
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const {
     service: { name: serviceName },
@@ -57,13 +57,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let status: number;
 
     before(async () => {
-      await generateData({ synthtraceEsClient, start, end });
+      await generateData({ apmSynthtraceEsClient, start, end });
       const response = await callApi();
       body = response.body;
       status = response.status;
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     it('returns correct HTTP status', () => {
       expect(status).to.be(200);

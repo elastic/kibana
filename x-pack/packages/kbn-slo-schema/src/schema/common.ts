@@ -43,11 +43,16 @@ const statusSchema = t.union([
   t.literal('VIOLATED'),
 ]);
 
-const summarySchema = t.type({
-  status: statusSchema,
-  sliValue: t.number,
-  errorBudget: errorBudgetSchema,
-});
+const summarySchema = t.intersection([
+  t.type({
+    status: statusSchema,
+    sliValue: t.number,
+    errorBudget: errorBudgetSchema,
+  }),
+  t.partial({
+    summaryUpdatedAt: t.union([t.string, t.null]),
+  }),
+]);
 
 const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
 
@@ -81,7 +86,10 @@ const groupSummarySchema = t.type({
   noData: t.number,
 });
 
-const dateRangeSchema = t.type({ from: dateType, to: dateType });
+const dateRangeSchema = t.type({
+  from: dateType,
+  to: dateType,
+});
 
 export {
   ALL_VALUE,

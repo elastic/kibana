@@ -135,7 +135,7 @@ describe('Buffered Task Store', () => {
         bufferedStore.update(tasks[2], { validate: true }),
       ];
       expect(await results[0]).toMatchObject(tasks[0]);
-      expect(results[1]).rejects.toMatchInlineSnapshot(`
+      await expect(results[1]).rejects.toMatchInlineSnapshot(`
         Object {
           "error": Object {
             "error": "Oh no, something went terribly wrong",

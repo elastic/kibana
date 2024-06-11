@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { getConfiguration } from '.';
 import { samplePieVis } from '../../sample_vis.test.mocks';
 
@@ -39,7 +39,7 @@ describe('getConfiguration', () => {
           percentDecimals: 2,
           primaryGroups: ['bucket-1'],
           secondaryGroups: [],
-          legendStats: [LegendStats.values],
+          legendStats: [PartitionLegendValue.Value],
           truncateLegend: true,
         },
       ],

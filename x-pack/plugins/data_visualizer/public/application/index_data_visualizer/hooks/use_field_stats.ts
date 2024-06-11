@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { last, cloneDeep } from 'lodash';
 import { mergeMap, switchMap } from 'rxjs';
 import { Comparators } from '@elastic/eui';
-import type { ISearchOptions } from '@kbn/data-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
 import type {
   DataStatsFetchProgress,

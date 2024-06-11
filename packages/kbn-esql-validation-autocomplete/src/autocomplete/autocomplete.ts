@@ -15,6 +15,7 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { partition } from 'lodash';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   columnExists,
@@ -70,7 +71,7 @@ import {
   buildSettingDefinitions,
   buildValueDefinitions,
 } from './factories';
-import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
+import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -79,7 +80,13 @@ import {
   getSourcesHelper,
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
-import { getFunctionsToIgnoreForStats, isAggFunctionUsedAlready } from './helper';
+import {
+  getFunctionsToIgnoreForStats,
+  getParamAtPosition,
+  getQueryForFields,
+  isAggFunctionUsedAlready,
+} from './helper';
+import { FunctionArgSignature } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -89,7 +96,6 @@ type GetFieldsByTypeFn = (
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
-type GetMetaFieldsFn = () => Promise<string[]>;
 
 function hasSameArgBothSides(assignFn: ESQLFunction) {
   if (assignFn.name === '=' && isColumnItem(assignFn.args[0]) && assignFn.args[1]) {
@@ -191,14 +197,13 @@ export async function suggest(
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = buildQueryUntilPreviousCommand(ast, finalText);
+  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
   );
   const getSources = getSourcesRetriever(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
-  const getMetaFields = getMetaFieldsRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -244,8 +249,7 @@ export async function suggest(
         { option, ...rest },
         getFieldsByType,
         getFieldsMap,
-        getPolicyMetadata,
-        getMetaFields
+        getPolicyMetadata
       );
     }
   }
@@ -281,13 +285,6 @@ function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLC
     },
     getFieldsMap: helpers.getFieldsMap,
   };
-}
-
-function getMetaFieldsRetriever(resourceRetriever?: ESQLCallbacks): () => Promise<string[]> {
-  if (resourceRetriever?.getMetaFields == null) {
-    return async () => [];
-  }
-  return async () => resourceRetriever!.getMetaFields!();
 }
 
 function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
@@ -594,7 +591,11 @@ async function getExpressionSuggestionsByType(
             option?.name,
             getFieldsByType,
             {
-              functions: canHaveAssignments,
+              // TODO instead of relying on canHaveAssignments and other command name checks
+              // we should have a more generic way to determine if a command can have functions.
+              // I think it comes down to the definition of 'column' since 'any' should always
+              // include functions.
+              functions: canHaveAssignments || command.name === 'sort',
               fields: !argDef.constantOnly,
               variables: anyVariables,
               literals: argDef.constantOnly,
@@ -973,6 +974,9 @@ function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote
   }));
 }
 
+/**
+ * TODO — split this into distinct functions, one for fields, one for functions, one for literals
+ */
 async function getFieldsOrFunctionsSuggestions(
   types: string[],
   commandName: string,
@@ -1043,6 +1047,8 @@ async function getFieldsOrFunctionsSuggestions(
   return suggestions;
 }
 
+const addCommaIf = (condition: boolean, text: string) => (condition ? `${text},` : text);
+
 async function getFunctionArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
@@ -1078,19 +1084,45 @@ async function getFunctionArgsSuggestions(
     argIndex -= 1;
   }
 
-  const literalOptions = fnDefinition.signatures.reduce<string[]>((acc, signature) => {
-    const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
-    return literalOptionsForThisParameter ? acc.concat(literalOptionsForThisParameter) : acc;
-  }, [] as string[]);
-
-  if (literalOptions.length) {
-    return buildValueDefinitions(literalOptions);
-  }
-
   const arg = node.args[argIndex];
 
   // the first signature is used as reference
+  // TODO - take into consideration all signatures that match the current args
   const refSignature = fnDefinition.signatures[0];
+
+  const hasMoreMandatoryArgs =
+    (refSignature.params.length >= argIndex &&
+      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+        0) ||
+    ('minParams' in refSignature && refSignature.minParams
+      ? refSignature.minParams - 1 > argIndex
+      : false);
+
+  const suggestedConstants = Array.from(
+    new Set(
+      fnDefinition.signatures.reduce<string[]>((acc, signature) => {
+        const p = signature.params[argIndex];
+        if (!p) {
+          return acc;
+        }
+
+        const _suggestions: string[] = p.literalSuggestions
+          ? p.literalSuggestions
+          : p.literalOptions
+          ? p.literalOptions
+          : [];
+
+        return acc.concat(_suggestions);
+      }, [] as string[])
+    )
+  );
+
+  if (suggestedConstants.length) {
+    return buildValueDefinitions(suggestedConstants).map((suggestion) => ({
+      ...suggestion,
+      text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', suggestion.text),
+    }));
+  }
 
   const suggestions = [];
   const noArgDefined = !arg;
@@ -1102,6 +1134,9 @@ async function getFunctionArgsSuggestions(
       variables: variablesExcludingCurrentCommandOnes,
     }).hit;
   if (noArgDefined || isUnknownColumn) {
+    // ... | EVAL fn( <suggest>)
+    // ... | EVAL fn( field, <suggest>)
+
     const commandArgIndex = command.args.findIndex(
       (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
     );
@@ -1112,9 +1147,14 @@ async function getFunctionArgsSuggestions(
         ? Math.max(command.args.length - 1, 0)
         : commandArgIndex;
 
+    const finalCommandArg = command.args[finalCommandArgIndex];
+
     const fnToIgnore = [];
     // just ignore the current function
-    if (command.name !== 'stats') {
+    if (
+      command.name !== 'stats' ||
+      (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
+    ) {
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
@@ -1143,36 +1183,47 @@ async function getFunctionArgsSuggestions(
         return true;
       });
 
-    const supportedFieldTypes = validSignatures
-      .flatMap((signature) => {
-        if (signature.params.length > argIndex) {
-          return signature.params[argIndex].type;
-        }
-        if (signature.minParams) {
-          return signature.params[signature.params.length - 1].type;
-        }
-        return [];
-      })
+    /**
+     * Get all parameter definitions across all function signatures
+     * for the current parameter position in the given function definition,
+     */
+    const allParamDefinitionsForThisPosition = validSignatures
+      .map((signature) => getParamAtPosition(signature, argIndex))
       .filter(nonNullable);
 
-    const shouldBeConstant = validSignatures.some(
-      ({ params }) => params[argIndex]?.constantOnly || /_literal$/.test(params[argIndex]?.type)
+    // Separate the param definitions into two groups:
+    // fields should only be suggested if the param isn't constant-only,
+    // and constant suggestions should only be given if it is.
+    //
+    // TODO - consider incorporating the literalOptions into this
+    //
+    // TODO — improve this to inherit the constant flag from the outer function
+    // (e.g. if func1's first parameter is constant-only, any nested functions should
+    // inherit that constraint: func1(func2(shouldBeConstantOnly)))
+    //
+    const [constantOnlyParamDefs, paramDefsWhichSupportFields] = partition(
+      allParamDefinitionsForThisPosition,
+      (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
     );
 
-    // ... | EVAL fn( <suggest>)
-    // ... | EVAL fn( field, <suggest>)
+    const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) => {
+      return Array.from(new Set(paramDefs.map(({ type }) => type)));
+    };
+
+    suggestions.push(
+      ...getCompatibleLiterals(command.name, getTypesFromParamDefs(constantOnlyParamDefs))
+    );
+
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
-        supportedFieldTypes,
+        getTypesFromParamDefs(paramDefsWhichSupportFields),
         command.name,
         option?.name,
         getFieldsByType,
         {
-          // @TODO: improve this to inherit the constant flag from the outer function
-          functions: !shouldBeConstant,
-          fields: !shouldBeConstant,
+          functions: true,
+          fields: true,
           variables: variablesExcludingCurrentCommandOnes,
-          literals: shouldBeConstant,
         },
         // do not repropose the same function as arg
         // i.e. avoid cases like abs(abs(abs(...))) with suggestions
@@ -1182,14 +1233,6 @@ async function getFunctionArgsSuggestions(
       ))
     );
   }
-
-  const hasMoreMandatoryArgs =
-    (refSignature.params.length >= argIndex &&
-      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-        0) ||
-    ('minParams' in refSignature && refSignature.minParams
-      ? refSignature.minParams - 1 > argIndex
-      : false);
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
@@ -1233,7 +1276,7 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ text, ...rest }) => ({
     ...rest,
-    text: hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${text},` : text,
+    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', text),
   }));
 }
 
@@ -1335,8 +1378,7 @@ async function getOptionArgsSuggestions(
   },
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn,
-  getMetaFields: GetMetaFieldsFn
+  getPolicyMetadata: GetPolicyMetadataFn
 ) {
   const optionDef = getCommandOption(option.name);
   const { nodeArg, argIndex, lastArg } = extractArgMeta(option, node);
@@ -1445,8 +1487,7 @@ async function getOptionArgsSuggestions(
 
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
-    const metaFields = await getMetaFields();
-    const filteredMetaFields = metaFields.filter((name) => !existingFields.has(name));
+    const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
     suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
   }
 

@@ -9,13 +9,13 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineModalHeader } from '.';
 import { render } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { useInspect } from '../../../../common/components/inspect/use_inspect';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineActions } from '../../../store';
 
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../hooks/use_create_timeline');
 jest.mock('../../../../common/components/inspect/use_inspect');
 jest.mock('../../../../common/lib/kibana');

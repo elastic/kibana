@@ -45,7 +45,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentlessPolicy } from './setup_technology';
+import { useAgentless } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -85,6 +85,7 @@ const DEFAULT_PACKAGE_POLICY = {
   description: '',
   namespace: '',
   policy_id: '',
+  policy_ids: [''],
   enabled: true,
   inputs: [],
 };
@@ -131,7 +132,8 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const { isAgentlessPolicyId } = useAgentlessPolicy();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
+    useAgentless();
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(
@@ -185,7 +187,8 @@ export function useOnSubmit({
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
-      const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
+      const hasAgentPolicy =
+        newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '';
       if (
         hasPackage &&
         (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&
@@ -231,9 +234,9 @@ export function useOnSubmit({
   }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
 
   useEffect(() => {
-    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+    if (agentPolicy && !packagePolicy.policy_ids.includes(agentPolicy.id)) {
       updatePackagePolicy({
-        policy_id: agentPolicy.id,
+        policy_ids: [agentPolicy.id],
       });
     }
   }, [packagePolicy, agentPolicy, updatePackagePolicy]);
@@ -260,7 +263,7 @@ export function useOnSubmit({
       }
       if (
         agentCount !== 0 &&
-        !isAgentlessPolicyId(packagePolicy?.policy_id) &&
+        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
@@ -272,7 +275,8 @@ export function useOnSubmit({
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
             const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            if (packageInfo) {
+            // skip preinstall of input package, to be able to rollback when package policy creation fails
+            if (packageInfo && packageInfo.type !== 'input') {
               packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {
@@ -286,14 +290,13 @@ export function useOnSubmit({
               await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
             }
           }
-
           createdPolicy = await createAgentPolicy({
             newAgentPolicy,
             packagePolicy,
             withSysMonitoring,
           });
           setAgentPolicy(createdPolicy);
-          updatePackagePolicy({ policy_id: createdPolicy.id });
+          updatePackagePolicy({ policy_ids: [createdPolicy.id] });
         } catch (e) {
           setFormState('VALID');
           notifications.toasts.addError(e, {
@@ -305,15 +308,22 @@ export function useOnSubmit({
         }
       }
 
-      const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const shouldForceInstallOnAgentless = isAgentlessPolicyId(agentPolicyIdToSave);
+      const agentPolicyIdToSave = createdPolicy?.id
+        ? [createdPolicy?.id]
+        : packagePolicy.policy_ids;
+
+      const shouldForceInstallOnAgentless =
+        isAgentlessAgentPolicy(createdPolicy) ||
+        isAgentlessIntegration(packageInfo) ||
+        isAgentlessPackagePolicy(packagePolicy);
+
       const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
-        policy_id: agentPolicyIdToSave,
+        policy_ids: agentPolicyIdToSave,
         force: forceInstall,
       });
 
@@ -372,14 +382,14 @@ export function useOnSubmit({
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
-            defaultMessage: `'{packagePolicyName}' integration added.`,
+            defaultMessage: `''{packagePolicyName}'' integration added.`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
           }),
           text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy.`,
                 values: {
                   agentPolicyName: agentPolicy!.name,
                 },
@@ -410,18 +420,20 @@ export function useOnSubmit({
       formState,
       hasErrors,
       agentCount,
-      packagePolicy,
+      isAgentlessIntegration,
+      packageInfo,
       selectedPolicyTab,
-      isAgentlessPolicyId,
+      packagePolicy,
+      isAgentlessAgentPolicy,
+      isAgentlessPackagePolicy,
+      hasFleetAddAgentsPrivileges,
       withSysMonitoring,
       newAgentPolicy,
       updatePackagePolicy,
-      packageInfo,
       notifications.toasts,
       agentPolicy,
       onSaveNavigate,
       confirmForceInstall,
-      hasFleetAddAgentsPrivileges,
     ]
   );
 

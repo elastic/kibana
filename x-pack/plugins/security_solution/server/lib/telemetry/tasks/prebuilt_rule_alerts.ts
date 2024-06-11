@@ -40,12 +40,11 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('prebuilt_rule_alerts'));
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('prebuilt_rule_alerts'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         const [clusterInfoPromise, licenseInfoPromise, packageVersion] = await Promise.allSettled([
@@ -61,8 +60,8 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         const index = receiver.getAlertsIndex();
 
         if (index === undefined) {
-          log.l(`alerts index is not ready yet, skipping telemetry task`);
-          taskMetricsService.end(trace);
+          log.warn(`alerts index is not ready yet, skipping telemetry task`);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -71,7 +70,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           taskExecutionPeriod.current
         )) {
           if (alerts.length === 0) {
-            taskMetricsService.end(trace);
+            await taskMetricsService.end(trace);
             return 0;
           }
 
@@ -96,21 +95,21 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             })
           );
 
-          log.l(`sending ${enrichedAlerts.length} elastic prebuilt alerts`);
+          log.l('sending elastic prebuilt alerts', { length: enrichedAlerts.length });
           const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
 
           const promises = batches.map(async (batch) => {
-            sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
           });
 
           await Promise.all(promises);
         }
 
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
         return 0;
       } catch (err) {
-        logger.error('could not complete prebuilt alerts telemetry task');
-        taskMetricsService.end(trace, err);
+        logger.error('could not complete task', { error: err });
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

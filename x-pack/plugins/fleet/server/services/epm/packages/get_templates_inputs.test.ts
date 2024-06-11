@@ -121,6 +121,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
     ).toEqual([
       {
         id: 'test-logs',
+        type: 'test-logs',
         streams: [
           {
             data_stream: {
@@ -147,6 +148,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
     expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
       {
         id: 'test-logs',
+        type: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
@@ -167,6 +169,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
     expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
       {
         id: 'test-logs',
+        type: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
@@ -187,6 +190,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
     expect(await templatePackagePolicyToFullInputStreams([mockInput2])).toEqual([
       {
         id: 'test-metrics-some-template',
+        type: 'test-metrics',
         streams: [
           {
             data_stream: {
@@ -213,6 +217,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
     ).toEqual([
       {
         id: 'test-logs',
+        type: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
@@ -286,6 +291,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
           inputVar4: '',
         },
         id: 'test-logs',
+        type: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',

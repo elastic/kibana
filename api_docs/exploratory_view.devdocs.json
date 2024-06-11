@@ -879,7 +879,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; isNewVersion: () => boolean; }"
+              ") => void; }"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,

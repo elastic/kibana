@@ -13,10 +13,10 @@ import { z } from 'zod';
  *
  * info:
  *   title: Risk Scoring API
- *   version: 1.0.0
+ *   version: 1
  */
 
-import { IdentifierType, RiskScore } from './common.gen';
+import { IdentifierType, EntityRiskScoreRecord } from '../common/common.gen';
 
 export type RiskScoresEntityCalculationRequest = z.infer<typeof RiskScoresEntityCalculationRequest>;
 export const RiskScoresEntityCalculationRequest = z.object({
@@ -28,6 +28,10 @@ export const RiskScoresEntityCalculationRequest = z.object({
    * Used to define the type of entity.
    */
   identifier_type: IdentifierType,
+  /**
+   * If 'wait_for' the request will wait for the index refresh.
+   */
+  refresh: z.literal('wait_for').optional(),
 });
 
 export type RiskScoresEntityCalculationResponse = z.infer<
@@ -35,5 +39,5 @@ export type RiskScoresEntityCalculationResponse = z.infer<
 >;
 export const RiskScoresEntityCalculationResponse = z.object({
   success: z.boolean(),
-  score: RiskScore.optional(),
+  score: EntityRiskScoreRecord.optional(),
 });

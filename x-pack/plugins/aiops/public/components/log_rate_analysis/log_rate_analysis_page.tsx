@@ -99,7 +99,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
   );
 
   useEffect(
-    // TODO: Consolidate this hook/function with with Data visualizer's
+    // TODO: Consolidate this hook/function with the one in `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx`
     function clearFiltersOnLeave() {
       return () => {
         // We want to clear all filters that have not been pinned globally

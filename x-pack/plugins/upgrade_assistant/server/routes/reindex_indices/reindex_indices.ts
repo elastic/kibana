@@ -34,6 +34,10 @@ export function registerReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/{indexName}`,
+      options: {
+        access: 'public',
+        summary: `Start or resume reindex`,
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -77,6 +81,10 @@ export function registerReindexIndicesRoutes(
   router.get(
     {
       path: `${BASE_PATH}/{indexName}`,
+      options: {
+        access: 'public',
+        summary: `Get reindex status`,
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -134,6 +142,10 @@ export function registerReindexIndicesRoutes(
   router.post(
     {
       path: `${BASE_PATH}/{indexName}/cancel`,
+      options: {
+        access: 'public',
+        summary: `Cancel reindex`,
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

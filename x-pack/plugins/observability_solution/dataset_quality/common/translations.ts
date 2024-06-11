@@ -46,6 +46,13 @@ export const flyoutOpenInLogsExplorerText = i18n.translate(
   }
 );
 
+export const flyoutOpenInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',
   {
@@ -137,6 +144,33 @@ export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShow
   defaultMessage: 'Show all',
 });
 
+export const flyoutImprovementText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Degraded fields',
+  }
+);
+
+export const flyoutImprovementTooltip = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of degraded fields found in your dataset.',
+  }
+);
+
+export const flyoutDegradedFieldsTableLoadingText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableLoadingText',
+  {
+    defaultMessage: 'Loading degraded fields',
+  }
+);
+
+export const flyoutDegradedFieldsTableNoData = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableNoData',
+  {
+    defaultMessage: 'No degraded fields found',
+  }
+);
 /*
 Summary Panel
 */
@@ -193,7 +227,7 @@ export const summaryPanelDatasetsActivityText = i18n.translate(
 export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
   {
-    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+    defaultMessage: 'The number of datasets with activity in the selected time range.',
   }
 );
 
@@ -207,7 +241,7 @@ export const summaryPanelEstimatedDataText = i18n.translate(
 export const summaryPanelEstimatedDataTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelEstimatedDataTooltipText',
   {
-    defaultMessage: 'The approximate amount of data stored in the last 24 hours.',
+    defaultMessage: 'The approximate amount of data stored in the selected time range.',
   }
 );
 

@@ -15,7 +15,8 @@ export async function createFailureIssue(
   buildUrl: string,
   failure: TestFailure,
   api: GithubApi,
-  branch: string
+  branch: string,
+  pipeline: string
 ) {
   const title = `Failing test: ${failure.classname} - ${failure.name}`;
 
@@ -39,7 +40,7 @@ export async function createFailureIssue(
       failureBody,
       '```',
       '',
-      `First failure: [CI Build - ${branch}](${buildUrl})`,
+      `First failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`,
     ].join('\n'),
     {
       'test.class': failure.classname,
@@ -55,7 +56,8 @@ export async function updateFailureIssue(
   buildUrl: string,
   issue: ExistingFailedTestIssue,
   api: GithubApi,
-  branch: string
+  branch: string,
+  pipeline: string
 ) {
   // Increment failCount
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
@@ -66,7 +68,7 @@ export async function updateFailureIssue(
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
   await api.addIssueComment(
     issue.github.number,
-    `New failure: [CI Build - ${branch}](${buildUrl})`
+    `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`
   );
 
   return { newBody, newCount };

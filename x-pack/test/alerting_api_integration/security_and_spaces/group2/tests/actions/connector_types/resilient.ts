@@ -273,7 +273,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 message: 'an error occurred while running the action',
                 service_message:
                   'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -299,7 +299,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
               });
@@ -328,7 +328,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
               });
@@ -357,7 +357,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
               });

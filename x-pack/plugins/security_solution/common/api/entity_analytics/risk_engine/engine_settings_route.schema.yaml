@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '1'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 servers:
@@ -13,6 +13,7 @@ servers:
 
 paths:
   /engine/settings:
+    x-internal: true
     get:
       operationId: RiskEngineSettingsGet
       summary: Get the settings of the Risk Engine
@@ -23,7 +24,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEngineSettingsResponse'
-                
+
 components:
   schemas:
     RiskEngineSettingsResponse:

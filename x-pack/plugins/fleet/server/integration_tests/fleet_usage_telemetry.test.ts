@@ -135,6 +135,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '22.04.2 LTS (Jammy Jellyfish)',
             },
+            elastic: { agent: { unprivileged: false } }, // Root agent
           },
           components: [
             {
@@ -172,6 +173,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '20.04.5 LTS (Focal Fossa)',
             },
+            elastic: { agent: { unprivileged: true } }, // Non root agent
           },
           components: [
             {
@@ -350,6 +352,7 @@ describe('fleet usage telemetry', () => {
       },
       enabled: true,
       policy_id: 'fleet-server-policy',
+      policy_ids: ['fleet-server-policy'],
       inputs: [
         {
           compiled_input: {
@@ -479,9 +482,15 @@ describe('fleet usage telemetry', () => {
           unhealthy: 0,
           offline: 0,
           updating: 0,
+          inactive: 0,
+          unenrolled: 0,
           num_host_urls: 0,
         },
         packages: [],
+        agents_per_privileges: {
+          root: 3,
+          unprivileged: 1,
+        },
         agents_per_version: [
           {
             version: '8.6.0',

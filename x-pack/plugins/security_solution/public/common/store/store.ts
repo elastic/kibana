@@ -39,15 +39,19 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
-import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
-import { initDataView } from './sourcerer/model';
+import type {
+  KibanaDataView,
+  SourcererModel,
+  SourcererDataView,
+} from '../../sourcerer/store/model';
+import { initDataView } from '../../sourcerer/store/model';
 import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
 import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
-import { sourcererActions } from './sourcerer';
+import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 

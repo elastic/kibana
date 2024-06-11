@@ -15,7 +15,7 @@ import { AssetDetailsProps } from './types';
 export const ContextProviders = ({
   children,
   ...props
-}: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricAlias'> & {
+}: Omit<AssetDetailsProps, 'links' | 'tabs' | 'activeTabId' | 'metricsIndexPattern'> & {
   children: React.ReactNode;
 }) => {
   const {

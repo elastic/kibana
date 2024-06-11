@@ -1382,7 +1382,10 @@ describe('rules_list with show only capability', () => {
       const rows = await screen.findAllByTestId('rule-row');
       expect(rows[0].className).not.toContain('actRulesList__tableRowDisabled');
       expect(rows[1].className).toContain('actRulesList__tableRowDisabled');
-      fireEvent.mouseOver(await screen.findByText('Info'));
+      const tooltips = await screen.findAllByText('Info');
+
+      fireEvent.mouseOver(tooltips[tooltips.length - 1]);
+
       const tooltip = await screen.findByTestId('ruleDisabledByLicenseTooltip');
       expect(tooltip).toHaveTextContent('This rule type requires a Platinum license.');
     });

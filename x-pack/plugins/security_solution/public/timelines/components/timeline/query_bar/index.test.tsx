@@ -17,10 +17,10 @@ import { QueryBar } from '../../../../common/components/query_bar';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
-import { buildGlobalQuery } from '../helpers';
+import { TIMELINE_FILTER_DROP_AREA, buildGlobalQuery } from '../helpers';
 
 import type { QueryBarTimelineComponentProps } from '.';
-import { QueryBarTimeline, getDataProviderFilter, TIMELINE_FILTER_DROP_AREA } from '.';
+import { QueryBarTimeline, getDataProviderFilter } from '.';
 import { waitFor } from '@testing-library/react';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
@@ -84,7 +84,6 @@ describe('Timeline QueryBar ', () => {
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
-          setFilters={mockSetFilters}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timline-real-id"
           updateReduxTime={mockUpdateReduxTime}
@@ -123,7 +122,6 @@ describe('Timeline QueryBar ', () => {
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
-          setFilters={mockSetFilters}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}
@@ -161,7 +159,6 @@ describe('Timeline QueryBar ', () => {
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
-          setFilters={mockSetFilters}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}
@@ -201,7 +198,6 @@ describe('Timeline QueryBar ', () => {
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
-          setFilters={mockSetFilters}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}
@@ -239,7 +235,6 @@ describe('Timeline QueryBar ', () => {
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
-          setFilters={mockSetFilters}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}

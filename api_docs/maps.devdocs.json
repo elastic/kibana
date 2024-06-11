@@ -1386,7 +1386,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              " | undefined; version?: string | undefined; filters?: ",
+              " | undefined; filters?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1394,7 +1394,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; description?: string | undefined; executionContext?: ",
+              "[] | undefined; description?: string | undefined; version?: string | undefined; executionContext?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1474,7 +1474,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              " | undefined; version?: string | undefined; filters?: ",
+              " | undefined; filters?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1482,7 +1482,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; description?: string | undefined; executionContext?: ",
+              "[] | undefined; description?: string | undefined; version?: string | undefined; executionContext?: ",
               {
                 "pluginId": "@kbn/core-execution-context-common",
                 "scope": "common",
@@ -1924,6 +1924,83 @@
               " | undefined; }"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.CreateLayerDescriptorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateLayerDescriptorParams",
+        "description": [],
+        "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.indexPatternId",
+            "type": "string",
+            "tags": [],
+            "label": "indexPatternId",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.geoFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "geoFieldName",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.geoFieldType",
+            "type": "Enum",
+            "tags": [],
+            "label": "geoFieldType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.ES_GEO_FIELD_TYPE",
+                "text": "ES_GEO_FIELD_TYPE"
+              }
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4265,7 +4342,7 @@
           },
           "<\"map\"> & { getLayerList: () => ",
           "ILayer",
-          "[]; } & ",
+          "[]; reload: () => void; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -4289,23 +4366,15 @@
             "section": "def-common.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
-            "text": "PublishingSubject"
+            "section": "def-common.PublishesFilters",
+            "text": "PublishesFilters"
           },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined>; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -4583,7 +4652,13 @@
               "text": "LayerDescriptor"
             },
             " | null>; createESSearchSourceLayerDescriptor: (params: ",
-            "CreateLayerDescriptorParams",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.CreateLayerDescriptorParams",
+              "text": "CreateLayerDescriptorParams"
+            },
             ") => Promise<",
             {
               "pluginId": "maps",
@@ -4597,6 +4672,100 @@
           "path": "x-pack/plugins/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "maps",
+          "id": "def-public.MapsStartApi.Map",
+          "type": "Function",
+          "tags": [],
+          "label": "Map",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.Map.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.Map.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "maps",
+          "id": "def-public.MapsStartApi.PassiveMap",
+          "type": "Function",
+          "tags": [],
+          "label": "PassiveMap",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.PassiveMap.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "maps",
+              "id": "def-public.MapsStartApi.PassiveMap.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         },
         {
           "parentPluginId": "maps",

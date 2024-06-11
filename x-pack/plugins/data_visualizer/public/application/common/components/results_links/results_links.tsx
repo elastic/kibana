@@ -74,8 +74,8 @@ export const ResultsLinks: FC<Props> = ({
   const {
     services: {
       fileUpload,
+      share: { url },
       application: { getUrlForApp, capabilities },
-      discover,
     },
   } = useDataVisualizerKibana();
 
@@ -96,12 +96,14 @@ export const ResultsLinks: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
-      if (!discover.locator) {
+      const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
+
+      if (!discoverLocator) {
         // eslint-disable-next-line no-console
         console.error('Discover locator not available');
         return;
       }
-      const discoverUrl = await discover.locator.getUrl({
+      const discoverUrl = await discoverLocator.getUrl({
         indexPatternId: dataViewId,
         timeRange: globalState?.time ? globalState.time : undefined,
       });
@@ -155,7 +157,7 @@ export const ResultsLinks: FC<Props> = ({
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, discover, JSON.stringify(globalState)]);
+  }, [dataViewId, url, JSON.stringify(globalState)]);
 
   useEffect(() => {
     updateTimeValues();

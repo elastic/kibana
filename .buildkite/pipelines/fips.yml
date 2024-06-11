@@ -5,7 +5,7 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
@@ -23,7 +23,7 @@ steps:
     label: "Smoke testing for FIPS"
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
       localSsds: 1

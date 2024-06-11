@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import type { GetFleetStatusResponse } from '../types';
 
+import { useStartServices } from './use_core';
 import { useConfig } from './use_config';
 import { useGetFleetStatusQuery } from './use_request';
 
@@ -20,6 +21,7 @@ export interface FleetStatusProviderProps {
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
   missingOptionalFeatures?: GetFleetStatusResponse['missing_optional_features'];
   isSecretsStorageEnabled?: GetFleetStatusResponse['is_secrets_storage_enabled'];
+  spaceId?: string;
 }
 
 interface FleetStatus extends FleetStatusProviderProps {
@@ -39,9 +41,20 @@ export const FleetStatusProvider: React.FC<{
   defaultFleetStatus?: FleetStatusProviderProps;
 }> = ({ defaultFleetStatus, children }) => {
   const config = useConfig();
+  const { spaces } = useStartServices();
+  const [spaceId, setSpaceId] = useState<string | undefined>();
   const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
 
   const { data, isLoading, refetch } = useGetFleetStatusQuery();
+  useEffect(() => {
+    const getSpace = async () => {
+      if (spaces) {
+        const space = await spaces.getActiveSpace();
+        setSpaceId(space.id);
+      }
+    };
+    getSpace();
+  }, [spaces]);
 
   const state = {
     ...defaultFleetStatus,
@@ -51,6 +64,7 @@ export const FleetStatusProvider: React.FC<{
     missingRequirements: data?.missing_requirements,
     missingOptionalFeatures: data?.missing_optional_features,
     isSecretsStorageEnabled: data?.is_secrets_storage_enabled,
+    spaceId,
   };
 
   return (

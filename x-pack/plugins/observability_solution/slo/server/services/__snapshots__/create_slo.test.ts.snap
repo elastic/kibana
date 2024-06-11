@@ -182,6 +182,17 @@ Array [
       "goodEvents": 0,
       "isTempDoc": true,
       "kibanaUrl": "http://myhost.com/mock-server-basepath",
+      "latestSliTimestamp": null,
+      "monitor": Object {
+        "config_id": null,
+        "name": null,
+      },
+      "observer": Object {
+        "geo": Object {
+          "name": null,
+        },
+        "name": null,
+      },
       "service": Object {
         "environment": "irrelevant",
         "name": "irrelevant",
@@ -222,6 +233,7 @@ Array [
       "spaceId": "some-space",
       "status": "NO_DATA",
       "statusCode": 0,
+      "summaryUpdatedAt": null,
       "totalEvents": 0,
       "transaction": Object {
         "name": "irrelevant",

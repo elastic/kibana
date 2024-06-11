@@ -38,7 +38,7 @@ export function initializeAlertingTelemetry(
 
 export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
   if (taskManager) {
-    scheduleTasks(logger, taskManager);
+    scheduleTasks(logger, taskManager).catch(() => {}); // it shouldn't reject, but just in case
   }
 }
 

@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
@@ -41,7 +42,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http, fieldFormats, isServerless } = useTriggerUiActionServices();
+  const { expressions, http, fieldFormats, isServerless, data } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, sourceFields } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -82,7 +83,7 @@ export const EsqlQueryExpression: React.FC<
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
     setQuery(esqlQuery ?? { esql: '' });
-    if (esqlQuery && 'esql' in esqlQuery) {
+    if (esqlQuery) {
       if (esqlQuery.esql) {
         refreshTimeFields(esqlQuery);
         refreshEsFields(esqlQuery, false);
@@ -182,9 +183,12 @@ export const EsqlQueryExpression: React.FC<
   const refreshEsFields = async (q: AggregateQuery, resetSourceFields: boolean = true) => {
     let fields: FieldOption[] = [];
     try {
-      const table = await fetchFieldsFromESQL({ esql: `${get(q, 'esql')} | limit 0` }, expressions);
-      if (table) {
-        fields = table.columns.map((c) => ({
+      const columns = await getESQLQueryColumns({
+        esqlQuery: `${get(q, 'esql')}`,
+        search: data.search.search,
+      });
+      if (columns.length) {
+        fields = columns.map((c) => ({
           name: c.id,
           type: c.meta.type,
           normalizedType: c.meta.type,

@@ -124,7 +124,8 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/discover-utils",
     "@kbn/react-kibana-context-render",
+    "@kbn/esql-utils",
+    "@kbn/core-lifecycle-browser",
   ],
 }

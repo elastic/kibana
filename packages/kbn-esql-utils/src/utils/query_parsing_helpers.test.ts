@@ -7,50 +7,13 @@
  */
 
 import {
-  getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasTransformationalCommand,
 } from './query_parsing_helpers';
 
-describe('sql/esql query helpers', () => {
-  describe('getIndexPatternFromSQLQuery', () => {
-    it('should return the index pattern string from sql queries', () => {
-      const idxPattern1 = getIndexPatternFromSQLQuery('SELECT * FROM foo');
-      expect(idxPattern1).toBe('foo');
-
-      const idxPattern2 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "foo"');
-      expect(idxPattern2).toBe('foo');
-
-      const idxPattern3 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "the_index_pattern"');
-      expect(idxPattern3).toBe('the_index_pattern');
-
-      const idxPattern4 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "the-index-pattern"');
-      expect(idxPattern4).toBe('the-index-pattern');
-
-      const idxPattern5 = getIndexPatternFromSQLQuery('SELECT woof, meow from "the-index-pattern"');
-      expect(idxPattern5).toBe('the-index-pattern');
-
-      const idxPattern6 = getIndexPatternFromSQLQuery('SELECT woof, meow from "logstash-*"');
-      expect(idxPattern6).toBe('logstash-*');
-
-      const idxPattern7 = getIndexPatternFromSQLQuery(
-        'SELECT woof, meow from logstash-1234! WHERE field > 100'
-      );
-      expect(idxPattern7).toBe('logstash-1234!');
-
-      const idxPattern8 = getIndexPatternFromSQLQuery(
-        'SELECT * FROM (SELECT woof, miaou FROM "logstash-1234!" GROUP BY woof)'
-      );
-      expect(idxPattern8).toBe('logstash-1234!');
-
-      const idxPattern9 = getIndexPatternFromSQLQuery(
-        'SELECT * FROM remote_cluster:logs-* WHERE field > 20'
-      );
-      expect(idxPattern9).toBe('remote_cluster:logs-*');
-    });
-  });
-
+describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
     it('should return the index pattern string from esql queries', () => {
       const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
@@ -131,6 +94,27 @@ describe('sql/esql query helpers', () => {
           'from a | drop @timestamp | drop a | drop b | keep c | drop d'
         )
       ).toBe('from a | keep c ');
+    });
+  });
+
+  describe('hasTransformationalCommand', () => {
+    it('should return false for non transformational command', () => {
+      expect(hasTransformationalCommand('from a | eval b = 1')).toBeFalsy();
+    });
+
+    it('should return true for stats', () => {
+      expect(hasTransformationalCommand('from a | stats count() as total by a=b')).toBeTruthy();
+    });
+
+    it('should return true for keep', () => {
+      expect(hasTransformationalCommand('from a | keep field1, field2')).toBeTruthy();
+    });
+
+    it('should return false for commented out transformational command', () => {
+      expect(
+        hasTransformationalCommand(`from logstash-*
+      // | stats  var0 = avg(bytes) by geo.dest`)
+      ).toBeFalsy();
     });
   });
 });

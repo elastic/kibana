@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   DataViewBase,
   EsQueryConfig,
@@ -105,7 +106,6 @@ import {
   IndexPatternRef,
   FramePublicAPI,
   AddUserMessages,
-  isMessageRemovable,
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
 } from '../types';
@@ -662,6 +662,10 @@ export class Embeddable
         fromDate: mergedSearchContext.timeRange?.from ?? '',
         toDate: mergedSearchContext.timeRange?.to ?? '',
       },
+      absDateRange: {
+        fromDate: mergedSearchContext.timeRange?.from ?? '',
+        toDate: mergedSearchContext.timeRange?.to ?? '',
+      },
       activeData: this.activeData,
     };
 
@@ -995,9 +999,7 @@ export class Embeddable
 
     this.removeActiveDataWarningMessages();
     const searchWarningMessages = this.getSearchWarningMessages(adapters);
-    this.removeActiveDataWarningMessages = this.addUserMessages(
-      searchWarningMessages.filter(isMessageRemovable)
-    );
+    this.removeActiveDataWarningMessages = this.addUserMessages(searchWarningMessages);
 
     this.activeData = newActiveData;
 
@@ -1143,7 +1145,7 @@ export class Embeddable
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
-              interactive={!input.disableTriggers && !this.isTextBasedLanguage()}
+              interactive={!input.disableTriggers}
               renderMode={input.renderMode}
               syncColors={input.syncColors}
               syncTooltips={input.syncTooltips}
@@ -1364,6 +1366,7 @@ export class Embeddable
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = this.input.onTableRowClick;
     }
+    const esqlQuery = this.isTextBasedLanguage() ? this.savedVis?.state.query : undefined;
 
     eventHandler?.({
       ...event.data,
@@ -1379,6 +1382,7 @@ export class Embeddable
             ...event.data,
             timeFieldName:
               event.data.timeFieldName || inferTimeField(this.deps.data.datatableUtilities, event),
+            query: esqlQuery,
           },
           embeddable: this,
         });
@@ -1556,7 +1560,7 @@ export class Embeddable
 
   public getIsEditable() {
     // for ES|QL, editing is allowed only if the advanced setting is on
-    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get('discover:enableESQL')) {
+    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get(ENABLE_ESQL)) {
       return false;
     }
     return (

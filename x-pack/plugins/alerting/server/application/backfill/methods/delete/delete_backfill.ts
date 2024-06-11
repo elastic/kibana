@@ -85,7 +85,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     );
 
     // remove the associated task
-    context.taskManager.removeIfExists(id);
+    await context.taskManager.removeIfExists(id);
 
     return removeResult;
   } catch (err) {

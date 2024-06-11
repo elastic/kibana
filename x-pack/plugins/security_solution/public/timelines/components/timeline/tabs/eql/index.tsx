@@ -13,9 +13,11 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
+import type { ControlColumnProps } from '../../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../../../store';
@@ -29,9 +31,9 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
@@ -54,6 +56,7 @@ import type { TimelineTabCommonProps } from '../shared/types';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -73,6 +76,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   start,
   timerangeKind,
+  pinnedEventIds,
+  eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
@@ -85,8 +90,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-  const { augmentedColumnHeaders, getTimelineQueryFieldsFromColumns, leadingControlColumns } =
-    useTimelineColumns(columns);
+  const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
+
+  const leadingControlColumns = useTimelineControlColumn(columns, TIMELINE_NO_SORTING);
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
@@ -119,7 +125,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     dataViewId,
     endDate: end,
     eqlOptions: restEqlOption,
-    fields: getTimelineQueryFieldsFromColumns(),
+    fields: timelineQueryFieldsFromColumns,
     filterQuery: eqlQuery ?? '',
     id: timelineId,
     indexNames: selectedPatterns,
@@ -195,6 +201,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 updatedAt={refreshedAt}
                 isTextBasedQuery={false}
                 pageInfo={pageInfo}
+                leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+                pinnedEventIds={pinnedEventIds}
+                eventIdToNoteIds={eventIdToNoteIds}
               />
             </ScrollableFlexItem>
           </FullWidthFlexGroup>
@@ -238,7 +247,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                       itemsCount: totalCount,
                       itemsPerPage,
                     })}
-                    leadingControlColumns={leadingControlColumns}
+                    leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                     trailingControlColumns={timelineEmptyTrailingControlColumns}
                   />
                 </StyledEuiFlyoutBody>
@@ -293,8 +302,16 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const { activeTab, columns, eqlOptions, expandedDetail, itemsPerPage, itemsPerPageOptions } =
-      timeline;
+    const {
+      activeTab,
+      columns,
+      eqlOptions,
+      expandedDetail,
+      itemsPerPage,
+      itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
+    } = timeline;
 
     return {
       activeTab,
@@ -306,6 +323,8 @@ const makeMapStateToProps = () => {
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
+      pinnedEventIds,
+      eventIdToNoteIds,
       showExpandedDetails:
         !!expandedDetail[TimelineTabs.eql] && !!expandedDetail[TimelineTabs.eql]?.panelView,
 
@@ -338,6 +357,8 @@ const EqlTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
+      deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions)
   )
 );

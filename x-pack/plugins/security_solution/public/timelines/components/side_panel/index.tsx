@@ -16,7 +16,7 @@ import { getScopedActions, isInTableScope, isTimelineScope } from '../../../help
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
-import type { RunTimeMappings } from '../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
@@ -34,6 +34,8 @@ interface DetailsPanelProps {
   scopeId: string;
   isReadOnly?: boolean;
 }
+
+const detailsPanelStyleProp = { zIndex: 1001 };
 
 /**
  * This panel is used in both the main timeline as well as the flyouts on the host, detection, cases, and network pages.
@@ -169,6 +171,7 @@ export const DetailsPanel = React.memo(
       <EuiFlyout
         data-test-subj="timeline:details-panel:flyout"
         size={panelSize}
+        style={detailsPanelStyleProp}
         onClose={closePanel}
         ownFocus={false}
         key={flyoutUniqueKey}

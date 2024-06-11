@@ -40,6 +40,7 @@ describe('GET remote clusters', () => {
 
   let remoteInfoMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['remoteInfo'];
   let getSettingsMockFn: ScopedClusterClientMock['asCurrentUser']['cluster']['getSettings'];
+  let resolveClusterMockFn: ScopedClusterClientMock['asCurrentUser']['indices']['resolveCluster'];
 
   const createMockRequest = () =>
     httpServerMock.createKibanaRequest({
@@ -63,6 +64,7 @@ describe('GET remote clusters', () => {
     mockContext = xpackMocks.createRequestHandlerContext();
     scopedClusterClientMock = mockContext.core.elasticsearch.client;
     remoteInfoMockFn = scopedClusterClientMock.asCurrentUser.cluster.remoteInfo;
+    resolveClusterMockFn = scopedClusterClientMock.asCurrentUser.indices.resolveCluster;
     getSettingsMockFn = scopedClusterClientMock.asCurrentUser.cluster.getSettings;
     mockRouteDependencies = createMockRouteDependencies();
 
@@ -87,9 +89,15 @@ describe('GET remote clusters', () => {
         },
         transient: {},
       });
-      remoteInfoMockFn.mockResponseOnce({
+      resolveClusterMockFn.mockResponseOnce({
         test: {
           connected: true,
+          skip_unavailable: false,
+        },
+      });
+      remoteInfoMockFn.mockResponseOnce({
+        test: {
+          connected: false,
           mode: 'sniff',
           seeds: ['127.0.0.1:9300'],
           num_nodes_connected: 1,

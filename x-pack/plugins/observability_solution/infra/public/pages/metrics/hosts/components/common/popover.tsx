@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiPopover, EuiIcon } from '@elastic/eui';
-import { useBoolean } from '../../../../../hooks/use_boolean';
+import { useBoolean } from '@kbn/react-hooks';
 
 export const Popover = ({ children }: { children: React.ReactNode }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);

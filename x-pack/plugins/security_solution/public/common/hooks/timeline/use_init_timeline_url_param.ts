@@ -7,11 +7,14 @@
 
 import { useCallback, useEffect } from 'react';
 import { safeDecode } from '@kbn/rison';
+import { useSelector } from 'react-redux';
 
-import { TimelineTabs } from '../../../../common/types';
+import type { State } from '../../store';
+import { TimelineId, TimelineTabs } from '../../../../common/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
-import type { TimelineUrl } from '../../../timelines/store/model';
+import type { TimelineModel, TimelineUrl } from '../../../timelines/store/model';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 import { URL_PARAM_KEY } from '../use_url_state';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
@@ -23,6 +26,9 @@ export const useInitTimelineFromUrlParam = () => {
   const isEsqlTabDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
 
   const queryTimelineById = useQueryTimelineById();
+  const activeTimeline = useSelector((state: State) =>
+    selectTimelineById(state, TimelineId.active)
+  );
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
@@ -54,13 +60,30 @@ export const useInitTimelineFromUrlParam = () => {
 
       const parsedState = safeDecode(timelineState) as TimelineUrl | null;
 
-      onInitialize(parsedState);
+      // Make sure we only re-initialize the timeline if there are siginificant changes to the active timeline.
+      // Without this check, we could potentially overwrite the timeline.
+      if (!hasTimelineStateChanged(activeTimeline, parsedState)) {
+        onInitialize(parsedState);
+      }
     };
 
     // This is needed to initialize the timeline from the URL when the user clicks the back / forward buttons
     window.addEventListener('popstate', listener);
     return () => window.removeEventListener('popstate', listener);
-  }, [onInitialize]);
+  }, [onInitialize, activeTimeline]);
 
   useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);
 };
+
+function hasTimelineStateChanged(
+  activeTimeline: TimelineModel | null,
+  newState: TimelineUrl | null
+) {
+  return (
+    activeTimeline &&
+    newState &&
+    (activeTimeline.id !== newState.id ||
+      activeTimeline.savedSearchId !== newState.savedSearchId ||
+      activeTimeline.graphEventId !== newState.graphEventId)
+  );
+}

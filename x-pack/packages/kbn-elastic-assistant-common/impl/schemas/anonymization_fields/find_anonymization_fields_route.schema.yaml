@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Find AnonymizationFields API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/elastic_assistant/anonymization_fields/_find:
+  /internal/elastic_assistant/anonymization_fields/_find:
     get:
       operationId: FindAnonymizationFields
       x-codegen-enabled: true

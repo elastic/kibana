@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let discoverLink = await appsMenu.getLink('Discover');
       expect(discoverLink?.href).to.contain(
         '/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
-          "&_a=(columns:!(),filters:!(),index:'logstash-*',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+          "&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
       );
       await appsMenu.closeCollapsibleNav();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
           "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
           "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
-          "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-*'," +
+          "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!()," +
           "interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
       );
       await appsMenu.clickLink('Discover', { category: 'kibana' });

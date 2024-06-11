@@ -19,6 +19,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useAgentless } from '../hooks/setup_technology';
+
 import { WithHeaderLayout } from '../../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
@@ -231,20 +233,23 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiFlexGroup>
     );
 
-    const rightColumn =
-      agentPolicy && (isAdd || isEdit) ? (
-        <EuiDescriptionList className="eui-textRight" textStyle="reverse">
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
-              defaultMessage="Agent policy"
-            />
-          </EuiDescriptionListTitle>
-          <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
-            {agentPolicy?.name || '-'}
-          </AgentPolicyName>
-        </EuiDescriptionList>
-      ) : undefined;
+    const { isAgentlessAgentPolicy } = useAgentless();
+    const hasAgentBasedPolicyId = !isAgentlessAgentPolicy(agentPolicy);
+    const showAgentPolicyName = agentPolicy && (isAdd || isEdit) && hasAgentBasedPolicyId;
+
+    const rightColumn = showAgentPolicyName ? (
+      <EuiDescriptionList className="eui-textRight" textStyle="reverse">
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
+            defaultMessage="Agent policy"
+          />
+        </EuiDescriptionListTitle>
+        <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
+          {agentPolicy?.name || '-'}
+        </AgentPolicyName>
+      </EuiDescriptionList>
+    ) : undefined;
 
     const maxWidth = 770;
     return (

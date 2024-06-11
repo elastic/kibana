@@ -112,6 +112,7 @@ export {
   getRequestValidation,
   getResponseValidation,
   isFullValidatorContainer,
+  isKibanaResponse,
 } from './src/router';
 
 export type { ICspConfig } from './src/csp';
@@ -140,6 +141,7 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpProtocol,
 } from './src/http_contract';
 
 export type {

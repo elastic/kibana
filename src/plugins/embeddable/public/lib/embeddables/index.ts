@@ -19,10 +19,5 @@ export { EmbeddableRoot } from './embeddable_root';
 export { ErrorEmbeddable } from './error_embeddable';
 export { isErrorEmbeddable } from './is_error_embeddable';
 export { isEmbeddable } from './is_embeddable';
-export type {
-  EmbeddableAppContext,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from './i_embeddable';
+export type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 export { withEmbeddableSubscription } from './with_subscription';

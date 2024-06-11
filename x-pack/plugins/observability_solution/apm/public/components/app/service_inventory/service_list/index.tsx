@@ -382,19 +382,15 @@ export function ServiceList({
       <EuiFlexItem>
         <TryItButton
           isFeatureEnabled={isTableSearchBarEnabled}
-          promoLabel={i18n.translate('xpack.apm.serviceList.promoLabel', {
-            defaultMessage: 'Want to filter your services faster?',
-          })}
           linkLabel={
             isTableSearchBarEnabled
-              ? i18n.translate('xpack.apm.serviceList.turnFastFilterOff', {
-                  defaultMessage: 'Turn off Fast Filter',
+              ? i18n.translate('xpack.apm.serviceList.disableFastFilter', {
+                  defaultMessage: 'Disable fast filter',
                 })
-              : i18n.translate('xpack.apm.serviceList.turnFastFilterOn', {
-                  defaultMessage: 'Try the new Fast Filter',
+              : i18n.translate('xpack.apm.serviceList.enableFastFilter', {
+                  defaultMessage: 'Enable fast filter',
                 })
           }
-          icon="beaker"
           onClick={onChangeTableSearchBarVisibility}
           isLoading={isSavingSetting}
           popoverContent={
@@ -449,15 +445,15 @@ export function ServiceList({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               position="top"
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate('xpack.apm.servicesTable.tooltip.metricsExplanation', {
                 defaultMessage:
                   'Service metrics are aggregated on their transaction type, which can be request or page-load. If neither exists, metrics are aggregated on the top available transaction type.',
               })}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">

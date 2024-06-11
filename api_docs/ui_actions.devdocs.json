@@ -2454,7 +2454,7 @@
           {
             "parentPluginId": "uiActions",
             "id": "def-public.VisualizeFieldContext.query",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],

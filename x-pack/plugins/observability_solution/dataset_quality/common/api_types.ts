@@ -16,6 +16,7 @@ export const dataStreamStatRt = rt.intersection([
     sizeBytes: rt.number,
     lastActivity: rt.number,
     integration: rt.string,
+    totalDocs: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
   }),
 ]);
 
@@ -70,11 +71,32 @@ export const getIntegrationsResponseRt = rt.exact(
 
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
-  percentage: rt.number,
   count: rt.number,
+  docsCount: rt.number,
+  percentage: rt.number,
 });
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
+
+export const degradedFieldRt = rt.type({
+  name: rt.string,
+  count: rt.number,
+  lastOccurrence: rt.union([rt.null, rt.number]),
+  timeSeries: rt.array(
+    rt.type({
+      x: rt.number,
+      y: rt.number,
+    })
+  ),
+});
+
+export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
+
+export const getDataStreamDegradedFieldsResponseRt = rt.type({
+  degradedFields: rt.array(degradedFieldRt),
+});
+
+export type DegradedFieldResponse = rt.TypeOf<typeof getDataStreamDegradedFieldsResponseRt>;
 
 export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
@@ -113,8 +135,15 @@ export const dataStreamsEstimatedDataInBytesRT = rt.type({
   estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
 });
 
-export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstimatedDataInBytesRT>;
-
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
   dataStreamsEstimatedDataInBytesRT
 );
+
+export const getNonAggregatableDatasetsRt = rt.exact(
+  rt.type({
+    aggregatable: rt.boolean,
+    datasets: rt.array(rt.string),
+  })
+);
+
+export type NonAggregatableDatasets = rt.TypeOf<typeof getNonAggregatableDatasetsRt>;

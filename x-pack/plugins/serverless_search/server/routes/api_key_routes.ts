@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../plugin';
 
-export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependencies) => {
+export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/api_keys',
@@ -16,6 +16,7 @@ export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependen
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
+      const security = await getSecurity();
       const user = security.authc.getCurrentUser(request);
       if (user) {
         const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
@@ -37,6 +38,7 @@ export const registerApiKeyRoutes = ({ logger, router, security }: RouteDependen
       },
     },
     async (context, request, response) => {
+      const security = await getSecurity();
       const result = await security.authc.apiKeys.create(request, request.body);
       if (result) {
         const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };

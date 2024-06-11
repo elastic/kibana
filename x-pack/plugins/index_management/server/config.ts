@@ -35,6 +35,8 @@ const schemaLatest = schema.object(
     dev: schema.object({
       // deprecated as unused after index details page has been implemented
       enableIndexDetailsPage: schema.boolean({ defaultValue: false }),
+      // deprecate as unused after semantic text is enabled everywhere
+      enableSemanticText: schema.boolean({ defaultValue: false }),
     }),
     enableIndexStats: offeringBasedSchema({
       // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
@@ -52,6 +54,11 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
+    enableMappingsSourceFieldSection: offeringBasedSchema({
+      // The _source field in the Mappings editor's advanced options form is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
     enableTogglingDataRetention: offeringBasedSchema({
       // The toggle for enabling data retention for DSL in data streams UI is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
@@ -64,11 +71,15 @@ const schemaLatest = schema.object(
 const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
   exposeToBrowser: {
     ui: true,
+    dev: {
+      enableSemanticText: true,
+    },
     enableIndexActions: true,
     enableLegacyTemplates: true,
     enableIndexStats: true,
     editableIndexSettings: true,
     enableDataStreamsStorageColumn: true,
+    enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
   },
   schema: schemaLatest,

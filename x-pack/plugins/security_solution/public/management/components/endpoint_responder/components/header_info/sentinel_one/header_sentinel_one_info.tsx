@@ -6,21 +6,22 @@
  */
 
 import React, { memo } from 'react';
+import { AgentStatus } from '../../../../../../common/components/agents/agent_status';
+import { useAgentStatusHook } from '../../../../../hooks/agents/use_get_agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
-import { useAgentStatusHook } from '../../../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
-import { SentinelOneAgentStatus } from '../../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { HeaderAgentInfo } from '../header_agent_info';
 import type { Platform } from '../platforms';
 
 interface HeaderSentinelOneInfoProps {
   agentId: ThirdPartyAgentInfo['agent']['id'];
+  agentType: ThirdPartyAgentInfo['agent']['type'];
   platform: ThirdPartyAgentInfo['host']['os']['family'];
   hostName: ThirdPartyAgentInfo['host']['name'];
 }
 
 export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(
-  ({ agentId, platform, hostName }) => {
+  ({ agentId, agentType, platform, hostName }) => {
     const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
       'sentinelOneManualHostActionsEnabled'
     );
@@ -35,8 +36,9 @@ export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(
         hostName={hostName}
         lastCheckin={lastCheckin}
       >
-        <SentinelOneAgentStatus
+        <AgentStatus
           agentId={agentId}
+          agentType={agentType}
           data-test-subj="responderHeaderSentinelOneAgentIsolationStatus"
         />
       </HeaderAgentInfo>

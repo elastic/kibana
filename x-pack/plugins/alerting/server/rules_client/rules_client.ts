@@ -10,7 +10,7 @@ import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext } from './types';
-import { clone, CloneArguments } from './methods/clone';
+import { cloneRule, CloneRuleParams } from '../application/rule/methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
 import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
@@ -36,10 +36,10 @@ import {
   getRuleExecutionKPI,
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
-import { find, FindParams } from './methods/find';
+import { findRules, FindRulesParams } from '../application/rule/methods/find';
 import { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
-import { deleteRule } from './methods/delete';
+import { deleteRule, DeleteRuleParams } from '../application/rule/methods/delete';
 import {
   bulkDeleteRules,
   BulkDeleteRulesRequestBody,
@@ -127,13 +127,13 @@ export class RulesClient {
 
   public aggregate = <T = Record<string, unknown>>(params: AggregateParams<T>): Promise<T> =>
     aggregateRules<T>(this.context, params);
-  public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
-    clone<Params>(this.context, ...args);
+  public clone = <Params extends RuleTypeParams = never>(params: CloneRuleParams) =>
+    cloneRule<Params>(this.context, params);
   public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
     createRule<Params>(this.context, params);
-  public delete = (params: { id: string }) => deleteRule(this.context, params);
-  public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
-    find<Params>(this.context, params);
+  public delete = (params: DeleteRuleParams) => deleteRule(this.context, params);
+  public find = <Params extends RuleTypeParams = never>(params?: FindRulesParams) =>
+    findRules<Params>(this.context, params);
   public get = <Params extends RuleTypeParams = never>(params: GetRuleParams) =>
     getRule<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>

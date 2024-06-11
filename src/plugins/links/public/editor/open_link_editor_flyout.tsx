@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { coreServices } from '../services/kibana_services';
 import { Link } from '../../common/content_management';

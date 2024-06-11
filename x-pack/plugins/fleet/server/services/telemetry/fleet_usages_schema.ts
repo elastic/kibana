@@ -135,6 +135,26 @@ export const fleetAgentsSchema: RootSchema<any> = {
       },
     },
   },
+  agents_per_privileges: {
+    _meta: {
+      description: 'Agents per privileges telemetry',
+      optional: true,
+    },
+    properties: {
+      root: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents running with root privilege',
+        },
+      },
+      unprivileged: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents running without root privilege',
+        },
+      },
+    },
+  },
   upgrade_details: {
     _meta: {
       description: 'Agent upgrade details telemetry',
@@ -260,6 +280,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'The total number of enrolled Fleet Server agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled Fleet Server agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled Fleet Server agents',
         },
       },
       num_host_urls: {
@@ -392,5 +424,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
         },
       },
     },
+  },
+  license_issued_to: {
+    type: 'text',
+    _meta: { description: 'The name of the user the license is issued to' },
+  },
+  deployment_id: {
+    type: 'keyword',
+    _meta: { description: 'id of the deployment', optional: true },
   },
 };

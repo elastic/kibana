@@ -28,7 +28,9 @@
     "@kbn/code-editor-mock",
     "@kbn/custom-icons",
     "@kbn/react-field",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/discover-shared-plugin",
+    "@kbn/fields-metadata-plugin"
   ],
   "exclude": [
     "target/**/*",

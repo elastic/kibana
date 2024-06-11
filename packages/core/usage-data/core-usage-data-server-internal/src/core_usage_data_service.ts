@@ -333,6 +333,9 @@ export class CoreUsageDataService
       },
       environment: {
         memory: {
+          arrayBuffersBytes: this.opsMetrics.process.memory.array_buffers_in_bytes,
+          residentSetSizeBytes: this.opsMetrics.process.memory.resident_set_size_in_bytes,
+          externalBytes: this.opsMetrics.process.memory.external_in_bytes,
           heapSizeLimit: this.opsMetrics.process.memory.heap.size_limit,
           heapTotalBytes: this.opsMetrics.process.memory.heap.total_in_bytes,
           heapUsedBytes: this.opsMetrics.process.memory.heap.used_in_bytes,

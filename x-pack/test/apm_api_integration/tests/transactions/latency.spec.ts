@@ -25,7 +25,7 @@ type LatencyChartReturnType =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .ratePerMinute(GO_PROD_RATE)
             .generator((timestamp) =>
@@ -110,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       const expectedLatencyAvgValueMs =
         ((GO_PROD_RATE * GO_PROD_DURATION + GO_DEV_RATE * GO_DEV_DURATION) /
