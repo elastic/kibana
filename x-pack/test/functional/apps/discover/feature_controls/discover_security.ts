@@ -129,6 +129,7 @@ export default function (ctx: FtrProviderContext) {
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.match(re);
+          await PageObjects.share.closeShareModal();
         });
       });
 
@@ -213,6 +214,7 @@ export default function (ctx: FtrProviderContext) {
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.not.match(re);
+          await PageObjects.share.closeShareModal();
         });
       });
       savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
@@ -287,6 +289,7 @@ export default function (ctx: FtrProviderContext) {
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.match(re);
+          await PageObjects.share.closeShareModal();
         });
       });
 
