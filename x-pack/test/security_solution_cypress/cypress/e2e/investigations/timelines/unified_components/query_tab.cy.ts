@@ -36,7 +36,6 @@ import {
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { openTab } from '../../../../tasks/inspect';
 
-// FLAKY: https://github.com/elastic/kibana/issues/181882
 describe(
   'Unsaved Timeline query tab',
   {
