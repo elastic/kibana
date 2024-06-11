@@ -462,7 +462,24 @@ export class SearchInterceptor {
             chunks.push(chunk);
           }
 
-          const mergedChunks = chunks.length > 1 ? Buffer.concat(chunks) : chunks[0];
+          function concatenate(uint8arrays) {
+            const totalLength = uint8arrays.reduce(
+              (total, uint8array) => total + uint8array.byteLength,
+              0
+            );
+
+            const result = new Uint8Array(totalLength);
+
+            let offset = 0;
+            uint8arrays.forEach((uint8array) => {
+              result.set(uint8array, offset);
+              offset += uint8array.byteLength;
+            });
+
+            return result;
+          }
+
+          const mergedChunks = chunks.length > 1 ? concatenate(chunks) : chunks[0];
 
           if (mergedChunks[0] === 123) {
             // json
