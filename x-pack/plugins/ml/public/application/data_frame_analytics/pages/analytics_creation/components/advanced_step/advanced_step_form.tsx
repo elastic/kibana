@@ -402,6 +402,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             {
               defaultMessage:
                 'Define the name of the prediction field in the results. The default is <dependent_variable>_prediction.',
+              ignoreTag: true,
             }
           )}
         >
