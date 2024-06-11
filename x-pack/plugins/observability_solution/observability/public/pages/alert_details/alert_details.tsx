@@ -174,12 +174,7 @@ export function AlertDetails() {
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="l" />
-        <AlertSummary
-          alert={alertDetail.formatted}
-          ruleName={rule?.name}
-          ruleLink={rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''}
-          alertSummaryFields={summaryFields}
-        />
+        <AlertSummary alert={alertDetail.formatted} alertSummaryFields={summaryFields} />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
         {rule && alertDetail.formatted && (
@@ -189,7 +184,6 @@ export function AlertDetails() {
               rule={rule}
               timeZone={timeZone}
               setAlertSummaryFields={setSummaryFields}
-              ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
             />
             <EuiSpacer size="l" />
             <AlertHistoryChart

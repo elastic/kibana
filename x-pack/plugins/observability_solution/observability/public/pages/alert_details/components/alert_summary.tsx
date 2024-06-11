@@ -8,13 +8,21 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { TAGS, ALERT_START, ALERT_END } from '@kbn/rule-data-utils';
+import {
+  TAGS,
+  ALERT_START,
+  ALERT_END,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { TopAlert } from '../../..';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { getSources } from '../../../components/alert_overview/helpers/get_sources';
+import { useKibana } from '../../../utils/kibana_react';
+import { paths } from '../../../../common/locators/paths';
 
 export interface AlertSummaryField {
   label: ReactNode | string;
@@ -22,24 +30,27 @@ export interface AlertSummaryField {
 }
 interface AlertSummaryProps {
   alert: TopAlert;
-  ruleLink: string;
-  ruleName?: string;
   alertSummaryFields?: AlertSummaryField[];
 }
 
-export function AlertSummary({ alert, ruleName, ruleLink, alertSummaryFields }: AlertSummaryProps) {
+export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
+  const { http } = useKibana().services;
+
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
-  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const ruleName = alert.fields[ALERT_RULE_NAME];
+  const ruleId = alert.fields[ALERT_RULE_UUID];
+  const tags = alert.fields[TAGS];
+
+  const ruleLink = http.basePath.prepend(paths.observability.ruleDetails(ruleId));
+  const commonAlertSummaryFields = [];
+  const groups = getSources(alert) as Array<{ field: string; value: string }>;
 
   useEffect(() => {
     setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
   }, [alertStart, alertEnd]);
-
-  const commonAlertSummaryFields = [];
-
-  const groups = getSources(alert) as Array<{ field: string; value: string }>;
-  const tags = alert.fields[TAGS];
 
   if (groups && groups.length > 0) {
     commonAlertSummaryFields.push({
@@ -73,7 +84,7 @@ export function AlertSummary({ alert, ruleName, ruleLink, alertSummaryFields }: 
     }),
     value: (
       <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
-        {ruleName ?? '-'}
+        {ruleName}
       </EuiLink>
     ),
   });
