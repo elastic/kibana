@@ -373,8 +373,6 @@ examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
-src/plugins/discover/public/context_awareness/profile_providers/log_document_profile @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
-src/plugins/discover/public/context_awareness/profile_providers/logs_data_source_profile @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
