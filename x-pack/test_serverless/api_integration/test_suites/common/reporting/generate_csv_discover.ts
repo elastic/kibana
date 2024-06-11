@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('svlReportingApi');
 
   const svlUserManager = getService('svlUserManager');
-  let role: RoleCredentials;
+  let roleAuthc: RoleCredentials;
 
   /*
    * Helper function to decorate with common fields needed in the API call
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.timeout(12 * 60 * 1000);
 
     before(async () => {
-      role = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
 
     beforeEach(async () => {
@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(role);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('exported CSV', () => {
@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reportingAPI.deleteAllReports(role);
+        await reportingAPI.deleteAllReports(roleAuthc);
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
@@ -168,10 +168,10 @@ export default function ({ getService }: FtrProviderContext) {
             title: 'Ecommerce Data',
             version: '8.14.0',
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(124183);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -206,10 +206,10 @@ export default function ({ getService }: FtrProviderContext) {
             title: 'Untitled discover search',
             version: '8.14.0',
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        return reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        return reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
       }
 
       it('includes an unmapped field to the report', async () => {
@@ -352,10 +352,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(1270683);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -399,10 +399,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(914755);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -452,10 +452,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['@timestamp', 'clientip', 'extension'],
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(3020);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -493,10 +493,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['@timestamp', 'clientip', 'extension'],
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(3020);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -528,10 +528,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['date', 'message'],
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(103);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -552,10 +552,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['date', 'message'],
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(103);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -590,10 +590,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['date', 'message', '_id', '_index'],
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(134);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -617,10 +617,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: ['name', 'power'],
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(274);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -696,10 +696,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
             columns: [],
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(329);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
@@ -757,10 +757,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           }),
-          role
+          roleAuthc
         );
-        await reportingAPI.waitForJobToFinish(res.path, role);
-        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, role);
+        await reportingAPI.waitForJobToFinish(res.path, roleAuthc);
+        const csvFile = await reportingAPI.getCompletedJobOutput(res.path, roleAuthc);
         expect((csvFile as string).length).to.be(4826973);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();
       });
