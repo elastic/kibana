@@ -14,6 +14,7 @@ import {
 const useAlertResponseActionsSupportMock = (): AlertResponseActionsSupport => {
   return {
     isSupported: true,
+    unsupportedReason: undefined,
     isAlert: true,
     details: {
       agentId: '123',
