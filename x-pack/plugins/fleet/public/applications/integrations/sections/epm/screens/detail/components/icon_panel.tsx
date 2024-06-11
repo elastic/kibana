@@ -7,26 +7,11 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 
 import type { UsePackageIconType } from '../../../../../hooks';
 import { usePackageIconType } from '../../../../../hooks';
 import { Loading } from '../../../../../components';
-
-const Panel = styled(EuiPanel)`
-  padding: ${(props) => props.theme.eui.euiSizeXL};
-  width: ${(props) =>
-    parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.euiSizeXL) * 2}px;
-  svg,
-  img {
-    height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
-    width: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
-  }
-  .euiFlexItem {
-    height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
-    justify-content: center;
-  }
-`;
 
 export function IconPanel({
   packageName,
@@ -36,6 +21,21 @@ export function IconPanel({
 }: Pick<UsePackageIconType, 'packageName' | 'integrationName' | 'version' | 'icons'>) {
   const iconType = usePackageIconType({ packageName, integrationName, version, icons });
 
+  const { euiTheme } = useEuiTheme();
+  const Panel = styled(EuiPanel)`
+    padding: ${euiTheme.size.xl};
+    width: ${parseFloat(euiTheme.size.base) * 6 + parseFloat(euiTheme.size.xl) * 2}px;
+    svg,
+    img {
+      height: ${parseFloat(euiTheme.size.base) * 6}px;
+      width: ${parseFloat(euiTheme.size.base) * 6}px;
+    }
+    .euiFlexItem {
+      height: ${parseFloat(euiTheme.size.base) * 6}px;
+      justify-content: center;
+    }
+  `;
+
   return (
     <Panel>
       <EuiIcon type={iconType} size="original" />
@@ -44,6 +44,21 @@ export function IconPanel({
 }
 
 export function LoadingIconPanel() {
+  const { euiTheme } = useEuiTheme();
+  const Panel = styled(EuiPanel)`
+    padding: ${euiTheme.size.xl};
+    width: ${parseFloat(euiTheme.size.base) * 6 + parseFloat(euiTheme.size.xl) * 2}px;
+    svg,
+    img {
+      height: ${parseFloat(euiTheme.size.base) * 6}px;
+      width: ${parseFloat(euiTheme.size.base) * 6}px;
+    }
+    .euiFlexItem {
+      height: ${parseFloat(euiTheme.size.base) * 6}px;
+      justify-content: center;
+    }
+  `;
+
   return (
     <Panel>
       <Loading />

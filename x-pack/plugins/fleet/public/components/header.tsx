@@ -7,33 +7,9 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
-
-const Container = styled.div`
-  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
-
-  @media (max-width: 767px) {
-    .euiFlexItem {
-      margin-bottom: 0 !important;
-    }
-  }
-`;
-
-const Wrapper = styled.div<{ maxWidth?: number | string }>`
-  max-width: ${(props) =>
-    typeof props.maxWidth === 'number'
-      ? `${props.maxWidth || 1200}px` || props.maxWidth
-      : props.maxWidth};
-
-  margin-left: auto;
-  margin-right: auto;
-  padding-top: ${(props) => props.theme.eui.euiSizeXL};
-  padding-left: ${(props) => props.theme.eui.euiSizeM};
-  padding-right: ${(props) => props.theme.eui.euiSizeM};
-`;
 
 const Tabs = styled(EuiTabs)`
   top: 1px;
@@ -71,33 +47,59 @@ export const Header: React.FC<HeaderProps> = ({
   maxWidth,
   tabsClassName,
   'data-test-subj': dataTestSubj,
-}) => (
-  <Container data-test-subj={dataTestSubj}>
-    <Wrapper maxWidth={maxWidth}>
-      {topContent}
-      <HeaderColumns
-        leftColumn={leftColumn}
-        rightColumn={rightColumn}
-        rightColumnGrow={rightColumnGrow}
-      />
-      <EuiFlexGroup>
-        {tabs ? (
-          <EuiFlexItem>
-            <EuiSpacer size="s" />
-            <Tabs className={tabsClassName}>
-              {tabs.map((props, index) => (
-                <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>
-                  {props.name}
-                </EuiTab>
-              ))}
-            </Tabs>
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem>
-            <EuiSpacer size="l" />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </Wrapper>
-  </Container>
-);
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const Container = styled.div`
+    border-bottom: ${euiTheme.border.thin};
+    background-color: ${euiTheme.colors.lightestShade};
+
+    @media (max-width: ${euiTheme.breakpoint.m}) {
+      .euiFlexItem {
+        margin-bottom: 0 !important;
+      }
+    }
+  `;
+
+  const Wrapper = styled.div<{ maxWidth?: number | string }>`
+    max-width: ${(props) =>
+      typeof props.maxWidth === 'number'
+        ? `${props.maxWidth || 1200}px` || props.maxWidth
+        : props.maxWidth};
+
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: ${euiTheme.size.xl};
+    padding-left: ${euiTheme.size.m};
+    padding-right: ${euiTheme.size.m};
+  `;
+  return (
+    <Container data-test-subj={dataTestSubj}>
+      <Wrapper maxWidth={maxWidth}>
+        {topContent}
+        <HeaderColumns
+          leftColumn={leftColumn}
+          rightColumn={rightColumn}
+          rightColumnGrow={rightColumnGrow}
+        />
+        <EuiFlexGroup>
+          {tabs ? (
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+              <Tabs className={tabsClassName}>
+                {tabs.map((props, index) => (
+                  <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>
+                    {props.name}
+                  </EuiTab>
+                ))}
+              </Tabs>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem>
+              <EuiSpacer size="l" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </Wrapper>
+    </Container>
+  );
+};

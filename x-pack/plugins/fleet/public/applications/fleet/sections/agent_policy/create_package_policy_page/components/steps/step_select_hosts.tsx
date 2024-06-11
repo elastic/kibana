@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { useGetAgentPolicies } from '../../../../../hooks';
@@ -24,12 +24,6 @@ export enum SelectedPolicyTab {
   NEW = 'new',
   EXISTING = 'existing',
 }
-
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  [role='tabpanel'] {
-    padding-top: ${(props) => props.theme.eui.euiSizeM};
-  }
-`;
 
 interface Props {
   agentPolicy: AgentPolicy | undefined;
@@ -118,6 +112,13 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
 
   const handleOnTabClick = (tab: EuiTabbedContentTab) =>
     updateSelectedTab(tab.id as SelectedPolicyTab);
+
+  const { euiTheme } = useEuiTheme();
+  const StyledEuiTabbedContent = styled(EuiTabbedContent)`
+    [role='tabpanel'] {
+      padding-top: ${(props) => euiTheme.size.m};
+    }
+  `;
 
   return agentPolicies.length > 0 ? (
     <StyledEuiTabbedContent

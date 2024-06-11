@@ -10,10 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { NoArgCallback } from '@elastic/eui';
-import { EuiTourStep, EuiLink, EuiText } from '@elastic/eui';
-import { useTheme } from 'styled-components';
-
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { EuiTourStep, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 
 import { useStartServices } from '../hooks';
 import { useDismissableTour } from '../hooks/use_dismissable_tour';
@@ -29,8 +26,8 @@ export const AddAgentHelpPopover = ({
   offset?: number;
   closePopover: NoArgCallback<void>;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { docLinks } = useStartServices();
-  const theme = useTheme() as EuiTheme;
   const optionalProps: { offset?: number } = {};
   const addAgentTour = useDismissableTour('ADD_AGENT_POPOVER');
 
@@ -62,7 +59,7 @@ export const AddAgentHelpPopover = ({
           />
         </EuiText>
       }
-      zIndex={theme.eui.euiZLevel1 - 1} // put popover behind any modals that happen to be open
+      zIndex={euiTheme.levels.flyout as number} // put popover behind any modals that happen to be open
       isStepOpen={isOpen}
       minWidth={300}
       onFinish={addAgentTour.dismiss}

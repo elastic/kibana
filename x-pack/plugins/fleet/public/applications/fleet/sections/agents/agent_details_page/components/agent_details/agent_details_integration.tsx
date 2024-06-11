@@ -29,39 +29,6 @@ import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
 import { getInputUnitsByPackage } from './input_status_utils';
 
-const StyledEuiAccordion = styled(EuiAccordion)`
-  .euiAccordion__button {
-    width: 90%;
-  }
-
-  .euiAccordion__triggerWrapper {
-    padding-left: ${(props) => props.theme.eui.euiSizeM};
-  }
-
-  &.euiAccordion-isOpen {
-    .euiAccordion__childWrapper {
-      padding: ${(props) => props.theme.eui.euiSizeM};
-      padding-top: 0px;
-    }
-  }
-
-  .ingest-integration-title-button {
-    padding: ${(props) => props.theme.eui.euiSizeS};
-  }
-
-  .euiTableRow:last-child .euiTableRowCell {
-    border-bottom: none;
-  }
-
-  .euiIEFlexWrapFix {
-    min-width: 0;
-  }
-
-  .euiAccordion__buttonContent {
-    width: 100%;
-  }
-`;
-
 const CollapsablePanel: React.FC<{
   children: React.ReactNode;
   id: string;
@@ -77,6 +44,39 @@ const CollapsablePanel: React.FC<{
     return undefined;
   }, [dataTestSubj]);
 
+  const { euiTheme } = useEuiTheme();
+  const StyledEuiAccordion = styled(EuiAccordion)`
+    .euiAccordion__button {
+      width: 90%;
+    }
+
+    .euiAccordion__triggerWrapper {
+      padding-left: ${euiTheme.size.m};
+    }
+
+    &.euiAccordion-isOpen {
+      .euiAccordion__childWrapper {
+        padding: ${euiTheme.size.m};
+        padding-top: 0px;
+      }
+    }
+
+    .ingest-integration-title-button {
+      padding: ${euiTheme.size.m};
+    }
+
+    .euiTableRow:last-child .euiTableRowCell {
+      border-bottom: none;
+    }
+
+    .euiIEFlexWrapFix {
+      min-width: 0;
+    }
+
+    .euiAccordion__buttonContent {
+      width: 100%;
+    }
+  `;
   return (
     <EuiPanel paddingSize="none">
       <StyledEuiAccordion

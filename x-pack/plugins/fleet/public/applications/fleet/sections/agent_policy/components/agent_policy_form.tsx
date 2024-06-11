@@ -13,6 +13,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -29,12 +30,6 @@ import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_field
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
 import type { ValidationResults } from './agent_policy_validation';
-
-const StyledEuiAccordion = styled(EuiAccordion)`
-  .ingest-active-button {
-    color: ${(props) => props.theme.eui.euiColorPrimary};
-  }
-`;
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -93,6 +88,13 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
       {children}
     </EuiDescribedFormGroup>
   );
+
+  const { euiTheme } = useEuiTheme();
+  const StyledEuiAccordion = styled(EuiAccordion)`
+    .ingest-active-button {
+      color: ${euiTheme.colors.primary};
+    }
+  `;
 
   return (
     <AgentPolicyFormContext.Provider

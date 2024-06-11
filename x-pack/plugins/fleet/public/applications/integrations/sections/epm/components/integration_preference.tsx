@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { usePutSettingsMutation, useStartServices } from '../../../hooks';
@@ -45,43 +46,9 @@ const recommendedTooltip = (
   />
 );
 
-const Item = styled(EuiFlexItem)`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
-`;
-
 const EuiSwitchNoWrap = styled(EuiSwitch)`
   white-space: nowrap;
 `;
-
-const options: Option[] = [
-  {
-    type: 'recommended',
-    label: (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.fleet.epm.integrationPreference.recommendedLabel', {
-            defaultMessage: 'Recommended',
-          })}
-        </EuiFlexItem>
-        <Item>
-          <EuiIconTip content={recommendedTooltip} />
-        </Item>
-      </EuiFlexGroup>
-    ),
-  },
-  {
-    type: 'agent',
-    label: i18n.translate('xpack.fleet.epm.integrationPreference.elasticAgentLabel', {
-      defaultMessage: 'Elastic Agent only',
-    }),
-  },
-  {
-    type: 'beats',
-    label: i18n.translate('xpack.fleet.epm.integrationPreference.beatsLabel', {
-      defaultMessage: 'Beats only',
-    }),
-  },
-];
 
 export const IntegrationPreference = ({
   initialType,
@@ -136,6 +103,41 @@ export const IntegrationPreference = ({
       values={{ link }}
     />
   );
+
+  const { euiTheme } = useEuiTheme();
+  const Item = styled(EuiFlexItem)`
+    padding-left: ${euiTheme.size.xs};
+  `;
+
+  const options: Option[] = [
+    {
+      type: 'recommended',
+      label: (
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.fleet.epm.integrationPreference.recommendedLabel', {
+              defaultMessage: 'Recommended',
+            })}
+          </EuiFlexItem>
+          <Item>
+            <EuiIconTip content={recommendedTooltip} />
+          </Item>
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      type: 'agent',
+      label: i18n.translate('xpack.fleet.epm.integrationPreference.elasticAgentLabel', {
+        defaultMessage: 'Elastic Agent only',
+      }),
+    },
+    {
+      type: 'beats',
+      label: i18n.translate('xpack.fleet.epm.integrationPreference.beatsLabel', {
+        defaultMessage: 'Beats only',
+      }),
+    },
+  ];
 
   const radios = options.map((option) => ({
     id: option.type,

@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useCallback, useState } from 'react';
 import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
-import sytled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import {
   EuiFlexGroup,
@@ -24,11 +24,10 @@ import {
   euiDragDropReorder,
   EuiFormErrorText,
   EuiTextArea,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 export interface MultiRowInputProps {
   id: string;
@@ -71,10 +70,6 @@ interface NonSortableTextFieldProps {
   deletable?: boolean;
 }
 
-const DraggableDiv = sytled.div`
-  margin: ${(props) => props.theme.eui.euiSizeS};
-`;
-
 function displayErrors(errors?: string[]) {
   return errors?.length
     ? errors.map((error, errorIndex) => (
@@ -101,7 +96,11 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
     }, [onDelete, index]);
 
     const isInvalid = (errors?.length ?? 0) > 0;
-    const theme = useTheme() as EuiTheme;
+    const { euiTheme } = useEuiTheme();
+
+    const DraggableDiv = styled.div`
+      margin: ${euiTheme.size.s};
+    `;
 
     return (
       <EuiDraggable
@@ -120,11 +119,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
             alignItems="center"
             gutterSize="none"
             responsive={false}
-            style={
-              state.isDragging
-                ? { background: theme.eui.euiPanelBackgroundColorModifiers.plain }
-                : {}
-            }
+            style={state.isDragging ? { background: euiTheme.colors.emptyShade } : {}}
           >
             <EuiFlexItem grow={false}>
               <DraggableDiv

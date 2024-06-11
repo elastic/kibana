@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiToolTip,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { useAuthz, useLink } from '../../../../../hooks';
@@ -38,12 +39,6 @@ export interface HeaderRightContentProps {
   setIsAddAgentHelpPopoverOpen: (state: boolean) => void;
 }
 
-const Divider = styled.div`
-  width: 0;
-  height: 100%;
-  border-left: ${(props) => props.theme.eui.euiBorderThin};
-`;
-
 export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps> = ({
   isLoading,
   agentPolicy,
@@ -55,6 +50,13 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   const authz = useAuthz();
   const { getPath } = useLink();
   const history = useHistory();
+
+  const { euiTheme } = useEuiTheme();
+  const Divider = styled.div`
+    width: 0;
+    height: 100%;
+    border-left: ${euiTheme.border.thin};
+  `;
 
   const isFleetServerPolicy = useMemo(
     () =>

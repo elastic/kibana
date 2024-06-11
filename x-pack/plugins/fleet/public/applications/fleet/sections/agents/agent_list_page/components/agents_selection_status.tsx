@@ -7,29 +7,13 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { Agent } from '../../../../types';
 
 import type { SelectionMode } from './types';
-
-const Divider = styled.div`
-  width: 0;
-  height: ${(props) => props.theme.eui.euiSizeL};
-  border-left: ${(props) => props.theme.eui.euiBorderThin};
-`;
-
-const FlexItem = styled(EuiFlexItem)`
-  height: ${(props) => props.theme.eui.euiSizeL};
-`;
-
-const Button = styled(EuiButtonEmpty)`
-  .euiButtonEmpty__text {
-    font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-  }
-`;
 
 export const AgentsSelectionStatus: React.FunctionComponent<{
   totalAgents: number;
@@ -55,6 +39,23 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
     selectionMode === 'manual' &&
     selectedAgents.length === selectableAgents &&
     selectableAgents < totalAgents - managedAgentsOnCurrentPage;
+
+  const { euiTheme } = useEuiTheme();
+  const Divider = styled.div`
+    width: 0;
+    height: ${euiTheme.size.l};
+    border-left: ${euiTheme.border.thin};
+  `;
+
+  const FlexItem = styled(EuiFlexItem)`
+    height: ${euiTheme.size.l};
+  `;
+
+  const Button = styled(EuiButtonEmpty)`
+    .euiButtonEmpty__text {
+      font-size: ${euiTheme.font.scale.xs};
+    }
+  `;
 
   return (
     <>
