@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -16,14 +17,15 @@ import {
   EuiForm,
   EuiFormRow,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
+import { useEffect } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { DataSourceTypeSelector } from './field_stats_initializer_view_type';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldStatsESQLEditor } from './field_stats_esql_editor';
 import type {
@@ -32,6 +34,7 @@ import type {
 } from '../grid_embeddable/types';
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { DataSourceTypeSelector } from './field_stats_initializer_view_type';
 export interface FieldStatsInitializerProps {
   initialInput?: Partial<FieldStatisticsTableEmbeddableState>;
   onCreate: (props: FieldStatsInitialState) => void;
@@ -59,12 +62,19 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
   const [viewType, setViewType] = useState(
-    initialInput?.viewType ?? FieldStatsInitializerViewType.ESQL
+    initialInput?.viewType ?? FieldStatsInitializerViewType.DATA_VIEW
   );
-  // @TODO: remove
-  console.log(`--@@initialInput?.query`, initialInput?.query);
   const [esqlQuery, setQuery] = useState<AggregateQuery>(initialInput?.query ?? defaultESQLQuery);
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
+
+  useEffect(() => {
+    if (initialInput?.viewType === undefined) {
+      // By default, if ES|QL is enabled, then use ES|QL
+      setViewType(
+        isEsqlEnabled ? FieldStatsInitializerViewType.ESQL : FieldStatsInitializerViewType.DATA_VIEW
+      );
+    }
+  }, [isEsqlEnabled, initialInput?.viewType]);
 
   const isEsqlMode = viewType === FieldStatsInitializerViewType.ESQL;
   const updatedProps = useMemo(() => {
@@ -95,7 +105,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     <>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2 id={'changePointConfig'}>
+          <h2 id={'fieldStatsConfig'}>
             <FormattedMessage
               id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.modalTitle"
               defaultMessage="Field statistics configuration"
@@ -106,7 +116,18 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
 
       <EuiFlyoutBody>
         <EuiForm>
-          <DataSourceTypeSelector value={viewType} onChange={setViewType} />
+          {initialInput?.viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
+            <>
+              <DataSourceTypeSelector value={viewType} onChange={setViewType} />
+            </>
+          ) : null}
+          {viewType === FieldStatsInitializerViewType.ESQL && !isEsqlEnabled ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCodeBlock>{esqlQuery.esql}</EuiCodeBlock>
+            </>
+          ) : null}
+
           {viewType === FieldStatsInitializerViewType.DATA_VIEW ? (
             <EuiFormRow
               fullWidth
