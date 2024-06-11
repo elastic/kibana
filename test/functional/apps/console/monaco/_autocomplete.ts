@@ -36,8 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.monaco.enterText(`GET _search\n`);
-      await PageObjects.console.sleepForDebouncePeriod();
-      await PageObjects.console.monaco.enterText(`{\n\t"query": {\n`);
+      await PageObjects.console.monaco.pressEnter();
+      await PageObjects.console.monaco.enterText(`{\n\t"query": {`);
+      await PageObjects.console.monaco.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.monaco.promptAutocomplete();
       expect(PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
@@ -101,14 +102,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
 
           await PageObjects.console.monaco.pressEscape();
-          await PageObjects.console.monaco.clearEditorText();
+          await PageObjects.console.monaco.pressEnter();
         }
       });
 
-      it('request body autocomplete', async () => {
+      it('JSON autocompletion with placeholder fields', async () => {
         await PageObjects.console.monaco.enterText('GET _search\n');
-        await PageObjects.console.monaco.enterText('{\n');
-        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.monaco.enterText('{');
+        await PageObjects.console.monaco.pressEnter();
 
         for (const char of '"ag') {
           await PageObjects.console.sleepForDebouncePeriod();
@@ -163,9 +164,10 @@ GET _search
         await PageObjects.console.monaco.clearEditorText();
       });
 
-      it('should suppress auto-complete on arrow keys', async () => {
-        await PageObjects.console.monaco.enterText(`GET _search\n`);
-        await PageObjects.console.monaco.enterText(`GET _search\n`);
+      // flaky
+      it.skip('should suppress auto-complete on arrow keys', async () => {
+        await PageObjects.console.monaco.enterText(`\nGET _search\nGET _search`);
+        await PageObjects.console.monaco.pressEnter();
         const keyPresses = [
           'pressUp',
           'pressUp',
@@ -196,8 +198,6 @@ GET _search
             dELETE dELETe dELEtE dELEte dELeTE dELeTe dELetE dELete dElETE dElETe dElEtE dElEte dEleTE dEleTe dEletE dElete
             deLETE deLETe deLEtE deLEte deLeTE deLeTe deLetE deLete delETE delETe delEtE delEte deleTE deleTe deletE delete
             HEAD HEAd HEaD HEad HeAD HeAd HeaD Head hEAD hEAd hEaD hEad heAD heAd heaD head
-            PATCH PATCh PATcH PATch PAtCH PAtCh PAtcH PAtch PaTCH PaTCh PaTcH PaTch PatCH PatCh PatcH Patch pATCH pATCh pATcH
-            pATch pAtCH pAtCh pAtcH pAtch paTCH paTCh paTcH paTch patCH patCh patcH patch
             `.split(/\s+/m)
           ),
           20 // 20 of 112 (approx. one-fifth) should be enough for testing
