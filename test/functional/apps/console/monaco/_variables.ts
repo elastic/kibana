@@ -53,7 +53,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     describe('with variables in request body', () => {
-      it('should send a successful request', async () => {
+      // bug in monaco https://github.com/elastic/kibana/issues/185999
+      it.skip('should send a successful request', async () => {
         await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });
         await PageObjects.console.monaco.enterText('\n GET _search\n');
         await PageObjects.console.monaco.enterText(`{\n\t"query": "\${query1}"`);

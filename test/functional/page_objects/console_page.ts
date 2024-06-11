@@ -28,6 +28,20 @@ export class ConsolePageObject extends FtrService {
       const editorViewDiv = await codeEditor.findByClassName('view-lines');
       return await editorViewDiv.getVisibleText();
     },
+    getEditorTextAtLine: async (line: number) => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      const editorViewDiv = await codeEditor.findAllByClassName('view-line');
+      return await editorViewDiv[line].getVisibleText();
+    },
+    getCurrentLineNumber: async () => {
+      const textArea = await this.monaco.getTextArea();
+      const styleAttribute = (await textArea.getAttribute('style')) ?? '';
+      const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
+      const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
+      // calculate the line number by dividing the top position by the line height
+      // and adding 1 because line numbers start at 1
+      return Math.ceil(top / height) + 1;
+    },
     clearEditorText: async () => {
       const textArea = await this.monaco.getTextArea();
       await textArea.clickMouseButton();
@@ -89,6 +103,39 @@ export class ConsolePageObject extends FtrService {
         Key.SPACE,
       ]);
     },
+    pressCtrlEnter: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.ENTER,
+      ]);
+    },
+    pressCtrlI: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'i']);
+    },
+    pressCtrlUp: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.UP,
+      ]);
+    },
+    pressCtrlDown: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([
+        Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+        Key.DOWN,
+      ]);
+    },
+    pressCtrlL: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'l']);
+    },
+    pressCtrlSlash: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], '/']);
+    },
     pressEscape: async () => {
       const textArea = await this.monaco.getTextArea();
       await textArea.pressKeys(Key.ESCAPE);
@@ -111,6 +158,15 @@ export class ConsolePageObject extends FtrService {
     responseHasDeprecationWarning: async () => {
       const response = await this.monaco.getOutputText();
       return response.trim().startsWith('#!');
+    },
+    selectCurrentRequest: async () => {
+      const textArea = await this.monaco.getTextArea();
+      await textArea.clickMouseButton();
+    },
+    getFontSize: async () => {
+      const codeEditor = await this.testSubjects.find('consoleMonacoEditor');
+      const editorViewDiv = await codeEditor.findByClassName('view-line');
+      return await editorViewDiv.getComputedStyle('font-size');
     },
   };
 
