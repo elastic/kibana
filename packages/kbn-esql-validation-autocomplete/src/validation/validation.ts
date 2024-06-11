@@ -205,8 +205,8 @@ function validateFunctionColumnArg(
   const messages: ESQLMessage[] = [];
   if (isColumnItem(actualArg)) {
     if (actualArg.name) {
-      const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
-      if (!columnCheck) {
+      const { hit, nameHit } = columnExists(actualArg, references);
+      if (!hit) {
         if (argDef.constantOnly) {
           messages.push(
             getMessageFromId({
@@ -1150,13 +1150,14 @@ async function validateAst(
   messages.push(...validateUnsupportedTypeFields(availableFields));
 
   for (const command of ast) {
-    const commandMessages = validateCommand(command, {
+    const references: ReferenceMaps = {
       sources,
       fields: availableFields,
       policies: availablePolicies,
       variables,
       query: queryString,
-    });
+    };
+    const commandMessages = validateCommand(command, references);
     messages.push(...commandMessages);
   }
 
