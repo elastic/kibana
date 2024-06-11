@@ -1,13 +1,30 @@
-TRIM
+## TRIM
 
-Syntax
-Parameters
-string
-String expression. If null, the function returns null.
-DescriptionRemoves leading and trailing whitespaces from a string.Supported types
-Example
+The `TRIM` function in ES|QL is used to remove leading and trailing whitespaces from a string. If the string expression is null, the function will return null.
+
+### Syntax
+
+`TRIM(string)`
+
+#### Parameters
+
+`string`: A string expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `TRIM` function in ES|QL:
+
 ```esql
 ROW message = "   some text  ",  color = " red "
 | EVAL message = TRIM(message)
 | EVAL color = TRIM(color)
 ```
+
+In this example, the `TRIM` function is used to remove the leading and trailing whitespaces from the `message` and `color` strings.
+
+```esql
+ROW name = "   John Doe   "
+| EVAL trimmed_name = TRIM(name)
+```
+
+In this second example, the `TRIM` function is used to remove the leading and trailing whitespaces from the `name` string.
