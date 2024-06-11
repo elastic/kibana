@@ -144,7 +144,7 @@ export const getCustomHeartbeatId = (
 
 export const getMonitorSchedule = (
   schedule: number | string | MonitorFields['schedule'],
-  defaultValue: MonitorFields['schedule']
+  defaultValue?: MonitorFields['schedule']
 ) => {
   if (!schedule && defaultValue) {
     return defaultValue;
