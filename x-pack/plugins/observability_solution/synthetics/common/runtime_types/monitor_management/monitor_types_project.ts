@@ -23,7 +23,7 @@ export const ProjectMonitorCodec = t.intersection([
     type: t.string,
     id: t.string,
     name: t.string,
-    schedule: t.number,
+    schedule: t.union([t.number, t.string]),
   }),
   t.partial({
     content: t.string,
