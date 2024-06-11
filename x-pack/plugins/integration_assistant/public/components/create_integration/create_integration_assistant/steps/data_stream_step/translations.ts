@@ -46,6 +46,12 @@ export const NO_SPACES_HELP = i18n.translate(
     defaultMessage: 'It can not contain spaces, only lowercase letters, numbers and underscore (_)',
   }
 );
+export const NAME_ALREADY_EXISTS_ERROR = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.nameAlreadyExistsError',
+  {
+    defaultMessage: 'This integration name is already in use. Please choose a different name.',
+  }
+);
 
 export const DATA_STREAM_TITLE_LABEL = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.dataStreamTitle.label',

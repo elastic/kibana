@@ -6,6 +6,6 @@
  */
 
 import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
-import type { IntegrationAssistantServices } from '../../types';
+import type { CreateIntegrationServices } from './types';
 
-export const useKibana = () => _useKibana<IntegrationAssistantServices>();
+export const useKibana = () => _useKibana<CreateIntegrationServices>();

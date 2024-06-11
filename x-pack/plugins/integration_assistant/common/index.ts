@@ -22,6 +22,7 @@ export type {
   EcsMappingApiResponse,
   CheckPipelineApiResponse,
   InstallPackageResponse,
+  GetPackagesResponse,
 } from './types';
 
 export {

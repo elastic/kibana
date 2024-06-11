@@ -412,6 +412,7 @@ export const initialState: State = {
     inputType: 'filestream',
     logsSampleParsed: rawSamples,
   },
+  invalidSettings: [],
   isGenerating: false,
   result,
 };

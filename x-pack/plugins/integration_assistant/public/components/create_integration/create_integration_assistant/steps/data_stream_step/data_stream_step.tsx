@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -22,6 +22,7 @@ import { StepContentWrapper } from '../step_content_wrapper';
 import { SampleLogsInput } from './sample_logs_input';
 import type { OnComplete } from './generation_modal';
 import { GenerationModal } from './generation_modal';
+import { useLoadPackageNames } from './use_load_package_names';
 import * as i18n from './translations';
 
 export const InputTypeOptions: Array<{ value: InputType; text: string }> = [
@@ -45,25 +46,41 @@ const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-
 
 interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];
+  invalidSettings: State['invalidSettings'];
   connectorId: State['connectorId'];
   isGenerating: State['isGenerating'];
   setIntegrationSettings: Actions['setIntegrationSettings'];
   setIsGenerating: Actions['setIsGenerating'];
   setStep: Actions['setStep'];
   setResult: Actions['setResult'];
+  setInvalidSettings: Actions['setInvalidSettings'];
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
   ({
     integrationSettings,
+    invalidSettings,
     connectorId,
     isGenerating,
     setIntegrationSettings,
+    setInvalidSettings,
     setIsGenerating,
     setStep,
     setResult,
   }) => {
-    const [invalidField, setInvalidField] = useState({ name: false, dataStreamName: false });
+    const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames();
 
+    const addInvalidSetting = useCallback(
+      (fieldName: keyof IntegrationSettings) => {
+        setInvalidSettings([...(invalidSettings ?? []), fieldName]);
+      },
+      [invalidSettings, setInvalidSettings]
+    );
+    const removeInvalidSetting = useCallback(
+      (fieldName: keyof IntegrationSettings) => {
+        setInvalidSettings(invalidSettings?.filter((key) => key !== fieldName) ?? []);
+      },
+      [invalidSettings, setInvalidSettings]
+    );
     const setIntegrationValues = useCallback(
       (settings: Partial<IntegrationSettings>) =>
         setIntegrationSettings({ ...integrationSettings, ...settings }),
@@ -74,10 +91,10 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
       return {
         name: (e: React.ChangeEvent<HTMLInputElement>) => {
           const name = e.target.value;
-          if (!isValidName(name)) {
-            setInvalidField((current) => ({ ...current, name: true }));
+          if (!isValidName(name) || packageNames?.has(name)) {
+            addInvalidSetting('name');
           } else {
-            setInvalidField((current) => ({ ...current, name: false }));
+            removeInvalidSetting('name');
           }
           setIntegrationValues({ name });
         },
@@ -86,11 +103,10 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
         dataStreamDescription: (e: React.ChangeEvent<HTMLInputElement>) =>
           setIntegrationValues({ dataStreamDescription: e.target.value }),
         dataStreamName: (e: React.ChangeEvent<HTMLInputElement>) => {
-          const dataStreamName = e.target.value;
-          if (!isValidName(dataStreamName)) {
-            setInvalidField((current) => ({ ...current, dataStreamName: true }));
+          if (!isValidName(e.target.value)) {
+            addInvalidSetting('dataStreamName');
           } else {
-            setInvalidField((current) => ({ ...current, dataStreamName: false }));
+            removeInvalidSetting('dataStreamName');
           }
           setIntegrationValues({ dataStreamName: e.target.value });
         },
@@ -98,19 +114,27 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           setIntegrationValues({ inputType: e.target.value as InputType });
         },
       };
-    }, [setIntegrationValues, setInvalidField]);
+    }, [setIntegrationValues, addInvalidSetting, removeInvalidSetting, packageNames]);
 
     useEffect(() => {
-      const defaultNames: Partial<IntegrationSettings> = {};
-      if (integrationSettings?.title && integrationSettings.name == null) {
-        defaultNames.name = getNameFromTitle(integrationSettings.title);
+      if (packageNames != null) {
+        const defaultNames: Partial<IntegrationSettings> = {};
+        if (integrationSettings?.title && integrationSettings.name == null) {
+          const generatedName = getNameFromTitle(integrationSettings.title);
+          if (!packageNames.has(generatedName)) {
+            defaultNames.name = generatedName;
+          }
+        }
+        if (integrationSettings?.dataStreamTitle && integrationSettings.dataStreamName == null) {
+          const generatedDataStreamName = getNameFromTitle(integrationSettings.dataStreamTitle);
+          if (!packageNames.has(generatedDataStreamName)) {
+            defaultNames.dataStreamName = generatedDataStreamName;
+          }
+        }
+        setIntegrationValues(defaultNames);
       }
-      if (integrationSettings?.dataStreamTitle && integrationSettings.dataStreamName == null) {
-        defaultNames.dataStreamName = getNameFromTitle(integrationSettings.dataStreamTitle);
-      }
-      setIntegrationValues(defaultNames);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [packageNames]);
 
     const onGenerationCompleted = useCallback<OnComplete>(
       (result: State['result']) => {
@@ -126,6 +150,12 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
       setIsGenerating(false); // aborts generation
     }, [setIsGenerating]);
 
+    const nameInputError = useMemo(() => {
+      if (packageNames && integrationSettings?.name && packageNames.has(integrationSettings.name)) {
+        return [i18n.NAME_ALREADY_EXISTS_ERROR];
+      }
+    }, [packageNames, integrationSettings?.name]);
+
     return (
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem>
@@ -135,12 +165,19 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           >
             <EuiPanel hasShadow={false} hasBorder>
               <EuiForm component="form" fullWidth>
-                <EuiFormRow label={i18n.INTEGRATION_NAME_LABEL} helpText={i18n.NO_SPACES_HELP}>
+                <EuiFormRow
+                  label={i18n.INTEGRATION_NAME_LABEL}
+                  helpText={i18n.NO_SPACES_HELP}
+                  isInvalid={!!nameInputError}
+                  error={nameInputError}
+                >
                   <EuiFieldText
                     name="name"
                     value={integrationSettings?.name ?? ''}
                     onChange={onChange.name}
-                    isInvalid={invalidField.name}
+                    isInvalid={invalidSettings?.includes('name')}
+                    isLoading={isLoadingPackageNames}
+                    disabled={isLoadingPackageNames}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -174,7 +211,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                     name="dataStreamName"
                     value={integrationSettings?.dataStreamName ?? ''}
                     onChange={onChange.dataStreamName}
-                    isInvalid={invalidField.dataStreamName}
+                    isInvalid={invalidSettings?.includes('dataStreamName')}
                   />
                 </EuiFormRow>
                 <EuiFormRow label={i18n.DATA_COLLECTION_METHOD_LABEL}>

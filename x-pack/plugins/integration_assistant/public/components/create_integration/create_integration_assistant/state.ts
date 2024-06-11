@@ -6,13 +6,14 @@
  */
 
 import type { Pipeline } from '../../../../common/types';
-import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
+// import { initialState as dummyInitialState } from './dummy_data'; // don't forget to remove this
 import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
   step: number;
   connectorId?: AIConnector['id'];
   integrationSettings?: IntegrationSettings;
+  invalidSettings?: Array<keyof IntegrationSettings>;
   isGenerating: boolean;
   result?: {
     pipeline: Pipeline;
@@ -20,19 +21,20 @@ export interface State {
   };
 }
 
-export const initialState = { ...dummyInitialState, step: 4 };
-// export const initialState: State = {
-//   step: 1,
-//   connectorId: undefined,
-//   integrationSettings: undefined,
-//   isGenerating: false,
-//   result: undefined,
-// };
+// export const initialState = { ...dummyInitialState, step: 4 };
+export const initialState: State = {
+  step: 1,
+  connectorId: undefined,
+  integrationSettings: undefined,
+  isGenerating: false,
+  result: undefined,
+};
 
 type Action =
   | { type: 'SET_STEP'; payload: State['step'] }
   | { type: 'SET_CONNECTOR_ID'; payload: State['connectorId'] }
   | { type: 'SET_INTEGRATION_SETTINGS'; payload: State['integrationSettings'] }
+  | { type: 'SET_INVALID_SETTINGS'; payload: State['invalidSettings'] }
   | { type: 'SET_IS_GENERATING'; payload: State['isGenerating'] }
   | { type: 'SET_GENERATED_RESULT'; payload: State['result'] };
 
@@ -49,6 +51,8 @@ export const reducer = (state: State, action: Action): State => {
       return { ...state, connectorId: action.payload };
     case 'SET_INTEGRATION_SETTINGS':
       return { ...state, integrationSettings: action.payload };
+    case 'SET_INVALID_SETTINGS':
+      return { ...state, invalidSettings: action.payload };
     case 'SET_IS_GENERATING':
       return { ...state, isGenerating: action.payload };
     case 'SET_GENERATED_RESULT':
@@ -62,6 +66,7 @@ export interface Actions {
   setStep: (payload: State['step']) => void;
   setConnectorId: (payload: State['connectorId']) => void;
   setIntegrationSettings: (payload: State['integrationSettings']) => void;
+  setInvalidSettings: (payload: State['invalidSettings']) => void;
   setIsGenerating: (payload: State['isGenerating']) => void;
   setResult: (payload: State['result']) => void;
 }

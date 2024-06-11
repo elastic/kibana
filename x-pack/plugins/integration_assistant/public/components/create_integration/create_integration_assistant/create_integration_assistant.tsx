@@ -78,8 +78,10 @@ export const CreateIntegrationAssistant = React.memo<CreateIntegrationAssistantP
             <DataStreamStep
               integrationSettings={state.integrationSettings}
               connectorId={state.connectorId}
-              setIntegrationSettings={actions.setIntegrationSettings}
               isGenerating={state.isGenerating}
+              invalidSettings={state.invalidSettings}
+              setIntegrationSettings={actions.setIntegrationSettings}
+              setInvalidSettings={actions.setInvalidSettings}
               setIsGenerating={actions.setIsGenerating}
               setResult={actions.setResult}
               setStep={actions.setStep}

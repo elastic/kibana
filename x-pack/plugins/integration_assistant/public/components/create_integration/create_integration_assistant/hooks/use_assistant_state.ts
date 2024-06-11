@@ -23,6 +23,9 @@ export const useAssistantState = () => {
       setIntegrationSettings: (payload) => {
         dispatch({ type: 'SET_INTEGRATION_SETTINGS', payload });
       },
+      setInvalidSettings: (payload) => {
+        dispatch({ type: 'SET_INVALID_SETTINGS', payload });
+      },
       setIsGenerating: (payload) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
       },

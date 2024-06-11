@@ -10,7 +10,7 @@ import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPopover, EuiLink } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { useKibana } from '../../../../../common/hooks/use_kibana';
+import { useKibana } from '../../../use_kibana';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ConnectorSelector } from './connector_selector';
 import * as i18n from './translations';

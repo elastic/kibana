@@ -123,3 +123,7 @@ export interface CheckPipelineApiResponse {
 export interface InstallPackageResponse {
   response: [{ id: string }];
 }
+
+export interface GetPackagesResponse {
+  response: [{ name: string }];
+}

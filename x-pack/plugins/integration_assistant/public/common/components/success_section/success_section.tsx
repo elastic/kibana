@@ -9,7 +9,7 @@ import React, { useMemo, type PropsWithChildren } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import * as i18n from './translations';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../components/create_integration/use_kibana';
 import { ButtonPanel } from '../button_panel';
 import { SectionWrapper } from '../section_wrapper';
 

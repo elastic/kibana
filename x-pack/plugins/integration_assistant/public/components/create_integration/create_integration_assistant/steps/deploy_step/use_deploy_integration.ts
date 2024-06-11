@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../use_kibana';
 import type { BuildIntegrationApiRequest } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';

@@ -17,7 +17,8 @@ import type {
   CheckPipelineApiResponse,
   BuildIntegrationApiRequest,
   InstallPackageResponse,
-} from '../../../common';
+  GetPackagesResponse,
+} from '../../../common/types';
 import {
   INTEGRATION_BUILDER_PATH,
   ECS_GRAPH_PATH,
@@ -103,8 +104,11 @@ export const runInstallPackage = async (
     signal: abortSignal,
   });
 
-export const getInstalledPackage = async ({ http, abortSignal }: RequestDeps): Promise<object> =>
-  http.get<object>(FLEET_PACKAGES_PATH, {
+export const getInstalledPackages = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<GetPackagesResponse> =>
+  http.get<GetPackagesResponse>(FLEET_PACKAGES_PATH, {
     headers: fleetDefaultHeaders,
     signal: abortSignal,
   });

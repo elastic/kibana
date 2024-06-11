@@ -5,15 +5,13 @@
  * 2.0.
  */
 import type { State } from '../../state';
-import { isValidName } from './util';
 
-export const isDataStreamStepReady = ({ integrationSettings }: State) =>
+export const isDataStreamStepReady = ({ integrationSettings, invalidSettings }: State) =>
   Boolean(
-    integrationSettings?.name &&
-      isValidName(integrationSettings.name) &&
+    !invalidSettings?.length &&
+      integrationSettings?.name &&
       integrationSettings?.dataStreamTitle &&
       integrationSettings?.dataStreamDescription &&
       integrationSettings?.dataStreamName &&
-      isValidName(integrationSettings.dataStreamName) &&
       integrationSettings?.logsSampleParsed
   );
