@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // issue with the url params with whitespaces
+    // issue with the url params with whitespaces https://github.com/elastic/kibana/issues/184927
     it.skip('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.monaco.selectAllRequests();
@@ -48,13 +48,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should resize the editor', async () => {
+    // the resizer doesn't work the same as in ace https://github.com/elastic/kibana/issues/184352
+    it.skip('should resize the editor', async () => {
       const editor = await PageObjects.console.monaco.getEditor();
       await browser.setWindowSize(1300, 1100);
       const initialSize = await editor.getSize();
       await browser.setWindowSize(1000, 1100);
       const afterSize = await editor.getSize();
-      expect(initialSize.width).to.not.be.lessThan(afterSize.width);
+      expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
     it('should return statusCode 400 to unsupported HTTP verbs', async () => {
@@ -96,6 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
+        // set the width of the browser, so that the response status is visible
+        await browser.setWindowSize(1300, 1100);
         await retry.try(async () => {
           const status = await PageObjects.console.getResponseStatus();
           expect(status).to.eql(200);

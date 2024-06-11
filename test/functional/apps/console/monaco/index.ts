@@ -19,7 +19,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     if (config.get('esTestCluster.ccs')) {
       loadTestFile(require.resolve('./_console_ccs'));
     } else {
-      //loadTestFile(require.resolve('./_console'));
+      loadTestFile(require.resolve('./_console'));
       loadTestFile(require.resolve('./_autocomplete'));
       // loadTestFile(require.resolve('./_vector_tile'));
       // loadTestFile(require.resolve('./_comments'));
