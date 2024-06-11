@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import { useWithResponderActionDataFromAlert } from './use_responder_action_data';
@@ -18,7 +19,7 @@ export const useResponderActionItem = (
 ): AlertTableContextMenuItem[] => {
   const { loading: isAuthzLoading, canAccessResponseConsole } =
     useUserPrivileges().endpointPrivileges;
-
+  const { isAlert } = useAlertResponseActionsSupport(eventDetailsData);
   const { handleResponseActionsClick, isDisabled, tooltip } = useWithResponderActionDataFromAlert({
     onClick,
     eventData: eventDetailsData,
@@ -27,7 +28,7 @@ export const useResponderActionItem = (
   return useMemo(() => {
     const actions: AlertTableContextMenuItem[] = [];
 
-    if (!isAuthzLoading && canAccessResponseConsole) {
+    if (!isAuthzLoading && canAccessResponseConsole && isAlert) {
       actions.push({
         key: 'endpointResponseActions-action-item',
         'data-test-subj': 'endpointResponseActions-action-item',
@@ -45,5 +46,12 @@ export const useResponderActionItem = (
     }
 
     return actions;
-  }, [canAccessResponseConsole, handleResponseActionsClick, isAuthzLoading, isDisabled, tooltip]);
+  }, [
+    canAccessResponseConsole,
+    handleResponseActionsClick,
+    isAlert,
+    isAuthzLoading,
+    isDisabled,
+    tooltip,
+  ]);
 };
