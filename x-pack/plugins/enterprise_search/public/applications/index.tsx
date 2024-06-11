@@ -104,7 +104,7 @@ export const renderApp = (
     core.security?.authc
       .getCurrentUser()
       .then((newUser) => {
-        user = newUser;
+        user = newUser || null; // necessary for kea, which can't handle undefined
       })
       .catch(() => {
         user = null;
@@ -160,11 +160,11 @@ export const renderApp = (
     readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
-
+  const { security: drop, ...restCore } = core;
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaContextProvider services={{ ...restCore, ...plugins }}>
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
