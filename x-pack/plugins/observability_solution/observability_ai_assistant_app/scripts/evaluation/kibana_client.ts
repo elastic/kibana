@@ -99,7 +99,7 @@ export class KibanaClient {
     });
   }
 
-  private getUrl(props: { query?: UrlObject['query']; pathname: string }) {
+  private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
     const parsed = parse(this.url);
 
     const baseUrl = parsed.pathname?.replaceAll('/', '') ?? '';
@@ -108,7 +108,7 @@ export class KibanaClient {
       ...parsed,
       pathname: `/${[
         baseUrl,
-        ...(this.spaceId ? ['s', this.spaceId] : []),
+        ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
         props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
       ].join('/')}`,
       query: props.query,
@@ -119,7 +119,7 @@ export class KibanaClient {
 
   callKibana<T>(
     method: string,
-    props: { query?: UrlObject['query']; pathname: string },
+    props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
     data?: any
   ) {
     const url = this.getUrl(props);
@@ -179,6 +179,58 @@ export class KibanaClient {
     );
 
     this.log.info('Knowledge base installed');
+  }
+
+  async createSpaceIfNeeded() {
+    if (!this.spaceId) {
+      return;
+    }
+
+    this.log.debug(`Checking if space ${this.spaceId} exists`);
+
+    const spaceExistsResponse = await this.callKibana<{
+      id?: string;
+    }>('GET', {
+      pathname: `/api/spaces/space/${this.spaceId}`,
+      ignoreSpaceId: true,
+    }).catch((error) => {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        return {
+          status: 404,
+          data: {
+            id: undefined,
+          },
+        };
+      }
+      throw error;
+    });
+
+    if (spaceExistsResponse.data.id) {
+      this.log.debug(`Space id ${this.spaceId} found`);
+      return;
+    }
+
+    this.log.info(`Creating space ${this.spaceId}`);
+
+    const spaceCreatedResponse = await this.callKibana<{ id: string }>(
+      'POST',
+      {
+        pathname: '/api/spaces/space',
+        ignoreSpaceId: true,
+      },
+      {
+        id: this.spaceId,
+        name: this.spaceId,
+      }
+    );
+
+    if (spaceCreatedResponse.status === 200) {
+      this.log.info(`Created space ${this.spaceId}`);
+    } else {
+      throw new Error(
+        `Error creating space: ${spaceCreatedResponse.status} - ${spaceCreatedResponse.data}`
+      );
+    }
   }
 
   createChatClient({
