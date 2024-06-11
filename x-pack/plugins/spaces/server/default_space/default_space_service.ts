@@ -19,7 +19,7 @@ import {
   timer,
 } from 'rxjs';
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
 import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
@@ -33,7 +33,7 @@ interface Deps {
   license$: Observable<ILicense>;
   spacesLicense: SpacesLicense;
   logger: Logger;
-  solution?: CloudSetup['onboarding']['defaultSolution'];
+  solution?: OnBoardingDefaultSolution;
 }
 
 export const RETRY_SCALE_DURATION = 100;
