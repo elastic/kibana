@@ -41,6 +41,10 @@ import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import {
+  commonColumns,
+  significantItemColumns,
+} from '../log_rate_analysis_results_table/use_columns';
 
 import {
   getGroupTableItems,
@@ -48,8 +52,10 @@ import {
   LogRateAnalysisResultsGroupsTable,
 } from '../log_rate_analysis_results_table';
 
-import { FieldFilterPopover } from './field_filter_popover';
+import { ItemFilterPopover as FieldFilterPopover } from './item_filter_popover';
+import { ItemFilterPopover as ColumnFilterPopover } from './item_filter_popover';
 import { LogRateAnalysisTypeCallOut } from './log_rate_analysis_type_callout';
+import type { ColumnNames } from '../log_rate_analysis_results_table';
 
 const groupResultsMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.groupedSwitchLabel.groupResults',
@@ -77,6 +83,37 @@ const groupResultsOnMessage = i18n.translate(
 );
 const resultsGroupedOffId = 'aiopsLogRateAnalysisGroupingOff';
 const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
+const fieldFilterHelpText = i18n.translate('xpack.aiops.logRateAnalysis.page.fieldFilterHelpText', {
+  defaultMessage:
+    'Deselect non-relevant fields to remove them from groups and click the Apply button to rerun the grouping.  Use the search bar to filter the list, then select/deselect multiple fields with the actions below.',
+});
+const columnsFilterHelpText = i18n.translate(
+  'xpack.aiops.logRateAnalysis.page.columnsFilterHelpText',
+  {
+    defaultMessage: 'Configure visible columns.',
+  }
+);
+const disabledFieldFilterApplyButtonTooltipContent = i18n.translate(
+  'xpack.aiops.analysis.fieldSelectorNotEnoughFieldsSelected',
+  {
+    defaultMessage: 'Grouping requires at least 2 fields to be selected.',
+  }
+);
+const disabledColumnFilterApplyButtonTooltipContent = i18n.translate(
+  'xpack.aiops.analysis.columnSelectorNotEnoughColumnsSelected',
+  {
+    defaultMessage: 'At least one column must be selected.',
+  }
+);
+const columnSearchAriaLabel = i18n.translate('xpack.aiops.analysis.columnSelectorAriaLabel', {
+  defaultMessage: 'Filter columns',
+});
+const columnsButton = i18n.translate('xpack.aiops.logRateAnalysis.page.columnsFilterButtonLabel', {
+  defaultMessage: 'Columns',
+});
+const fieldsButton = i18n.translate('xpack.aiops.analysis.fieldFilterButtonLabel', {
+  defaultMessage: 'Filter fields',
+});
 
 /**
  * Interface for log rate analysis results data.
@@ -157,6 +194,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
+  const [skippedColumns, setSkippedColumns] = useState<ColumnNames[]>(['p-value']);
 
   const onGroupResultsToggle = (optionId: string) => {
     setToggleIdSelected(optionId);
@@ -177,6 +215,10 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       regroupOnly: true,
     });
     startHandler(true, false);
+  };
+
+  const onVisibleColumnsChange = (columns: ColumnNames[]) => {
+    setSkippedColumns(columns);
   };
 
   const {
@@ -378,10 +420,34 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FieldFilterPopover
+            dataTestSubj="aiopsFieldFilterButton"
             disabled={!groupResults || isRunning}
             disabledApplyButton={isRunning}
-            uniqueFieldNames={uniqueFieldNames}
+            disabledApplyTooltipContent={disabledFieldFilterApplyButtonTooltipContent}
+            helpText={fieldFilterHelpText}
+            itemSearchAriaLabel={fieldsButton}
+            popoverButtonTitle={fieldsButton}
+            uniqueItemNames={uniqueFieldNames}
             onChange={onFieldsFilterChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ColumnFilterPopover
+            dataTestSubj="aiopsColumnFilterButton"
+            disabled={isRunning}
+            disabledApplyButton={isRunning}
+            disabledApplyTooltipContent={disabledColumnFilterApplyButtonTooltipContent}
+            helpText={columnsFilterHelpText}
+            itemSearchAriaLabel={columnSearchAriaLabel}
+            initialSkippedItems={skippedColumns}
+            popoverButtonTitle={columnsButton}
+            selectedItemLimit={1}
+            uniqueItemNames={
+              (groupResults
+                ? Object.values(commonColumns)
+                : Object.values(significantItemColumns)) as string[]
+            }
+            onChange={onVisibleColumnsChange as (columns: string[]) => void}
           />
         </EuiFlexItem>
       </ProgressControls>
@@ -481,6 +547,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         {showLogRateAnalysisResultsTable && groupResults ? (
           <LogRateAnalysisResultsGroupsTable
+            skippedColumns={skippedColumns}
             significantItems={data.significantItems}
             groupTableItems={groupTableItems}
             loading={isRunning}
@@ -493,6 +560,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
           <LogRateAnalysisResultsTable
+            skippedColumns={skippedColumns}
             significantItems={data.significantItems}
             loading={isRunning}
             timeRangeMs={timeRangeMs}
