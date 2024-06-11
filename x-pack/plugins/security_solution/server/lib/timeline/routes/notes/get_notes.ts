@@ -43,15 +43,25 @@ export const getNotesByDocumentIdsRoute = (
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
           const alertIds = queryParams.alertIds ?? null;
           console.log('alertIds:', alertIds);
-          if (alertIds != null && Array.isArray(alertIds)) {
-            const alertIdSearchString = alertIds?.join(' | ');
-            const options = {
-              type: noteSavedObjectType,
-              search: alertIdSearchString,
-            };
-            const res = await getAllSavedNote(frameworkRequest, options);
+          if (alertIds != null) {
+            if (Array.isArray(alertIds)) {
+              const alertIdSearchString = alertIds?.join(' | ');
+              const options = {
+                type: noteSavedObjectType,
+                search: alertIdSearchString,
+              };
+              const res = await getAllSavedNote(frameworkRequest, options);
 
-            return response.ok({ body: res ?? {} });
+              return response.ok({ body: res ?? {} });
+            } else {
+              const options = {
+                type: noteSavedObjectType,
+                search: alertIds,
+              };
+              const res = await getAllSavedNote(frameworkRequest, options);
+
+              return response.ok({ body: res ?? {} });
+            }
           } else {
             const perPage = queryParams?.perPage ? parseInt(queryParams.perPage, 10) : 10;
             const page = queryParams?.page ? parseInt(queryParams.page, 10) : 1;
