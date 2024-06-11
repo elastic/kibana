@@ -24,6 +24,9 @@ import React, { useMemo, Fragment } from 'react';
 import styled from 'styled-components';
 
 import { useLocation } from 'react-router-dom';
+import type { CodeEditorProps } from '@kbn/code-editor/code_editor';
+import { CodeEditor } from '@kbn/code-editor/code_editor';
+import { XJsonLang } from '@kbn/monaco';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
@@ -110,6 +113,8 @@ export const ModalInspectQuery = ({
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
 
+  const modalRef = React.useRef<HTMLDivElement | null>(null);
+
   const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
   const responses: string[] = [
     response,
@@ -189,9 +194,34 @@ export const ModalInspectQuery = ({
     },
   ];
 
+  const monacoHeightConfig: CodeEditorProps['fitToContent'] = useMemo(() => {
+    return {
+      minLines: 10,
+      maxLines: 50,
+    };
+  }, []);
+
+  const monacoOptions: CodeEditorProps['options'] = useMemo(
+    () => ({
+      readOnly: true,
+      lineNumbers: 'on',
+      fontSize: 12,
+      minimap: {
+        enabled: false,
+      },
+      folding: true,
+      scrollBeyondLastLine: false,
+      wordWrap: 'on',
+      wrappingIndent: 'indent',
+      automaticLayout: false,
+    }),
+    []
+  );
+
   const tabs = [
     {
       id: 'statistics',
+      'data-test-subj': 'modal-inspect-statistics-tab',
       name: 'Statistics',
       content: (
         <>
@@ -207,21 +237,18 @@ export const ModalInspectQuery = ({
     {
       id: 'request',
       name: 'Request',
+      'data-test-subj': 'modal-inspect-request-tab',
       content:
         inspectRequests.length > 0 ? (
           inspectRequests.map((inspectRequest, index) => (
             <Fragment key={index}>
               <EuiSpacer />
-              <EuiCodeBlock
-                language="js"
-                fontSize="m"
-                paddingSize="m"
-                color="dark"
-                overflowHeight={300}
-                isCopyable
-              >
-                {manageStringify(inspectRequest.body)}
-              </EuiCodeBlock>
+              <CodeEditor
+                languageId={XJsonLang.ID}
+                value={manageStringify(inspectRequest.body)}
+                fitToContent={monacoHeightConfig}
+                options={monacoOptions}
+              />
             </Fragment>
           ))
         ) : (
@@ -231,21 +258,18 @@ export const ModalInspectQuery = ({
     {
       id: 'response',
       name: 'Response',
+      'data-test-subj': 'modal-inspect-response-tab',
       content:
         inspectResponses.length > 0 ? (
           responses.map((responseText, index) => (
             <Fragment key={index}>
               <EuiSpacer />
-              <EuiCodeBlock
-                language="js"
-                fontSize="m"
-                paddingSize="m"
-                color="dark"
-                overflowHeight={300}
-                isCopyable
-              >
-                {responseText}
-              </EuiCodeBlock>
+              <CodeEditor
+                languageId={XJsonLang.ID}
+                value={responseText}
+                fitToContent={monacoHeightConfig}
+                options={monacoOptions}
+              />
             </Fragment>
           ))
         ) : (
