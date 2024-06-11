@@ -35,14 +35,9 @@ packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
-packages/analytics/client @elastic/kibana-core
 packages/analytics/utils/analytics_collection_utils @elastic/kibana-core
 test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
-packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
-packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
-packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
-packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
@@ -378,6 +373,7 @@ packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
+packages/analytics/ebt @elastic/kibana-core
 packages/kbn-ebt-tools @elastic/kibana-core
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
