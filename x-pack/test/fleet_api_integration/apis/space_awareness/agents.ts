@@ -101,19 +101,17 @@ export default function (providerContext: FtrProviderContext) {
       it('should return agents in a specific space', async () => {
         const agents = await apiClient.getAgents(TEST_SPACE_1);
         expect(agents.total).to.eql(2);
-        const policyIds = agents.items?.map((item) => item.policy_id);
-        expect(policyIds).to.contain(spaceTest1Policy1.item.id);
-        expect(policyIds).to.contain(spaceTest1Policy2.item.id);
-        expect(policyIds).not.to.contain(defaultSpacePolicy1.item.id);
+        const agentIds = agents.items?.map((item) => item.id);
+        expect(agentIds).to.contain(testSpaceAgent1);
+        expect(agentIds).to.contain(testSpaceAgent2);
       });
 
       it('should return agents in default space', async () => {
         const agents = await apiClient.getAgents();
         expect(agents.total).to.eql(2);
-        const policyIds = agents.items?.map((item) => item.policy_id);
-        expect(policyIds).not.to.contain(spaceTest1Policy1.item.id);
-        expect(policyIds).not.contain(spaceTest1Policy2.item.id);
-        expect(policyIds).to.contain(defaultSpacePolicy1.item.id);
+        const agentIds = agents.items?.map((item) => item.id);
+        expect(agentIds).to.contain(defaultSpaceAgent1);
+        expect(agentIds).to.contain(defaultSpaceAgent2);
       });
     });
 
