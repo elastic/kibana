@@ -30,8 +30,6 @@ const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
 describe('useHostIsolationAction', () => {
-  // FIXME:PT refactor ensure test file - its not actually testing the component
-
   const setFeatureFlags = (isEnabled: boolean = true): void => {
     useIsExperimentalFeatureEnabledMock.mockReturnValue(isEnabled);
     (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
@@ -40,18 +38,43 @@ describe('useHostIsolationAction', () => {
     });
   };
 
+  const createReactQueryWrapper = () => {
+    const queryClient = new QueryClient();
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    return wrapper;
+  };
+
+  it('should NOT return the menu item for Events', () => {
+    useAgentStatusHookMock.mockImplementation(() => {
+      return jest.fn(() => {
+        return { data: {} };
+      });
+    });
+    setFeatureFlags(true);
+    const { result } = renderHook(
+      () => {
+        return useHostIsolationAction({
+          closePopover: jest.fn(),
+          detailsData: endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
+            'kibana.alert.rule.uuid': undefined,
+          }),
+          isHostIsolationPanelOpen: false,
+          onAddIsolationStatusClick: jest.fn(),
+        });
+      },
+      { wrapper: createReactQueryWrapper() }
+    );
+
+    expect(result.current).toHaveLength(0);
+  });
+
+  // FIXME:PT refactor describe below - its not actually testing the component! Tests seem to be for `useAgentStatusHook()`
   describe.each([
     ['useGetSentinelOneAgentStatus', useGetSentinelOneAgentStatusMock],
     ['useGetAgentStatus', useGetAgentStatusMock],
   ])('works with %s hook', (name, hook) => {
-    const createReactQueryWrapper = () => {
-      const queryClient = new QueryClient();
-      const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      );
-      return wrapper;
-    };
-
     const render = (agentTypeAlert: ResponseActionAgentType) =>
       renderHook(
         () =>
