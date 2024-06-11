@@ -11,7 +11,6 @@ import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { History } from 'history';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -188,7 +187,15 @@ export const FleetAppContext: React.FC<{
     const XXL_BREAKPOINT = 1600;
 
     return (
-      <KibanaRenderContextProvider {...startServices}>
+      <KibanaRenderContextProvider
+        {...startServices}
+        theme={startServices.theme}
+        modify={{
+          breakpoint: {
+            xxl: XXL_BREAKPOINT,
+          },
+        }}
+      >
         <RedirectAppLinks
           coreStart={{
             application: startServices.application,
@@ -197,27 +204,18 @@ export const FleetAppContext: React.FC<{
           <KibanaContextProvider services={{ ...startServices }}>
             <ConfigContext.Provider value={config}>
               <KibanaVersionContext.Provider value={kibanaVersion}>
-                <KibanaThemeProvider
-                  theme={startServices.theme}
-                  modify={{
-                    breakpoint: {
-                      xxl: XXL_BREAKPOINT,
-                    },
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <ReactQueryDevtools initialIsOpen={false} />
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                        <Router history={history}>
-                          <PackageInstallProvider startServices={startServices}>
-                            <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                          </PackageInstallProvider>
-                        </Router>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </QueryClientProvider>
-                </KibanaThemeProvider>
+                <QueryClientProvider client={queryClient}>
+                  <ReactQueryDevtools initialIsOpen={false} />
+                  <UIExtensionsContext.Provider value={extensions}>
+                    <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                      <Router history={history}>
+                        <PackageInstallProvider startServices={startServices}>
+                          <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                        </PackageInstallProvider>
+                      </Router>
+                    </FleetStatusProvider>
+                  </UIExtensionsContext.Provider>
+                </QueryClientProvider>
               </KibanaVersionContext.Provider>
             </ConfigContext.Provider>
           </KibanaContextProvider>
