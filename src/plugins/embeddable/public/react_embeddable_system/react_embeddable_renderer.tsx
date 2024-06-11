@@ -98,26 +98,26 @@ export const ReactEmbeddableRenderer = <
         const factory = await getReactEmbeddableFactory<SerializedState, Api, RuntimeState>(type);
         const subscriptions = new Subscription();
 
+        const setApi = (
+          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, Api>
+        ) => {
+          const fullApi = {
+            ...apiRegistration,
+            uuid,
+            phase$,
+            parentApi,
+            type: factory.type,
+          } as unknown as Api;
+          onApiAvailable?.(fullApi);
+          return fullApi;
+        };
+
         const buildEmbeddable = async () => {
           const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
             SerializedState,
             Api,
             RuntimeState
           >(uuid, factory, parentApi);
-
-          const setApi = (
-            apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, Api>
-          ) => {
-            const fullApi = {
-              ...apiRegistration,
-              uuid,
-              phase$,
-              parentApi,
-              type: factory.type,
-            } as unknown as Api;
-            onApiAvailable?.(fullApi);
-            return fullApi;
-          };
 
           const buildApi = (
             apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
