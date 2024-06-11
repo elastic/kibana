@@ -482,6 +482,7 @@ export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-l
 
 export type {
   AnalyticsClient,
+  AnalyticsClientInitContext,
   Event,
   EventContext,
   EventType,
@@ -492,8 +493,6 @@ export type {
   ShipperClassConstructor,
   TelemetryCounter,
   TelemetryCounterType,
-} from '@kbn/analytics-client';
-export type {
   AnalyticsServiceSetup,
   AnalyticsServicePreboot,
   AnalyticsServiceStart,

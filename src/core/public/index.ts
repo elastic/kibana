@@ -96,9 +96,11 @@ export type {
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
 
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {
   AnalyticsClient,
+  AnalyticsClientInitContext,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
   Event,
   EventContext,
   EventType,
@@ -109,7 +111,7 @@ export type {
   ContextProviderOpts,
   TelemetryCounter,
   TelemetryCounterType,
-} from '@kbn/analytics-client';
+} from '@kbn/core-analytics-browser';
 
 export { AppStatus } from '@kbn/core-application-browser';
 export type {
