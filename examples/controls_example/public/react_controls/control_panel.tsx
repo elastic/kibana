@@ -132,7 +132,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
               isLoading={Boolean(dataLoading)}
               prepend={
                 api?.CustomPrependComponent ? (
-                  <api.CustomPrependComponent/>
+                  <api.CustomPrependComponent />
                 ) : usingTwoLineLayout ? (
                   <DragHandle
                     isEditable={isEditable}

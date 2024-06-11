@@ -53,7 +53,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch>> & {
-    autoApplySelections$: PublishingSubject<boolean>
+    autoApplySelections$: PublishingSubject<boolean>;
   };
 
 export interface ControlGroupRuntimeState {
@@ -95,5 +95,5 @@ export type ControlGroupSerializedState = Omit<
   controlStyle: ControlStyle;
   // In runtime state, we refer to the inverse of this property as `autoApplySelections`
   // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
-  showApplySelections: boolean | undefined, 
+  showApplySelections: boolean | undefined;
 };

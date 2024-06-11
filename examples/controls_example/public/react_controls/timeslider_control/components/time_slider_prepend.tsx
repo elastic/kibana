@@ -10,9 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import React, { FC, useCallback, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';
-import {
-  ViewMode,
-} from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { TimeSliderStrings } from './time_slider_strings';
 import { PlayButton } from './play_button';
 
@@ -52,7 +50,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     props.setIsPopoverOpen(true);
     setIsPaused(false);
     playNextFrame();
-  }, [props.setIsPopoverOpen, playNextFrame]);
+  }, [props, playNextFrame]);
 
   const onPause = useCallback(() => {
     props.setIsPopoverOpen(true);
@@ -65,7 +63,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
       clearTimeout(timeoutId);
       setTimeoutId(undefined);
     }
-  }, [props.setIsPopoverOpen, subscription, timeoutId]);
+  }, [props, subscription, timeoutId]);
 
   return (
     <div>

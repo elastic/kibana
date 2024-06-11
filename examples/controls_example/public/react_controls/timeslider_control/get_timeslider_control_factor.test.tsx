@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { TimeRange } from '@kbn/es-query';
 import { StateComparators } from '@kbn/presentation-publishing';
@@ -24,6 +25,7 @@ describe('TimesliderControlApi', () => {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
   const controlGroupApi = {
+    autoApplySelections$: new BehaviorSubject(true),
     parentApi: dashboardApi,
   } as unknown as ControlGroupApi;
   const dataStartServiceMock = dataPluginMock.createStartContract();
@@ -115,7 +117,10 @@ describe('TimesliderControlApi', () => {
       uuid,
       controlGroupApi
     );
-    const { findByTestId } = render(api.getCustomPrepend!());
+    if (!api.CustomPrependComponent) {
+      throw new Error('API does not return CustomPrependComponent');
+    }
+    const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-previousTimeWindow'));
 
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -134,7 +139,10 @@ describe('TimesliderControlApi', () => {
       uuid,
       controlGroupApi
     );
-    const { findByTestId } = render(api.getCustomPrepend!());
+    if (!api.CustomPrependComponent) {
+      throw new Error('API does not return CustomPrependComponent');
+    }
+    const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-previousTimeWindow'));
     fireEvent.click(await findByTestId('timeSlider-previousTimeWindow'));
 
@@ -154,7 +162,10 @@ describe('TimesliderControlApi', () => {
       uuid,
       controlGroupApi
     );
-    const { findByTestId } = render(api.getCustomPrepend!());
+    if (!api.CustomPrependComponent) {
+      throw new Error('API does not return CustomPrependComponent');
+    }
+    const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
 
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -173,7 +184,10 @@ describe('TimesliderControlApi', () => {
       uuid,
       controlGroupApi
     );
-    const { findByTestId } = render(api.getCustomPrepend!());
+    if (!api.CustomPrependComponent) {
+      throw new Error('API does not return CustomPrependComponent');
+    }
+    const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
@@ -194,8 +208,11 @@ describe('TimesliderControlApi', () => {
       uuid,
       controlGroupApi
     );
+    if (!api.CustomPrependComponent) {
+      throw new Error('API does not return CustomPrependComponent');
+    }
 
-    const { findByTestId } = render(api.getCustomPrepend!());
+    const { findByTestId } = render(<api.CustomPrependComponent />);
     fireEvent.click(await findByTestId('timeSlider-nextTimeWindow'));
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect('2024-06-09T12:00:00.000Z').toEqual(new Date(api.timeslice$.value![0]).toISOString());

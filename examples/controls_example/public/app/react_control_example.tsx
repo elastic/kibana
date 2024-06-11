@@ -172,7 +172,7 @@ export const ReactControlExample = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [dashboardApi]);
+  }, [dashboardApi, dataLoading$]);
 
   // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
@@ -205,7 +205,7 @@ export const ReactControlExample = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [controlGroupApi]);
+  }, [controlGroupApi, timeslice$]);
 
   if (error || (!dataViews?.[0]?.id && !loading))
     return (

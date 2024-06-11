@@ -8,10 +8,7 @@
 
 import { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import {
-  apiHasParentApi,
-  apiPublishesTimeRange,
-} from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import moment from 'moment';
 import { BehaviorSubject, skip } from 'rxjs';
 import { getTimeRangeMeta, getTimezone, TimeRangeMeta } from './get_time_range_meta';
@@ -19,9 +16,10 @@ import { getMomentTimezone } from './time_utils';
 import { Services } from './types';
 
 export function initTimeRangeSubscription(controlGroupApi: unknown, services: Services) {
-  const timeRange$ = apiHasParentApi(controlGroupApi) && apiPublishesTimeRange(controlGroupApi.parentApi)
-    ? controlGroupApi.parentApi.timeRange$
-    : new BehaviorSubject<TimeRange | undefined>(undefined);
+  const timeRange$ =
+    apiHasParentApi(controlGroupApi) && apiPublishesTimeRange(controlGroupApi.parentApi)
+      ? controlGroupApi.parentApi.timeRange$
+      : new BehaviorSubject<TimeRange | undefined>(undefined);
   const timeRangeMeta$ = new BehaviorSubject<TimeRangeMeta>(
     getTimeRangeMeta(timeRange$.value, services)
   );

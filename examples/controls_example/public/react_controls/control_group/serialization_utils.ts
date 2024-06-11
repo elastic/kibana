@@ -43,9 +43,10 @@ export const deserializeControlGroup = (
     ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
     initialChildControlState: flattenedPanels,
     ignoreParentSettings,
-    autoApplySelections: typeof state.rawState.showApplySelections === 'boolean'
-      ? !state.rawState.showApplySelections
-      : false,
+    autoApplySelections:
+      typeof state.rawState.showApplySelections === 'boolean'
+        ? !state.rawState.showApplySelections
+        : false,
     labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
     defaultControlGrow: DEFAULT_CONTROL_GROW,
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,

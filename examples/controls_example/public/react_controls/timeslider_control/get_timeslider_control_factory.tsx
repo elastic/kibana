@@ -186,9 +186,10 @@ export const getTimesliderControlFactory = (
       const { defaultControlApi, defaultControlComparators, serializeDefaultControl } =
         initializeDefaultControlApi(initialState);
 
-      const dashboardDataLoading$ = apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
-        ? controlGroupApi.parentApi.dataLoading
-        : new BehaviorSubject<boolean | undefined>(false);
+      const dashboardDataLoading$ =
+        apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
+          ? controlGroupApi.parentApi.dataLoading
+          : new BehaviorSubject<boolean | undefined>(false);
       const waitForDashboardPanelsToLoad$ = dashboardDataLoading$.pipe(
         // debounce to give time for panels to start loading if they are going to load from time changes
         debounceTime(300),
@@ -218,8 +219,10 @@ export const getTimesliderControlFactory = (
             };
           },
           CustomPrependComponent: () => {
-            const [autoApplySelections, viewMode] =
-              useBatchedPublishingSubjects(controlGroupApi.autoApplySelections$, viewModeSubject);
+            const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
+              controlGroupApi.autoApplySelections$,
+              viewModeSubject
+            );
 
             return (
               <TimeSliderPrepend
