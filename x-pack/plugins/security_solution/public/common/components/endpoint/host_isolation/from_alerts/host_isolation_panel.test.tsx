@@ -10,6 +10,8 @@ import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-help
 import { HostIsolationPanel } from '.';
 import { useKibana as mockUseKibana } from '../../../../lib/kibana/__mocks__';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { endpointAlertDataMock } from '../../../../mock/endpoint';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 const queryClient = new QueryClient({
   logger: {
@@ -19,36 +21,40 @@ const queryClient = new QueryClient({
   },
 });
 
+jest.mock('../../../../experimental_features_service');
+
 const useKibanaMock = mockUseKibana as jest.Mock;
 jest.mock('../../../../lib/kibana');
 
 describe('HostIsolationPanel', () => {
   const renderWithContext = (Element: React.ReactElement) =>
     render(<QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>);
+  let cancelCallback: () => void;
+  let details: TimelineEventsDetailsItem[];
+
   beforeEach(() => {
     useKibanaMock.mockReturnValue({
       ...mockUseKibana(),
       services: { ...mockUseKibana().services, notifications: { toasts: jest.fn() } },
     });
-  });
-  const details = [
-    {
-      category: 'observer',
-      field: 'observer.serial_number',
-      values: ['expectedSentinelOneAgentId'],
-      originalValue: ['expectedSentinelOneAgentId'],
-      isObjectArray: false,
-    },
-    {
-      category: 'crowdstrike',
-      field: 'crowdstrike.event.DeviceId',
-      values: ['expectedCrowdstrikeAgentId'],
-      originalValue: ['expectedCrowdstrikeAgentId'],
-      isObjectArray: false,
-    },
-  ];
 
-  const cancelCallback = jest.fn();
+    cancelCallback = jest.fn();
+    details = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
+  });
+
+  it('should render warning callout if alert data host does not support response actions', () => {
+    const { getByTestId } = renderWithContext(
+      <HostIsolationPanel
+        details={[]}
+        cancelCallback={cancelCallback}
+        isolateAction="isolateHost"
+      />
+    );
+
+    expect(getByTestId('unsupportedAlertHost')).toHaveTextContent(
+      "The alert's host () does not support host isolation response actions."
+    );
+  });
 
   it('renders IsolateHost when isolateAction is "isolateHost"', () => {
     const { getByText } = renderWithContext(
