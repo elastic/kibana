@@ -23,6 +23,8 @@ interface ResultBucket {
   count: number;
 }
 
+const SIZE_LIMIT = 10000;
+
 export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
@@ -65,7 +67,7 @@ export async function getDegradedDocsPaginated(options: {
     datasets: {
       composite: {
         ...(afterKey ? { after: afterKey } : {}),
-        size: 10000,
+        size: SIZE_LIMIT,
         sources: [
           { dataset: { terms: { field: 'data_stream.dataset' } } },
           { namespace: { terms: { field: 'data_stream.namespace' } } },
@@ -117,8 +119,8 @@ export async function getDegradedDocsPaginated(options: {
   const docsCount = [...prevResults.docsCount, ...currTotalDocs];
 
   if (
-    response.responses[0].aggregations?.datasets.after_key ||
-    response.responses[1].aggregations?.datasets.after_key
+    response.responses[0].aggregations?.datasets.after_key &&
+    response.responses[0].aggregations?.datasets.buckets.length === SIZE_LIMIT
   ) {
     return getDegradedDocsPaginated({
       esClient,
