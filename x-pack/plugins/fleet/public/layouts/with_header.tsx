@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiPageBody,
-  EuiSpacer,
-  useIsWithinMaxBreakpoint,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
+import { EuiPageBody, EuiSpacer, useIsWithinMinBreakpoint } from '@elastic/eui';
 
 import type { HeaderProps } from '../components';
 import { Header } from '../components';
