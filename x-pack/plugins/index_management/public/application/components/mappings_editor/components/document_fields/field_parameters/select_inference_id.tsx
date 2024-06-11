@@ -158,7 +158,7 @@ export const SelectInferenceId = ({
     setOptions(Object.values(mergedOptions));
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
 
-  const { showSuccessToasts, showErrorToasts } = useMLModelNotificationToasts();
+  const { showErrorToasts } = useMLModelNotificationToasts();
 
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
@@ -166,7 +166,6 @@ export const SelectInferenceId = ({
       try {
         const isDeployable =
           modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch;
-        if (isDeployable) showSuccessToasts();
 
         const newOption: EuiSelectableOption[] = [
           {
@@ -195,19 +194,11 @@ export const SelectInferenceId = ({
           modelConfig,
         };
         setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
-        showSuccessToasts();
       } catch (error) {
         showErrorToasts(error);
       }
     },
-    [
-      isInferenceFlyoutVisible,
-      ml,
-      setNewInferenceEndpoint,
-      options,
-      showSuccessToasts,
-      showErrorToasts,
-    ]
+    [isInferenceFlyoutVisible, ml, setNewInferenceEndpoint, options, showErrorToasts]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {

@@ -136,7 +136,6 @@ export function useSemanticText(props: UseSemanticTextProps) {
 
     const { trainedModelId } = inferenceData;
     dispatch({ type: 'field.addSemanticText', value: data });
-    showSuccessToasts();
 
     try {
       // if model exists already, do not create inference endpoint
@@ -146,6 +145,11 @@ export function useSemanticText(props: UseSemanticTextProps) {
       );
       if (inferenceModel) {
         return;
+      }
+
+      if (trainedModelId) {
+        // show toasts only if it's elastic models
+        showSuccessToasts();
       }
 
       await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);
