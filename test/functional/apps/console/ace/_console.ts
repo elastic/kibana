@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.getRequest();
         log.debug(actualRequest);
-        expect(actualRequest.trim()).to.eql(DEFAULT_INPUT_VALUE);
+        expect(actualRequest.trim()).to.eql(DEFAULT_INPUT_VALUE.trim());
       });
     });
 
