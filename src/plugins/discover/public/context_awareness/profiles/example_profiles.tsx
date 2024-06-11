@@ -105,11 +105,12 @@ export const logDocumentProfileProvider: DocumentProfileProvider = {
   profile: {
     getDocViewer: (prev) => (params) => {
       const recordId = params.record.id;
+      const prevValue = prev(params);
       return {
-        title: `${prev(params).title} #${recordId}`,
+        title: `${prevValue.title} #${recordId}`,
         docViewsRegistry: (registry) => {
           registry.enableById('doc_view_logs_overview');
-          return prev(params).docViewsRegistry(registry);
+          return prevValue.docViewsRegistry(registry);
         },
       };
     },
