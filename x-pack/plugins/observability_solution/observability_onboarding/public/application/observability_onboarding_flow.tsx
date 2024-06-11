@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { EuiPageTemplate, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiPageTemplate, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import backgroundImageUrl from './header/background.svg';
 import { Footer } from './footer/footer';
@@ -23,7 +23,6 @@ const queryClient = new QueryClient();
 
 export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
-  const theme = useEuiTheme();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,9 +42,6 @@ export function ObservabilityOnboardingFlow() {
               background-image: url(${backgroundImageUrl});
               background-position: right center;
               background-repeat: no-repeat;
-            }
-            & {
-              background-color: ${theme.euiTheme.colors.ghost};
             }
           `}
           grow={false}
