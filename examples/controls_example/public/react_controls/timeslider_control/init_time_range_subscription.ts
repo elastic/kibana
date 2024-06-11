@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   apiHasParentApi,
   apiPublishesTimeRange,
-  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import moment from 'moment';
 import { BehaviorSubject, skip } from 'rxjs';
@@ -19,13 +18,15 @@ import { getTimeRangeMeta, getTimezone, TimeRangeMeta } from './get_time_range_m
 import { getMomentTimezone } from './time_utils';
 import { Services } from './types';
 
-export function initTimeRangeSubscription(api: unknown, services: Services) {
-  const rootTimeRange$ = getTimeRange$(api);
+export function initTimeRangeSubscription(controlGroupApi: unknown, services: Services) {
+  const timeRange$ = apiHasParentApi(controlGroupApi) && apiPublishesTimeRange(controlGroupApi.parentApi)
+    ? controlGroupApi.parentApi.timeRange$
+    : new BehaviorSubject<TimeRange | undefined>(undefined);
   const timeRangeMeta$ = new BehaviorSubject<TimeRangeMeta>(
-    getTimeRangeMeta(rootTimeRange$.value, services)
+    getTimeRangeMeta(timeRange$.value, services)
   );
 
-  const timeRangeSubscription = rootTimeRange$.pipe(skip(1)).subscribe((timeRange) => {
+  const timeRangeSubscription = timeRange$.pipe(skip(1)).subscribe((timeRange) => {
     timeRangeMeta$.next(getTimeRangeMeta(timeRange, services));
   });
 
@@ -41,16 +42,4 @@ export function initTimeRangeSubscription(api: unknown, services: Services) {
       timeRangeSubscription.unsubscribe();
     },
   };
-}
-
-function getTimeRange$(api: unknown): PublishingSubject<TimeRange | undefined> {
-  if (apiHasParentApi(api)) {
-    return getTimeRange$(api.parentApi);
-  }
-
-  if (apiPublishesTimeRange(api)) {
-    return api.timeRange$;
-  }
-
-  return new BehaviorSubject<TimeRange | undefined>(undefined);
 }

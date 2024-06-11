@@ -8,9 +8,11 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
 import {
+  apiHasParentApi,
+  apiPublishesDataLoading,
   getViewModeSubject,
   useBatchedPublishingSubjects,
   ViewMode,
@@ -47,9 +49,9 @@ export const getTimesliderControlFactory = (
       i18n.translate('controlsExamples.timesliderControl.displayName', {
         defaultMessage: 'Timeslider',
       }),
-    buildControl: (initialState, buildApi, uuid, parentApi) => {
+    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
-        initTimeRangeSubscription(parentApi, services);
+        initTimeRangeSubscription(controlGroupApi, services);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       function syncTimesliceWithTimeRangePercentage(
         startPercentage: number | undefined,
@@ -179,10 +181,26 @@ export const getTimesliderControlFactory = (
         isPopoverOpen$.next(value);
       }
       const viewModeSubject =
-        getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode);
+        getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
       const { defaultControlApi, defaultControlComparators, serializeDefaultControl } =
         initializeDefaultControlApi(initialState);
+
+      const dashboardDataLoading$ = apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
+        ? controlGroupApi.parentApi.dataLoading
+        : new BehaviorSubject<boolean | undefined>(false);
+      const waitForDashboardPanelsToLoad$ = dashboardDataLoading$.pipe(
+        // debounce to give time for panels to start loading if they are going to load from time changes
+        debounceTime(300),
+        first((isLoading: boolean | undefined) => {
+          return !isLoading;
+        }),
+        map(() => {
+          // Observable notifies subscriber when loading is finished
+          // Return void to not expose internal implemenation details of observabale
+          return;
+        })
+      );
 
       const api = buildApi(
         {
@@ -207,6 +225,7 @@ export const getTimesliderControlFactory = (
                 viewModeSubject={viewModeSubject}
                 disablePlayButton={false}
                 setIsPopoverOpen={setIsPopoverOpen}
+                waitForControlOutputConsumersToLoad$={waitForDashboardPanelsToLoad$}
               />
             );
           },
