@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Error: Failed to delete all indices with pattern [.ml-*]
     this.tags(['failsOnMKI']);
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('admin');
 
       // Load logstash* data and create dataview for logstash*, logstash-2015.09.22
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
