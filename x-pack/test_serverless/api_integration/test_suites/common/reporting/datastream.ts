@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
-  let role: RoleCredentials;
+  let roleAuthc: RoleCredentials;
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Data Stream', () => {
     before(async () => {
-      role = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
 
       await esArchiver.load(archives.ecommerce.data);
       await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
@@ -46,22 +46,22 @@ export default function ({ getService }: FtrProviderContext) {
           title: 'Ecommerce Data',
           version: '8.15.0',
         },
-        role
+        roleAuthc
       );
     });
 
     after(async () => {
-      await reportingAPI.deleteAllReports(role);
+      await reportingAPI.deleteAllReports(roleAuthc);
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
-      await svlUserManager.invalidateApiKeyForRole(role);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('uses the datastream configuration', async () => {
       const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(role.apiKeyHeader);
+        .set(roleAuthc.apiKeyHeader);
 
       svlCommonApi.assertResponseStatusCode(200, status, body);
 
