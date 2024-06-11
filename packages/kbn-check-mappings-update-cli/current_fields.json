@@ -612,6 +612,7 @@
     "package.title",
     "package.version",
     "policy_id",
+    "policy_ids",
     "revision",
     "secret_references",
     "secret_references.id",

@@ -1780,6 +1780,8 @@
       "@kbn/unified-search-plugin/*": ["src/plugins/unified_search/*"],
       "@kbn/unsaved-changes-badge": ["packages/kbn-unsaved-changes-badge"],
       "@kbn/unsaved-changes-badge/*": ["packages/kbn-unsaved-changes-badge/*"],
+      "@kbn/unsaved-changes-prompt": ["packages/kbn-unsaved-changes-prompt"],
+      "@kbn/unsaved-changes-prompt/*": ["packages/kbn-unsaved-changes-prompt/*"],
       "@kbn/upgrade-assistant-plugin": ["x-pack/plugins/upgrade_assistant"],
       "@kbn/upgrade-assistant-plugin/*": ["x-pack/plugins/upgrade_assistant/*"],
       "@kbn/uptime-plugin": ["x-pack/plugins/observability_solution/uptime"],
