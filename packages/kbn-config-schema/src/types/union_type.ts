@@ -15,7 +15,7 @@ export type UnionTypeOptions<T> = TypeOptions<T> & {
   meta?: Omit<TypeMeta, 'id'>;
 };
 
-export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
+export class UnionType<RTS extends Array<Type<unknown, unknown>>, T, R> extends Type<T, R> {
   private readonly unionTypes: RTS;
   private readonly typeOptions?: UnionTypeOptions<T>;
 
@@ -28,8 +28,8 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
-    return new UnionType(
-      this.unionTypes.map((t) => t.extendsDeep(options)),
+    return new UnionType<RTS, T, R>(
+      this.unionTypes.map((t) => t.extendsDeep(options)) as RTS,
       this.typeOptions
     );
   }

@@ -9,10 +9,10 @@
 import { Type, ExtendsDeepOptions } from './type';
 
 import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
-export class MaybeType<V> extends Type<V | undefined> {
-  private readonly maybeType: Type<V>;
+export class MaybeType<V, R> extends Type<V | undefined, R | undefined> {
+  private readonly maybeType: Type<V, R>;
 
-  constructor(type: Type<V>) {
+  constructor(type: Type<V, R>) {
     super(
       type
         .getSchema()
@@ -24,6 +24,6 @@ export class MaybeType<V> extends Type<V | undefined> {
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
-    return new MaybeType(this.maybeType.extendsDeep(options));
+    return new MaybeType<V, R>(this.maybeType.extendsDeep(options));
   }
 }

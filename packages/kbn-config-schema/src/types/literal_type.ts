@@ -9,7 +9,7 @@
 import { internals } from '../internals';
 import { Type } from './type';
 
-export class LiteralType<T> extends Type<T> {
+export class LiteralType<T, R> extends Type<T, R> {
   constructor(value: T) {
     super(internals.any().valid(value));
   }

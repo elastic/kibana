@@ -59,15 +59,42 @@ describe('transform', () => {
     const obj = schema.object({
       a: schema.object({ durationA: durationSchema, durationB: durationSchema }),
     });
+    const result = obj.validate({ a: { durationA: '1d', durationB: '1m' } });
+
+    expectAssignable<{ a: { durationA: moment.Duration; durationB: moment.Duration } }>(result);
     const {
       a: { durationA, durationB },
-    } = obj.validate({ a: { durationA: '1d', durationB: '1m' } });
+    } = result;
+
     expect(moment.isDuration(durationA)).toBe(true);
     expect(moment.isDuration(durationB)).toBe(true);
-
     expect(durationTransformation).toHaveBeenCalledTimes(2);
     expect(durationTransformation).toHaveBeenNthCalledWith(1, '1d');
     expect(durationTransformation).toHaveBeenNthCalledWith(2, '1m');
+  });
+  it('works with extended, nested values', () => {
+    const obj = schema.object({
+      a: schema.object({ durationA: durationSchema, durationB: durationSchema }),
+    });
+    const objExtended = obj.extends({ b: schema.object({ durationC: durationSchema }) });
+    const result = objExtended.validate({
+      a: { durationA: '1d', durationB: '1m' },
+      b: { durationC: '2M' },
+    });
+
+    expectAssignable<{
+      a: { durationA: moment.Duration; durationB: moment.Duration };
+      b: { durationC: moment.Duration };
+    }>(result);
+
+    const {
+      a: { durationA, durationB },
+      b: { durationC },
+    } = result;
+    expect(moment.isDuration(durationA)).toBe(true);
+    expect(moment.isDuration(durationB)).toBe(true);
+    expect(moment.isDuration(durationC)).toBe(true);
+    expect(durationTransformation).toHaveBeenCalledTimes(3);
   });
   it('still reports errors as expected', () => {
     expect(() => durationSchema.validate('hello there')).toThrowError(/must have a maximum length/);

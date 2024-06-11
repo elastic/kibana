@@ -14,12 +14,12 @@ import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
 export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>>;
 
-export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
+export class RecordOfType<K extends string, V, R> extends Type<Record<K, V>, R> {
   private readonly keyType: Type<K>;
-  private readonly valueType: Type<V>;
+  private readonly valueType: Type<V, R>;
   private readonly options: RecordOfOptions<K, V>;
 
-  constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
+  constructor(keyType: Type<K>, valueType: Type<V, R>, options: RecordOfOptions<K, V> = {}) {
     const schema = internals
       .record()
       .entries(keyType.getSchema(), valueType.getSchema())
