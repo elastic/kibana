@@ -8,7 +8,7 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Verify FIPS enabled
 
-NODE_BINARY="$KIBANA_BUILD_LOCATION/node/bin/node"
+NODE_BINARY="$KIBANA_BUILD_LOCATION/node/glibc-217/bin/node"
 
 if [[ -x "$NODE_BINARY" ]]; then
   # sed is used to remove invisible ANSI color codes from the output
