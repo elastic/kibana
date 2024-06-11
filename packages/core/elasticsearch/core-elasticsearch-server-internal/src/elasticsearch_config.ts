@@ -186,7 +186,7 @@ export const configSchema = schema.object({
     }),
     { defaultValue: [] }
   ),
-  dnsCacheTtlInSeconds: schema.number({ defaultValue: 0, min: 0, max: Infinity }),
+  dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -429,10 +429,10 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 
   /**
-   * The maximum number of seconds to retain the DNS lookup resolutions.
+   * The maximum time to retain the DNS lookup resolutions.
    * Set to 0 to disable the cache (default Node.js behavior)
    */
-  public readonly dnsCacheTtlInSeconds: number;
+  public readonly dnsCacheTtl: Duration;
 
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
@@ -459,7 +459,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
-    this.dnsCacheTtlInSeconds = rawConfig.dnsCacheTtlInSeconds;
+    this.dnsCacheTtl = rawConfig.dnsCacheTtl;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
