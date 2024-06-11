@@ -97,7 +97,8 @@ export const ReactEmbeddableRenderer = <
         const parentApi = getParentApi();
         const factory = await getReactEmbeddableFactory<SerializedState, Api, RuntimeState>(type);
         const subscriptions = new Subscription();
-        try {
+
+        const buildEmbeddable = async () => {
           const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
             SerializedState,
             Api,
@@ -151,7 +152,7 @@ export const ReactEmbeddableRenderer = <
               );
             }
 
-            const { unsavedChanges, resetUnsavedChanges, snapshotRuntimeState, cleanup } =
+            const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
               startStateDiffing(comparators);
 
             const fullApi = setApi({
@@ -181,6 +182,11 @@ export const ReactEmbeddableRenderer = <
             reportPhaseChange(false);
           }
 
+          return { api, Component };
+        };
+
+        try {
+          const { api, Component } = await buildEmbeddable();
           return React.forwardRef<typeof api>((_, ref) => {
             // expose the api into the imperative handle
             useImperativeHandle(ref, () => api, []);
@@ -188,6 +194,10 @@ export const ReactEmbeddableRenderer = <
             return <Component />;
           });
         } catch (e) {
+          /**
+           * critical error encountered when trying to build the api / embeddable;
+           * since no API is available, create a dummy API that allows the panel to be deleted
+           * */
           const errorApi = {
             uuid,
             blockingError: new BehaviorSubject(e),
@@ -196,7 +206,7 @@ export const ReactEmbeddableRenderer = <
             errorApi.parentApi = parentApi;
           }
           return React.forwardRef<Api>((_, ref) => {
-            // expose the api into the imperative handle
+            // expose the dummy error api into the imperative handle
             useImperativeHandle(ref, () => errorApi, []);
             return null;
           });
