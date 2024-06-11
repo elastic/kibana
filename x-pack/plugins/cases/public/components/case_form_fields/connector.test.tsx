@@ -5,41 +5,30 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
-
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { AppMockRenderer } from '../../common/mock';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
-import type { CreateCaseFormSchema } from '../create/schema';
-import { schema } from '../create/schema';
-import type { AppMockRenderer } from '../../common/mock';
-import {
-  noConnectorsCasePermission,
-  createAppMockRenderer,
-  TestProviders,
-} from '../../common/mock';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { noConnectorsCasePermission, createAppMockRenderer } from '../../common/mock';
+
+import { FormTestComponent } from '../../common/test_utils';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { ConnectorTypes } from '../../../common';
 
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../../containers/configure/use_get_case_configuration');
 
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 
 const useGetIncidentTypesResponse = {
   isLoading: false,
@@ -65,21 +54,6 @@ const defaultProps = {
 
 describe('Connector', () => {
   let appMockRender: AppMockRenderer;
-  let globalForm: FormHook;
-
-  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<CreateCaseFormSchema>({
-      defaultValue: { connectorId: connectorsMock[0].id, fields: null },
-      schema: {
-        connectorId: schema.connectorId,
-        fields: schema.fields,
-      },
-    });
-
-    globalForm = form;
-
-    return <Form form={form}>{children}</Form>;
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -87,99 +61,88 @@ describe('Connector', () => {
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
-    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
-  it('it renders', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockHookWrapperComponent>
-          <Connector {...defaultProps} />
-        </MockHookWrapperComponent>
-      </TestProviders>
+  it('renders correctly', async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <Connector {...defaultProps} />
+      </FormTestComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
-    // Selected connector is set to none so no fields should be displayed
-    expect(wrapper.find(`[data-test-subj="connector-fields"]`).exists()).toBeFalsy();
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+    expect(screen.queryByTestId('connector-fields')).not.toBeInTheDocument();
   });
 
-  it('it is disabled and loading when isLoadingConnectors=true', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockHookWrapperComponent>
-          <Connector {...{ ...defaultProps, isLoadingConnectors: true }} />
-        </MockHookWrapperComponent>
-      </TestProviders>
+  it('renders loading state correctly', async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <Connector {...{ ...defaultProps, isLoading: true }} />
+      </FormTestComponent>
     );
+
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Loading')).toBeInTheDocument();
+    expect(await screen.findByTestId('dropdown-connectors')).toBeDisabled();
+  });
+
+  it('renders default connector correctly', async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <Connector
+          {...{
+            ...defaultProps,
+            configurationConnector: {
+              id: connectorsMock[2].id,
+              fields: null,
+              type: ConnectorTypes.jira,
+              name: connectorsMock[2].name,
+            },
+          }}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+    expect(await screen.findByText('Jira')).toBeInTheDocument();
+    expect(await screen.findByTestId('connector-fields-jira')).toBeInTheDocument();
+  });
+
+  it('shows all connectors in dropdown', async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <Connector {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
+
+    await waitForEuiPopoverOpen();
 
     expect(
-      wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isLoading')
-    ).toEqual(true);
-
-    expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('disabled')).toEqual(
-      true
-    );
-  });
-
-  it('it is disabled and loading when isLoading=true', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockHookWrapperComponent>
-          <Connector {...{ ...defaultProps, isLoading: true }} />
-        </MockHookWrapperComponent>
-      </TestProviders>
-    );
-
+      await screen.findByTestId(`dropdown-connector-${connectorsMock[0].id}`)
+    ).toBeInTheDocument();
     expect(
-      wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isLoading')
-    ).toEqual(true);
-    expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('disabled')).toEqual(
-      true
-    );
+      await screen.findByTestId(`dropdown-connector-${connectorsMock[1].id}`)
+    ).toBeInTheDocument();
   });
 
-  it(`it should change connector`, async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockHookWrapperComponent>
-          <Connector {...defaultProps} />
-        </MockHookWrapperComponent>
-      </TestProviders>
+  it(`loads connector fields when dropdown selected`, async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <Connector {...defaultProps} />
+      </FormTestComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+    userEvent.click(await screen.findByTestId('dropdown-connectors'));
 
-    await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
-    });
+    await waitForEuiPopoverOpen();
 
-    act(() => {
-      (
-        wrapper.find(EuiComboBox).props() as unknown as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }
-      ).onChange([{ value: '19', label: 'Denial of Service' }]);
-    });
+    userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'));
 
-    act(() => {
-      wrapper
-        .find('select[data-test-subj="severitySelect"]')
-        .first()
-        .simulate('change', {
-          target: { value: '4' },
-        });
-    });
-
-    await waitFor(() => {
-      expect(globalForm.getFormData()).toEqual({
-        connectorId: 'resilient-2',
-        fields: { incidentTypes: ['19'], severityCode: '4' },
-      });
-    });
+    expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
   });
 
   it('shows the actions permission message if the user does not have read access to actions', async () => {
@@ -188,24 +151,57 @@ describe('Connector', () => {
       actions: { save: false, show: false },
     };
 
-    const result = appMockRender.render(
-      <MockHookWrapperComponent>
+    appMockRender.render(
+      <FormTestComponent>
         <Connector {...defaultProps} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
-    expect(result.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
-    expect(result.queryByTestId('caseConnectors')).toBe(null);
+    expect(
+      await screen.findByTestId('create-case-connector-permissions-error-msg')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('caseConnectors')).not.toBeInTheDocument();
   });
 
   it('shows the actions permission message if the user does not have access to case connector', async () => {
     appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
-    const result = appMockRender.render(
-      <MockHookWrapperComponent>
+    appMockRender.render(
+      <FormTestComponent>
         <Connector {...defaultProps} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
-    expect(result.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
-    expect(result.queryByTestId('caseConnectors')).toBe(null);
+    expect(screen.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
+    expect(screen.queryByTestId('caseConnectors')).not.toBeInTheDocument();
+  });
+
+  it('sets to the configuration connector when configuration changes', async () => {
+    const { rerender } = appMockRender.render(
+      <FormTestComponent>
+        <Connector {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('dropdown-connector-no-connector')).toBeInTheDocument();
+    expect(screen.queryByTestId('connector-fields')).not.toBeInTheDocument();
+
+    rerender(
+      <FormTestComponent>
+        <Connector
+          {...{
+            ...defaultProps,
+            configurationConnector: {
+              id: connectorsMock[2].id,
+              fields: null,
+              type: ConnectorTypes.jira,
+              name: connectorsMock[2].name,
+            },
+          }}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
+    expect(await screen.findByText('Jira')).toBeInTheDocument();
+    expect(await screen.findByTestId('connector-fields-jira')).toBeInTheDocument();
   });
 });

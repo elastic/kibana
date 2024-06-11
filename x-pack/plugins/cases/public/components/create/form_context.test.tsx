@@ -16,7 +16,6 @@ import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
@@ -66,7 +65,6 @@ jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_get_all_case_configurations');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
@@ -81,7 +79,6 @@ jest.mock('../../containers/use_get_categories');
 jest.mock('../app/use_available_owners');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
@@ -206,7 +203,6 @@ describe('Create case', () => {
     useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
-    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
@@ -642,11 +638,6 @@ describe('Create case', () => {
         },
       };
 
-      useGetCaseConfigurationMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        data: configuration,
-      }));
-
       useGetAllCaseConfigurationsMock.mockImplementation(() => ({
         ...useGetAllCaseConfigurationsResponse,
         data: [configuration],
@@ -704,11 +695,6 @@ describe('Create case', () => {
           fields: null,
         },
       };
-
-      useGetCaseConfigurationMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        data: configuration,
-      }));
 
       useGetAllCaseConfigurationsMock.mockImplementation(() => ({
         ...useGetAllCaseConfigurationsResponse,
