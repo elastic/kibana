@@ -49,6 +49,15 @@ import {
 } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 
+const EDITABLE_KEYS: Array<keyof SavedSearchAttributes> = [
+  'sort',
+  'columns',
+  'rowHeight',
+  'sampleSize',
+  'rowsPerPage',
+  'headerRowHeight',
+];
+
 export const getSearchEmbeddableFactory = ({
   startServices,
   discoverServices,
@@ -72,7 +81,13 @@ export const getSearchEmbeddableFactory = ({
       const savedObjectId = serializedState.rawState.savedObjectId;
 
       if (savedObjectId) {
+        // by reference
         const so = await get(savedObjectId, true);
+        const savedObjectOverride = pick(serializedState.rawState, [
+          'title', // panel title
+          'description', // panel description
+          ...EDITABLE_KEYS,
+        ]);
         return {
           ...so,
           savedObjectId,
@@ -80,33 +95,25 @@ export const getSearchEmbeddableFactory = ({
           savedObjectDescription: so.description,
 
           // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
-          ...pick(serializedState.rawState, [
-            'title',
-            'description',
-            'sort',
-            'columns',
-            'rowHeight',
-            'sampleSize',
-            'rowsPerPage',
-            'headerRowHeight',
-          ]),
+          ...savedObjectOverride,
+        };
+      } else {
+        // by value
+        const savedSearch = await toSavedSearch(
+          undefined,
+          inject(
+            serializedState.rawState as EmbeddableStateWithType,
+            serializedState.references ?? []
+          ) as SavedSearchUnwrapResult,
+          true
+        );
+
+        return {
+          ...savedSearch,
+          title: serializedState?.rawState.title, // panel title
+          description: serializedState?.rawState.description, // panel description
         };
       }
-
-      const savedSearch = await toSavedSearch(
-        undefined,
-        inject(
-          serializedState.rawState as EmbeddableStateWithType,
-          serializedState.references ?? []
-        ) as SavedSearchUnwrapResult,
-        true
-      );
-
-      return {
-        ...savedSearch,
-        title: serializedState?.rawState.title, // panel title
-        description: serializedState?.rawState.description, // panel description
-      };
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
@@ -137,16 +144,7 @@ export const getSearchEmbeddableFactory = ({
         const savedObjectId = savedObjectId$.getValue();
         if (savedObjectId) {
           // only save the current state that is **different** than the initial state
-          const overwriteState = (
-            [
-              'sort',
-              'columns',
-              'rowHeight',
-              'sampleSize',
-              'rowsPerPage',
-              'headerRowHeight',
-            ] as Array<keyof SavedSearchAttributes>
-          ).reduce((prev, key) => {
+          const overwriteState = EDITABLE_KEYS.reduce((prev, key) => {
             if (
               deepEqual(
                 savedSearchAttributes[key],
@@ -165,6 +163,7 @@ export const getSearchEmbeddableFactory = ({
               ...serializeTitles(),
               ...overwriteState,
             },
+            // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
             references: [],
           };
         }
