@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { HasSerializedChildState, SerializedPanelState } from '@kbn/presentation-containers';
+import {
+  apiIsPresentationContainer,
+  HasSerializedChildState,
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
   apiPublishesDataLoading,
@@ -20,9 +24,9 @@ import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { initializeReactEmbeddableState } from './react_embeddable_state';
 import {
+  BuildReactEmbeddableApiRegistration,
   DefaultEmbeddableApi,
   SetReactEmbeddableApiRegistration,
-  BuildReactEmbeddableApiRegistration,
 } from './types';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
@@ -147,16 +151,17 @@ export const ReactEmbeddableRenderer = <
               );
             }
 
-            const stateDiffing = startStateDiffing?.(comparators);
+            const { unsavedChanges, resetUnsavedChanges, snapshotRuntimeState, cleanup } =
+              startStateDiffing(comparators);
 
             const fullApi = setApi({
               ...apiRegistration,
-              nsavedChanges: stateDiffing?.unsavedChanges,
-              resetUnsavedChanges: stateDiffing?.resetUnsavedChanges,
-              snapshotRuntimeState: stateDiffing?.snapshotRuntimeState,
+              unsavedChanges,
+              resetUnsavedChanges,
+              snapshotRuntimeState,
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, Api>);
 
-            cleanupFunction.current = () => stateDiffing?.cleanup();
+            cleanupFunction.current = () => cleanup();
             return fullApi;
           };
 
@@ -183,18 +188,16 @@ export const ReactEmbeddableRenderer = <
             return <Component />;
           });
         } catch (e) {
-          return React.forwardRef((_, ref) => {
+          const errorApi = {
+            uuid,
+            blockingError: new BehaviorSubject(e),
+          } as unknown as Api;
+          if (apiIsPresentationContainer(parentApi)) {
+            errorApi.parentApi = parentApi;
+          }
+          return React.forwardRef<Api>((_, ref) => {
             // expose the api into the imperative handle
-            useImperativeHandle(
-              ref,
-              () => ({
-                uuid,
-                parentApi,
-                type: factory.type,
-                blockingError: new BehaviorSubject(e),
-              }),
-              []
-            );
+            useImperativeHandle(ref, () => errorApi, []);
             return null;
           });
         }
