@@ -916,7 +916,7 @@ export function trainedModelsRoutes(
             const body = await modelsProvider(client, mlClient, cloud).getModelsDownloadStatus();
 
             return response.ok({
-              body: body ?? undefined,
+              body,
             });
           } catch (e) {
             return response.customError(wrapError(e));

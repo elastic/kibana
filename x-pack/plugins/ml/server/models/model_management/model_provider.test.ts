@@ -271,7 +271,7 @@ describe('modelsProvider', () => {
   describe('getModelsDownloadStatus', () => {
     test('returns null if no model download is in progress', async () => {
       const result = await modelService.getModelsDownloadStatus();
-      expect(result).toBeNull();
+      expect(result).toEqual({});
     });
     test('provides download status for all models', async () => {
       (mockClient.asInternalUser.tasks.list as jest.Mock).mockResolvedValueOnce(

@@ -612,7 +612,7 @@ export class ModelsProvider {
     });
 
     if (!result.tasks?.length) {
-      return null;
+      return {};
     }
 
     // Groups results by model id
