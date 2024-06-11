@@ -230,7 +230,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
-  // enableReusableIntegrationPolicies = false;
 
   const {
     isLoading,
