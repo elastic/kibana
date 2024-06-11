@@ -185,7 +185,7 @@ export const FleetAppContext: React.FC<{
     routerHistory: _routerHistory,
     fleetStatus,
   }) => {
-    const XXL_BREAKPOINT = 1599;
+    const XXL_BREAKPOINT = 1600;
 
     return (
       <KibanaRenderContextProvider {...startServices}>
