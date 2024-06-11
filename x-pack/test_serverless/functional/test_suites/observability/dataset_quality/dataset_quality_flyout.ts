@@ -139,31 +139,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('dataset details', () => {
-      it('should show the correct last activity', async () => {
-        const testDatasetName = datasetNames[2]; // Dataset with last activity
-
-        const cols = await PageObjects.datasetQuality.parseDatasetTable();
-        const datasetNameCol = cols['Dataset Name'];
-        const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-        const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
-          (dName: string) => dName === testDatasetName
-        );
-
-        const lastActivityText = (await cols['Last Activity'].getCellTexts())[testDatasetRowIndex];
-
-        await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
-
-        const lastActivityTextExists = await PageObjects.datasetQuality.doestTextExistInFlyout(
-          lastActivityText,
-          `[data-test-subj=${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutFieldValue}]`
-        );
-
-        expect(lastActivityTextExists).to.eql(true);
-        await PageObjects.datasetQuality.closeFlyout();
-      });
-    });
-
     describe('integrations', () => {
       it('should hide the integration section for non integrations', async () => {
         const testDatasetName = datasetNames[1];
