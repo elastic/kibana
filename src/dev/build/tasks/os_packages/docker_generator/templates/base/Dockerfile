@@ -111,7 +111,7 @@ RUN for iter in {1..10}; do \
 
 {{#serverless}}
 # Use jemalloc as the default memory allocator (https://github.com/nodejs/help/issues/1518)
-RUN echo "/usr/lib/x86_64-linux-gnu/libjemalloc.so.2" >> /etc/ld.so.preload
+RUN echo "/usr/lib/$(arch)-linux-gnu/libjemalloc.so.2" >> /etc/ld.so.preload
 {{/serverless}}
 {{/ubuntu}}
 {{#chainguard}}
