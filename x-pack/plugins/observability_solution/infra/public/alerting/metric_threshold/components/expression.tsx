@@ -28,7 +28,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { RuleConditionChart } from '@kbn/observability-plugin/public';
+import { GenericAggType, RuleConditionChart } from '@kbn/observability-plugin/public';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import {
   useMetricsDataViewContext,
@@ -305,15 +305,22 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size="xs" />
       {metricsView &&
         ruleParams.criteria.map((e, idx) => {
-          const metricExpression = [
+          let metricExpression = [
             {
-              aggType: e.aggType,
+              aggType: e.aggType as GenericAggType,
               // RuleConditionChart uses A,B,C etc in its parser to identify multiple conditions
               name: String.fromCharCode('A'.charCodeAt(0) + idx),
               field: e.metric || '',
             },
           ];
-
+          if (e.customMetrics) {
+            metricExpression = e.customMetrics.map((metric) => ({
+              name: metric.name,
+              aggType: metric.aggType as GenericAggType,
+              field: metric.field || '',
+              filter: metric.filter,
+            }));
+          }
           return (
             <ExpressionRow
               canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
@@ -327,7 +334,7 @@ export const Expressions: React.FC<Props> = (props) => {
             >
               <RuleConditionChart
                 metricExpression={{
-                  metrics: e.customMetrics || metricExpression,
+                  metrics: metricExpression,
                   threshold: e.threshold,
                   comparator: e.comparator,
                   timeSize,

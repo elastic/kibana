@@ -101,3 +101,4 @@ export { AutocompleteField } from './components/rule_kql_filter/autocomplete_fie
 export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';
 export { RuleConditionChart } from './components/rule_condition_chart/rule_condition_chart';
 export { getGroupFilters } from '../common/custom_threshold_rule/helpers/get_group';
+export type { GenericAggType } from './components/rule_condition_chart/rule_condition_chart';

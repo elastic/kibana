@@ -38,6 +38,7 @@ import type {
 } from '@kbn/event-annotation-common';
 
 import { getGroupFilters } from '@kbn/observability-plugin/public';
+import type { GenericAggType } from '@kbn/observability-plugin/public';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { Threshold } from '../../common/components/threshold';
 import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
@@ -155,13 +156,21 @@ export function AlertDetailsAppSection({
             unit: criterion.timeUnit!,
           }
         );
-        const metricExpression = [
+        let metricExpression = [
           {
-            aggType: criterion.aggType,
+            aggType: criterion.aggType as GenericAggType,
             name: String.fromCharCode('A'.charCodeAt(0) + index),
             field: criterion.metric || '',
           },
         ];
+        if (criterion.customMetrics) {
+          metricExpression = criterion.customMetrics.map((metric) => ({
+            name: metric.name,
+            aggType: metric.aggType as GenericAggType,
+            field: metric.field || '',
+            filter: metric.filter,
+          }));
+        }
         return (
           <EuiFlexItem key={generateUniqueKey(criterion)}>
             <EuiPanel hasBorder hasShadow={false}>
@@ -203,7 +212,7 @@ export function AlertDetailsAppSection({
                     <RuleConditionChart
                       additionalFilters={getGroupFilters(groups)}
                       metricExpression={{
-                        metrics: criterion.customMetrics || metricExpression,
+                        metrics: metricExpression,
                         threshold: criterion.threshold,
                         comparator: criterion.comparator,
                         timeSize: criterion.timeSize,

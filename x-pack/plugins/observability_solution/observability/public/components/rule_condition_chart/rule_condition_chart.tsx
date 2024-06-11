@@ -27,7 +27,6 @@ import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { Aggregators as MetricRuleAgg } from '@kbn/infra-plugin/common/alerting/metrics';
 import { TimeUnitChar } from '../../../common';
 import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
 import { EventsAsUnit } from '../../../common/constants';
@@ -50,8 +49,11 @@ interface GenericSearchSourceFields extends SerializedSearchSourceFields {
   query?: Query;
   filter?: Array<Pick<Filter, 'meta' | 'query'>>;
 }
+
+export type GenericAggType = Aggregators | 'custom';
+
 export interface GenericMetric {
-  aggType: Aggregators | MetricRuleAgg;
+  aggType: GenericAggType;
   name: string;
   field?: string;
   filter?: string;
