@@ -31,9 +31,9 @@ export function useEsqlMode({
 }) {
   const prev = useRef<{
     query: string;
-    latestModifiedColumns: string[];
+    recentlyUpdatedToColumns: string[];
   }>({
-    latestModifiedColumns: [],
+    recentlyUpdatedToColumns: [],
     query: '',
   });
   const initialFetch = useRef<boolean>(true);
@@ -43,7 +43,7 @@ export function useEsqlMode({
     if (prev.current.query) {
       // cleanup when it's not an ES|QL query
       prev.current = {
-        latestModifiedColumns: [],
+        recentlyUpdatedToColumns: [],
         query: '',
       };
       initialFetch.current = true;
@@ -76,7 +76,7 @@ export function useEsqlMode({
               return;
             }
 
-            let nextColumns: string[] = prev.current.latestModifiedColumns;
+            let nextColumns: string[] = prev.current.recentlyUpdatedToColumns;
 
             if (hasResults) {
               // check if state needs to contain column transformation due to a different columns in the result set
@@ -93,7 +93,7 @@ export function useEsqlMode({
             if (initialFetch.current) {
               initialFetch.current = false;
               prev.current.query = query.esql;
-              prev.current.latestModifiedColumns = nextColumns;
+              prev.current.recentlyUpdatedToColumns = nextColumns;
             }
 
             const indexPatternChanged =
@@ -101,12 +101,12 @@ export function useEsqlMode({
               getIndexPatternFromESQLQuery(prev.current.query);
 
             const addColumnsToState =
-              indexPatternChanged || !isEqual(nextColumns, prev.current.latestModifiedColumns);
+              indexPatternChanged || !isEqual(nextColumns, prev.current.recentlyUpdatedToColumns);
 
             const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
             // console.log('query', query.esql, prev.current.query);
-            // console.log('columns', nextColumns, prev.current.latestModifiedColumns);
+            // console.log('columns', nextColumns, prev.current.recentlyUpdatedToColumns);
             // console.log('indexPatternChanged', indexPatternChanged);
             // console.log('addColumnsToState', addColumnsToState);
             // console.log('changeViewMode', changeViewMode);
@@ -118,7 +118,7 @@ export function useEsqlMode({
             }
 
             prev.current.query = query.esql;
-            prev.current.latestModifiedColumns = nextColumns;
+            prev.current.recentlyUpdatedToColumns = nextColumns;
 
             // just change URL state if necessary
             if (addColumnsToState || changeViewMode) {
