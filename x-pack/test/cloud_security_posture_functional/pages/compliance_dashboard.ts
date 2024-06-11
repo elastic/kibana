@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'cloudPostureDashboard', 'header']);
+  const pageObjects = getPageObjects(['common', 'cspSecurity', 'cloudPostureDashboard', 'header']);
   const chance = new Chance();
 
   const data = [
@@ -36,10 +36,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['cloud_security_posture_compliance_dashboard']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
+    let cspSecurity = pageObjects.cspSecurity;
 
     before(async () => {
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
+      cspSecurity = pageObjects.cspSecurity;
+
       await cspDashboard.waitForPluginInitialized();
 
       await cspDashboard.index.add(data);
@@ -66,5 +69,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // describe('TODO - Cloud Dashboard', () => {
     //   it('todo - displays accurate summary compliance score', async () => {});
     // });
+
+    describe('Access with custom roles', async () => {
+      this.afterEach(async () => {
+        // force logout to prevent the next test from failing
+        await cspSecurity.logout();
+      });
+      it('Access with valid user role', async () => {
+        await cspSecurity.logout();
+        await cspSecurity.login('csp_read_user');
+        await cspDashboard.navigateToComplianceDashboardPage();
+        await retry.waitFor(
+          'Cloud posture integration dashboard to be displayed',
+          async () => !!dashboard.getIntegrationDashboardContainer()
+        );
+        const scoreElement = await dashboard.getKubernetesComplianceScore();
+
+        expect((await scoreElement.getVisibleText()) === '0%').to.be(true); // based on the ingested findings
+      });
+
+      // Blocked by https://github.com/elastic/kibana/issues/184621
+      it.skip('todo - Access with invalid user role', async () => {});
+    });
   });
 }

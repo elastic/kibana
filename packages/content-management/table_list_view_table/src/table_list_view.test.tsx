@@ -72,6 +72,10 @@ describe('TableListView', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   afterAll(() => {
     jest.useRealTimers();
   });
@@ -506,7 +510,7 @@ describe('TableListView', () => {
       ]);
     });
 
-    test('filter select should change the sort order', async () => {
+    test('filter select should change the sort order and remember the order', async () => {
       let testBed: TestBed;
 
       await act(async () => {
@@ -515,7 +519,7 @@ describe('TableListView', () => {
         });
       });
 
-      const { component, table, find } = testBed!;
+      let { component, table, find } = testBed!;
       const { openSortSelect } = getActions(testBed!);
       component.update();
 
@@ -538,6 +542,26 @@ describe('TableListView', () => {
       });
       component.update();
 
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+
+      expect(localStorage.getItem('tableSort:test')).toBe(
+        '{"field":"attributes.title","direction":"desc"}'
+      );
+
+      component.unmount();
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      ({ component, table, find } = testBed!);
+      component.update();
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
 
       expect(tableCellsValues).toEqual([

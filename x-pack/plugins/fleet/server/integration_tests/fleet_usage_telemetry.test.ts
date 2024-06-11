@@ -352,6 +352,7 @@ describe('fleet usage telemetry', () => {
       },
       enabled: true,
       policy_id: 'fleet-server-policy',
+      policy_ids: ['fleet-server-policy'],
       inputs: [
         {
           compiled_input: {
