@@ -40,6 +40,7 @@ import {
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
+import { useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -338,11 +339,14 @@ export function DiscoverMainRoute({
     stateContainer,
   ]);
 
+  const { solutionNavId } = customizationContext;
+  const { rootProfileLoading } = useRootProfile({ solutionNavId });
+
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!customizationService) {
+  if (!customizationService || rootProfileLoading) {
     return loadingIndicator;
   }
 
