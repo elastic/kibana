@@ -241,7 +241,10 @@ export function useOnSubmit({
   useEffect(() => {
     if (
       agentPolicies.length > 0 &&
-      !agentPolicies.every((agentPolicy) => packagePolicy.policy_ids.includes(agentPolicy.id))
+      !isEqual(
+        agentPolicies.map((policy) => policy.id),
+        packagePolicy.policy_ids
+      )
     ) {
       updatePackagePolicy({
         policy_ids: agentPolicies.map((policy) => policy.id),

@@ -384,7 +384,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 isFleetReady && selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicy ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
-                    defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policy."
+                    defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policies."
                     values={{
                       count: selectedAgentPolicies.reduce(
                         (acc, curr) => acc + (curr.agents ?? 0),
