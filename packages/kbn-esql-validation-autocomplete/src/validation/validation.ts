@@ -666,6 +666,7 @@ const validateAggregates = (
       const aggInAggFunction = findNestedAggFunction(aggregate);
       if (aggInAggFunction) {
         messages.push(errors.aggInAggFunction(aggInAggFunction));
+        break;
       }
     }
   }
