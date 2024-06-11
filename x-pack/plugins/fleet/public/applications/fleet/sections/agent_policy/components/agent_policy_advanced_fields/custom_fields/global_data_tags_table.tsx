@@ -216,7 +216,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
       const res = await overlays.openConfirm(
         i18n.translate('xpack.fleet.globalDataTagsTable.deleteModalText', {
           defaultMessage:
-            "Removing the field will affect the next sync. This action cannot be undone.'",
+            'Removing the field will affect the next sync. This action cannot be undone.',
         }),
         {
           title: i18n.translate('xpack.fleet.globalDataTagsTable.deleteModalTitle', {
@@ -233,7 +233,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
             }
           ),
           confirmButtonText: i18n.translate(
-            '"xpack.fleet.globalDataTagsTable.deleteModalConfirmButtonText"',
+            'xpack.fleet.globalDataTagsTable.deleteModalConfirmButtonText',
             {
               defaultMessage: 'Remove',
             }
