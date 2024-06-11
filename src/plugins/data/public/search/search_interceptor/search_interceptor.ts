@@ -458,7 +458,7 @@ export class SearchInterceptor {
         })
         .then(async (response) => {
           const chunks = [];
-          for await (const chunk of response.response.body) {
+          for await (const chunk of response.response?.body) {
             chunks.push(chunk);
           }
 
@@ -471,14 +471,23 @@ export class SearchInterceptor {
           }
 
           const decoded = decode(mergedChunks);
-          return {
-            id: decoded.id,
-            rawResponse: strategy === ENHANCED_ES_SEARCH_STRATEGY ? decoded.response : decoded,
-            isPartial: false,
-            isRunning: false,
-            // ...(response.body.header?.warning ? { warning: response.body.header?.warning } : {}),
-            // ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
-          };
+          // if cbor was returned search strategy might need to do some work before returning response
+          switch (strategy) {
+            case ENHANCED_ES_SEARCH_STRATEGY:
+              return {
+                id: decoded.id,
+                rawResponse: decoded.response,
+                isPartial: false,
+                isRunning: false,
+              };
+            default:
+              return {
+                id: decoded.id,
+                rawResponse: decoded,
+                isPartial: false,
+                isRunning: false,
+              };
+          }
         })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {
