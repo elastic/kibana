@@ -35,9 +35,13 @@ export function buildDataTableRecord(
  * @param docs Array of documents returned from Elasticsearch
  * @param dataView this current data view
  */
-export function buildDataTableRecordList(
+export function buildDataTableRecordList<T extends DataTableRecord = DataTableRecord>(
   docs: EsHitRecord[],
-  dataView?: DataView
+  dataView?: DataView,
+  { processRecord }: { processRecord?: (record: DataTableRecord) => T } = {}
 ): DataTableRecord[] {
-  return docs.map((doc) => buildDataTableRecord(doc, dataView));
+  return docs.map((doc) => {
+    const record = buildDataTableRecord(doc, dataView);
+    return processRecord ? processRecord(record) : record;
+  });
 }
