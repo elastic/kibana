@@ -23,7 +23,7 @@ export interface DocumentContext {
   type: DocumentType;
 }
 
-export type DocumentProfile = Pick<Profile, 'getDocViewsRegistry'>;
+export type DocumentProfile = Omit<Profile, 'getCellRenderers'>;
 
 export class DocumentProfileService extends ProfileService<
   DocumentProfile,

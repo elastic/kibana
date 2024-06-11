@@ -39,16 +39,20 @@ describe('ProfilesManager', () => {
   });
 
   it('should resolve document profile', async () => {
-    mocks.profilesManagerMock.resolveDocumentProfile({ record: mocks.contextRecordMock });
-    const profiles = mocks.profilesManagerMock.getProfiles({ record: mocks.contextRecordMock });
+    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+      record: mocks.contextRecordMock,
+    });
+    const profiles = mocks.profilesManagerMock.getProfiles({ record });
     expect(profiles).toEqual([{}, {}, mocks.documentProfileProviderMock.profile]);
   });
 
   it('should resolve multiple profiles', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
     await mocks.profilesManagerMock.resolveDataSourceProfile({});
-    mocks.profilesManagerMock.resolveDocumentProfile({ record: mocks.contextRecordMock });
-    const profiles = mocks.profilesManagerMock.getProfiles({ record: mocks.contextRecordMock });
+    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+      record: mocks.contextRecordMock,
+    });
+    const profiles = mocks.profilesManagerMock.getProfiles({ record });
     expect(profiles).toEqual([
       mocks.rootProfileProviderMock.profile,
       mocks.dataSourceProfileProviderMock.profile,
@@ -58,23 +62,23 @@ describe('ProfilesManager', () => {
 
   it('should expose profiles as an observable', async () => {
     const getProfilesSpy = jest.spyOn(mocks.profilesManagerMock, 'getProfiles');
-    const profiles$ = mocks.profilesManagerMock.getProfiles$({ record: mocks.contextRecordMock });
+    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+      record: mocks.contextRecordMock,
+    });
+    const profiles$ = mocks.profilesManagerMock.getProfiles$({ record });
     const next = jest.fn();
     profiles$.subscribe(next);
     expect(getProfilesSpy).toHaveBeenCalledTimes(1);
-    expect(next).toHaveBeenCalledWith([{}, {}, {}]);
+    expect(next).toHaveBeenCalledWith([{}, {}, mocks.documentProfileProviderMock.profile]);
     await mocks.profilesManagerMock.resolveRootProfile({});
     expect(getProfilesSpy).toHaveBeenCalledTimes(2);
-    expect(next).toHaveBeenCalledWith([mocks.rootProfileProviderMock.profile, {}, {}]);
-    await mocks.profilesManagerMock.resolveDataSourceProfile({});
-    expect(getProfilesSpy).toHaveBeenCalledTimes(3);
     expect(next).toHaveBeenCalledWith([
       mocks.rootProfileProviderMock.profile,
-      mocks.dataSourceProfileProviderMock.profile,
       {},
+      mocks.documentProfileProviderMock.profile,
     ]);
-    mocks.profilesManagerMock.resolveDocumentProfile({ record: mocks.contextRecordMock });
-    expect(getProfilesSpy).toHaveBeenCalledTimes(4);
+    await mocks.profilesManagerMock.resolveDataSourceProfile({});
+    expect(getProfilesSpy).toHaveBeenCalledTimes(3);
     expect(next).toHaveBeenCalledWith([
       mocks.rootProfileProviderMock.profile,
       mocks.dataSourceProfileProviderMock.profile,
@@ -157,15 +161,19 @@ describe('ProfilesManager', () => {
   });
 
   it('should log an error and fall back to the default profile if document profile resolution fails', () => {
-    mocks.profilesManagerMock.resolveDocumentProfile({ record: mocks.contextRecordMock });
-    let profiles = mocks.profilesManagerMock.getProfiles({ record: mocks.contextRecordMock });
+    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+      record: mocks.contextRecordMock,
+    });
+    let profiles = mocks.profilesManagerMock.getProfiles({ record });
     expect(profiles).toEqual([{}, {}, mocks.documentProfileProviderMock.profile]);
     const resolveSpy = jest.spyOn(mocks.documentProfileProviderMock, 'resolve');
     resolveSpy.mockImplementation(() => {
       throw new Error('Failed to resolve');
     });
-    mocks.profilesManagerMock.resolveDocumentProfile({ record: mocks.contextRecordMock2 });
-    profiles = mocks.profilesManagerMock.getProfiles({ record: mocks.contextRecordMock2 });
+    const record2 = mocks.profilesManagerMock.resolveDocumentProfile({
+      record: mocks.contextRecordMock2,
+    });
+    profiles = mocks.profilesManagerMock.getProfiles({ record: record2 });
     expect(addLog).toHaveBeenCalledWith(
       '[ProfilesManager] document context resolution failed with params: {\n  "recordId": "logstash-2014.09.09::388::"\n}',
       new Error('Failed to resolve')

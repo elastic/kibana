@@ -36,7 +36,9 @@ export const renderApp = ({
 }: AppDependencies) => {
   render(
     <KibanaRenderContextProvider {...startServices}>
-      <AppContextProvider args={{ initialLicenseStatus, notifications, http, location }}>
+      <AppContextProvider
+        args={{ initialLicenseStatus, notifications, http, location, ...startServices }}
+      >
         <ProfileContextProvider>
           <App />
         </ProfileContextProvider>

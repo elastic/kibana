@@ -50,7 +50,7 @@ export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }
             <h2>
               <FormattedMessage
                 id="xpack.fleet.agentDetails.jsonFlyoutTitle"
-                defaultMessage="'{name}' agent details"
+                defaultMessage="''{name}'' agent details"
                 values={{
                   name: agentName,
                 }}

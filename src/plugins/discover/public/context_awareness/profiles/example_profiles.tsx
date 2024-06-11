@@ -24,19 +24,7 @@ import { RootProfileProvider, SolutionType } from './root_profile';
 
 export const o11yRootProfileProvider: RootProfileProvider = {
   profileId: 'o11y-root-profile',
-  profile: {
-    getTopNavItems: (prev) => () =>
-      [
-        {
-          id: 'o11y-root-entry',
-          label: 'O11y project entry',
-          run: () => {
-            alert('HELLO WORLD');
-          },
-        },
-        ...prev(),
-      ],
-  },
+  profile: {},
   resolve: (params) => {
     if (params.solutionNavId === 'oblt') {
       return {
@@ -54,30 +42,10 @@ export const o11yRootProfileProvider: RootProfileProvider = {
 export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'logs-data-source-profile',
   profile: {
-    getTopNavItems: (prev) => () =>
-      [
-        {
-          id: 'logs-data-source-entry',
-          label: 'Logs data source entry',
-          run: () => {
-            alert('HELLO WORLD');
-          },
-        },
-        ...prev(),
-      ],
-    getDefaultColumns: () => () => ({
-      columns: ['@timestamp', 'log.level', 'message'],
-      settings: {
-        'log.level': {
-          width: 120,
-        },
-      },
-    }),
     getCellRenderers: (prev) => () => ({
       ...prev(),
       '@timestamp': (props) => {
         const timestamp = getFieldValue(props.row, '@timestamp');
-
         return (
           <EuiBadge color="hollow" title={timestamp}>
             {timestamp}
@@ -86,17 +54,14 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
       },
       'log.level': (props) => {
         const level = getFieldValue(props.row, 'log.level');
-
         if (!level) {
           return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
         }
-
         const levelMap: Record<string, string> = {
           info: 'primary',
           debug: 'default',
           error: 'danger',
         };
-
         return (
           <EuiBadge color={levelMap[level]} title={level}>
             {capitalize(level)}
@@ -107,7 +72,6 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
         const { value } = getMessageFieldWithFallbacks(
           props.row.flattened as unknown as LogDocumentOverview
         );
-
         return value || <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
       },
     }),
@@ -138,12 +102,7 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
 
 export const logDocumentProfileProvider: DocumentProfileProvider = {
   profileId: 'log-document-profile',
-  profile: {
-    getDocViewsRegistry: (prev) => (registry) => {
-      registry.enableById('doc_view_logs_overview');
-      return prev(registry);
-    },
-  },
+  profile: {},
   resolve: (params) => {
     if (getFieldValue(params.record, 'data_stream.type') === 'logs') {
       return {

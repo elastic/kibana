@@ -25,8 +25,9 @@ const {
 
 profilesManagerMock.resolveRootProfile({});
 profilesManagerMock.resolveDataSourceProfile({});
-profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock });
-profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock2 });
+
+const record = profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock });
+const record2 = profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock2 });
 
 discoverServiceMock.profilesManager = profilesManagerMock;
 
@@ -35,7 +36,7 @@ const getProfiles$Spy = jest.spyOn(discoverServiceMock.profilesManager, 'getProf
 
 const render = () => {
   return renderHook((props) => useProfiles(props), {
-    initialProps: { record: contextRecordMock } as GetProfilesOptions,
+    initialProps: { record } as GetProfilesOptions,
     wrapper: ({ children }) => (
       <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
     ),
@@ -63,11 +64,11 @@ describe('useProfiles', () => {
     expect(getProfilesSpy).toHaveBeenCalledTimes(2);
     expect(getProfiles$Spy).toHaveBeenCalledTimes(1);
     const prevResult = result.current;
-    rerender({ record: contextRecordMock });
+    rerender({ record });
     expect(getProfilesSpy).toHaveBeenCalledTimes(2);
     expect(getProfiles$Spy).toHaveBeenCalledTimes(1);
     expect(result.current).toBe(prevResult);
-    rerender({ record: contextRecordMock2 });
+    rerender({ record: record2 });
     expect(getProfilesSpy).toHaveBeenCalledTimes(3);
     expect(getProfiles$Spy).toHaveBeenCalledTimes(2);
     expect(result.current).toBe(prevResult);
@@ -78,7 +79,7 @@ describe('useProfiles', () => {
     expect(getProfilesSpy).toHaveBeenCalledTimes(2);
     expect(getProfiles$Spy).toHaveBeenCalledTimes(1);
     const prevResult = result.current;
-    rerender({ record: contextRecordMock });
+    rerender({ record });
     expect(getProfilesSpy).toHaveBeenCalledTimes(2);
     expect(getProfiles$Spy).toHaveBeenCalledTimes(1);
     expect(result.current).toBe(prevResult);

@@ -23,6 +23,7 @@ import type {
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
+  ScanActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import type {
@@ -42,6 +43,8 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   UploadedFileInfo,
+  ResponseActionsScanParameters,
+  ResponseActionScanOutputContent,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -284,6 +287,16 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       ExecuteActionRequestBody,
       ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>
     >('execute', actionRequestWithDefaults, options);
+  }
+
+  async scan(
+    actionRequest: ScanActionRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+    return this.handleResponseAction<
+      ScanActionRequestBody,
+      ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>
+    >('scan', actionRequest, options);
   }
 
   async upload(

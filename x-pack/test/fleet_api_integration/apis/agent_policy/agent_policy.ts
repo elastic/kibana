@@ -63,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         expect(body.items.length).to.eql(1);
-        const { id, updated_at: updatedAt, ...rest } = body.items[0];
+        const { id, updated_at: updatedAt, version, ...rest } = body.items[0];
         expectSnapshot(rest).toMatch();
       });
 
@@ -517,7 +517,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = item;
+        const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
@@ -947,7 +947,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1108,7 +1108,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
         expect(newPolicy).to.eql({
@@ -1168,7 +1168,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1308,6 +1308,28 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('should allow hosted policy delete with force flag', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Hosted policy',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+        hostedPolicy = createdPolicy;
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxx')
+          .send({ agentPolicyId: hostedPolicy.id, force: true })
+          .expect(200);
+
+        await supertest.get(`/api/fleet/agent_policies/${hostedPolicy.id}`).expect(404);
+      });
+
       describe('Errors when trying to delete', () => {
         it('should prevent policies having agents from being deleted', async () => {
           const {
@@ -1353,6 +1375,16 @@ export default function (providerContext: FtrProviderContext) {
             'agent-inactive-1',
             policyWithInactiveAgents.id
           );
+
+          // inactive agents are included in agent policy agents count
+          const {
+            body: {
+              item: { agents: agentsCount },
+            },
+          } = await supertest
+            .get(`/api/fleet/agent_policies/${policyWithInactiveAgents.id}`)
+            .expect(200);
+          expect(agentsCount).to.equal(1);
 
           const { body } = await supertest
             .post('/api/fleet/agent_policies/delete')
@@ -1437,7 +1469,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(items[0].package_policies.length).equal(1);
         expect(items[0].package_policies[0]).to.have.property('package');
         expect(items[0].package_policies[0].package.name).equal('system');
-        const { package_policies: packagePolicies, id, updated_at: updatedAt, ...rest } = items[0];
+        const {
+          package_policies: packagePolicies,
+          id,
+          updated_at: updatedAt,
+          version: policyVersion,
+          ...rest
+        } = items[0];
         expectSnapshot({
           ...rest,
           package_policies: packagePolicies.map(

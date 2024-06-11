@@ -41,13 +41,14 @@ import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
+import { isLastSeenOld } from '../../utils/connector_status_helpers';
 import { isAdvancedSyncRuleSnippetEmpty } from '../../utils/sync_rules_helpers';
-import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 
 import { getConnectorTemplate } from '../search_index/connector/constants';
 
 import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/connector_filtering_logic';
+import { SyncsContextMenu } from '../shared/header_actions/syncs_context_menu';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
@@ -282,18 +283,20 @@ export const ConnectorConfiguration: React.FC = () => {
                               </EuiButton>
                             </EuiCallOut>
                           ) : (
-                            <EuiCallOut
-                              iconType="check"
-                              color="success"
-                              title={i18n.translate(
-                                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorConnected',
-                                {
-                                  defaultMessage:
-                                    'Your connector {name} has connected to Search successfully.',
-                                  values: { name: connector.name },
-                                }
-                              )}
-                            />
+                            !isLastSeenOld(connector) && (
+                              <EuiCallOut
+                                iconType="check"
+                                color="success"
+                                title={i18n.translate(
+                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorConnected',
+                                  {
+                                    defaultMessage:
+                                      'Your connector {name} has connected to Search successfully.',
+                                    values: { name: connector.name },
+                                  }
+                                )}
+                              />
+                            )
                           )}
                           <EuiSpacer size="s" />
                           {connector.status &&

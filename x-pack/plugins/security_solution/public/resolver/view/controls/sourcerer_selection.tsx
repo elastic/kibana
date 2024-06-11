@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopover } from '@elastic/eui';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
-import { Sourcerer } from '../../../common/components/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { Sourcerer } from '../../../sourcerer/components';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 const nodeLegendButtonTitle = i18n.translate(
   'xpack.securitySolution.resolver.graphControls.sourcererButtonTitle',

@@ -168,7 +168,7 @@ export class SavedSearchEmbeddable
         this.services.core.chrome.getActiveSolutionNavId$()
       );
 
-      this.services.profilesManager.resolveRootProfile({ solutionNavId });
+      await this.services.profilesManager.resolveRootProfile({ solutionNavId });
 
       // deferred loading of this embeddable is complete
       this.setInitializationFinished();
@@ -324,17 +324,17 @@ export class SavedSearchEmbeddable
 
       // Request ES|QL data
       if (isEsqlMode && query) {
-        const result = await fetchEsql(
-          savedSearch.searchSource.getField('query')!,
+        const result = await fetchEsql({
+          query: savedSearch.searchSource.getField('query')!,
+          inputQuery: this.input.query,
+          filters: this.input.filters,
           dataView,
-          this.services.data,
-          this.services.expressions,
-          this.services.inspector,
-          this.services.profilesManager,
-          this.abortController.signal,
-          this.input.filters,
-          this.input.query
-        );
+          abortSignal: this.abortController.signal,
+          inspectorAdapters: this.services.inspector,
+          data: this.services.data,
+          expressions: this.services.expressions,
+          profilesManager: this.services.profilesManager,
+        });
 
         this.updateOutput({
           ...this.getOutput(),
@@ -682,6 +682,7 @@ export class SavedSearchEmbeddable
               query={this.input.query}
               onAddFilter={searchProps.onFilter}
               searchSessionId={this.input.searchSessionId}
+              isEsqlMode={isEsqlMode}
             />
           </KibanaContextProvider>
         </KibanaRenderContextProvider>,

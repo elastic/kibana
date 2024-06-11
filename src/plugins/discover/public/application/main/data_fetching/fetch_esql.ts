@@ -26,17 +26,27 @@ interface EsqlErrorResponse {
   type: 'error';
 }
 
-export function fetchEsql(
-  query: Query | AggregateQuery,
-  dataView: DataView,
-  data: DataPublicPluginStart,
-  expressions: ExpressionsStart,
-  inspectorAdapters: Adapters,
-  profilesManager: ProfilesManager,
-  abortSignal?: AbortSignal,
-  filters?: Filter[],
-  inputQuery?: Query
-): Promise<RecordsFetchResponse> {
+export function fetchEsql({
+  query,
+  inputQuery,
+  filters,
+  dataView,
+  abortSignal,
+  inspectorAdapters,
+  data,
+  expressions,
+  profilesManager,
+}: {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  dataView: DataView;
+  abortSignal?: AbortSignal;
+  inspectorAdapters: Adapters;
+  data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  profilesManager: ProfilesManager;
+}): Promise<RecordsFetchResponse> {
   const timeRange = data.query.timefilter.timefilter.getTime();
   return textBasedQueryStateToAstWithValidation({
     filters,
@@ -78,9 +88,7 @@ export function fetchEsql(
                 flattened: row,
               };
 
-              profilesManager.resolveDocumentProfile({ record });
-
-              return record;
+              return profilesManager.resolveDocumentProfile({ record });
             });
           }
         });

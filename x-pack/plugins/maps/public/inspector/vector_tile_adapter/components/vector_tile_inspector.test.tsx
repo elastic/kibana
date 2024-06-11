@@ -15,6 +15,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RESPONSE_VIEW_ID, VectorTileInspector } from './vector_tile_inspector';
 import { VectorTileAdapter } from '../vector_tile_adapter';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('VectorTileInspector', () => {
   let vectorTileAdapter: VectorTileAdapter | undefined;
@@ -56,7 +57,9 @@ describe('VectorTileInspector', () => {
 
   test('should show first layer, first tile, and request tab when options not provided', () => {
     render(
-      <VectorTileInspector adapters={{ vectorTiles: vectorTileAdapter }} title="Vector tiles" />
+      <I18nProvider>
+        <VectorTileInspector adapters={{ vectorTiles: vectorTileAdapter }} title="Vector tiles" />
+      </I18nProvider>
     );
     screen.getByText('layer1 label');
     screen.getByText('1/0/0');
@@ -70,11 +73,13 @@ describe('VectorTileInspector', () => {
       initialTab: RESPONSE_VIEW_ID,
     };
     render(
-      <VectorTileInspector
-        adapters={{ vectorTiles: vectorTileAdapter! }}
-        options={options}
-        title="Vector tiles"
-      />
+      <I18nProvider>
+        <VectorTileInspector
+          adapters={{ vectorTiles: vectorTileAdapter! }}
+          options={options}
+          title="Vector tiles"
+        />
+      </I18nProvider>
     );
     screen.getByText('layer2 label');
     screen.getByText('1/1/1');

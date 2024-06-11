@@ -8,8 +8,8 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isEqual, memoize } from 'lodash';
-import { BehaviorSubject, combineLatest, filter, map, Observable, startWith } from 'rxjs';
+import { isEqual } from 'lodash';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
 import type {
@@ -45,7 +45,6 @@ export interface GetProfilesOptions {
 export class ProfilesManager {
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-  private readonly recordId$ = new BehaviorSubject<string | undefined>(undefined);
 
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
@@ -116,21 +115,27 @@ export class ProfilesManager {
   }
 
   public resolveDocumentProfile(params: DocumentProfileProviderParams) {
-    Object.defineProperty(params.record, 'context', {
-      get: memoize(() => {
-        let context = this.documentProfileService.defaultContext;
+    let context: ContextWithProfileId<DocumentContext> | undefined;
 
-        try {
-          context = this.documentProfileService.resolve(params);
-        } catch (e) {
-          logResolutionError(ContextType.Document, { recordId: params.record.id }, e);
+    return new Proxy(params.record, {
+      has: (target, prop) => prop === 'context' || Reflect.has(target, prop),
+      get: (target, prop, receiver) => {
+        if (prop !== 'context') {
+          return Reflect.get(target, prop, receiver);
+        }
+
+        if (!context) {
+          try {
+            context = this.documentProfileService.resolve(params);
+          } catch (e) {
+            logResolutionError(ContextType.Document, { recordId: params.record.id }, e);
+            context = this.documentProfileService.defaultContext;
+          }
         }
 
         return context;
-      }),
+      },
     });
-
-    this.recordId$.next(params.record.id);
   }
 
   public getProfiles({ record }: GetProfilesOptions = {}) {
@@ -144,19 +149,9 @@ export class ProfilesManager {
   }
 
   public getProfiles$(options: GetProfilesOptions = {}) {
-    const observables: Array<Observable<unknown>> = [this.rootContext$, this.dataSourceContext$];
-    const record = options.record;
-
-    if (record) {
-      observables.push(
-        this.recordId$.pipe(
-          startWith(record.id),
-          filter((recordId) => recordId === record.id)
-        )
-      );
-    }
-
-    return combineLatest(observables).pipe(map(() => this.getProfiles(options)));
+    return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
+      map(() => this.getProfiles(options))
+    );
   }
 }
 

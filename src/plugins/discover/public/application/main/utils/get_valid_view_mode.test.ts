@@ -60,7 +60,7 @@ describe('getValidViewMode', () => {
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
         isEsqlMode: true,
       })
-    ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    ).toBe(VIEW_MODE.AGGREGATED_LEVEL);
 
     expect(
       getValidViewMode({

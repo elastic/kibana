@@ -27,7 +27,12 @@ import { ProfilesManager } from '../profiles_manager';
 export const createContextAwarenessMocks = () => {
   const rootProfileProviderMock: RootProfileProvider = {
     profileId: 'root-profile',
-    profile: { getCellRenderers: jest.fn() },
+    profile: {
+      getCellRenderers: jest.fn((prev) => () => ({
+        ...prev(),
+        rootProfile: () => 'root-profile',
+      })),
+    },
     resolve: jest.fn(() => ({
       isMatch: true,
       context: {
@@ -38,7 +43,12 @@ export const createContextAwarenessMocks = () => {
 
   const dataSourceProfileProviderMock: DataSourceProfileProvider = {
     profileId: 'data-source-profile',
-    profile: { getCellRenderers: jest.fn() },
+    profile: {
+      getCellRenderers: jest.fn((prev) => () => ({
+        ...prev(),
+        rootProfile: () => 'data-source-profile',
+      })),
+    },
     resolve: jest.fn(() => ({
       isMatch: true,
       context: {
@@ -49,7 +59,12 @@ export const createContextAwarenessMocks = () => {
 
   const documentProfileProviderMock: DocumentProfileProvider = {
     profileId: 'document-profile',
-    profile: { getCellRenderers: jest.fn() } as DocumentProfileProvider['profile'],
+    profile: {
+      getCellRenderers: jest.fn((prev) => () => ({
+        ...prev(),
+        rootProfile: () => 'document-profile',
+      })),
+    } as DocumentProfileProvider['profile'],
     resolve: jest.fn(() => ({
       isMatch: true,
       context: {

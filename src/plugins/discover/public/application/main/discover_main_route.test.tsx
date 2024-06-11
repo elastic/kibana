@@ -40,12 +40,14 @@ jest.mock('./discover_main_app', () => {
   };
 });
 
+let mockRootProfileLoading = false;
+
 jest.mock('../../context_awareness', () => {
   const originalModule = jest.requireActual('../../context_awareness');
   return {
     ...originalModule,
     useRootProfile: () => ({
-      rootProfileLoading: false,
+      rootProfileLoading: mockRootProfileLoading,
     }),
   };
 });
@@ -53,6 +55,7 @@ jest.mock('../../context_awareness', () => {
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = createCustomizationService();
+    mockRootProfileLoading = false;
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
@@ -101,6 +104,20 @@ describe('DiscoverMainRoute', () => {
       expect(component.find(DiscoverMainApp).exists()).toBe(false);
     });
     mockCustomizationService = createCustomizationService();
+    await waitFor(() => {
+      component.setProps({}).update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('renders LoadingIndicator while root profile is loading', async () => {
+    mockRootProfileLoading = true;
+    const component = mountComponent(true, true);
+    await waitFor(() => {
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(false);
+    });
+    mockRootProfileLoading = false;
     await waitFor(() => {
       component.setProps({}).update();
       expect(component.find(DiscoverMainApp).exists()).toBe(true);

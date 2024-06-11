@@ -36,6 +36,21 @@ const levelSchema = schema.oneOf(
   }
 );
 
+// until we have feature parity between browser and server logging, we need to define distinct logger schemas
+const browserLoggerSchema = schema.object({
+  name: schema.string(),
+  level: levelSchema,
+});
+
+const browserConfig = schema.object({
+  root: schema.object({
+    level: levelSchema,
+  }),
+  loggers: schema.arrayOf(browserLoggerSchema, {
+    defaultValue: [],
+  }),
+});
+
 /**
  * Config schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.
  *
@@ -45,12 +60,6 @@ export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
   name: schema.string(),
   level: levelSchema,
-});
-
-const browserConfig = schema.object({
-  root: schema.object({
-    level: levelSchema,
-  }),
 });
 
 export const config = {
