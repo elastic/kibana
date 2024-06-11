@@ -129,6 +129,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldStatsControlsComparators,
         serializeFieldStatsChartState,
         onFieldStatsTableDestroy,
+        resetData$,
       } = initializeFieldStatsControls(state);
 
       const defaultDataViewId = await deps.data.dataViews.getDefaultId();
@@ -176,6 +177,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 chartState,
                 fieldStatsControlsApi
               );
+
               fieldStatsControlsApi.updateUserInput(nextUpdate);
             } catch (e) {
               return Promise.reject(e);
@@ -223,6 +225,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         map((fetchContext) => fetchContext.filters),
         distinctUntilChanged(fastIsEqual)
       );
+      const reset$ = resetData$.pipe(skip(1), distinctUntilChanged());
 
       const onTableUpdate = (changes: Partial<DataVisualizerTableState>) => {
         if (isDefined(changes?.showDistributions)) {
@@ -300,6 +303,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 onTableUpdate={onTableUpdate}
                 showPreviewByDefault={showPreviewByDefault}
                 onAddFilter={onAddFilter}
+                resetData$={reset$}
               />
             </EuiFlexItem>
           );

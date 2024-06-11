@@ -26,11 +26,18 @@ export const initializeFieldStatsControls = (rawState: FieldStatsInitialState) =
   const dataViewId$ = new BehaviorSubject<string | undefined>(rawState.dataViewId);
   const query$ = new BehaviorSubject<AggregateQuery | undefined>(rawState.query);
   const showDistributions$ = new BehaviorSubject<boolean | undefined>(rawState.showDistributions);
+  const resetData$ = new BehaviorSubject<number>(Date.now());
 
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
   const updateUserInput = (update: FieldStatsInitialState) => {
+    const currentState = serializeFieldStatsChartState();
+    const shouldResetData =
+      currentState.query?.esql !== update.query?.esql || currentState.viewType !== update.viewType;
+    if (shouldResetData) {
+      resetData$.next(Date.now());
+    }
     viewType$.next(update.viewType);
     dataViewId$.next(update.dataViewId);
     query$.next(update.query);
@@ -70,12 +77,15 @@ export const initializeFieldStatsControls = (rawState: FieldStatsInitialState) =
       onLoading,
       onError,
     },
+    // Reset data is internal state management, so no need to expose this in api
+    resetData$,
     serializeFieldStatsChartState,
     fieldStatsControlsComparators,
     onFieldStatsTableDestroy: () => {
       viewType$.complete();
       dataViewId$.complete();
       query$.complete();
+      resetData$.complete();
     },
   };
 };

@@ -9,7 +9,7 @@ import type { AggregateQuery, Filter } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
@@ -99,6 +99,7 @@ export interface FieldStatisticTableEmbeddableProps {
    */
   overridableServices?: { data: DataPublicPluginStart };
   renderFieldName?: (fieldName: string, item: DataVisualizerTableItem) => JSX.Element;
+  resetData$?: Observable<number>;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<

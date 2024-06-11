@@ -58,6 +58,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         showPreviewByDefault={props.showPreviewByDefault}
         totalDocuments={props.totalDocuments}
         visibleFieldNames={props.visibleFieldNames}
+        resetData$={props.resetData$}
       />
     );
   }
@@ -167,6 +168,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
             showPreviewByDefault={props.showPreviewByDefault}
             totalDocuments={props.totalDocuments}
             visibleFieldNames={props.visibleFieldNames}
+            resetData$={props.resetData$}
           />
         </DatePickerContextProvider>
       </KibanaContextProvider>

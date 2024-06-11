@@ -44,15 +44,24 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
       overallStatsProgress,
       setLastRefresh,
       getItemIdToExpandedRowMap,
+      resetData,
     } = useESQLDataVisualizerData(props, dataVisualizerListState);
 
     useEffect(() => {
       setLastRefresh(Date.now());
     }, [props?.lastReloadRequestTime, setLastRefresh]);
 
+    useEffect(() => {
+      const subscription = props.resetData$?.subscribe(() => {
+        resetData();
+      });
+      return () => subscription?.unsubscribe();
+    }, [props.resetData$, resetData]);
+
     if (progress === 100 && configs.length === 0) {
       return <EmbeddableNoResultsEmptyPrompt />;
     }
+
     return (
       <DataVisualizerTable<FieldVisConfig>
         items={configs}
