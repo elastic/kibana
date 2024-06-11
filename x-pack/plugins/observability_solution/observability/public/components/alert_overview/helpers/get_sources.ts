@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
+import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE, ALERT_GROUP } from '@kbn/rule-data-utils';
 import {
   apmSources,
   infraSources,
@@ -17,6 +17,10 @@ interface AlertFields {
 }
 
 export const getSources = (alert: TopAlert) => {
+  // when `kibana.alert.group` is not flattened (for alert detail pages)
+  if (alert.fields[ALERT_GROUP]) return alert.fields[ALERT_GROUP];
+
+  // when `kibana.alert.group` is flattened (for alert flyout)
   const groupsFromGroupFields = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
     const values = alert.fields[ALERT_GROUP_VALUE];
     if (values?.length && values[index]) {

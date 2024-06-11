@@ -174,7 +174,12 @@ export function AlertDetails() {
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="l" />
-        <AlertSummary alertSummaryFields={summaryFields} />
+        <AlertSummary
+          alert={alertDetail.formatted}
+          ruleName={rule?.name}
+          ruleLink={rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''}
+          alertSummaryFields={summaryFields}
+        />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
         {rule && alertDetail.formatted && (

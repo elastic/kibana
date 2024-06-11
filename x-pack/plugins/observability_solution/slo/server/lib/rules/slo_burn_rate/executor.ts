@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -123,6 +124,12 @@ export const getRuleExecutor = ({
           window: windowDef,
         } = result;
 
+        const instances = instanceId.split(',');
+        const groups = [slo.groupBy].flat().reduce((resultGroups: any, groupByItem, index) => {
+          resultGroups.push({ field: groupByItem, value: instances[index].trim() });
+          return resultGroups;
+        }, []);
+
         const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
@@ -165,6 +172,7 @@ export const getRuleExecutor = ({
               [ALERT_REASON]: reason,
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
               [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+              [ALERT_GROUP]: groups,
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,

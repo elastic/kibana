@@ -8,10 +8,10 @@
 import { EuiLink } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
-import { useKibana } from '../../../../utils/kibana_react';
-import { TimeRange, Group } from '../../../../../common/custom_threshold_rule/types';
-import { generateSourceLink } from '../../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
-import { APM_APP_LOCATOR_ID } from '../../../../../common/custom_threshold_rule/get_apm_app_url';
+import { useKibana } from '../../../utils/kibana_react';
+import { TimeRange, Group } from '../../../../common/custom_threshold_rule/types';
+import { generateSourceLink } from '../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
+import { APM_APP_LOCATOR_ID } from '../../../../common/custom_threshold_rule/get_apm_app_url';
 
 export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: TimeRange }) {
   const {
