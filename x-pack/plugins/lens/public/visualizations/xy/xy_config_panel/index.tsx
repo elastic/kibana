@@ -229,7 +229,7 @@ const xyLegendValues: Array<{
   {
     value: LegendValue.Total,
     label: i18n.translate('xpack.lens.shared.legendValues.total', {
-      defaultMessage: 'Sum',
+      defaultMessage: 'Total',
     }),
     toolTipContent: i18n.translate('xpack.lens.shared.legendValues.totalDesc', {
       defaultMessage: 'The sum of all values in the series.',
