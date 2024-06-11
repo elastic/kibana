@@ -470,6 +470,7 @@ class AgentPolicyService {
       withPackagePolicies?: boolean;
       fields?: string[];
       esClient?: ElasticsearchClient;
+      withAgentCount?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
