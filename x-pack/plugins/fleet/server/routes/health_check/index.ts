@@ -21,12 +21,12 @@ import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  // get fleet server health check by host
+  // get fleet server health check by host id
   router.versioned
     .post({
       path: APP_API_ROUTES.HEALTH_CHECK_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allSettings: true },
       },
       description: `Check Fleet Server health`,
     })
@@ -44,27 +44,39 @@ export const postHealthCheckHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostHealthCheckRequestSchema.body>
 > = async (context, request, response) => {
-  try {
-    const abortController = new AbortController();
-    const { id } = request.body;
-    const coreContext = await context.core;
-    const soClient = coreContext.savedObjects.client;
+  const abortController = new AbortController();
+  const { id, host: deprecatedField } = request.body;
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
 
+  if (deprecatedField) {
+    return response.badRequest({
+      body: {
+        message: `Property 'host' is deprecated. Please use id instead.`,
+      },
+    });
+  }
+  try {
     const fleetServerHost = await getFleetServerHost(soClient, id);
-    const { host_urls: hostUrls } = fleetServerHost;
-    if (!fleetServerHost || hostUrls.length === 0)
+
+    if (
+      !fleetServerHost ||
+      !fleetServerHost?.host_urls ||
+      fleetServerHost?.host_urls?.length === 0
+    ) {
       return response.badRequest({
         body: {
           message: `The requested host id ${id} does not have associated host urls.`,
         },
       });
-    const host = hostUrls[0];
+    }
 
     // Sometimes when the host is not online, the request hangs
     // Setting a timeout to abort the request after 5s
     setTimeout(() => {
       abortController.abort();
     }, 5000);
+    const host = fleetServerHost.host_urls[0];
 
     const res = await fetch(`${host}/api/status`, {
       headers: {
@@ -82,12 +94,13 @@ export const postHealthCheckHandler: FleetRequestHandler<
     return response.ok({ body });
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
-      return response.badRequest({
+      return response.notFound({
         body: {
           message: `The requested host id ${request.body.id} does not exist.`,
         },
       });
     }
+
     // when the request is aborted, return offline status
     if (error.message.includes('user aborted')) {
       return response.ok({
