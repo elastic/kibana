@@ -147,7 +147,7 @@ export class SamlSessionManager {
   }
 
   async getUserData(role: string) {
-    const { email, fullname } = await this.getSessionByRole(role);
-    return { email, fullname };
+    const { email, fullname, username } = await this.getSessionByRole(role);
+    return { email, fullname, username };
   }
 }
