@@ -54,7 +54,7 @@ export const OtelLogsPanel: React.FC = () => {
     services: { share, http },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
-  const AGENT_CDN_BASE_URL = 'https://artifacts.elastic.co/downloads/beats/elastic-agent';
+  const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
 
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
@@ -78,45 +78,47 @@ export const OtelLogsPanel: React.FC = () => {
     {
       id: 'mac',
       name: 'Mac',
-      prompt: 'Run the following commands in your terminal to install the collector.',
+      prompt:
+        'Run the following commands in your terminal to download the collector and prepare the configuration.',
       content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch" && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch 
+curl --output elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch" && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-darwin-$arch 
       
-rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       check: './otelcol --config otel.yml',
       type: 'copy',
     },
     {
       id: 'linux',
       name: 'Linux',
-      prompt: 'Run the following commands in your terminal to install the collector.',
+      prompt:
+        'Run the following commands in your terminal to download the collector and prepare the configuration.',
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --url ${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${setup?.elasticAgentVersion}-linux-$arch && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-linux-$arch 
+curl --output elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${setup?.elasticAgentVersion}-linux-$arch && tar -xvf elastic-distro-${setup?.elasticAgentVersion}-linux-$arch.tar.gz -C "elastic-distro-${setup?.elasticAgentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${setup?.elasticAgentVersion}-linux-$arch 
         
-rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       check: './otelcol --config otel.yml',
       type: 'copy',
     },
     {
       id: 'windows',
       name: 'Windows',
-      prompt: 'Run the following commands in your terminal to install the collector.',
-      content: `# not final
-      curl --proto '=https' --tlsv1.2 -fOL https://snapshots.elastic.co/8.14.0-6b2f3648/downloads/beats/elastic-agent/elastic-agent-8.14.0-SNAPSHOT-darwin-x86_64.tar.gz
-      tar -xvf elastic-agent-8.13.4-darwin-x86_64.tar.gz
-      rm elastic-agent-8.13.4-darwin-x86_64/otel.yml && cp elastic-agent-8.13.4-darwin-x86_64/otel_templates/logs_hostmetrics.yaml elastic-agent-8.13.4-darwin-x86_64/otel.yml
-      sed -i '' 's/<<ES_ENDPOINT>>/'${setup?.elasticsearchUrl}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml && sed -i '' 's/<<ES_API_KEY>>/'${apiKeyData?.apiKeyEncoded}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml
-      
-      elastic-agent-8.13.4-darwin-x86_64/elastic-agent otel`,
-      check: './otelcol --config otel.yml',
+      prompt:
+        'Run the following commands in your terminal to download the collector and prepare the configuration.',
+      content: `$ProgressPreference = 'SilentlyContinue'
+
+Invoke-WebRequest -OutFile elastic-distro-${setup?.elasticAgentVersion}-windows-x86_64.zip -Uri https://${AGENT_CDN_BASE_URL}/elastic-agent-${setup?.elasticAgentVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-distro-${setup?.elasticAgentVersion}-windows-x86_64.zip -DestinationPath .; Move-Item .\elastic-agent-${setup?.elasticAgentVersion}-windows-x86_64 .\\elastic-distro-${setup?.elasticAgentVersion}-windows-x86_64; Set-Location elastic-distro-${setup?.elasticAgentVersion}-windows-x86_64
+
+remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((Get-Content ./otel.yml) -replace '<<ES_ENDPOINT>>', '${setup?.elasticsearchUrl}') -replace '<<ES_API_KEY>>', '${apiKeyData?.apiKeyEncoded}' | Set-Content ./otel.yml`,
+      check: '.\\otelcol.exe --config .\\otel.yml',
       type: 'copy',
     },
     {
       id: 'kubernetes',
       name: 'Kubernetes',
-      prompt: 'Install the following via kubectl apply -f otel-collector-k8s.yml.',
+      prompt: 'Install the collector via kubectl apply -f otel-collector-k8s.yml.',
       content: `apiVersion: v1
       kind: Service
       metadata:
@@ -322,8 +324,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogsandhostmetrics.yml ./otel.yml && 
                         {i18n.translate(
                           'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorOrLabel',
                           {
-                            defaultMessage:
-                              'Run the following command to make sure the collector is running properly.',
+                            defaultMessage: 'Run the following command to start the collector',
                           }
                         )}
                       </p>
