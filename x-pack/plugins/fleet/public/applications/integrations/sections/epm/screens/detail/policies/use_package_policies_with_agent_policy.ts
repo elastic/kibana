@@ -63,7 +63,7 @@ export const usePackagePoliciesWithAgentPolicy = (
     // the entire list of package_policy ids.
     return Array.from(
       new Set<string>(
-        packagePoliciesData.items.map((packagePolicy) => packagePolicy.policy_id)
+        packagePoliciesData.items.flatMap((packagePolicy) => packagePolicy.policy_ids)
       ).values()
     );
   }, [packagePoliciesData]);
@@ -105,7 +105,7 @@ export const usePackagePoliciesWithAgentPolicy = (
       (packagePolicy) => {
         return {
           packagePolicy,
-          agentPolicy: agentPoliciesById[packagePolicy.policy_id],
+          agentPolicy: agentPoliciesById[packagePolicy.policy_ids[0]], // TODO multiple agent policies
         };
       }
     );
