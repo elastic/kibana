@@ -108,6 +108,10 @@ export class ConsolePageObject extends FtrService {
     hasInvalidSyntax: async () => {
       return await this.find.existsByCssSelector('.squiggly-error');
     },
+    responseHasDeprecationWarning: async () => {
+      const response = await this.monaco.getOutputText();
+      return response.trim().startsWith('#!');
+    },
   };
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
