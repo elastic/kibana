@@ -29,6 +29,7 @@ import {
   parseCaseUsers,
   convertCustomFieldValue,
   addOrReplaceField,
+  removeEmptyFields,
 } from './utils';
 
 describe('Utils', () => {
@@ -723,6 +724,37 @@ describe('Utils', () => {
               ]
           `
       );
+    });
+  });
+
+  describe('removeEmptyFields', () => {
+    it('removes empty fields', () => {
+      const res = removeEmptyFields({
+        key: '',
+        name: '',
+        templateDescription: '',
+        title: '',
+        description: '',
+        templateTags: [],
+        tags: [],
+        fields: null,
+      });
+
+      expect(res).toEqual({});
+    });
+
+    it('does not remove not empty fields', () => {
+      const res = removeEmptyFields({
+        key: 'key_1',
+        name: 'template 1',
+        templateDescription: 'description 1',
+      });
+
+      expect(res).toEqual({
+        key: 'key_1',
+        name: 'template 1',
+        templateDescription: 'description 1',
+      });
     });
   });
 });

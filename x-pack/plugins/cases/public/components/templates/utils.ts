@@ -5,22 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { getConnectorsFormSerializer } from '../utils';
+import { getConnectorsFormSerializer, removeEmptyFields } from '../utils';
 import type { TemplateFormProps } from './types';
-
-export function removeEmptyFields<T extends Record<string, unknown>>(obj: T): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(obj)
-      .filter(([_, value]) => !isEmpty(value) || typeof value === 'boolean')
-      .map(([key, value]) => [
-        key,
-        value === Object(value) && !Array.isArray(value)
-          ? removeEmptyFields(value as Record<string, unknown>)
-          : value,
-      ])
-  ) as T;
-}
 
 export const templateSerializer = (data: TemplateFormProps): TemplateFormProps => {
   if (data !== null) {

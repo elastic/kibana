@@ -251,3 +251,16 @@ export const addOrReplaceField = <T extends { key: string }>(fields: T[], fieldT
     return fieldToAdd;
   });
 };
+
+export function removeEmptyFields<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj)
+      .filter(([_, value]) => !isEmpty(value) || typeof value === 'boolean')
+      .map(([key, value]) => [
+        key,
+        value === Object(value) && !Array.isArray(value)
+          ? removeEmptyFields(value as Record<string, unknown>)
+          : value,
+      ])
+  ) as T;
+}
