@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
@@ -12,13 +12,10 @@ import {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-  ALERT_INSTANCE_ID,
   ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import moment from 'moment';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { EuiCallOut } from '@elastic/eui';
@@ -34,7 +31,6 @@ import { TimeRangeMetadataContextProvider } from '../../../../context/time_range
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import FailedTransactionChart from './failed_transaction_chart';
 import { getAggsTypeFromRule } from './helpers';
-import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
 import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import { AlertDetailsAppSectionProps } from './types';
@@ -125,12 +121,6 @@ export function AlertDetailsAppSection({
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
-  const historicalRange = useMemo(() => {
-    return {
-      start: moment().subtract(30, 'days').toISOString(),
-      end: moment().toISOString(),
-    };
-  }, []);
 
   const { from, to } = timeRange;
   if (!from || !to) {
@@ -154,6 +144,8 @@ export function AlertDetailsAppSection({
       </EuiCallOut>
     );
   }
+
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -189,6 +181,8 @@ export function AlertDetailsAppSection({
                 environment={environment}
                 start={from}
                 end={to}
+                alertStart={alert.start}
+                alertEnd={alertEnd}
                 comparisonChartTheme={comparisonChartTheme}
                 comparisonEnabled={false}
                 offset={''}
@@ -201,24 +195,12 @@ export function AlertDetailsAppSection({
                 environment={environment}
                 start={from}
                 end={to}
+                alertStart={alert.start}
+                alertEnd={alertEnd}
                 comparisonChartTheme={comparisonChartTheme}
                 timeZone={timeZone}
               />
             </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LatencyAlertsHistoryChart
-              ruleId={alert.fields[ALERT_RULE_UUID]}
-              alertInstanceId={alert.fields[ALERT_INSTANCE_ID]}
-              serviceName={serviceName}
-              start={historicalRange.start}
-              end={historicalRange.end}
-              transactionType={transactionType}
-              transactionName={transactionName}
-              latencyAggregationType={latencyAggregationType}
-              environment={environment}
-              timeZone={timeZone}
-            />
           </EuiFlexItem>
         </ChartPointerEventContextProvider>
       </TimeRangeMetadataContextProvider>

@@ -242,7 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.legacyUnlinkFromLibary(originalPanel);
+      await panelActions.legacyUnlinkFromLibrary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');

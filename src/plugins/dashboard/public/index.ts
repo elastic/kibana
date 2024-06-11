@@ -17,13 +17,13 @@ export {
   PanelPlacementStrategy,
 } from './dashboard_constants';
 export {
-  registerDashboardPanelPlacementSetting,
   type DashboardAPI,
   type AwaitingDashboardAPI,
   DashboardRenderer,
   DASHBOARD_CONTAINER_TYPE,
   type DashboardCreationOptions,
   type DashboardLocatorParams,
+  type IProvidesLegacyPanelPlacementSettings,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 

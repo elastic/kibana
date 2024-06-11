@@ -8,7 +8,7 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
+import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
 import { schema } from '@kbn/config-schema';
 import {
@@ -31,7 +31,7 @@ import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 import {
   DEFAULT_PLUGIN_NAME,
@@ -41,6 +41,7 @@ import {
 import { getLangSmithTracer } from './evaluate/utils';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
+import { ElasticsearchStore } from '../lib/langchain/elasticsearch_store/elasticsearch_store';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -180,7 +181,7 @@ export const postActionsConnectorExecuteRoute = (
                       model: request.body.model,
                       messages: [
                         {
-                          role: 'assistant',
+                          role: 'system',
                           content: i18n.translate(
                             'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
                             {
@@ -315,7 +316,7 @@ export const postActionsConnectorExecuteRoute = (
               []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 
-          const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+          const elserId = await getElser();
 
           const anonymizationFieldsRes =
             await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -323,42 +324,57 @@ export const postActionsConnectorExecuteRoute = (
               page: 1,
             });
 
-          const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
-            await callAgentExecutor({
-              abortSignal,
-              alertsIndexPattern: request.body.alertsIndexPattern,
-              anonymizationFields: anonymizationFieldsRes
-                ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
-                : undefined,
-              actions,
-              isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
-              assistantTools,
-              connectorId,
-              elserId,
-              esClient,
-              isStream:
-                // TODO implement llmClass for bedrock streaming
-                // tracked here: https://github.com/elastic/security-team/issues/7363
-                request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
-              llmType: getLlmType(actionTypeId),
-              kbResource: ESQL_RESOURCE,
-              langChainMessages,
-              logger,
-              onNewReplacements,
-              onLlmResponse,
-              request,
-              replacements: request.body.replacements,
-              size: request.body.size,
-              telemetry,
-              traceOptions: {
+          // Create an ElasticsearchStore for KB interactions
+          // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
+          const enableKnowledgeBaseByDefault =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const kbDataClient = enableKnowledgeBaseByDefault
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            : undefined;
+          const kbIndex =
+            enableKnowledgeBaseByDefault && kbDataClient != null
+              ? kbDataClient.indexTemplateAndPattern.alias
+              : KNOWLEDGE_BASE_INDEX_PATTERN;
+          const esStore = new ElasticsearchStore(
+            esClient,
+            kbIndex,
+            logger,
+            telemetry,
+            elserId,
+            ESQL_RESOURCE,
+            kbDataClient
+          );
+
+          const result: StreamResponseWithHeaders | StaticReturnType = await callAgentExecutor({
+            abortSignal,
+            alertsIndexPattern: request.body.alertsIndexPattern,
+            anonymizationFields: anonymizationFieldsRes
+              ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+              : undefined,
+            actions,
+            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
+            assistantTools,
+            connectorId,
+            esClient,
+            esStore,
+            isStream: request.body.subAction !== 'invokeAI',
+            llmType: getLlmType(actionTypeId),
+            langChainMessages,
+            logger,
+            onNewReplacements,
+            onLlmResponse,
+            request,
+            replacements: request.body.replacements,
+            size: request.body.size,
+            traceOptions: {
+              projectName: langSmithProject,
+              tracers: getLangSmithTracer({
+                apiKey: langSmithApiKey,
                 projectName: langSmithProject,
-                tracers: getLangSmithTracer({
-                  apiKey: langSmithApiKey,
-                  projectName: langSmithProject,
-                  logger,
-                }),
-              },
-            });
+                logger,
+              }),
+            },
+          });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             actionTypeId,
@@ -371,9 +387,7 @@ export const postActionsConnectorExecuteRoute = (
               request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
           });
 
-          return response.ok<
-            StreamFactoryReturnType['responseWithHeaders']['body'] | StaticReturnType['body']
-          >(result);
+          return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

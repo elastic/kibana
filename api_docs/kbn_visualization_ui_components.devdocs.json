@@ -948,15 +948,13 @@
                 "label": "dataView",
                 "description": [],
                 "signature": [
-                  "{ fields: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
                     "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.DataViewFieldBase",
-                    "text": "DataViewFieldBase"
-                  },
-                  "[]; id?: string | undefined; title: string; }"
+                    "section": "def-common.DataViewBase",
+                    "text": "DataViewBase"
+                  }
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
                 "deprecated": false,

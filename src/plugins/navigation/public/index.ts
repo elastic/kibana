@@ -20,6 +20,7 @@ export type {
   NavigationPublicSetup as NavigationPublicPluginSetup,
   NavigationPublicStart as NavigationPublicPluginStart,
   SolutionType,
+  AddSolutionNavigationArg,
 } from './types';
 
 // Export plugin after all other imports

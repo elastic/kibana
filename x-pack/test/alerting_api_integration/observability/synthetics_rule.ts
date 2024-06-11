@@ -39,7 +39,6 @@ export default function ({ getService }: FtrProviderContext) {
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
-          heartbeatIndices: 'heartbeat-*',
           certExpirationThreshold: 30,
           certAgeThreshold: 730,
           defaultConnectors: testActions.slice(0, 2),
@@ -79,7 +78,6 @@ export default function ({ getService }: FtrProviderContext) {
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
-          heartbeatIndices: 'heartbeat-*',
           certExpirationThreshold: 30,
           certAgeThreshold: 730,
           defaultConnectors: testActions,

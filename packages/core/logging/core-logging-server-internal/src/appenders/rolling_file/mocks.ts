@@ -12,13 +12,16 @@ import type { RollingFileContext } from './rolling_file_context';
 import type { RollingFileManager } from './rolling_file_manager';
 import type { TriggeringPolicy } from './policies/policy';
 import type { RollingStrategy } from './strategies/strategy';
+import type { RetentionPolicy } from './retention/retention_policy';
 
-const createContextMock = (filePath: string) => {
+const createContextMock = (filePath: string = 'kibana.log') => {
   const mock: jest.Mocked<RollingFileContext> = {
     currentFileSize: 0,
     currentFileTime: 0,
     filePath,
     refreshFileInfo: jest.fn(),
+    getOrderedRolledFiles: jest.fn(),
+    setOrderedRolledFileFn: jest.fn(),
   };
   return mock;
 };
@@ -52,10 +55,18 @@ const createFileManagerMock = () => {
   return mock;
 };
 
+const createRetentionPolicyMock = () => {
+  const mock: jest.Mocked<RetentionPolicy> = {
+    apply: jest.fn(),
+  };
+  return mock;
+};
+
 export const rollingFileAppenderMocks = {
   createContext: createContextMock,
   createStrategy: createStrategyMock,
   createPolicy: createPolicyMock,
   createLayout: createLayoutMock,
   createFileManager: createFileManagerMock,
+  createRetentionPolicy: createRetentionPolicyMock,
 };

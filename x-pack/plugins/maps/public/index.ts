@@ -26,6 +26,7 @@ export type {
 } from './classes/tooltips/tooltip_property';
 
 export type { MapsSetupApi, MapsStartApi } from './api';
+export type { CreateLayerDescriptorParams } from './classes/sources/es_search_source/create_layer_descriptor';
 
 export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
 export { type MapApi, isMapApi } from './embeddable/map_api';

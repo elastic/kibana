@@ -25,8 +25,6 @@ fi
 
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"
 
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-
 docker manifest inspect "$SOURCE_IMAGE" | tee manifests.json
 
 ARM_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest' manifests.json)
@@ -59,7 +57,6 @@ docker manifest inspect "$TARGET_IMAGE"
 ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE@$ARM_64_DIGEST")
 ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq -r '.[].Config.Labels["org.opencontainers.image.revision"]')
 
-docker logout docker.elastic.co
 
 echo "Image push to $TARGET_IMAGE successful."
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"

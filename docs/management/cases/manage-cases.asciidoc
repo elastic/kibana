@@ -36,6 +36,11 @@ information, refer to <<add-case-connectors>>.
 
 . After you've completed all of the required fields, click *Create case*.
 
+preview:[] Alternatively, you can configure your rules to automatically create cases by using <<cases-action-type,case actions>>.
+By default, the rule adds all of the alerts within a specified time window to a single case.
+You can optionally choose a field to group the alerts and create separate cases for each group.
+You can also choose whether you want the rule to reopen cases or open new ones when the time window elapses.
+
 [[case-custom-fields]]
 === Add custom fields
 

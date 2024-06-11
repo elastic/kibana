@@ -4,21 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { Rule } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { AlertSummaryField } from '@kbn/observability-plugin/public';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
-import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
 import { useFetchSloDetails } from '../../../../hooks/use_fetch_slo_details';
-import { BurnRateRuleParams } from '../../../../typings/slo';
-import { AlertsHistoryPanel } from './components/alerts_history/alerts_history_panel';
-import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
+import { SLOGroupings } from '../../../../pages/slos/components/common/slo_groupings';
+import { useKibana } from '../../../../utils/kibana_react';
 import { CustomAlertDetailsPanel } from './components/custom_panels/custom_panels';
-
-export type BurnRateRule = Rule<BurnRateRuleParams>;
-export type BurnRateAlert = TopAlert;
+import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
+import { BurnRateAlert, BurnRateRule } from './types';
 
 interface AppSectionProps {
   alert: BurnRateAlert;
@@ -46,7 +42,7 @@ export default function AlertDetailsAppSection({
   const alertLink = alert.link;
 
   useEffect(() => {
-    setAlertSummaryFields([
+    const fields = [
       {
         label: i18n.translate('xpack.slo.burnRateRule.alertDetailsAppSection.summaryField.slo', {
           defaultMessage: 'Source SLO',
@@ -67,14 +63,25 @@ export default function AlertDetailsAppSection({
           </EuiLink>
         ),
       },
-    ]);
-  }, [alertLink, rule, ruleLink, setAlertSummaryFields, basePath, slo]);
+    ];
+
+    if (instanceId !== ALL_VALUE) {
+      fields.push({
+        label: i18n.translate(
+          'xpack.slo.burnRateRule.alertDetailsAppSection.summaryField.instanceId',
+          { defaultMessage: 'SLO Instance' }
+        ),
+        value: <SLOGroupings direction="column" slo={slo} gutterSize="none" truncate={false} />,
+      });
+    }
+
+    setAlertSummaryFields(fields);
+  }, [alertLink, rule, ruleLink, setAlertSummaryFields, basePath, slo, instanceId]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
       <ErrorRatePanel alert={alert} slo={slo} isLoading={isLoading} />
       <CustomAlertDetailsPanel alert={alert} slo={slo} rule={rule} />
-      <AlertsHistoryPanel alert={alert} rule={rule} slo={slo} isLoading={isLoading} />
     </EuiFlexGroup>
   );
 }

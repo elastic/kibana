@@ -1932,6 +1932,83 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-public.CreateLayerDescriptorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateLayerDescriptorParams",
+        "description": [],
+        "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.indexPatternId",
+            "type": "string",
+            "tags": [],
+            "label": "indexPatternId",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.geoFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "geoFieldName",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.geoFieldType",
+            "type": "Enum",
+            "tags": [],
+            "label": "geoFieldType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.ES_GEO_FIELD_TYPE",
+                "text": "ES_GEO_FIELD_TYPE"
+              }
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.CreateLayerDescriptorParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/create_layer_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-public.EMSTermJoinConfig",
         "type": "Interface",
         "tags": [],
@@ -4265,7 +4342,7 @@
           },
           "<\"map\"> & { getLayerList: () => ",
           "ILayer",
-          "[]; } & ",
+          "[]; reload: () => void; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -4289,23 +4366,15 @@
             "section": "def-common.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
-            "text": "PublishingSubject"
+            "section": "def-common.PublishesFilters",
+            "text": "PublishesFilters"
           },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined>; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -4583,7 +4652,13 @@
               "text": "LayerDescriptor"
             },
             " | null>; createESSearchSourceLayerDescriptor: (params: ",
-            "CreateLayerDescriptorParams",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.CreateLayerDescriptorParams",
+              "text": "CreateLayerDescriptorParams"
+            },
             ") => Promise<",
             {
               "pluginId": "maps",

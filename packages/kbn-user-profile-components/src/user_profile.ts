@@ -136,3 +136,16 @@ export interface GetUserDisplayNameParams {
 export function getUserDisplayName(params: GetUserDisplayNameParams) {
   return params.full_name || params.email || params.username;
 }
+
+/**
+ * Determines the display label for the provided user information.
+ * Includes the email if it is different from the display name.
+ * @param params Set of available user's name-related fields.
+ */
+export function getUserDisplayLabel(user: GetUserDisplayNameParams): string {
+  const displayName = getUserDisplayName(user);
+  if (user.email && user.email !== displayName) {
+    return `${displayName} (${user.email})`;
+  }
+  return displayName;
+}

@@ -5,14 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
-import { getRawRecordType } from '../utils/get_raw_record_type';
 import {
   checkHitCount,
   sendCompleteMsg,
@@ -25,13 +26,9 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import {
-  DataMsg,
-  RecordRawType,
-  SavedSearchData,
-} from '../state_management/discover_data_state_container';
+import { DataMsg, SavedSearchData } from '../state_management/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { fetchTextBased } from './fetch_text_based';
+import { fetchEsql } from './fetch_esql';
 import { InternalState } from '../state_management/discover_internal_state_container';
 
 export interface FetchDeps {
@@ -67,20 +64,20 @@ export function fetchAll(
     savedSearch,
     abortController,
   } = fetchDeps;
-  const { data } = services;
+  const { data, expressions, profilesManager } = services;
   const searchSource = savedSearch.searchSource.createChild();
 
   try {
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
-    const recordRawType = getRawRecordType(query);
-    const useTextBased = recordRawType === RecordRawType.PLAIN;
+    const isEsqlQuery = isOfAggregateQueryType(query);
+
     if (reset) {
-      sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
+      sendResetMsg(dataSubjects, initialFetchStatus);
     }
 
-    if (recordRawType === RecordRawType.DOCUMENT) {
+    if (!isEsqlQuery) {
       // Update the base searchSource, base for all child fetches
       updateVolatileSearchSource(searchSource, {
         dataView,
@@ -90,36 +87,35 @@ export function fetchAll(
       });
     }
 
-    const shouldFetchTextBased = useTextBased && !!query;
-
     // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$, { recordRawType });
-    sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
+    sendLoadingMsg(dataSubjects.main$);
+    sendLoadingMsg(dataSubjects.documents$, { query });
 
     // histogram for data view mode will send `loading` for totalHits$
-    if (shouldFetchTextBased) {
+    if (isEsqlQuery) {
       sendLoadingMsg(dataSubjects.totalHits$, {
-        recordRawType,
         result: dataSubjects.totalHits$.getValue().result,
       });
     }
 
     // Start fetching all required requests
-    const response = shouldFetchTextBased
-      ? fetchTextBased(
+    const response = isEsqlQuery
+      ? fetchEsql({
           query,
           dataView,
-          data,
-          services.expressions,
+          abortSignal: abortController.signal,
           inspectorAdapters,
-          abortController.signal
-        )
+          data,
+          expressions,
+          profilesManager,
+        })
       : fetchDocuments(searchSource, fetchDeps);
-    const fetchType = shouldFetchTextBased ? 'fetchTextBased' : 'fetchDocuments';
+    const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
+
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns, interceptedWarnings, textBasedHeaderWarning }) => {
+      .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -129,11 +125,10 @@ export function fetchAll(
           });
         }
 
-        if (shouldFetchTextBased) {
+        if (isEsqlQuery) {
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.COMPLETE,
             result: records.length,
-            recordRawType,
           });
         } else {
           const currentTotalHits = dataSubjects.totalHits$.getValue();
@@ -144,29 +139,28 @@ export function fetchAll(
             dataSubjects.totalHits$.next({
               fetchStatus: FetchStatus.PARTIAL,
               result: records.length,
-              recordRawType,
             });
           }
         }
+
         /**
-         * The partial state for text based query languages is necessary in case the query has changed
-         * In the follow up useTextBasedQueryLanguage hook in this case new columns are added to AppState
+         * The partial state for ES|QL mode is necessary in case the query has changed
+         * In the follow up useEsqlMode hook in this case new columns are added to AppState
          * So the data table shows the new columns of the table. The partial state was introduced to prevent
          * To frequent change of state causing the table to re-render to often, which causes race conditions
          * So it takes too long, a bad user experience, also a potential flakniess in tests
          */
         const fetchStatus =
-          useTextBased && (!prevQuery || !isEqual(query, prevQuery))
+          isEsqlQuery && (!prevQuery || !isEqual(query, prevQuery))
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
 
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,
-          textBasedQueryColumns,
-          textBasedHeaderWarning,
+          esqlQueryColumns,
+          esqlHeaderWarning,
           interceptedWarnings,
-          recordRawType,
           query,
         });
 
@@ -210,12 +204,11 @@ export async function fetchMoreDocuments(
   try {
     const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
-
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
-    const recordRawType = getRawRecordType(query);
+    const isEsqlQuery = isOfAggregateQueryType(query);
 
-    if (recordRawType === RecordRawType.PLAIN) {
+    if (isEsqlQuery) {
       // not supported yet
       return;
     }

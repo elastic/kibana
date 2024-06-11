@@ -24,9 +24,9 @@ export const RegisterEmbeddable = () => {
         <h2>Register a new embeddable type</h2>
         <p>
           This plugin registers several embeddable types with{' '}
-          <strong>registerReactEmbeddableFactory</strong> during plugin start. The code example
-          below shows Search embeddable registration. Notice how the embeddable factory is imported
-          asynchronously to limit initial page load size.
+          <strong>registerReactEmbeddableFactory</strong>. The code example below shows Search
+          embeddable registration. The embeddable factory is imported asynchronously to limit
+          initial page load size.
         </p>
       </EuiText>
       <EuiSpacer size="s" />
@@ -64,10 +64,11 @@ export const RegisterEmbeddable = () => {
       <EuiText>
         <h2>Configure initial dashboard placement (optional)</h2>
         <p>
-          Add an entry to <strong>registerDashboardPanelPlacementSetting</strong> to configure
-          initial dashboard placement. Panel placement lets you configure the width, height, and
-          placement strategy when panels get added to a dashboard. In the example below, the Field
-          List embeddable will be added to dashboards as a narrow and tall panel.
+          Add an entry to <strong>registerDashboardPanelPlacementSetting</strong> provided by the
+          Dashboard plugin start contract to configure initial dashboard placement. Panel placement
+          lets you configure the width, height, and placement strategy when panels get added to a
+          dashboard. In the example below, the Field List embeddable will be added to dashboards as
+          a narrow and tall panel.
         </p>
       </EuiText>
       <EuiSpacer size="s" />

@@ -32,30 +32,41 @@ export const testSchema = schema.object({
     scheme: ['prototest'],
     defaultValue: () => 'prototest://something',
   }),
+  any: schema.any({ meta: { description: 'any type' } }),
 });
 
-type RouterMeta = ReturnType<Router['getRoutes']>[number];
-type VersionedRouterMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
+type RoutesMeta = ReturnType<Router['getRoutes']>[number];
+type VersionedRoutesMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
 
-export const createRouter = (args: { routes: RouterMeta[] }) => {
+export const createRouter = (args: { routes: RoutesMeta[] }) => {
   return {
     getRoutes: () => args.routes,
   } as unknown as Router;
 };
-export const createVersionedRouter = (args: { routes: VersionedRouterMeta[] }) => {
+export const createVersionedRouter = (args: { routes: VersionedRoutesMeta[] }) => {
   return {
     getRoutes: () => args.routes,
   } as unknown as CoreVersionedRouter;
 };
 
-const getRouterDefaults = () => ({
+export const getRouterDefaults = () => ({
   isVersioned: false,
-  path: '/foo/{id}',
+  path: '/foo/{id}/{path*}',
   method: 'get',
+  options: {
+    tags: ['foo', 'oas-tag:bar'],
+    summary: 'route summary',
+    description: 'route description',
+  },
   validationSchemas: {
     request: {
-      params: schema.object({ id: schema.string({ maxLength: 36 }) }),
-      query: schema.object({ page: schema.number({ max: 999, min: 1, defaultValue: 1 }) }),
+      params: schema.object({
+        id: schema.string({ maxLength: 36, meta: { description: 'id' } }),
+        path: schema.string({ maxLength: 36, meta: { description: 'path' } }),
+      }),
+      query: schema.object({
+        page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
+      }),
       body: testSchema,
     },
     response: {
@@ -65,15 +76,18 @@ const getRouterDefaults = () => ({
       unsafe: { body: true },
     },
   },
-  options: { tags: ['foo'] },
   handler: jest.fn(),
 });
 
-const getVersionedRouterDefaults = () => ({
+export const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
+    summary: 'versioned route',
     access: 'public',
+    options: {
+      tags: ['ignore-me', 'oas-tag:versioned'],
+    },
   },
   handlers: [
     {
@@ -83,11 +97,19 @@ const getVersionedRouterDefaults = () => ({
           request: {
             body: schema.object({
               foo: schema.string(),
-              deprecatedFoo: schema.maybe(schema.string({ meta: { deprecated: true } })),
+              deprecatedFoo: schema.maybe(
+                schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
+              ),
             }),
           },
           response: {
-            [200]: { body: () => schema.object({ fooResponse: schema.string() }) },
+            [200]: {
+              body: () =>
+                schema.object(
+                  { fooResponseWithDescription: schema.string() },
+                  { meta: { description: 'fooResponse' } }
+                ),
+            },
           },
         },
         version: 'oas-test-version-1',
@@ -112,25 +134,29 @@ const getVersionedRouterDefaults = () => ({
   ],
 });
 
+interface CreatTestRouterArgs {
+  routers?: { [routerId: string]: { routes: Array<Partial<RoutesMeta>> } };
+  versionedRouters?: {
+    [routerId: string]: { routes: Array<Partial<VersionedRoutesMeta>> };
+  };
+}
+
 export const createTestRouters = (
-  {
-    routers = [],
-    versionedRouters = [],
-  }: {
-    routers?: Array<Array<Partial<RouterMeta>>>;
-    versionedRouters?: Array<Array<Partial<VersionedRouterMeta>>>;
-  } = { routers: [[{}]], versionedRouters: [[{}]] }
+  { routers = {}, versionedRouters = {} }: CreatTestRouterArgs = {
+    routers: { testRouter: { routes: [{}] } },
+    versionedRouters: { testVersionedRouter: { routes: [{}] } },
+  }
 ): [routers: Router[], versionedRouters: CoreVersionedRouter[]] => {
   return [
     [
-      ...routers.map((rs) =>
-        createRouter({ routes: rs.map((r) => Object.assign(getRouterDefaults(), r)) })
+      ...Object.values(routers).map((rs) =>
+        createRouter({ routes: rs.routes.map((r) => Object.assign(getRouterDefaults(), r)) })
       ),
     ],
     [
-      ...versionedRouters.map((rs) =>
+      ...Object.values(versionedRouters).map((rs) =>
         createVersionedRouter({
-          routes: rs.map((r) => Object.assign(getVersionedRouterDefaults(), r)),
+          routes: rs.routes.map((r) => Object.assign(getVersionedRouterDefaults(), r)),
         })
       ),
     ],

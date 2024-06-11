@@ -15,14 +15,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
 import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
 import { ChatFormFields } from '../types';
 import { AnalyticsEvents } from '../analytics/constants';
+import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 
 const maxWidthPage = 640;
 
@@ -36,12 +38,23 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const { watch } = useFormContext();
   const usageTracker = useUsageTracker();
 
+  const [searchParams] = useSearchParams();
+  const index = useMemo(() => searchParams.get('default-index'), [searchParams]);
+  const { addIndex } = useSourceIndicesFields();
+
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.startNewChatPageLoaded);
+    if (index) {
+      addIndex(index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.startNewChatPageLoaded);
   }, [usageTracker]);
 
   return (
-    <EuiFlexGroup justifyContent="center" className="eui-yScroll">
+    <EuiFlexGroup justifyContent="center" className="eui-yScroll" data-test-subj="startChatPage">
       <EuiFlexGroup
         css={{
           height: 'fit-content',
@@ -55,7 +68,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
             <EuiTitle>
-              <h2>
+              <h2 data-test-subj="startNewChatTitle">
                 <FormattedMessage
                   id="xpack.searchPlayground.startNewChat.title"
                   defaultMessage="Start a new chat"
@@ -90,8 +103,9 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             fill
             iconType="arrowRight"
             iconSide="right"
+            data-test-subj="startChatButton"
             disabled={
-              !watch(ChatFormFields.indices, []).length ||
+              !watch(ChatFormFields.indices, [])?.length ||
               !Object.keys(connectors || {}).length ||
               !watch(ChatFormFields.elasticsearchQuery, '')
             }

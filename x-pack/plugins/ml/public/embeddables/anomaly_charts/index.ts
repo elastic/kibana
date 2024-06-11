@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AnomalyChartsEmbeddableFactory } from './anomaly_charts_embeddable_factory';
+export { getAnomalyChartsReactEmbeddableFactory } from './anomaly_charts_embeddable_factory';

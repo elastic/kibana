@@ -12,6 +12,8 @@ import { render as testingLibraryRender } from '@testing-library/react';
 
 import { LogicWrapper, Provider, resetContext } from 'kea';
 
+import { of } from 'rxjs';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { ApplicationStart } from '@kbn/core-application-browser';
@@ -53,6 +55,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   esConfig: {
     elasticsearch_host: 'https://your_deployment_url',
   },
+  getChromeStyle$: jest.fn().mockReturnValue(of('classic')),
   guidedOnboarding: {},
   history: mockHistory,
   indexMappingComponent: () => {
@@ -87,6 +90,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  updateSideNavDefinition: jest.fn(),
   user: null,
 };
 

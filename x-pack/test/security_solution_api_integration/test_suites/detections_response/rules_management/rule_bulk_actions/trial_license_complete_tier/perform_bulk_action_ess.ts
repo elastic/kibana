@@ -25,6 +25,7 @@ import {
   checkInvestigationFieldSoValue,
   createLegacyRuleAction,
   createRuleThroughAlertingEndpoint,
+  getCustomQueryRuleParams,
   getLegacyActionSO,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
@@ -46,8 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
-  // Failing: See https://github.com/elastic/kibana/issues/182512
-  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
+  describe('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
               webhookUrl: 'http://localhost:1234',
             },
           }),
-        createRule(supertest, log, getSimpleRule(ruleId, false)),
+        createRule(supertest, log, { ...getSimpleRule(ruleId, false), index: ['*'] }),
       ]);
       await createLegacyRuleAction(supertest, rule1.id, connector.body.id);
 
@@ -274,6 +274,26 @@ export default ({ getService }: FtrProviderContext): void => {
             frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
+      });
+    });
+
+    it('should set rule_source to "internal" when duplicating a rule', async () => {
+      await createRule(supertest, log, getCustomQueryRuleParams());
+
+      const { body } = await securitySolutionApi
+        .performBulkAction({
+          body: {
+            query: '',
+            action: BulkActionTypeEnum.duplicate,
+            duplicate: { include_exceptions: false, include_expired_exceptions: false },
+          },
+          query: {},
+        })
+        .expect(200);
+
+      // Check that the duplicated rule is returned with the correct rule_source
+      expect(body.attributes.results.created[0].rule_source).to.eql({
+        type: 'internal',
       });
     });
 

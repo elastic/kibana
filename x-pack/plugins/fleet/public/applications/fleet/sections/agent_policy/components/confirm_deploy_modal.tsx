@@ -17,7 +17,18 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   onCancel: () => void;
   agentCount: number;
   agentPolicy: AgentPolicy;
-}> = ({ onConfirm, onCancel, agentCount, agentPolicy }) => {
+  showUnprivilegedAgentsCallout?: boolean;
+  unprivilegedAgentsCount?: number;
+  dataStreams?: Array<{ name: string; title: string }>;
+}> = ({
+  onConfirm,
+  onCancel,
+  agentCount,
+  agentPolicy,
+  showUnprivilegedAgentsCallout = false,
+  unprivilegedAgentsCount = 0,
+  dataStreams,
+}) => {
   return (
     <EuiConfirmModal
       title={

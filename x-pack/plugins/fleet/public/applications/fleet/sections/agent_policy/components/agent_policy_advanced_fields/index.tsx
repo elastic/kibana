@@ -138,7 +138,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
                 defaultMessage="Prevent agent tampering"
-              />
+              />{' '}
               {!policyHasElasticDefend && (
                 <span data-test-subj="tamperMissingIntegrationTooltip">
                   <EuiIconTip
@@ -587,7 +587,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           <h3>
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
-              defaultMessage="Agent Binary Download"
+              defaultMessage="Agent binary download"
               data-test-subj="agentPolicyForm.downloadSource.label"
             />
           </h3>
@@ -628,67 +628,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         title={
           <h3>
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
-              defaultMessage="Unenrollment timeout"
-            />
-            &nbsp;
-            <EuiToolTip
-              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
-                defaultMessage:
-                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
-              })}
-            >
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
-                  { defaultMessage: 'Deprecated' }
-                )}
-                size="s"
-              />
-            </EuiToolTip>
-          </h3>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
-            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
-          />
-        }
-      >
-        <EuiFormRow
-          fullWidth
-          error={
-            touchedFields.unenroll_timeout && validation.unenroll_timeout
-              ? validation.unenroll_timeout
-              : null
-          }
-          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-          isDisabled={disabled}
-        >
-          <EuiFieldNumber
-            fullWidth
-            disabled={disabled || agentPolicy.is_managed === true}
-            value={agentPolicy.unenroll_timeout || ''}
-            min={0}
-            onChange={(e) => {
-              updateAgentPolicy({
-                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
-              });
-            }}
-            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            <FormattedMessage
               id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
               defaultMessage="Host name format"
             />
-            &nbsp;
-            <EuiBetaBadge label="beta" size="s" color="accent" />
           </h3>
         }
         description={
@@ -763,6 +705,62 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               });
             }}
             name="radio group"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
+              defaultMessage="Unenrollment timeout"
+            />
+            &nbsp;
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
+                defaultMessage:
+                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
+              })}
+            >
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
+                  { defaultMessage: 'Deprecated' }
+                )}
+                size="s"
+              />
+            </EuiToolTip>
+          </h3>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+          isDisabled={disabled}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={disabled || agentPolicy.is_managed === true}
+            value={agentPolicy.unenroll_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

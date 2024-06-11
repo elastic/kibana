@@ -15,7 +15,7 @@ import type {
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 
-export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createApmApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';

@@ -86,7 +86,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
   }) => {
     const {
       actionTypeRegistry,
-      modelEvaluatorEnabled,
+      assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       toasts,
       selectedSettingsTab,

@@ -168,9 +168,6 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
-export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandableFlyout' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
@@ -428,10 +425,14 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
   FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
+  ATTACK_DISCOVERY: 'securitySolution.attackDiscovery.newFeaturesTour.v8.14',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
+
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
 
 // TODO: https://github.com/elastic/kibana/pull/142950
 /**

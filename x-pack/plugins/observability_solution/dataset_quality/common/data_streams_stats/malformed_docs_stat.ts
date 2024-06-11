@@ -13,12 +13,14 @@ export class DegradedDocsStat {
   dataset: DegradedDocsStatType['dataset'];
   percentage: DegradedDocsStatType['percentage'];
   count: DegradedDocsStatType['count'];
+  docsCount: DegradedDocsStatType['docsCount'];
   quality: QualityIndicators;
 
   private constructor(degradedDocsStat: DegradedDocsStat) {
     this.dataset = degradedDocsStat.dataset;
     this.percentage = degradedDocsStat.percentage;
     this.count = degradedDocsStat.count;
+    this.docsCount = degradedDocsStat.docsCount;
     this.quality = degradedDocsStat.quality;
   }
 

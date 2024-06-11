@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const datasetQualityAppTitle = i18n.translate('xpack.datasetQuality.appTitle', {
-  defaultMessage: 'Datasets',
+  defaultMessage: 'Data Set Quality',
 });
 
 export const noDatasetsDescription = i18n.translate('xpack.datasetQuality.noDatasetsDescription', {
@@ -46,10 +46,17 @@ export const flyoutOpenInLogsExplorerText = i18n.translate(
   }
 );
 
+export const flyoutOpenInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
 export const flyoutDatasetDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutDatasetDetailsText',
   {
-    defaultMessage: 'Dataset details',
+    defaultMessage: 'Data set details',
   }
 );
 
@@ -137,6 +144,33 @@ export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShow
   defaultMessage: 'Show all',
 });
 
+export const flyoutImprovementText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Degraded fields',
+  }
+);
+
+export const flyoutImprovementTooltip = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of degraded fields found in your data set.',
+  }
+);
+
+export const flyoutDegradedFieldsTableLoadingText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableLoadingText',
+  {
+    defaultMessage: 'Loading degraded fields',
+  }
+);
+
+export const flyoutDegradedFieldsTableNoData = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableNoData',
+  {
+    defaultMessage: 'No degraded fields found',
+  }
+);
 /*
 Summary Panel
 */
@@ -151,14 +185,14 @@ export const summaryPanelLast24hText = i18n.translate(
 export const summaryPanelQualityText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityText',
   {
-    defaultMessage: 'Datasets Quality',
+    defaultMessage: 'Data Sets Quality',
   }
 );
 
 export const summaryPanelQualityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityTooltipText',
   {
-    defaultMessage: 'Quality is based on the percentage of degraded docs in a dataset.',
+    defaultMessage: 'Quality is based on the percentage of degraded docs in a data set.',
   }
 );
 
@@ -186,14 +220,14 @@ export const summaryPanelQualityGoodText = i18n.translate(
 export const summaryPanelDatasetsActivityText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityText',
   {
-    defaultMessage: 'Active Datasets',
+    defaultMessage: 'Active Data Sets',
   }
 );
 
 export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
   {
-    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+    defaultMessage: 'The number of data sets with activity in the selected time range.',
   }
 );
 
@@ -207,12 +241,12 @@ export const summaryPanelEstimatedDataText = i18n.translate(
 export const summaryPanelEstimatedDataTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelEstimatedDataTooltipText',
   {
-    defaultMessage: 'The approximate amount of data stored in the last 24 hours.',
+    defaultMessage: 'The approximate amount of data stored in the selected time range.',
   }
 );
 
 export const inactiveDatasetsLabel = i18n.translate('xpack.datasetQuality.inactiveDatasetsLabel', {
-  defaultMessage: 'Show inactive datasets',
+  defaultMessage: 'Show inactive data sets',
 });
 
 export const inactiveDatasetsDescription = i18n.translate(
@@ -224,12 +258,12 @@ export const inactiveDatasetsDescription = i18n.translate(
 );
 
 export const fullDatasetNameLabel = i18n.translate('xpack.datasetQuality.fullDatasetNameLabel', {
-  defaultMessage: 'Show full dataset names',
+  defaultMessage: 'Show full data set names',
 });
 
 export const fullDatasetNameDescription = i18n.translate(
   'xpack.datasetQuality.fullDatasetNameDescription',
   {
-    defaultMessage: 'Turn on to show the actual dataset names used to store the documents.',
+    defaultMessage: 'Turn on to show the actual data set names used to store the documents.',
   }
 );

@@ -11,6 +11,7 @@ import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/l
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
   ExternalServiceCredentials,
   Incident,
@@ -115,7 +116,7 @@ export const getAxiosInstance = ({
 
   if (!isOAuth && username && password) {
     axiosInstance = axios.create({
-      auth: { username, password },
+      headers: getBasicAuthHeader({ username, password }),
     });
   } else {
     axiosInstance = axios.create();

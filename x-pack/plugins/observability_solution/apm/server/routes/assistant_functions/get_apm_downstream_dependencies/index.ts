@@ -7,6 +7,7 @@
 import datemath from '@elastic/datemath';
 import * as t from 'io-ts';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -35,14 +36,16 @@ export interface APMDownstreamDependency {
 export async function getAssistantDownstreamDependencies({
   arguments: args,
   apmEventClient,
+  randomSampler,
 }: {
   arguments: t.TypeOf<typeof downstreamDependenciesRouteRt>;
   apmEventClient: APMEventClient;
+  randomSampler: RandomSampler;
 }): Promise<APMDownstreamDependency[]> {
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
 
-  const map = await getDestinationMap({
+  const { nodesBydependencyName: map } = await getDestinationMap({
     start,
     end,
     apmEventClient,
@@ -50,6 +53,7 @@ export async function getAssistantDownstreamDependencies({
       ...termQuery(SERVICE_NAME, args['service.name']),
       ...environmentQuery(args['service.environment'] ?? ENVIRONMENT_ALL.value),
     ],
+    randomSampler,
   });
 
   const items: Array<{

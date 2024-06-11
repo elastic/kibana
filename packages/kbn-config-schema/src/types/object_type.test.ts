@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import { expectType } from 'tsd';
 import { schema } from '../..';
 import { TypeOf } from './object_type';
@@ -19,6 +20,16 @@ test('returns value by default', () => {
   };
 
   expect(type.validate(value)).toEqual({ name: 'test' });
+});
+
+test('meta', () => {
+  const type = schema.object(
+    {
+      name: schema.string(),
+    },
+    { meta: { id: 'test_id' } }
+  );
+  expect(get(type.getSchema().describe(), 'flags.id')).toEqual('test_id');
 });
 
 test('returns empty object if undefined', () => {

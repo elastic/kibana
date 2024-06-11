@@ -152,7 +152,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined) => ",
+          " | undefined, { processRecord }: { processRecord?: ((record: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ") => T) | undefined; }) => ",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
@@ -213,6 +221,65 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.buildDataTableRecordList.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "{ processRecord }",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.buildDataTableRecordList.$3.processRecord",
+                "type": "Function",
+                "tags": [],
+                "label": "processRecord",
+                "description": [],
+                "signature": [
+                  "((record: ",
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.DataTableRecord",
+                    "text": "DataTableRecord"
+                  },
+                  ") => T) | undefined"
+                ],
+                "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/discover-utils",
+                    "id": "def-common.buildDataTableRecordList.$3.processRecord.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "record",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/discover-utils",
+                        "scope": "common",
+                        "docId": "kibKbnDiscoverUtilsPluginApi",
+                        "section": "def-common.DataTableRecord",
+                        "text": "DataTableRecord"
+                      }
+                    ],
+                    "path": "packages/kbn-discover-utils/src/utils/build_data_record.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1011,7 +1078,7 @@
         "label": "isLegacyTableEnabled",
         "description": [],
         "signature": [
-          "({\n  uiSettings,\n  isTextBasedQueryMode,\n}: { uiSettings: ",
+          "({\n  uiSettings,\n  isEsqlMode,\n}: { uiSettings: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
             "scope": "common",
@@ -1019,7 +1086,7 @@
             "section": "def-common.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
-          "; isTextBasedQueryMode: boolean; }) => boolean"
+          "; isEsqlMode: boolean; }) => boolean"
         ],
         "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
         "deprecated": false,
@@ -1030,7 +1097,7 @@
             "id": "def-common.isLegacyTableEnabled.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  uiSettings,\n  isTextBasedQueryMode,\n}",
+            "label": "{\n  uiSettings,\n  isEsqlMode,\n}",
             "description": [],
             "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
             "deprecated": false,
@@ -1058,10 +1125,10 @@
               },
               {
                 "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.isLegacyTableEnabled.$1.isTextBasedQueryMode",
+                "id": "def-common.isLegacyTableEnabled.$1.isEsqlMode",
                 "type": "boolean",
                 "tags": [],
-                "label": "isTextBasedQueryMode",
+                "label": "isEsqlMode",
                 "description": [],
                 "path": "packages/kbn-discover-utils/src/utils/is_legacy_table_enabled.ts",
                 "deprecated": false,

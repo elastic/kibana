@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { Theme } from '@elastic/charts';
+import { BoolQuery } from '@kbn/es-query';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   RecursivePartial,
   EuiFlexItem,
@@ -14,7 +16,9 @@ import {
   EuiFlexGroup,
   EuiTitle,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -23,6 +27,10 @@ import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
+import { TransactionTypeSelect } from './transaction_type_select';
+import { ViewInAPMButton } from './view_in_apm_button';
+import { getAlertStartAnnotation } from './get_alert_start_annotation';
+import { DEFAULT_DATE_FORMAT } from './constants';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -30,34 +38,48 @@ const INITIAL_STATE = {
 };
 function ThroughputChart({
   transactionType,
+  transactionTypes,
+  setTransactionType,
   transactionName,
   serviceName,
   environment,
   start,
   end,
+  alertStart,
+  alertEnd,
   comparisonChartTheme,
   comparisonEnabled,
   offset,
   timeZone,
+  kuery = '',
+  filters,
 }: {
   transactionType: string;
+  transactionTypes?: string[];
+  setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
   serviceName: string;
   environment: string;
   start: string;
   end: string;
+  alertStart?: number;
+  alertEnd?: number;
   comparisonChartTheme: RecursivePartial<Theme>;
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
+  kuery?: string;
+  filters?: BoolQuery;
 }) {
-  /* Throughput Chart */
-
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { uiSettings },
+  } = useKibana();
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
     numBuckets: 100,
-    kuery: '',
+    kuery,
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
@@ -73,7 +95,8 @@ function ThroughputChart({
             },
             query: {
               environment,
-              kuery: '',
+              kuery,
+              filters: filters ? JSON.stringify(filters) : undefined,
               start,
               end,
               transactionType,
@@ -86,7 +109,17 @@ function ThroughputChart({
         });
       }
     },
-    [environment, serviceName, start, end, transactionType, transactionName, preferred]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      preferred,
+      kuery,
+      filters,
+    ]
   );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
   const timeseriesThroughput = [
@@ -109,6 +142,19 @@ function ThroughputChart({
         ]
       : []),
   ];
+  const getThroughputChartAdditionalData = () => {
+    if (alertStart) {
+      return getAlertStartAnnotation({
+        alertStart,
+        alertEnd,
+        color: euiTheme.colors.danger,
+        dateFormat: (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT,
+      });
+    }
+    return [];
+  };
+
+  const showTransactionTypeSelect = setTransactionType && transactionTypes;
 
   return (
     <EuiFlexItem>
@@ -132,6 +178,30 @@ function ThroughputChart({
               position="right"
             />
           </EuiFlexItem>
+          {showTransactionTypeSelect && (
+            <EuiFlexItem grow={false}>
+              <TransactionTypeSelect
+                transactionType={transactionType}
+                transactionTypes={transactionTypes}
+                onChange={setTransactionType}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <ViewInAPMButton
+                  serviceName={serviceName}
+                  environment={environment}
+                  from={start}
+                  to={end}
+                  kuery={kuery}
+                  transactionName={transactionName}
+                  transactionType={transactionType}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <TimeseriesChart
@@ -144,6 +214,7 @@ function ThroughputChart({
           timeseries={timeseriesThroughput}
           yLabelFormat={asExactTransactionRate}
           timeZone={timeZone}
+          annotations={getThroughputChartAdditionalData()}
         />
       </EuiPanel>
     </EuiFlexItem>

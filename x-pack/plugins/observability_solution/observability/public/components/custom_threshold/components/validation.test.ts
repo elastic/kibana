@@ -15,9 +15,7 @@ import { EQUATION_REGEX, validateCustomThreshold } from './validation';
 const errorReason = 'this should appear as error reason';
 
 jest.mock('@kbn/es-query', () => {
-  const actual = jest.requireActual('@kbn/es-query');
   return {
-    ...actual,
     buildEsQuery: jest.fn(() => {
       // eslint-disable-next-line no-throw-literal
       throw { shortMessage: errorReason };

@@ -76,6 +76,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/openapi-generator",
     "@kbn/code-editor",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/react-kibana-context-render"
   ]
 }

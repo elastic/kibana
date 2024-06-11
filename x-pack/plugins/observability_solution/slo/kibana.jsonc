@@ -17,10 +17,12 @@
       "charts",
       "contentManagement",
       "controls",
+      "dashboard",
       "data",
       "dataViews",
       "lens",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "fieldFormats",
       "observability",
       "observabilityShared",
@@ -49,8 +51,7 @@
       "kibanaUtils",
       "unifiedSearch",
       "embeddable",
-      "ingestPipelines",
-      "dashboard"
+      "ingestPipelines"
     ]
   }
 }

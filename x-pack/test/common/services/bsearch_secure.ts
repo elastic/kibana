@@ -28,7 +28,7 @@ const getSpaceUrlPrefix = (spaceId?: string): string => {
 };
 
 interface SendOptions {
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>;
+  supertestWithoutAuth: SuperTest.Agent;
   auth: { username: string; password: string };
   referer?: string;
   kibanaVersion?: string;

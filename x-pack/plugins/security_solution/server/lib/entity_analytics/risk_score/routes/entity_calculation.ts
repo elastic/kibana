@@ -10,12 +10,13 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { isEmpty } from 'lodash/fp';
+import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
-import type { AfterKeys } from '../../../../../common/entity_analytics/risk_engine';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
-import type { CalculateAndPersistScoresResponse, EntityAnalyticsRoutesDeps } from '../../types';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { convertRangeToISO } from '../tasks/helpers';
@@ -69,7 +70,7 @@ export const riskScoreEntityCalculationRoute = (
           logger
         );
 
-        const { identifier_type: identifierType, identifier } = request.body;
+        const { identifier_type: identifierType, identifier, refresh } = request.body;
 
         try {
           const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -78,7 +79,7 @@ export const riskScoreEntityCalculationRoute = (
 
           if (entityAnalyticsConfig == null) {
             return siemResponse.error({
-              statusCode: 405,
+              statusCode: 400,
               body: 'No Risk engine configuration found',
             });
           }
@@ -94,7 +95,7 @@ export const riskScoreEntityCalculationRoute = (
 
           if (!enabled) {
             return siemResponse.error({
-              statusCode: 405,
+              statusCode: 400,
               body: 'Risk engine is disabled',
             });
           }
@@ -112,20 +113,26 @@ export const riskScoreEntityCalculationRoute = (
           const identifierFilter = {
             term: { [getFieldForIdentifier(identifierType)]: identifier },
           };
+
           const filter = isEmpty(userFilter) ? [identifierFilter] : [userFilter, identifierFilter];
 
-          const result: CalculateAndPersistScoresResponse =
+          const result: RiskScoresCalculationResponse =
             await riskScoreService.calculateAndPersistScores({
               pageSize,
               identifierType,
               index,
-              filter,
+              filter: {
+                bool: {
+                  filter,
+                },
+              },
               range,
               runtimeMappings,
               weights: [],
               alertSampleSizePerShard,
               afterKeys,
               returnScores: true,
+              refresh,
             });
 
           if (result.errors.length) {
@@ -137,6 +144,10 @@ export const riskScoreEntityCalculationRoute = (
               },
               bypassErrorFormat: true,
             });
+          }
+
+          if (result.scores_written > 0) {
+            await riskScoreService.scheduleLatestTransformNow();
           }
 
           const score =

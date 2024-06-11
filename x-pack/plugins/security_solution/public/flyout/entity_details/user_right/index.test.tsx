@@ -69,22 +69,6 @@ describe('UserPanel', () => {
     expect(getByTestId('securitySolutionFlyoutNavigationExpandDetailButton')).toBeInTheDocument();
   });
 
-  it('renders loading state when risk score is loading', () => {
-    mockedUseRiskScore.mockReturnValue({
-      ...mockRiskScoreState,
-      data: undefined,
-      loading: true,
-    });
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <UserPanel {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
-  });
-
   it('renders loading state when observed user is loading', () => {
     mockedUseObservedUser.mockReturnValue({
       ...mockObservedUser,

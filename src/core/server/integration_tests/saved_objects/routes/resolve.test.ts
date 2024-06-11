@@ -79,8 +79,9 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
     const config = setupConfig();
+    const access = 'public';
 
-    registerResolveRoute(router, { config, coreUsageData, logger });
+    registerResolveRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

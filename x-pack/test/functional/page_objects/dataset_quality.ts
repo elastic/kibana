@@ -11,9 +11,13 @@ import expect from '@kbn/expect';
 import { TimeUnitId } from '@elastic/eui';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
-  OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
+  DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
-} from '@kbn/observability-logs-explorer-plugin/common';
+} from '@kbn/data-quality-plugin/common';
+import {
+  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+} from '@kbn/dataset-quality-plugin/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -22,7 +26,18 @@ const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
     page: 0,
   },
   filters: {},
-  flyout: {},
+  flyout: {
+    degradedFields: {
+      table: {
+        page: 0,
+        rowsPerPage: 10,
+        sort: {
+          field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+          direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+        },
+      },
+    },
+  },
 };
 
 type SummaryPanelKpi = Record<
@@ -47,9 +62,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
     datasetQualityTableColumn: (column: number) =>
       `[data-test-subj="datasetQualityTable"] .euiTableRowCell:nth-child(${column})`,
-    datasetSearchInput: '[placeholder="Filter datasets"]',
-    showFullDatasetNamesSwitch: 'button[aria-label="Show full dataset names"]',
-    showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive datasets"]',
+    datasetSearchInput: '[placeholder="Filter data sets"]',
+    showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
+    showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
     superDatePickerApplyButton: '.euiQuickSelect__applyButton',
   };
 
@@ -60,6 +75,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyout: 'datasetQualityFlyout',
     datasetQualityFlyoutBody: 'datasetQualityFlyoutBody',
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
+    datasetQualityFlyoutDegradedFieldTable: 'datasetQualityFlyoutDegradedFieldTable',
+    datasetQualityFlyoutDegradedTableNoData: 'datasetQualityFlyoutDegradedTableNoData',
+    datasetQualitySparkPlot: 'datasetQualitySparkPlot',
     datasetQualityHeaderButton: 'datasetQualityHeaderButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
     datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
@@ -97,7 +115,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       pageState?: datasetQualityUrlSchemaV1.UrlSchema;
     } = {}) {
       const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY]: rison.encode(
+        [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
           datasetQualityUrlSchemaV1.urlSchemaRT.encode({
             ...defaultPageState,
             ...pageState,
@@ -106,8 +124,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       });
 
       return PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogsExplorer',
-        '/dataset-quality',
+        'management',
+        '/data/data_quality',
         queryStringParams,
         {
           // the check sometimes is too slow for the page so it misses the point
@@ -121,12 +139,18 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
+    async waitUntilTableInFlyoutLoaded() {
+      await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiBasicTable-loading', 20 * 1000);
+    },
+
     async waitUntilSummaryPanelLoaded() {
       await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
       await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
     },
 
     async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
+      await this.waitUntilSummaryPanelLoaded();
+
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
         { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
@@ -157,6 +181,19 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.find(testSubjectSelectors.datasetQualityTable);
     },
 
+    getDatasetQualityFlyoutDegradedFieldTable(): Promise<WebElementWrapper> {
+      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable);
+    },
+
+    async getDatasetQualityFlyoutDegradedFieldTableRows(): Promise<WebElementWrapper[]> {
+      await this.waitUntilTableInFlyoutLoaded();
+      const table = await testSubjects.find(
+        testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+      );
+      const tBody = await table.findByTagName('tbody');
+      return tBody.findAllByTagName('tr');
+    },
+
     async refreshTable() {
       const filtersContainer = await testSubjects.find(
         testSubjectSelectors.datasetQualityFiltersContainer
@@ -178,14 +215,19 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       const table = await this.getDatasetsTable();
       return parseDatasetTable(table, [
         '0',
-        'Dataset Name',
+        'Data Set Name',
         'Namespace',
         'Size',
-        'Dataset Quality',
+        'Data Set Quality',
         'Degraded Docs (%)',
         'Last Activity',
         'Actions',
       ]);
+    },
+
+    async parseDegradedFieldTable() {
+      const table = await this.getDatasetQualityFlyoutDegradedFieldTable();
+      return parseDatasetTable(table, ['Field', 'Docs count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -222,7 +264,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async openDatasetFlyout(datasetName: string) {
       const cols = await this.parseDatasetTable();
-      const datasetNameCol = cols['Dataset Name'];
+      const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
         (dName) => dName === datasetName
@@ -492,7 +534,7 @@ const texts = {
   datasetHealthPoor: 'Poor',
   datasetHealthDegraded: 'Degraded',
   datasetHealthGood: 'Good',
-  activeDatasets: 'Active Datasets',
+  activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
   docsCountTotal: 'Docs count (total)',
   size: 'Size',

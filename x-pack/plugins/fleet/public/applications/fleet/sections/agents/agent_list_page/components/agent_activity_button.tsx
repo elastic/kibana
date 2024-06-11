@@ -9,19 +9,31 @@ import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { TOUR_STORAGE_CONFIG } from '../../../../constants';
+import { TOUR_STORAGE_KEYS } from '../../../../constants';
 import { useStartServices } from '../../../../hooks';
 
 export const AgentActivityButton: React.FC<{
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
 }> = ({ onClickAgentActivity, showAgentActivityTour }) => {
-  const { uiSettings } = useStartServices();
+  const { storage, uiSettings } = useStartServices();
 
   const [agentActivityTourState, setAgentActivityTourState] = useState(showAgentActivityTour);
 
-  const isTourHidden = uiSettings.get('hideAgentActivityTour', false);
+  const isTourHidden =
+    uiSettings.get('hideAnnouncements', false) ||
+    (
+      storage.get(TOUR_STORAGE_KEYS.AGENT_ACTIVITY) as
+        | TOUR_STORAGE_CONFIG['AGENT_ACTIVITY']
+        | undefined
+    )?.active === false;
 
-  const setTourAsHidden = () => uiSettings.set('hideAgentActivityTour', true);
+  const setTourAsHidden = () => {
+    storage.set(TOUR_STORAGE_KEYS.AGENT_ACTIVITY, {
+      active: false,
+    } as TOUR_STORAGE_CONFIG['AGENT_ACTIVITY']);
+  };
 
   useEffect(() => {
     setAgentActivityTourState(showAgentActivityTour);

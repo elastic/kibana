@@ -19,7 +19,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'RiskSummary entityType: %s',
   (riskEntity) => {
     it(`renders ${riskEntity} risk data`, () => {
-      const riskSeverity = RiskSeverity.low;
+      const riskSeverity = RiskSeverity.Low;
       const risk = {
         loading: false,
         isModuleEnabled: true,

@@ -2086,11 +2086,11 @@ describe('TaskManagerRunner', () => {
       });
       await runner.run();
 
-      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledTimes(3);
       expect(logger.debug).toHaveBeenNthCalledWith(1, 'Running task bar "foo"', {
         tags: ['task:start', 'foo', 'bar'],
       });
-      expect(logger.debug).toHaveBeenNthCalledWith(2, 'Task bar "foo" ended', {
+      expect(logger.debug).toHaveBeenNthCalledWith(3, 'Task bar "foo" ended', {
         tags: ['task:end', 'foo', 'bar'],
       });
     });

@@ -59,14 +59,16 @@ export function generateDatasets(
     {
       percentage: DegradedDocsStat['percentage'];
       count: DegradedDocsStat['count'];
+      docsCount: DegradedDocsStat['docsCount'];
       quality: DegradedDocsStat['quality'];
     }
   > = degradedDocStats.reduce(
-    (degradedMapAcc, { dataset, percentage, count, quality }) =>
+    (degradedMapAcc, { dataset, percentage, count, docsCount, quality }) =>
       Object.assign(degradedMapAcc, {
         [dataset]: {
           percentage,
           count,
+          docsCount,
           quality: mapPercentageToQuality(percentage),
         },
       }),

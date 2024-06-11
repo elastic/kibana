@@ -85,6 +85,7 @@ export const createPrepackagedRules = async (
   const savedObjectsClient = context.core.savedObjects.client;
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
+  const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
   if (!siemClient || !rulesClient) {
@@ -106,14 +107,14 @@ export const createPrepackagedRules = async (
   const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
   const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-  const result = await createPrebuiltRules(rulesClient, rulesToInstall);
+  const result = await createPrebuiltRules(detectionRulesClient, rulesToInstall);
   if (result.errors.length > 0) {
     throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
   }
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(rulesClient, rulesToUpdate);
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate);
 
   const prebuiltRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
     rules_installed: rulesToInstall.length,

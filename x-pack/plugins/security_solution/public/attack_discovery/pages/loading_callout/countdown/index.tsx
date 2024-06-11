@@ -9,6 +9,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiOutsideClickDetector,
   EuiPopover,
   EuiText,
   useEuiTheme,
@@ -80,15 +81,17 @@ const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorI
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          anchorPosition="upCenter"
-          button={iconInQuestionButton}
-          closePopover={closePopover}
-          data-test-subj="infoPopover"
-          isOpen={isPopoverOpen}
-        >
-          <InfoPopoverBody connectorIntervals={connectorIntervals} />
-        </EuiPopover>
+        <EuiOutsideClickDetector isDisabled={!isPopoverOpen} onOutsideClick={() => closePopover()}>
+          <EuiPopover
+            anchorPosition="upCenter"
+            button={iconInQuestionButton}
+            closePopover={closePopover}
+            data-test-subj="infoPopover"
+            isOpen={isPopoverOpen}
+          >
+            <InfoPopoverBody connectorIntervals={connectorIntervals} />
+          </EuiPopover>
+        </EuiOutsideClickDetector>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

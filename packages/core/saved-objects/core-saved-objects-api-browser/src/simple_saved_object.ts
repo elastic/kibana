@@ -42,6 +42,8 @@ export interface SimpleSavedObject<T = unknown> {
   references: SavedObjectType<T>['references'];
   /** The date this object was last updated */
   updatedAt: SavedObjectType<T>['updated_at'];
+  /** The user that last updated this object */
+  updatedBy: SavedObjectType<T>['updated_by'];
   /** The date this object was created */
   createdAt: SavedObjectType<T>['created_at'];
   /** The user that created this object */

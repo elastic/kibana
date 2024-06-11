@@ -245,7 +245,6 @@ export const RulesContainer = () => {
         pageSize={rulesPageData.rules_page.length}
         isSearching={status === 'loading'}
         selectedRules={selectedRules}
-        refetchRulesStates={rulesStates.refetch}
         setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
         enabledDisabledItemsFilterState={enabledDisabledItemsFilter}
         setSelectAllRules={setSelectAllRules}
@@ -268,16 +267,11 @@ export const RulesContainer = () => {
         }}
         selectedRuleId={params.ruleId}
         onRuleClick={navToRuleFlyout}
-        refetchRulesStates={rulesStates.refetch}
         selectedRules={selectedRules}
         setSelectedRules={setSelectedRules}
       />
       {params.ruleId && rulesFlyoutData.metadata && (
-        <RuleFlyout
-          rule={rulesFlyoutData}
-          onClose={navToRulePage}
-          refetchRulesStates={rulesStates.refetch}
-        />
+        <RuleFlyout rule={rulesFlyoutData} onClose={navToRulePage} />
       )}
     </div>
   );

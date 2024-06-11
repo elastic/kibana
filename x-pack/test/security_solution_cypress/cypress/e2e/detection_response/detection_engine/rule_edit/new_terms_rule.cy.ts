@@ -33,7 +33,6 @@ import { saveEditedRule } from '../../../../tasks/edit_rule';
 import {
   selectAlertSuppressionPerRuleExecution,
   selectDoNotSuppressForMissingFields,
-  fillAlertSuppressionFields,
 } from '../../../../tasks/create_new_rule';
 import { visit } from '../../../../tasks/navigation';
 
@@ -57,7 +56,7 @@ describe(
         createRule({
           ...rule,
           alert_suppression: {
-            group_by: SUPPRESS_BY_FIELDS.slice(0, 1),
+            group_by: SUPPRESS_BY_FIELDS,
             duration: { value: 20, unit: 'm' },
             missing_fields_strategy: 'suppress',
           },
@@ -77,12 +76,11 @@ describe(
           .eq(1)
           .should('be.enabled')
           .should('have.value', 'm');
-        cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.slice(0, 1).join(''));
+        cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
         cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS).should('be.checked');
 
-        selectAlertSuppressionPerRuleExecution();
         selectDoNotSuppressForMissingFields();
-        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS.slice(1));
+        selectAlertSuppressionPerRuleExecution();
 
         saveEditedRule();
 
