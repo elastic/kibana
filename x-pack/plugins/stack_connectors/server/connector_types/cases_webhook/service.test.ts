@@ -14,11 +14,7 @@ import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-import {
-  AuthType as CasesWebhookAuthType,
-  WebhookMethods as CasesWebhookMethods,
-  SSLCertType,
-} from '../../../common/auth/constants';
+import { AuthType, WebhookMethods, SSLCertType } from '../../../common/auth/constants';
 import { CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -38,11 +34,11 @@ const configurationUtilities = actionsConfigMock.create();
 
 const config: CasesWebhookPublicConfigurationType = {
   createCommentJson: '{"body":{{{case.comment}}}}',
-  createCommentMethod: CasesWebhookMethods.POST,
+  createCommentMethod: WebhookMethods.POST,
   createCommentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}/comment',
   createIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
-  createIncidentMethod: CasesWebhookMethods.POST,
+  createIncidentMethod: WebhookMethods.POST,
   createIncidentResponseKey: 'id',
   createIncidentUrl: 'https://coolsite.net/issue',
   getIncidentResponseExternalTitleKey: 'key',
@@ -52,7 +48,7 @@ const config: CasesWebhookPublicConfigurationType = {
   getIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
   updateIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
-  updateIncidentMethod: CasesWebhookMethods.PUT,
+  updateIncidentMethod: WebhookMethods.PUT,
   updateIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
 };
 const secrets = {
@@ -68,7 +64,7 @@ const mockTime = new Date('2021-10-20T19:41:02.754+0300');
 
 const sslConfig: CasesWebhookPublicConfigurationType = {
   ...config,
-  authType: CasesWebhookAuthType.SSL,
+  authType: AuthType.SSL,
   certType: SSLCertType.CRT,
   hasAuth: true,
 };
@@ -481,7 +477,7 @@ describe('Cases webhook service', () => {
         axios,
         url: 'https://coolsite.net/issue',
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
         data: `{"fields":{"title":"title","description":"desc","tags":["hello","world"],"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`,
@@ -747,7 +743,7 @@ describe('Cases webhook service', () => {
       expect(requestMock.mock.calls[0][0]).toEqual({
         axios,
         logger,
-        method: CasesWebhookMethods.PUT,
+        method: WebhookMethods.PUT,
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
         url: 'https://coolsite.net/issue/1',
@@ -983,7 +979,7 @@ describe('Cases webhook service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
         url: 'https://coolsite.net/issue/1/comment',
@@ -1227,7 +1223,7 @@ describe('Cases webhook service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment","id":"1"}`,
@@ -1267,7 +1263,7 @@ describe('Cases webhook service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
-        method: CasesWebhookMethods.POST,
+        method: WebhookMethods.POST,
         configurationUtilities,
         url: 'https://coolsite.net/issue/1/comment',
         data: `{"body":"comment","id":1}`,

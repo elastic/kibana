@@ -9,7 +9,7 @@ import React from 'react';
 import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, screen, waitFor } from '@testing-library/react';
-import { AuthType as CasesWebhookAuthType } from '../../../common/auth/constants';
+import { AuthType } from '../../../common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
 
@@ -28,7 +28,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 const invalidJsonTitle = `{"fields":{"summary":"wrong","description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
 const invalidJsonBoth = `{"fields":{"summary":"wrong","description":"wrong","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
 const config = {
-  authType: CasesWebhookAuthType.Basic,
+  authType: AuthType.Basic,
   createCommentJson: '{"body":{{{case.comment}}}}',
   createCommentMethod: 'post',
   createCommentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}/comment',
@@ -71,8 +71,10 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
+
     expect(await screen.findByTestId('authNone')).toBeInTheDocument();
     expect(await screen.findByTestId('authBasic')).toBeInTheDocument();
+    expect(await screen.findByTestId('authSSL')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookUserInput')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookPasswordInput')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookHeadersKeyInput')).toBeInTheDocument();
@@ -361,6 +363,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           data: {
             ...rest,
             __internal__: {
+              hasCA: false,
               hasHeaders: true,
             },
           },
@@ -401,6 +404,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
               authType: null,
             },
             __internal__: {
+              hasCA: false,
               hasHeaders: true,
             },
           },
@@ -438,6 +442,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             ...rest,
             config: rest2,
             __internal__: {
+              hasCA: false,
               hasHeaders: false,
             },
           },

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { WebhookMethods as CasesWebhookMethods } from '../../../common/auth/constants';
+import { WebhookMethods } from '../../../common/auth/constants';
 import { AuthConfiguration, SecretConfigurationSchema } from '../../../common/auth/schema';
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
@@ -14,9 +14,9 @@ const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 export const ExternalIncidentServiceConfiguration = {
   createIncidentUrl: schema.string(),
   createIncidentMethod: schema.oneOf(
-    [schema.literal(CasesWebhookMethods.POST), schema.literal(CasesWebhookMethods.PUT)],
+    [schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)],
     {
-      defaultValue: CasesWebhookMethods.POST,
+      defaultValue: WebhookMethods.POST,
     }
   ),
   createIncidentJson: schema.string(), // stringified object
@@ -27,12 +27,12 @@ export const ExternalIncidentServiceConfiguration = {
   updateIncidentUrl: schema.string(),
   updateIncidentMethod: schema.oneOf(
     [
-      schema.literal(CasesWebhookMethods.POST),
-      schema.literal(CasesWebhookMethods.PATCH),
-      schema.literal(CasesWebhookMethods.PUT),
+      schema.literal(WebhookMethods.POST),
+      schema.literal(WebhookMethods.PATCH),
+      schema.literal(WebhookMethods.PUT),
     ],
     {
-      defaultValue: CasesWebhookMethods.PUT,
+      defaultValue: WebhookMethods.PUT,
     }
   ),
   updateIncidentJson: schema.string(),
@@ -40,12 +40,12 @@ export const ExternalIncidentServiceConfiguration = {
   createCommentMethod: schema.nullable(
     schema.oneOf(
       [
-        schema.literal(CasesWebhookMethods.POST),
-        schema.literal(CasesWebhookMethods.PUT),
-        schema.literal(CasesWebhookMethods.PATCH),
+        schema.literal(WebhookMethods.POST),
+        schema.literal(WebhookMethods.PUT),
+        schema.literal(WebhookMethods.PATCH),
       ],
       {
-        defaultValue: CasesWebhookMethods.PUT,
+        defaultValue: WebhookMethods.PUT,
       }
     )
   ),
