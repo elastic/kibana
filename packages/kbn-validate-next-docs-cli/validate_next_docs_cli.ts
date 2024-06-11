@@ -19,6 +19,7 @@ run(
     const cloneOnly = flagsReader.boolean('clone-only');
 
     const repos = new Repos(log);
+    // testing this
     const docsRepo = await repos.init('elastic/docs.elastic.dev');
     const contentConfig = new Config(docsRepo);
     const sources = contentConfig.getSources().filter((s) => s.location !== 'elastic/kibana');
