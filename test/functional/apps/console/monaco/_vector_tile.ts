@@ -29,7 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should validate response', async () => {
-      await PageObjects.console.monaco.enterText(`GET kibana_sample_data_logs/_mvt/geo.coordinates/0/0/0`);
+      await PageObjects.console.monaco.enterText(
+        `GET kibana_sample_data_logs/_mvt/geo.coordinates/0/0/0`
+      );
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.monaco.getOutputText();
