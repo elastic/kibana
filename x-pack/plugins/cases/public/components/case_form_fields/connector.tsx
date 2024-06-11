@@ -14,26 +14,27 @@ import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { schema } from '../create/schema';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import type { CasesConfigurationUI } from '../../containers/types';
 
 interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   isLoadingConnectors: boolean;
+  configurationConnector: CasesConfigurationUI['connector'];
 }
 
-const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
+const ConnectorComponent: React.FC<Props> = ({
+  connectors,
+  isLoading,
+  isLoadingConnectors,
+  configurationConnector,
+}) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const connector = getConnectorById(connectorId, connectors) ?? null;
-
-  const {
-    data: { connector: configurationConnector },
-  } = useGetCaseConfiguration();
-
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;

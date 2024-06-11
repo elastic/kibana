@@ -60,6 +60,7 @@ const defaultProps = {
   connectors: connectorsMock,
   isLoading: false,
   isLoadingConnectors: false,
+  configurationConnector: useCaseConfigureResponse.data.connector,
 };
 
 describe('Connector', () => {

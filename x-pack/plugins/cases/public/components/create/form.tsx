@@ -245,11 +245,12 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               connectors={connectors}
               isLoadingConnectors={isLoading}
               isLoading={isSubmitting}
+              configurationConnector={configuration.connector}
             />
           </div>
         ),
       }),
-      [connectors, isLoading, isSubmitting]
+      [configuration.connector, connectors, isLoading, isSubmitting]
     );
 
     const allSteps = useMemo(

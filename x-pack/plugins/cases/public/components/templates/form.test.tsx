@@ -257,9 +257,7 @@ describe('TemplateForm', () => {
       />
     );
 
-    const connectors = await screen.findByTestId('caseConnectors');
-
-    expect(await within(connectors).findByTestId('form-optional-field-label')).toBeInTheDocument();
+    await screen.findByTestId('caseConnectors');
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
