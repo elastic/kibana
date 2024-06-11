@@ -321,12 +321,20 @@ remove-item ./otel.yml; copy-item ./otel_samples/hostmetrics.yml ./otel.yml; ((G
                     <EuiSpacer />
                     <EuiText>
                       <p>
-                        {i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorOrLabel',
-                          {
-                            defaultMessage: 'Run the following command to start the collector',
-                          }
-                        )}
+                        {selectedTab === 'kubernetes'
+                          ? i18n.translate(
+                              'xpack.observability_onboarding.otelLogsPanel.p.checkTheCollectorLabel',
+                              {
+                                defaultMessage:
+                                  'Run the following command to check whether the collector is running correctly.',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel',
+                              {
+                                defaultMessage: 'Run the following command to start the collector',
+                              }
+                            )}
                       </p>
                     </EuiText>
                     <EuiCodeBlock language="yaml" isCopyable>
