@@ -78,7 +78,7 @@ export const ControlGroupEditorStrings = {
         getShowApplySelectionsTooltip: () =>
           i18n.translate('controls.controlGroup.management.showApplySelections.tooltip', {
             defaultMessage:
-              'If disabled, control selections will only be applied after clicking apply.',
+              'When disabled, control selections will only be applied after clicking apply.',
           }),
       },
     },

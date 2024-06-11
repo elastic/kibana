@@ -217,13 +217,16 @@ export const getTimesliderControlFactory = (
               references: [],
             };
           },
-          getCustomPrepend: () => {
+          CustomPrependComponent: () => {
+            const [autoApplySelections, viewMode] =
+              useBatchedPublishingSubjects(controlGroupApi.autoApplySelections$, viewModeSubject);
+
             return (
               <TimeSliderPrepend
                 onNext={onNext}
                 onPrevious={onPrevious}
-                viewModeSubject={viewModeSubject}
-                disablePlayButton={false}
+                viewMode={viewMode}
+                disablePlayButton={!autoApplySelections}
                 setIsPopoverOpen={setIsPopoverOpen}
                 waitForControlOutputConsumersToLoad$={waitForDashboardPanelsToLoad$}
               />

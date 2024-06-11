@@ -66,16 +66,16 @@ export const getControlGroupEmbeddableFactory = (services: {
         defaultControlWidth,
         labelPosition,
         chainingSystem,
-        showApplySelections: initialShowApply,
+        autoApplySelections,
         ignoreParentSettings: initialParentSettings,
       } = initialState;
 
+      const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
-      const showApplySelections = new BehaviorSubject<boolean | undefined>(initialShowApply);
       const ignoreParentSettings = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         initialParentSettings
       );
@@ -114,6 +114,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           .sort((a, b) => (a.order > b.order ? 1 : -1))
       );
       const api = setApi({
+        autoApplySelections$,
         unsavedChanges,
         resetUnsavedChanges: () => {
           // TODO: Implement this
@@ -132,7 +133,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             {
               chainingSystem: chainingSystem$,
               labelPosition: labelPosition$,
-              showApplySelections,
+              autoApplySelections: autoApplySelections$,
               ignoreParentSettings,
             },
             { core: services.core }
@@ -153,7 +154,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             {
               labelPosition: labelPosition$.getValue(),
               chainingSystem: chainingSystem$.getValue(),
-              showApplySelections: showApplySelections.getValue(),
+              autoApplySelections: autoApplySelections$.getValue(),
               ignoreParentSettings: ignoreParentSettings.getValue(),
             }
           );
@@ -182,11 +183,11 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       /**
        * Subscribe to all children's output filters, combine them, and output them
-       * TODO: If `showApplySelections` is true, publish to "unpublishedFilters" instead
+       * TODO: If `autoApplySelections` is false, publish to "unpublishedFilters" instead
        * and only output to filters$ when the apply button is clicked.
        *       OR
        *       Always publish to "unpublishedFilters" and publish them manually on click
-       *       (when `showApplySelections` is true) or after a small debounce (when false)
+       *       (when `autoApplySelections` is false) or after a small debounce (when false)
        *       See: https://github.com/elastic/kibana/pull/182842#discussion_r1624929511
        * - Note: Unsaved changes of control group **should** take into consideration the
        *         output filters,  but not the "unpublishedFilters"

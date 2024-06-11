@@ -11,8 +11,6 @@ import React, { FC, useCallback, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';
 import {
-  PublishingSubject,
-  useBatchedPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { TimeSliderStrings } from './time_slider_strings';
@@ -22,7 +20,7 @@ interface Props {
   onNext: () => void;
   onPrevious: () => void;
   waitForControlOutputConsumersToLoad$?: Observable<void>;
-  viewModeSubject: PublishingSubject<ViewMode>;
+  viewMode: ViewMode;
   disablePlayButton: boolean;
   setIsPopoverOpen: (isPopoverOpen: boolean) => void;
 }
@@ -31,8 +29,6 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
-
-  const [viewMode] = useBatchedPublishingSubjects(props.viewModeSubject);
 
   const playNextFrame = useCallback(() => {
     // advance to next frame
@@ -87,7 +83,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         onPlay={onPlay}
         onPause={onPause}
         waitForControlOutputConsumersToLoad$={props.waitForControlOutputConsumersToLoad$}
-        viewMode={viewMode}
+        viewMode={props.viewMode}
         disablePlayButton={props.disablePlayButton}
         isPaused={isPaused}
       />
