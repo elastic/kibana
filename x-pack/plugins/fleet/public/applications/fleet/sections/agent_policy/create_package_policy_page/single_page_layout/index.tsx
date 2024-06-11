@@ -22,7 +22,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSteps,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -82,6 +81,17 @@ import { PostInstallGoogleCloudShellModal } from './components/cloud_security_po
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
 
+const StepsWithLessPadding = styled(EuiSteps)`
+  .euiStep__content {
+    padding-bottom: ${(props) => props.theme.eui.euiSizeM};
+  }
+
+  // compensating for EuiBottomBar hiding the content
+  @media (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-bottom: 100px;
+  }
+`;
+
 const CustomEuiBottomBar = styled(EuiBottomBar)`
   /* A relatively _low_ z-index value here to account for EuiComboBox popover that might appear under the bottom bar */
   z-index: 50;
@@ -92,18 +102,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   queryParamsPolicyId,
   prerelease,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const StepsWithLessPadding = styled(EuiSteps)`
-    .euiStep__content {
-      padding-bottom: ${euiTheme.size.m};
-    }
-
-    // compensating for EuiBottomBar hiding the content
-    @media (max-width: ${euiTheme.breakpoint.m}) {
-      margin-bottom: 100px;
-    }
-  `;
-
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();

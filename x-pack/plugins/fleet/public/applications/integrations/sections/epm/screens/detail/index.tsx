@@ -21,7 +21,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,6 +101,12 @@ export interface DetailParams {
   pkgkey: string;
   panel?: DetailViewPanelName;
 }
+
+const Divider = styled.div`
+  width: 0;
+  height: 100%;
+  border-left: ${(props) => props.theme.eui.euiBorderThin};
+`;
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -451,13 +456,6 @@ export function Detail() {
     [getPath, history]
   );
 
-  const { euiTheme } = useEuiTheme();
-  const Divider = styled.div`
-    width: 0;
-    height: 100%;
-    border-left: ${euiTheme.border.thin};
-  `;
-
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -548,9 +546,6 @@ export function Detail() {
       ) : undefined,
     [
       packageInfo,
-      showVersionSelect,
-      versionLabel,
-      versionOptions,
       updateAvailable,
       isInstalled,
       pkgkey,
@@ -564,7 +559,9 @@ export function Detail() {
       integrationInfo?.title,
       handleAddIntegrationPolicyClick,
       onVersionChange,
-      Divider,
+      showVersionSelect,
+      versionLabel,
+      versionOptions,
     ]
   );
 

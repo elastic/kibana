@@ -13,7 +13,6 @@ import {
   EuiToolTip,
   EuiText,
   EuiTreeView,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +24,44 @@ import { useLink } from '../../../../../hooks';
 import { AgentDetailsIntegrationInputStatus } from './agent_details_integration_input_status';
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 import { getInputUnitsByPackage, InputStatusFormatter } from './input_status_utils';
+
+const StyledEuiLink = styled(EuiLink)`
+  font-size: ${(props) => props.theme.eui.euiFontSizeS};
+`;
+
+const StyledEuiTreeView = styled(EuiTreeView)`
+  .input-action-item-expanded {
+    height: auto;
+    padding-top: ${({ theme }) => theme.eui.euiSizeS};
+    padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+    .euiTreeView__nodeLabel {
+      width: 100%;
+    }
+  }
+  .inputStatusHealth {
+    padding-top: 5px;
+  }
+  .euiTreeView__node--expanded {
+    max-height: none !important;
+    .policy-response-action-expanded + div {
+      .euiTreeView__node {
+        // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
+        max-height: none !important;
+      }
+    }
+  }
+  .euiTreeView__node {
+    max-height: none !important;
+    .euiNotificationBadge {
+      margin-right: 5px;
+    }
+    .euiTreeView__nodeLabel {
+      .euiText {
+        font-size: ${({ theme }) => theme.eui.euiFontSize};
+      }
+    }
+  }
+`;
 
 export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
   agent: Agent;
@@ -175,44 +212,6 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
     ];
   };
 
-  const { euiTheme } = useEuiTheme();
-  const StyledEuiLink = styled(EuiLink)`
-    font-size: ${euiTheme.font.scale.s};
-  `;
-
-  const StyledEuiTreeView = styled(EuiTreeView)`
-    .input-action-item-expanded {
-      height: auto;
-      padding-top: ${euiTheme.size.s};
-      padding-bottom: ${euiTheme.size.s};
-      .euiTreeView__nodeLabel {
-        width: 100%;
-      }
-    }
-    .inputStatusHealth {
-      padding-top: 5px;
-    }
-    .euiTreeView__node--expanded {
-      max-height: none !important;
-      .policy-response-action-expanded + div {
-        .euiTreeView__node {
-          // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
-          max-height: none !important;
-        }
-      }
-    }
-    .euiTreeView__node {
-      max-height: none !important;
-      .euiNotificationBadge {
-        margin-right: 5px;
-      }
-      .euiTreeView__nodeLabel {
-        .euiText {
-          font-size: ${euiTheme.font.scale.s};
-        }
-      }
-    }
-  `;
   return (
     <StyledEuiTreeView
       items={generateInputsTreeView()}

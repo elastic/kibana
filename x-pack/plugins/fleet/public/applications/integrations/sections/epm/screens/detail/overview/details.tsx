@@ -16,7 +16,6 @@ import {
   EuiNotificationBadge,
   EuiLink,
   EuiPortal,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -47,6 +46,23 @@ interface Props {
   packageInfo: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
 }
+
+const Replacements = euiStyled(EuiFlexItem)`
+  margin: 0;
+
+  & .euiAccordion {
+    padding-top: ${({ theme }) => parseInt(theme.eui.euiSizeL, 10) * 2}px;
+
+    &::before {
+      content: '';
+      display: block;
+      border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+      position: relative;
+      top: -${({ theme }) => theme.eui.euiSizeL};
+      margin: 0 ${({ theme }) => theme.eui.euiSizeXS};
+    }
+  }
+`;
 
 export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
@@ -282,24 +298,6 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     toggleNoticeModal,
     toggleChangelogModal,
   ]);
-
-  const { euiTheme } = useEuiTheme();
-  const Replacements = euiStyled(EuiFlexItem)`
-margin: 0;
-
-& .euiAccordion {
-  padding-top: ${parseInt(euiTheme.size.l, 10) * 2}px;
-
-  &::before {
-    content: '';
-    display: block;
-    border-top: 1px solid ${euiTheme.colors.lightShade};
-    position: relative;
-    top: -${euiTheme.size.l};
-    margin: 0 ${euiTheme.size.xs};
-  }
-}
-`;
 
   return (
     <>

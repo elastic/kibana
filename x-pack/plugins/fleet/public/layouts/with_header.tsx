@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 import {
-  EuiPage,
   EuiPageBody,
   EuiSpacer,
+  useIsWithinMaxBreakpoint,
   useIsWithinMinBreakpoint,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import type { HeaderProps } from '../components';
 import { Header } from '../components';
+
+import { Page, ContentWrapper, Wrapper } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;
@@ -34,27 +34,6 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
 }) => {
   const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
   const fullWidthSize = isBiggerScreen ? '80%' : '100%';
-
-  // These components should match the ones in `without_header.tsx`
-  const { euiTheme } = useEuiTheme();
-  const Wrapper = styled.div`
-    background-color: ${euiTheme.colors.emptyShade};
-
-    // Set the min height to the viewport size minus the height of any global Kibana headers
-    min-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
-  `;
-  const Page = styled(EuiPage)`
-    background: ${euiTheme.colors.emptyShade};
-    width: 100%;
-    align-self: center;
-    margin: auto;
-    flex: 1;
-  `;
-  const ContentWrapper = styled.div`
-    height: 100%;
-    padding-left: ${euiTheme.size.m};
-    padding-right: ${euiTheme.size.m};
-  `;
 
   return (
     <Wrapper>

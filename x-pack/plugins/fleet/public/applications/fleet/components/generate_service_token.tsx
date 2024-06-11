@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -29,6 +29,15 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
   max-width: 100%;
 `;
 
+// Otherwise the copy button is over the text
+const CommandCode = styled.div.attrs(() => {
+  return {
+    className: 'eui-textBreakAll',
+  };
+})`
+  margin-right: ${(props) => props.theme.eui.euiSizeM};
+`;
+
 export const GenerateServiceTokenComponent: React.FunctionComponent<{
   serviceToken?: string;
   generateServiceToken: (remote?: boolean) => void;
@@ -37,16 +46,6 @@ export const GenerateServiceTokenComponent: React.FunctionComponent<{
 }> = ({ serviceToken, generateServiceToken, isLoadingServiceToken, isRemote = false }) => {
   const { docLinks } = useStartServices();
   const { permissionsError, isPermissionsLoading } = useCheckPermissions();
-
-  // Otherwise the copy button is over the text
-  const { euiTheme } = useEuiTheme();
-  const CommandCode = styled.div.attrs(() => {
-    return {
-      className: 'eui-textBreakAll',
-    };
-  })`
-    margin-right: ${euiTheme.size.m};
-  `;
 
   return (
     <>

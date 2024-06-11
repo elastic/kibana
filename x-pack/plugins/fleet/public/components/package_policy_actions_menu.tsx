@@ -6,8 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { EuiContextMenuItem, EuiPortal, useEuiTheme } from '@elastic/eui';
+import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
@@ -16,6 +15,7 @@ import { policyHasFleetServer } from '../services';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
+import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
@@ -120,11 +120,6 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     //   />
     // </EuiContextMenuItem>,
   ];
-
-  const { euiTheme } = useEuiTheme();
-  const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
-    color: ${euiTheme.colors.dangerText};
-  `;
 
   if (!agentPolicy || !agentPolicyIsManaged) {
     const ContextMenuItem = canWriteIntegrationPolicies

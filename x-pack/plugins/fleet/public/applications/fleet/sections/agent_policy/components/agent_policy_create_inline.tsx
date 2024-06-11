@@ -17,7 +17,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -33,6 +32,12 @@ import { agentPolicyFormValidation } from '.';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
+
+const StyledEuiAccordion = styled(EuiAccordion)`
+  .ingest-active-button {
+    color: ${(props) => props.theme.eui.euiColorPrimary};
+  }
+`;
 
 interface Props {
   updateAgentPolicy: (u: AgentPolicy | null, errorMessage?: JSX.Element) => void;
@@ -99,13 +104,6 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
         );
     }
   }
-
-  const { euiTheme } = useEuiTheme();
-  const StyledEuiAccordion = styled(EuiAccordion)`
-    .ingest-active-button {
-      color: ${euiTheme.colors.primary};
-    }
-  `;
 
   return (
     <EuiForm>

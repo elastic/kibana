@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -54,6 +53,11 @@ import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
+
+const SettingsTitleCell = styled.td`
+  padding-right: ${(props) => props.theme.eui.euiSizeXL};
+  padding-bottom: ${(props) => props.theme.eui.euiSizeM};
+`;
 
 const NoteLabel = () => (
   <strong>
@@ -247,12 +251,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
     }),
     [packageInfo.assets]
   );
-
-  const { euiTheme } = useEuiTheme();
-  const SettingsTitleCell = styled.td`
-    padding-right: ${euiTheme.size.xl};
-    padding-bottom: ${euiTheme.size.m};
-  `;
 
   return (
     <>

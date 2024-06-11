@@ -7,45 +7,43 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiPage, EuiPageBody, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+
+export const Wrapper = styled.div`
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+
+  // Set the min height to the viewport size minus the height of any global Kibana headers
+  min-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+`;
+
+export const Page = styled(EuiPage)`
+  background: ${(props) => props.theme.eui.euiColorEmptyShade};
+  width: 100%;
+  align-self: center;
+  margin: auto;
+  flex: 1;
+`;
+
+export const ContentWrapper = styled.div`
+  height: 100%;
+  padding-left: ${(props) => props.theme.eui.euiSizeM};
+  padding-right: ${(props) => props.theme.eui.euiSizeM};
+`;
 
 interface Props {
   restrictWidth?: number;
   children?: React.ReactNode;
 }
 
-export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => {
-  // These components should match the ones in `with_header.tsx`
-  const { euiTheme } = useEuiTheme();
-  const Wrapper = styled.div`
-    background-color: ${euiTheme.colors.emptyShade};
-
-    // Set the min height to the viewport size minus the height of any global Kibana headers
-    min-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
-  `;
-  const Page = styled(EuiPage)`
-    background: ${euiTheme.colors.emptyShade};
-    width: 100%;
-    align-self: center;
-    margin: auto;
-    flex: 1;
-  `;
-  const ContentWrapper = styled.div`
-    height: 100%;
-    padding-left: ${euiTheme.size.m};
-    padding-right: ${euiTheme.size.m};
-  `;
-
-  return (
-    <Wrapper>
-      <Page restrictWidth={restrictWidth || 1200}>
-        <EuiPageBody>
-          <ContentWrapper>
-            <EuiSpacer size="m" />
-            {children}
-          </ContentWrapper>
-        </EuiPageBody>
-      </Page>
-    </Wrapper>
-  );
-};
+export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
+  <Wrapper>
+    <Page restrictWidth={restrictWidth || 1200}>
+      <EuiPageBody>
+        <ContentWrapper>
+          <EuiSpacer size="m" />
+          {children}
+        </ContentWrapper>
+      </EuiPageBody>
+    </Page>
+  </Wrapper>
+);

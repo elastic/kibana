@@ -7,11 +7,13 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { useEuiTheme } from '@elastic/eui';
 
 export type RequirementVersion = string;
 export type RequirementVersionRange = string;
 
+const CodeText = styled.span`
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+`;
 export function Version({
   className,
   version,
@@ -19,10 +21,5 @@ export function Version({
   className?: string;
   version: RequirementVersion;
 }) {
-  const { euiTheme } = useEuiTheme();
-  const CodeText = styled.span`
-    font-family: ${euiTheme.font.familyCode};
-  `;
-
   return <CodeText className={className}>{version}</CodeText>;
 }

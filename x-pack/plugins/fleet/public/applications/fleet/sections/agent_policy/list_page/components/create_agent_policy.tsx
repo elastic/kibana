@@ -22,7 +22,6 @@ import {
   EuiButton,
   EuiText,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
@@ -32,6 +31,10 @@ import { DevtoolsRequestFlyoutButton } from '../../../../components';
 import { generateCreateAgentPolicyDevToolsRequest } from '../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
+
+const FlyoutWithHigherZIndex = styled(EuiFlyout)`
+  z-index: ${(props) => props.theme.eui.euiZLevel5};
+`;
 
 interface Props extends Omit<EuiFlyoutProps, 'onClose'> {
   onClose: (createdAgentPolicy?: AgentPolicy) => void;
@@ -102,11 +105,6 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     () => generateCreateAgentPolicyDevToolsRequest(agentPolicy, withSysMonitoring),
     [agentPolicy, withSysMonitoring]
   );
-
-  const { euiTheme } = useEuiTheme();
-  const FlyoutWithHigherZIndex = styled(EuiFlyout)`
-    z-index: ${(euiTheme.levels.flyout as number) + 1000};
-  `;
 
   const footer = (
     <EuiFlyoutFooter>
