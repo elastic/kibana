@@ -98,7 +98,7 @@ const testData: TestData[] = [
           fieldValue: 'AAL',
           impact: 'High',
           logRate: 'Chart type:bar chart',
-          pValue: '8.96e-49',
+          pValue: '',
         },
       ],
     },
