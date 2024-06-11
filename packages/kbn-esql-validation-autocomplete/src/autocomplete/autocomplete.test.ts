@@ -347,9 +347,7 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
-    const suggestedIndexes = indexes
-      .filter(({ hidden }) => !hidden)
-      .map(({ name, suggestedAs }) => suggestedAs || name);
+    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
     // Monaco will filter further down here
     testSuggestions(
       'f',
