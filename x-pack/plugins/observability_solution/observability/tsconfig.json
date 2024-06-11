@@ -103,7 +103,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
-    "@kbn/infra-plugin",
   ],
   "exclude": [
     "target/**/*"
