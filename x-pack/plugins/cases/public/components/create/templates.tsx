@@ -7,7 +7,7 @@
 
 import type { EuiSelectOption } from '@elastic/eui';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../containers/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { TEMPLATE_HELP_TEXT, TEMPLATE_LABEL } from './translations';
@@ -23,6 +23,8 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
   templates,
   onTemplateChange,
 }) => {
+  const [selectedTemplate, onSelectTemplate] = useState<string>();
+
   const options: EuiSelectOption[] = templates.map((template) => ({
     text: template.name,
     value: template.key,
@@ -33,6 +35,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
       const selectedTemplated = templates.find((template) => template.key === e.target.value);
 
       if (selectedTemplated) {
+        onSelectTemplate(selectedTemplated.key);
         onTemplateChange(selectedTemplated.caseFields);
       }
     },
@@ -53,6 +56,9 @@ export const TemplateSelectorComponent: React.FC<Props> = ({
         disabled={isLoading}
         isLoading={isLoading}
         data-test-subj="create-case-template-select"
+        fullWidth
+        hasNoInitialSelection
+        value={selectedTemplate}
       />
     </EuiFormRow>
   );

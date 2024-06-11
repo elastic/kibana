@@ -55,4 +55,26 @@ describe('CustomFields', () => {
       expect(onTemplateChange).toHaveBeenCalledWith(selectedTemplate.caseFields);
     });
   });
+
+  it('shows the selected option correctly', async () => {
+    const selectedTemplate = templatesConfigurationMock[2];
+
+    appMockRender.render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+      />
+    );
+
+    userEvent.selectOptions(
+      await screen.findByTestId('create-case-template-select'),
+      selectedTemplate.key
+    );
+
+    expect(
+      (await screen.findByRole<HTMLOptionElement>('option', { name: selectedTemplate.name }))
+        .selected
+    ).toBe(true);
+  });
 });

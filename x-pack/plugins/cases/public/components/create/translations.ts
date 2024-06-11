@@ -11,14 +11,18 @@ export * from '../../common/translations';
 export * from '../user_profiles/translations';
 
 export const STEP_ONE_TITLE = i18n.translate('xpack.cases.create.stepOneTitle', {
-  defaultMessage: 'Case fields',
+  defaultMessage: 'Select template',
 });
 
 export const STEP_TWO_TITLE = i18n.translate('xpack.cases.create.stepTwoTitle', {
-  defaultMessage: 'Case settings',
+  defaultMessage: 'Case fields',
 });
 
 export const STEP_THREE_TITLE = i18n.translate('xpack.cases.create.stepThreeTitle', {
+  defaultMessage: 'Case settings',
+});
+
+export const STEP_FOUR_TITLE = i18n.translate('xpack.cases.create.stepFourTitle', {
   defaultMessage: 'External Connector Fields',
 });
 

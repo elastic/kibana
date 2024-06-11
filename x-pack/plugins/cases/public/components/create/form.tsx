@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
@@ -28,7 +28,7 @@ import { Tags } from '../case_form_fields/tags';
 import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
-import type { CaseUI } from '../../containers/types';
+import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
@@ -47,8 +47,11 @@ import { Assignees } from '../case_form_fields/assignees';
 import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from '../case_form_fields/category';
-import { CustomFields } from './custom_fields';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { TemplateSelector } from './templates';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { getConfigurationByOwner } from '../../containers/configure/utils';
+import { CustomFields } from '../case_form_fields/custom_fields';
 
 const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
   big
@@ -60,11 +63,13 @@ const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
       `;
 
 export interface CreateCaseFormFieldsProps {
+  configurations: CasesConfigurationUI[];
   connectors: ActionConnector[];
-  isLoadingConnectors: boolean;
+  isLoading: boolean;
   withSteps: boolean;
   draftStorageKey: string;
 }
+
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
   onSuccess: (theCase: CaseUI) => void;
@@ -78,17 +83,50 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 }
 
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, withSteps, draftStorageKey }) => {
+  ({ configurations, connectors, isLoading, withSteps, draftStorageKey }) => {
     const { owner } = useCasesContext();
+    const [{ selectedOwner }] = useFormData<{ selectedOwner: string }>({
+      watch: ['selectedOwner'],
+    });
+
+    const configurationOwner: string | undefined = selectedOwner ? selectedOwner : owner[0];
+
+    const configuration = useMemo(
+      () =>
+        getConfigurationByOwner({
+          configurations,
+          owner: configurationOwner,
+        }),
+      [configurations, configurationOwner]
+    );
+
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
     const { euiTheme } = useEuiTheme();
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
+    const onTemplateChange = useCallback(() => {}, []);
+
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
+        children: (
+          <div>
+            <TemplateSelector
+              isLoading={isSubmitting || isLoading}
+              templates={configuration.templates}
+              onTemplateChange={onTemplateChange}
+            />
+          </div>
+        ),
+      }),
+      [configuration.templates, isLoading, isSubmitting, onTemplateChange]
+    );
+
+    const secondStep = useMemo(
+      () => ({
+        title: i18n.STEP_TWO_TITLE,
         children: (
           <>
             <Title isLoading={isSubmitting} autoFocus={true} />
@@ -110,7 +148,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               <div css={containerCss(euiTheme, true)}>
                 <CreateCaseOwnerSelector
                   availableOwners={availableOwners}
-                  isLoading={isSubmitting}
+                  isLoading={isSubmitting || isLoading}
                 />
               </div>
             )}
@@ -118,7 +156,10 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
               <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
             </div>
             <div css={containerCss(euiTheme)}>
-              <CustomFields isLoading={isSubmitting} />
+              <CustomFields
+                isLoading={isSubmitting || isLoading}
+                configurationCustomFields={configuration.customFields}
+              />
             </div>
             <div css={containerCss(euiTheme)} />
           </>
@@ -126,17 +167,19 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       }),
       [
         isSubmitting,
-        euiTheme,
         caseAssignmentAuthorized,
+        euiTheme,
         canShowCaseSolutionSelection,
         availableOwners,
+        isLoading,
         draftStorageKey,
+        configuration.customFields,
       ]
     );
 
-    const secondStep = useMemo(
+    const thirdStep = useMemo(
       () => ({
-        title: i18n.STEP_TWO_TITLE,
+        title: i18n.STEP_THREE_TITLE,
         children: (
           <div>
             <SyncAlertsToggle isLoading={isSubmitting} />
@@ -146,25 +189,25 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       [isSubmitting]
     );
 
-    const thirdStep = useMemo(
+    const fourthStep = useMemo(
       () => ({
-        title: i18n.STEP_THREE_TITLE,
+        title: i18n.STEP_FOUR_TITLE,
         children: (
           <div>
             <Connector
               connectors={connectors}
-              isLoadingConnectors={isLoadingConnectors}
+              isLoadingConnectors={isLoading}
               isLoading={isSubmitting}
             />
           </div>
         ),
       }),
-      [connectors, isLoadingConnectors, isSubmitting]
+      [connectors, isLoading, isSubmitting]
     );
 
     const allSteps = useMemo(
-      () => [firstStep, ...(isSyncAlertsEnabled ? [secondStep] : []), thirdStep],
-      [isSyncAlertsEnabled, firstStep, secondStep, thirdStep]
+      () => [firstStep, secondStep, ...(isSyncAlertsEnabled ? [thirdStep] : []), fourthStep],
+      [firstStep, isSyncAlertsEnabled, secondStep, thirdStep, fourthStep]
     );
 
     return (
@@ -190,8 +233,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         ) : (
           <>
             {firstStep.children}
-            {isSyncAlertsEnabled && secondStep.children}
-            {thirdStep.children}
+            {secondStep.children}
+            {isSyncAlertsEnabled && thirdStep.children}
+            {fourthStep.children}
           </>
         )}
       </>
@@ -212,8 +256,12 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     initialValue,
   }) => {
     const { owner } = useCasesContext();
+
     const { data: connectors = [], isLoading: isLoadingConnectors } =
       useGetSupportedActionConnectors();
+
+    const { data: configurations, isLoading: isLoadingCaseConfiguration } =
+      useGetAllCaseConfigurations();
 
     const draftStorageKey = getMarkdownEditorStorageKey({
       appId: owner[0],
@@ -246,9 +294,10 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         >
           <CreateCaseFormFields
             connectors={connectors}
-            isLoadingConnectors={isLoadingConnectors}
+            isLoading={isLoadingConnectors || isLoadingCaseConfiguration}
             withSteps={withSteps}
             draftStorageKey={draftStorageKey}
+            configurations={configurations}
           />
           <div>
             <EuiFlexGroup

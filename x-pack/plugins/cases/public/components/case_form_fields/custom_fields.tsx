@@ -15,13 +15,13 @@ import * as i18n from './translations';
 
 interface Props {
   isLoading: boolean;
-  setCustomFieldsOptional: boolean;
   configurationCustomFields: CasesConfigurationUI['customFields'];
+  setCustomFieldsOptional?: boolean;
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({
   isLoading,
-  setCustomFieldsOptional,
+  setCustomFieldsOptional = false,
   configurationCustomFields,
 }) => {
   const sortedCustomFields = useMemo(
