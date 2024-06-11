@@ -11,10 +11,10 @@ import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { History } from 'history';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
@@ -23,7 +23,6 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -186,8 +185,7 @@ export const FleetAppContext: React.FC<{
     routerHistory: _routerHistory,
     fleetStatus,
   }) => {
-    const darkModeObservable = useObservable(startServices.theme.theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+    const XXL_BREAKPOINT = 1599;
 
     return (
       <KibanaRenderContextProvider {...startServices}>
@@ -199,7 +197,14 @@ export const FleetAppContext: React.FC<{
           <KibanaContextProvider services={{ ...startServices }}>
             <ConfigContext.Provider value={config}>
               <KibanaVersionContext.Provider value={kibanaVersion}>
-                <EuiThemeProvider darkMode={isDarkMode}>
+                <KibanaThemeProvider
+                  theme={startServices.theme}
+                  modify={{
+                    breakpoint: {
+                      xxl: XXL_BREAKPOINT,
+                    },
+                  }}
+                >
                   <QueryClientProvider client={queryClient}>
                     <ReactQueryDevtools initialIsOpen={false} />
                     <UIExtensionsContext.Provider value={extensions}>
@@ -212,7 +217,7 @@ export const FleetAppContext: React.FC<{
                       </FleetStatusProvider>
                     </UIExtensionsContext.Provider>
                   </QueryClientProvider>
-                </EuiThemeProvider>
+                </KibanaThemeProvider>
               </KibanaVersionContext.Provider>
             </ConfigContext.Provider>
           </KibanaContextProvider>
