@@ -7,8 +7,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { hasTransformationalCommand, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
@@ -31,9 +31,9 @@ export function useEsqlMode({
 }) {
   const prev = useRef<{
     query: string;
-    columns: string[];
+    latestModifiedColumns: string[];
   }>({
-    columns: [],
+    latestModifiedColumns: [],
     query: '',
   });
   const initialFetch = useRef<boolean>(true);
@@ -43,9 +43,10 @@ export function useEsqlMode({
     if (prev.current.query) {
       // cleanup when it's not an ES|QL query
       prev.current = {
-        columns: [],
+        latestModifiedColumns: [],
         query: '',
       };
+      initialFetch.current = true;
     }
   }, []);
 
@@ -57,64 +58,79 @@ export function useEsqlMode({
           if (!query || next.fetchStatus === FetchStatus.ERROR) {
             return;
           }
+
           const sendComplete = () => {
             stateContainer.dataState.data$.documents$.next({
               ...next,
               fetchStatus: FetchStatus.COMPLETE,
             });
           };
+
           const { viewMode } = stateContainer.appState.getState();
-          let nextColumns: string[] = [];
           const isEsqlQuery = isOfAggregateQueryType(query);
-          const hasResults = Boolean(next.result?.length);
-          let queryHasTransformationalCommands = false;
-          if ('esql' in query) {
-            if (hasTransformationalCommand(query.esql)) {
-              queryHasTransformationalCommands = true;
-            }
-          }
 
           if (isEsqlQuery) {
-            const language = getAggregateQueryMode(query);
+            const hasResults = Boolean(next.result?.length);
+
             if (next.fetchStatus !== FetchStatus.PARTIAL) {
               return;
             }
 
+            let nextColumns: string[] = prev.current.latestModifiedColumns;
+
             if (hasResults) {
-              // check if state needs to contain column transformation due to a different columns in the resultset
+              // check if state needs to contain column transformation due to a different columns in the result set
               const firstRow = next.result![0];
-              const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-              if (!queryHasTransformationalCommands) {
-                nextColumns = [];
-                initialFetch.current = false;
+              const firstRowColumns = Object.keys(firstRow.raw);
+
+              if (hasTransformationalCommand(query.esql)) {
+                nextColumns = firstRowColumns.slice(0, MAX_NUM_OF_COLUMNS);
               } else {
-                nextColumns = firstRowColumns;
-                if (initialFetch.current && !prev.current.columns.length) {
-                  prev.current.columns = firstRowColumns;
-                }
+                nextColumns = [];
               }
             }
-            const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
-            const queryChanged = query[language] !== prev.current.query;
+
+            if (initialFetch.current) {
+              initialFetch.current = false;
+              prev.current.query = query.esql;
+              prev.current.latestModifiedColumns = nextColumns;
+            }
+
+            const indexPatternChanged =
+              getIndexPatternFromESQLQuery(query.esql) !==
+              getIndexPatternFromESQLQuery(prev.current.query);
+
+            const addColumnsToState =
+              indexPatternChanged || !isEqual(nextColumns, prev.current.latestModifiedColumns);
+
             const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
-            if (!queryChanged || (!addColumnsToState && !changeViewMode)) {
+
+            // console.log('query', query.esql, prev.current.query);
+            // console.log('columns', nextColumns, prev.current.latestModifiedColumns);
+            // console.log('indexPatternChanged', indexPatternChanged);
+            // console.log('addColumnsToState', addColumnsToState);
+            // console.log('changeViewMode', changeViewMode);
+
+            if (!indexPatternChanged && !addColumnsToState && !changeViewMode) {
+              // console.log('complete');
               sendComplete();
               return;
             }
 
-            if (queryChanged) {
-              prev.current.query = query[language];
-              prev.current.columns = nextColumns;
-            }
+            prev.current.query = query.esql;
+            prev.current.latestModifiedColumns = nextColumns;
+
             // just change URL state if necessary
             if (addColumnsToState || changeViewMode) {
               const nextState = {
                 ...(addColumnsToState && { columns: nextColumns }),
                 ...(changeViewMode && { viewMode: undefined }),
               };
+              // console.log('change URL state', nextState);
               await stateContainer.appState.replaceUrlState(nextState);
             }
 
+            // console.log('all complete');
             sendComplete();
           } else {
             // cleanup for a "regular" query
