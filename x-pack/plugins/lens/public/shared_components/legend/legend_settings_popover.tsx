@@ -364,9 +364,9 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
                 defaultMessage: 'Select one or more statistics to show',
               })}
               options={allowedLegendStats}
-              selectedOptions={allowedLegendStats.filter(({ value }) =>
-                legendStats?.includes(value)
-              )}
+              selectedOptions={legendStats
+                .map((value) => allowedLegendStats.find((option) => option.value === value))
+                .filter(nonNullable)}
               onChange={(options) => {
                 const newLegendStats = options.map(({ value }) => value).filter(nonNullable);
                 const hasConvertedToTable =
