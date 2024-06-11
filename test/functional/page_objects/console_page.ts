@@ -105,6 +105,9 @@ export class ConsolePageObject extends FtrService {
     getEditor: async () => {
       return await this.testSubjects.find('consoleMonacoEditor');
     },
+    hasInvalidSyntax: async () => {
+      return await this.find.existsByCssSelector('.squiggly-error');
+    },
   };
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {

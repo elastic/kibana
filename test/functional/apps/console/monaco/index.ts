@@ -22,7 +22,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_console'));
       loadTestFile(require.resolve('./_autocomplete'));
       loadTestFile(require.resolve('./_vector_tile'));
-      // loadTestFile(require.resolve('./_comments'));
+      loadTestFile(require.resolve('./_comments'));
       // loadTestFile(require.resolve('./_variables'));
       // loadTestFile(require.resolve('./_xjson'));
       // loadTestFile(require.resolve('./_misc_console_behavior'));
