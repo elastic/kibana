@@ -259,9 +259,9 @@ export const allowedExperimentalValues = Object.freeze({
   manualRuleRunEnabled: false,
 
   /**
-   * Adds a new option to filter descendents of a process for Management / Event Filters
+   * Adds a new option to filter descendants of a process for Management / Event Filters
    */
-  filterDescendentsOfProcessForEventFiltersEnabled: false,
+  filterProcessDescendantsForEventFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -38,10 +38,10 @@ import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
-import { FILTER_DESCENDENTS_OF_PROCESS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 import {
-  isFilterDescendentsOfProcessEnabled,
-  isFilterDescendentsOfProcessTag,
+  isFilterProcessDescendantsEnabled,
+  isFilterProcessDescendantsTag,
   isPolicySelectionTag,
 } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
@@ -94,7 +94,7 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
 // Defines the tag categories for Event Filters, using the given order.
 const TAG_FILTERS = Object.freeze({
   policySelection: isPolicySelectionTag,
-  descendentOfProcessFiltering: isFilterDescendentsOfProcessTag,
+  processDescendantsFiltering: isFilterProcessDescendantsTag,
 });
 
 const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
@@ -173,12 +173,12 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const { getTagsUpdatedBy } = useGetUpdatedTags(exception, TAG_FILTERS);
     const euiTheme = useEuiTheme();
 
-    const isFilterDescendentsOfProcessFeatureEnabled = useIsExperimentalFeatureEnabled(
-      'filterDescendentsOfProcessForEventFiltersEnabled'
+    const isFilterProcessDescendantsFeatureEnabled = useIsExperimentalFeatureEnabled(
+      'filterProcessDescendantsForEventFiltersEnabled'
     );
 
-    const isFilterDescendentsOfProcessSelected = useMemo(
-      () => isFilterDescendentsOfProcessEnabled(exception),
+    const isFilterProcessDescendantsSelected = useMemo(
+      () => isFilterProcessDescendantsEnabled(exception),
       [exception]
     );
 
@@ -439,10 +439,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
     const handleFilterTypeOnChange = useCallback(
       (id: string) => {
-        const newTagsForDescendents =
-          id === 'descendents' ? [FILTER_DESCENDENTS_OF_PROCESS_TAG] : [];
+        const newTagsForDescendants = id === 'descendants' ? [FILTER_PROCESS_DESCENDANTS_TAG] : [];
 
-        const tags = getTagsUpdatedBy('descendentOfProcessFiltering', newTagsForDescendents);
+        const tags = getTagsUpdatedBy('processDescendantsFiltering', newTagsForDescendants);
 
         processChanged({ tags });
         if (!hasFormChanged) setHasFormChanged(true);
@@ -451,19 +450,19 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const filterTypeOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
-      const descendentsTooltip = (
+      const descendantsTooltip = (
         <EuiToolTip
           content={
             <FormattedMessage
-              id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.tooltip"
-              defaultMessage="Filtering the descendents of a process means that events from the matched process are still ingested, but the ones from its descendent processes will be omitted."
+              id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltip"
+              defaultMessage="Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted."
             />
           }
-          data-test-subj={getTestId('filterProcessDescendents-tooltipText')}
+          data-test-subj={getTestId('filterProcessDescendants-tooltipText')}
         >
           <EuiIcon
             type="iInCircle"
-            data-test-subj={getTestId('filterProcessDescendents-tooltipIcon')}
+            data-test-subj={getTestId('filterProcessDescendants-tooltipIcon')}
           />
         </EuiToolTip>
       );
@@ -474,40 +473,40 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           label: (
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.eventsButton"
+                id="xpack.securitySolution.eventFilters.filterProcessDescendants.eventsButton"
                 defaultMessage="Events"
               />
             </EuiText>
           ),
-          iconType: isFilterDescendentsOfProcessSelected ? 'empty' : 'checkInCircleFilled',
+          iconType: isFilterProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
           'data-test-subj': getTestId('filterEventsButton'),
         },
         {
-          id: 'descendents',
+          id: 'descendants',
           label: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiText size="s">
                 <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.descendentsOfProcessButton"
-                  defaultMessage="Descendents of process"
+                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.processDescendantsButton"
+                  defaultMessage="Process Descendants"
                 />
               </EuiText>
-              {descendentsTooltip}
+              {descendantsTooltip}
             </EuiFlexGroup>
           ),
-          iconType: isFilterDescendentsOfProcessSelected ? 'checkInCircleFilled' : 'empty',
-          'data-test-subj': getTestId('filterProcessDescendentsButton'),
+          iconType: isFilterProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
+          'data-test-subj': getTestId('filterProcessDescendantsButton'),
         },
       ];
-    }, [getTestId, isFilterDescendentsOfProcessSelected]);
+    }, [getTestId, isFilterProcessDescendantsSelected]);
 
     const filterTypeSubsection = useMemo(() => {
-      if (!isFilterDescendentsOfProcessFeatureEnabled) return null;
+      if (!isFilterProcessDescendantsFeatureEnabled) return null;
 
       return (
         <>
           <EuiButtonGroup
-            legend="Events or Process descendents selector"
+            legend="Events or Process descendants selector"
             color="primary"
             onChange={handleFilterTypeOnChange}
             css={css`
@@ -516,26 +515,26 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               }
             `}
             options={filterTypeOptions}
-            idSelected={isFilterDescendentsOfProcessSelected ? 'descendents' : 'events'}
+            idSelected={isFilterProcessDescendantsSelected ? 'descendants' : 'events'}
           />
           <EuiSpacer size="m" />
 
-          {isFilterDescendentsOfProcessSelected && (
+          {isFilterProcessDescendantsSelected && (
             <>
               <EuiText
                 size="s"
                 data-test-subj={getTestId(
-                  'filterProcessDescendents-additionalConditionDescription'
+                  'filterProcessDescendants-additionalConditionDescription'
                 )}
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.additionalConditionDescription"
+                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.additionalConditionDescription"
                   defaultMessage="Additional condition added:"
                 />
               </EuiText>
               <code>
                 <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterDescendentsOfProcess.additionalCondition"
+                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.additionalCondition"
                   defaultMessage="event.category is process"
                 />
               </code>
@@ -545,11 +544,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         </>
       );
     }, [
-      isFilterDescendentsOfProcessFeatureEnabled,
+      isFilterProcessDescendantsFeatureEnabled,
       handleFilterTypeOnChange,
       euiTheme.euiTheme.size.l,
       filterTypeOptions,
-      isFilterDescendentsOfProcessSelected,
+      isFilterProcessDescendantsSelected,
       getTestId,
     ]);
 

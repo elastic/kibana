@@ -9,7 +9,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { PolicyData } from '../../types';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
-  FILTER_DESCENDENTS_OF_PROCESS_TAG,
+  FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from './constants';
 import {
@@ -19,8 +19,8 @@ import {
   getPolicyIdsFromArtifact,
   isArtifactByPolicy,
   isArtifactGlobal,
-  isFilterDescendentsOfProcessEnabled,
-  isFilterDescendentsOfProcessTag,
+  isFilterProcessDescendantsEnabled,
+  isFilterProcessDescendantsTag,
   isPolicySelectionTag,
 } from './utils';
 
@@ -146,31 +146,31 @@ describe('Endpoint artifact utilities', () => {
     });
   });
 
-  describe('when using `isFilterDescendentsOfProcessEnabled()`', () => {
+  describe('when using `isFilterProcessDescendantsEnabled()`', () => {
     it('should return false when `tags` is undefined', () => {
-      expect(isFilterDescendentsOfProcessEnabled({})).toBe(false);
+      expect(isFilterProcessDescendantsEnabled({})).toBe(false);
     });
 
     it('should return false when `tags` does not contain the relevant tag', () => {
-      expect(isFilterDescendentsOfProcessEnabled({ tags: ['aaa', 'bbb', 'ccc'] })).toBe(false);
+      expect(isFilterProcessDescendantsEnabled({ tags: ['aaa', 'bbb', 'ccc'] })).toBe(false);
     });
 
     it('should return true when `tags` contain the relevant tag', () => {
       expect(
-        isFilterDescendentsOfProcessEnabled({
-          tags: ['aaa', 'bbb', FILTER_DESCENDENTS_OF_PROCESS_TAG, 'ccc'],
+        isFilterProcessDescendantsEnabled({
+          tags: ['aaa', 'bbb', FILTER_PROCESS_DESCENDANTS_TAG, 'ccc'],
         })
       ).toBe(true);
     });
   });
 
-  describe('when using `isFilterDescendentsOfProcessTag()`', () => {
-    it('should return true if tag equals with the filter descendent of process tag', () => {
-      expect(isFilterDescendentsOfProcessTag(FILTER_DESCENDENTS_OF_PROCESS_TAG)).toBe(true);
+  describe('when using `isFilterProcessDescendantsTag()`', () => {
+    it('should return true if tag equals with the filter process descendants tag', () => {
+      expect(isFilterProcessDescendantsTag(FILTER_PROCESS_DESCENDANTS_TAG)).toBe(true);
     });
 
     it('should return false otherwise', () => {
-      expect(isFilterDescendentsOfProcessTag('otherwise')).toBe(false);
+      expect(isFilterProcessDescendantsTag('otherwise')).toBe(false);
     });
   });
 

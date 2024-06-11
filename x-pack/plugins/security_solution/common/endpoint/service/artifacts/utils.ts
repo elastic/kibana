@@ -14,7 +14,7 @@ import type { EffectedPolicySelection } from '../../../../public/management/comp
 import type { PolicyData } from '../../types';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
-  FILTER_DESCENDENTS_OF_PROCESS_TAG,
+  FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from './constants';
 
@@ -94,13 +94,12 @@ export const getEffectedPolicySelectionByTags = (
   };
 };
 
-export const isFilterDescendentsOfProcessEnabled = (
+export const isFilterProcessDescendantsEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
-): boolean =>
-  (item.tags ?? []).find((tag) => tag === FILTER_DESCENDENTS_OF_PROCESS_TAG) !== undefined;
+): boolean => (item.tags ?? []).find((tag) => tag === FILTER_PROCESS_DESCENDANTS_TAG) !== undefined;
 
-export const isFilterDescendentsOfProcessTag: TagFilter = (tag) =>
-  tag === FILTER_DESCENDENTS_OF_PROCESS_TAG;
+export const isFilterProcessDescendantsTag: TagFilter = (tag) =>
+  tag === FILTER_PROCESS_DESCENDANTS_TAG;
 
 export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {
   return {
