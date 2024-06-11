@@ -6,7 +6,6 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLODefinition } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -14,8 +13,9 @@ import {
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
+import { SLODefinition } from '../../../domain/models';
 import { getGroupBy } from './common';
-import { getOneHourRange, getFiveMinuteRange, getOneDayRange } from './utils';
+import { buildBurnRateAgg } from './utils';
 
 export function generateSummaryTransformForOccurrences(
   slo: SLODefinition
@@ -116,63 +116,9 @@ export function generateSummaryTransformForOccurrences(
             field: '@timestamp',
           },
         },
-        fiveMinuteBurnRate: {
-          filter: {
-            range: {
-              '@timestamp': getFiveMinuteRange(slo),
-            },
-          },
-          aggs: {
-            goodEvents: {
-              sum: {
-                field: 'slo.numerator',
-              },
-            },
-            totalEvents: {
-              sum: {
-                field: 'slo.denominator',
-              },
-            },
-          },
-        },
-        oneHourBurnRate: {
-          filter: {
-            range: {
-              '@timestamp': getOneHourRange(slo),
-            },
-          },
-          aggs: {
-            goodEvents: {
-              sum: {
-                field: 'slo.numerator',
-              },
-            },
-            totalEvents: {
-              sum: {
-                field: 'slo.denominator',
-              },
-            },
-          },
-        },
-        oneDayBurnRate: {
-          filter: {
-            range: {
-              '@timestamp': getOneDayRange(slo),
-            },
-          },
-          aggs: {
-            goodEvents: {
-              sum: {
-                field: 'slo.numerator',
-              },
-            },
-            totalEvents: {
-              sum: {
-                field: 'slo.denominator',
-              },
-            },
-          },
-        },
+        ...buildBurnRateAgg('fiveMinuteBurnRate', slo),
+        ...buildBurnRateAgg('oneHourBurnRate', slo),
+        ...buildBurnRateAgg('oneDayBurnRate', slo),
       },
     },
     description: `Summarise the rollup data of SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}].`,

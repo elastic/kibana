@@ -247,12 +247,12 @@ export const getSLOSummaryPipelineTemplate = (
 function getBurnRateSource(
   burnRateKey: 'oneDayBurnRate' | 'oneHourBurnRate' | 'fiveMinuteBurnRate'
 ): string {
-  return `def totalEvents = ctx[${burnRateKey}]["totalEvents"];
-  def goodEvents = ctx[${burnRateKey}]["goodEvents"];
+  return `def totalEvents = ctx["${burnRateKey}"]["totalEvents"];
+  def goodEvents = ctx["${burnRateKey}"]["goodEvents"];
   def errorBudgetInitial = ctx["errorBudgetInitial"];
 
   if (totalEvents == null || totalEvents == 0) {
-    ctx[${burnRateKey}]["value"] = 0.0;
+    ctx["${burnRateKey}"]["value"] = 0.0;
     return;
   }
 
@@ -261,9 +261,9 @@ function getBurnRateSource(
   if (isTimeslice && totalSlicesInRange > 0) {
     def badEvents = (double)totalEvents - (double)goodEvents;
     def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
-    ctx[${burnRateKey}]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+    ctx["${burnRateKey}"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
   } else {
     def sliValue = (double)goodEvents / (double)totalEvents;
-    ctx[${burnRateKey}]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+    ctx["${burnRateKey}"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
   }`;
 }
