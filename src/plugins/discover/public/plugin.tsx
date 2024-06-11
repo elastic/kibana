@@ -88,7 +88,6 @@ import {
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
-import { logDocumentProfileProvider } from './context_awareness/profiles/example_profiles';
 
 /**
  * @public
@@ -463,7 +462,7 @@ export class DiscoverPlugin
     // TODO: Conditionally register example profiles for functional testing in a follow up PR
     // this.rootProfileService.registerProvider(o11yRootProfileProvider);
     // this.dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
-    this.documentProfileService.registerProvider(logDocumentProfileProvider);
+    // this.documentProfileService.registerProvider(logDocumentProfileProvider);
   }
 
   private createProfilesManager() {

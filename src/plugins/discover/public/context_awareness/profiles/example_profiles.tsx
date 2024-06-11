@@ -103,17 +103,17 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
 export const logDocumentProfileProvider: DocumentProfileProvider = {
   profileId: 'log-document-profile',
   profile: {
-    getDocViewer: (prev) => (params) => {
-      const recordId = params.record.id;
-      const prevValue = prev(params);
-      return {
-        title: `${prevValue.title} #${recordId}`,
-        docViewsRegistry: (registry) => {
-          registry.enableById('doc_view_logs_overview');
-          return prevValue.docViewsRegistry(registry);
-        },
-      };
-    },
+    // getDocViewer: (prev) => (params) => {
+    //   const recordId = params.record.id;
+    //   const prevValue = prev(params);
+    //   return {
+    //     title: `${prevValue.title} #${recordId}`,
+    //     docViewsRegistry: (registry) => {
+    //       registry.enableById('doc_view_logs_overview');
+    //       return prevValue.docViewsRegistry(registry);
+    //     },
+    //   };
+    // },
   },
   resolve: (params) => {
     if (getFieldValue(params.record, 'data_stream.type') === 'logs') {
