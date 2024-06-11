@@ -900,8 +900,6 @@
     "@langchain/community": "^0.0.44",
     "@langchain/core": "^0.1.53",
     "@langchain/openai": "^0.0.25",
-    "@langtrase/trace-attributes": "^3.0.8",
-    "@langtrase/typescript-sdk": "^2.2.1",
     "@launchdarkly/node-server-sdk": "^9.4.5",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",
