@@ -11,7 +11,7 @@ import { NOTE_WIDGET_NAME } from '../../constants';
 import { NoteWidget } from '../../components/note_widget';
 
 export function registerNoteWidget(options: RegisterWidgetOptions) {
-  options.dependencies.setup.investigate.registerWidget(
+  options.registerWidget(
     {
       type: NOTE_WIDGET_NAME,
       description: '',

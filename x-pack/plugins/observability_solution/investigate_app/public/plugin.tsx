@@ -15,7 +15,7 @@ import {
 import { INVESTIGATE_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { mapValues, once } from 'lodash';
+import { once } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createCallInvestigateAppAPI } from './api';
@@ -27,7 +27,6 @@ import type {
   InvestigateAppSetupDependencies,
   InvestigateAppStartDependencies,
 } from './types';
-import { RegisterWidgetOptions, registerWidgets } from './widgets/register_widgets';
 
 const getCreateAssistantService = once(() =>
   import('./services/assistant').then((m) => m.createAssistantService)
@@ -126,25 +125,25 @@ export class InvestigateAppPlugin
       .getStartServices()
       .then(([, pluginsStart]) => pluginsStart);
 
-    registerWidgets({
-      dependencies: {
-        setup: pluginsSetup,
-        start: mapValues(pluginsSetup, (_, key) =>
-          pluginsStartPromise.then((pluginsStart) => pluginsStart[key as keyof typeof pluginsStart])
-        ) as RegisterWidgetOptions['dependencies']['start'],
-      },
-      services: {
-        esql: Promise.all([pluginsStartPromise, getCreateEsqlService()]).then(
-          ([pluginsStart, createEsqlService]) =>
-            createEsqlService({
+    pluginsSetup.investigate.register((registerWidget) =>
+      Promise.all([
+        pluginsStartPromise,
+        import('./widgets/register_widgets').then((m) => m.registerWidgets),
+        getCreateEsqlService(),
+        getCreateAssistantService(),
+      ]).then(([pluginsStart, registerWidgets, createEsqlService, createAssistantService]) => {
+        registerWidgets({
+          dependencies: {
+            setup: pluginsSetup,
+            start: pluginsStart,
+          },
+          services: {
+            esql: createEsqlService({
               data: pluginsStart.data,
               dataViews: pluginsStart.dataViews,
               lens: pluginsStart.lens,
-            })
-        ),
-        assistant: Promise.all([pluginsStartPromise, getCreateAssistantService()]).then(
-          ([pluginsStart, createAssistantService]) =>
-            createAssistantService({
+            }),
+            assistant: createAssistantService({
               contentManagement: pluginsStart.contentManagement,
               embeddable: pluginsStart.embeddable,
               observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
@@ -153,10 +152,12 @@ export class InvestigateAppPlugin
               security: pluginsStart.security,
               apiClient,
               logger: this.logger,
-            })
-        ),
-      },
-    });
+            }),
+          },
+          registerWidget,
+        });
+      })
+    );
 
     return {};
   }

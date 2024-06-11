@@ -14,7 +14,7 @@ import {
   ApmPluginStartDeps,
 } from './plugin';
 
-export { createInvestigateServiceInventoryWidget } from './components/app/investigate_widgets/investigate_service_inventory/create_investigate_service_inventory_widget';
+export { createInvestigateServiceInventoryWidget } from './investigate/investigate_service_inventory/create_investigate_service_inventory_widget';
 
 export interface ConfigSchema {
   serviceMapEnabled: boolean;

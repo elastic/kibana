@@ -14,16 +14,12 @@ import { registerNoteWidget } from './note_widget';
 import { registerAssistantWidgets } from './register_assistant_widgets';
 
 export interface RegisterWidgetOptions {
-  registerWidget: RegisterWidget;
   dependencies: {
     setup: InvestigateAppSetupDependencies;
-    start: {
-      [K in keyof InvestigateAppStartDependencies]: Promise<InvestigateAppStartDependencies[K]>;
-    };
+    start: InvestigateAppStartDependencies;
   };
-  services: {
-    [K in keyof InvestigateAppServices]: Promise<InvestigateAppServices[K]>;
-  };
+  services: InvestigateAppServices;
+  registerWidget: RegisterWidget;
 }
 
 export function registerWidgets(options: RegisterWidgetOptions) {

@@ -29,10 +29,10 @@ function WithPersistedChanges(props: React.ComponentProps<typeof Component>) {
     <MiniMapContextProvider container={null}>
       <Component
         {...props}
-        onItemsChange={(nextItems) => {
+        onItemsChange={async (nextItems) => {
           setItems(() => nextItems);
         }}
-        onItemCopy={(item) => {
+        onItemCopy={async (item) => {
           setItems((prevItems) =>
             prevItems.concat({
               ...item,
@@ -40,7 +40,7 @@ function WithPersistedChanges(props: React.ComponentProps<typeof Component>) {
             })
           );
         }}
-        onItemDelete={(item) => {
+        onItemDelete={async (item) => {
           setItems((prevItems) => prevItems.filter((currentItem) => currentItem.id !== item.id));
         }}
         items={items}

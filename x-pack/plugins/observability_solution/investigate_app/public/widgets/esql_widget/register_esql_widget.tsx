@@ -125,8 +125,9 @@ export function registerEsqlWidget({
     setup: { investigate },
   },
   services,
+  registerWidget,
 }: RegisterWidgetOptions) {
-  investigate.registerWidget(
+  registerWidget(
     {
       type: ESQL_WIDGET_NAME,
       description: 'Visualize an ES|QL query',

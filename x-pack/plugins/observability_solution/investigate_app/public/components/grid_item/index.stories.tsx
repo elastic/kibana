@@ -48,11 +48,12 @@ const defaultProps: Story = {
             onCopy={() => {}}
             onDelete={() => {}}
             onLockToggle={() => {}}
-            onOverrideRemove={() => {}}
+            onOverrideRemove={async () => {}}
             onTitleChange={() => {}}
             overrides={[]}
             title="My visualization"
             description="A long description"
+            onEditClick={() => {}}
             {...props}
           />
         </MiniMapContextProvider>
