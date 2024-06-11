@@ -140,10 +140,6 @@ export class ConsolePageObject extends FtrService {
       const textArea = await this.monaco.getTextArea();
       await textArea.pressKeys(Key.ESCAPE);
     },
-    pressBackspace: async () => {
-      const textArea = await this.monaco.getTextArea();
-      await textArea.pressKeys(Key.BACK_SPACE);
-    },
     selectAllRequests: async () => {
       const textArea = await this.monaco.getTextArea();
       const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
@@ -176,6 +172,9 @@ export class ConsolePageObject extends FtrService {
       const textArea = await this.monaco.getTextArea();
       await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'a']);
       await textArea.pressKeys([Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'], 'c']);
+    },
+    isA11yOverlayVisible: async () => {
+      return await this.testSubjects.exists('codeEditorAccessibilityOverlay');
     },
   };
 
