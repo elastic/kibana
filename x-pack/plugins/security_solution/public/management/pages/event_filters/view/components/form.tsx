@@ -92,10 +92,10 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
 }));
 
 // Defines the tag categories for Event Filters, using the given order.
-const TAG_FILTERS = {
+const TAG_FILTERS = Object.freeze({
   policySelection: isPolicySelectionTag,
   descendentOfProcessFiltering: isFilterDescendentsOfProcessTag,
-};
+});
 
 const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
   formFields.reduce<{ [k: string]: number }>((allFields, field) => {
