@@ -12,7 +12,8 @@ import { DragDropContextWrapper } from '../../common/components/drag_and_drop/dr
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
-import { getScopeFromPath, useSourcererDataView } from '../../sourcerer/containers';
+import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 

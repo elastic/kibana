@@ -15,16 +15,31 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
-NODE="${DIR}/node/bin/node"
-test -x "$NODE"
-if [ ! -x "$NODE" ]; then
-  echo "unable to find usable node.js executable."
-  exit 1
-fi
+
+test_node() {
+  test -x "$NODE"
+  if [ ! -x "$NODE" ]; then
+    echo "unable to find usable node.js executable."
+    exit 1
+  fi
+}
 
 if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
+
+{{#darwin}}
+NODE="${DIR}/node/default/bin/node"
+{{/darwin}}
+{{#linux}}
+NODE="${DIR}/node/glibc-217/bin/node"
+{{#serverless}}
+if [ "$KBN_DISABLE_POINTER_COMPRESSION" != 'true' ]; then
+  NODE="${DIR}/node/pointer-compression/bin/node"
+fi
+{{/serverless}}
+{{/linux}}
+test_node
 
 # Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 # For now only on POSIX platforms, term signals work differently on Windows.

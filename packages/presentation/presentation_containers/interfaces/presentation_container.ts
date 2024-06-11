@@ -6,23 +6,16 @@
  * Side Public License, v 1.
  */
 
-import {
-  apiHasParentApi,
-  apiHasUniqueId,
-  PublishesViewMode,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiHasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
-import { PublishesSettings } from './publishes_settings';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
   initialState?: SerializedState;
 }
 
-export interface PresentationContainer
-  extends Partial<PublishesViewMode & PublishesSettings>,
-    CanAddNewPanel {
+export interface PresentationContainer extends CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */
@@ -100,4 +93,35 @@ export const listenForCompatibleApi = <ApiType extends unknown>(
     subscription.unsubscribe();
     lastCleanupFunction?.();
   };
+};
+
+export const combineCompatibleChildrenApis = <ApiType extends unknown, PublishingSubjectType>(
+  api: unknown,
+  observableKey: keyof ApiType,
+  isCompatible: (api: unknown) => api is ApiType,
+  emptyState: PublishingSubjectType,
+  flattenMethod?: (array: PublishingSubjectType[]) => PublishingSubjectType
+): Observable<PublishingSubjectType> => {
+  if (!api || !apiIsPresentationContainer(api)) return of();
+
+  return api.children$.pipe(
+    switchMap((children) => {
+      const compatibleChildren: Array<Observable<PublishingSubjectType>> = [];
+      for (const child of Object.values(children)) {
+        if (isCompatible(child) && isObservable(child[observableKey]))
+          compatibleChildren.push(child[observableKey] as BehaviorSubject<PublishingSubjectType>);
+      }
+
+      if (compatibleChildren.length === 0) return of(emptyState);
+
+      return combineLatest(compatibleChildren).pipe(
+        map(
+          flattenMethod
+            ? flattenMethod
+            : (nextCompatible) =>
+                nextCompatible.flat().filter((value) => Boolean(value)) as PublishingSubjectType
+        )
+      );
+    })
+  );
 };
