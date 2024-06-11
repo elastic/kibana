@@ -12,6 +12,7 @@ import { OasConverter } from './oas_converter';
 import { createOperationIdCounter } from './operation_id_counter';
 import { processRouter } from './process_router';
 import { processVersionedRouter } from './process_versioned_router';
+import { buildGlobalTags } from './util';
 
 export const openApiVersion = '3.0.0';
 
@@ -48,6 +49,7 @@ export const generateOpenApiDocument = (
     const result = processVersionedRouter(router, converter, getOpId, filters);
     Object.assign(paths, result.paths);
   }
+  const tags = buildGlobalTags(paths, opts.tags);
   return {
     openapi: openApiVersion,
     info: {
@@ -76,7 +78,7 @@ export const generateOpenApiDocument = (
       },
     },
     security: [{ basicAuth: [] }],
-    tags: opts.tags?.map((tag) => ({ name: tag })),
+    tags,
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };
 };

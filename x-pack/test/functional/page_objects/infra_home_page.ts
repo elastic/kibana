@@ -478,5 +478,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
     },
+
+    async clickCloseFlyoutButton() {
+      return testSubjects.click('euiFlyoutCloseButton');
+    },
   };
 }

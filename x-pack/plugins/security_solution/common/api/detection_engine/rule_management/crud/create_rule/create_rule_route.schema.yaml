@@ -5,6 +5,7 @@ info:
 paths:
   /api/detection_engine/rules:
     post:
+      x-labels: [ess, serverless]
       operationId: CreateRule
       x-codegen-enabled: true
       description: Create a single detection rule
