@@ -54,12 +54,9 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
 
   if (groups && groups.length > 0) {
     commonAlertSummaryFields.push({
-      label: i18n.translate(
-        'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.source',
-        {
-          defaultMessage: 'Source',
-        }
-      ),
+      label: i18n.translate('xpack.observability.alertDetails.alertSummaryField.source', {
+        defaultMessage: 'Source',
+      }),
       value: (
         <Groups groups={groups} timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }} />
       ),
@@ -68,22 +65,19 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
 
   if (tags && tags.length > 0) {
     commonAlertSummaryFields.push({
-      label: i18n.translate(
-        'xpack.observability.metrics.alertDetailsAppSection.summaryField.tags',
-        {
-          defaultMessage: 'Tags',
-        }
-      ),
+      label: i18n.translate('xpack.observability.alertDetails.alertSummaryField.tags', {
+        defaultMessage: 'Tags',
+      }),
       value: <Tags tags={tags} />,
     });
   }
 
   commonAlertSummaryFields.push({
-    label: i18n.translate('xpack.observability.metrics.alertDetailsAppSection.summaryField.rule', {
+    label: i18n.translate('xpack.observability.alertDetails.alertSummaryField.rule', {
       defaultMessage: 'Rule',
     }),
     value: (
-      <EuiLink data-test-subj="metricsRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
+      <EuiLink data-test-subj="o11yAlertRuleLink" href={ruleLink}>
         {ruleName}
       </EuiLink>
     ),
