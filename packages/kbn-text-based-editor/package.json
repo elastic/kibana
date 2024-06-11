@@ -3,5 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "sideEffects": ["*.scss"]
+  "sideEffects": [
+    "*.scss"
+  ],
+  "scripts": {
+    "make:docs": "ts-node --transpileOnly scripts/generate_esql_docs.ts",
+    "postmake:docs": "yarn run lint:fix && yarn run i18n:fix",
+    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-text-based-editor/src/esql_documentation_sections.tsx",
+    "i18n:fix": "cd ../.. && node ./scripts/i18n_check.js --fix"
+  }
 }

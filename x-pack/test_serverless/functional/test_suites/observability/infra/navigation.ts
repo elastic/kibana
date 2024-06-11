@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Infra Side Navigation', () => {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
       await svlObltNavigation.navigateToLandingPage();
     });
 

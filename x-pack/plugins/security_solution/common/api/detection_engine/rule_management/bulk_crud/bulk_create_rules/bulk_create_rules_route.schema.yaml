@@ -5,6 +5,7 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_create:
     post:
+      x-labels: [ess]
       operationId: BulkCreateRules
       x-codegen-enabled: true
       deprecated: true
