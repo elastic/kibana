@@ -10,10 +10,10 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import type { StartServices } from '../../../context/kibana_context/use_kibana';
-import type { ApmPluginStartDeps } from '../../../plugin';
-import { ApmThemeProvider } from '../../routing/app_root';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import type { StartServices } from '../context/kibana_context/use_kibana';
+import type { ApmPluginStartDeps } from '../plugin';
+import { ApmThemeProvider } from '../components/routing/app_root';
+import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 
 export function InvestigateContextProvider({
   timeRange,

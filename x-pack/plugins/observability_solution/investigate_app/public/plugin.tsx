@@ -15,13 +15,11 @@ import {
 import { INVESTIGATE_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { mapValues } from 'lodash';
+import { mapValues, once } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { createCallInvestigateAppAPI } from './api';
-import { createAssistantService } from './services/assistant';
-import { createEsqlService } from './services/esql';
-import { InvestigateAppServices } from './services/types';
+import type { InvestigateAppServices } from './services/types';
 import type {
   ConfigSchema,
   InvestigateAppPublicSetup,
@@ -30,6 +28,12 @@ import type {
   InvestigateAppStartDependencies,
 } from './types';
 import { RegisterWidgetOptions, registerWidgets } from './widgets/register_widgets';
+
+const getCreateAssistantService = once(() =>
+  import('./services/assistant').then((m) => m.createAssistantService)
+);
+
+const getCreateEsqlService = once(() => import('./services/esql').then((m) => m.createEsqlService));
 
 export class InvestigateAppPlugin
   implements
@@ -71,9 +75,16 @@ export class InvestigateAppPlugin
       ],
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
-        const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
+        const [
+          { Application },
+          [coreStart, pluginsStart],
+          createEsqlService,
+          createAssistantService,
+        ] = await Promise.all([
           import('./application'),
           coreSetup.getStartServices(),
+          getCreateEsqlService(),
+          getCreateAssistantService(),
         ]);
 
         const services: InvestigateAppServices = {
@@ -123,24 +134,26 @@ export class InvestigateAppPlugin
         ) as RegisterWidgetOptions['dependencies']['start'],
       },
       services: {
-        esql: pluginsStartPromise.then((pluginsStart) =>
-          createEsqlService({
-            data: pluginsStart.data,
-            dataViews: pluginsStart.dataViews,
-            lens: pluginsStart.lens,
-          })
+        esql: Promise.all([pluginsStartPromise, getCreateEsqlService()]).then(
+          ([pluginsStart, createEsqlService]) =>
+            createEsqlService({
+              data: pluginsStart.data,
+              dataViews: pluginsStart.dataViews,
+              lens: pluginsStart.lens,
+            })
         ),
-        assistant: pluginsStartPromise.then((pluginsStart) =>
-          createAssistantService({
-            contentManagement: pluginsStart.contentManagement,
-            embeddable: pluginsStart.embeddable,
-            observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
-            datasetQuality: pluginsStart.datasetQuality,
-            dataViews: pluginsStart.dataViews,
-            security: pluginsStart.security,
-            apiClient,
-            logger: this.logger,
-          })
+        assistant: Promise.all([pluginsStartPromise, getCreateAssistantService()]).then(
+          ([pluginsStart, createAssistantService]) =>
+            createAssistantService({
+              contentManagement: pluginsStart.contentManagement,
+              embeddable: pluginsStart.embeddable,
+              observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
+              datasetQuality: pluginsStart.datasetQuality,
+              dataViews: pluginsStart.dataViews,
+              security: pluginsStart.security,
+              apiClient,
+              logger: this.logger,
+            })
         ),
       },
     });

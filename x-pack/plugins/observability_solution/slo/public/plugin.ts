@@ -31,7 +31,6 @@ import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 
 import { callSloApi, createSloApiClient } from './rest';
-import { registerSloInvestigateWidgets } from './investigate/register_slo_investigate_widgets';
 import { SloEmbeddableContextProps } from './embeddable/slo/common/slo_embeddable_context';
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
@@ -92,10 +91,15 @@ export class SloPlugin
 
     registerBurnRateRuleType(pluginsSetup.observability.observabilityRuleTypeRegistry);
 
-    registerSloInvestigateWidgets({
-      coreSetup,
-      pluginsSetup,
-      kibanaVersion,
+    pluginsSetup.investigate?.register(async (registerWidget) => {
+      return import('./investigate/register_slo_investigate_widgets').then((m) => {
+        m.registerSloInvestigateWidgets({
+          coreSetup,
+          pluginsSetup,
+          kibanaVersion,
+          registerWidget,
+        });
+      });
     });
 
     const assertPlatinumLicense = async () => {

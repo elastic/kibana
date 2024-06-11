@@ -9,21 +9,21 @@ import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { WidgetRenderAPI } from '@kbn/investigate-plugin/public/types';
 import { i18n } from '@kbn/i18n';
-import type { Environment } from '../../../../../common/environment_rt';
-import { ServiceIcons } from '../../../shared/service_icons';
-import { TransactionTypeSelectBase } from '../../../shared/transaction_type_select';
+import type { Environment } from '../../../common/environment_rt';
+import { ServiceIcons } from '../../components/shared/service_icons';
+import { TransactionTypeSelectBase } from '../../components/shared/transaction_type_select';
 import { InvestigateLatencyChart } from './investigate_latency_chart';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { ChartPointerEventContextProvider } from '../../context/chart_pointer_event/chart_pointer_event_context';
 import {
   PreferredDataSourceAndBucketSize,
   usePreferredDataSourceAndBucketSize,
-} from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../../common/document_type';
+} from '../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../common/document_type';
 import { InvestigateTransactionThroughputChart } from './investigate_transaction_throughput_chart';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
-import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { AnnotationsContextProvider } from '../../context/annotations/annotations_context';
+import { useServiceTransactionTypesFetcher } from '../../context/apm_service/use_service_transaction_types_fetcher';
 import { InvestigateTransactionFailureRateChart } from './investigate_transaction_failure_rate_chart';
 
 function InvestigateServiceDetailHeader({

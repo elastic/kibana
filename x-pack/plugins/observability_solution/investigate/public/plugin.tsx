@@ -28,12 +28,30 @@ export class InvestigatePlugin
 
   widgetRegistry: WidgetRegistry = new WidgetRegistry();
 
+  registrationPromises: Array<Promise<void>> = [];
+
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
   setup(coreSetup: CoreSetup, pluginsSetup: InvestigateSetupDependencies): InvestigatePublicSetup {
     return {
-      registerWidget: this.widgetRegistry.registerWidget,
+      register: (callback) => {
+        const registrationPromise = Promise.race([
+          callback(this.widgetRegistry.registerWidget),
+          new Promise<void>((resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error('Timed out running registration function'));
+            }, 30_000);
+          }),
+        ]).catch((error) => {
+          this.logger.error(
+            new Error('Encountered an error during widget registration', { cause: error })
+          );
+          return Promise.resolve();
+        });
+
+        this.registrationPromises.push(registrationPromise);
+      },
     };
   }
 

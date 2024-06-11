@@ -8,18 +8,20 @@ import type { CoreSetup } from '@kbn/core/public';
 import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { lazy } from 'react';
-import type { Environment } from '../../../../common/environment_rt';
+import type { RegisterWidget } from '@kbn/investigate-plugin/public/types';
+import type { Environment } from '../../common/environment_rt';
 import {
   APM_SERVICE_DETAIL_WIDGET_NAME,
   APM_SERVICE_INVENTORY_WIDGET_NAME,
-} from '../../../../common/investigate';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../../plugin';
+} from '../../common/investigate';
+import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { InvestigateContextProvider } from './investigate_context_provider';
 import { createInvestigateServiceDetailWidget } from './investigate_service_detail/create_investigate_service_detail_widget';
 
 interface RegisterInvestigateWidgetOptions {
   core: CoreSetup<ApmPluginStartDeps, unknown>;
   pluginsSetup: ApmPluginSetupDeps;
+  registerWidget: RegisterWidget;
 }
 
 export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOptions) {
@@ -39,7 +41,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
     )
   );
 
-  options.pluginsSetup.investigate?.registerWidget(
+  options.registerWidget(
     {
       type: APM_SERVICE_INVENTORY_WIDGET_NAME,
       description:
@@ -96,7 +98,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
     }
   );
 
-  options.pluginsSetup.investigate?.registerWidget(
+  options.registerWidget(
     {
       type: APM_SERVICE_DETAIL_WIDGET_NAME,
       description: `Details for a specific service. Shows throughput, latency and failure rate metrics,

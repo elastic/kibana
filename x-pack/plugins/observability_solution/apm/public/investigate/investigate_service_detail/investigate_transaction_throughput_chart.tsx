@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { ServiceOverviewThroughputChartWithoutAppContext } from '../../service_overview/service_overview_throughput_chart';
+import { ServiceOverviewThroughputChartWithoutAppContext } from '../../components/app/service_overview/service_overview_throughput_chart';
 
 type InvestigateTransactionThroughputChartProps = Omit<
   React.ComponentProps<typeof ServiceOverviewThroughputChartWithoutAppContext>,

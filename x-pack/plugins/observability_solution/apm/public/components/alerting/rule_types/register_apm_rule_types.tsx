@@ -18,7 +18,7 @@ import {
 } from '../../../../common/rules/default_action_message';
 import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { InvestigateContextProvider } from '../../app/investigate_widgets/investigate_context_provider';
+import { InvestigateContextProvider } from '../../../investigate/investigate_context_provider';
 import type { AlertParams } from './anomaly_rule_type';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size

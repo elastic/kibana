@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RegisterWidget } from '@kbn/investigate-plugin/public/types';
 import type { InvestigateAppServices } from '../services/types';
 import type { InvestigateAppSetupDependencies, InvestigateAppStartDependencies } from '../types';
 import { registerEmbeddableWidget } from './embeddable_widget/register_embeddable_widget';
@@ -13,6 +14,7 @@ import { registerNoteWidget } from './note_widget';
 import { registerAssistantWidgets } from './register_assistant_widgets';
 
 export interface RegisterWidgetOptions {
+  registerWidget: RegisterWidget;
   dependencies: {
     setup: InvestigateAppSetupDependencies;
     start: {

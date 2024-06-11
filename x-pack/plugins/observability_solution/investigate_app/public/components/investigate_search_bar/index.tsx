@@ -23,6 +23,7 @@ export function InvestigateSearchBar({
   onRefresh,
   onFocus,
   onBlur,
+  showSubmitButton = true,
 }: {
   kuery: string;
   rangeFrom?: string;
@@ -38,6 +39,7 @@ export function InvestigateSearchBar({
   onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
   onFocus?: () => void;
   onBlur?: () => void;
+  showSubmitButton?: boolean;
 }) {
   const searchBarQuery: Required<React.ComponentProps<typeof SearchBar>>['query'] = {
     language: 'kuery',
@@ -54,7 +56,7 @@ export function InvestigateSearchBar({
 
   const {
     dependencies: {
-      start: { data, unifiedSearch },
+      start: { unifiedSearch },
     },
   } = useKibana();
 
@@ -126,7 +128,6 @@ export function InvestigateSearchBar({
           onQueryChange({ dateRange, kuery: String(query?.query) });
         }}
         onQuerySubmit={({ dateRange, query }) => {
-          data.query.timefilter.timefilter.setTime(dateRange);
           onQuerySubmit({ dateRange, kuery: String(query?.query) });
         }}
         showQueryInput
@@ -136,6 +137,9 @@ export function InvestigateSearchBar({
         dateRangeTo={rangeTo}
         onRefresh={onRefresh}
         displayStyle="inPage"
+        showSubmitButton={showSubmitButton}
+        disableQueryLanguageSwitcher
+        showQueryMenu={false}
       />
     </div>
   );

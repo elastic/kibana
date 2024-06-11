@@ -76,7 +76,7 @@ export interface InvestigateSetupDependencies {}
 export interface InvestigateStartDependencies {}
 
 export interface InvestigatePublicSetup {
-  registerWidget: RegisterWidget;
+  register: (callback: (registerWidget: RegisterWidget) => Promise<void>) => void;
 }
 
 export interface InvestigatePublicStart {

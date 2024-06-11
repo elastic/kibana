@@ -116,7 +116,7 @@ export function MiniMapContextProvider({
   children,
 }: {
   container: HTMLElement | null;
-  children: React.ReactElement;
+  children: React.ReactNode;
 }) {
   const api = useMemo(() => {
     return createMiniMapApi(container);

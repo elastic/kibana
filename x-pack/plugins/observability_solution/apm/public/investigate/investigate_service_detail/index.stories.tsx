@@ -10,13 +10,13 @@ import React from 'react';
 import type { RequiredKeys } from 'utility-types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { InvestigateServiceDetailBase as Component } from '.';
-import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
+import { mockApmApiCallResponse } from '../../services/rest/call_apm_api_spy';
 import { InvestigateContextProvider } from '../investigate_context_provider';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import latencyChartResponse from '../../../shared/charts/latency_chart/latency_chart_response.json';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import { RollupInterval } from '../../../../../common/rollup';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import latencyChartResponse from '../../components/shared/charts/latency_chart/latency_chart_response.json';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
 
 export default {
   title: 'widgets/InvestigateServiceDetail',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { FailedTransactionRateWithoutAppContext } from '../../../shared/charts/failed_transaction_rate_chart';
+import { FailedTransactionRateWithoutAppContext } from '../../components/shared/charts/failed_transaction_rate_chart';
 
 type InvestigateTransactionFailureRateChartProps = Omit<
   React.ComponentProps<typeof FailedTransactionRateWithoutAppContext>,

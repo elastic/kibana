@@ -7,22 +7,22 @@
 
 import React, { useMemo } from 'react';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import { Environment } from '../../../../../common/environment_rt';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { PreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
-import { filterNil } from '../../../shared/charts/latency_chart';
+import { ApmDocumentType } from '../../../common/document_type';
+import { Environment } from '../../../common/environment_rt';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { useFetcher } from '../../hooks/use_fetcher';
+import { PreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
+import { getLatencyChartSelector } from '../../selectors/latency_chart_selectors';
+import { filterNil } from '../../components/shared/charts/latency_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../../shared/charts/transaction_charts/helper';
-import { getTimeZone } from '../../../shared/charts/helper/timezone';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
-import { useKibana } from '../../../../context/kibana_context/use_kibana';
+} from '../../components/shared/charts/transaction_charts/helper';
+import { getTimeZone } from '../../components/shared/charts/helper/timezone';
+import { isTimeComparison } from '../../components/shared/time_comparison/get_comparison_options';
+import { TimeseriesChart } from '../../components/shared/charts/timeseries_chart';
+import { getComparisonChartTheme } from '../../components/shared/time_comparison/get_comparison_chart_theme';
+import { useKibana } from '../../context/kibana_context/use_kibana';
 
 export function InvestigateLatencyChart({
   start,

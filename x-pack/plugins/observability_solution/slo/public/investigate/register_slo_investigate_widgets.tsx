@@ -10,6 +10,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { lazy } from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { ChromeOption } from '@kbn/investigate-plugin/public';
+import type { RegisterWidget } from '@kbn/investigate-plugin/public/types';
 import type { SloPublicPluginsSetup, SloPublicPluginsStart } from '..';
 import { SLO_DETAIL_WIDGET_NAME, SLO_INVENTORY_WIDGET_NAME } from './constants';
 import { SloEmbeddableContext } from '../embeddable/slo/common/slo_embeddable_context';
@@ -18,6 +19,7 @@ interface RegisterInvestigateWidgetOptions {
   coreSetup: CoreSetup<SloPublicPluginsStart>;
   pluginsSetup: SloPublicPluginsSetup;
   kibanaVersion: string;
+  registerWidget: RegisterWidget;
 }
 
 const LazyInvestigateSloInventory = withSuspense(
@@ -40,7 +42,7 @@ export function registerSloInvestigateWidgets(options: RegisterInvestigateWidget
   function WithContext({ children }: { children: React.ReactNode }) {
     const startServicesAsync = useAsync(async () => {
       return await options.coreSetup.getStartServices();
-    }, [options.coreSetup]);
+    }, []);
 
     const [coreStart, pluginsStart] = startServicesAsync.value ?? [undefined, undefined];
 
@@ -59,7 +61,7 @@ export function registerSloInvestigateWidgets(options: RegisterInvestigateWidget
     );
   }
 
-  options.pluginsSetup.investigate?.registerWidget(
+  options.registerWidget(
     {
       type: SLO_INVENTORY_WIDGET_NAME,
       description: 'Show a grid of SLOs, which displays their state, and the history of the SLI',
@@ -87,7 +89,7 @@ export function registerSloInvestigateWidgets(options: RegisterInvestigateWidget
     }
   );
 
-  options.pluginsSetup.investigate?.registerWidget(
+  options.registerWidget(
     {
       type: SLO_DETAIL_WIDGET_NAME,
       description:

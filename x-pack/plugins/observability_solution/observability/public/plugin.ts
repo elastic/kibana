@@ -90,7 +90,6 @@ import {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
-import { registerInvestigateWidgets } from './investigate/register_investigate_widgets';
 
 export interface ConfigSchema {
   unsafe: {
@@ -320,13 +319,18 @@ export class Plugin
       logsExplorerLocator
     );
 
-    registerInvestigateWidgets({
-      coreSetup,
-      pluginsSetup,
-      kibanaVersion,
-      isDev: this.initContext.env.mode.dev,
-      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      config,
+    pluginsSetup.investigate?.register(async (registerWidget) => {
+      return import('./investigate/register_investigate_widgets').then((m) => {
+        m.registerInvestigateWidgets({
+          coreSetup,
+          pluginsSetup,
+          kibanaVersion,
+          isDev: this.initContext.env.mode.dev,
+          observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+          config,
+          registerWidget,
+        });
+      });
     });
 
     if (pluginsSetup.home) {

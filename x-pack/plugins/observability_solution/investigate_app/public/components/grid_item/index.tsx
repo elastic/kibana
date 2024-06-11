@@ -4,18 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBadge,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useTheme } from '../../hooks/use_theme';
 import { InvestigateTextButton } from '../investigate_text_button';
 import { InvestigateWidgetGridItemOverride } from '../investigate_widget_grid';
@@ -35,7 +28,8 @@ interface GridItemProps {
   onLockToggle: () => void;
   loading: boolean;
   faded: boolean;
-  onOverrideRemove: (override: InvestigateWidgetGridItemOverride) => void;
+  onOverrideRemove: (override: InvestigateWidgetGridItemOverride) => Promise<void>;
+  onEditClick: () => void;
   overrides: InvestigateWidgetGridItemOverride[];
 }
 
@@ -58,7 +52,7 @@ const fadedClassName = css`
 `;
 
 const lockedControlClassName = css`
-  opacity: 0.5 !important;
+  opacity: 0.9 !important;
   &:hover {
     opacity: 1 !important;
   }
@@ -105,7 +99,8 @@ export function GridItem({
   loading,
   faded,
   overrides,
-  onTitleChange,
+  onOverrideRemove,
+  onEditClick,
 }: GridItemProps) {
   const theme = useTheme();
 
@@ -118,15 +113,6 @@ export function GridItem({
       opacity: 0;
     }
   `;
-
-  const [editingTitle, setEditingTitle] = useState(false);
-
-  const [editedTitle, setEditedTitle] = useState('');
-
-  function onTitleSubmit() {
-    onTitleChange(editedTitle);
-    setEditingTitle(false);
-  }
 
   return (
     <MiniMapWidget id={id} title={title}>
@@ -144,45 +130,9 @@ export function GridItem({
             className={headerClassName}
           >
             <EuiFlexItem className={titleContainerClassName}>
-              <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false} className={titleItemClassName}>
-                  {editingTitle ? (
-                    <EuiForm
-                      component="form"
-                      onSubmit={() => {
-                        onTitleSubmit();
-                      }}
-                    >
-                      <EuiFieldText
-                        name="title"
-                        data-test-subj="investigateAppGridItemFieldText"
-                        value={editedTitle}
-                        onChange={(event) => {
-                          setEditedTitle(event.currentTarget.value);
-                        }}
-                        compressed
-                        autoFocus
-                      />
-                    </EuiForm>
-                  ) : (
-                    <EuiText size="s">{title}</EuiText>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <InvestigateTextButton
-                    className={editTitleButtonClassName}
-                    iconType={editingTitle ? 'check' : 'pencil'}
-                    onClick={() => {
-                      if (!editingTitle) {
-                        setEditedTitle(title);
-                        setEditingTitle(() => true);
-                      } else {
-                        onTitleSubmit();
-                      }
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiText size="s" className={titleItemClassName}>
+                {title}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {overrides.length ? (
@@ -194,6 +144,15 @@ export function GridItem({
                         className={changeBadgeClassName}
                         iconType="cross"
                         iconSide="right"
+                        iconOnClick={() => {
+                          onOverrideRemove(override);
+                        }}
+                        iconOnClickAriaLabel={i18n.translate(
+                          'xpack.investigateApp.gridItem.removeOverrideButtonAriaLabel',
+                          {
+                            defaultMessage: 'Remove filter',
+                          }
+                        )}
                       >
                         <EuiText size="xs">{override.label}</EuiText>
                       </EuiBadge>
@@ -211,15 +170,6 @@ export function GridItem({
               >
                 <EuiFlexItem grow={false}>
                   <InvestigateTextButton
-                    iconType="trash"
-                    onClick={() => {
-                      onDelete();
-                    }}
-                    disabled={loading}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <InvestigateTextButton
                     iconType="copy"
                     onClick={() => {
                       onCopy();
@@ -229,8 +179,27 @@ export function GridItem({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <InvestigateTextButton
+                    iconType="trash"
+                    onClick={() => {
+                      onDelete();
+                    }}
+                    disabled={loading}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InvestigateTextButton
+                    iconType="pencil"
+                    onClick={() => {
+                      onEditClick();
+                    }}
+                    disabled={loading}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InvestigateTextButton
                     iconType={locked ? 'lock' : 'lockOpen'}
                     className={locked ? lockedControlClassName : ''}
+                    color={locked ? 'primary' : 'text'}
                     onClick={() => {
                       onLockToggle();
                     }}

@@ -6,7 +6,7 @@
  */
 
 import type { InvestigateWidget } from '@kbn/investigate-plugin/common';
-import type { Environment } from '../../../../../common/environment_rt';
+import type { Environment } from '../../../common/environment_rt';
 
 export interface InvestigateServiceDetailWidgetParameters {
   environment: Environment;

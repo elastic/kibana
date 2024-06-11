@@ -84,7 +84,6 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
-import { registerInvestigateWidgets } from './components/app/investigate_widgets';
 import { APMClient, callApmApi } from './services/rest/create_call_apm_api';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
@@ -412,9 +411,14 @@ export class ApmPlugin
       coreSetup: core,
     });
 
-    registerInvestigateWidgets({
-      core,
-      pluginsSetup: plugins,
+    plugins.investigate?.register(async (registerWidget) => {
+      await import('./investigate').then((m) => {
+        m.registerInvestigateWidgets({
+          core,
+          pluginsSetup: plugins,
+          registerWidget,
+        });
+      });
     });
 
     import('./services/rest/create_call_apm_api').then((m) => m.createCallApmApi(core));

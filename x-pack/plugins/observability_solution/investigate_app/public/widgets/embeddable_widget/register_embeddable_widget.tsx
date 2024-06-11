@@ -6,7 +6,7 @@
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
+import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
@@ -173,13 +173,8 @@ function EmbeddableWidget(props: Props) {
   return <LegacyEmbeddable {...props} />;
 }
 
-export function registerEmbeddableWidget({
-  dependencies: {
-    setup: { investigate },
-  },
-  services,
-}: RegisterWidgetOptions) {
-  investigate.registerWidget(
+export function registerEmbeddableWidget({ registerWidget }: RegisterWidgetOptions) {
+  registerWidget(
     {
       type: EMBEDDABLE_WIDGET_NAME,
       description: 'Display a saved embeddable',

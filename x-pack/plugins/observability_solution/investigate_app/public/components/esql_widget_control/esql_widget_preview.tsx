@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import {
   InvestigateWidgetColumnSpan,
   InvestigateWidgetCreate,
@@ -55,22 +55,20 @@ function getWidgetFromSuggestion({
 
 function PreviewContainer({ children }: { children: React.ReactNode }) {
   return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiFlexGroup
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        className={css`
+    <EuiFlexGroup
+      direction="row"
+      alignItems="center"
+      justifyContent="center"
+      className={css`
+        width: 100%;
+        > div {
           width: 100%;
-          > div {
-            width: 100%;
-            height: 500px;
-          }
-        `}
-      >
-        {children}
-      </EuiFlexGroup>
-    </EuiPanel>
+          height: 500px;
+        }
+      `}
+    >
+      {children}
+    </EuiFlexGroup>
   );
 }
 

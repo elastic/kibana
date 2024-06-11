@@ -9,6 +9,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import useAsync from 'react-use/lib/useAsync';
 import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RegisterWidget } from '@kbn/investigate-plugin/public/types';
 import type { ObservabilityPublicPluginsStart, ObservabilityPublicPluginsSetup } from '../plugin';
 import { ALERTS_INVENTORY_WIDGET_NAME } from './investigate_alerts_inventory/constants';
 import { SharedProviders } from '../application/shared_providers';
@@ -27,13 +28,14 @@ interface RegisterInvestigateWidgetOptions {
   config: ConfigSchema;
   kibanaVersion: string;
   isDev: boolean;
+  registerWidget: RegisterWidget;
 }
 
 export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOptions) {
   function WithContext({ children }: { children: React.ReactNode }) {
     const startServicesAsync = useAsync(async () => {
       return await options.coreSetup.getStartServices();
-    }, [options.coreSetup]);
+    }, []);
 
     const [coreStart, pluginsStart] = startServicesAsync.value ?? [undefined, undefined];
 
@@ -56,7 +58,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
     );
   }
 
-  options.pluginsSetup.investigate?.registerWidget(
+  options.registerWidget(
     {
       type: ALERTS_INVENTORY_WIDGET_NAME,
       description: 'Displays an overview of recently active and recovered alerts',
@@ -96,7 +98,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
     }
   );
 
-  options.pluginsSetup.investigate?.registerWidget(
+  options.registerWidget(
     {
       type: ALERTS_DETAIL_WIDGET_NAME,
       description: 'Displays detailed information about a specific alert',
@@ -133,7 +135,7 @@ export function registerInvestigateWidgets(options: RegisterInvestigateWidgetOpt
     }
   );
 
-  options.pluginsSetup.investigate?.registerWidget(
+  options.registerWidget(
     {
       type: ALERT_LOG_RATE_ANALYSIS_WIDGET_NAME,
       description: 'Analyse metadata that could be related to triggering the alert',

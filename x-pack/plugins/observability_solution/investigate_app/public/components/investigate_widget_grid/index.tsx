@@ -56,15 +56,16 @@ export interface InvestigateWidgetGridItem {
 
 interface InvestigateWidgetGridProps {
   items: InvestigateWidgetGridItem[];
-  onItemsChange: (items: InvestigateWidgetGridItem[]) => void;
-  onItemCopy: (item: InvestigateWidgetGridItem) => void;
-  onItemDelete: (item: InvestigateWidgetGridItem) => void;
-  onItemLockToggle: (item: InvestigateWidgetGridItem) => void;
+  onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
+  onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
+  onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
+  onItemLockToggle: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemOverrideRemove: (
     item: InvestigateWidgetGridItem,
     override: InvestigateWidgetGridItemOverride
-  ) => void;
-  onItemTitleChange: (item: InvestigateWidgetGridItem, title: string) => void;
+  ) => Promise<void>;
+  onItemTitleChange: (item: InvestigateWidgetGridItem, title: string) => Promise<void>;
+  onItemEditClick: (item: InvestigateWidgetGridItem) => void;
   fadeLockedItems: boolean;
 }
 
@@ -132,6 +133,7 @@ function GridSectionRenderer({
   onItemLockToggle,
   onItemOverrideRemove,
   onItemTitleChange,
+  onItemEditClick,
   fadeLockedItems,
 }: InvestigateWidgetGridProps) {
   const WithFixedWidth = useMemo(() => WidthProvider(Responsive), []);
@@ -145,6 +147,7 @@ function GridSectionRenderer({
     onItemLockToggle,
     onItemOverrideRemove,
     onItemTitleChange,
+    onItemEditClick,
   };
 
   const itemCallbacksRef = useRef(callbacks);
@@ -165,20 +168,23 @@ function GridSectionRenderer({
           title={item.title}
           description={item.description}
           onTitleChange={(title) => {
-            itemCallbacksRef.current.onItemTitleChange(item, title);
+            return itemCallbacksRef.current.onItemTitleChange(item, title);
           }}
           onCopy={() => {
-            itemCallbacksRef.current.onItemCopy(item);
+            return itemCallbacksRef.current.onItemCopy(item);
           }}
           onDelete={() => {
-            itemCallbacksRef.current.onItemDelete(item);
+            return itemCallbacksRef.current.onItemDelete(item);
           }}
           locked={item.locked}
           onLockToggle={() => {
             itemCallbacksRef.current.onItemLockToggle(item);
           }}
           onOverrideRemove={(override) => {
-            itemCallbacksRef.current.onItemOverrideRemove(item, override);
+            return itemCallbacksRef.current.onItemOverrideRemove(item, override);
+          }}
+          onEditClick={() => {
+            return itemCallbacksRef.current.onItemEditClick(item);
           }}
           overrides={item.overrides}
           loading={item.loading}
@@ -271,6 +277,7 @@ export function InvestigateWidgetGrid({
   fadeLockedItems,
   onItemOverrideRemove,
   onItemTitleChange,
+  onItemEditClick,
 }: InvestigateWidgetGridProps) {
   const sections = useMemo<Section[]>(() => {
     let currentGrid: GridSection = { items: [] };
@@ -305,13 +312,13 @@ export function InvestigateWidgetGrid({
               <GridSectionRenderer
                 items={section.items}
                 onItemCopy={(copiedItem) => {
-                  onItemCopy(copiedItem);
+                  return onItemCopy(copiedItem);
                 }}
                 onItemDelete={(deletedItem) => {
-                  onItemDelete(deletedItem);
+                  return onItemDelete(deletedItem);
                 }}
                 onItemLockToggle={(toggledItem) => {
-                  onItemLockToggle(toggledItem);
+                  return onItemLockToggle(toggledItem);
                 }}
                 onItemsChange={(itemsInSection) => {
                   const nextItems = sections.flatMap((sectionAtIndex) => {
@@ -324,13 +331,16 @@ export function InvestigateWidgetGrid({
                     return itemsInSection;
                   });
 
-                  onItemsChange(nextItems);
+                  return onItemsChange(nextItems);
                 }}
                 onItemOverrideRemove={(item, override) => {
-                  onItemOverrideRemove(item, override);
+                  return onItemOverrideRemove(item, override);
                 }}
                 onItemTitleChange={(item, title) => {
-                  onItemTitleChange(item, title);
+                  return onItemTitleChange(item, title);
+                }}
+                onItemEditClick={(item) => {
+                  return onItemEditClick(item);
                 }}
                 fadeLockedItems={fadeLockedItems}
               />
@@ -351,19 +361,22 @@ export function InvestigateWidgetGrid({
                 locked={section.item.locked}
                 overrides={section.item.overrides}
                 onCopy={() => {
-                  onItemCopy(section.item);
+                  return onItemCopy(section.item);
                 }}
                 onDelete={() => {
-                  onItemDelete(section.item);
+                  return onItemDelete(section.item);
                 }}
                 onOverrideRemove={(override) => {
-                  onItemOverrideRemove(section.item, override);
+                  return onItemOverrideRemove(section.item, override);
                 }}
                 onTitleChange={(nextTitle) => {
-                  onItemTitleChange(section.item, nextTitle);
+                  return onItemTitleChange(section.item, nextTitle);
                 }}
                 onLockToggle={() => {
-                  onItemLockToggle(section.item);
+                  return onItemLockToggle(section.item);
+                }}
+                onEditClick={() => {
+                  return onItemEditClick(section.item);
                 }}
               >
                 {section.item.element}

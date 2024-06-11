@@ -11,7 +11,7 @@ import { ASSISTANT_RESPONSE_WIDGET_NAME } from '../../constants';
 import { RegisterWidgetOptions } from '../register_widgets';
 
 export function registerAssistantResponseWidget(options: RegisterWidgetOptions) {
-  options.dependencies.setup.investigate.registerWidget(
+  options.registerWidget(
     {
       type: ASSISTANT_RESPONSE_WIDGET_NAME,
       description: '',

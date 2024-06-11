@@ -90,10 +90,19 @@ export function EsqlWidget({
     const messageColumn = datatable.columns.find((column) => column.name === 'message');
 
     if (datatable.columns.length > 10 && timestampColumn && messageColumn) {
-      return [timestampColumn, messageColumn];
+      const hasDataForBothColumns = datatable.rows.every((row) => {
+        const timestampValue = row['@timestamp'];
+        const messageValue = row.message;
+
+        return timestampValue !== null && timestampValue !== undefined && !!messageValue;
+      });
+
+      if (hasDataForBothColumns) {
+        return [timestampColumn, messageColumn];
+      }
     }
     return undefined;
-  }, [datatable.columns]);
+  }, [datatable.columns, datatable.rows]);
 
   if (input.attributes.visualizationType === 'lnsDatatable') {
     return (
@@ -180,7 +189,7 @@ export function registerEsqlWidget({
         dataView: meta.dataView,
       };
     },
-    ({ widget, blocks, onWidgetAdd }) => {
+    ({ widget, blocks }) => {
       const { dataView, columns, values, suggestion } = widget.data;
       return (
         <EsqlWidget

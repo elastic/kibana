@@ -47,5 +47,5 @@ export function useDateRange() {
     };
   }, [data]);
 
-  return time;
+  return [time, setTime] as const;
 }

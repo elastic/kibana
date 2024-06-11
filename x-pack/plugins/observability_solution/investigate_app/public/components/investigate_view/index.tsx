@@ -17,11 +17,12 @@ import {
 } from '@kbn/investigate-plugin/public';
 import { WidgetDefinition } from '@kbn/investigate-plugin/public/types';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { keyBy, last, pick } from 'lodash';
+import { keyBy, last, omit, pick } from 'lodash';
 import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
+import moment from 'moment';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { useMemoWithAbortSignal } from '../../hooks/use_memo_with_abort_signal';
@@ -37,6 +38,7 @@ import { InvestigationHistory } from '../investigation_history';
 import { MiniTimeline } from '../mini_timeline';
 import { InvestigateTimelineWithLoadingState } from './types';
 import { mergePlainObjects } from '../../utils/merge_plain_objects';
+import { EditWidgetFlyout } from '../edit_widget_flyout';
 
 const DEFAULT_COLUMN_SPAN = InvestigateWidgetColumnSpan.Four;
 const DEFAULT_ROW_SPAN = 12;
@@ -149,7 +151,7 @@ export function InvestigateView({}: {}) {
     z-index: 100;
   `;
 
-  const range = useDateRange();
+  const [range, setRange] = useDateRange();
 
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
 
@@ -162,6 +164,8 @@ export function InvestigateView({}: {}) {
     user,
     title: new Date().toISOString(),
   });
+
+  const [editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
 
   const [filterOverrides, setFilterOverrides] = useState(() => {
     return {
@@ -220,9 +224,14 @@ export function InvestigateView({}: {}) {
   const [blocks, setBlocks] = useState<Record<string, WorkflowBlock[]>>({});
 
   useEffect(() => {
+    const itemIds = timeline.items.map((item) => item.id);
+    setEditingItem((prevEditingItem) => {
+      if (prevEditingItem && !itemIds.includes(prevEditingItem.id)) {
+        return undefined;
+      }
+      return prevEditingItem;
+    });
     setBlocks((prevBlocks) => {
-      const itemIds = timeline.items.map((item) => item.id);
-
       return pick(prevBlocks, itemIds);
     });
   }, [timeline.items]);
@@ -405,8 +414,14 @@ export function InvestigateView({}: {}) {
                 kuery={kuery}
                 rangeFrom={range.from}
                 rangeTo={range.to}
-                onQuerySubmit={() => {
-                  setFilterOverrides((prevOverrides) => ({ ...prevOverrides, kuery }));
+                onQuerySubmit={({ kuery: nextKuery, dateRange: nextDateRange }) => {
+                  setRange({
+                    start: moment(nextDateRange.from),
+                    end: moment(nextDateRange.to),
+                    from: nextDateRange.from,
+                    to: nextDateRange.to,
+                  });
+                  setFilterOverrides((prevOverrides) => ({ ...prevOverrides, kuery: nextKuery }));
                 }}
                 onQueryChange={({ kuery: nextKuery }) => {
                   setKuery(nextKuery);
@@ -422,7 +437,7 @@ export function InvestigateView({}: {}) {
             <EuiFlexItem className={gridContainerClassName} grow={false}>
               <InvestigateWidgetGrid
                 items={gridItems}
-                onItemsChange={(nextGridItems) => {
+                onItemsChange={async (nextGridItems) => {
                   setTimeline((prevTimeline) => {
                     const itemsById = keyBy(prevTimeline.items, 'id');
                     return {
@@ -439,7 +454,7 @@ export function InvestigateView({}: {}) {
                     };
                   });
                 }}
-                onItemTitleChange={(item, title) => {
+                onItemTitleChange={async (item, title) => {
                   setTimeline((prevTimeline) => {
                     return {
                       ...prevTimeline,
@@ -453,7 +468,7 @@ export function InvestigateView({}: {}) {
                     };
                   });
                 }}
-                onItemCopy={(copiedItem) => {
+                onItemCopy={async (copiedItem) => {
                   setTimeline((prevTimeline) => {
                     const matchedItem = prevTimeline.items.find(
                       (item) => item.id === copiedItem.id
@@ -476,7 +491,7 @@ export function InvestigateView({}: {}) {
                     };
                   });
                 }}
-                onItemDelete={(deletedItem) => {
+                onItemDelete={async (deletedItem) => {
                   setTimeline((prevTimeline) => ({
                     ...prevTimeline,
                     items: prevTimeline.items.filter((item) => item.id !== deletedItem.id),
@@ -519,7 +534,38 @@ export function InvestigateView({}: {}) {
                   });
                 }}
                 fadeLockedItems={searchBarFocused}
-                onItemOverrideRemove={() => {}}
+                onItemOverrideRemove={async (updatedItem, override) => {
+                  let updatedWidget = timeline.items.find((item) => item.id === updatedItem.id)!;
+
+                  updatedWidget = {
+                    ...(await regenerateItem({
+                      user,
+                      globalWidgetParameters,
+                      signal: new AbortController().signal,
+                      widget: {
+                        ...updatedWidget,
+                        parameters: omit(updatedWidget.parameters, override.id),
+                      },
+                      widgetDefinitions,
+                    })),
+                    loading: false,
+                  };
+
+                  setTimeline((nextTimeline) => {
+                    return {
+                      ...nextTimeline,
+                      items: nextTimeline.items.map((item) => {
+                        if (item.id === updatedWidget.id) {
+                          return updatedWidget;
+                        }
+                        return item;
+                      }),
+                    };
+                  });
+                }}
+                onItemEditClick={(itemToEdit) => {
+                  setEditingItem(timeline.items.find((item) => item.id === itemToEdit.id));
+                }}
               />
             </EuiFlexItem>
 
@@ -607,6 +653,35 @@ export function InvestigateView({}: {}) {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {editingItem ? (
+        <EditWidgetFlyout
+          widget={editingItem}
+          onWidgetUpdate={async (nextWidget) => {
+            const updatedWidget = await regenerateItem({
+              globalWidgetParameters,
+              user,
+              widget: nextWidget,
+              widgetDefinitions,
+              signal: new AbortController().signal,
+            });
+
+            setTimeline((prevTimeline) => {
+              return {
+                ...prevTimeline,
+                items: prevTimeline.items.map((item) => {
+                  if (item.id === updatedWidget.id) {
+                    return { ...updatedWidget, loading: false };
+                  }
+                  return item;
+                }),
+              };
+            });
+          }}
+          onClose={() => {
+            setEditingItem(undefined);
+          }}
+        />
+      ) : null}
     </MiniMapContextProvider>
   );
 }

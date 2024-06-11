@@ -6,8 +6,10 @@
  */
 
 import { createWidgetFactory } from '@kbn/investigate-plugin/public';
-import { APM_SERVICE_DETAIL_WIDGET_NAME } from '../../../../../common/investigate';
-import type { InvestigateServiceDetailWidgetParameters } from './types';
+import { APM_SERVICE_INVENTORY_WIDGET_NAME } from '../../../common/investigate';
+import type { InvestigateServiceInventoryWidgetParameters } from './types';
 
-export const createInvestigateServiceDetailWidget =
-  createWidgetFactory<InvestigateServiceDetailWidgetParameters>(APM_SERVICE_DETAIL_WIDGET_NAME);
+export const createInvestigateServiceInventoryWidget =
+  createWidgetFactory<InvestigateServiceInventoryWidgetParameters>(
+    APM_SERVICE_INVENTORY_WIDGET_NAME
+  );

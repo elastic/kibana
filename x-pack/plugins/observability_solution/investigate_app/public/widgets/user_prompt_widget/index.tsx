@@ -11,7 +11,7 @@ import { USER_PROMPT_WIDGET_NAME } from '../../constants';
 import { RegisterWidgetOptions } from '../register_widgets';
 
 export function registerUserPromptWidget(options: RegisterWidgetOptions) {
-  options.dependencies.setup.investigate.registerWidget(
+  options.registerWidget(
     {
       type: USER_PROMPT_WIDGET_NAME,
       description: '',

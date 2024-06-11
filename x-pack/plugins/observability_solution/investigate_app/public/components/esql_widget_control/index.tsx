@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { GlobalWidgetParameters, OnWidgetAdd } from '@kbn/investigate-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EsqlWidgetPreview } from './esql_widget_preview';
 
 const editorContainerClassName = css`
@@ -40,21 +41,48 @@ export function EsqlWidgetControl({
 
   const [submittedEsqlQuery, setSubmittedEsqlQuery] = useState(esqlQuery);
 
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EsqlWidgetPreview
-          filters={filters}
-          esqlQuery={submittedEsqlQuery}
-          timeRange={timeRange}
-          query={query}
-          onWidgetAdd={onWidgetAdd}
-        />
+        <EuiPanel hasBorder hasShadow={false}>
+          <EuiAccordion
+            id="esql_widget_preview"
+            forceState={isPreviewOpen ? 'open' : 'closed'}
+            onToggle={(nextIsOpen) => {
+              setIsPreviewOpen(nextIsOpen);
+            }}
+            buttonContent={
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.investigateApp.esqlWidgetControl.previewResultsLabel', {
+                    defaultMessage: 'Preview results',
+                  })}
+                </h2>
+              </EuiTitle>
+            }
+          >
+            <EsqlWidgetPreview
+              filters={filters}
+              esqlQuery={submittedEsqlQuery}
+              timeRange={timeRange}
+              query={query}
+              onWidgetAdd={(widget) => {
+                setIsPreviewOpen(false);
+                return onWidgetAdd(widget);
+              }}
+            />
+          </EuiAccordion>
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className={editorContainerClassName}>
         <TextBasedLangEditor
           query={{ esql: esqlQuery }}
-          onTextLangQueryChange={(nextQuery) => setEsqlQuery(nextQuery.esql)}
+          onTextLangQueryChange={(nextQuery) => {
+            setIsPreviewOpen(true);
+            setEsqlQuery(nextQuery.esql);
+          }}
           onTextLangQuerySubmit={async (nextSubmittedQuery) => {
             setSubmittedEsqlQuery(nextSubmittedQuery?.esql ?? '');
           }}

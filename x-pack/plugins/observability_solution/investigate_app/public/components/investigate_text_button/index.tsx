@@ -19,7 +19,12 @@ const buttonClassName = css`
   &:disabled {
     color: inherit;
   }
-  padding-inline: 4px;
+`;
+
+const buttonOnlyClassName = css`
+  .euiButtonEmpty__content {
+    gap: 0;
+  }
 `;
 
 interface InvestigateTextButtonProps {
@@ -31,6 +36,7 @@ interface InvestigateTextButtonProps {
   children?: string;
   className?: string;
   type?: 'submit' | 'reset' | 'button';
+  color?: React.ComponentProps<typeof EuiButtonEmpty>['color'];
 }
 
 export function InvestigateTextButton({
@@ -42,24 +48,23 @@ export function InvestigateTextButton({
   onMouseLeave,
   className,
   type,
+  color = 'text',
 }: InvestigateTextButtonProps) {
-  return (
-    <EuiButtonEmpty
-      size="s"
-      iconSize="s"
-      color="text"
-      data-test-subj="investigateTextButton"
-      iconType={iconType}
-      disabled={disabled}
-      className={classNames(buttonClassName, className)}
-      onClick={() => {
-        onClick();
-      }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      type={type}
-    >
-      {children && <EuiText size="xs">{children}</EuiText>}
-    </EuiButtonEmpty>
-  );
+  const props = {
+    size: 's' as const,
+    iconSize: 's' as const,
+    iconType,
+    color,
+    disabled,
+    className: classNames(buttonClassName, className, {
+      [buttonOnlyClassName]: !children,
+    }),
+    onClick,
+    onMouseEnter,
+    onMouseLeave,
+    type,
+    children: children ? <EuiText size="xs">{children}</EuiText> : undefined,
+  };
+
+  return <EuiButtonEmpty data-test-subj="investigateTextButton" {...props} />;
 }
