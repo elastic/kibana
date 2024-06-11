@@ -16,17 +16,24 @@ import type { ScanActionRequestBody } from '../../../../common/api/endpoint';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { SCAN_ROUTE } from '../../../../common/endpoint/constants';
 
+export type ScanRequestCustomOptions = UseMutationOptions<
+  ResponseActionApiResponse,
+  IHttpFetchError,
+  ScanActionRequestBody
+>;
+
+export type UseSendScanRequestResult = UseMutationResult<
+  ResponseActionApiResponse,
+  IHttpFetchError,
+  ScanActionRequestBody
+>;
 /**
  * Create scan request
  * @param customOptions
  */
 export const useSendScanRequest = (
-  customOptions?: UseMutationOptions<
-    ResponseActionApiResponse,
-    IHttpFetchError,
-    ScanActionRequestBody
-  >
-): UseMutationResult<ResponseActionApiResponse, IHttpFetchError, ScanActionRequestBody> => {
+  customOptions?: ScanRequestCustomOptions
+): UseSendScanRequestResult => {
   return useMutation<ResponseActionApiResponse, IHttpFetchError, ScanActionRequestBody>(
     (reqBody) => {
       return KibanaServices.get().http.post<ResponseActionApiResponse>(SCAN_ROUTE, {
