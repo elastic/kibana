@@ -67,14 +67,14 @@ describe('step select agent policy', () => {
   let renderResult: ReturnType<typeof testRenderer.render>;
   const mockSetHasAgentPolicyError = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
-  const render = (packageInfo?: PackageInfo) =>
+  const render = (packageInfo?: PackageInfo, selectedAgentPolicyId?: string) =>
     (renderResult = testRenderer.render(
       <StepSelectAgentPolicy
-        packageInfo={packageInfo ?? ({ name: 'apache' } as any)}
+        packageInfo={packageInfo || ({ name: 'apache' } as any)}
         agentPolicies={[]}
         updateAgentPolicies={updateAgentPoliciesMock}
         setHasAgentPolicyError={mockSetHasAgentPolicyError}
-        selectedAgentPolicyId={undefined}
+        selectedAgentPolicyId={selectedAgentPolicyId}
       />
     ));
 
@@ -139,6 +139,54 @@ describe('step select agent policy', () => {
         isLoading: false,
         resendRequest: jest.fn(),
       } as any);
+    });
+
+    test('should select agent policy by default if one exists', async () => {
+      useGetAgentPoliciesMock.mockReturnValueOnce({
+        data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
+        error: undefined,
+        isLoading: false,
+        resendRequest: jest.fn(),
+      } as any);
+
+      render();
+      await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
+      await act(async () => {
+        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
+      });
+    });
+
+    test('should not select agent policy by default if multiple exists', async () => {
+      useGetAgentPoliciesMock.mockReturnValue({
+        data: {
+          items: [
+            { id: 'policy-1', name: 'Policy 1' },
+            { id: 'policy-2', name: 'Policy 2' },
+          ],
+        },
+        error: undefined,
+        isLoading: false,
+        resendRequest: jest.fn(),
+      } as any);
+
+      render();
+
+      await act(async () => {
+        const select = renderResult.container.querySelector(
+          '[data-test-subj="agentPolicyMultiSelect"]'
+        );
+        expect((select as any)?.value).toEqual(undefined);
+
+        expect(renderResult.getByText('An agent policy is required.')).toBeVisible();
+      });
+    });
+
+    test('should select agent policy if pre selected', async () => {
+      render(undefined, 'policy-1');
+      await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
+      await act(async () => {
+        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
+      });
     });
 
     test('should select multiple agent policies', async () => {

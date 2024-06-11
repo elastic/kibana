@@ -226,29 +226,21 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
+  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  // enableReusableIntegrationPolicies = false;
+
   const {
     isLoading,
     agentPoliciesError,
     agentPolicyOptions,
-    agentPolicies: existingAgentPolicies,
     agentPolicyMultiOptions,
+    agentPolicies: existingAgentPolicies,
   } = useAgentPoliciesOptions(packageInfo);
-  // Selected agent policy state
-  const agentPolicyIds = agentPolicies.map((policy) => policy.id);
-  const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>(
-    agentPolicyIds.length > 0
-      ? agentPolicyIds
-      : selectedAgentPolicyId
-      ? [selectedAgentPolicyId]
-      : existingAgentPolicies.length === 1
-      ? [existingAgentPolicies[0].id]
-      : []
-  );
+
+  const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>([]);
 
   const [isLoadingSelectedAgentPolicy, setIsLoadingSelectedAgentPolicy] = useState<boolean>(false);
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<AgentPolicy[]>(agentPolicies);
-
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
 
   const updateAgentPolicies = useCallback(
     (selectedPolicies: AgentPolicy[]) => {
@@ -292,14 +284,34 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     if (
       selectedPolicyIds.length === 0 &&
       existingAgentPolicies.length &&
-      agentPolicyOptions.length
+      (enableReusableIntegrationPolicies
+        ? agentPolicyMultiOptions.length
+        : agentPolicyOptions.length)
     ) {
-      const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
-      if (enabledOptions.length === 1) {
-        setSelectedPolicyIds([enabledOptions[0].value]);
+      if (enableReusableIntegrationPolicies) {
+        const enabledOptions = agentPolicyMultiOptions.filter((option) => !option.disabled);
+        if (enabledOptions.length === 1) {
+          setSelectedPolicyIds([enabledOptions[0].key!]);
+        } else if (selectedAgentPolicyId) {
+          setSelectedPolicyIds([selectedAgentPolicyId]);
+        }
+      } else {
+        const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
+        if (enabledOptions.length === 1) {
+          setSelectedPolicyIds([enabledOptions[0].value]);
+        } else if (selectedAgentPolicyId) {
+          setSelectedPolicyIds([selectedAgentPolicyId]);
+        }
       }
     }
-  }, [existingAgentPolicies, agentPolicyOptions, selectedPolicyIds]);
+  }, [
+    agentPolicyOptions,
+    agentPolicyMultiOptions,
+    enableReusableIntegrationPolicies,
+    selectedAgentPolicyId,
+    selectedPolicyIds,
+    existingAgentPolicies,
+  ]);
 
   // Bubble up any issues with agent policy selection
   useEffect(() => {

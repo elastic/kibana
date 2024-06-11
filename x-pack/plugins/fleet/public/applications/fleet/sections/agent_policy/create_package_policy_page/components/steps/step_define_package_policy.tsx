@@ -283,6 +283,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       }
                     >
                       <EuiComboBox
+                        data-test-subj="packagePolicyNamespaceInput"
                         noSuggestions
                         placeholder={agentPolicies?.[0]?.namespace}
                         isDisabled={isEditPage && packageInfo.type === 'input'}
