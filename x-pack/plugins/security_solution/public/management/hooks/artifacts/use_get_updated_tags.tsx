@@ -13,6 +13,8 @@ type TagFiltersType = {
   [tagCategory in string]: TagFilter;
 };
 
+type GetTagsUpdatedBy<TagFilters> = (tagsToUpdate: keyof TagFilters, newTags: string[]) => string[];
+
 /**
  * A hook to be used to generate a new `tags` array that contains multiple 'categories' of tags,
  * e.g. policy assignment, some special settings, in a desired order.
@@ -43,9 +45,11 @@ type TagFiltersType = {
 export const useGetUpdatedTags = <TagFilters extends TagFiltersType>(
   exception: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
   filters: TagFilters
-) => {
-  const getTagsUpdatedBy = useCallback(
-    (tagsToUpdate: keyof TagFilters, newTags: string[]): string[] => {
+): {
+  getTagsUpdatedBy: GetTagsUpdatedBy<TagFilters>;
+} => {
+  const getTagsUpdatedBy: GetTagsUpdatedBy<TagFilters> = useCallback(
+    (tagsToUpdate, newTags) => {
       const tagCategories = Object.keys(filters);
 
       const arrayOfTagArrays: string[][] = tagCategories.map((category) => {
