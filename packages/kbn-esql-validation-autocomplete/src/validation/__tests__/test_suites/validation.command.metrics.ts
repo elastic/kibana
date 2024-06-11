@@ -107,6 +107,7 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors(`metrics a_index sum(case(false, 0, 1))`, []);
             await expectErrors(`metrics a_index var0 = sum( case(false, 0, 1))`, []);
             await expectErrors('metrics a_index count(stringField == "a" or null)', []);
+            await expectErrors('metrics other_index max(numberField) by stringField', []);
           });
 
           test('syntax errors', async () => {
