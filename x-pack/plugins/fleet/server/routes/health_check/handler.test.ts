@@ -82,12 +82,14 @@ describe('Fleet server health_check handler', () => {
       host_id: 'default-fleet-server',
       name: 'Default',
     };
+
     jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,
       host_urls: ['https://localhost:8220'],
     } as any);
+
     mockedFetch.mockResolvedValueOnce({
       json: () => activeRes,
       status: 200,
@@ -130,14 +132,14 @@ describe('Fleet server health_check handler', () => {
     });
   });
 
-  it('should return status: offline when fetch request gets aborted', async () => {
+  it('should return status `offline` when fetch request gets aborted', async () => {
     jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
       id: 'default-fleet-server',
       name: 'Default',
       is_default: true,
       host_urls: ['https://localhost:8220'],
     } as any);
-    mockedFetch.mockRejectedValue({ message: 'user aborted' });
+    mockedFetch.mockRejectedValue({ message: 'user aborted', name: 'AbortError' });
 
     const res = await postHealthCheckHandler(
       mockContext,
@@ -147,7 +149,6 @@ describe('Fleet server health_check handler', () => {
 
     expect(res).toEqual({
       body: {
-        // host: 'https://localhost:8220',
         host_id: 'default-fleet-server',
         status: 'OFFLINE',
       },

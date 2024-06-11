@@ -102,7 +102,7 @@ export const postHealthCheckHandler: FleetRequestHandler<
     }
 
     // when the request is aborted, return offline status
-    if (error.message.includes('user aborted')) {
+    if (error.name === 'AbortError' || error.message.includes('user aborted')) {
       return response.ok({
         body: { status: `OFFLINE`, host_id: request.body.id },
       });
