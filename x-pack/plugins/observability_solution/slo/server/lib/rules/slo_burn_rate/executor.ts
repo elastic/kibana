@@ -125,10 +125,13 @@ export const getRuleExecutor = ({
         } = result;
 
         const instances = instanceId.split(',');
-        const groups = [slo.groupBy].flat().reduce((resultGroups: any, groupByItem, index) => {
-          resultGroups.push({ field: groupByItem, value: instances[index].trim() });
-          return resultGroups;
-        }, []);
+        const groups =
+          instanceId !== ALL_VALUE
+            ? [slo.groupBy].flat().reduce((resultGroups: any, groupByItem, index) => {
+                resultGroups.push({ field: groupByItem, value: instances[index].trim() });
+                return resultGroups;
+              }, [])
+            : undefined;
 
         const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
         const viewInAppUrl = addSpaceIdToPath(
