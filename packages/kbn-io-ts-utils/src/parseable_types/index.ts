@@ -19,6 +19,7 @@ export type ParseableType =
   | t.PartialType<t.Props>
   | t.UnionType<t.Mixed[]>
   | t.IntersectionType<t.Mixed[]>
+  | t.LiteralType<string | boolean | number>
   | MergeType<t.Mixed, t.Mixed>;
 
 const parseableTags = [
@@ -32,6 +33,7 @@ const parseableTags = [
   'UnionType',
   'IntersectionType',
   'MergeType',
+  'LiteralType',
 ];
 
 export const isParsableType = (type: t.Type<any> | ParseableType): type is ParseableType => {

@@ -54,11 +54,104 @@ describe('toJsonSchema', () => {
     ).toEqual({
       type: 'object',
       additionalProperties: {
-        allOf: [
-          { type: 'object', properties: { foo: { type: 'string' } }, required: ['foo'] },
-          { type: 'object', properties: { bar: { type: 'array', items: { type: 'boolean' } } } },
-        ],
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string',
+          },
+          bar: {
+            type: 'array',
+            items: {
+              type: 'boolean',
+            },
+          },
+        },
+        required: ['foo'],
       },
+    });
+  });
+
+  it('converts literal types', () => {
+    expect(
+      toJsonSchema(
+        t.type({
+          myEnum: t.union([t.literal(true), t.literal(0), t.literal('foo')]),
+        })
+      )
+    ).toEqual({
+      type: 'object',
+      properties: {
+        myEnum: {
+          anyOf: [
+            {
+              type: 'boolean',
+              const: true,
+            },
+            {
+              type: 'number',
+              const: 0,
+            },
+            {
+              type: 'string',
+              const: 'foo',
+            },
+          ],
+        },
+      },
+      required: ['myEnum'],
+    });
+  });
+
+  it('merges schemas where possible', () => {
+    expect(
+      toJsonSchema(
+        t.intersection([
+          t.type({
+            myEnum: t.union([t.literal('foo'), t.literal('bar')]),
+          }),
+          t.type({
+            requiredProperty: t.string,
+            anotherRequiredProperty: t.string,
+          }),
+          t.partial({
+            optionalProperty: t.string,
+          }),
+          t.type({
+            mixedProperty: t.string,
+          }),
+          t.type({
+            mixedProperty: t.number,
+          }),
+        ])
+      )
+    ).toEqual({
+      type: 'object',
+      properties: {
+        myEnum: {
+          type: 'string',
+          enum: ['foo', 'bar'],
+        },
+        optionalProperty: {
+          type: 'string',
+        },
+        requiredProperty: {
+          type: 'string',
+        },
+        anotherRequiredProperty: {
+          type: 'string',
+        },
+        mixedProperty: {
+          anyOf: [
+            {
+              type: 'string',
+            },
+            {
+              type: 'number',
+            },
+          ],
+        },
+      },
+      required: ['myEnum', 'requiredProperty', 'anotherRequiredProperty', 'mixedProperty'],
     });
   });
 });
