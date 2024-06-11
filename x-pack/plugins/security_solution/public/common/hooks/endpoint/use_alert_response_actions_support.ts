@@ -28,7 +28,8 @@ export const ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD = (
   return i18n.translate(
     'xpack.securitySolution.useAlertResponseActionsSupport.missingAgentIdField',
     {
-      defaultMessage: 'Alert event data missing {agentTypeName} agent identifier ({missingField})',
+      defaultMessage:
+        'Alert event data missing {agentTypeName} agent identifier field ({missingField})',
       values: {
         missingField,
         agentTypeName,
