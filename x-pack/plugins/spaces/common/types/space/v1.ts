@@ -62,7 +62,7 @@ export interface Space {
   /**
    * Solution selected for this space.
    */
-  solution?: 'security' | 'observability' | 'search' | 'classic';
+  solution?: 'security' | 'oblt' | 'es' | 'classic';
 }
 
 /**

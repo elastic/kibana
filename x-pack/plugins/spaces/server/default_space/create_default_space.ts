@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger, SavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -14,9 +15,10 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 interface Deps {
   getSavedObjects: () => Promise<Pick<SavedObjectsServiceStart, 'createInternalRepository'>>;
   logger: Logger;
+  solution?: Pick<CloudSetup['onboarding'], 'defaultSolution'>;
 }
 
-export async function createDefaultSpace({ getSavedObjects, logger }: Deps) {
+export async function createDefaultSpace({ getSavedObjects, logger, solution }: Deps) {
   const { createInternalRepository } = await getSavedObjects();
 
   const savedObjectsRepository = createInternalRepository(['space']);
@@ -48,6 +50,7 @@ export async function createDefaultSpace({ getSavedObjects, logger }: Deps) {
         color: '#00bfb3',
         disabledFeatures: [],
         _reserved: true,
+        ...(solution ? { solution } : {}),
       },
       options
     );
