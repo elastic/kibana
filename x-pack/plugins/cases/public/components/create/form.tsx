@@ -48,6 +48,7 @@ import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from '../case_form_fields/category';
 import { CustomFields } from './custom_fields';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
   big
@@ -76,7 +77,6 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
-const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ connectors, isLoadingConnectors, withSteps, draftStorageKey }) => {
     const { owner } = useCasesContext();
@@ -212,6 +212,9 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     initialValue,
   }) => {
     const { owner } = useCasesContext();
+    const { data: connectors = [], isLoading: isLoadingConnectors } =
+      useGetSupportedActionConnectors();
+
     const draftStorageKey = getMarkdownEditorStorageKey({
       appId: owner[0],
       caseId: 'createCase',
@@ -242,8 +245,8 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
           initialValue={initialValue}
         >
           <CreateCaseFormFields
-            connectors={empty}
-            isLoadingConnectors={false}
+            connectors={connectors}
+            isLoadingConnectors={isLoadingConnectors}
             withSteps={withSteps}
             draftStorageKey={draftStorageKey}
           />

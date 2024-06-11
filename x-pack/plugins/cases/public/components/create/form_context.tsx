@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import { CaseSeverity } from '../../../common/types/domain';
@@ -64,8 +64,7 @@ export const FormContext: React.FC<Props> = ({
   attachments,
   initialValue,
 }) => {
-  const { data: connectors = [], isLoading: isLoadingConnectors } =
-    useGetSupportedActionConnectors();
+  const { data: connectors = [] } = useGetSupportedActionConnectors();
   const { data: allConfigurations } = useGetAllCaseConfigurations();
   const { owner } = useCasesContext();
   const { appId } = useApplication();
@@ -222,18 +221,6 @@ export const FormContext: React.FC<Props> = ({
     deserializer: getConnectorsFormDeserializer,
   });
 
-  const childrenWithExtraProp = useMemo(
-    () =>
-      children != null
-        ? React.Children.map(children, (child: React.ReactElement) =>
-            React.cloneElement(child, {
-              connectors,
-              isLoadingConnectors,
-            })
-          )
-        : null,
-    [children, connectors, isLoadingConnectors]
-  );
   return (
     <Form
       onKeyDown={(e: KeyboardEvent) => {
@@ -245,7 +232,7 @@ export const FormContext: React.FC<Props> = ({
       }}
       form={form}
     >
-      {childrenWithExtraProp}
+      {children}
     </Form>
   );
 };
