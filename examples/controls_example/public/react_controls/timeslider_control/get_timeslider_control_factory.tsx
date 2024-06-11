@@ -81,7 +81,7 @@ export const getTimesliderControlFactory = (
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
         timeslice$.next(timeslice);
       }
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(undefined);
+      const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       function setIsAnchored(isAnchored: boolean | undefined) {
         isAnchored$.next(isAnchored);
       }

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { StateComparators } from '@kbn/presentation-publishing';
 import { debounce } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { TimeRangeMeta } from './get_time_range_meta';
@@ -70,6 +71,11 @@ export function initTimeRangePercentage(
           debouncedOnReset();
         },
       ],
-    },
+    } as StateComparators<
+      Pick<
+        TimesliderControlState,
+        'timesliceStartAsPercentageOfTimeRange' | 'timesliceEndAsPercentageOfTimeRange'
+      >
+    >,
   };
 }
