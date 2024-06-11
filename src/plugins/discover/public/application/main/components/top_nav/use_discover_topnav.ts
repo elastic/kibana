@@ -8,7 +8,6 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -49,10 +48,9 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const getTopNavMenuAccessor = useProfileAccessor('getTopNavItems');
-  const topNavMenu = useMemo(() => {
-    const getTopNavMenu = getTopNavMenuAccessor(() => {
-      return getTopNavLinks({
+  const topNavMenu = useMemo(
+    () =>
+      getTopNavLinks({
         dataView,
         services,
         state: stateContainer,
@@ -60,20 +58,17 @@ export const useDiscoverTopNav = ({
         isEsqlMode,
         adHocDataViews,
         topNavCustomization,
-      });
-    });
-
-    return getTopNavMenu();
-  }, [
-    adHocDataViews,
-    dataView,
-    getTopNavMenuAccessor,
-    isEsqlMode,
-    onOpenInspector,
-    services,
-    stateContainer,
-    topNavCustomization,
-  ]);
+      }),
+    [
+      adHocDataViews,
+      dataView,
+      isEsqlMode,
+      onOpenInspector,
+      services,
+      stateContainer,
+      topNavCustomization,
+    ]
+  );
 
   return {
     topNavMenu,

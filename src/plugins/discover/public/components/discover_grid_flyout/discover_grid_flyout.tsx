@@ -33,12 +33,10 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
-import { useProfileAccessor } from '../../context_awareness';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -163,20 +161,6 @@ export function DiscoverGridFlyout({
     [onRemoveColumn, services.toastNotifications]
   );
 
-  const getDocViewsRegistryAccessor = useProfileAccessor('getDocViewsRegistry', {
-    record: actualHit,
-  });
-
-  const docViewsRegistry = useMemo(() => {
-    const getDocViewsRegistry = getDocViewsRegistryAccessor((registry) =>
-      typeof flyoutCustomization?.docViewsRegistry === 'function'
-        ? flyoutCustomization.docViewsRegistry(registry)
-        : registry
-    );
-
-    return (registry: DocViewsRegistry) => getDocViewsRegistry(registry);
-  }, [flyoutCustomization, getDocViewsRegistryAccessor]);
-
   const renderDefaultContent = useCallback(
     () => (
       <UnifiedDocViewer
@@ -188,20 +172,20 @@ export function DiscoverGridFlyout({
         onAddColumn={addColumn}
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
-        docViewsRegistry={docViewsRegistry}
+        docViewsRegistry={flyoutCustomization?.docViewsRegistry}
       />
     ),
     [
+      actualHit,
+      addColumn,
       columns,
       columnsMeta,
       dataView,
-      onFilter,
-      actualHit,
-      addColumn,
-      removeColumn,
-      isEsqlQuery,
       hits,
-      docViewsRegistry,
+      isEsqlQuery,
+      onFilter,
+      removeColumn,
+      flyoutCustomization?.docViewsRegistry,
     ]
   );
 
