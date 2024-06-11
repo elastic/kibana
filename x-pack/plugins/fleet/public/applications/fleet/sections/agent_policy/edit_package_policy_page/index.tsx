@@ -329,7 +329,7 @@ export const EditPackagePolicyForm = memo<{
           )}
 
           {extensionView &&
-            packagePolicy.policy_id &&
+            packagePolicy.policy_ids[0] &&
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
