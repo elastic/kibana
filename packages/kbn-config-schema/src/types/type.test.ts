@@ -104,11 +104,11 @@ describe('transform', () => {
   });
   it('only runs the last provided transform function', () => {
     const transform1 = jest.fn((v) => Number(v));
-    const transform2 = jest.fn((v) => Boolean(v));
-    const transform3 = jest.fn((v) => String(v));
+    const transform2 = jest.fn((v) => String(v));
+    const transform3 = jest.fn((v) => Boolean(v));
     // Explicitly define the type to catch type errors, we should reflect the type
     // of the last provided transform function
-    const stringSchema: Type<string, string> = schema
+    const stringSchema: Type<string, boolean> = schema
       .string()
       .transform(transform1)
       .transform(transform2)
@@ -119,7 +119,7 @@ describe('transform', () => {
     expect(transform2).not.toHaveBeenCalled();
     expect(transform3).toHaveBeenCalledTimes(1);
     expect(transform3).toHaveBeenCalledWith('foo');
-    expect(result).toBe('foo');
+    expect(result).toBe(true);
   });
 
   it('loses some type specific options/methods, but preserves generics', () => {
