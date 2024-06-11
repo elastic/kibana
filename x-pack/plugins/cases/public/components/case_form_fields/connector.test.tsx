@@ -20,7 +20,7 @@ import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_ty
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
-import type { FormProps } from '../create/schema';
+import type { CreateCaseFormSchema } from '../create/schema';
 import { schema } from '../create/schema';
 import type { AppMockRenderer } from '../../common/mock';
 import {
@@ -67,7 +67,7 @@ describe('Connector', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<FormProps>({
+    const { form } = useForm<CreateCaseFormSchema>({
       defaultValue: { connectorId: connectorsMock[0].id, fields: null },
       schema: {
         connectorId: schema.connectorId,

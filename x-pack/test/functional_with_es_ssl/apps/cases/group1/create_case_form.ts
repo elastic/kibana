@@ -150,7 +150,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.openCreateCasePage();
 
         // verify custom fields on create case page
-        await testSubjects.existOrFail('create-case-custom-fields');
+        await testSubjects.existOrFail('caseCustomFields');
 
         await cases.create.setTitle(caseTitle);
         await cases.create.setDescription('this is a test description');
@@ -207,7 +207,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.openCreateCasePage();
 
         // verify custom fields on create case page
-        await testSubjects.existOrFail('create-case-custom-fields');
+        await testSubjects.existOrFail('caseCustomFields');
 
         await cases.create.setTitle(caseTitle);
         await cases.create.setDescription('this is a test description');

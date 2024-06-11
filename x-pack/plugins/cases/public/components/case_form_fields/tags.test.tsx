@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Tags } from './tags';
-import type { FormProps } from '../create/schema';
+import type { CreateCaseFormSchema } from '../create/schema';
 import { schema } from '../create/schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
@@ -30,7 +30,7 @@ describe('Tags', () => {
   let appMockRender: AppMockRenderer;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<FormProps>({
+    const { form } = useForm<CreateCaseFormSchema>({
       defaultValue: { tags: [] },
       schema: {
         tags: schema.tags,

@@ -107,7 +107,8 @@ const defaultPostCase = {
 };
 
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
-  isLoadingConnectors: false,
+  configurations: useGetAllCaseConfigurationsResponse.data,
+  isLoading: false,
   connectors: [],
   withSteps: true,
   draftStorageKey: 'cases.kibana.createCase.description.markdownEditor',
@@ -446,27 +447,29 @@ describe('Create case', () => {
     });
 
     it('should submit form with custom fields', async () => {
+      const configurations = [
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          customFields: [
+            ...customFieldsConfigurationMock,
+            {
+              key: 'my_custom_field_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'my custom field label',
+              required: false,
+            },
+          ],
+        },
+      ];
+
       useGetAllCaseConfigurationsMock.mockImplementation(() => ({
         ...useGetAllCaseConfigurationsResponse,
-        data: [
-          {
-            ...useGetAllCaseConfigurationsResponse.data[0],
-            customFields: [
-              ...customFieldsConfigurationMock,
-              {
-                key: 'my_custom_field_key',
-                type: CustomFieldTypes.TEXT,
-                label: 'my custom field label',
-                required: false,
-              },
-            ],
-          },
-        ],
+        data: configurations,
       }));
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} configurations={configurations} />
           <SubmitCaseButton />
         </FormContext>
       );
@@ -477,7 +480,7 @@ describe('Create case', () => {
       const textField = customFieldsConfigurationMock[0];
       const toggleField = customFieldsConfigurationMock[1];
 
-      expect(await screen.findByTestId('create-case-custom-fields')).toBeInTheDocument();
+      expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
 
       const textCustomField = await screen.findByTestId(
         `${textField.key}-${textField.type}-create-custom-field`
@@ -534,30 +537,32 @@ describe('Create case', () => {
         required: false,
       };
 
+      const configurations = [
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          owner: 'securitySolution',
+          customFields: [securityCustomField],
+        },
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          owner: 'observability',
+          customFields: [o11yCustomField],
+        },
+        {
+          ...useGetAllCaseConfigurationsResponse.data[0],
+          owner: 'cases',
+          customFields: [stackCustomField],
+        },
+      ];
+
       useGetAllCaseConfigurationsMock.mockImplementation(() => ({
         ...useGetAllCaseConfigurationsResponse,
-        data: [
-          {
-            ...useGetAllCaseConfigurationsResponse.data[0],
-            owner: 'securitySolution',
-            customFields: [securityCustomField],
-          },
-          {
-            ...useGetAllCaseConfigurationsResponse.data[0],
-            owner: 'observability',
-            customFields: [o11yCustomField],
-          },
-          {
-            ...useGetAllCaseConfigurationsResponse.data[0],
-            owner: 'cases',
-            customFields: [stackCustomField],
-          },
-        ],
+        data: configurations,
       }));
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} configurations={configurations} />
           <SubmitCaseButton />
         </FormContext>
       );
@@ -565,7 +570,7 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      const createCaseCustomFields = await screen.findByTestId('create-case-custom-fields');
+      const createCaseCustomFields = await screen.findByTestId('caseCustomFields');
 
       // the default selectedOwner is securitySolution
       // only the security custom field should be displayed
@@ -627,32 +632,24 @@ describe('Create case', () => {
     });
 
     it('should select the default connector set in the configuration', async () => {
+      const configuration = {
+        ...useCaseConfigureResponse.data,
+        connector: {
+          id: 'servicenow-1',
+          name: 'SN',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+      };
+
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        data: {
-          ...useCaseConfigureResponse.data,
-          connector: {
-            id: 'servicenow-1',
-            name: 'SN',
-            type: ConnectorTypes.serviceNowITSM,
-            fields: null,
-          },
-        },
+        data: configuration,
       }));
 
       useGetAllCaseConfigurationsMock.mockImplementation(() => ({
         ...useGetAllCaseConfigurationsResponse,
-        data: [
-          {
-            ...useGetAllCaseConfigurationsResponse.data,
-            connector: {
-              id: 'servicenow-1',
-              name: 'SN',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-          },
-        ],
+        data: [configuration],
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -662,7 +659,11 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <CreateCaseFormFields
+            {...defaultCreateCaseForm}
+            configurations={[configuration]}
+            connectors={connectorsMock}
+          />
           <SubmitCaseButton />
         </FormContext>
       );
@@ -694,32 +695,24 @@ describe('Create case', () => {
     });
 
     it('should default to none if the default connector does not exist in connectors', async () => {
+      const configuration = {
+        ...useCaseConfigureResponse.data,
+        connector: {
+          id: 'not-exist',
+          name: 'SN',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+      };
+
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        data: {
-          ...useCaseConfigureResponse.data,
-          connector: {
-            id: 'not-exist',
-            name: 'SN',
-            type: ConnectorTypes.serviceNowITSM,
-            fields: null,
-          },
-        },
+        data: configuration,
       }));
 
       useGetAllCaseConfigurationsMock.mockImplementation(() => ({
         ...useGetAllCaseConfigurationsResponse,
-        data: [
-          {
-            ...useGetAllCaseConfigurationsResponse.data,
-            connector: {
-              id: 'not-exist',
-              name: 'SN',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-          },
-        ],
+        data: [configuration],
       }));
 
       useGetConnectorsMock.mockReturnValue({
@@ -729,7 +722,11 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <CreateCaseFormFields
+            {...defaultCreateCaseForm}
+            configurations={[configuration]}
+            connectors={connectorsMock}
+          />
           <SubmitCaseButton />
         </FormContext>
       );
@@ -789,7 +786,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
           <SubmitCaseButton />
         </FormContext>
       );
@@ -862,7 +859,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext onSuccess={onFormSubmitSuccess}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectors} />
           <SubmitCaseButton />
         </FormContext>
       );
@@ -915,7 +912,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
-        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
         <SubmitCaseButton />
       </FormContext>
     );
@@ -1048,7 +1045,7 @@ describe('Create case', () => {
         afterCaseCreated={afterCaseCreated}
         attachments={attachments}
       >
-        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
         <SubmitCaseButton />
       </FormContext>
     );

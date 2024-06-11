@@ -15,7 +15,7 @@ import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
-import type { FormProps } from './schema';
+import type { CreateCaseFormSchema } from './schema';
 import { schema } from './schema';
 import type { CreateCaseFormProps } from './form';
 import { CreateCaseForm } from './form';
@@ -37,7 +37,7 @@ const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 
-const initialCaseValue: FormProps = {
+const initialCaseValue: CreateCaseFormSchema = {
   description: '',
   tags: [],
   title: '',
@@ -62,7 +62,7 @@ describe('CreateCaseForm', () => {
       testProviderProps?: unknown;
     }>
   > = ({ children, testProviderProps = {} }) => {
-    const { form } = useForm<FormProps>({
+    const { form } = useForm<CreateCaseFormSchema>({
       defaultValue: initialCaseValue,
       options: { stripEmptyFields: false },
       schema,
@@ -237,7 +237,7 @@ describe('CreateCaseForm', () => {
       </MockHookWrapperComponent>
     );
 
-    expect(result.getByTestId('create-case-custom-fields')).toBeInTheDocument();
+    expect(result.getByTestId('caseCustomFields')).toBeInTheDocument();
 
     for (const item of customFieldsConfigurationMock) {
       expect(

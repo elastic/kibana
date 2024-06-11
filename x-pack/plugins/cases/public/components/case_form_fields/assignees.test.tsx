@@ -15,7 +15,6 @@ import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { Assignees } from './assignees';
-import type { FormProps } from '../create/schema';
 import { act, waitFor, screen } from '@testing-library/react';
 import * as api from '../../containers/user_profiles/api';
 import type { UserProfile } from '@kbn/user-profile-components';
@@ -29,7 +28,7 @@ describe('Assignees', () => {
   let appMockRender: AppMockRenderer;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<FormProps>();
+    const { form } = useForm();
     globalForm = form;
 
     return <Form form={form}>{children}</Form>;
