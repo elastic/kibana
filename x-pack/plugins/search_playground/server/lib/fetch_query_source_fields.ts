@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SearchResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  SearchResponse,
+  FieldCapsResponse,
+  IndicesGetMappingResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { IndicesQuerySourceFields } from '../types';
 
@@ -14,9 +18,16 @@ interface FieldModelId {
   modelId: string | undefined;
 }
 
+interface SemanticField {
+  field: string;
+  inferenceId: string;
+  embeddingType: 'sparse_vector' | 'dense_vector';
+}
+
 interface IndexFieldModel {
   index: string;
   fields: FieldModelId[];
+  semanticTextFields: SemanticField[];
 }
 
 export const getModelIdFields = (fieldCapsResponse: FieldCapsResponse) => {
@@ -63,7 +74,7 @@ export const fetchFields = async (
 
   const modelIdFields = getModelIdFields(fieldCapabilities);
 
-  const indicesAggs = await Promise.all(
+  const indicesAggsMappings = await Promise.all(
     indices.map(async (index) => ({
       index,
       doc: await client.asCurrentUser.search({
@@ -84,13 +95,18 @@ export const fetchFields = async (
           ),
         },
       }),
+      mapping: await client.asCurrentUser.indices.getMapping({ index }),
     }))
   );
 
-  return parseFieldsCapabilities(fieldCapabilities, indicesAggs);
+  return parseFieldsCapabilities(fieldCapabilities, indicesAggsMappings);
 };
 
 const INFERENCE_MODEL_FIELD_REGEXP = /\.predicted_value|\.tokens/;
+
+const getSemanticField = (field: string, semanticFields: SemanticField[]) => {
+  return semanticFields.find((sf) => sf.field === field);
+};
 
 const getModelField = (field: string, modelIdFields: FieldModelId[]) => {
   // For input_output inferred fields, the model_id is at the top level
@@ -129,12 +145,12 @@ const isFieldNested = (field: string, fieldCapsResponse: FieldCapsResponse) => {
 
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
-  aggDocs: Array<{ index: string; doc: SearchResponse }>
+  aggMappingDocs: Array<{ index: string; doc: SearchResponse; mapping: IndicesGetMappingResponse }>
 ): IndicesQuerySourceFields => {
   const { fields, indices: indexOrIndices } = fieldCapsResponse;
   const indices = Array.isArray(indexOrIndices) ? indexOrIndices : [indexOrIndices];
 
-  const indexModelIdFields = aggDocs.map<IndexFieldModel>((aggDoc) => {
+  const indexModelIdFields = aggMappingDocs.map<IndexFieldModel>((aggDoc) => {
     const modelIdFields = Object.keys(aggDoc.doc.aggregations || {}).map<FieldModelId>((field) => {
       return {
         field,
@@ -142,9 +158,30 @@ export const parseFieldsCapabilities = (
       };
     });
 
+    const mappingProperties = aggDoc.mapping[aggDoc.index].mappings.properties || {};
+
+    const semanticTextFields: SemanticField[] = Object.keys(mappingProperties || {})
+      .filter(
+        // @ts-ignore
+        (field) => mappingProperties[field].type === 'semantic_text'
+      )
+      .map((field) => {
+        return {
+          field,
+          // @ts-ignore
+          inferenceId: mappingProperties[field]?.inference_id,
+          embeddingType:
+            // @ts-ignore
+            mappingProperties[field].model_settings.task_type === 'sparse_embedding'
+              ? 'sparse_vector'
+              : 'dense_vector',
+        };
+      });
+
     return {
       index: aggDoc.index,
       fields: modelIdFields,
+      semanticTextFields,
     };
   });
 
@@ -155,6 +192,7 @@ export const parseFieldsCapabilities = (
       bm25_query_fields: [],
       source_fields: [],
       skipped_fields: 0,
+      semantic_fields: [],
     };
     return acc;
   }, {});
@@ -174,12 +212,34 @@ export const parseFieldsCapabilities = (
           : (indices as unknown as string[]);
 
       for (const index of indicesPresentIn) {
-        const modelIdFields = indexModelIdFields.find(
+        const { fields: modelIdFields, semanticTextFields } = indexModelIdFields.find(
           (indexModelIdField) => indexModelIdField.index === index
-        )!.fields;
+        )!;
+        const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
 
-        if ('rank_features' in field || 'sparse_vector' in field) {
-          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
+        if ('semantic_text' in field) {
+          const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
+
+          // only use this when embeddingType and inferenceId is defined
+          // this requires semantic_text field to be set up correctly and ingested
+          if (
+            semanticFieldMapping &&
+            semanticFieldMapping.embeddingType &&
+            semanticFieldMapping.inferenceId &&
+            !nestedField
+          ) {
+            const semanticField = {
+              field: fieldKey,
+              inferenceId: semanticFieldMapping.inferenceId,
+              embeddingType: semanticFieldMapping.embeddingType,
+            };
+
+            acc[index].semantic_fields.push(semanticField);
+            acc[index].source_fields.push(fieldKey);
+          } else {
+            acc[index].skipped_fields++;
+          }
+        } else if ('rank_features' in field || 'sparse_vector' in field) {
           const modelId = getModelField(fieldKey, modelIdFields);
 
           // Check if the sparse vector field has a model_id associated with it
@@ -189,7 +249,6 @@ export const parseFieldsCapabilities = (
             const elserModelField = {
               field: fieldKey,
               model_id: modelId,
-              nested: !!isFieldNested(fieldKey, fieldCapsResponse),
               indices: indicesPresentIn,
             };
             acc[index].elser_query_fields.push(elserModelField);
@@ -197,7 +256,6 @@ export const parseFieldsCapabilities = (
             acc[index].skipped_fields++;
           }
         } else if ('dense_vector' in field) {
-          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
           const modelId = getModelField(fieldKey, modelIdFields);
 
           // Check if the dense vector field has a model_id associated with it
@@ -207,7 +265,6 @@ export const parseFieldsCapabilities = (
             const denseVectorField = {
               field: fieldKey,
               model_id: modelId,
-              nested: !!nestedField,
               indices: indicesPresentIn,
             };
             acc[index].dense_vector_query_fields.push(denseVectorField);

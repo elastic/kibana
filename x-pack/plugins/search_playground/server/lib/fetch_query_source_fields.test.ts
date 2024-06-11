@@ -19,6 +19,8 @@ import {
   SPARSE_INPUT_OUTPUT_ONE_INDEX,
   SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS,
   SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS_MODEL_ID_KEYWORD,
+  SPARSE_SEMANTIC_FIELD_FIELD_CAPS,
+  SPARSE_SEMANTIC_FIELD_MAPPINGS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import {
   fetchFields,
@@ -34,10 +36,20 @@ describe('fetch_query_source_fields', () => {
           {
             index: 'workplace_index',
             doc: ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS[0],
+            mapping: {
+              workplace_index: {
+                mappings: {},
+              },
+            },
           },
           {
             index: 'workplace_index2',
             doc: ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS[1],
+            mapping: {
+              workplace_index2: {
+                mappings: {},
+              },
+            },
           },
         ])
       ).toEqual({
@@ -53,14 +65,15 @@ describe('fetch_query_source_fields', () => {
             {
               field: 'vector.tokens',
               model_id: '.elser_model_2',
-              nested: false,
               indices: ['workplace_index'],
             },
           ],
           skipped_fields: 8,
           source_fields: ['metadata.summary', 'metadata.rolePermissions', 'text', 'metadata.name'],
+          semantic_fields: [],
         },
         workplace_index2: {
+          semantic_fields: [],
           bm25_query_fields: [
             'metadata.summary',
             'content',
@@ -73,7 +86,6 @@ describe('fetch_query_source_fields', () => {
             {
               field: 'content_vector.tokens',
               model_id: '.elser_model_2',
-              nested: false,
               indices: ['workplace_index2'],
             },
           ],
@@ -93,10 +105,16 @@ describe('fetch_query_source_fields', () => {
           {
             index: 'search-example-main',
             doc: DENSE_PASSAGE_FIRST_SINGLE_INDEX_DOC,
+            mapping: {
+              'search-example-main': {
+                mappings: {},
+              },
+            },
           },
         ])
       ).toEqual({
         'search-example-main': {
+          semantic_fields: [],
           bm25_query_fields: [
             'page_content_key',
             'title',
@@ -116,7 +134,6 @@ describe('fetch_query_source_fields', () => {
             {
               field: 'page_content_e5_embbeding.predicted_value',
               model_id: '.multilingual-e5-small_linux-x86_64',
-              nested: false,
               indices: ['search-example-main'],
             },
           ],
@@ -147,18 +164,23 @@ describe('fetch_query_source_fields', () => {
           {
             index: 'search-nethys',
             doc: SPARSE_DOC_SINGLE_INDEX,
+            mapping: {
+              'search-nethys': {
+                mappings: {},
+              },
+            },
           },
         ])
       ).toEqual({
         'search-nethys': {
           bm25_query_fields: ['body_content', 'headings', 'title'],
           dense_vector_query_fields: [],
+          semantic_fields: [],
           elser_query_fields: [
             {
               field: 'ml.inference.body_content_expanded.predicted_value',
               indices: ['search-nethys'],
               model_id: '.elser_model_2_linux-x86_64',
-              nested: false,
             },
           ],
           source_fields: ['body_content', 'headings', 'title'],
@@ -174,6 +196,11 @@ describe('fetch_query_source_fields', () => {
           {
             index: 'workplace_index_nested',
             doc: DENSE_VECTOR_DOCUMENT_FIRST[0],
+            mapping: {
+              workplace_index_nested: {
+                mappings: {},
+              },
+            },
           },
         ])
       ).toEqual({
@@ -190,6 +217,7 @@ describe('fetch_query_source_fields', () => {
           ],
           dense_vector_query_fields: [],
           elser_query_fields: [],
+          semantic_fields: [],
           source_fields: [
             'metadata.category',
             'content',
@@ -211,6 +239,11 @@ describe('fetch_query_source_fields', () => {
           {
             index: 'index2',
             doc: DENSE_INPUT_OUTPUT_ONE_INDEX[0],
+            mapping: {
+              index2: {
+                mappings: {},
+              },
+            },
           },
         ])
       ).toEqual({
@@ -221,10 +254,10 @@ describe('fetch_query_source_fields', () => {
               field: 'text_embedding',
               indices: ['index2'],
               model_id: '.multilingual-e5-small',
-              nested: false,
             },
           ],
           elser_query_fields: [],
+          semantic_fields: [],
           source_fields: ['text'],
           skipped_fields: 2,
         },
@@ -237,6 +270,11 @@ describe('fetch_query_source_fields', () => {
           {
             index: 'index',
             doc: SPARSE_INPUT_OUTPUT_ONE_INDEX[0],
+            mapping: {
+              index: {
+                mappings: {},
+              },
+            },
           },
         ])
       ).toEqual({
@@ -247,13 +285,43 @@ describe('fetch_query_source_fields', () => {
               field: 'text_embedding',
               indices: ['index'],
               model_id: '.elser_model_2',
-              nested: false,
             },
           ],
           dense_vector_query_fields: [],
+          semantic_fields: [],
           source_fields: ['text'],
           skipped_fields: 2,
         },
+      });
+    });
+
+    describe('semantic text support', () => {
+      it('should return the correct fields for semantic text', () => {
+        expect(
+          parseFieldsCapabilities(SPARSE_SEMANTIC_FIELD_FIELD_CAPS, [
+            {
+              index: 'test-index2',
+              // unused
+              doc: SPARSE_INPUT_OUTPUT_ONE_INDEX[0],
+              mapping: SPARSE_SEMANTIC_FIELD_MAPPINGS,
+            },
+          ])
+        ).toEqual({
+          'test-index2': {
+            bm25_query_fields: ['non_infer_field'],
+            dense_vector_query_fields: [],
+            elser_query_fields: [],
+            semantic_fields: [
+              {
+                embeddingType: 'sparse_vector',
+                field: 'infer_field',
+                inferenceId: 'elser-endpoint',
+              },
+            ],
+            skipped_fields: 4,
+            source_fields: ['infer_field', 'non_infer_field'],
+          },
+        });
       });
     });
   });
@@ -294,6 +362,13 @@ describe('fetch_query_source_fields', () => {
         asCurrentUser: {
           fieldCaps: jest.fn().mockResolvedValue(DENSE_PASSAGE_FIRST_SINGLE_INDEX_FIELD_CAPS),
           search: jest.fn().mockResolvedValue(DENSE_PASSAGE_FIRST_SINGLE_INDEX_DOC),
+          indices: {
+            getMapping: jest.fn().mockResolvedValue({
+              'search-example-main': {
+                mappings: {},
+              },
+            }),
+          },
         },
       } as any;
       const indices = ['search-example-main'];
@@ -325,6 +400,13 @@ describe('fetch_query_source_fields', () => {
         asCurrentUser: {
           fieldCaps: jest.fn().mockResolvedValue(SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS),
           search: jest.fn().mockResolvedValue(SPARSE_INPUT_OUTPUT_ONE_INDEX),
+          indices: {
+            getMapping: jest.fn().mockResolvedValue({
+              index: {
+                mappings: {},
+              },
+            }),
+          },
         },
       } as any;
       const indices = ['index'];

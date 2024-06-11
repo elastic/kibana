@@ -5,7 +5,80 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetMappingResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+
+export const SPARSE_SEMANTIC_FIELD_FIELD_CAPS = {
+  indices: ['test-index2'],
+  fields: {
+    infer_field: {
+      semantic_text: {
+        type: 'semantic_text',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference.chunks.embeddings': {
+      sparse_vector: {
+        type: 'sparse_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    non_infer_field: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference.chunks.text': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference': {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'infer_field.inference.chunks': {
+      nested: {
+        type: 'nested',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+  },
+};
+
+export const SPARSE_SEMANTIC_FIELD_MAPPINGS = {
+  'test-index2': {
+    mappings: {
+      properties: {
+        infer_field: {
+          type: 'semantic_text',
+          inference_id: 'elser-endpoint',
+          model_settings: {
+            task_type: 'sparse_embedding',
+          },
+        },
+        non_infer_field: {
+          type: 'text',
+        },
+      },
+    },
+  },
+} as any as IndicesGetMappingResponse;
 
 export const ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS = [
   {
