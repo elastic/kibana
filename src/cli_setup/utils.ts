@@ -12,7 +12,7 @@ import { duration } from 'moment';
 import { merge } from 'lodash';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { ElasticsearchConfig, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema } from '@kbn/core-elasticsearch-server-internal';
 import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
@@ -39,12 +39,18 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
     createClient: (type, config) => {
       const defaults = configSchema.validate({});
       return new ClusterClient({
-        config: merge(new ElasticsearchConfig(defaults), config),
+        config: merge(
+          defaults,
+          {
+            hosts: Array.isArray(defaults.hosts) ? defaults.hosts : [defaults.hosts],
+          },
+          config
+        ),
         logger,
         type,
         // we use an independent AgentManager for cli_setup, no need to track performance of this one
         agentFactoryProvider: new AgentManager(logger.get('agent-manager'), {
-          dnsCacheTtlInSeconds: 0,
+          dnsCacheTtlInSeconds: config?.dnsCacheTtl?.asSeconds() ?? 0,
         }),
         kibanaVersion: kibanaPackageJson.version,
       });
