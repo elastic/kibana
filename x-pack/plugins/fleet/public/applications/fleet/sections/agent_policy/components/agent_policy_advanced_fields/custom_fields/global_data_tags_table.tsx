@@ -36,12 +36,15 @@ interface Props {
   globalDataTags: GlobalDataTag[];
 }
 
-function parseValue(value: string): string | number {
-  if (!value.match(/^[0-9]*$/)) {
+function parseValue(value: string | number): string | number {
+  if (typeof value === 'number') {
     return value;
   }
+  if (!value.match(/^[0-9]*$/)) {
+    return value.trim();
+  }
   const parsedValue = Number(value);
-  return isNaN(parsedValue) ? value : parsedValue;
+  return isNaN(parsedValue) ? value.trim() : parsedValue;
 }
 
 export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
@@ -133,7 +136,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
 
     const updatedTags = [
       ...globalDataTags,
-      { ...newTag, name: newTag.name.trim(), value: parseValue(newTag.value.toString().trim()) },
+      { ...newTag, name: newTag.name.trim(), value: parseValue(newTag.value) },
     ];
 
     updateAgentPolicy({ global_data_tags: updatedTags });
@@ -156,9 +159,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
       }
 
       const updatedTags = globalDataTags.map((t, i) =>
-        i === index
-          ? { ...tag, name: tag.name.trim(), value: parseValue(tag.value.toString().trim()) }
-          : t
+        i === index ? { ...tag, name: tag.name.trim(), value: parseValue(tag.value) } : t
       );
       updateAgentPolicy({ global_data_tags: updatedTags });
       setEditTags((prevValue) => {
