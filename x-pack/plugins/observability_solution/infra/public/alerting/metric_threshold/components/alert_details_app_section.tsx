@@ -18,13 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
-import {
-  ALERT_END,
-  ALERT_START,
-  ALERT_EVALUATION_VALUES,
-  ALERT_GROUP,
-  TAGS,
-} from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -68,17 +62,10 @@ interface AppSectionProps {
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({
-  alert,
-  rule,
-  ruleLink,
-  setAlertSummaryFields,
-}: AppSectionProps) {
+export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const groupInstance = alert.fields[ALERT_GROUP]?.map((group: Group) => group.value);
-  const groups = alert.fields[ALERT_GROUP];
-  const tags = alert.fields[TAGS];
 
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
