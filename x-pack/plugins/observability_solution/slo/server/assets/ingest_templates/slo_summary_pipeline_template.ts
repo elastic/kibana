@@ -205,27 +205,7 @@ export const getSLOSummaryPipelineTemplate = (
               ? Math.floor(5 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
-          source: `
-            def totalEvents = ctx["fiveMinuteBurnRate"]["totalEvents"];
-            def goodEvents = ctx["fiveMinuteBurnRate"]["goodEvents"];
-            def errorBudgetInitial = ctx["errorBudgetInitial"];
-
-            if (totalEvents == null || totalEvents == 0) {
-              ctx["fiveMinuteBurnRate"]["value"] = 0.0;
-              return;
-            }
-
-            def totalSlicesInRange = params["totalSlicesInRange"];
-            def isTimeslice = params["isTimeslice"];
-            if (isTimeslice && totalSlicesInRange > 0) {
-              def badEvents = (double)totalEvents - (double)goodEvents;
-              def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
-              ctx["fiveMinuteBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
-            } else {
-              def sliValue = (double)goodEvents / (double)totalEvents;
-              ctx["fiveMinuteBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
-            }
-          `,
+          source: getBurnRateSource('fiveMinuteBurnRate'),
         },
       },
       {
@@ -238,27 +218,7 @@ export const getSLOSummaryPipelineTemplate = (
               ? Math.floor(60 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
-          source: ` 
-            def totalEvents = ctx["oneHourBurnRate"]["totalEvents"];
-            def goodEvents = ctx["oneHourBurnRate"]["goodEvents"];
-            def errorBudgetInitial = ctx["errorBudgetInitial"];
-
-            if (totalEvents == null || totalEvents == 0) {
-              ctx["oneHourBurnRate"]["value"] = 0.0;
-              return;
-            }
-
-            def totalSlicesInRange = params["totalSlicesInRange"];
-            def isTimeslice = params["isTimeslice"];
-            if (isTimeslice && totalSlicesInRange > 0) {
-              def badEvents = (double)totalEvents - (double)goodEvents;
-              def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
-              ctx["oneHourBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
-            } else {
-              def sliValue = (double)goodEvents / (double)totalEvents;
-              ctx["oneHourBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
-            }
-          `,
+          source: getBurnRateSource('oneHourBurnRate'),
         },
       },
       {
@@ -271,27 +231,7 @@ export const getSLOSummaryPipelineTemplate = (
               ? Math.floor(1440 / slo.objective.timesliceWindow!.asMinutes())
               : 0,
           },
-          source: ` 
-            def totalEvents = ctx["oneDayBurnRate"]["totalEvents"];
-            def goodEvents = ctx["oneDayBurnRate"]["goodEvents"];
-            def errorBudgetInitial = ctx["errorBudgetInitial"];
-
-            if (totalEvents == null || totalEvents == 0) {
-              ctx["oneDayBurnRate"]["value"] = 0.0;
-              return;
-            }
-
-            def totalSlicesInRange = params["totalSlicesInRange"];
-            def isTimeslice = params["isTimeslice"];
-            if (isTimeslice && totalSlicesInRange > 0) {
-              def badEvents = (double)totalEvents - (double)goodEvents;
-              def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
-              ctx["oneDayBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
-            } else {
-              def sliValue = (double)goodEvents / (double)totalEvents;
-              ctx["oneDayBurnRate"]["value"] = (1.0 - sliValue) / errorBudgetInitial;
-            }
-            `,
+          source: getBurnRateSource('oneDayBurnRate'),
         },
       },
     ],
@@ -303,3 +243,27 @@ export const getSLOSummaryPipelineTemplate = (
     },
   };
 };
+
+function getBurnRateSource(
+  burnRateKey: 'oneDayBurnRate' | 'oneHourBurnRate' | 'fiveMinuteBurnRate'
+): string {
+  return `def totalEvents = ctx[${burnRateKey}]["totalEvents"];
+  def goodEvents = ctx[${burnRateKey}]["goodEvents"];
+  def errorBudgetInitial = ctx["errorBudgetInitial"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx[${burnRateKey}]["value"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params["totalSlicesInRange"];
+  def isTimeslice = params["isTimeslice"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx[${burnRateKey}]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx[${burnRateKey}]["value"] = (1.0 - sliValue) / errorBudgetInitial;
+  }`;
+}
