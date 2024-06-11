@@ -13,7 +13,8 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
+import useObservable from 'react-use/lib/useObservable';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -72,6 +73,9 @@ export const IntegrationsAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
+    const darkModeObservable = useObservable(startServices.theme.theme$);
+    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
@@ -92,27 +96,33 @@ export const IntegrationsAppContext: React.FC<{
           <KibanaContextProvider services={{ ...startServices }}>
             <ConfigContext.Provider value={config}>
               <KibanaVersionContext.Provider value={kibanaVersion}>
-                <QueryClientProvider client={queryClient}>
-                  <ReactQueryDevtools initialIsOpen={false} />
-                  <UIExtensionsContext.Provider value={extensions}>
-                    <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                      <startServices.customIntegrations.ContextProvider>
-                        <CloudContext>
-                          <Router history={history}>
-                            <AgentPolicyContextProvider>
-                              <PackageInstallProvider startServices={startServices}>
-                                <FlyoutContextProvider>
-                                  <IntegrationsHeader {...{ setHeaderActionMenu, startServices }} />
-                                  {children}
-                                </FlyoutContextProvider>
-                              </PackageInstallProvider>
-                            </AgentPolicyContextProvider>
-                          </Router>
-                        </CloudContext>
-                      </startServices.customIntegrations.ContextProvider>
-                    </FleetStatusProvider>
-                  </UIExtensionsContext.Provider>
-                </QueryClientProvider>
+                {/* This should be removed since theme is passed to `KibanaRenderContextProvider`,
+                however, removing this breaks usages of `props.theme.eui` in styled components */}
+                <EuiThemeProvider darkMode={isDarkMode}>
+                  <QueryClientProvider client={queryClient}>
+                    <ReactQueryDevtools initialIsOpen={false} />
+                    <UIExtensionsContext.Provider value={extensions}>
+                      <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                        <startServices.customIntegrations.ContextProvider>
+                          <CloudContext>
+                            <Router history={history}>
+                              <AgentPolicyContextProvider>
+                                <PackageInstallProvider startServices={startServices}>
+                                  <FlyoutContextProvider>
+                                    <IntegrationsHeader
+                                      {...{ setHeaderActionMenu, startServices }}
+                                    />
+                                    {children}
+                                  </FlyoutContextProvider>
+                                </PackageInstallProvider>
+                              </AgentPolicyContextProvider>
+                            </Router>
+                          </CloudContext>
+                        </startServices.customIntegrations.ContextProvider>
+                      </FleetStatusProvider>
+                    </UIExtensionsContext.Provider>
+                  </QueryClientProvider>
+                </EuiThemeProvider>
               </KibanaVersionContext.Provider>
             </ConfigContext.Provider>
           </KibanaContextProvider>
