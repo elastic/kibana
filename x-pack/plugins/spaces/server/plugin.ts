@@ -163,7 +163,7 @@ export class SpacesPlugin
       license$: plugins.licensing.license$,
       spacesLicense: license,
       logger: this.log,
-      solution: plugins.cloud?.onboarding.defaultSolution,
+      solution: plugins.cloud?.onboarding?.defaultSolution,
     });
 
     initSpacesViewsRoutes({

@@ -15,7 +15,7 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 interface Deps {
   getSavedObjects: () => Promise<Pick<SavedObjectsServiceStart, 'createInternalRepository'>>;
   logger: Logger;
-  solution?: Pick<CloudSetup['onboarding'], 'defaultSolution'>;
+  solution?: CloudSetup['onboarding']['defaultSolution'];
 }
 
 export async function createDefaultSpace({ getSavedObjects, logger, solution }: Deps) {

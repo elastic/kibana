@@ -33,7 +33,7 @@ interface Deps {
   license$: Observable<ILicense>;
   spacesLicense: SpacesLicense;
   logger: Logger;
-  solution?: Pick<CloudSetup['onboarding'], 'defaultSolution'>;
+  solution?: CloudSetup['onboarding']['defaultSolution'];
 }
 
 export const RETRY_SCALE_DURATION = 100;
