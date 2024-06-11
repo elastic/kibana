@@ -8,7 +8,6 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-// import { EPM_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -241,6 +240,14 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
 };
 
 const getIntegrations = async (core: CoreStart) => {
+  const fleetCapabilities = core.application.capabilities.fleet;
+  if (!fleetCapabilities?.read) {
+    return [];
+  }
+  // Ideally we should use the Fleet plugin constants to fetch the integrations
+  // import { EPM_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
+  // but it complicates things as we need to use an x-pack plugin as dependency to get 2 constants
+  // and this needs to be done in various places in the codebase which use the editor
   const route = '/api/fleet/epm/packages/installed';
   const response = (await core.http
     .get(route, { query: undefined, version: '2023-10-31' })
