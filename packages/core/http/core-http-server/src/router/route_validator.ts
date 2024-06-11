@@ -79,7 +79,7 @@ export type RouteValidationFunction<T> = (
  *
  * @public
  */
-export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;
+export type RouteValidationSpec<T> = ObjectType | Type<unknown, T> | RouteValidationFunction<T>;
 
 /**
  * The configuration object to the RouteValidator class.
