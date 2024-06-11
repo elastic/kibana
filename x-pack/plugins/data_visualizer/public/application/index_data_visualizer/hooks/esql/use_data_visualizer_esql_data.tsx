@@ -599,12 +599,14 @@ export const useESQLDataVisualizerData = (
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
               timeFieldName={timeFieldName}
+              onAddFilter={input.onAddFilter}
             />
           );
         }
         return map;
       }, {} as ItemIdToExpandedRowMap);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentDataView, totalCount, query.esql, timeFieldName]
   );
 

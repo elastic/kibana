@@ -9,10 +9,16 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { FieldStatisticsInitializer } from './field_stats_initializer';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
-import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
+import type {
+  FieldStatisticsTableEmbeddableState,
+  FieldStatsInitialState,
+} from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
+import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 
 export async function resolveEmbeddableFieldStatsUserInput(
   coreStart: CoreStart,
@@ -43,6 +49,25 @@ export async function resolveEmbeddableFieldStatsUserInput(
         overlayTracker?.clearOverlays();
       };
 
+      const update = async (nextUpdate: FieldStatsInitialState) => {
+        const esqlQuery = nextUpdate?.query?.esql;
+        if (isDefined(esqlQuery)) {
+          const indexPatternFromQuery = getIndexPatternFromESQLQuery(esqlQuery);
+          const dv = await getOrCreateDataViewByIndexPattern(
+            pluginStart.data.dataViews,
+            indexPatternFromQuery,
+            undefined
+          );
+          if (dv?.id && nextUpdate.dataViewId !== dv.id) {
+            nextUpdate.dataViewId = dv.id;
+          }
+        }
+
+        resolve(nextUpdate);
+        flyoutSession.close();
+        overlayTracker?.clearOverlays();
+      };
+
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <KibanaContextProvider services={services}>
@@ -54,11 +79,7 @@ export async function resolveEmbeddableFieldStatsUserInput(
                   hasChanged = true;
                 }
               }}
-              onCreate={(update) => {
-                resolve(update);
-                flyoutSession.close();
-                overlayTracker?.clearOverlays();
-              }}
+              onCreate={update}
               onCancel={cancelChanges}
             />
           </KibanaContextProvider>,

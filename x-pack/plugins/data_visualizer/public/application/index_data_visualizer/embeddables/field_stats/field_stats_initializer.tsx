@@ -37,7 +37,7 @@ import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DataSourceTypeSelector } from './field_stats_initializer_view_type';
 export interface FieldStatsInitializerProps {
   initialInput?: Partial<FieldStatisticsTableEmbeddableState>;
-  onCreate: (props: FieldStatsInitialState) => void;
+  onCreate: (props: FieldStatsInitialState) => Promise<void>;
   onCancel: () => void;
   onPreview: (update: Partial<FieldStatsInitialState>) => Promise<void>;
 }
