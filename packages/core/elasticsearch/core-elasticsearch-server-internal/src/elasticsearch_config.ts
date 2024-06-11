@@ -186,7 +186,7 @@ export const configSchema = schema.object({
     }),
     { defaultValue: [] }
   ),
-  dnsCacheTtlInSeconds: schema.number({ defaultValue: 0, min: 0, max: Infinity }),
+  dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -459,7 +459,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
-    this.dnsCacheTtlInSeconds = rawConfig.dnsCacheTtlInSeconds;
+    this.dnsCacheTtlInSeconds = rawConfig.dnsCacheTtl.asSeconds();
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
