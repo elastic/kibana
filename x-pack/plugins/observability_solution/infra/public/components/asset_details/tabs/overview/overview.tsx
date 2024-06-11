@@ -23,6 +23,8 @@ import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
 import { ServicesContent } from './services';
 import { MetricsContent } from './metrics/metrics';
+import { useIntegrationCheck } from '../../hooks/use_integration_check';
+import { INTEGRATIONS } from '../../constants';
 
 export const Overview = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -34,6 +36,7 @@ export const Overview = () => {
     error: fetchMetadataError,
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
+  const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
 
   const isFullPageView = renderMode.mode === 'page';
 
@@ -61,7 +64,7 @@ export const Overview = () => {
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
-      {asset.type === 'host' || asset.type === 'container' ? ( // TODO Check integration
+      {asset.type === 'host' || isDockerContainer ? (
         <EuiFlexItem grow={false}>
           <AlertsSummaryContent
             assetId={asset.id}
