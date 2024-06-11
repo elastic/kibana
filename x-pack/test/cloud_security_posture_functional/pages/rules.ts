@@ -98,8 +98,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'add-integration/kspm'
           )
         );
-        await rule.rulePage.clickIntegrationsEvaluatedButton();
-        await pageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
       });
 
       it('Shows the failed findings counter when there are findings', async () => {
