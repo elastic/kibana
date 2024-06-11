@@ -49,6 +49,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
+  policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
   inputs: [
     {
       type: 'synthetics/http',
@@ -539,6 +540,7 @@ export const getTestProjectSyntheticsPolicy = (
   package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
+  policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
   inputs: [
     {
       type: 'synthetics/http',
