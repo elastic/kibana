@@ -69,6 +69,8 @@ export interface SimpleSignificantItem {
  * @param end The end of the time range, in Elasticsearch date math, like `now-24h`.
  * @param timefield The Elasticesarch source index pattern time field.
  * @param abortSignal Abort signal.
+ * @param keywordFieldCandidates Optional keyword field candidates.
+ * @param textFieldCandidates Optional text field candidates.
  * @returns Log rate analysis data.
  */
 export const fetchSimpleLogRateAnalysis = async (
