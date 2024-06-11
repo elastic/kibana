@@ -35,8 +35,8 @@ export default function (ctx: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
-  const logstashIndexName = 'logstash-2015.09.22';
   const deployment = getService('deployment');
+  const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -120,7 +120,7 @@ export default function (ctx: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
-      it('Permalinks shows short urls for the right priviledged user', async () => {
+      it('Shows short urls for the right priviledged user', async () => {
         let actualUrl: string = '';
         await PageObjects.share.clickShareTopNavButton();
         const re = new RegExp(
@@ -215,8 +215,8 @@ export default function (ctx: FtrProviderContext) {
           expect(actualUrl).to.not.match(re);
         });
       });
+      savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
     });
-    savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
 
     describe('discover read-only privileges with url_create', () => {
       before(async () => {
