@@ -88,12 +88,6 @@ import {
   ProfilesManager,
   RootProfileService,
 } from './context_awareness';
-import {
-  logDocumentProfileProvider,
-  logsDataSourceProfileProvider,
-  o11yRootProfileProvider,
-} from './context_awareness/profiles/example_profiles';
-import { registerEnabledProfiles } from './context_awareness/register_enabled_profiles';
 
 /**
  * @public
@@ -243,6 +237,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
+  private profileProvidersRegistered = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -346,7 +341,7 @@ export class DiscoverPlugin
           history: this.historyService.getHistory(),
           scopedHistory: this.scopedHistory,
           urlTracker: this.urlTracker!,
-          profilesManager: this.createProfilesManager(),
+          profilesManager: await this.createProfilesManager(),
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -429,8 +424,6 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    this.registerProfiles();
-
     const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
 
     plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
@@ -466,32 +459,21 @@ export class DiscoverPlugin
     }
   }
 
-  private registerProfiles() {
-    const rootProfileProviders = [o11yRootProfileProvider];
-    const dataSourceProfileProviders = [logsDataSourceProfileProvider];
-    const documentProfileProviders = [logDocumentProfileProvider];
-    const enabledProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
+  private async createProfilesManager() {
+    if (!this.profileProvidersRegistered) {
+      const { registerProfileProviders } = await import('./context_awareness');
+      const enabledProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
-    registerEnabledProfiles({
-      profileService: this.rootProfileService,
-      availableProviders: rootProfileProviders,
-      enabledProfileIds,
-    });
+      registerProfileProviders({
+        rootProfileService: this.rootProfileService,
+        dataSourceProfileService: this.dataSourceProfileService,
+        documentProfileService: this.documentProfileService,
+        enabledProfileIds,
+      });
 
-    registerEnabledProfiles({
-      profileService: this.dataSourceProfileService,
-      availableProviders: dataSourceProfileProviders,
-      enabledProfileIds,
-    });
+      this.profileProvidersRegistered = true;
+    }
 
-    registerEnabledProfiles({
-      profileService: this.documentProfileService,
-      availableProviders: documentProfileProviders,
-      enabledProfileIds,
-    });
-  }
-
-  private createProfilesManager() {
     return new ProfilesManager(
       this.rootProfileService,
       this.dataSourceProfileService,
@@ -510,7 +492,7 @@ export class DiscoverPlugin
   private getDiscoverServices = (
     core: CoreStart,
     plugins: DiscoverStartPlugins,
-    profilesManager = this.createProfilesManager()
+    profilesManager: ProfilesManager
   ) => {
     return buildServices({
       core,
@@ -536,7 +518,8 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      return this.getDiscoverServices(coreStart, deps);
+      const profilesManager = await this.createProfilesManager();
+      return this.getDiscoverServices(coreStart, deps, profilesManager);
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
