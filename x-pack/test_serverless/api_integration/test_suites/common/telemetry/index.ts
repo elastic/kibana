@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless security API', function () {
+  describe('telemetry', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./cases'));
-    loadTestFile(require.resolve('./cloud_security_posture'));
+    loadTestFile(require.resolve('./snapshot_telemetry'));
+    loadTestFile(require.resolve('./telemetry_config'));
   });
 }
