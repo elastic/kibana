@@ -133,23 +133,23 @@ function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): Obje
   return new ObjectType(props, options);
 }
 
-function arrayOf<T, R>(itemType: Type<T, R>, options?: ArrayOptions<T>): Type<T[], R[]> {
+function arrayOf<T, R = T>(itemType: Type<T, R>, options?: ArrayOptions<T>): Type<T[], R[]> {
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, V, R>(
+function mapOf<K, V, R = V>(
   keyType: Type<K>,
   valueType: Type<V, R>,
   options?: MapOfOptions<K, V>
-): Type<Map<K, V>, R> {
+): Type<Map<K, V>, Map<K, R>> {
   return new MapOfType(keyType, valueType, options);
 }
 
-function recordOf<K extends string, V, R>(
+function recordOf<K extends string, V, R = V>(
   keyType: Type<K>,
   valueType: Type<V, R>,
   options?: RecordOfOptions<K, V>
-): Type<Record<K, V>, R> {
+): Type<Record<K, V>, Record<K, R>> {
   return new RecordOfType(keyType, valueType, options);
 }
 
@@ -168,11 +168,11 @@ function siblingRef<T>(key: string): SiblingReference<T> {
   return new SiblingReference(key);
 }
 
-function conditional<A extends ConditionalTypeValue, B, C>(
+function conditional<A extends ConditionalTypeValue, B, BR, C, CR>(
   leftOperand: Reference<A>,
   rightOperand: Reference<A> | A | Type<unknown>,
-  equalType: Type<B>,
-  notEqualType: Type<C>,
+  equalType: Type<B, BR>,
+  notEqualType: Type<C, CR>,
   options?: TypeOptions<B | C>
 ) {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);

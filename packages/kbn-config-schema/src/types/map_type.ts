@@ -14,7 +14,7 @@ import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 
 export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
 
-export class MapOfType<K, V, R> extends Type<Map<K, V>, R> {
+export class MapOfType<K, V, R> extends Type<Map<K, V>, Map<K, R>> {
   private readonly keyType: Type<K>;
   private readonly valueType: Type<V, R>;
   private readonly mapOptions: MapOfOptions<K, V>;
@@ -42,9 +42,9 @@ export class MapOfType<K, V, R> extends Type<Map<K, V>, R> {
   }
 
   public extendsDeep(options: ExtendsDeepOptions) {
-    return new MapOfType(
+    return new MapOfType<K, V, R>(
       this.keyType.extendsDeep(options),
-      this.valueType.extendsDeep(options),
+      this.valueType.extendsDeep(options) as Type<V, R>,
       this.mapOptions
     );
   }

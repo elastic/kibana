@@ -50,7 +50,7 @@ export interface SchemaStructureEntry {
  * implementation simple while losing some type information. This is similar to
  * how Zod, another popular validation lib approaches `.transform`.
  */
-export type TransformedType<T, TT> = Type<T, TT>;
+export type TransformedType<T, R> = Type<T, R>;
 
 /**
  * Options for dealing with unknown keys:
@@ -97,12 +97,12 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
-export abstract class Type<V, TV = V> {
+export abstract class Type<V, R = V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
   // fail if it wasn't initialized we use a "trick" to which basically just
   // sets the value to `null` while still keeping the type.
   public readonly type: V = null! as V;
-  public transformedType: TV = null! as TV;
+  public transformedType: R = null! as R;
 
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
@@ -153,11 +153,11 @@ export abstract class Type<V, TV = V> {
     this.internalSchema = schema;
   }
 
-  public extendsDeep(newOptions: ExtendsDeepOptions): Type<V, TV> {
+  public extendsDeep(newOptions: ExtendsDeepOptions): Type<V, R> {
     return this;
   }
 
-  public validate(value: any, context: Record<string, any> = {}, namespace?: string): TV {
+  public validate(value: any, context: Record<string, any> = {}, namespace?: string): R {
     const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',

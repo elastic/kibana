@@ -14,7 +14,7 @@ import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
 export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>>;
 
-export class RecordOfType<K extends string, V, R> extends Type<Record<K, V>, R> {
+export class RecordOfType<K extends string, V, R> extends Type<Record<K, V>, Record<K, R>> {
   private readonly keyType: Type<K>;
   private readonly valueType: Type<V, R>;
   private readonly options: RecordOfOptions<K, V>;
