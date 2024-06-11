@@ -204,13 +204,11 @@ export default ({ getService }: FtrProviderContext) => {
         const sidecarActionsPostResults = await getLegacyActionSO(es);
         expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
+        const username = await utils.getUsername();
         // @ts-expect-error
         body.forEach((response) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
-          const outputRule = updateUsername(
-            getSimpleRuleOutput(response.rule_id, false),
-            await utils.getUsername()
-          );
+          const outputRule = updateUsername(getSimpleRuleOutput(response.rule_id, false), username);
 
           outputRule.actions = [
             {

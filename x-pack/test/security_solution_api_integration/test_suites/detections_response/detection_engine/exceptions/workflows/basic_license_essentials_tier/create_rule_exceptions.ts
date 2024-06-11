@@ -168,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('adds exception items to rule default exception list', async () => {
-      const username = utils.getUsername();
+      const username = await utils.getUsername();
       // create default exception list
       const exceptionList: CreateExceptionListSchema = {
         ...getCreateExceptionListMinimalSchemaMock(),
