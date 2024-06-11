@@ -221,6 +221,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [mlFields]
   );
 
+  console.log(
+    JSON.stringify({
+      installedMlJobs,
+      ruleMlJobs,
+      numberOfRuleMlJobsStarted,
+      noMlJobsStarted,
+      someMlJobsStarted,
+      mlFields,
+      mlSuppressionFields,
+    })
+  );
+
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);

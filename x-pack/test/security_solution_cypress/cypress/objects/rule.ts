@@ -361,6 +361,7 @@ export const getMachineLearningRule = (
 ): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
+    // TODO these are not valid job IDs
     'Unusual Linux Network Activity',
     'Anomalous Process for a Linux Population',
   ],

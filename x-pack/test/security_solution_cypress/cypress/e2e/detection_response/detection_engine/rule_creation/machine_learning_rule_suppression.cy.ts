@@ -6,6 +6,8 @@
  */
 
 import { getMachineLearningRule } from '../../../../objects/rule';
+import { TOOLTIP } from '../../../../screens/common';
+import { ALERT_SUPPRESSION_FIELDS_INPUT } from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
   DETAILS_TITLE,
@@ -13,6 +15,10 @@ import {
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
+import {
+  executeSetupModuleRequest,
+  forceStartDatafeeds,
+} from '../../../../support/machine_learning';
 import {
   continueFromDefineStep,
   fillAlertSuppressionFields,
@@ -46,79 +52,132 @@ describe(
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
+    const jobId = 'v3_linux_anomalous_network_activity_ecs';
     const suppressByFields = ['agent.name', 'host.name'];
 
     beforeEach(() => {
       login();
       visit(CREATE_RULE_URL);
-      mlRule = getMachineLearningRule();
-      selectMachineLearningRuleType();
-      fillDefineMachineLearningRule(mlRule);
     });
 
     describe('with Alert Suppression', () => {
-      it('allows a rule with per-execution suppression to be created and displayed', () => {
-        fillAlertSuppressionFields(suppressByFields);
-        continueFromDefineStep();
-
-        // ensures details preview works correctly
-        cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
-          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
-          getDetails(SUPPRESS_MISSING_FIELD).should(
-            'have.text',
-            'Suppress and group alerts for events with missing fields'
-          );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
+      describe('when no ML jobs have run', () => {
+        beforeEach(() => {
+          mlRule = getMachineLearningRule();
+          selectMachineLearningRuleType();
+          fillDefineMachineLearningRule(mlRule);
         });
 
-        fillAboutRuleMinimumAndContinue(mlRule);
-        skipScheduleRuleAction();
-        createRuleWithoutEnabling();
-
-        cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
-          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
-          getDetails(SUPPRESS_MISSING_FIELD).should(
-            'have.text',
-            'Suppress and group alerts for events with missing fields'
+        it('disables the suppression fields and displays a message', () => {
+          cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
+          cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).realHover();
+          cy.get(TOOLTIP).contains(
+            'Machine Learning jobs must be running to enable alert suppression.'
           );
         });
       });
 
-      it('allows a rule with interval suppression to be created and displayed', () => {
-        fillAlertSuppressionFields(suppressByFields);
-        selectAlertSuppressionPerInterval();
-        setAlertSuppressionDuration(45, 'm');
-        selectDoNotSuppressForMissingFields();
-        continueFromDefineStep();
-
-        // ensures details preview works correctly
-        cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
-          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
-          getDetails(SUPPRESS_MISSING_FIELD).should(
-            'have.text',
-            'Do not suppress alerts for events with missing fields'
-          );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
+      describe('when ML jobs have run', () => {
+        before(() => {
+          cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
+          executeSetupModuleRequest({ moduleName: 'security_linux_v3' });
+          forceStartDatafeeds({ jobIds: [jobId] });
+          cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
         });
 
-        fillAboutRuleMinimumAndContinue(mlRule);
-        skipScheduleRuleAction();
-        createRuleWithoutEnabling();
+        after(() => {
+          cy.task('esArchiverUnload', { archiveName: 'anomalies', type: 'ftr' });
+          cy.task('esArchiverUnload', { archiveName: '../auditbeat/hosts', type: 'ftr' });
+        });
 
-        cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
-          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
-          getDetails(SUPPRESS_MISSING_FIELD).should(
-            'have.text',
-            'Do not suppress alerts for events with missing fields'
-          );
+        describe('when not all jobs are running', () => {
+          beforeEach(() => {
+            mlRule = getMachineLearningRule();
+            selectMachineLearningRuleType();
+            fillDefineMachineLearningRule(mlRule);
+          });
+
+          it.only('displays a warning message on the suppression fields', () => {
+            cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
+            cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should(
+              'have.attr',
+              'title',
+              'Alert suppression will be disabled until the Machine Learning jobs are run.'
+            );
+          });
+        });
+
+        describe('when all jobs are running', () => {
+          beforeEach(() => {
+            mlRule = getMachineLearningRule({ machine_learning_job_id: [jobId] });
+            selectMachineLearningRuleType();
+            fillDefineMachineLearningRule(mlRule);
+          });
+
+          it('allows a rule with per-execution suppression to be created and displayed', () => {
+            fillAlertSuppressionFields(suppressByFields);
+            continueFromDefineStep();
+
+            // ensures details preview works correctly
+            cy.get(DEFINITION_DETAILS).within(() => {
+              getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
+              getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
+              getDetails(SUPPRESS_MISSING_FIELD).should(
+                'have.text',
+                'Suppress and group alerts for events with missing fields'
+              );
+
+              // suppression functionality should be under Tech Preview
+              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
+            });
+
+            fillAboutRuleMinimumAndContinue(mlRule);
+            skipScheduleRuleAction();
+            createRuleWithoutEnabling();
+
+            cy.get(DEFINITION_DETAILS).within(() => {
+              getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
+              getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
+              getDetails(SUPPRESS_MISSING_FIELD).should(
+                'have.text',
+                'Suppress and group alerts for events with missing fields'
+              );
+            });
+          });
+
+          it('allows a rule with interval suppression to be created and displayed', () => {
+            fillAlertSuppressionFields(suppressByFields);
+            selectAlertSuppressionPerInterval();
+            setAlertSuppressionDuration(45, 'm');
+            selectDoNotSuppressForMissingFields();
+            continueFromDefineStep();
+
+            // ensures details preview works correctly
+            cy.get(DEFINITION_DETAILS).within(() => {
+              getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
+              getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
+              getDetails(SUPPRESS_MISSING_FIELD).should(
+                'have.text',
+                'Do not suppress alerts for events with missing fields'
+              );
+
+              // suppression functionality should be under Tech Preview
+              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
+            });
+
+            fillAboutRuleMinimumAndContinue(mlRule);
+            skipScheduleRuleAction();
+            createRuleWithoutEnabling();
+
+            cy.get(DEFINITION_DETAILS).within(() => {
+              getDetails(SUPPRESS_BY_DETAILS).should('have.text', suppressByFields.join(''));
+              getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
+              getDetails(SUPPRESS_MISSING_FIELD).should(
+                'have.text',
+                'Do not suppress alerts for events with missing fields'
+              );
+            });
+          });
         });
       });
     });
