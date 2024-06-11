@@ -133,9 +133,9 @@ export class DefaultSummaryClient implements SummaryClient {
         sliValue,
         errorBudget,
         status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
-        fiveMinuteBurnRate: burnRates.find(({ name }) => name === '5m')?.burnRate ?? 0,
-        oneHourBurnRate: burnRates.find(({ name }) => name === '1h')?.burnRate ?? 0,
-        oneDayBurnRate: burnRates.find(({ name }) => name === '1d')?.burnRate ?? 0,
+        fiveMinuteBurnRate: getBurnRate('5m', burnRates),
+        oneHourBurnRate: getBurnRate('1h', burnRates),
+        oneDayBurnRate: getBurnRate('1d', burnRates),
       },
       groupings: groupings ? getFlattenedGroupings({ groupBy: slo.groupBy, groupings }) : {},
       meta: getMetaFields(slo, source ?? {}),
@@ -208,4 +208,8 @@ function computeErrorBudget(slo: SLODefinition, sliValue: number) {
     calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
       occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
   );
+}
+
+function getBurnRate(burnRateWindow: string, burnRates: Array<{ name: string; burnRate: number }>) {
+  return burnRates.find(({ name }) => name === burnRateWindow)?.burnRate ?? 0;
 }
