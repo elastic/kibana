@@ -696,7 +696,6 @@ describe('Sourcerer Hooks', () => {
 
       expect(result.current.sourcererDataView?.title).toBe(testPatterns.join(','));
       expect(result.current.sourcererDataView?.name).toBe(testPatterns.join(','));
-      expect(result.current.sourcererDataView?.getName()).toBe(testPatterns.join(','));
     });
   });
 });

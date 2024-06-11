@@ -83,7 +83,6 @@ export const useSourcererDataView = (
         ..._dv.dataView,
         title: selectedPatterns.join(','),
         name: selectedPatterns.join(','),
-        getName: () => selectedPatterns.join(','),
       },
     };
   }, [legacyDataView, missingPatterns.length, selectedDataView, selectedPatterns]);
