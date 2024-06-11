@@ -8,8 +8,6 @@
 
 import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataViewsCommon } from './config_builder';
 
