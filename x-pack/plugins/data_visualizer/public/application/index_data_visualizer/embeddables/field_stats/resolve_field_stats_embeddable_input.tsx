@@ -56,11 +56,6 @@ export async function resolveEmbeddableFieldStatsUserInput(
               }}
               onCreate={(update) => {
                 resolve(update);
-
-                if (update?.dataViewId !== initialState?.dataViewId) {
-                  // @TODO: Need to reset
-                }
-
                 flyoutSession.close();
                 overlayTracker?.clearOverlays();
               }}

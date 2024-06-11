@@ -49,9 +49,6 @@ export const FieldStatsESQLEditor = ({
         }}
         expandCodeEditor={expandCodeEditor}
         isCodeEditorExpanded
-        // detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
-        // hideTimeFilterInfo={hideTimeFilterInfo}
-        // errors={errors}
         hideMinimizeButton
         editorIsInline
         hideRunQueryText
