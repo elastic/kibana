@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
-import { ConnectorTypes } from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
@@ -99,6 +99,36 @@ describe('form fields', () => {
     expect(await screen.findByTestId('caseCategory')).toBeInTheDocument();
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
     expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
+  });
+
+  it('renders case fields with existing', async () => {
+    appMockRenderer.render(
+      <FormTestComponent
+        formDefaultValue={{
+          title: 'Case title',
+          description: 'case description',
+          tags: ['case-1', 'case-2'],
+          category: 'new',
+          severity: CaseSeverity.MEDIUM,
+        }}
+        onSubmit={onSubmit}
+      >
+        <FormFields {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    expect(await within(await screen.findByTestId('caseTitle')).findByTestId('input')).toHaveValue(
+      'Case title'
+    );
+
+    const caseTags = await screen.findByTestId('caseTags');
+    expect(await within(caseTags).findByTestId('comboBoxInput')).toHaveTextContent('case-1');
+    expect(await within(caseTags).findByTestId('comboBoxInput')).toHaveTextContent('case-2');
+
+    const category = await screen.findByTestId('caseCategory');
+    expect(await within(category).findByTestId('comboBoxSearchInput')).toHaveValue('new');
+    expect(await screen.findByTestId('case-severity-selection-medium')).toBeInTheDocument();
+    expect(await screen.findByTestId('caseDescription')).toHaveTextContent('case description');
   });
 
   it('renders sync alerts correctly', async () => {

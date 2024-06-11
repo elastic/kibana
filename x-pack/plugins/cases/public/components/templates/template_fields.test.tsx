@@ -38,6 +38,36 @@ describe('Template fields', () => {
     expect(await screen.findByTestId('template-description-input')).toBeInTheDocument();
   });
 
+  it('renders template fields with existing value', async () => {
+    appMockRenderer.render(
+      <FormTestComponent
+        formDefaultValue={{
+          name: 'Sample template',
+          templateDescription: 'This is a template description',
+          templateTags: ['template-1', 'template-2'],
+        }}
+        onSubmit={onSubmit}
+      >
+        <TemplateFields {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('template-name-input')).toHaveValue('Sample template');
+
+    const templateTags = await screen.findByTestId('template-tags');
+
+    expect(await within(templateTags).findByTestId('comboBoxInput')).toHaveTextContent(
+      'template-1'
+    );
+    expect(await within(templateTags).findByTestId('comboBoxInput')).toHaveTextContent(
+      'template-2'
+    );
+
+    expect(await screen.findByTestId('template-description-input')).toHaveTextContent(
+      'This is a template description'
+    );
+  });
+
   it('calls onSubmit with template fields', async () => {
     appMockRenderer.render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -49,7 +79,7 @@ describe('Template fields', () => {
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(within(templateTags).getByRole('combobox'), 'first');
+    userEvent.paste(await within(templateTags).findByRole('combobox'), 'first');
     userEvent.keyboard('{enter}');
 
     userEvent.paste(
@@ -65,6 +95,43 @@ describe('Template fields', () => {
           name: 'Template 1',
           templateDescription: 'this is a first template',
           templateTags: ['first'],
+        },
+        true
+      );
+    });
+  });
+
+  it('calls onSubmit with updated template fields', async () => {
+    appMockRenderer.render(
+      <FormTestComponent
+        formDefaultValue={{
+          name: 'Sample template',
+          templateDescription: 'This is a template description',
+          templateTags: ['template-1', 'template-2'],
+        }}
+        onSubmit={onSubmit}
+      >
+        <TemplateFields {...defaultProps} />
+      </FormTestComponent>
+    );
+
+    userEvent.paste(await screen.findByTestId('template-name-input'), '!!');
+
+    const templateTags = await screen.findByTestId('template-tags');
+
+    userEvent.paste(await within(templateTags).findByRole('combobox'), 'first');
+    userEvent.keyboard('{enter}');
+
+    userEvent.paste(await screen.findByTestId('template-description-input'), '..');
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          name: 'Sample template!!',
+          templateDescription: 'This is a template description..',
+          templateTags: ['template-1', 'template-2', 'first'],
         },
         true
       );

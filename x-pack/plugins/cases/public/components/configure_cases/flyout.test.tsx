@@ -11,7 +11,11 @@ import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
-import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
+import {
+  connectorsMock,
+  customFieldsConfigurationMock,
+  templatesConfigurationMock,
+} from '../../containers/mock';
 import {
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
@@ -29,8 +33,10 @@ import * as i18n from './translations';
 import type { FlyOutBodyProps } from './flyout';
 import { CommonFlyout } from './flyout';
 import type { TemplateFormProps } from '../templates/types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../connectors/servicenow/use_get_choices');
+jest.mock('../../containers/user_profiles/api');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;
 
@@ -386,6 +392,84 @@ describe('CommonFlyout ', () => {
       expect(await screen.findByTestId('template-creation-form-steps')).toBeInTheDocument();
     });
 
+    it('should render all fields with details', async () => {
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+
+      const newConfiguration = {
+        ...currentConfiguration,
+        customFields: [
+          {
+            key: 'first_custom_field_key',
+            type: CustomFieldTypes.TEXT,
+            label: 'First custom field',
+            required: true,
+          },
+        ],
+      };
+
+      const newRenderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
+        <TemplateForm
+          initialValue={templatesConfigurationMock[3]}
+          connectors={[]}
+          currentConfiguration={newConfiguration}
+          onChange={onChange}
+        />
+      );
+
+      appMockRender = createAppMockRenderer({ license });
+
+      appMockRender.render(
+        <CommonFlyout
+          {...{
+            ...newProps,
+            renderBody: newRenderBody,
+          }}
+        />
+      );
+
+      // template fields
+      expect(await screen.findByTestId('template-name-input')).toHaveValue('Fourth test template');
+      expect(await screen.findByTestId('template-description-input')).toHaveTextContent(
+        'This is a fourth test template'
+      );
+
+      const templateTags = await screen.findByTestId('template-tags');
+      expect(await within(templateTags).findByTestId('comboBoxInput')).toHaveTextContent('foo');
+      expect(await within(templateTags).findByTestId('comboBoxInput')).toHaveTextContent('bar');
+
+      const caseTitle = await screen.findByTestId('caseTitle');
+      expect(within(caseTitle).getByTestId('input')).toHaveValue('Case with sample template 4');
+
+      const caseDescription = await screen.findByTestId('caseDescription');
+      expect(within(caseDescription).getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
+        'case desc'
+      );
+
+      const caseCategory = await screen.findByTestId('caseCategory');
+      expect(within(caseCategory).getByRole('combobox')).toHaveTextContent('');
+
+      const caseTags = await screen.findByTestId('caseTags');
+      expect(await within(caseTags).findByTestId('comboBoxInput')).toHaveTextContent('sample-4');
+
+      expect(await screen.findByTestId('case-severity-selection-low')).toBeInTheDocument();
+
+      const assigneesComboBox = await screen.findByTestId('createCaseAssigneesComboBox');
+
+      expect(await within(assigneesComboBox).findByTestId('comboBoxInput')).toHaveTextContent(
+        'Damaged Raccoon'
+      );
+
+      // custom fields
+      expect(
+        await screen.findByTestId('first_custom_field_key-text-create-custom-field')
+      ).toHaveValue('this is a text field value');
+
+      // connector
+      expect(await screen.findByTestId('dropdown-connector-no-connector')).toBeInTheDocument();
+    });
+
     it('calls onSaveField form correctly', async () => {
       appMockRender.render(<CommonFlyout {...newProps} />);
 
@@ -419,7 +503,7 @@ describe('CommonFlyout ', () => {
           initialValue={{
             key: 'random_key',
             name: 'Template 1',
-            templateDescription: 'test description',
+            description: 'test description',
           }}
           connectors={[]}
           currentConfiguration={currentConfiguration}
@@ -472,7 +556,7 @@ describe('CommonFlyout ', () => {
           initialValue={{
             key: 'random_key',
             name: 'Template 1',
-            templateDescription: 'test description',
+            description: 'test description',
           }}
           connectors={[]}
           currentConfiguration={newConfig}
@@ -530,7 +614,7 @@ describe('CommonFlyout ', () => {
           initialValue={{
             key: 'random_key',
             name: 'Template 1',
-            templateDescription: 'test description',
+            description: 'test description',
           }}
           connectors={connectorsMock}
           currentConfiguration={newConfig}
@@ -567,6 +651,79 @@ describe('CommonFlyout ', () => {
             subcategory: null,
           },
           syncAlerts: true,
+        });
+      });
+    });
+
+    it('calls onSaveField with edited fields correctly', async () => {
+      const newConfig = {
+        ...currentConfiguration,
+        customFields: [
+          {
+            key: 'first_custom_field_key',
+            type: CustomFieldTypes.TEXT,
+            label: 'First custom field',
+            required: true,
+          },
+        ],
+        connector: {
+          id: 'servicenow-1',
+          name: 'My SN connector',
+          type: ConnectorTypes.serviceNowITSM,
+          fields: null,
+        },
+      };
+
+      const newRenderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (
+        <TemplateForm
+          initialValue={templatesConfigurationMock[3]}
+          connectors={connectorsMock}
+          currentConfiguration={newConfig}
+          onChange={onChange}
+          isEditMode={true}
+        />
+      );
+
+      appMockRender.render(
+        <CommonFlyout
+          {...{
+            ...newProps,
+            renderBody: newRenderBody,
+          }}
+        />
+      );
+
+      userEvent.clear(await screen.findByTestId('template-name-input'));
+      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
+
+      const caseTitle = await screen.findByTestId('caseTitle');
+      userEvent.clear(within(caseTitle).getByTestId('input'));
+      userEvent.paste(within(caseTitle).getByTestId('input'), 'Updated case using template');
+
+      const customField = await screen.findByTestId(
+        'first_custom_field_key-text-create-custom-field'
+      );
+      userEvent.clear(customField);
+      userEvent.paste(customField, 'Updated custom field value');
+
+      userEvent.click(await screen.findByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(newProps.onSaveField).toBeCalledWith({
+          connectorId: 'none',
+          customFields: {
+            first_custom_field_key: 'Updated custom field value',
+          },
+          description: 'case desc',
+          fields: null,
+          key: 'test_template_4',
+          name: 'Template name',
+          severity: 'low',
+          syncAlerts: true,
+          tags: ['sample-4'],
+          templateDescription: 'This is a fourth test template',
+          templateTags: ['foo', 'bar'],
+          title: 'Updated case using template',
         });
       });
     });

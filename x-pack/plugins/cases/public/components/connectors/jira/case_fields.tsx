@@ -27,7 +27,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
   const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
   const { http } = useKibana().services;
 
-  const { issueType } = fields ?? {};
+  const { issueType, parent } = fields ?? {};
 
   const {
     isLoading: isLoadingIssueTypesData,
@@ -107,7 +107,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
         <div style={{ display: hasParent ? 'block' : 'none' }}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <SearchIssues actionConnector={connector} />
+              <SearchIssues actionConnector={connector} currentParent={parent} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />

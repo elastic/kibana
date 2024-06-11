@@ -84,7 +84,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
         />
       ),
     }),
-    [connectors, connector, isSubmitting]
+    [connectors, connector, isSubmitting, isEditMode]
   );
 
   const allSteps = useMemo(

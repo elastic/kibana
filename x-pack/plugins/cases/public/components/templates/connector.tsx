@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -42,7 +42,10 @@ const ConnectorComponent: React.FC<Props> = ({
     connectors,
   });
 
-  const connector = useMemo(() => getConnectorById(connectorId, connectors) ?? null, [connectorId]);
+  const connector = useMemo(
+    () => getConnectorById(connectorId, connectors) ?? null,
+    [connectorId, connectors]
+  );
 
   if (!hasReadPermissions) {
     return (

@@ -14,7 +14,7 @@ import * as i18n from './translations';
 import { schema } from './schema';
 interface Props {
   isLoading: boolean;
-  currentTags: string[];
+  currentTags?: string[];
 }
 
 const TagsComponent: React.FC<Props> = ({ isLoading, currentTags }) => {
@@ -41,7 +41,7 @@ const TagsComponent: React.FC<Props> = ({ isLoading, currentTags }) => {
         idAria: 'caseTags',
         'data-test-subj': 'caseTags',
         euiFieldProps: {
-          placeHolder: '',
+          placeholder: '',
           fullWidth: true,
           disabled: isLoading || isLoadingTags,
           options,
