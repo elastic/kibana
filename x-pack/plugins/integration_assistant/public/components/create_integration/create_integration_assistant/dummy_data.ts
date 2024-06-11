@@ -395,17 +395,20 @@ const rawSamples = [
   '{"ei":0,"event":"cert.create","uid":"efd326fc-dd13-4df8-acef-3102c2d717d3","code":"TC000I","time":"2024-02-23T18:56:50.653Z","cluster_name":"teleport.ericbeahan.com","cert_type":"user","identity.user":"teleport-admin","identity.roles":["access","editor"],"identity.logins":["root","ubuntu","ec2-user","-teleport-internal-join"],"identity.expires":"2024-02-24T06:56:50.648137154Z","identity.route_to_cluster":"teleport.ericbeahan.com","identity.traits.aws_role_arns":null,"identity.traits.azure_identities":null,"identity.traits.db_names":null,"identity.traits.db_roles":null,"identity.traits.db_users":null,"identity.traits.gcp_service_accounts":null,"identity.traits.host_user_gid":[""],"identity.traits.host_user_uid":[""],"identity.traits.kubernetes_groups":null,"identity.traits.kubernetes_users":null,"identity.traits.logins":["root","ubuntu","ec2-user"],"identity.traits.windows_logins":null,"identity.teleport_cluster":"teleport.ericbeahan.com","identity.client_ip":"136.61.214.196","identity.prev_identity_expires":"0001-01-01T00:00:00Z","identity.private_key_policy":"none"}',
   '{"ei":0,"event":"session.start","uid":"fff30583-13be-49e8-b159-32952c6ea34f","code":"T2000I","time":"2024-02-23T18:56:57.199Z","cluster_name":"teleport.ericbeahan.com","user":"teleport-admin","login":"ec2-user","user_kind":1,"sid":"293fda2d-2266-4d4d-b9d1-bd5ea9dd9fc3","private_key_policy":"none","namespace":"default","server_id":"face0091-2bf1-43fd-a16a-f1514b4119f4","server_hostname":"ip-172-31-8-163.us-east-2.compute.internal","server_labels.hostname":"ip-172-31-8-163.us-east-2.compute.internal","server_labels.teleport.internal/resource-id":"dccb2999-9fb8-4169-aded-ec7a1c0a26de","addr.remote":"136.61.214.196:50339","proto":"ssh","size":"80:25","initial_command":[""],"session_recording":"node"}',
 ];
+const logo =
+  'PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMyNjlfMjExOTMpIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMC41IDExLjk5OTdMNC40MDQgMS42ODQyMUMzLjM4Nzc1IC0wLjAzNzA0MDIgMC43NSAwLjY4NDQ2IDAuNzUgMi42ODMyMVYyMS4zMTYyQzAuNzUgMjMuMzE1IDMuMzg3NzUgMjQuMDM2NSA0LjQwNCAyMi4zMTUyTDEwLjUgMTEuOTk5N1oiIGZpbGw9IiNGMDRFOTgiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMy4xMTMzIDEyTDEyLjQzNzYgMTMuMTQ0NUw2LjM0MTU2IDIzLjQ2QzYuMjI2ODEgMjMuNjUzNSA2LjA5NzA2IDIzLjgzMDUgNS45NTgzMSAyNEgxMi44NDAzQzE0LjY1MDggMjQgMTYuMzMzMSAyMy4wNjc3IDE3LjI5MjMgMjEuNTMyNUwyMy4yNTAzIDEySDEzLjExMzNaIiBmaWxsPSIjRkE3NDRFIi8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTcuMjkyNCAyLjQ2NzVDMTYuMzMzMiAwLjkzMjI1IDE0LjY1MDkgMCAxMi44Mzk3IDBINS45NTg0NEM2LjA5NjQ0IDAuMTY5NSA2LjIyNjk0IDAuMzQ2NSA2LjM0MDk0IDAuNTRMMTIuNDM2OSAxMC44NTU1TDEzLjExMzQgMTJIMjMuMjQ5N0wxNy4yOTI0IDIuNDY3NVoiIGZpbGw9IiMzNDM3NDEiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMjY5XzIxMTkzIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPgo=';
 
 export const initialState: State = {
   step: 4,
   connectorId: 'claudeV3OpusUsWest2',
   integrationSettings: {
-    title: 'My Integration',
-    name: 'my_integration',
-    description: 'My manual integration description',
-    dataStreamTitle: 'My data stream title',
-    dataStreamName: 'my_data_stream',
-    dataStreamDescription: 'My manual data stream description',
+    title: 'My test integration',
+    name: 'my_test_integration',
+    logo,
+    description: 'My manual test integration description',
+    dataStreamTitle: 'My test data stream title',
+    dataStreamName: 'my_test_data_stream',
+    dataStreamDescription: 'My manual test data stream description',
     inputType: 'filestream',
     logsSampleParsed: rawSamples,
   },

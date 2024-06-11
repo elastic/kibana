@@ -37,23 +37,20 @@ interface PackageCardPreviewProps {
 
 export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({ integrationSettings }) => {
   const cardCss = useCardCss();
-  if (!integrationSettings) {
-    return null;
-  }
   return (
     <EuiCard
       css={cardCss}
       data-test-subj="package-card-preview"
       layout="horizontal"
-      title={integrationSettings.title ?? ''}
-      description={integrationSettings.description ?? ''}
+      title={integrationSettings?.title ?? ''}
+      description={integrationSettings?.description ?? ''}
       titleSize="xs"
       hasBorder
       icon={
         <EuiIcon
           size={'xl'}
           type={
-            integrationSettings.logo
+            integrationSettings?.logo
               ? `data:image/svg+xml;base64,${integrationSettings.logo}`
               : 'brokenLink'
           }

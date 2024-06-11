@@ -14,6 +14,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiProgress,
+  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -72,7 +73,7 @@ export const useGeneration = ({
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: integrationSettings.logsSampleParsed ?? [],
-          connectorId,
+          connectorId: connectorId ?? '',
         };
 
         setProgress('ecs');
@@ -120,7 +121,7 @@ export const useGeneration = ({
 const useModalBodyCss = () => {
   const { euiTheme } = useEuiTheme();
   return css`
-    padding: ${euiTheme.size.xl} ${euiTheme.size.l};
+    padding: ${euiTheme.size.l};
     min-width: 600px;
   `;
 };
@@ -151,6 +152,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
           <EuiModalHeaderTitle>{i18n.ANALYZING}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody css={modalBodyCss}>
+          <EuiSpacer size="l" />
           <EuiFlexGroup direction="column" gutterSize="l" justifyContent="center">
             {progress && (
               <>
@@ -182,6 +184,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
               </>
             )}
           </EuiFlexGroup>
+          <EuiSpacer size="xxl" />
         </EuiModalBody>
       </EuiModal>
     );
