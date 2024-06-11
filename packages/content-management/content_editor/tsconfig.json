@@ -26,7 +26,8 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/test-jest-helpers",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/content-management-user-profiles"
   ],
   "exclude": [
     "target/**/*"

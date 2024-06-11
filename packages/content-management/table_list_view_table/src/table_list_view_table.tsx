@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
+import { UserAvatarTip } from '@kbn/content-management-user-profiles';
 import type {
   OpenContentEditorParams,
   SavedObjectsReference,
@@ -47,7 +48,6 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
-import { UserAvatarTip } from './components/user_avatar_tip';
 import { NoUsersTip } from './components/user_missing_tip';
 
 interface ContentEditorConfig

@@ -11,9 +11,8 @@ import React from 'react';
 import { EuiFilterButton, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
-import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import { useServices } from '../services';
+import { useUserProfiles } from '@kbn/content-management-user-profiles';
 import { NoUsersTip } from './user_missing_tip';
 
 interface Context {
@@ -25,43 +24,29 @@ interface Context {
 }
 
 const UserFilterContext = React.createContext<Context | null>(null);
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false, staleTime: 30 * 60 * 1000 } },
-});
 
 export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) => {
   if (!props.enabled) {
     return <>{children}</>;
   }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <UserFilterContext.Provider value={props}>{children}</UserFilterContext.Provider>
-    </QueryClientProvider>
-  );
+  return <UserFilterContext.Provider value={props}>{children}</UserFilterContext.Provider>;
 };
 
 export const NULL_USER = 'no-user';
 
 export const UserFilterPanel: FC<{}> = () => {
-  const { bulkGetUserProfiles } = useServices();
   const { euiTheme } = useEuiTheme();
   const componentContext = React.useContext(UserFilterContext);
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
-  if (!bulkGetUserProfiles)
-    throw new Error('UserFilterPanel must be used with a bulkGetUserProfiles function');
 
   const { onSelectedUsersChange, selectedUsers, showNoUserOption } = componentContext;
 
   const [isPopoverOpen, setPopoverOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
 
-  const query = useQuery({
-    queryKey: ['user-filter-suggestions', componentContext.allUsers],
-    queryFn: () => bulkGetUserProfiles(componentContext.allUsers),
-    enabled: isPopoverOpen,
-  });
+  const query = useUserProfiles(componentContext.allUsers, { enabled: isPopoverOpen });
 
   const usersMap = React.useMemo(() => {
     if (!query.data) return {};

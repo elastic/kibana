@@ -3580,6 +3580,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-user-profiles@link:packages/content-management/user_profiles":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-utils@link:packages/kbn-content-management-utils":
   version "0.0.0"
   uid ""

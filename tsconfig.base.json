@@ -206,6 +206,8 @@
       "@kbn/content-management-table-list-view-common/*": ["packages/content-management/table_list_view_common/*"],
       "@kbn/content-management-table-list-view-table": ["packages/content-management/table_list_view_table"],
       "@kbn/content-management-table-list-view-table/*": ["packages/content-management/table_list_view_table/*"],
+      "@kbn/content-management-user-profiles": ["packages/content-management/user_profiles"],
+      "@kbn/content-management-user-profiles/*": ["packages/content-management/user_profiles/*"],
       "@kbn/content-management-utils": ["packages/kbn-content-management-utils"],
       "@kbn/content-management-utils/*": ["packages/kbn-content-management-utils/*"],
       "@kbn/controls-example-plugin": ["examples/controls_example"],
