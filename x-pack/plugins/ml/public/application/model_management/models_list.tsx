@@ -130,6 +130,8 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
+const DOWNLOAD_POLL_INTERVAL = 2000;
+
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
@@ -434,8 +436,7 @@ export const ModelsList: FC<Props> = ({
 
         if (!downloadStatus) return;
 
-        // Wait for one second
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_POLL_INTERVAL));
         await fetchDownloadStatus(fetchInProgress);
       } catch (e) {
         // Fail silently
