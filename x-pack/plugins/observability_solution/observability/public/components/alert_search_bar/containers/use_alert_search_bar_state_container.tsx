@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import deepEqual from 'fast-deep-equal';
 import { isRight } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
@@ -129,8 +130,7 @@ function useUrlStateSyncEffect(
       timefilterService,
       stateContainer,
       urlStateStorage,
-      urlStorageKey,
-      replace
+      urlStorageKey
     );
 
     return stop;
@@ -157,7 +157,9 @@ function setupUrlStateSync(
     stateStorage: {
       ...urlStateStorage,
       set: <AlertSearchBarStateContainer,>(key: string, state: AlertSearchBarStateContainer) =>
-        urlStateStorage.set(key, state, { replace }),
+        urlStateStorage.set(key, state, {
+          replace: deepEqual(defaultState, state) ? true : replace,
+        }),
     },
   });
 }
@@ -166,8 +168,7 @@ function syncUrlStateWithInitialContainerState(
   timefilterService: TimefilterContract,
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
-  urlStorageKey: string,
-  replace: boolean = true
+  urlStorageKey: string
 ) {
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
@@ -180,10 +181,6 @@ function syncUrlStateWithInitialContainerState(
     };
 
     stateContainer.set(newState);
-    urlStateStorage.set(urlStorageKey, stateContainer.get(), {
-      replace: true,
-    });
-    return;
   } else if (timefilterService.isTimeTouched()) {
     const { from, to } = timefilterService.getTime();
     const newState = {
@@ -199,6 +196,6 @@ function syncUrlStateWithInitialContainerState(
   }
 
   urlStateStorage.set(urlStorageKey, stateContainer.get(), {
-    replace,
+    replace: true,
   });
 }

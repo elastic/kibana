@@ -49,6 +49,7 @@ const defaultState: AlertSearchBarContainerState = {
   kuery: '',
   status: ALL_ALERTS.status,
   filters: [],
+  savedQueryId: undefined,
 };
 
 const transitions: AlertSearchBarStateTransitions = {
